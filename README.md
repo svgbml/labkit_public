@@ -19,7 +19,7 @@ Rekentools en een gelfoto-editor voor het biomedisch laboratorium. Gemaakt voor 
 **Forensisch:** degradatie-index, man/vrouw-verhouding en STR-input uit een kwantificatiekit (DNA-kwantificatie).
 **Microbiologie en cellen:** verdunningsreeks en KVE/mL, telkamer (Bürker, Neubauer, Fuchs-Rosenthal), teller met toetsen 1–9.
 **DNA:** A₂₆₀-kwantificatie en normaliseren naar STR-input, PCR-mastermix, PCR-cyclus (Tₘ via nearest-neighbor met zout- en Mg²⁺-correctie, programma, amplificatie, qPCR-efficiëntie), agarosegel en bandgrootte, gelfoto-editor, ligatie, transformatie en blauw-witscreening (transformanten, % wit, transformatiefrequentie per µg vector).
-**Data:** statistiek volgens het Tabellenboek Statistiek: beschrijvend met betrouwbaarheidsinterval, normaliteit (Lilliefors), uitbijters (Grubbs, Dixon), t-toetsen (één steekproef, twee groepen met F-toets, gepaard), Wilcoxon-rangtekentoets, one-way ANOVA met Tukey-vergelijkingen en χ²-toets, telkens met de volledige toetsingsprocedure. De standaardcurve geeft bij een lineair model ook LOD en LOQ (ICH Q2).
+**Data:** statistiek volgens het Tabellenboek Statistiek: beschrijvend met betrouwbaarheidsinterval, normaliteit (Lilliefors), uitbijters (Grubbs, Dixon), t-toetsen (één steekproef, twee groepen met F-toets, gepaard), Wilcoxon-rangtekentoets, one-way ANOVA met Tukey-vergelijkingen, Kruskal-Wallis met Dunn-vergelijkingen (Bonferroni) en χ²-toets, telkens met de volledige toetsingsprocedure. De standaardcurve geeft bij een lineair model ook LOD en LOQ (ICH Q2), kent naast 4PL ook 5PL voor asymmetrische ELISA-curves en leest een 96-wells-plaatexport van de plaatlezer in.
 **Protocollen:** afbeeldingen voor protocollen en labjournaal: verdunningsschema (buizen, overdracht, uitplaten), pipetteerschema (met water aanvullen en mastermix), PCR-programma (temperatuurprofiel met cyclus) en gel-laadschema. Download als PNG of kopieer als afbeelding.
 **Bench:** centrifuge (rpm ↔ × g), meerdere timers met meldingen, plaatindeling.
 
@@ -30,7 +30,8 @@ Rekentools en een gelfoto-editor voor het biomedisch laboratorium. Gemaakt voor 
 - Automatische ladderdetectie met 100 bp-, 100 bp plus-, 1 kb-ladder of een eigen ladder (bp of kDa)
 - Automatisch rechtzetten en lanedetectie die ook lege lanen vindt (via de vaste kamafstand)
 - Banden meten met semi-logaritmische interpolatie, of alle banden in één keer meten; putjes worden overgeslagen
-- Densitometrie: relatieve bandintensiteit per meting
+- Densitometrie: relatieve bandintensiteit per meting, met achtergrondcorrectie via rolling ball of dal-tot-dal
+- Rf-waarde per gemeten band
 - De gel zelf blijft onbewerkt: alle tekst, streepjes en metingen staan in de witte marge eromheen
 - Export als PNG of JPG op 1×, 2× of 3× resolutie, met losse schakelaars voor titel, lanelabels, ladderwaarden, streepjes, eenheid, metingen en witte rand
 
@@ -44,7 +45,7 @@ Rekentools en een gelfoto-editor voor het biomedisch laboratorium. Gemaakt voor 
 
 ## Validatie
 
-`tests/validate.py` voert voor elke tool gepubliceerde ruwe data in via de echte interface en vergelijkt de uitkomst met de bron (FDA BAM, Cold Spring Harbor, NEB, iGEM, OriGene, Thermo Fisher, Sigma-Aldrich, R-datasets Puromycin, sleep en PlantGrowth, Mendel, NIST, Livak/Pfaffl, Biopython, SciPy, statsmodels). Het resultaat staat in [`tests/VALIDATIE.md`](tests/VALIDATIE.md) en wordt bij elke wijziging opnieuw gecontroleerd door GitHub Actions.
+`tests/validate.py` voert voor elke tool gepubliceerde ruwe data in via de echte interface en vergelijkt de uitkomst met de bron (FDA BAM, Cold Spring Harbor, NEB, iGEM, OriGene, Thermo Fisher, Sigma-Aldrich, R-datasets Puromycin, sleep en PlantGrowth, scikit-posthocs, Mendel, NIST, Livak/Pfaffl, Biopython, SciPy, statsmodels). Het resultaat staat in [`tests/VALIDATIE.md`](tests/VALIDATIE.md) en wordt bij elke wijziging opnieuw gecontroleerd door GitHub Actions.
 
 ## Projectstructuur
 
@@ -68,11 +69,9 @@ Elke tool vermeldt onderaan zijn bron. De belangrijkste: FDA Bacteriological Ana
 
 ## Ideeën voor volgende versies
 
-- Plaatlezer-export inlezen en koppelen aan plaatindeling en standaardcurve
 - Protocolmodus met stappen, checklist en ingebouwde timers
 - Restrictieknip-planner die de verwachte banden op de gel voorspelt
 - Eén PDF-verslag voor je labjournaal met berekeningen, curves en gelfoto
 - Bandmassa schatten uit de ladder (ng per band) naast de relatieve intensiteit
-- Plaatlezer-export (CSV) direct inlezen in standaardcurve en plaatindeling
 
 Berekeningen zijn hulpmiddelen; controleer resultaten altijd tegen het protocol van je practicum.

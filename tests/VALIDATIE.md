@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-13 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 106 van 106 controles binnen tolerantie.**
+**Resultaat: 118 van 118 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -41,9 +41,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9442 | -0.03% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7823 | +0.58% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5616 | +1.09% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9404 | -0.43% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7786 | +0.10% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5537 | -0.34% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -113,5 +113,17 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Pipetteerschema | Water aanvullen en mastermix | water NTC (µL) | 19,88 | 19,88 | +0.00% | ✅ | Optellen: 25 − (2,5 + 0,5 + 1 + 1 + 0,125 + 1) = 18,875 µL; mastermix 4 buizen + 10% = 4,4 × 18,875 = 83,05 µL |
 | Pipetteerschema | Water aanvullen en mastermix | water mastermix (µL) | 83,05 | 83,05 | +0.00% | ✅ | Optellen: 25 − (2,5 + 0,5 + 1 + 1 + 0,125 + 1) = 18,875 µL; mastermix 4 buizen + 10% = 4,4 × 18,875 = 83,05 µL |
 | PCR-programma | Looptijd | minuten | 77 | 77 | +0.00% | ✅ | 2:00 + 35 × (0:30 + 0:30 + 1:00) + 5:00 = 77 min |
+| Statistiek | Kruskal-Wallis + Dunn | H | 7,988 | 7,988 | -0.00% | ✅ | R-dataset PlantGrowth; R kruskal.test: H = 7,988, p = 0,01842; Dunn met Bonferroni: referentie scikit-posthocs posthoc_dunn |
+| Statistiek | Kruskal-Wallis + Dunn | p | 0,01842 | 0,0184 | -0.11% | ✅ | R-dataset PlantGrowth; R kruskal.test: H = 7,988, p = 0,01842; Dunn met Bonferroni: referentie scikit-posthocs posthoc_dunn |
+| Statistiek | Kruskal-Wallis + Dunn | Dunn trt1 − ctrl | 0,7911 | 0,791 | -0.01% | ✅ | R-dataset PlantGrowth; R kruskal.test: H = 7,988, p = 0,01842; Dunn met Bonferroni: referentie scikit-posthocs posthoc_dunn |
+| Statistiek | Kruskal-Wallis + Dunn | Dunn trt2 − ctrl | 0,2735 | 0,273 | -0.18% | ✅ | R-dataset PlantGrowth; R kruskal.test: H = 7,988, p = 0,01842; Dunn met Bonferroni: referentie scikit-posthocs posthoc_dunn |
+| Statistiek | Kruskal-Wallis + Dunn | Dunn trt2 − trt1 | 0,015 | 0,015 | -0.01% | ✅ | R-dataset PlantGrowth; R kruskal.test: H = 7,988, p = 0,01842; Dunn met Bonferroni: referentie scikit-posthocs posthoc_dunn |
+| Standaardcurve | ELISA, 5PL | terugberekend | 300 | 300 | +0.00% | ✅ | Rekentest: standaarden berekend met A = 0,05; B = 1,3; C = 400; D = 3,2; E = 0,6 (asymmetrisch, Gottschalk & Dunn 2005); monster x = 300 moet terugkomen |
+| Standaardcurve | Plaatlezer-import | standaarden | 8 | 8 | +0.00% | ✅ | Rekentest: plaatblok met standaarden in kolom 1–2 (A–H = 0…1500) en monsters in duplo; resultaat gelijk aan dezelfde waarden handmatig invoeren |
+| Standaardcurve | Plaatlezer-import | monsters | 8 | 8 | +0.00% | ✅ | Rekentest: plaatblok met standaarden in kolom 1–2 (A–H = 0…1500) en monsters in duplo; resultaat gelijk aan dezelfde waarden handmatig invoeren |
+| Standaardcurve | Plaatlezer-import | monster A3–A4 | 236,8 | 237 | +0.08% | ✅ | Rekentest: plaatblok met standaarden in kolom 1–2 (A–H = 0…1500) en monsters in duplo; resultaat gelijk aan dezelfde waarden handmatig invoeren |
+| Gelfoto-editor | Achtergrondcorrectie | dal tot dal | 1003 | 1001 | -0.21% | ✅ | Rekentest: profiel met schuine achtergrond (10 → 40) en een gaussische band (hoogte 100, σ 4 px, oppervlak 1002,7) |
+| Gelfoto-editor | Achtergrondcorrectie | rolling ball | 1003 | 986,9 | -1.57% | ✅ | Rekentest: profiel met schuine achtergrond (10 → 40) en een gaussische band (hoogte 100, σ 4 px, oppervlak 1002,7) |
+| Gelfoto-editor | Rf-waarde | Rf | 0,5 | 0,5 | +0.00% | ✅ | Rf = looplengte vanaf slotje / afstand slotje–front; front op 400 px, band op 200 px, geen slotjesrij → 0,5 |
 
 Toleranties: rekenregels 0,1–0,5%; gepubliceerde receptgrammen (afgerond in de bron) 1–3%; densitometrie op de getekende demo-gel 5%.

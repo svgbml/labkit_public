@@ -356,6 +356,59 @@ def _(pg):
     return [('minuten', t, 77, 0.0001)]
 
 
+
+@case('Statistiek', 'Kruskal-Wallis + Dunn', 'R-dataset PlantGrowth; R kruskal.test: H = 7,988, p = 0,01842; Dunn met Bonferroni: referentie scikit-posthocs posthoc_dunn')
+def _(pg):
+    import scikit_posthocs as sp
+    c=[4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14]; t1=[4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69]; t2=[6.31,5.12,5.54,5.50,5.37,5.29,4.92,6.15,5.80,5.26]
+    ref = sp.posthoc_dunn([c,t1,t2], p_adjust='bonferroni').values
+    pg.evaluate("__go('stat');__set('st-alpha','0.05');__set('st-groups','ctrl: 4,17 5,58 5,18 6,11 4,50 4,61 5,17 4,53 5,33 5,14\\ntrt1: 4,81 4,17 4,41 3,59 5,87 3,83 6,03 4,89 4,32 4,69\\ntrt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26');__set('st-test','kw')")
+    H = pg.evaluate("__big('#st-out')")
+    p = pg.evaluate("__n([...document.querySelectorAll('#st-out li')].find(l=>l.textContent.includes('p-waarde')).textContent.split('=')[1])")
+    pa = pg.evaluate("[...document.querySelectorAll('#st-dunn tbody tr')].map(r=>__n(r.cells[4].textContent))")
+    return [('H', H, 7.9882, 0.001), ('p', p, 0.01842, 0.01), ('Dunn trt1 − ctrl', pa[0], 1.0 if ref[0,1] > 1 else ref[0,1], 0.01), ('Dunn trt2 − ctrl', pa[1], ref[0,2], 0.01), ('Dunn trt2 − trt1', pa[2], ref[1,2], 0.01)]
+
+@case('Standaardcurve', 'ELISA, 5PL', 'Rekentest: standaarden berekend met A = 0,05; B = 1,3; C = 400; D = 3,2; E = 0,6 (asymmetrisch, Gottschalk & Dunn 2005); monster x = 300 moet terugkomen')
+def _(pg):
+    pg.evaluate("""__go('curve');__set('s-preset','leeg');__set('s-model','5pl');__set('s-blank',false);
+      const xs=[0,7.8,15.6,31.3,62.5,125,250,500,1000,2000], f=x=>3.2+(0.05-3.2)/Math.pow(1+Math.pow(x/400,1.3),0.6);
+      document.querySelector('#s-std tbody').innerHTML=xs.map(x=>sStdRow([x,Number(f(x).toFixed(6))])).join('');
+      document.querySelector('#s-unk tbody').innerHTML=sUnkRow(['test',Number(f(300).toFixed(6)),'','',1]); calc.curve();""")
+    return [('terugberekend', pg.evaluate("__cells('#s-unk tbody tr [data-x]')[0]"), 300, 0.01)]
+
+@case('Standaardcurve', 'Plaatlezer-import', 'Rekentest: plaatblok met standaarden in kolom 1–2 (A–H = 0…1500) en monsters in duplo; resultaat gelijk aan dezelfde waarden handmatig invoeren')
+def _(pg):
+    conc = [0,25,125,250,500,750,1000,1500]
+    rowsL = []
+    for i, r in enumerate('ABCDEFGH'):
+        a = 0.05 + conc[i]*0.0011
+        vals = [a, a+0.004] + [0.31+i*0.07, 0.315+i*0.07] + ['']*8
+        rowsL.append(r + '\t' + '\t'.join(('' if v=='' else f"{v:.4f}".replace('.', ',')) for v in vals))
+    txt = '\t' + '\t'.join(str(c) for c in range(1,13)) + '\n' + '\n'.join(rowsL)
+    pg.evaluate(f"__go('curve');__set('s-model','lin');__set('s-blank',false);__set('s-ptxt',{txt!r});__set('s-pstd','1-2');__set('s-pconc','0 25 125 250 500 750 1000 1500');__set('s-punk','3-12');__set('s-prep','2');__set('s-pdir','h');document.getElementById('s-pgo').click();")
+    nstd = pg.evaluate("document.querySelectorAll('#s-std tbody tr').length"); nunk = pg.evaluate("document.querySelectorAll('#s-unk tbody tr').length")
+    import numpy as np
+    X=[];Y=[]
+    for i,c in enumerate(conc):
+        a=0.05+c*0.0011; X+= [c,c]; Y+=[round(a,4),round(a+0.004,4)]
+    b,a0=np.polyfit(X,Y,1); m=(round(0.31,4)+round(0.315,4))/2
+    got = pg.evaluate("__cells('#s-unk tbody tr [data-x]')[0]")
+    return [('standaarden', nstd, 8, 0), ('monsters', nunk, 8, 0), ('monster A3–A4', got, (m-a0)/b, 0.005)]
+
+@case('Gelfoto-editor', 'Achtergrondcorrectie', 'Rekentest: profiel met schuine achtergrond (10 → 40) en een gaussische band (hoogte 100, σ 4 px, oppervlak 1002,7)')
+def _(pg):
+    v = pg.evaluate("""(()=>{ const n=400, pr=new Float32Array(n); for(let i=0;i<n;i++) pr[i]=10+30*i/n+100*Math.exp(-((i-200)**2)/(2*16));
+      return [densArea(pr,200,'valley').area, densArea(pr,200,'ball',40).area]; })()""")
+    import math
+    exp = 100*4*math.sqrt(2*math.pi)
+    return [('dal tot dal', v[0], exp, 0.03), ('rolling ball', v[1], exp, 0.03)]
+
+@case('Gelfoto-editor', 'Rf-waarde', 'Rf = looplengte vanaf slotje / afstand slotje–front; front op 400 px, band op 200 px, geen slotjesrij → 0,5')
+def _(pg):
+    v = pg.evaluate("(()=>{ const old=gfWellRows; gfWellRows=()=>[]; __set('gf-front','400'); const r=gfRf(200); gfWellRows=old; __set('gf-front',''); return r; })()")
+    return [('Rf', v, 0.5, 0.0001)]
+
+
 def main():
     rows = []; fails = 0
     with sync_playwright() as p:
