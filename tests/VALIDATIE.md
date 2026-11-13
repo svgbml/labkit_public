@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-13 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 51 van 51 controles binnen tolerantie.**
+**Resultaat: 87 van 87 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -41,9 +41,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9452 | +0.08% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7858 | +1.03% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5648 | +1.66% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9513 | +0.72% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7881 | +1.33% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5694 | +2.48% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -58,5 +58,41 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Gelfoto-editor | Realistische testgel (scheef, smeer, lege lanen) | dimeer 60 bp (gem.) | 60 | 60,26 | +0.43% | ✅ | tests/make_test_gel.py: 11 lanen, 2,0° scheef, ladder in lane 1, producten 650 bp, dimeren 60 bp |
 | Centrifuge | rpm → × g | × g | 1957 | 1957 | +0.00% | ✅ | Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g |
 | Centrifuge | × g → rpm | rpm | 5837 | 5837 | +0.00% | ✅ | CASRAI: 4000 × g, r = 10,5 cm → 5837 rpm |
+| Transformatie | Rekenvoorbeeld iGEM | kve/µg | 5,0000e+07 | 5,0000e+07 | +0.00% | ✅ | iGEM Troubleshooting Transformations: 1 µL van 0,05 ng/µL, 100 van 1000 µL uitgeplaat, 250 kolonies → 5 × 10⁷ kve/µg |
+| Transformatie | Rekenvoorbeeld NEB | kve/µg | 2,0000e+06 | 2,0000e+06 | +0.00% | ✅ | NEB FAQ C2925: 100 pg pUC19, 100 van 1000 µL uitgeplaat, 20 kolonies → 2 × 10⁶ kve/µg |
+| Transformatie | Rekenvoorbeeld OriGene | kve/µg | 4,0000e+08 | 4,0000e+08 | +0.00% | ✅ | OriGene, transformatieprotocol: 20 pg pUC19, 5 µL van 1 mL uitgeplaat, 40 kolonies → 4 × 10⁸ kve/µg |
+| Statistiek | Gepaarde t-toets, slaapdata | t | -4,062 | -4,062 | -0.00% | ✅ | Student (1908), Cushny & Peebles; R: t.test(paired=TRUE) → t = −4,0621, p = 0,002833 |
+| Statistiek | Gepaarde t-toets, slaapdata | p | 0,002833 | 0,00283 | -0.11% | ✅ | Student (1908), Cushny & Peebles; R: t.test(paired=TRUE) → t = −4,0621, p = 0,002833 |
+| Statistiek | F-toets + t-toets, twee groepen | F | 1,253 | 1,253 | +0.03% | ✅ | Slaapdata; R: var.test → F = 0,7983 (1/F = 1,2526), p = 0,7427; t.test(var.equal=TRUE) → t = −1,8608, df 18, p = 0,07919 |
+| Statistiek | F-toets + t-toets, twee groepen | t | -1,861 | -1,861 | +0.01% | ✅ | Slaapdata; R: var.test → F = 0,7983 (1/F = 1,2526), p = 0,7427; t.test(var.equal=TRUE) → t = −1,8608, df 18, p = 0,07919 |
+| Statistiek | F-toets + t-toets, twee groepen | p | 0,07919 | 0,0792 | +0.01% | ✅ | Slaapdata; R: var.test → F = 0,7983 (1/F = 1,2526), p = 0,7427; t.test(var.equal=TRUE) → t = −1,8608, df 18, p = 0,07919 |
+| Statistiek | t-toets, één steekproef | t | 1,326 | 1,326 | +0.02% | ✅ | Slaapdata middel 1 tegen 0; referentie SciPy ttest_1samp: t = 1,3257, p = 0,2176 |
+| Statistiek | t-toets, één steekproef | p | 0,2176 | 0,218 | +0.18% | ✅ | Slaapdata middel 1 tegen 0; referentie SciPy ttest_1samp: t = 1,3257, p = 0,2176 |
+| Statistiek | Wilcoxon-rangtekentoets | T = min(W₊, W₋) | 5 | 5 | +0.00% | ✅ | Hollander & Wolfe (depressiescores, R-voorbeeld wilcox.test): V = 40; tweezijdig p = 0,03906 |
+| Statistiek | Wilcoxon-rangtekentoets | p | 0,03906 | 0,0391 | +0.10% | ✅ | Hollander & Wolfe (depressiescores, R-voorbeeld wilcox.test): V = 40; tweezijdig p = 0,03906 |
+| Statistiek | Wilcoxon kritieke waarden | n = 6 | 0 | 0 | +0.00% | ✅ | Tabellenboek Statistiek, Bijlage 11 (tweezijdig, α = 0,05): n = 6 → 0, 8 → 3, 10 → 8, 12 → 13, 15 → 25 |
+| Statistiek | Wilcoxon kritieke waarden | n = 8 | 3 | 3 | +0.00% | ✅ | Tabellenboek Statistiek, Bijlage 11 (tweezijdig, α = 0,05): n = 6 → 0, 8 → 3, 10 → 8, 12 → 13, 15 → 25 |
+| Statistiek | Wilcoxon kritieke waarden | n = 10 | 8 | 8 | +0.00% | ✅ | Tabellenboek Statistiek, Bijlage 11 (tweezijdig, α = 0,05): n = 6 → 0, 8 → 3, 10 → 8, 12 → 13, 15 → 25 |
+| Statistiek | Wilcoxon kritieke waarden | n = 12 | 13 | 13 | +0.00% | ✅ | Tabellenboek Statistiek, Bijlage 11 (tweezijdig, α = 0,05): n = 6 → 0, 8 → 3, 10 → 8, 12 → 13, 15 → 25 |
+| Statistiek | Wilcoxon kritieke waarden | n = 15 | 25 | 25 | +0.00% | ✅ | Tabellenboek Statistiek, Bijlage 11 (tweezijdig, α = 0,05): n = 6 → 0, 8 → 3, 10 → 8, 12 → 13, 15 → 25 |
+| Statistiek | χ²-aanpassingstoets, Mendel | χ² | 0,47 | 0,47 | +0.00% | ✅ | Mendel (1866), erwten 315/108/101/32 tegen 9:3:3:1: χ² = 0,470, df 3; SciPy chisquare p = 0,9254 |
+| Statistiek | χ²-aanpassingstoets, Mendel | p | 0,9254 | 0,925 | -0.04% | ✅ | Mendel (1866), erwten 315/108/101/32 tegen 9:3:3:1: χ² = 0,470, df 3; SciPy chisquare p = 0,9254 |
+| Statistiek | Grubbs, uitbijter | G | 2,469 | 2,469 | +0.01% | ✅ | NIST/SEMATECH e-Handbook 1.3.5.17.1 (8 uraniummetingen): G = 2,4687; tabel 10 n = 8 → 2,126 |
+| Statistiek | Grubbs, uitbijter | G krit | 2,126 | 2,126 | +0.00% | ✅ | NIST/SEMATECH e-Handbook 1.3.5.17.1 (8 uraniummetingen): G = 2,4687; tabel 10 n = 8 → 2,126 |
+| Statistiek | Grubbs, kritieke waarde berekend | n = 3 | 1,155 | 1,154 | -0.06% | ✅ | Formule NIST 1.3.5.17.1 tegen Tabellenboek Bijlage 10 (n = 3–10, α = 0,05; tabel op 3 decimalen, n = 3 exact 1,1543) |
+| Statistiek | Grubbs, kritieke waarde berekend | n = 4 | 1,481 | 1,481 | +0.02% | ✅ | Formule NIST 1.3.5.17.1 tegen Tabellenboek Bijlage 10 (n = 3–10, α = 0,05; tabel op 3 decimalen, n = 3 exact 1,1543) |
+| Statistiek | Grubbs, kritieke waarde berekend | n = 5 | 1,715 | 1,715 | +0.00% | ✅ | Formule NIST 1.3.5.17.1 tegen Tabellenboek Bijlage 10 (n = 3–10, α = 0,05; tabel op 3 decimalen, n = 3 exact 1,1543) |
+| Statistiek | Grubbs, kritieke waarde berekend | n = 6 | 1,887 | 1,887 | +0.01% | ✅ | Formule NIST 1.3.5.17.1 tegen Tabellenboek Bijlage 10 (n = 3–10, α = 0,05; tabel op 3 decimalen, n = 3 exact 1,1543) |
+| Statistiek | Grubbs, kritieke waarde berekend | n = 7 | 2,02 | 2,02 | -0.00% | ✅ | Formule NIST 1.3.5.17.1 tegen Tabellenboek Bijlage 10 (n = 3–10, α = 0,05; tabel op 3 decimalen, n = 3 exact 1,1543) |
+| Statistiek | Grubbs, kritieke waarde berekend | n = 8 | 2,126 | 2,127 | +0.03% | ✅ | Formule NIST 1.3.5.17.1 tegen Tabellenboek Bijlage 10 (n = 3–10, α = 0,05; tabel op 3 decimalen, n = 3 exact 1,1543) |
+| Statistiek | Grubbs, kritieke waarde berekend | n = 9 | 2,215 | 2,215 | +0.00% | ✅ | Formule NIST 1.3.5.17.1 tegen Tabellenboek Bijlage 10 (n = 3–10, α = 0,05; tabel op 3 decimalen, n = 3 exact 1,1543) |
+| Statistiek | Grubbs, kritieke waarde berekend | n = 10 | 2,29 | 2,29 | -0.00% | ✅ | Formule NIST 1.3.5.17.1 tegen Tabellenboek Bijlage 10 (n = 3–10, α = 0,05; tabel op 3 decimalen, n = 3 exact 1,1543) |
+| Statistiek | Dixon Q-toets | Q | 0,4545 | 0,455 | +0.11% | ✅ | Wikipedia, Dixon’s Q test (10 waarden): Q = 0,455 < 0,466 bij 95% → geen uitbijter |
+| Statistiek | Dixon Q-toets | uitbijter (0 = nee) | 0 | 0 | +0.00% | ✅ | Wikipedia, Dixon’s Q test (10 waarden): Q = 0,455 < 0,466 bij 95% → geen uitbijter |
+| Statistiek | Normaliteit (Lilliefors D) | D | 0,1889 | 0,189 | +0.08% | ✅ | Slaapdata middel 1; referentie statsmodels.stats.diagnostic.lilliefors |
+| Statistiek | t-verdeling, kritieke waarden | df 1 | 12,71 | 12,71 | +0.00% | ✅ | Tabellenboek Statistiek, Bijlage 4 (tweezijdig α = 0,05): df 1 → 12,706; 5 → 2,571; 10 → 2,228; 30 → 2,042 |
+| Statistiek | t-verdeling, kritieke waarden | df 5 | 2,571 | 2,571 | -0.02% | ✅ | Tabellenboek Statistiek, Bijlage 4 (tweezijdig α = 0,05): df 1 → 12,706; 5 → 2,571; 10 → 2,228; 30 → 2,042 |
+| Statistiek | t-verdeling, kritieke waarden | df 10 | 2,228 | 2,228 | +0.01% | ✅ | Tabellenboek Statistiek, Bijlage 4 (tweezijdig α = 0,05): df 1 → 12,706; 5 → 2,571; 10 → 2,228; 30 → 2,042 |
+| Statistiek | t-verdeling, kritieke waarden | df 30 | 2,042 | 2,042 | +0.01% | ✅ | Tabellenboek Statistiek, Bijlage 4 (tweezijdig α = 0,05): df 1 → 12,706; 5 → 2,571; 10 → 2,228; 30 → 2,042 |
 
 Toleranties: rekenregels 0,1–0,5%; gepubliceerde receptgrammen (afgerond in de bron) 1–3%; densitometrie op de getekende demo-gel 5%.

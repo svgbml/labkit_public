@@ -18,7 +18,8 @@ Rekentools en een gelfoto-editor voor het biomedisch laboratorium. Gemaakt voor 
 **qPCR-analyse:** relatieve expressie met 2^−ΔΔCt (Livak) en Pfaffl, met herhalingen, SD en grafiek.
 **Forensisch:** degradatie-index, man/vrouw-verhouding en STR-input uit een kwantificatiekit (DNA-kwantificatie).
 **Microbiologie en cellen:** verdunningsreeks en KVE/mL, telkamer (Bürker, Neubauer, Fuchs-Rosenthal), teller met toetsen 1–9.
-**DNA:** A₂₆₀-kwantificatie en normaliseren naar STR-input, PCR-mastermix, PCR-cyclus (Tₘ via nearest-neighbor met zout- en Mg²⁺-correctie, programma, amplificatie, qPCR-efficiëntie), agarosegel en bandgrootte, gelfoto-editor, ligatie.
+**DNA:** A₂₆₀-kwantificatie en normaliseren naar STR-input, PCR-mastermix, PCR-cyclus (Tₘ via nearest-neighbor met zout- en Mg²⁺-correctie, programma, amplificatie, qPCR-efficiëntie), agarosegel en bandgrootte, gelfoto-editor, ligatie, transformatie en blauw-witscreening (transformanten, % wit, transformatiefrequentie per µg vector).
+**Data:** statistiek volgens het Tabellenboek Statistiek: beschrijvend met betrouwbaarheidsinterval, normaliteit (Lilliefors), uitbijters (Grubbs, Dixon), t-toetsen (één steekproef, twee groepen met F-toets, gepaard), Wilcoxon-rangtekentoets en χ²-toets, telkens met de volledige toetsingsprocedure.
 **Bench:** centrifuge (rpm ↔ × g), meerdere timers met meldingen, plaatindeling.
 
 ### Gelfoto-editor
@@ -42,7 +43,7 @@ Rekentools en een gelfoto-editor voor het biomedisch laboratorium. Gemaakt voor 
 
 ## Validatie
 
-`tests/validate.py` voert voor elke tool gepubliceerde ruwe data in via de echte interface en vergelijkt de uitkomst met de bron (FDA BAM, Cold Spring Harbor, NEB, Thermo Fisher, Sigma-Aldrich, R-dataset Puromycin, Livak/Pfaffl, Biopython, SciPy). Het resultaat staat in [`tests/VALIDATIE.md`](tests/VALIDATIE.md) en wordt bij elke wijziging opnieuw gecontroleerd door GitHub Actions.
+`tests/validate.py` voert voor elke tool gepubliceerde ruwe data in via de echte interface en vergelijkt de uitkomst met de bron (FDA BAM, Cold Spring Harbor, NEB, iGEM, OriGene, Thermo Fisher, Sigma-Aldrich, R-datasets Puromycin en sleep, Mendel, NIST, Livak/Pfaffl, Biopython, SciPy, statsmodels). Het resultaat staat in [`tests/VALIDATIE.md`](tests/VALIDATIE.md) en wordt bij elke wijziging opnieuw gecontroleerd door GitHub Actions.
 
 ## Projectstructuur
 
@@ -72,6 +73,5 @@ Elke tool vermeldt onderaan zijn bron. De belangrijkste: FDA Bacteriological Ana
 - Eén PDF-verslag voor je labjournaal met berekeningen, curves en gelfoto
 - Bandmassa schatten uit de ladder (ng per band) naast de relatieve intensiteit
 - Plaatlezer-export (CSV) direct inlezen in standaardcurve en plaatindeling
-- Statistiek op ΔCt-waarden (t-toets) in de qPCR-analyse
 
 Berekeningen zijn hulpmiddelen; controleer resultaten altijd tegen het protocol van je practicum.

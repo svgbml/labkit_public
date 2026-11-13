@@ -204,11 +204,14 @@ canvas{max-width:100%}
   <a href="#gel"><span class="k">%</span>Agarosegel &amp; bandgrootte</a>
   <a href="#gelfoto"><span class="k">img</span>Gelfoto-editor</a>
   <a href="#ligatie"><span class="k">3:1</span>Ligatie</a>
+  <a href="#transf"><span class="k">wit</span>Transformatie &amp; blauw-wit</a>
+  <div class="navgroup">Data</div>
+  <a href="#stat"><span class="k">t</span>Statistiek</a>
   <div class="navgroup">Bench</div>
   <a href="#centrifuge"><span class="k">×g</span>Centrifuge</a>
   <a href="#timers"><span class="k">⏱</span>Timers</a>
   <a href="#plaat"><span class="k">96</span>Plaatindeling</a>
-  <div class="navfoot"><div class="row" style="gap:10px"><button type="button" class="ghost" id="sess-save" title="Bewaar alle invoer als bestand, bijvoorbeeld om naar een andere computer over te zetten">Sessie opslaan</button><button type="button" class="ghost" id="sess-open">Sessie openen</button><input type="file" id="sess-file" accept=".json,application/json" hidden></div><button type="button" class="ghost" id="reset-store" title="Wist de onthouden invoer op dit apparaat">Opgeslagen invoer wissen</button><span>Versie 1.4.0</span></div>
+  <div class="navfoot"><div class="row" style="gap:10px"><button type="button" class="ghost" id="sess-save" title="Bewaar alle invoer als bestand, bijvoorbeeld om naar een andere computer over te zetten">Sessie opslaan</button><button type="button" class="ghost" id="sess-open">Sessie openen</button><input type="file" id="sess-file" accept=".json,application/json" hidden></div><button type="button" class="ghost" id="reset-store" title="Wist de onthouden invoer op dit apparaat">Opgeslagen invoer wissen</button><span>Versie 1.5.0</span></div>
 </nav>
 
 <main>
@@ -793,6 +796,76 @@ canvas{max-width:100%}
   <p class="src">ΔCt = Ct<sub>doel</sub> − Ct<sub>ref</sub>; ΔΔCt = ΔCt<sub>monster</sub> − ΔCt<sub>kalibrator</sub>; fold change = 2<sup>−ΔΔCt</sup> (Livak &amp; Schmittgen, Methods 2001). Pfaffl: ratio = E<sub>doel</sub><sup>ΔCt doel (kalibrator − monster)</sup> / E<sub>ref</sub><sup>ΔCt ref (kalibrator − monster)</sup> (Pfaffl, Nucleic Acids Res 2001). Voorbeeld: het rekenvoorbeeld van CASRAI (controle 24,0/20,0; behandeld 21,5/20,2 → 6,5×).</p>
 </section>
 
+<!-- ============ STATISTIEK ============ -->
+<section class="tool" id="t-stat" data-tool="stat">
+  <header class="tool-head"><h2>Statistiek</h2>
+  <p>Beschrijvende statistiek, uitbijtertoetsen en de toetsen uit het Tabellenboek Statistiek, met de volledige toetsingsprocedure. Plak een kolom uit Excel of typ getallen gescheiden door spaties of enters.</p></header>
+  <div class="grid2">
+    <div class="stack">
+      <div class="panel">
+        <div class="fields">
+          <div class="f"><label for="st-test">Toets</label><select id="st-test" style="width:100%">
+            <option value="desc">Beschrijvend en uitbijters</option>
+            <option value="t1">t-toets, één steekproef tegen µ₀</option>
+            <option value="t2">t-toets, twee onafhankelijke groepen</option>
+            <option value="tp">t-toets, gepaarde waarnemingen</option>
+            <option value="wil">Wilcoxon-rangtekentoets</option>
+            <option value="chi">χ²-toets</option>
+          </select></div>
+          <div class="f"><label for="st-alpha">Significantieniveau α</label><select id="st-alpha" style="width:100%"><option value="0.05">0,05</option><option value="0.01">0,01</option><option value="0.10">0,10</option></select></div>
+          <div class="f" data-st-show="t1 t2 tp wil"><label for="st-side">Toetsing</label><select id="st-side" style="width:100%"><option value="2">Tweezijdig (≠)</option><option value="r">Rechtszijdig (A &gt; B of &gt; µ₀)</option><option value="l">Linkszijdig (A &lt; B of &lt; µ₀)</option></select></div>
+          <div class="f" data-st-show="t1 wil"><label for="st-mu">Referentiewaarde µ₀</label><input id="st-mu" inputmode="decimal" value="0"></div>
+        </div>
+      </div>
+      <div class="panel" data-st-show="desc t1 t2 tp wil">
+        <div class="fields" style="grid-template-columns:1fr 1fr">
+          <div class="f"><label for="st-na">Naam groep A</label><input id="st-na" class="txt" value="Middel 1"></div>
+          <div class="f" data-st-show="desc t2 tp wil"><label for="st-nb">Naam groep B</label><input id="st-nb" class="txt" value="Middel 2"></div>
+          <div class="f"><label for="st-a">Waarden A <span class="example">voorbeeld</span></label><textarea id="st-a" rows="7">0,7 -1,6 -0,2 -1,2 -0,1 3,4 3,7 0,8 0,0 2,0</textarea></div>
+          <div class="f" data-st-show="desc t2 tp wil"><label for="st-b">Waarden B <span id="st-bopt" style="font-weight:400">(optioneel)</span></label><textarea id="st-b" rows="7">1,9 0,8 1,1 0,1 -0,1 4,4 5,5 1,6 4,6 3,4</textarea></div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0" id="st-hint">Bij een gepaarde toets horen de waarden op dezelfde plek bij elkaar (zelfde proefpersoon, monster of plaat).</p>
+      </div>
+      <div class="panel" data-st-show="chi">
+        <div class="f"><label for="st-obs">Waargenomen aantallen <span class="example">voorbeeld</span></label><textarea id="st-obs" rows="3">315 108 101 32</textarea></div>
+        <div class="f" style="margin-top:12px"><label for="st-exp">Verwachte verhouding of verwachte aantallen</label><input id="st-exp" class="mono" value="9 3 3 1"></div>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">Eén regel met aantallen = aanpassingstoets (laat de verwachting leeg voor een gelijke verdeling). Meerdere regels = kruistabel (rijen × kolommen); dan wordt de verwachting uit de rij- en kolomtotalen berekend.</p>
+      </div>
+    </div>
+    <div class="result" id="st-out"></div>
+  </div>
+  <div class="panel" style="margin-top:16px" id="st-dpanel"><h3>Per groep</h3><div id="st-desc"></div></div>
+  <p class="src">Kritieke waarden zoals in het Tabellenboek Statistiek (J.P.M. Andries, Avans): t tweezijdig (Bijlage 4), F (5 en 6), χ² (7), Kolmogorov-Smirnov met geschatte µ en σ (Lilliefors, 8), Dixon Q (9), Grubbs tweezijdig (10), Wilcoxon (11). Grubbs: G = max|xᵢ − x̄| / s, voor n &gt; 10 G<sub>krit</sub> = (n−1)/√n · √(t²/(n−2+t²)) met t bij α/(2n) en n−2 vrijheidsgraden (NIST/SEMATECH e-Handbook 1.3.5.17.1). Dixon: Q = sprong / spreidingsbreedte (Rorabacher, Anal. Chem. 1991). Welch-toets: t = (x̄₁−x̄₂)/√(s₁²/n₁+s₂²/n₂) met Welch–Satterthwaite-vrijheidsgraden. p-waarden exact uit de t-, F- en χ²-verdeling; Wilcoxon exact zonder gelijke waarden, anders normale benadering met correctie. Voorbeelddata: Student (1908), slaapwinst van twee middelen bij 10 proefpersonen (Cushny &amp; Peebles); χ²: Mendel, erwten 315/108/101/32 tegen 9:3:3:1.</p>
+</section>
+
+<!-- ============ TRANSFORMATIE ============ -->
+<section class="tool" id="t-transf" data-tool="transf">
+  <header class="tool-head"><h2>Transformatie &amp; blauw-wit</h2>
+  <p>Aantal transformanten, verhouding wit/blauw en transformatiefrequentie (transformanten per µg vector) uit je plaattellingen, voor je eigen ligatie en de controle.</p></header>
+  <div class="grid2">
+    <div class="stack">
+      <div class="panel">
+        <h3>Transformatie</h3>
+        <div class="fields">
+          <div class="f"><label for="tf-lv">Ligatievolume</label><div class="inu"><input id="tf-lv" inputmode="decimal" value="10"><span class="u">µL</span></div></div>
+          <div class="f"><label for="tf-vng">Vector in ligatie</label><div class="inu"><input id="tf-vng" inputmode="decimal" value="50"><span class="u">ng</span></div></div>
+          <div class="f"><label for="tf-used">Getransformeerd</label><div class="inu"><input id="tf-used" inputmode="decimal" value="1"><span class="u">µL ligatie</span></div></div>
+          <div class="f"><label for="tf-tot">Totaal na herstel (cellen + SOC)</label><div class="inu"><input id="tf-tot" inputmode="decimal" value="1040"><span class="u">µL</span></div></div>
+          <div class="f"><label for="tf-range">Telbare platen</label><select id="tf-range" style="width:100%"><option value="30-300">30–300 kolonies</option><option value="20-400">20–400 kolonies</option><option value="1-100000">Alle platen met kolonies</option></select></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Plaattellingen <span class="example">voorbeeld</span></h3>
+        <div class="tbl-wrap"><table id="tf-tbl" class="mini"><thead><tr><th>Experiment</th><th class="num">Uitgeplaat (µL)</th><th class="num">Blauw</th><th class="num">Wit</th><th></th></tr></thead><tbody></tbody></table></div>
+        <div class="row" style="margin-top:10px"><button type="button" id="tf-add">+ Plaat</button></div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Platen met dezelfde naam bij Experiment worden samen verwerkt. Heb je de rest geconcentreerd (centrifugeren, pellet in ±200 µL), vul dan het oorspronkelijke volume in dat op die plaat terechtkwam, bijvoorbeeld 930 µL.</p>
+      </div>
+    </div>
+    <div class="result" id="tf-out"></div>
+  </div>
+  <p class="src">Transformatie-efficiëntie = kolonies / µg DNA / fractie uitgeplaat (NEB FAQ C2925; iGEM Troubleshooting Transformations: 250 kolonies, 100 van 1000 µL, 0,05 ng → 5 × 10⁷ kve/µg). Wit = lacZα onderbroken door een insert; niet elke witte kolonie bevat het juiste insert en een blauwe kolonie kan soms toch een insert hebben (Promega pGEM-T Easy FAQ, TM042). Werkwijze en 5 ng vector per µL ligatie: Avans DNA toolbox, Lab 3–4 (electroporatie en blauw-witscreening).</p>
+</section>
+
 </main>
 </div>
 
@@ -814,7 +887,7 @@ const kv=rows=>`<dl class="kv">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`)
 const calc={};
 
 /* ---------- routing ---------- */
-const TOOLS=['verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','centrifuge','timers','plaat'];
+const TOOLS=['verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','transf','stat','centrifuge','timers','plaat'];
 let current='verdunning';
 function route(){
   const h=(location.hash||'').slice(1);
@@ -1799,7 +1872,7 @@ $('#w-csv').addEventListener('click',()=>{ const {r,c}=dims(); const {lab}=label
 $('#q-csv').addEventListener('click',()=>dlMsg($('#q-copied'),()=>saveBlob('pcr-mastermix.csv',csvBlob(qText))));
 
 /* ================= PLAKKEN UIT EXCEL ================= */
-const ADDBTN={'s-std':'#s-addstd','s-unk':'#s-addunk','k-tbl':'#k-add','q-tbl':'#q-add','o-tbl':'#o-add','qp-tbl':'#qp-add','gc-tbl':'#gc-add'};
+const ADDBTN={'s-std':'#s-addstd','s-unk':'#s-addunk','k-tbl':'#k-add','q-tbl':'#q-add','o-tbl':'#o-add','qp-tbl':'#qp-add','gc-tbl':'#gc-add','tf-tbl':'#tf-add'};
 document.addEventListener('paste',e=>{
   const el=e.target; if(el.tagName!=='INPUT') return; const td=el.closest('td'), tb=el.closest('tbody'); if(!td||!tb) return;
   const txt=(e.clipboardData||window.clipboardData).getData('text')||''; if(!/[\t\n]/.test(txt.trim())) return;
@@ -2004,7 +2077,7 @@ $('#gf-auto').addEventListener('click',gfAutoStraighten);
 $('#sess-save').addEventListener('click',()=>{ try{ localStorage.setItem(TBLKEY,JSON.stringify(tblSnap())); }catch(e){}
   const data={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('labkit:')) data[k]=localStorage.getItem(k); } }catch(e){}
   const d=new Date(), stamp=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  saveBlob(`labkit-sessie-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',versie:'1.4.0',opgeslagen:d.toISOString(),data},null,1)],{type:'application/json'})).catch(()=>{}); });
+  saveBlob(`labkit-sessie-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',versie:'1.5.0',opgeslagen:d.toISOString(),data},null,1)],{type:'application/json'})).catch(()=>{}); });
 $('#sess-open').addEventListener('click',()=>$('#sess-file').click());
 $('#sess-file').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const j=JSON.parse(t); if(!j||j.app!=='Labkit BML'||typeof j.data!=='object') throw 0; Object.entries(j.data).forEach(([k,v])=>{ if(k.startsWith('labkit:')) localStorage.setItem(k,v); }); location.reload(); }).catch(()=>alertBox('Dit bestand is geen Labkit-sessie.')); });
 function alertBox(t){ const n=document.createElement('div'); n.className='note bad'; n.style.cssText='position:fixed;left:16px;bottom:16px;z-index:50;max-width:320px'; n.textContent=t; document.body.appendChild(n); setTimeout(()=>n.remove(),4000); }
@@ -2018,7 +2091,8 @@ const TBLDEF={
   'q-tbl':{row:qRow,num:[1,2]},
   'o-tbl':{row:oRow,num:[1,2]},
   'qp-tbl':{row:qpRow,num:[1,2]},
-  'gc-tbl':{row:(r)=>gcRow(r,0),num:[0,1]}
+  'gc-tbl':{row:(r)=>gcRow(r,0),num:[0,1]},
+  'tf-tbl':{row:(r)=>tfRow(r),num:[1]}
 };
 function tblSnap(){ const out={}; Object.keys(TBLDEF).forEach(id=>{ out[id]=[...document.querySelectorAll('#'+id+' tbody tr')].map(tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select')].map(e=>e.value)); });
   out.reeks=reeksCounts; out.plate={fmt:$('#w-fmt').value,wells,groups,title:$('#w-title').value}; out.curve={model:$('#s-model').value,unit:$('#s-unit').value,blank:$('#s-blank').checked,logx:$('#s-logx').checked}; return out; }
@@ -2031,12 +2105,189 @@ let lastTbl='', tblDirty=false; ['input','change','click'].forEach(ev=>document.
 setInterval(()=>{ try{ const t=JSON.stringify(tblSnap()); if(t!==lastTbl){ if(tblDirty) localStorage.setItem(TBLKEY,t); lastTbl=t; } }catch(e){} },1500);
 $('#reset-store').addEventListener('click',()=>{ try{ localStorage.removeItem(TBLKEY); }catch(e){} },true);
 
+
+/* ================= STATISTIEK ================= */
+function gammaln(x){ const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5]; let y=x, t=x+5.5; t-=(x+0.5)*Math.log(t); let s=1.000000000190015; for(let j=0;j<6;j++) s+=c[j]/++y; return -t+Math.log(2.5066282746310005*s/x); }
+function betacf(a,b,x){ const MAXIT=300, EPS=3e-16, FPMIN=1e-300; let qab=a+b, qap=a+1, qam=a-1, c=1, d=1-qab*x/qap; if(Math.abs(d)<FPMIN) d=FPMIN; d=1/d; let h=d;
+  for(let m=1;m<=MAXIT;m++){ const m2=2*m; let aa=m*(b-m)*x/((qam+m2)*(a+m2)); d=1+aa*d; if(Math.abs(d)<FPMIN) d=FPMIN; c=1+aa/c; if(Math.abs(c)<FPMIN) c=FPMIN; d=1/d; h*=d*c; aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2)); d=1+aa*d; if(Math.abs(d)<FPMIN) d=FPMIN; c=1+aa/c; if(Math.abs(c)<FPMIN) c=FPMIN; d=1/d; const del=d*c; h*=del; if(Math.abs(del-1)<EPS) break; } return h; }
+function ibeta(x,a,b){ if(x<=0) return 0; if(x>=1) return 1; const bt=Math.exp(gammaln(a+b)-gammaln(a)-gammaln(b)+a*Math.log(x)+b*Math.log(1-x)); return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b; }
+function gammp(a,x){ if(x<=0) return 0; if(x<a+1){ let ap=a, sum=1/a, del=sum; for(let n=0;n<500;n++){ ap++; del*=x/ap; sum+=del; if(Math.abs(del)<Math.abs(sum)*3e-16) break; } return sum*Math.exp(-x+a*Math.log(x)-gammaln(a)); }
+  let b=x+1-a, c=1e300, d=1/b, h=d; for(let i=1;i<500;i++){ const an=-i*(i-a); b+=2; d=an*d+b; if(Math.abs(d)<1e-300) d=1e-300; c=b+an/c; if(Math.abs(c)<1e-300) c=1e-300; d=1/d; const del=d*c; h*=del; if(Math.abs(del-1)<3e-16) break; } return 1-Math.exp(-x+a*Math.log(x)-gammaln(a))*h; }
+const tcdf=(t,df)=>{ const p=0.5*ibeta(df/(df+t*t),df/2,0.5); return t>0?1-p:p; };
+const fcdf=(f,a,b)=>f<=0?0:ibeta(a*f/(a*f+b),a/2,b/2);
+const chicdf=(x,k)=>x<=0?0:gammp(k/2,x/2);
+const ncdf=z=>z<0?0.5*(1-gammp(0.5,z*z/2)):0.5*(1+gammp(0.5,z*z/2));
+function invcdf(F,p,lo,hi){ for(let i=0;i<300;i++){ const m=(lo+hi)/2; if(F(m)<p) lo=m; else hi=m; if(hi-lo<1e-12*Math.max(1,Math.abs(m))) break; } return (lo+hi)/2; }
+const tinv=(p,df)=>invcdf(t=>tcdf(t,df),p,-1e6,1e6);
+const finv=(p,a,b)=>invcdf(f=>fcdf(f,a,b),p,0,1e6);
+const chiinv=(p,k)=>invcdf(x=>chicdf(x,k),p,0,1e5);
+/* Tabellenboek Statistiek (Avans) */
+const ST_DIXON={3:[0.941,0.970,0.994],4:[0.765,0.829,0.926],5:[0.642,0.710,0.821],6:[0.560,0.625,0.740],7:[0.507,0.568,0.680],8:[0.468,0.526,0.634],9:[0.437,0.493,0.598],10:[0.412,0.466,0.568],11:[NaN,0.444,0.542],12:[NaN,0.426,0.522],13:[NaN,0.410,0.503],14:[NaN,0.396,0.488],15:[NaN,0.384,0.475],16:[NaN,0.374,0.463],17:[NaN,0.365,0.452]};
+const ST_LILL={3:0.376,4:0.375,5:0.343,6:0.323,7:0.304,8:0.288,9:0.274,10:0.262,11:0.251,12:0.242,13:0.234,14:0.226,15:0.219,16:0.213,17:0.207,18:0.202,19:0.197,20:0.192};
+const ST_GRUBBS={3:1.155,4:1.481,5:1.715,6:1.887,7:2.020,8:2.126,9:2.215,10:2.290};
+function stNums(txt){ return String(txt).replace(/[−–]/g,'-').replace(/,\s+/g,' ').split(/[\s;\t]+/).filter(Boolean).flatMap(t=>(t.match(/,/g)||[]).length>1?t.split(','):[t]).map(t=>num(t)).filter(x=>isFinite(x)); }
+function grubbsCrit(n,alpha){ if(alpha===0.05&&ST_GRUBBS[n]) return {v:ST_GRUBBS[n],tab:true}; const t=tinv(1-alpha/(2*n),n-2); return {v:(n-1)/Math.sqrt(n)*Math.sqrt(t*t/(n-2+t*t)),tab:false}; }
+function lillieD(x){ const n=x.length, m=mean(x), s=sd(x); if(!(s>0)) return NaN; const z=[...x].sort((a,b)=>a-b).map(v=>ncdf((v-m)/s)); let D=0; z.forEach((F,i)=>{ D=Math.max(D,(i+1)/n-F,F-i/n); }); return D; }
+function stDesc(x,alpha){
+  const n=x.length, s=[...x].sort((a,b)=>a-b), m=mean(x), sdv=sd(x), sem=sdv/Math.sqrt(n), med=n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2;
+  const tq=n>1?tinv(1-alpha/2,n-1):NaN;
+  const o={n,m,sd:sdv,sem,med,min:s[0],max:s[n-1],cv:sdv/Math.abs(m)*100,ci:[m-tq*sem,m+tq*sem],tq};
+  if(n>=3&&sdv>0){ const dmax=s[n-1]-m, dmin=m-s[0]; o.gr={G:Math.max(dmax,dmin)/sdv,val:dmax>=dmin?s[n-1]:s[0],crit:grubbsCrit(n,alpha)}; }
+  if(n>=3&&n<=17&&s[n-1]>s[0]){ const ai=alpha===0.10?0:alpha===0.05?1:2, qc=ST_DIXON[n][ai]; const qlo=(s[1]-s[0])/(s[n-1]-s[0]), qhi=(s[n-1]-s[n-2])/(s[n-1]-s[0]); o.dx={Q:Math.max(qlo,qhi),val:qhi>=qlo?s[n-1]:s[0],crit:qc}; }
+  if(n>=3){ o.lD=lillieD(x); o.lC=n<=20?ST_LILL[n]:0.886/Math.sqrt(n); }
+  return o;
+}
+function wilcoxDist(n){ const max=n*(n+1)/2; let f=new Float64Array(max+1); f[0]=1; for(let k=1;k<=n;k++){ for(let s=max;s>=k;s--) f[s]+=f[s-k]; } const tot=2**n; const cdf=new Float64Array(max+1); let c=0; for(let s=0;s<=max;s++){ c+=f[s]; cdf[s]=c/tot; } return cdf; }
+function wilcoxCrit(n,a){ if(n<1) return NaN; const cdf=wilcoxDist(n); let c=-1; for(let s=0;s<cdf.length;s++){ if(cdf[s]<=a+1e-12) c=s; else break; } return c; }
+function rankAbs(d){ const idx=d.map((v,i)=>[Math.abs(v),i]).sort((a,b)=>a[0]-b[0]); const r=new Array(d.length); let ties=0, tcorr=0; for(let i=0;i<idx.length;){ let j=i; while(j+1<idx.length&&idx[j+1][0]===idx[i][0]) j++; const rk=(i+j)/2+1; for(let k=i;k<=j;k++) r[idx[k][1]]=rk; const t=j-i+1; if(t>1){ ties++; tcorr+=t*t*t-t; } i=j+1; } return {r,ties,tcorr}; }
+const pfmt=p=>!isFinite(p)?'–':p<0.0001?'&lt; 0,0001':sig(p,3);
+function stShow(){ const t=$('#st-test').value; $$('[data-st-show]').forEach(el=>{ el.style.display=el.dataset.stShow.split(' ').includes(t)?'':'none'; }); $('#st-bopt').style.display=t==='desc'?'':'none'; $('#st-hint').style.display=t==='tp'||t==='wil'?'':'none'; }
+calc.stat=function(){
+  stShow();
+  const T=$('#st-test').value, alpha=num($('#st-alpha').value), side=$('#st-side').value, mu0=num($('#st-mu').value)||0;
+  const nA=$('#st-na').value||'A', nB=$('#st-nb').value||'B';
+  const A=stNums($('#st-a').value), B=stNums($('#st-b').value), out=$('#st-out');
+  const useB=['desc','t2','tp','wil'].includes(T)&&B.length>0;
+  /* tabel per groep */
+  const groups=T==='chi'?[]:[[nA,A]].concat(useB?[[nB,B]]:[]);
+  if(T==='tp'&&A.length===B.length&&A.length>1) groups.push([`Verschil (${nA} − ${nB})`,A.map((v,i)=>v-B[i])]);
+  const D=groups.filter(g=>g[1].length>0).map(g=>[g[0],stDesc(g[1],alpha)]);
+  $('#st-dpanel').style.display=D.length?'':'none';
+  if(D.length){
+    const r=(lab,f)=>`<tr><td>${lab}</td>${D.map(([,o])=>`<td class="num">${f(o)}</td>`).join('')}</tr>`;
+    const yes=(c)=>c?'<span class="chip bad">uitbijter</span>':'<span class="chip ok">geen</span>';
+    $('#st-desc').innerHTML=`<div class="tbl-wrap"><table class="mini"><thead><tr><th></th>${D.map(([n])=>`<th class="num">${esc(n)}</th>`).join('')}</tr></thead><tbody>`+
+      r('n',o=>o.n)+r('Gemiddelde',o=>sig(o.m,5))+r('Mediaan',o=>sig(o.med,5))+r('Standaardafwijking s',o=>o.n>1?sig(o.sd,4):'–')+r('Standaardfout (s/√n)',o=>o.n>1?sig(o.sem,4):'–')+r('Variatiecoëfficiënt',o=>o.n>1&&isFinite(o.cv)?fmt(o.cv,1)+' %':'–')+r('Minimum',o=>sig(o.min,5))+r('Maximum',o=>sig(o.max,5))+
+      r(`${fmt((1-alpha)*100,0)}%-betrouwbaarheidsinterval`,o=>o.n>1?`${sig(o.ci[0],4)} – ${sig(o.ci[1],4)}`:'–')+r('t (tweezijdig, df = n−1)',o=>o.n>1?fmt(o.tq,3):'–')+
+      r('Grubbs G (verdachte waarde)',o=>o.gr?`${fmt(o.gr.G,3)} (${sig(o.gr.val,5)})`:'–')+r('Grubbs G<sub>krit</sub>',o=>o.gr?fmt(o.gr.crit.v,3)+(o.gr.crit.tab?' (tabel 10)':''):'–')+r('Grubbs: uitbijter?',o=>o.gr?yes(o.gr.G>o.gr.crit.v):'–')+
+      r('Dixon Q (verdachte waarde)',o=>o.dx?`${fmt(o.dx.Q,3)} (${sig(o.dx.val,5)})`:'–')+r('Dixon Q<sub>krit</sub>',o=>o.dx&&isFinite(o.dx.crit)?fmt(o.dx.crit,3)+' (tabel 9)':'–')+r('Dixon: uitbijter?',o=>o.dx&&isFinite(o.dx.crit)?yes(o.dx.Q>o.dx.crit):'–')+
+      r('Normaliteit: D (Lilliefors)',o=>isFinite(o.lD)?fmt(o.lD,3):'–')+r('D<sub>krit</sub> (α = 0,05, tabel 8)',o=>isFinite(o.lC)?fmt(o.lC,3):'–')+r('Normaal verdeeld?',o=>isFinite(o.lD)?(o.lD>o.lC?'<span class="chip warn">nee</span>':'<span class="chip ok">aanname houdbaar</span>'):'–')+
+      `</tbody></table></div>`;
+  } else $('#st-desc').innerHTML='';
+  const H0=(h0,h1)=>`<li><b>Hypothesen.</b> H₀: ${h0}; H₁: ${h1}.</li>`;
+  const sideTxt=(two,r,l)=>side==='2'?two:side==='r'?r:l;
+  const decide=(rej,txtRej,txtAcc)=>`<li><b>Beslissing.</b> ${rej?'H₀ verwerpen':'H₀ niet verwerpen'} (α = ${fmt(alpha,2)}).</li><li><b>Conclusie.</b> ${rej?txtRej:txtAcc}</li>`;
+  const pSide=(t,df)=>side==='2'?2*(1-tcdf(Math.abs(t),df)):side==='r'?1-tcdf(t,df):tcdf(t,df);
+  const tCritTxt=(df)=>{ const tc=tinv(1-(side==='2'?alpha/2:alpha),df); return {tc,txt:`${side==='2'?'±':side==='r'?'+':'−'}${fmt(tc,3)} (df = ${fmt(df,df%1?2:0)}, ${side==='2'?'tweezijdig':'eenzijdig'})`}; };
+  const rejT=(t,tc)=>side==='2'?Math.abs(t)>tc:side==='r'?t>tc:t<-tc;
+  const head=(lab,val)=>`<div class="lbl">${lab}</div><div class="big">${val}</div>`;
+  let h='';
+  if(T==='desc'){
+    if(!A.length){ out.innerHTML=note('info','Vul waarden in bij groep A.'); return; }
+    const o=D[0][1];
+    h=head(esc(nA)+': gemiddelde ± s',`${sig(o.m,4)} <small>± ${o.n>1?sig(o.sd,3):'–'} (n = ${o.n})</small>`)+kv([['Mediaan',sig(o.med,4)],[`${fmt((1-alpha)*100,0)}%-BI gemiddelde`,o.n>1?`${sig(o.ci[0],4)} – ${sig(o.ci[1],4)}`:'–'],['Variatiecoëfficiënt',o.n>1?fmt(o.cv,1)+' %':'–']]);
+    const flags=D.flatMap(([n,o])=>[o.gr&&o.gr.G>o.gr.crit.v?`Grubbs: ${sig(o.gr.val,5)} in ${esc(n)} is een uitbijter (G = ${fmt(o.gr.G,3)} &gt; ${fmt(o.gr.crit.v,3)}).`:null,o.dx&&isFinite(o.dx.crit)&&o.dx.Q>o.dx.crit?`Dixon: ${sig(o.dx.val,5)} in ${esc(n)} is een uitbijter (Q = ${fmt(o.dx.Q,3)} &gt; ${fmt(o.dx.crit,3)}).`:null]).filter(Boolean);
+    h+=flags.length?note('warn',flags.join('<br>')+' Verwijder een waarde alleen met een aanwijsbare oorzaak en noteer dat in je labjournaal; test maar één waarde per keer.'):note('info','Geen uitbijters volgens Grubbs en Dixon.');
+    if(D.some(([,o])=>o.n<3)) h+=note('info','Uitbijtertoetsen hebben minstens 3 waarden nodig.');
+    h+=`<div class="formula">s = √(Σ(xᵢ − x̄)² / (n − 1)) · BI = x̄ ± t · s/√n · G = max|xᵢ − x̄| / s · Q = sprong / spreidingsbreedte</div>`;
+    out.innerHTML=h; return;
+  }
+  if(T==='t1'){
+    if(A.length<2){ out.innerHTML=note('info','Vul minstens twee waarden in.'); return; }
+    const o=stDesc(A,alpha), t=(o.m-mu0)/o.sem, df=o.n-1, p=pSide(t,df), {tc,txt}=tCritTxt(df), rej=rejT(t,tc);
+    h=head('t-toets, één steekproef',`t = ${fmt(t,3)} <small>p = ${pfmt(p)}</small>`)+`<ol class="steps">`+H0(`µ = ${sig(mu0,4)}`,sideTxt(`µ ≠ ${sig(mu0,4)}`,`µ &gt; ${sig(mu0,4)}`,`µ &lt; ${sig(mu0,4)}`))+`<li><b>Toetsingsgrootheid.</b> t = (x̄ − µ₀) / (s/√n) = (${sig(o.m,5)} − ${sig(mu0,4)}) / (${sig(o.sd,4)}/√${o.n}) = <b>${fmt(t,3)}</b></li><li><b>Kritieke waarde</b> (tabel 4): t = ${txt}</li><li><b>p-waarde</b> = ${pfmt(p)}</li>`+decide(rej,`Het gemiddelde van ${esc(nA)} wijkt significant af van ${sig(mu0,4)}.`,`Er is geen significant verschil met ${sig(mu0,4)} aangetoond.`)+`</ol>`;
+    out.innerHTML=h; return;
+  }
+  if(T==='t2'){
+    if(A.length<2||B.length<2){ out.innerHTML=note('info','Vul in beide groepen minstens twee waarden in.'); return; }
+    const a=stDesc(A,alpha), b=stDesc(B,alpha); const big=a.sd>=b.sd?a:b, sml=a.sd>=b.sd?b:a;
+    const F=big.sd**2/sml.sd**2, d1=big.n-1, d2=sml.n-1, Fc=finv(1-alpha/2,d1,d2), pF=Math.min(1,2*(1-fcdf(F,d1,d2))), eq=F<=Fc;
+    const sp2=((a.n-1)*a.sd**2+(b.n-1)*b.sd**2)/(a.n+b.n-2), tP=(a.m-b.m)/Math.sqrt(sp2*(1/a.n+1/b.n)), dfP=a.n+b.n-2;
+    const va=a.sd**2/a.n, vb=b.sd**2/b.n, tW=(a.m-b.m)/Math.sqrt(va+vb), dfW=(va+vb)**2/(va*va/(a.n-1)+vb*vb/(b.n-1));
+    const t=eq?tP:tW, df=eq?dfP:dfW, p=pSide(t,df), {tc,txt}=tCritTxt(df), rej=rejT(t,tc);
+    h=head(eq?'t-toets, gelijke varianties':'Welch-toets, ongelijke varianties',`t = ${fmt(t,3)} <small>p = ${pfmt(p)}</small>`)+`<ol class="steps">`+
+      `<li><b>Eerst F-toets op gelijke varianties.</b> F = s²<sub>groot</sub> / s²<sub>klein</sub> = ${sig(big.sd,4)}² / ${sig(sml.sd,4)}² = <b>${fmt(F,3)}</b>; F<sub>krit</sub> (tweezijdig, df ${d1}; ${d2}) = ${fmt(Fc,3)}; p = ${pfmt(pF)} → ${eq?'varianties gelijk, gebruik de gepoolde t-toets':'varianties verschillen, gebruik de Welch-toets'}.</li>`+
+      H0(`µ<sub>${esc(nA)}</sub> = µ<sub>${esc(nB)}</sub>`,sideTxt(`µ<sub>${esc(nA)}</sub> ≠ µ<sub>${esc(nB)}</sub>`,`µ<sub>${esc(nA)}</sub> &gt; µ<sub>${esc(nB)}</sub>`,`µ<sub>${esc(nA)}</sub> &lt; µ<sub>${esc(nB)}</sub>`))+
+      (eq?`<li><b>Toetsingsgrootheid.</b> s<sub>p</sub> = √(((n₁−1)s₁² + (n₂−1)s₂²)/(n₁+n₂−2)) = ${sig(Math.sqrt(sp2),4)}; t = (x̄₁ − x̄₂) / (s<sub>p</sub>·√(1/n₁ + 1/n₂)) = (${sig(a.m,5)} − ${sig(b.m,5)}) / (${sig(Math.sqrt(sp2),4)}·√(1/${a.n} + 1/${b.n})) = <b>${fmt(t,3)}</b></li>`
+         :`<li><b>Toetsingsgrootheid.</b> t = (x̄₁ − x̄₂) / √(s₁²/n₁ + s₂²/n₂) = (${sig(a.m,5)} − ${sig(b.m,5)}) / √(${sig(a.sd,4)}²/${a.n} + ${sig(b.sd,4)}²/${b.n}) = <b>${fmt(t,3)}</b>; df (Welch–Satterthwaite) = ${fmt(dfW,2)}</li>`)+
+      `<li><b>Kritieke waarde</b>: t = ${txt}</li><li><b>p-waarde</b> = ${pfmt(p)}</li>`+decide(rej,`De gemiddelden van ${esc(nA)} en ${esc(nB)} verschillen significant.`,`Er is geen significant verschil tussen ${esc(nA)} en ${esc(nB)} aangetoond.`)+`</ol>`+
+      kv([['Verschil gemiddelden',sig(a.m-b.m,4)],[eq?'Ter vergelijking: Welch':'Ter vergelijking: gepoold',eq?`t = ${fmt(tW,3)}, df = ${fmt(dfW,2)}, p = ${pfmt(pSide(tW,dfW))}`:`t = ${fmt(tP,3)}, df = ${dfP}, p = ${pfmt(pSide(tP,dfP))}`]]);
+    out.innerHTML=h; return;
+  }
+  if(T==='tp'){
+    if(A.length!==B.length||A.length<2){ out.innerHTML=note('bad',`Een gepaarde toets heeft evenveel waarden in A en B nodig (nu ${A.length} en ${B.length}).`); return; }
+    const d=A.map((v,i)=>v-B[i]), o=stDesc(d,alpha), t=o.m/o.sem, df=o.n-1, p=pSide(t,df), {tc,txt}=tCritTxt(df), rej=rejT(t,tc);
+    h=head('Gepaarde t-toets',`t = ${fmt(t,3)} <small>p = ${pfmt(p)}</small>`)+`<ol class="steps">`+H0('µ<sub>d</sub> = 0 (geen verschil per paar)',sideTxt('µ<sub>d</sub> ≠ 0','µ<sub>d</sub> &gt; 0 (A groter)','µ<sub>d</sub> &lt; 0 (A kleiner)'))+`<li><b>Verschillen</b> d = A − B: gemiddelde d̄ = ${sig(o.m,4)}, s<sub>d</sub> = ${sig(o.sd,4)}, n = ${o.n}</li><li><b>Toetsingsgrootheid.</b> t = d̄ / (s<sub>d</sub>/√n) = ${sig(o.m,4)} / (${sig(o.sd,4)}/√${o.n}) = <b>${fmt(t,3)}</b></li><li><b>Kritieke waarde</b> (tabel 4): t = ${txt}</li><li><b>p-waarde</b> = ${pfmt(p)}</li>`+decide(rej,`Er is een significant verschil tussen ${esc(nA)} en ${esc(nB)} binnen de paren.`,`Er is geen significant verschil binnen de paren aangetoond.`)+`</ol>`+kv([[`${fmt((1-alpha)*100,0)}%-BI van het verschil`,`${sig(o.ci[0],4)} – ${sig(o.ci[1],4)}`]]);
+    out.innerHTML=h; return;
+  }
+  if(T==='wil'){
+    const paired=B.length>0;
+    if(paired&&A.length!==B.length){ out.innerHTML=note('bad',`Gepaard: evenveel waarden in A en B nodig (nu ${A.length} en ${B.length}). Laat B leeg om tegen µ₀ te toetsen.`); return; }
+    const d0=paired?A.map((v,i)=>v-B[i]):A.map(v=>v-mu0), d=d0.filter(v=>v!==0), n=d.length;
+    if(n<5){ out.innerHTML=note('info','Te weinig verschillen ongelijk aan nul (minstens 5 nodig; tabel 11 begint bij n = 5).'); return; }
+    const {r,ties,tcorr}=rankAbs(d); let Wp=0,Wm=0; d.forEach((v,i)=>{ if(v>0) Wp+=r[i]; else Wm+=r[i]; });
+    const Tst=side==='2'?Math.min(Wp,Wm):side==='r'?Wm:Wp;
+    let p, method, crit=NaN;
+    if(!ties&&n<=50){ const cdf=wilcoxDist(n); const c=cdf[Math.floor(Tst+1e-9)]; p=side==='2'?Math.min(1,2*c):c; method='exact'; crit=wilcoxCrit(n,side==='2'?alpha/2:alpha); }
+    else { const m=n*(n+1)/4, s=Math.sqrt(n*(n+1)*(2*n+1)/24-tcorr/48), z=(Tst-m+0.5)/s; p=side==='2'?Math.min(1,2*ncdf(z)):ncdf(z); method='normale benadering (gelijke waarden)'; crit=wilcoxCrit(n,side==='2'?alpha/2:alpha); }
+    const rej=p<alpha;
+    h=head('Wilcoxon-rangtekentoets',`T = ${fmt(Tst,1)} <small>p = ${pfmt(p)}</small>`)+`<ol class="steps">`+H0(paired?'de mediaan van de verschillen A − B is 0':`de mediaan is ${sig(mu0,4)}`,sideTxt('mediaan ≠ 0','A groter (mediaan &gt; 0)','A kleiner (mediaan &lt; 0)'))+
+      `<li><b>Rangnummers</b> van |d| (${n} verschillen ≠ 0${d0.length-n?`, ${d0.length-n} nul weggelaten`:''}${ties?`, ${ties}× gelijke waarden → gemiddelde rang`:''}): W₊ = ${fmt(Wp,1)}, W₋ = ${fmt(Wm,1)}</li><li><b>Toetsingsgrootheid</b> T = ${side==='2'?'min(W₊, W₋)':side==='r'?'W₋':'W₊'} = <b>${fmt(Tst,1)}</b></li><li><b>Kritieke waarde</b> (tabel 11, ${side==='2'?'tweezijdig':'eenzijdig'}): ${crit>=0?crit:'niet beschikbaar (n te klein)'}; verwerp H₀ als T ≤ kritieke waarde</li><li><b>p-waarde</b> = ${pfmt(p)} (${method})</li>`+
+      decide(rej,'Er is een significant verschil.','Er is geen significant verschil aangetoond.')+`</ol>`;
+    out.innerHTML=h; return;
+  }
+  if(T==='chi'){
+    const lines=$('#st-obs').value.split('\n').map(stNums).filter(r=>r.length);
+    if(!lines.length){ out.innerHTML=note('info','Vul waargenomen aantallen in.'); return; }
+    let chi=0, df, E, O, rows=[], warn=false, yates=NaN;
+    if(lines.length===1){
+      O=lines[0]; const k=O.length, tot=O.reduce((a,b)=>a+b,0); let ex=stNums($('#st-exp').value); if(!ex.length) ex=O.map(()=>1);
+      if(ex.length!==k){ out.innerHTML=note('bad',`Aantal verwachte waarden (${ex.length}) is niet gelijk aan het aantal categorieën (${k}).`); return; }
+      const es=ex.reduce((a,b)=>a+b,0); E=ex.map(v=>v/es*tot); df=k-1;
+      O.forEach((o,i)=>{ const c=(o-E[i])**2/E[i]; chi+=c; if(E[i]<5) warn=true; rows.push([`Categorie ${i+1}`,o,E[i],c]); });
+    } else {
+      const c=Math.max(...lines.map(r=>r.length)); if(lines.some(r=>r.length!==c)){ out.innerHTML=note('bad','Alle rijen van de kruistabel moeten evenveel kolommen hebben.'); return; }
+      const R=lines.map(r=>r.reduce((a,b)=>a+b,0)), C=[...Array(c).keys()].map(j=>lines.reduce((a,r)=>a+r[j],0)), N=R.reduce((a,b)=>a+b,0);
+      df=(lines.length-1)*(c-1); yates=0;
+      lines.forEach((r,i)=>r.forEach((o,j)=>{ const e=R[i]*C[j]/N, x=(o-e)**2/e; chi+=x; yates+=(Math.max(0,Math.abs(o-e)-0.5))**2/e; if(e<5) warn=true; rows.push([`Rij ${i+1}, kolom ${j+1}`,o,e,x]); }));
+    }
+    const p=1-chicdf(chi,df), cc=chiinv(1-alpha,df), rej=chi>cc;
+    h=head('χ²-toets',`χ² = ${fmt(chi,3)} <small>p = ${pfmt(p)}</small>`)+`<ol class="steps">`+H0(lines.length===1?'de waargenomen verdeling volgt de verwachte verhouding':'rij- en kolomvariabele zijn onafhankelijk',lines.length===1?'de verdeling wijkt af':'er is samenhang')+
+      `<li><b>Toetsingsgrootheid.</b> χ² = Σ (O − E)² / E = <b>${fmt(chi,3)}</b>, df = ${df}</li><li><b>Kritieke waarde</b> (tabel 7): χ² = ${fmt(cc,3)}</li><li><b>p-waarde</b> = ${pfmt(p)}</li>`+decide(rej,lines.length===1?'De waarnemingen wijken significant af van de verwachte verhouding.':'Er is een significante samenhang.',lines.length===1?'De waarnemingen passen bij de verwachte verhouding.':'Er is geen significante samenhang aangetoond.')+`</ol>`+
+      `<div class="tbl-wrap"><table class="mini"><thead><tr><th>Cel</th><th class="num">Waargenomen O</th><th class="num">Verwacht E</th><th class="num">(O − E)²/E</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td class="num">${fmt(r[1],2)}</td><td class="num">${fmt(r[2],2)}</td><td class="num">${fmt(r[3],3)}</td></tr>`).join('')}</tbody></table></div>`;
+    if(warn) h+=note('warn','Eén of meer verwachte aantallen zijn kleiner dan 5; de χ²-benadering is dan onbetrouwbaar. Voeg categorieën samen of gebruik een exacte toets.');
+    if(lines.length===2&&lines[0].length===2) h+=note('info',`2×2-tabel met Yates-correctie: χ² = ${fmt(yates,3)}, p = ${pfmt(1-chicdf(yates,1))}.`);
+    out.innerHTML=h; return;
+  }
+};
+
+/* ================= TRANSFORMATIE ================= */
+const TFDATA=[['Eigen ligatie',10,3,19],['Eigen ligatie',100,31,176],['Eigen ligatie',930,'TNTC','TNTC'],['Controle-insert',100,72,118]];
+const tfRow=r=>`<tr><td><input class="txt" data-n value="${esc(r[0]??'')}" style="width:140px"></td><td>${inp(r[1],80,'data-v')}</td><td><input data-b value="${esc(r[2]??'')}" inputmode="decimal" style="text-align:right;width:70px"></td><td><input data-w value="${esc(r[3]??'')}" inputmode="decimal" style="text-align:right;width:70px"></td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
+$('#tf-tbl tbody').innerHTML=TFDATA.map(tfRow).join('');
+$('#tf-add').addEventListener('click',()=>{ $('#tf-tbl tbody').insertAdjacentHTML('beforeend',tfRow(['',100,'',''])); });
+$('#tf-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); calc.transf(); }});
+calc.transf=function(){
+  const lv=num($('#tf-lv').value), vng=num($('#tf-vng').value), used=num($('#tf-used').value), tot=num($('#tf-tot').value);
+  const [lo,hi]=$('#tf-range').value.split('-').map(Number), out=$('#tf-out');
+  const ng=vng/lv*used, ug=ng/1000;
+  const G={};
+  $$('#tf-tbl tbody tr').forEach(tr=>{ const n=(tr.querySelector('[data-n]').value||'').trim()||'Experiment', v=num(tr.querySelector('[data-v]').value), bR=tr.querySelector('[data-b]').value.trim(), wR=tr.querySelector('[data-w]').value.trim();
+    if(bR===''&&wR==='') return; const tn=x=>/^(>|tntc)/i.test(x); const b=num(bR), w=num(wR); (G[n]=G[n]||[]).push({v,b:tn(bR)?Infinity:(isFinite(b)?b:0),w:tn(wR)?Infinity:(isFinite(w)?w:0)}); });
+  const names=Object.keys(G);
+  if(!names.length){ out.innerHTML=note('info','Vul de tellingen per plaat in.'); return; }
+  if(!(ng>0)||!(tot>0)){ out.innerHTML=note('bad','Vul ligatievolume, hoeveelheid vector, getransformeerd volume en totaalvolume in.'); return; }
+  const res=names.map(n=>{ const P=G[n].filter(p=>p.v>0); const fin=P.filter(p=>isFinite(p.b+p.w)); let use=fin.filter(p=>p.b+p.w>=lo&&p.b+p.w<=hi), est=false; if(!use.length){ use=fin.filter(p=>p.b+p.w>0); est=true; }
+    const sv=use.reduce((a,p)=>a+p.v,0), sb=use.reduce((a,p)=>a+p.b,0), sw=use.reduce((a,p)=>a+p.w,0), col=sb+sw;
+    const T=sv>0?col/sv*tot:NaN, W=sv>0?sw/sv*tot:NaN;
+    return {n,plates:P.length,used:use.length,est,T,W,Bl:T-W,pw:col>0?sw/col*100:NaN,ratio:sb>0?sw/sb:Infinity,freq:T/ug,wfreq:W/ug,sv,col}; });
+  const main=res[0];
+  let h=`<div class="lbl">${esc(main.n)}: transformatiefrequentie</div><div class="big">${sci(main.freq,2)} <small>transformanten/µg vector</small></div>`;
+  h+=kv([['Vector per transformatie',fmt(ng,3)+' ng'],['Transformanten totaal',isFinite(main.T)?fmt(Math.round(main.T),0):'–'],['Waarvan wit',isFinite(main.W)?fmt(Math.round(main.W),0)+` (${fmt(main.pw,1)} %)`:'–'],['Verhouding wit : blauw',isFinite(main.ratio)?fmt(main.ratio,2)+' : 1':'alleen wit'],['Witte transformanten/µg',sci(main.wfreq,2)]]);
+  h+=`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Experiment</th><th class="num">Platen gebruikt</th><th class="num">Transformanten</th><th class="num">Wit</th><th class="num">% wit</th><th class="num">Wit : blauw</th><th class="num">Frequentie (per µg)</th></tr></thead><tbody>${res.map(r=>`<tr><td>${esc(r.n)}</td><td class="num">${r.used} van ${r.plates}</td><td class="num">${isFinite(r.T)?fmt(Math.round(r.T),0):'–'}</td><td class="num">${isFinite(r.W)?fmt(Math.round(r.W),0):'–'}</td><td class="num">${fmt(r.pw,1)}</td><td class="num">${isFinite(r.ratio)?fmt(r.ratio,2):'–'}</td><td class="num">${sci(r.freq,2)}</td></tr>`).join('')}</tbody></table></div>`;
+  res.filter(r=>r.est).forEach(r=>{ h+=note('warn',`${esc(r.n)}: geen plaat binnen ${lo}–${hi} kolonies; berekend met alle platen met kolonies. Markeer als schatting.`); });
+  res.filter(r=>r.used>0&&r.col<10).forEach(r=>{ h+=note('warn',`${esc(r.n)}: minder dan 10 kolonies geteld; de verhouding wit/blauw is dan erg onzeker.`); });
+  h+=`<div class="formula">transformanten = Σ kolonies / Σ uitgeplaat volume × ${fmt(tot,0)} µL · vector = ${fmt(vng,1)} ng / ${fmt(lv,1)} µL × ${fmt(used,2)} µL = ${fmt(ng,3)} ng · frequentie = transformanten / µg vector</div>`;
+  h+=note('info','Wit betekent dat lacZα onderbroken is, niet dat het juiste insert erin zit. Controleer witte kolonies met een kolonie-PCR of restrictieanalyse.');
+  out.innerHTML=h;
+};
+
 /* ---------- init new tools ---------- */
 buildReeks();
 sLoad('bradford');
 tblRestore();
 gfDemo();
-['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
+['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei','transf','stat'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
 decorateXL();
 route();
 </script>

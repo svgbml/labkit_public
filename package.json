@@ -1,7 +1,7 @@
 {
   "name": "labkit-bml",
   "productName": "Labkit BML",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Rekentools, standaardcurves, enzymkinetiek, PCR en gelfoto-editor voor het biomedisch lab",
   "main": "electron/main.js",
   "author": "svgbml",

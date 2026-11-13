@@ -208,6 +208,103 @@ def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','10,5');__set('z-g','4000')")
     return [('rpm', pg.evaluate("__big('#z-out')"), 5837, 0.001)]
 
+
+# ---------------- Transformatie ----------------
+def _tf(pg, lv, vng, used, tot, rows):
+    pg.evaluate(f"""__go('transf');__set('tf-range','1-100000');__set('tf-lv','{lv}');__set('tf-vng','{vng}');__set('tf-used','{used}');__set('tf-tot','{tot}');
+      document.querySelector('#tf-tbl tbody').innerHTML={rows!r}.map(r=>tfRow(r)).join(''); calc.transf();""")
+    return pg.evaluate("__big('#tf-out')")
+
+@case('Transformatie', 'Rekenvoorbeeld iGEM', 'iGEM Troubleshooting Transformations: 1 µL van 0,05 ng/µL, 100 van 1000 µL uitgeplaat, 250 kolonies → 5 × 10⁷ kve/µg')
+def _(pg):
+    return [('kve/µg', _tf(pg, 1, 0.05, 1, 1000, [['test', 100, 0, 250]]), 5e7, 0.001)]
+
+@case('Transformatie', 'Rekenvoorbeeld NEB', 'NEB FAQ C2925: 100 pg pUC19, 100 van 1000 µL uitgeplaat, 20 kolonies → 2 × 10⁶ kve/µg')
+def _(pg):
+    return [('kve/µg', _tf(pg, 1, 0.1, 1, 1000, [['test', 100, 0, 20]]), 2e6, 0.001)]
+
+@case('Transformatie', 'Rekenvoorbeeld OriGene', 'OriGene, transformatieprotocol: 20 pg pUC19, 5 µL van 1 mL uitgeplaat, 40 kolonies → 4 × 10⁸ kve/µg')
+def _(pg):
+    return [('kve/µg', _tf(pg, 1, 0.02, 1, 1000, [['test', 5, 0, 40]]), 4e8, 0.001)]
+
+# ---------------- Statistiek ----------------
+SLEEP_A = '0,7 -1,6 -0,2 -1,2 -0,1 3,4 3,7 0,8 0,0 2,0'
+SLEEP_B = '1,9 0,8 1,1 0,1 -0,1 4,4 5,5 1,6 4,6 3,4'
+def _st(pg, test, a='', b='', side='2', mu='0', alpha='0.05'):
+    pg.evaluate(f"""__go('stat');__set('st-alpha','{alpha}');__set('st-side','{side}');__set('st-mu','{mu}');__set('st-a',{a!r});__set('st-b',{b!r});__set('st-test','{test}');""")
+    big = pg.evaluate("__big('#st-out')")
+    p = pg.evaluate("(()=>{ const li=[...document.querySelectorAll('#st-out li')].find(l=>l.textContent.includes('p-waarde')); return li?__n(li.textContent.split('=')[1]):NaN; })()")
+    return big, p
+
+@case('Statistiek', 'Gepaarde t-toets, slaapdata', 'Student (1908), Cushny & Peebles; R: t.test(paired=TRUE) → t = −4,0621, p = 0,002833')
+def _(pg):
+    t, p = _st(pg, 'tp', SLEEP_A, SLEEP_B)
+    return [('t', t, -4.0621, 0.001), ('p', p, 0.002833, 0.01)]
+
+@case('Statistiek', 'F-toets + t-toets, twee groepen', 'Slaapdata; R: var.test → F = 0,7983 (1/F = 1,2526), p = 0,7427; t.test(var.equal=TRUE) → t = −1,8608, df 18, p = 0,07919')
+def _(pg):
+    t, p = _st(pg, 't2', SLEEP_A, SLEEP_B)
+    F = pg.evaluate("__n([...document.querySelectorAll('#st-out li')][0].textContent.split('=').slice(-3)[0])")
+    return [('F', F, 1/0.7983, 0.002), ('t', t, -1.8608, 0.001), ('p', p, 0.07919, 0.01)]
+
+@case('Statistiek', 't-toets, één steekproef', 'Slaapdata middel 1 tegen 0; referentie SciPy ttest_1samp: t = 1,3257, p = 0,2176')
+def _(pg):
+    from scipy import stats
+    r = stats.ttest_1samp([0.7,-1.6,-0.2,-1.2,-0.1,3.4,3.7,0.8,0.0,2.0], 0)
+    t, p = _st(pg, 't1', SLEEP_A)
+    return [('t', t, r.statistic, 0.001), ('p', p, r.pvalue, 0.01)]
+
+@case('Statistiek', 'Wilcoxon-rangtekentoets', 'Hollander & Wolfe (depressiescores, R-voorbeeld wilcox.test): V = 40; tweezijdig p = 0,03906')
+def _(pg):
+    x = '1,83 0,50 1,62 2,48 1,68 1,88 1,55 3,06 1,30'; y = '0,878 0,647 0,598 2,05 1,06 1,29 1,06 3,14 1,29'
+    T, p = _st(pg, 'wil', x, y)
+    return [('T = min(W₊, W₋)', T, 5, 0.0001), ('p', p, 0.03906, 0.01)]
+
+@case('Statistiek', 'Wilcoxon kritieke waarden', 'Tabellenboek Statistiek, Bijlage 11 (tweezijdig, α = 0,05): n = 6 → 0, 8 → 3, 10 → 8, 12 → 13, 15 → 25')
+def _(pg):
+    v = pg.evaluate("[6,8,10,12,15].map(n=>wilcoxCrit(n,0.025))")
+    return [(f'n = {n}', a, e, 0.0001) for n, a, e in zip([6,8,10,12,15], v, [0,3,8,13,25])]
+
+@case('Statistiek', 'χ²-aanpassingstoets, Mendel', 'Mendel (1866), erwten 315/108/101/32 tegen 9:3:3:1: χ² = 0,470, df 3; SciPy chisquare p = 0,9254')
+def _(pg):
+    pg.evaluate("__go('stat');__set('st-obs','315 108 101 32');__set('st-exp','9 3 3 1');__set('st-test','chi')")
+    c = pg.evaluate("__big('#st-out')")
+    p = pg.evaluate("__n([...document.querySelectorAll('#st-out li')].find(l=>l.textContent.includes('p-waarde')).textContent.split('=')[1])")
+    return [('χ²', c, 0.4700, 0.002), ('p', p, 0.9254, 0.002)]
+
+@case('Statistiek', 'Grubbs, uitbijter', 'NIST/SEMATECH e-Handbook 1.3.5.17.1 (8 uraniummetingen): G = 2,4687; tabel 10 n = 8 → 2,126')
+def _(pg):
+    pg.evaluate("__go('stat');__set('st-alpha','0.05');__set('st-a','199,31 199,53 200,19 200,82 201,92 201,95 202,18 245,57');__set('st-b','');__set('st-test','desc')")
+    G = pg.evaluate("__n([...document.querySelectorAll('#st-desc tr')].find(r=>r.cells[0].textContent.startsWith('Grubbs G (')).cells[1].textContent)")
+    Gc = pg.evaluate("__n([...document.querySelectorAll('#st-desc tr')].find(r=>r.cells[0].textContent.startsWith('Grubbs Gkrit')).cells[1].textContent)")
+    return [('G', G, 2.4687, 0.0005), ('G krit', Gc, 2.126, 0.0001)]
+
+@case('Statistiek', 'Grubbs, kritieke waarde berekend', 'Formule NIST 1.3.5.17.1 tegen Tabellenboek Bijlage 10 (n = 3–10, α = 0,05; tabel op 3 decimalen, n = 3 exact 1,1543)')
+def _(pg):
+    v = pg.evaluate("[3,4,5,6,7,8,9,10].map(n=>{ const t=tinv(1-0.05/(2*n),n-2); return (n-1)/Math.sqrt(n)*Math.sqrt(t*t/(n-2+t*t)); })")
+    return [(f'n = {n}', a, e, 0.001) for n, a, e in zip(range(3,11), v, [1.155,1.481,1.715,1.887,2.020,2.126,2.215,2.290])]
+
+@case('Statistiek', 'Dixon Q-toets', 'Wikipedia, Dixon’s Q test (10 waarden): Q = 0,455 < 0,466 bij 95% → geen uitbijter')
+def _(pg):
+    pg.evaluate("__go('stat');__set('st-a','0,189 0,167 0,187 0,183 0,186 0,182 0,181 0,184 0,181 0,177');__set('st-b','');__set('st-test','desc')")
+    Q = pg.evaluate("__n([...document.querySelectorAll('#st-desc tr')].find(r=>r.cells[0].textContent.startsWith('Dixon Q (')).cells[1].textContent)")
+    out = pg.evaluate("[...document.querySelectorAll('#st-desc tr')].find(r=>r.cells[0].textContent.startsWith('Dixon: uitbijter')).cells[1].textContent.trim()")
+    return [('Q', Q, 0.4545, 0.002), ('uitbijter (0 = nee)', 0 if out=='geen' else 1, 0, 0)]
+
+@case('Statistiek', 'Normaliteit (Lilliefors D)', 'Slaapdata middel 1; referentie statsmodels.stats.diagnostic.lilliefors')
+def _(pg):
+    from statsmodels.stats.diagnostic import lilliefors
+    D, _p = lilliefors([0.7,-1.6,-0.2,-1.2,-0.1,3.4,3.7,0.8,0.0,2.0], dist='norm', pvalmethod='table')
+    pg.evaluate(f"__go('stat');__set('st-a','{SLEEP_A}');__set('st-b','');__set('st-test','desc')")
+    v = pg.evaluate("__n([...document.querySelectorAll('#st-desc tr')].find(r=>r.cells[0].textContent.startsWith('Normaliteit')).cells[1].textContent)")
+    return [('D', v, D, 0.003)]
+
+@case('Statistiek', 't-verdeling, kritieke waarden', 'Tabellenboek Statistiek, Bijlage 4 (tweezijdig α = 0,05): df 1 → 12,706; 5 → 2,571; 10 → 2,228; 30 → 2,042')
+def _(pg):
+    v = pg.evaluate("[1,5,10,30].map(d=>tinv(0.975,d))")
+    return [(f'df {d}', a, e, 0.0005) for d, a, e in zip([1,5,10,30], v, [12.706,2.571,2.228,2.042])]
+
+
 def main():
     rows = []; fails = 0
     with sync_playwright() as p:
