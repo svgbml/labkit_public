@@ -484,6 +484,31 @@ def _(pg):
     return [('som ladder (ng)', v, 502, 0)]
 
 
+
+@case('Spectrofotometrie', 'NADH, Lambert-Beer', 'Sigma-Aldrich: ε₃₄₀ NADH = 6220 M⁻¹·cm⁻¹; A = 0,311 bij 1 cm → 0,0500 mM')
+def _(pg):
+    pg.evaluate("__go('spec');__set('sp-a','0,311');__set('sp-e','6220');__set('sp-l','1');__set('sp-df','1');__set('sp-c','')")
+    return [('mM', pg.evaluate("__big('#sp-out')"), 0.05, 0.001)]
+
+@case('Spectrofotometrie', 'ε₂₈₀ volgens Pace', 'Pace e.a. 1995: ε = 5500·W + 1490·Y + 125·cystines; 2 W, 20 Y, 17 S–S → 11 000 + 29 800 + 2125 = 42 925 M⁻¹·cm⁻¹')
+def _(pg):
+    pg.evaluate("__go('spec');__set('sp-seq','');__set('sp-nw','2');__set('sp-ny','20');__set('sp-nc','17')")
+    return [('ε₂₈₀', pg.evaluate("__kv('#sp-pout','ε₂₈₀')"), 42925, 0)]
+
+@case('Eenheden omrekenen', 'Fysiologisch zout', '0,9% NaCl (58,44 g/mol) = 9 g/L = 154 mmol/L')
+def _(pg):
+    pg.evaluate("__go('units');__set('un-v','0,9');__set('un-u','pct');__set('un-mw','58,44')")
+    t = pg.evaluate("document.querySelector('#un-out dd').textContent")
+    import re
+    mm = float(re.search(r'([\d,]+) mM', t).group(1).replace(',', '.'))
+    return [('mM', mm, 154.0, 0.002)]
+
+@case('Inoculum', 'Start-OD', 'C₁V₁ = C₂V₂: (1,6 − 0,05) × 1 → OD 1,55; 0,05 × 50 mL / 1,55 = 1,613 mL cultuur')
+def _(pg):
+    pg.evaluate("__go('inoc');__set('io-od','1,6');__set('io-df','1');__set('io-bl','0,05');__set('io-to','0,05');__set('io-v','50')")
+    return [('mL cultuur', pg.evaluate("__big('#io-out')"), 0.05*50/1.55, 0.002)]
+
+
 def main():
     rows = []; fails = 0
     with sync_playwright() as p:

@@ -16,14 +16,17 @@ Alles draait lokaal op je eigen apparaat. Er gaan geen gegevens, metingen of fot
 **Oplossingen**
 - Verdunning (C₁V₁ = C₂V₂)
 - Oplossing en buffer uit een recept, met stappenschema als afbeelding
+- Eenheden omrekenen (M, g/L, % w/v, ppm)
 
 **Assays**
 - Standaardcurve: lineair, kwadratisch, 4PL en 5PL, met LOD en LOQ en import van een 96-wells-plaatexport
 - Enzymkinetiek: activiteit uit ΔA/min, Michaelis-Menten, Lineweaver-Burk, Hanes-Woolf, remmingstype
+- Spectrofotometrie: Lambert-Beer en eiwitconcentratie uit A₂₈₀ (ε uit de sequentie)
 
 **Microbiologie en cellen**
 - Verdunningsreeks en KVE/mL
 - Groeicurve en groeicurves vergelijken (gemodificeerd Gompertz-model)
+- Inoculum: cultuur verdunnen naar een start-OD
 - Antibiotica-gevoeligheid: MIC uit een microdilutiereeks en S/I/R uit MIC of remzone
 - Telkamer en teller
 
@@ -64,7 +67,7 @@ Alles draait lokaal op je eigen apparaat. Er gaan geen gegevens, metingen of fot
 
 ## Validatie
 
-Bij elke wijziging draait [`tests/validate.py`](tests/validate.py) automatisch. Het script voert gepubliceerde of onafhankelijk berekende data in via de echte interface en vergelijkt de uitkomst met de bron. Het resultaat staat per controle met bronvermelding in [`tests/VALIDATIE.md`](tests/VALIDATIE.md).
+Bij elke wijziging draait [`tests/validate.py`](tests/validate.py) automatisch. Het script voert gepubliceerde of onafhankelijk berekende data in via de echte interface en vergelijkt de uitkomst met de bron. Het resultaat staat per controle met bronvermelding in [`tests/VALIDATIE.md`](tests/VALIDATIE.md). Daarnaast controleert [`tests/layout_audit.py`](tests/layout_audit.py) elke tool op drie schermbreedtes op overlappende of afgesneden tekst, ook in de gegenereerde afbeeldingen.
 
 Referenties zijn onder meer:
 - FDA BAM, NIST, Cold Spring Harbor

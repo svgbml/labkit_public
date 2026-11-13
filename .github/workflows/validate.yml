@@ -25,6 +25,8 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - name: Alle tools doorrekenen met gepubliceerde ruwe data
         run: python tests/validate.py
+      - name: Layoutcontrole op drie schermbreedtes
+        run: python tests/layout_audit.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

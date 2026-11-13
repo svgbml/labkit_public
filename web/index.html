@@ -54,11 +54,14 @@ main{padding:24px clamp(16px,2.5vw,36px) 56px;min-width:0}
 .tool-head h2{margin:0 0 2px;font-size:21px;font-weight:600;text-wrap:balance}
 .tool-head p{margin:0;color:var(--muted);max-width:78ch}
 .grid2{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
-.stack{display:grid;gap:16px}
+.stack{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.panel,.result,.grid2>*,.stack>*{min-width:0}
 .panel,.result{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
 .panel h3{margin:0 0 12px;font-size:14px;font-weight:600}
-.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-.f{display:grid;gap:4px;align-content:start}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:12px}
+.f{display:grid;gap:4px;align-content:start;min-width:0}
+.f>*{min-width:0}
+.f>label{overflow-wrap:break-word;hyphens:auto}
 .f label{font-size:12.5px;color:var(--muted);font-weight:600}
 .inu{display:flex}
 .inu input{border-top-right-radius:0;border-bottom-right-radius:0;min-width:0}
@@ -71,7 +74,10 @@ input.txt{font-family:var(--font-ui)}
 textarea{resize:vertical}
 input:focus,select:focus,textarea:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 button:focus-visible,a:focus-visible,[role=button]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-select{width:auto;cursor:pointer}
+select{width:auto;cursor:pointer;max-width:100%}
+.fields{min-width:0}
+.row>.fields{flex:1 1 280px;min-width:0}
+.inu{min-width:0}
 input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--accent)}
 input[type=range]{padding:0;border:0;accent-color:var(--accent);box-shadow:none}
 input[type=file]{font-size:13px}
@@ -146,6 +152,8 @@ tr.dim td{color:var(--muted)}
 .plate .hd{font-size:11.5px;color:var(--muted);display:flex;align-items:center;justify-content:center}
 .well{border-radius:50%;border:1.5px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;cursor:crosshair;color:#fff;line-height:1;text-align:center;overflow:hidden}
 .well.on{border-color:transparent}
+.well.wtxt span{display:block;width:100%;text-align:center}
+.well.wtxt{white-space:normal;word-break:break-word;overflow-wrap:anywhere;line-height:1.05;padding:3px;hyphens:auto}
 .well.wsel{outline:3px solid var(--accent);outline-offset:1px}
 .legend{display:flex;flex-wrap:wrap;gap:8px}
 .grp{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 5px;border:1px solid var(--line);border-radius:4px;background:var(--surface);cursor:pointer}
@@ -189,12 +197,15 @@ canvas{max-width:100%}
   <div class="navgroup">Oplossingen</div>
   <a href="#verdunning"><span class="k">C₁V₁</span>Verdunning</a>
   <a href="#oplossing"><span class="k">g</span>Oplossing &amp; buffer</a>
+  <a href="#units"><span class="k">M</span>Eenheden omrekenen</a>
   <div class="navgroup">Assays</div>
   <a href="#curve"><span class="k">y=f(x)</span>Standaardcurve</a>
   <a href="#enzym"><span class="k">Km</span>Enzymkinetiek</a>
+  <a href="#spec"><span class="k">A</span>Spectrofotometrie</a>
   <div class="navgroup">Microbiologie &amp; cellen</div>
   <a href="#reeks"><span class="k">KVE</span>Verdunningsreeks &amp; KVE</a>
   <a href="#groei"><span class="k">OD</span>Groeicurve</a>
+  <a href="#inoc"><span class="k">OD₀</span>Inoculum (OD verdunnen)</a>
   <a href="#telkamer"><span class="k">#</span>Telkamer</a>
   <a href="#teller"><span class="k">1–9</span>Teller</a>
   <a href="#gcomp"><span class="k">λ</span>Groeicurves vergelijken</a>
@@ -221,7 +232,7 @@ canvas{max-width:100%}
   <a href="#centrifuge"><span class="k">×g</span>Centrifuge</a>
   <a href="#timers"><span class="k">⏱</span>Timers</a>
   <a href="#plaat"><span class="k">96</span>Plaatindeling</a>
-  <div class="navfoot"><input id="sess-name" class="txt" placeholder="Projectnaam (optioneel)" style="height:28px;font-size:12.5px;margin-bottom:4px"><div class="row" style="gap:10px"><button type="button" class="ghost" id="sess-save" title="Bewaar alle invoer als bestand, bijvoorbeeld om naar een andere computer over te zetten">Sessie opslaan</button><button type="button" class="ghost" id="sess-open">Sessie openen</button><input type="file" id="sess-file" accept=".json,application/json" hidden></div><button type="button" class="ghost" id="reset-store" title="Wist de onthouden invoer op dit apparaat">Opgeslagen invoer wissen</button><span>Versie 1.8.0</span></div>
+  <div class="navfoot"><input id="sess-name" class="txt" placeholder="Projectnaam (optioneel)" style="height:28px;font-size:12.5px;margin-bottom:4px"><div class="row" style="gap:10px"><button type="button" class="ghost" id="sess-save" title="Bewaar alle invoer als bestand, bijvoorbeeld om naar een andere computer over te zetten">Sessie opslaan</button><button type="button" class="ghost" id="sess-open">Sessie openen</button><input type="file" id="sess-file" accept=".json,application/json" hidden></div><button type="button" class="ghost" id="reset-store" title="Wist de onthouden invoer op dit apparaat">Opgeslagen invoer wissen</button><span>Versie 1.9.0</span></div>
 </nav>
 
 <main>
@@ -547,7 +558,7 @@ canvas{max-width:100%}
       <div class="row"><button type="button" id="w-addg">+ Groep</button><button type="button" id="w-erase">Gum</button><button type="button" id="w-textmode" title="Klik daarna op een putje en typ de tekst">Tekst per putje</button><button type="button" id="w-clear">Leegmaken</button><button type="button" class="primary" id="w-copy">Kopieer als tabel</button><button type="button" id="w-csv" class="dl-only" style="display:none">Download CSV</button></div>
     </div>
     <div class="legend" id="w-legend"></div>
-    <div class="row" id="w-textbar" style="margin-top:10px;display:none"><span class="chip info" id="w-sel">geen putje</span><input id="w-wtext" class="txt" placeholder="Tekst in dit putje, bijv. S1 of 1:10" style="width:240px" maxlength="16"><button type="button" id="w-wclr">Tekst wissen</button><span style="font-size:13px;color:var(--muted)">Enter gaat naar het volgende putje.</span></div>
+    <div class="row" id="w-textbar" style="margin-top:10px;display:none"><span class="chip info" id="w-sel">geen putje</span><input id="w-wtext" class="txt" placeholder="Tekst in dit putje, bijv. S1 of 1:10" style="width:240px" maxlength="24"><button type="button" id="w-wclr">Tekst wissen</button><span style="font-size:13px;color:var(--muted)">Enter gaat naar het volgende putje.</span></div>
     <div class="tbl-wrap" style="margin-top:14px"><div class="plate" id="w-plate"></div></div>
     <div class="f" style="margin-top:12px"><label for="w-note">Eigen tekst onder de afbeelding (bijv. verdunningen, incubatietijden)</label><textarea id="w-note" rows="2">Standaarden in duplo in kolom 1–2; monsters in drievoud.</textarea></div>
     <h3 style="margin:16px 0 8px">Afbeelding</h3>
@@ -749,7 +760,7 @@ canvas{max-width:100%}
         <div class="row"><div class="f"><label for="gf-lad">Ladder</label><select id="gf-lad"><option value="100">100 bp (1000–100)</option><option value="neb100">NEB 100 bp (1517–100)</option><option value="100p">100 bp plus (3000–100)</option><option value="1k">1 kb (10 000–250)</option><option value="ppp">Eiwit: Precision Plus (250–10 kDa)</option><option value="prplus">Eiwit: PageRuler Plus (250–10 kDa)</option><option value="custom">Eigen ladder…</option></select></div><div class="f"><label for="gf-unit">Eenheid</label><select id="gf-unit"><option>bp</option><option>kDa</option></select></div><div class="f"><label>&nbsp;</label><button type="button" class="primary" id="gf-bands">Detecteer banden</button></div></div>
         <div class="f" id="gf-ladcw" style="margin-top:8px;display:none"><label for="gf-ladc">Eigen ladder, grootste eerst (spaties of ;)</label><input id="gf-ladc" class="mono" value="250 150 100 75 50 37 25 20 15 10"></div>
         <div class="row" style="margin-top:8px"><button type="button" id="gf-addband">+ Ladderband (klik)</button><button type="button" id="gf-measure">Band meten (klik)</button><button type="button" id="gf-measall">Meet alle banden</button><button type="button" id="gf-clrmarks">Metingen wissen</button></div>
-        <div class="fields" style="margin-top:8px;grid-template-columns:repeat(3,minmax(0,1fr))">
+        <div class="fields" style="margin-top:8px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
           <div class="f"><label for="gf-bg">Achtergrond (densitometrie)</label><select id="gf-bg" style="width:100%"><option value="ball">Rolling ball</option><option value="valley">Dal tot dal</option><option value="none">Geen (laagste punt)</option></select></div>
           <div class="f"><label for="gf-ball">Straal bal</label><div class="inu"><input id="gf-ball" inputmode="numeric" placeholder="auto"><span class="u">px</span></div></div>
           <div class="f"><label for="gf-front">Front voor Rf</label><div class="inu"><input id="gf-front" inputmode="numeric" placeholder="onderkant"><span class="u">px</span></div></div>
@@ -1132,6 +1143,83 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
   <p class="src">−dF/dT met een centrale differentie na glijdend gemiddelde; Tm = maximum van −dF/dT, verfijnd met parabolische interpolatie. Eén scherpe piek wijst op één specifiek product; een extra piek bij lagere temperatuur past bij primerdimeren (Ririe e.a., Anal. Biochem. 245:154–160, 1997).</p>
 </section>
 
+<!-- ============ SPECTROFOTOMETRIE ============ -->
+<section class="tool" id="t-spec" data-tool="spec">
+  <header class="tool-head"><h2>Spectrofotometrie</h2>
+  <p>Wet van Lambert-Beer (A = ε·c·l) en eiwitconcentratie uit A₂₈₀, met de extinctiecoëfficiënt berekend uit de aminozuursequentie.</p></header>
+  <div class="stack">
+    <div class="grid2">
+      <div class="panel">
+        <h3>Lambert-Beer <span class="example">voorbeeld: NADH bij 340 nm</span></h3>
+        <div class="fields">
+          <div class="f"><label for="sp-a">Absorbantie A</label><input id="sp-a" inputmode="decimal" value="0,311"></div>
+          <div class="f"><label for="sp-e">ε (M⁻¹·cm⁻¹)</label><input id="sp-e" inputmode="decimal" value="6220"></div>
+          <div class="f"><label for="sp-l">Weglengte</label><div class="inu"><input id="sp-l" inputmode="decimal" value="1"><span class="u">cm</span></div></div>
+          <div class="f"><label for="sp-c">Concentratie</label><div class="inu"><input id="sp-c" inputmode="decimal" value="" placeholder="berekenen"><span class="u">mM</span></div></div>
+          <div class="f"><label for="sp-df">Verdunningsfactor</label><input id="sp-df" inputmode="decimal" value="1"></div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Laat A of de concentratie leeg; dat veld wordt berekend.</p>
+      </div>
+      <div class="result" id="sp-out"></div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Eiwit uit A₂₈₀</h3>
+        <div class="f"><label for="sp-seq">Aminozuursequentie (één-lettercode) of alleen aantallen hieronder</label><textarea id="sp-seq" rows="3" spellcheck="false" placeholder="MKWVTFISLLFLFSSAYS…"></textarea></div>
+        <div class="fields" style="margin-top:10px">
+          <div class="f"><label for="sp-nw">Trp (W)</label><input id="sp-nw" inputmode="numeric" value="2"></div>
+          <div class="f"><label for="sp-ny">Tyr (Y)</label><input id="sp-ny" inputmode="numeric" value="20"></div>
+          <div class="f"><label for="sp-nc">Cystines (S–S)</label><input id="sp-nc" inputmode="numeric" value="17"></div>
+          <div class="f"><label for="sp-mw">Molmassa</label><div class="inu"><input id="sp-mw" inputmode="decimal" value="66430"><span class="u">g/mol</span></div></div>
+          <div class="f"><label for="sp-a280">A₂₈₀ (gemeten)</label><input id="sp-a280" inputmode="decimal" value="0,45"></div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Plak je een sequentie, dan worden W, Y en de molmassa ingevuld; het aantal cystines (zwavelbruggen) vul je zelf in. De voorbeeldaantallen zijn alleen ter illustratie.</p>
+      </div>
+      <div class="result" id="sp-pout"></div>
+    </div>
+  </div>
+  <p class="src">A = ε·c·l (Lambert-Beer). NADH: ε₃₄₀ = 6220 M⁻¹·cm⁻¹ (Sigma-Aldrich, enzymatic assay procedures). ε₂₈₀ = 5500·n<sub>W</sub> + 1490·n<sub>Y</sub> + 125·n<sub>cystine</sub> (Pace e.a., Protein Science 4:2411–2423, 1995; gebruikt door ExPASy ProtParam). Molmassa uit de sequentie met gemiddelde residumassa's plus 18,02 voor water.</p>
+</section>
+
+<!-- ============ EENHEDEN OMREKENEN ============ -->
+<section class="tool" id="t-units" data-tool="units">
+  <header class="tool-head"><h2>Eenheden omrekenen</h2>
+  <p>Concentratie omrekenen tussen molair, massa per volume, procent en ppm. Vul één waarde in; de rest volgt uit de molmassa.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="un-v">Waarde</label><input id="un-v" inputmode="decimal" value="0,9"></div>
+        <div class="f"><label for="un-u">Eenheid</label><select id="un-u" style="width:100%"><option value="M">M (mol/L)</option><option value="mM">mM</option><option value="uM">µM</option><option value="nM">nM</option><option value="gL">g/L</option><option value="mgmL">mg/mL</option><option value="ugmL">µg/mL</option><option value="ngul">ng/µL</option><option value="pct" selected>% w/v</option><option value="ppm">ppm (mg/L)</option></select></div>
+        <div class="f"><label for="un-mw">Molmassa</label><div class="inu"><input id="un-mw" inputmode="decimal" value="58,44" list="un-chem"><span class="u">g/mol</span></div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Voorbeeld: fysiologisch zout, 0,9% NaCl. ppm hier als mg/L (waterige oplossing, dichtheid ≈ 1).</p>
+    </div>
+    <div class="result" id="un-out"></div>
+  </div>
+  <p class="src">1 M = 1 mol/L; g/L = M × molmassa; % w/v = g per 100 mL; 1 mg/mL = 1 g/L = 1 µg/µL; 1 ng/µL = 1 µg/mL = 1 mg/L ≈ 1 ppm in water. 0,9% NaCl ≈ 154 mmol/L.</p>
+</section>
+
+<!-- ============ INOCULUM ============ -->
+<section class="tool" id="t-inoc" data-tool="inoc">
+  <header class="tool-head"><h2>Inoculum (OD verdunnen)</h2>
+  <p>Hoeveel cultuur en medium je nodig hebt om op een start-OD of een celdichtheid te beginnen, bijvoorbeeld voor een groeicurve, MIC-bepaling of transformatie.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="io-od">Gemeten OD₆₀₀ (cultuur)</label><input id="io-od" inputmode="decimal" value="1,6"></div>
+        <div class="f"><label for="io-df">Gemeten in verdunning</label><div class="inu"><span class="u" style="border-left:1px solid var(--line);border-radius:4px 0 0 4px;border-right:0">1 :</span><input id="io-df" inputmode="decimal" value="1" style="border-radius:0 4px 4px 0"></div></div>
+        <div class="f"><label for="io-bl">Blanco (medium)</label><input id="io-bl" inputmode="decimal" value="0,05"></div>
+        <div class="f"><label for="io-to">Gewenste start-OD</label><input id="io-to" inputmode="decimal" value="0,05"></div>
+        <div class="f"><label for="io-v">Eindvolume</label><div class="inu"><input id="io-v" inputmode="decimal" value="50"><span class="u">mL</span></div></div>
+        <div class="f"><label for="io-fac">Cellen/mL bij OD 1,0</label><input id="io-fac" inputmode="decimal" value="8e8"></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Meet boven OD ≈ 1 in een verdunning (bijv. 1:10) voor een betrouwbare waarde.</p>
+    </div>
+    <div class="result" id="io-out"></div>
+  </div>
+  <p class="src">OD<sub>cultuur</sub> = (gemeten − blanco) × verdunning; V<sub>cultuur</sub> = OD<sub>start</sub> × V<sub>eind</sub> / OD<sub>cultuur</sub> (C₁V₁ = C₂V₂). OD₆₀₀ is tot ongeveer 1,0 evenredig met het celaantal; ≈ 8 × 10⁸ E. coli-cellen/mL bij OD 1 is een vuistregel (Agilent, E. coli Cell Culture Concentration from OD600).</p>
+</section>
+
 </main>
 </div>
 
@@ -1153,7 +1241,7 @@ const kv=rows=>`<dl class="kv">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`)
 const calc={};
 
 /* ---------- routing ---------- */
-const TOOLS=['verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','transf','stat','mic','gcomp','wb','melt','pverd','ppip','pprog','plaad','centrifuge','timers','plaat'];
+const TOOLS=['verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','transf','stat','spec','units','inoc','mic','gcomp','wb','melt','pverd','ppip','pprog','plaad','centrifuge','timers','plaat'];
 let current='verdunning';
 function route(){
   const h=(location.hash||'').slice(1);
@@ -1552,7 +1640,7 @@ let selG=0, wells={}, painting=false, eraser=false;
 function dims(){ const [r,c]=$('#w-fmt').value.split('x').map(Number); return {r,c}; }
 const RL='ABCDEFGHIJKLMNOP';
 function exampleWells(){ wells={}; const {r,c}=dims(); if(r!==8) return; for(let i=0;i<7;i++){ wells[RL[i]+1]=0; wells[RL[i]+2]=0; } wells['H1']=1; wells['H2']=1; for(let col=3;col<=8;col++) for(let i=0;i<8;i++) wells[RL[i]+col]=2; wells['H11']=3; wells['H12']=3; }
-function labels(){ const {r,c}=dims(); const cnt={}, lab={}; for(let i=0;i<r;i++) for(let j=1;j<=c;j++){ const k=RL[i]+j; const g=wells[k]; if(g==null||!groups[g]) continue; cnt[g]=(cnt[g]||0)+1; const short=groups[g].n.replace(/[^A-Za-zÀ-ÿ0-9]/g,'').slice(0,2)||'G'; lab[k]=short+cnt[g]; } return {cnt,lab}; }
+function labels(){ const {r,c}=dims(); const cnt={}, nr={}, lab={}; for(let i=0;i<r;i++) for(let j=1;j<=c;j++){ const k=RL[i]+j; const g=wells[k]; if(g==null||!groups[g]) continue; cnt[g]=(cnt[g]||0)+1; if(typeof wText!=='undefined'&&wText[k]) continue; nr[g]=(nr[g]||0)+1; const short=groups[g].n.replace(/[^A-Za-zÀ-ÿ0-9]/g,'').slice(0,2)||'G'; lab[k]=short+nr[g]; } return {cnt,lab}; }
 function renderPlate(){
   const {r,c}=dims(); const sz=c>=12?34:c>=8?42:56;
   const {cnt,lab}=labels();
@@ -2365,7 +2453,7 @@ $('#gf-auto').addEventListener('click',gfAutoStraighten);
 $('#sess-save').addEventListener('click',()=>{ try{ localStorage.setItem(TBLKEY,JSON.stringify(tblSnap())); }catch(e){}
   const data={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('labkit:')) data[k]=localStorage.getItem(k); } }catch(e){}
   const d=new Date(), stamp=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  const pn=($('#sess-name').value||'').trim(); saveBlob(`${pn?safeName(pn):'labkit-sessie'}-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',project:pn,versie:'1.8.0',opgeslagen:d.toISOString(),data},null,1)],{type:'application/json'})).catch(()=>{}); });
+  const pn=($('#sess-name').value||'').trim(); saveBlob(`${pn?safeName(pn):'labkit-sessie'}-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',project:pn,versie:'1.9.0',opgeslagen:d.toISOString(),data},null,1)],{type:'application/json'})).catch(()=>{}); });
 $('#sess-open').addEventListener('click',()=>$('#sess-file').click());
 $('#sess-file').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const j=JSON.parse(t); if(!j||j.app!=='Labkit BML'||typeof j.data!=='object') throw 0; Object.entries(j.data).forEach(([k,v])=>{ if(k.startsWith('labkit:')) localStorage.setItem(k,v); }); location.reload(); }).catch(()=>alertBox('Dit bestand is geen Labkit-sessie.')); });
 function alertBox(t){ const n=document.createElement('div'); n.className='note bad'; n.style.cssText='position:fixed;left:16px;bottom:16px;z-index:50;max-width:320px'; n.textContent=t; document.body.appendChild(n); setTimeout(()=>n.remove(),4000); }
@@ -2829,10 +2917,17 @@ function plateImg(){ const cv=$('#w-cv'); if(!cv) return; const {r,c}=dims(), {l
     x.strokeStyle=PCOL.ink; x.lineWidth=1.2; x.beginPath(); x.roundRect?x.roundRect(L-6,T-4,c*sz+12,r*sz+8,10):x.rect(L-6,T-4,c*sz+12,r*sz+8); x.stroke();
     for(let i=0;i<r;i++) for(let j=1;j<=c;j++){ const k=RL[i]+j, g=wells[k], on=g!=null&&groups[g], cx=L+(j-0.5)*sz, cy=T+(i+0.5)*sz, rad=sz*0.42;
       x.beginPath(); x.arc(cx,cy,rad,0,7); x.fillStyle=on?groups[g].c:'#f4f5f7'; x.fill(); x.strokeStyle=on?'rgba(0,0,0,.25)':PCOL.line; x.lineWidth=1; x.stroke();
-      const t=wText[k]!=null&&wText[k]!==''?wText[k]:on?lab[k]:''; if(t){ x.fillStyle=on?'#fff':PCOL.ink; let fs=Math.min(12,sz*0.3); x.font=`600 ${fs}px `+PFONT(); while(x.measureText(t).width>rad*1.85&&fs>6){ fs-=0.5; x.font=`600 ${fs}px `+PFONT(); } x.fillText(t,cx,cy); } }
+      const t=wText[k]!=null&&wText[k]!==''?wText[k]:on?lab[k]:''; if(t){ x.fillStyle=on?'#fff':PCOL.ink; wellLines(x,t,cx,cy,rad); } }
     let ly=T+r*sz+26; used.forEach(([g,i],q)=>{ const col=q%3, row=Math.floor(q/3), lx=L+col*Math.max(170,(W-L-20)/3), yy=ly+row*22; x.fillStyle=g.c; x.beginPath(); x.arc(lx+6,yy,6,0,7); x.fill(); x.fillStyle=PCOL.ink; x.font='12.5px '+PFONT(); x.textAlign='left'; x.fillText(`${g.n} (${cnt[i]})`,lx+18,yy); });
     if(NL_.length) pDrawNotes(x,NL_,ly+legRows*22+8); }); }
-function applyWellText(){ $$('#w-plate [data-w]').forEach(el=>{ const k=el.dataset.w, t=wText[k]; if(t!=null&&t!==''){ el.textContent=t; el.style.fontSize=t.length>4?'8.5px':''; if(!el.classList.contains('on')) el.style.color='var(--ink)'; } el.classList.toggle('wsel',wTextMode&&k===wSel); }); }
+function wellLines(x,t,cx,cy,rad){ const W=rad*1.72, set=fs=>{ x.font=`600 ${fs}px `+PFONT(); };
+  const wrap=(fs,split)=>{ set(fs); let words=String(t).split(/\s+/); if(split) words=words.flatMap(w=>{ if(x.measureText(w).width<=W) return [w]; const parts=[]; let cur=''; [...w].forEach(ch=>{ if(x.measureText(cur+ch+'-').width>W&&cur){ parts.push(cur+'-'); cur=ch; } else cur+=ch; }); parts.push(cur); return parts; });
+    const out=[]; let ln=''; words.forEach(w=>{ const c=(ln+' '+w).trim(); if(x.measureText(c).width>W&&ln){ out.push(ln); ln=w; } else ln=c; }); if(ln) out.push(ln); return out; };
+  const fits=(L,fs)=>{ set(fs); const n=L.length, hh=n*fs*1.1; return L.every((l,i)=>{ const yy=(i-(n-1)/2)*fs*1.1, half=Math.sqrt(Math.max(0,rad*rad*0.92-(Math.abs(yy)+fs*0.45)**2)); return x.measureText(l).width<=2*half; })&&hh<=rad*1.7; };
+  let fs=Math.min(12,rad*0.62), L=null; for(;fs>=5.5;fs-=0.5){ const c=wrap(fs,false); if(fits(c,fs)){ L=c; break; } }
+  if(!L){ for(fs=Math.min(9,rad*0.45);fs>=5;fs-=0.5){ const c=wrap(fs,true); if(fits(c,fs)||fs<=5.5){ L=c; break; } } }
+  set(fs); L.forEach((l,i)=>x.fillText(l,cx,cy+(i-(L.length-1)/2)*fs*1.1)); }
+function applyWellText(){ const sz=parseFloat(getComputedStyle($('#w-plate')).gridAutoRows)||34; $$('#w-plate [data-w]').forEach(el=>{ const k=el.dataset.w, t=wText[k]; if(t!=null&&t!==''){ el.innerHTML=`<span>${esc(t)}</span>`; el.classList.add('wtxt'); el.title=k+' · '+t; let fs=Math.min(11,sz*0.3); el.style.fontSize=fs+'px'; if(!el.classList.contains('on')) el.style.color='var(--ink)'; for(let i=0;i<12&&(el.scrollHeight>el.clientHeight+1||el.scrollWidth>el.clientWidth+1)&&fs>5.5;i++){ fs-=0.5; el.style.fontSize=fs+'px'; } } el.classList.toggle('wsel',wTextMode&&k===wSel); }); }
 { const _rp=renderPlate; renderPlate=function(){ _rp(); applyWellText(); try{ plateImg(); }catch(e){} }; }
 $('#w-plate').addEventListener('pointerdown',e=>{ if(!wTextMode) return; const w=e.target.closest('[data-w]'); if(!w) return; e.stopPropagation(); e.preventDefault(); wSel=w.dataset.w; $('#w-sel').textContent=wSel; $('#w-wtext').value=wText[wSel]||''; renderPlate(); setTimeout(()=>$('#w-wtext').focus(),0); },true);
 $('#w-textmode').addEventListener('click',()=>{ wTextMode=!wTextMode; $('#w-textmode').classList.toggle('primary',wTextMode); $('#w-textbar').style.display=wTextMode?'flex':'none'; if(wTextMode&&!wSel){ wSel='A1'; $('#w-sel').textContent=wSel; $('#w-wtext').value=wText[wSel]||''; } renderPlate(); });
@@ -3001,12 +3096,39 @@ function stBars(cv,G,R,alpha){ const names=G.map(g=>g.name), ms=G.map(g=>mean(g.
     sig_.forEach((q,k)=>{ const i=names.indexOf(q.b), j=names.indexOf(q.a), y=top0-k*22, xa=X(Math.min(i,j)), xb=X(Math.max(i,j)); x.strokeStyle=PCOL.ink; x.lineWidth=1.2; x.beginPath(); x.moveTo(xa,y+6); x.lineTo(xa,y); x.lineTo(xb,y); x.lineTo(xb,y+6); x.stroke(); x.fillStyle=PCOL.ink; x.font='600 13px '+PFONT(); x.textAlign='center'; x.fillText(q.p<0.001?'***':q.p<0.01?'**':'*',(xa+xb)/2,y-7); });
     x.save(); x.translate(16,(T+B)/2); x.rotate(-Math.PI/2); x.textAlign='center'; x.fillStyle=PCOL.muted; x.font='12px '+PFONT(); x.fillText('gemiddelde ± SD',0,0); x.restore(); });
   cv._data={head:['groep','gemiddelde','SD','n'],rows:names.map((n,i)=>[n,ms[i],sds[i],G[i].v.length])}; }
+/* ================= SPECTROFOTOMETRIE ================= */
+const AAM={A:71.0788,R:156.1875,N:114.1038,D:115.0886,C:103.1388,E:129.1155,Q:128.1307,G:57.0519,H:137.1411,I:113.1594,L:113.1594,K:128.1741,M:131.1926,F:147.1766,P:97.1167,S:87.0782,T:101.1051,W:186.2132,Y:163.1760,V:99.1326};
+$('#sp-seq').addEventListener('input',e=>{ const s=e.target.value.toUpperCase().replace(/[^A-Z]/g,''); if(!s) return; const c=ch=>(s.match(new RegExp(ch,'g'))||[]).length; $('#sp-nw').value=c('W'); $('#sp-ny').value=c('Y'); const mw=[...s].reduce((a,ch)=>a+(AAM[ch]||0),0)+18.015; $('#sp-mw').value=String(Math.round(mw*100)/100).replace('.',','); });
+calc.spec=function(){
+  const A=num($('#sp-a').value), e=num($('#sp-e').value), l=num($('#sp-l').value)||1, df=num($('#sp-df').value)||1, cin=num($('#sp-c').value), out=$('#sp-out');
+  if(isFinite(A)&&e>0){ const c=A/(e*l)*df; out.innerHTML=`<div class="lbl">Concentratie (onverdund)</div><div class="big">${sig(c*1e3,4)} <small>mM</small></div>`+kv([['In de cuvet',sig(A/(e*l)*1e6,4)+' µM'],['Onverdund',sig(c*1e6,4)+' µM'],['Verdunningsfactor',fmt(df,2)]])+(A>1.5?note('warn','A boven ±1,5 valt buiten het lineaire bereik van de meeste fotometers; verdun en meet opnieuw.'):A<0.05?note('warn','Erg lage absorbantie; de meetfout is relatief groot.'):'')+`<div class="formula">c = A / (ε · l) × verdunning</div>`; }
+  else if(isFinite(cin)&&e>0){ const a=cin/1e3*e*l/df; out.innerHTML=`<div class="lbl">Verwachte absorbantie</div><div class="big">${fmt(a,3)}</div><div class="formula">A = ε · c · l / verdunning</div>`; }
+  else out.innerHTML=note('info','Vul A of de concentratie in, plus ε.');
+  const nW=num($('#sp-nw').value)||0, nY=num($('#sp-ny').value)||0, nC=num($('#sp-nc').value)||0, mw=num($('#sp-mw').value), a280=num($('#sp-a280').value);
+  const eps=5500*nW+1490*nY+125*nC, abs01=mw>0?eps/mw:NaN, mgml=a280/(eps*l)*mw*df;
+  $('#sp-pout').innerHTML=eps>0?`<div class="lbl">Eiwitconcentratie</div><div class="big">${isFinite(mgml)?sig(mgml,3):'–'} <small>mg/mL</small></div>`+kv([['ε₂₈₀',fmt(eps,0)+' M⁻¹·cm⁻¹'],['A₂₈₀ van 1 mg/mL (Abs 0,1%)',isFinite(abs01)?fmt(abs01,3):'–'],['Molair',isFinite(a280)?sig(a280/(eps*l)*df*1e6,4)+' µM':'–']])+(nW===0?note('warn','Zonder tryptofaan is A₂₈₀ onnauwkeurig (fout tot ±10%); overweeg Bradford of BCA.'):'')+`<div class="formula">ε = 5500·W + 1490·Y + 125·cystines · c (mg/mL) = A / (ε·l) × M</div>`:note('info','Vul aantallen W, Y en cystines in of plak een sequentie.');
+};
+/* ================= EENHEDEN ================= */
+calc.units=function(){
+  const v=num($('#un-v').value), u=$('#un-u').value, mw=num($('#un-mw').value), out=$('#un-out');
+  const toGL={gL:1,mgmL:1,ugmL:1e-3,ngul:1e-3,pct:10,ppm:1e-3}, toM={M:1,mM:1e-3,uM:1e-6,nM:1e-9};
+  if(!isFinite(v)){ out.innerHTML=note('info','Vul een waarde in.'); return; }
+  let gL, M; if(toM[u]!=null){ M=v*toM[u]; gL=M*mw; } else { gL=v*toGL[u]; M=gL/mw; }
+  out.innerHTML=`<div class="lbl">Omgerekend</div>`+kv([['Molair',isFinite(M)?`${sig(M,4)} M · ${sig(M*1e3,4)} mM · ${sig(M*1e6,4)} µM`:'molmassa nodig'],['Massa per volume',`${sig(gL,4)} g/L = ${sig(gL,4)} mg/mL`],['',`${sig(gL*1e3,4)} µg/mL = ${sig(gL*1e3,4)} ng/µL`],['Procent (w/v)',sig(gL/10,4)+' %'],['ppm (mg/L)',sig(gL*1e3,4)]])+(!isFinite(mw)&&toM[u]!=null?note('warn','Vul de molmassa in om naar massa om te rekenen.'):'');
+};
+/* ================= INOCULUM ================= */
+calc.inoc=function(){
+  const od=num($('#io-od').value), df=num($('#io-df').value)||1, bl=num($('#io-bl').value)||0, to=num($('#io-to').value), V=num($('#io-v').value), fac=num($('#io-fac').value), out=$('#io-out');
+  const odc=(od-bl)*df; if(!(odc>0)||!(to>0)||!(V>0)){ out.innerHTML=note('info','Vul gemeten OD, gewenste OD en volume in.'); return; }
+  if(to>=odc){ out.innerHTML=note('bad','De gewenste OD is hoger dan die van de cultuur; laat de cultuur langer groeien of concentreer de cellen.'); return; }
+  const vc=to*V/odc; out.innerHTML=`<div class="lbl">Pipetteer</div><div class="big">${vol(vc*1000)} <small>cultuur</small></div>`+kv([['Medium',vol((V-vc)*1000)],['OD cultuur (gecorrigeerd)',fmt(odc,3)],['Verdunning','1 : '+sig(odc/to,4)],['Cellen/mL bij start (schatting)',isFinite(fac)?sci(to*fac,2):'–']])+((od-bl)>1?note('warn','De meting ligt boven OD 1; daar is OD niet meer lineair. Meet in een verdunning.'):'')+`<div class="formula">V<sub>cultuur</sub> = ${fmt(to,3)} × ${fmt(V,1)} mL / ${fmt(odc,3)}</div>`;
+};
 /* ---------- init new tools ---------- */
 buildReeks();
 sLoad('bradford');
 tblRestore();
 gfDemo();
-['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei','transf','stat','pverd','ppip','pprog','plaad','mic','gcomp','wb','melt'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
+['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei','transf','stat','pverd','ppip','pprog','plaad','mic','gcomp','wb','melt','spec','units','inoc'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
 ppBuild(); plBuild(); $('#qp-impgo').addEventListener('click',qpImport); { const _op=calc.oplossing; calc.oplossing=function(e){ _op(e); try{ bufImg(); }catch(err){} }; } ['o-btitle','o-note'].forEach(id=>$('#'+id).addEventListener('input',()=>bufImg())); try{ bufImg(); }catch(e){} try{ calc.ppip(); calc.plaad(); }catch(e){ console.error(e); }
 decorateXL();
 route();
