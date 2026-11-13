@@ -113,6 +113,10 @@ td input{padding:5px 7px}
 tr.hl td{background:var(--accent-soft)}
 tr.dim td{color:var(--muted)}
 .mini td,.mini th{padding:4px 6px;font-size:13px}
+.xlbar{display:flex;justify-content:flex-end;gap:6px;margin:2px 0 4px}
+.xlbtn{font-size:12px;font-weight:500;padding:2px 8px;color:var(--muted);background:var(--surface)}
+.xlbtn:hover{color:var(--accent);border-color:var(--accent);background:var(--surface)}
+.xlbtn.done{color:var(--ok);border-color:var(--ok)}
 .example{font-size:12px;font-weight:400;color:var(--muted);margin-left:6px}
 .example::before{content:"("}.example::after{content:")"}
 /* teller */
@@ -189,12 +193,14 @@ canvas{max-width:100%}
   <a href="#enzym"><span class="k">Km</span>Enzymkinetiek</a>
   <div class="navgroup">Microbiologie &amp; cellen</div>
   <a href="#reeks"><span class="k">KVE</span>Verdunningsreeks &amp; KVE</a>
+  <a href="#groei"><span class="k">OD</span>Groeicurve</a>
   <a href="#telkamer"><span class="k">#</span>Telkamer</a>
   <a href="#teller"><span class="k">1–9</span>Teller</a>
   <div class="navgroup">DNA</div>
   <a href="#dna"><span class="k">A₂₆₀</span>DNA-kwantificatie</a>
   <a href="#pcr"><span class="k">×n</span>PCR-mastermix</a>
   <a href="#pcrcyclus"><span class="k">Tm</span>PCR-cyclus</a>
+  <a href="#qpcr"><span class="k">ΔΔCt</span>qPCR-analyse (ΔΔCt)</a>
   <a href="#gel"><span class="k">%</span>Agarosegel &amp; bandgrootte</a>
   <a href="#gelfoto"><span class="k">img</span>Gelfoto-editor</a>
   <a href="#ligatie"><span class="k">3:1</span>Ligatie</a>
@@ -202,7 +208,7 @@ canvas{max-width:100%}
   <a href="#centrifuge"><span class="k">×g</span>Centrifuge</a>
   <a href="#timers"><span class="k">⏱</span>Timers</a>
   <a href="#plaat"><span class="k">96</span>Plaatindeling</a>
-  <div class="navfoot"><button type="button" class="ghost" id="reset-store" title="Wist de onthouden invoer op dit apparaat">Opgeslagen invoer wissen</button><span>Versie 1.3.0</span></div>
+  <div class="navfoot"><div class="row" style="gap:10px"><button type="button" class="ghost" id="sess-save" title="Bewaar alle invoer als bestand, bijvoorbeeld om naar een andere computer over te zetten">Sessie opslaan</button><button type="button" class="ghost" id="sess-open">Sessie openen</button><input type="file" id="sess-file" accept=".json,application/json" hidden></div><button type="button" class="ghost" id="reset-store" title="Wist de onthouden invoer op dit apparaat">Opgeslagen invoer wissen</button><span>Versie 1.4.0</span></div>
 </nav>
 
 <main>
@@ -301,7 +307,7 @@ canvas{max-width:100%}
         <div class="f"><label for="k-sv">Volume suspensie</label><div class="inu"><input id="k-sv" inputmode="decimal" value="10"><span class="u">mL</span></div></div>
         <div class="f"><label for="k-need">Nodig: cellen</label><input id="k-need" inputmode="decimal" value="1e5"></div>
       </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Trypaanblauw 1:1 = factor 2. Getallen scheiden met spatie, komma of enter.</p>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Trypaanblauw 1:1 = factor 2. Getallen scheiden met spatie, puntkomma of enter; een komma zonder spatie is een decimaalteken.</p>
     </div>
     <div class="result" id="k-out"></div>
   </div>
@@ -373,7 +379,21 @@ canvas{max-width:100%}
       <div class="result" id="p-out"></div>
     </div>
   </div>
-  <p class="src">Omrekenfactoren A₂₆₀ = 1 bij 1 cm: dsDNA 50, ssDNA 33, RNA 40 µg/mL; zuiver DNA A₂₆₀/A₂₈₀ ≈ 1,8–2,0 en A₂₆₀/A₂₃₀ ≥ 2,0 (Eppendorf Application Note 279). ≈ 6,6 pg DNA per diploïde menselijke cel; STR-kits werken doorgaans het best rond 0,5–2 ng input (NIST, Butler &amp; McCord, AAFS 2006 workshop; PMC9267064).</p>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Forensische qPCR-kwantificatie <span class="example">voorbeeld</span></h3>
+        <div class="fields">
+          <div class="f"><label for="fq-s">Klein autosomaal doel</label><div class="inu"><input id="fq-s" inputmode="decimal" value="0,25"><span class="u">ng/µL</span></div></div>
+          <div class="f"><label for="fq-l">Groot autosomaal doel</label><div class="inu"><input id="fq-l" inputmode="decimal" value="0,05"><span class="u">ng/µL</span></div></div>
+          <div class="f"><label for="fq-y">Y-doel (mannelijk)</label><div class="inu"><input id="fq-y" inputmode="decimal" value="0,02"><span class="u">ng/µL</span></div></div>
+          <div class="f"><label for="fq-ng">Gewenste STR-input</label><div class="inu"><input id="fq-ng" inputmode="decimal" value="1"><span class="u">ng</span></div></div>
+          <div class="f"><label for="fq-v">Max. volume in PCR</label><div class="inu"><input id="fq-v" inputmode="decimal" value="15"><span class="u">µL</span></div></div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Concentraties zoals een kwantificatiekit met een kort en een lang autosomaal doel en een Y-doel ze geeft (bijvoorbeeld Quantifiler Trio).</p>
+      </div>
+      <div class="result" id="fq-out"></div>
+    </div>
+  <p class="src">Forensische kwantificatie: degradatie-index = klein / groot autosomaal doel; DI ≤ 1 wijst op intact DNA, boven 1 mogelijk degradatie (Thermo Fisher, Behind the Bench); indeling 1–10 matig en &gt; 10 sterk gedegradeerd volgens Othram. Omrekenfactoren A₂₆₀ = 1 bij 1 cm: dsDNA 50, ssDNA 33, RNA 40 µg/mL; zuiver DNA A₂₆₀/A₂₈₀ ≈ 1,8–2,0 en A₂₆₀/A₂₃₀ ≥ 2,0 (Eppendorf Application Note 279). ≈ 6,6 pg DNA per diploïde menselijke cel; STR-kits werken doorgaans het best rond 0,5–2 ng input (NIST, Butler &amp; McCord, AAFS 2006 workshop; PMC9267064).</p>
 </section>
 
 <!-- ============ PCR ============ -->
@@ -673,7 +693,7 @@ canvas{max-width:100%}
         <div class="rng" style="margin-top:10px"><label for="gf-bri">Helderheid</label><input type="range" id="gf-bri" min="-60" max="60" value="0"><span id="gf-briv">0</span></div>
         <div class="rng"><label for="gf-con">Contrast</label><input type="range" id="gf-con" min="0.5" max="3" step="0.05" value="1"><span id="gf-conv">1,00</span></div>
         <div class="rng"><label for="gf-rot">Rechtzetten</label><input type="range" id="gf-rot" min="-15" max="15" step="0.25" value="0"><span id="gf-rotv">0°</span></div>
-        <div class="row" style="margin-top:8px"><button type="button" id="gf-r90">⟳ 90°</button><button type="button" id="gf-flip">Spiegelen</button><button type="button" id="gf-crop">Bijsnijden</button><button type="button" id="gf-uncrop">Herstel</button></div>
+        <div class="row" style="margin-top:8px"><button type="button" id="gf-auto">Automatisch rechtzetten</button><button type="button" id="gf-r90">⟳ 90°</button><button type="button" id="gf-flip">Spiegelen</button><button type="button" id="gf-crop">Bijsnijden</button><button type="button" id="gf-uncrop">Herstel</button></div>
         <div class="row" id="gf-cropbar" style="margin-top:8px;display:none"><span style="font-size:13px">Sleep een kader over de foto.</span><button type="button" class="primary" id="gf-cropok">Toepassen</button><button type="button" id="gf-cropno">Annuleren</button></div>
       </div>
       <div class="panel">
@@ -688,7 +708,7 @@ canvas{max-width:100%}
         <h3>4 · Ladder &amp; banden meten</h3>
         <div class="row"><div class="f"><label for="gf-lad">Ladder</label><select id="gf-lad"><option value="100">100 bp (1000–100)</option><option value="100p">100 bp plus (3000–100)</option><option value="1k">1 kb (10 000–250)</option><option value="custom">Eigen ladder…</option></select></div><div class="f"><label for="gf-unit">Eenheid</label><select id="gf-unit"><option>bp</option><option>kDa</option></select></div><div class="f"><label>&nbsp;</label><button type="button" class="primary" id="gf-bands">Detecteer banden</button></div></div>
         <div class="f" id="gf-ladcw" style="margin-top:8px;display:none"><label for="gf-ladc">Eigen ladder, grootste eerst (spaties of ;)</label><input id="gf-ladc" class="mono" value="250 150 100 75 50 37 25 20 15 10"></div>
-        <div class="row" style="margin-top:8px"><button type="button" id="gf-addband">+ Ladderband (klik)</button><button type="button" id="gf-measure">Band meten (klik)</button></div>
+        <div class="row" style="margin-top:8px"><button type="button" id="gf-addband">+ Ladderband (klik)</button><button type="button" id="gf-measure">Band meten (klik)</button><button type="button" id="gf-measall">Meet alle banden</button><button type="button" id="gf-clrmarks">Metingen wissen</button></div>
         <div class="tbl-wrap" style="margin-top:8px;max-height:220px;overflow-y:auto"><table class="mini" id="gf-bt"><thead><tr><th class="num">y (px)</th><th class="num">bp</th><th></th></tr></thead><tbody></tbody></table></div>
         <div id="gf-marks" style="margin-top:8px"></div>
       </div>
@@ -728,6 +748,51 @@ canvas{max-width:100%}
   <p class="src">Bandgrootte: semi-logaritmische interpolatie (log₁₀ bp tegen migratieafstand) tussen de twee dichtstbijzijnde ladderbanden. De demo-gel is getekend, geen echte meting.</p>
 </section>
 
+<!-- ============ GROEICURVE ============ -->
+<section class="tool" id="t-groei" data-tool="groei">
+  <header class="tool-head"><h2>Groeicurve</h2>
+  <p>Specifieke groeisnelheid, verdubbelingstijd en lag-fase uit OD₆₀₀-metingen of kiemgetallen. De exponentiële fase wordt automatisch gezocht.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="g2-tu">Tijdseenheid</label><select id="g2-tu" style="width:100%"><option value="h">uur</option><option value="min">minuten</option></select></div>
+        <div class="f"><label for="g2-type">Meetwaarde</label><select id="g2-type" style="width:100%"><option value="od">OD₆₀₀</option><option value="kve">KVE/mL of cellen/mL</option></select></div>
+        <div class="f"><label for="g2-blank">Blanco (medium)</label><input id="g2-blank" inputmode="decimal" value="0"></div>
+        <div class="f"><label for="g2-fac">Cellen/mL bij OD 1,0</label><input id="g2-fac" inputmode="decimal" value="8e8"></div>
+        <div class="f"><label for="g2-win">Exponentiële fase</label><select id="g2-win" style="width:100%"><option value="auto">Automatisch</option><option value="man">Zelf kiezen</option></select></div>
+        <div class="f"><label for="g2-from">Van punt / tot punt</label><div class="inu"><input id="g2-from" inputmode="numeric" value="4" style="border-radius:4px 0 0 4px"><input id="g2-to" inputmode="numeric" value="9" style="border-radius:0 4px 4px 0;border-left:0"></div></div>
+      </div>
+      <h3 style="margin-top:16px">Metingen <span class="example">voorbeeld</span></h3>
+      <div class="tbl-wrap"><table id="gc-tbl" class="mini"><thead><tr><th class="num">#</th><th class="num">Tijd</th><th class="num">Waarde</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:10px"><button type="button" id="gc-add">+ Meetpunt</button></div>
+    </div>
+    <div class="result"><canvas id="gc-cv"></canvas><div id="gc-res"></div></div>
+  </div>
+  <p class="src">N(t) = N₀·e<sup>µt</sup>, µ = helling van ln(waarde) tegen tijd in de exponentiële fase, t<sub>d</sub> = ln 2 / µ (ConductScience, Doubling Time Calculator). OD₆₀₀ en kiemgetal hangen alleen tot ongeveer OD 1,0 lineair samen (JoVE Science Education, Growth Curves); ± 8 × 10⁸ E. coli-cellen per mL bij OD₆₀₀ = 1 is een vuistregel, kalibreer voor je eigen stam. Voorbeelddata zijn verzonnen.</p>
+</section>
+
+<!-- ============ qPCR ΔΔCt ============ -->
+<section class="tool" id="t-qpcr" data-tool="qpcr">
+  <header class="tool-head"><h2>qPCR-analyse (ΔΔCt)</h2>
+  <p>Relatieve genexpressie van een doelgen ten opzichte van een referentiegen en een kalibrator, met de 2<sup>−ΔΔCt</sup>-methode en de efficiëntie-gecorrigeerde Pfaffl-methode. Herhalingen: geef ze dezelfde monsternaam.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="qp-et">Efficiëntie doelgen</label><div class="inu"><input id="qp-et" inputmode="decimal" value="100"><span class="u">%</span></div></div>
+        <div class="f"><label for="qp-er">Efficiëntie referentiegen</label><div class="inu"><input id="qp-er" inputmode="decimal" value="100"><span class="u">%</span></div></div>
+        <div class="f"><label for="qp-cal">Kalibrator (controle)</label><select id="qp-cal" style="width:100%"></select></div>
+        <div class="f"><label for="qp-m">Grafiek toont</label><select id="qp-m" style="width:100%"><option value="auto">Automatisch</option><option value="livak">2^−ΔΔCt (Livak)</option><option value="pfaffl">Pfaffl</option></select></div>
+      </div>
+      <h3 style="margin-top:16px">Ct-waarden <span class="example">voorbeeld</span></h3>
+      <div class="tbl-wrap"><table id="qp-tbl" class="mini"><thead><tr><th>Monster</th><th class="num">Ct doelgen</th><th class="num">Ct referentiegen</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:10px"><button type="button" id="qp-add">+ Rij</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Efficiëntie haal je uit een verdunningsreeks (PCR-cyclus → qPCR-efficiëntie). Laat beide op 100% voor de klassieke 2<sup>−ΔΔCt</sup>.</p>
+    </div>
+    <div class="result"><canvas id="qp-cv"></canvas><div id="qp-res"></div></div>
+  </div>
+  <p class="src">ΔCt = Ct<sub>doel</sub> − Ct<sub>ref</sub>; ΔΔCt = ΔCt<sub>monster</sub> − ΔCt<sub>kalibrator</sub>; fold change = 2<sup>−ΔΔCt</sup> (Livak &amp; Schmittgen, Methods 2001). Pfaffl: ratio = E<sub>doel</sub><sup>ΔCt doel (kalibrator − monster)</sup> / E<sub>ref</sub><sup>ΔCt ref (kalibrator − monster)</sup> (Pfaffl, Nucleic Acids Res 2001). Voorbeeld: het rekenvoorbeeld van CASRAI (controle 24,0/20,0; behandeld 21,5/20,2 → 6,5×).</p>
+</section>
+
 </main>
 </div>
 
@@ -742,14 +807,14 @@ function sig(n,s=3){ if(!isFinite(n)) return '–'; if(n===0) return '0'; const 
 function sci(n,s=3){ if(!isFinite(n)) return '–'; if(n===0) return '0'; const e=Math.floor(Math.log10(Math.abs(n))); if(e>=-2&&e<5) return sig(n,s); const m=n/10**e; return `${NL(Number(m.toFixed(s-1)),s-1)} × 10<sup>${e}</sup>`; }
 function vol(uL){ if(!isFinite(uL)) return '–'; const a=Math.abs(uL); if(a>=1000) return sig(uL/1000,4)+' mL'; if(a<1&&a>0) return fmt(uL,3)+' µL'; return fmt(uL,a<10?2:1)+' µL'; }
 function mass(g){ if(!isFinite(g)) return '–'; const a=Math.abs(g); if(a>=1) return fmt(g,3)+' g'; if(a>=1e-3) return fmt(g*1e3,2)+' mg'; return fmt(g*1e6,1)+' µg'; }
-function list(txt){ return String(txt).split(/[\s;,]+/).map(x=>x.trim()).filter(Boolean).map(Number).filter(x=>isFinite(x)); }
+function list(txt){ /* komma+spatie of meerdere komma's = scheiding; enkele komma tussen cijfers = decimaal */ return String(txt).replace(/,\s+/g,' ').split(/[\s;]+/).flatMap(t=>(t.match(/,/g)||[]).length>1?t.split(','):[t]).map(t=>num(t)).filter(x=>isFinite(x)); }
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 const note=(cls,txt)=>`<div class="note ${cls}">${txt}</div>`;
 const kv=rows=>`<dl class="kv">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
 const calc={};
 
 /* ---------- routing ---------- */
-const TOOLS=['verdunning','oplossing','curve','enzym','reeks','telkamer','teller','dna','pcr','pcrcyclus','gel','gelfoto','ligatie','centrifuge','timers','plaat'];
+const TOOLS=['verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','centrifuge','timers','plaat'];
 let current='verdunning';
 function route(){
   const h=(location.hash||'').slice(1);
@@ -1052,6 +1117,7 @@ function calcBands(){
   const b=sxy/sxx, a=my-b*mx, r2=(sxy*sxy)/(sxx*syy);
   const sp=pts.slice().sort((p,q)=>p.d-q.d); const local=d=>{ if(d<sp[0].d||d>sp[sp.length-1].d) return 10**(a+b*d); let i=0; while(i<sp.length-2&&d>sp[i+1].d) i++; const p=sp[i],q=sp[i+1]; if(q.d===p.d) return p.bp; return 10**(Math.log10(p.bp)+(d-p.d)/(q.d-p.d)*(Math.log10(q.bp)-Math.log10(p.bp))); };
   const est=unk.map(d=>({d,bp:local(d)}));
+  cv._data={head:['type','afstand (mm)','grootte (bp)'],rows:[...pts.map(p=>['ladder',p.d,p.bp]),...est.map(e=>['onbekend',e.d,Math.round(e.bp)])]};
   /* plot */
   const pad={l:52,r:12,t:12,b:34};
   const allx=xs.concat(unk), xmin=Math.min(...allx)*0.9, xmax=Math.max(...allx)*1.05;
@@ -1221,28 +1287,33 @@ function chart(cv,o){
   const W=o.w||480,H=o.h||300,dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=H*dpr; cv.style.width='100%'; cv.style.maxWidth=W+'px';
   const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
   const cs=getComputedStyle(document.documentElement), C=k=>cs.getPropertyValue(k).trim();
-  const pad={l:58,r:14,t:16,b:42}; const logx=!!o.logx;
-  const tx=v=>logx?Math.log10(v):v;
+  const pad={l:58,r:14,t:16,b:42}; const logx=!!o.logx, logy=!!o.logy;
+  const tx=v=>logx?Math.log10(v):v, ty=v=>logy?Math.log10(v):v;
   let {xmin,xmax,ymin,ymax}=o; if(xmax===xmin){ xmax+=1; xmin-=logx?0:1; } if(ymax===ymin){ ymax+=1; ymin-=1; }
-  const X=v=>pad.l+(tx(v)-tx(xmin))/(tx(xmax)-tx(xmin))*(W-pad.l-pad.r), Y=v=>H-pad.b-(v-ymin)/(ymax-ymin)*(H-pad.t-pad.b);
+  const X=v=>pad.l+(tx(v)-tx(xmin))/(tx(xmax)-tx(xmin))*(W-pad.l-pad.r), Y=v=>H-pad.b-(ty(v)-ty(ymin))/(ty(ymax)-ty(ymin))*(H-pad.t-pad.b);
   ctx.font='11px '+C('--font-ui'); ctx.lineWidth=1;
   const ys=niceStep(ymax-ymin,5); ctx.textAlign='right'; ctx.textBaseline='middle';
-  for(let t=Math.ceil(ymin/ys)*ys;t<=ymax+ys*1e-6;t+=ys){ ctx.strokeStyle=C('--line'); ctx.beginPath(); ctx.moveTo(pad.l,Y(t)); ctx.lineTo(W-pad.r,Y(t)); ctx.stroke(); ctx.fillStyle=C('--muted'); ctx.fillText(tickLabel(t),pad.l-6,Y(t)); }
+  if(logy){ for(let e=Math.floor(Math.log10(ymin));e<=Math.ceil(Math.log10(ymax));e++) [1,2,5].forEach(m=>{ const v=m*10**e; if(v<ymin||v>ymax) return; ctx.strokeStyle=C('--line'); ctx.beginPath(); ctx.moveTo(pad.l,Y(v)); ctx.lineTo(W-pad.r,Y(v)); ctx.stroke(); ctx.fillStyle=C('--muted'); ctx.fillText(tickLabel(v),pad.l-6,Y(v)); }); }
+  else for(let t=Math.ceil(ymin/ys)*ys;t<=ymax+ys*1e-6;t+=ys){ ctx.strokeStyle=C('--line'); ctx.beginPath(); ctx.moveTo(pad.l,Y(t)); ctx.lineTo(W-pad.r,Y(t)); ctx.stroke(); ctx.fillStyle=C('--muted'); ctx.fillText(tickLabel(t),pad.l-6,Y(t)); }
   ctx.textAlign='center'; ctx.textBaseline='top';
   if(logx){ for(let e=Math.floor(Math.log10(xmin));e<=Math.ceil(Math.log10(xmax));e++) [1,2,5].forEach(m=>{ const v=m*10**e; if(v<xmin||v>xmax) return; ctx.strokeStyle=C('--line'); ctx.beginPath(); ctx.moveTo(X(v),pad.t); ctx.lineTo(X(v),H-pad.b); ctx.stroke(); ctx.fillStyle=C('--muted'); ctx.fillText(tickLabel(v),X(v),H-pad.b+6); }); }
   else { const xs=niceStep(xmax-xmin,6); for(let t=Math.ceil(xmin/xs)*xs;t<=xmax+xs*1e-6;t+=xs){ ctx.fillStyle=C('--muted'); ctx.fillText(tickLabel(t),X(t),H-pad.b+6); if(Math.abs(t)<xs*1e-6&&xmin<0){ ctx.strokeStyle=C('--muted'); ctx.beginPath(); ctx.moveTo(X(0),pad.t); ctx.lineTo(X(0),H-pad.b); ctx.stroke(); } } }
-  if(ymin<0&&ymax>0){ ctx.strokeStyle=C('--muted'); ctx.beginPath(); ctx.moveTo(pad.l,Y(0)); ctx.lineTo(W-pad.r,Y(0)); ctx.stroke(); }
+  if(!logy&&ymin<0&&ymax>0){ ctx.strokeStyle=C('--muted'); ctx.beginPath(); ctx.moveTo(pad.l,Y(0)); ctx.lineTo(W-pad.r,Y(0)); ctx.stroke(); }
   ctx.strokeStyle=C('--muted'); ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,H-pad.b); ctx.lineTo(W-pad.r,H-pad.b); ctx.stroke();
   ctx.fillStyle=C('--muted'); ctx.font='12px '+C('--font-ui'); ctx.fillText(o.xlabel||'',(W+pad.l)/2,H-16);
   ctx.save(); ctx.translate(14,(H-pad.b+pad.t)/2); ctx.rotate(-Math.PI/2); ctx.textBaseline='middle'; ctx.fillText(o.ylabel||'',0,0); ctx.restore();
   ctx.save(); ctx.beginPath(); ctx.rect(pad.l,pad.t,W-pad.l-pad.r,H-pad.t-pad.b); ctx.clip();
   (o.series||[]).forEach(s=>{
     const col=C(s.color||'--accent')||s.color;
-    if(s.fn){ ctx.strokeStyle=col; ctx.lineWidth=2; ctx.setLineDash(s.dash||[]); ctx.beginPath(); const a=tx(s.x0??xmin), b=tx(s.x1??xmax); let first=true; for(let i=0;i<=240;i++){ const xv=a+(b-a)*i/240, x=logx?10**xv:xv, y=s.fn(x); if(!isFinite(y)){ first=true; continue; } first?ctx.moveTo(X(x),Y(y)):ctx.lineTo(X(x),Y(y)); first=false; } ctx.stroke(); ctx.setLineDash([]); }
-    if(s.pts){ s.pts.forEach(p=>{ if(logx&&p[0]<=0) return; ctx.beginPath(); ctx.arc(X(p[0]),Y(p[1]),s.r||3.5,0,7); if(s.hollow){ ctx.strokeStyle=col; ctx.lineWidth=1.8; ctx.stroke(); } else { ctx.fillStyle=col; ctx.fill(); } }); }
+    if(s.fn){ ctx.strokeStyle=col; ctx.lineWidth=2; ctx.setLineDash(s.dash||[]); ctx.beginPath(); const a=tx(s.x0??xmin), b=tx(s.x1??xmax); let first=true; for(let i=0;i<=240;i++){ const xv=a+(b-a)*i/240, x=logx?10**xv:xv, y=s.fn(x); if(!isFinite(y)||(logy&&y<=0)){ first=true; continue; } first?ctx.moveTo(X(x),Y(y)):ctx.lineTo(X(x),Y(y)); first=false; } ctx.stroke(); ctx.setLineDash([]); }
+    if(s.pts){ s.pts.forEach(p=>{ if((logx&&p[0]<=0)||(logy&&p[1]<=0)) return; ctx.beginPath(); ctx.arc(X(p[0]),Y(p[1]),s.r||3.5,0,7); if(s.hollow){ ctx.strokeStyle=col; ctx.lineWidth=1.8; ctx.stroke(); } else { ctx.fillStyle=col; ctx.fill(); } }); }
   });
   ctx.restore();
-  if(o.legend){ let lx=pad.l+10, ly=pad.t+6; ctx.font='12px '+C('--font-ui'); ctx.textAlign='left'; ctx.textBaseline='middle'; o.legend.forEach(([lab,col])=>{ ctx.fillStyle=C(col)||col; ctx.fillRect(lx,ly-4,10,8); ctx.fillStyle=C('--ink'); ctx.fillText(lab,lx+16,ly); ly+=16; }); }
+  if(o.legend){ let lx=o.legendPos==='br'?W-pad.r-150:pad.l+10, ly=o.legendPos==='br'?H-pad.b-10-16*(o.legend.length-1):pad.t+6; ctx.font='12px '+C('--font-ui'); ctx.textAlign='left'; ctx.textBaseline='middle'; o.legend.forEach(([lab,col])=>{ ctx.fillStyle=C(col)||col; ctx.fillRect(lx,ly-4,10,8); ctx.fillStyle=C('--ink'); ctx.fillText(lab,lx+16,ly); ly+=16; }); }
+  const D={head:['reeks',o.xlabel||'x',o.ylabel||'y'],rows:[]};
+  (o.series||[]).forEach((s,i)=>{ if(s.pts) s.pts.forEach(p=>D.rows.push([s.name||('reeks '+(i+1)),p[0],p[1]])); });
+  (o.series||[]).forEach(s=>{ if(s.fn&&s.name){ const a=tx(s.x0??xmin), b=tx(s.x1??xmax); for(let k=0;k<=50;k++){ const xv=a+(b-a)*k/50, x=logx?10**xv:xv, y=s.fn(x); if(isFinite(y)) D.rows.push([s.name,x,y]); } } });
+  cv._data=D;
   return {X,Y};
 }
 const inp=(v,w=72,k='')=>`<input ${k} inputmode="decimal" value="${v==null||v===''||(typeof v==='number'&&!isFinite(v))?'':String(v).replace('.',',')}" style="text-align:right;width:${w}px">`;
@@ -1310,7 +1381,7 @@ calc.curve=function(){
   const xmin=logx?Math.min(...xsAll)/1.5:0, xmax=Math.max(...xsAll)*(logx?1.5:1.05);
   const yAll=Y.concat(out.map(u=>u.m)); const ymin=Math.min(0,...yAll), ymax=Math.max(...yAll)*1.08;
   chart(cv,{xmin,xmax,ymin,ymax,logx,xlabel:'concentratie ('+unit+')',ylabel:useBlank&&blank?'absorptie − blanco':'absorptie',
-    series:[{fn:fit.f,x0:xmin,x1:xmax},{pts:X.map((x,i)=>[x,Y[i]]),color:'--ink'},{pts:out.filter(u=>isFinite(u.x)).map(u=>[u.x,u.m]),color:'--bad',r:5,hollow:true}],
+    series:[{fn:fit.f,x0:xmin,x1:xmax,name:'fit'},{pts:X.map((x,i)=>[x,Y[i]]),color:'--ink',name:'standaard'},{pts:out.filter(u=>isFinite(u.x)).map(u=>[u.x,u.m]),color:'--bad',r:5,hollow:true,name:'monster'}],
     legend:[['standaard','--ink'],['monster','--bad']]});
   const rcov=recov.length?Math.max(...recov.map(p=>Math.abs(p-100))):0;
   res.innerHTML=`<div class="lbl" style="margin-top:8px">Fit</div>`+kv([['Model',$('#s-model').selectedOptions[0].text],['R²',`<span class="chip ${r2>=0.99?'ok':r2>=0.98?'warn':'bad'}">${fmt(r2,4)}</span>`],['Blanco',useBlank&&blank?fmt(blank,3):'niet afgetrokken'],['Signaalbereik std',`${fmt(ylo,3)} – ${fmt(yhi,3)}`]])+
@@ -1364,7 +1435,7 @@ calc.enzym=function(){
   const sMax=Math.max(...rows.filter(r=>r.s>0).map(r=>r.s));
   if(kPlot==='mm'){
     const ymax=Math.max(F.Vm,...A.map(r=>r.v),...(G?B.map(r=>r.vi):[]))*1.1;
-    chart(cv,{xmin:0,xmax:sMax*1.08,ymin:0,ymax,xlabel:`[S] (${su})`,ylabel:`v (${vu})`,series:[{fn:s=>F.Vm*s/(F.Km+s),x0:0},{pts:A.map(r=>[r.s,r.v]),color:'--ink'},{fn:s=>F.Vm/2,dash:[4,4],color:'--line'},...(G?[{fn:s=>G.Vm*s/(G.Km+s),x0:0,color:'--bad'},{pts:B.map(r=>[r.s,r.vi]),color:'--bad',hollow:true}]:[])],legend:G?[['zonder remmer','--accent'],['met remmer','--bad']]:null});
+    chart(cv,{xmin:0,xmax:sMax*1.08,ymin:0,ymax,xlabel:`[S] (${su})`,ylabel:`v (${vu})`,series:[{fn:s=>F.Vm*s/(F.Km+s),x0:0,name:'MM-fit'},{pts:A.map(r=>[r.s,r.v]),color:'--ink',name:'zonder remmer'},{fn:s=>F.Vm/2,dash:[4,4],color:'--line'},...(G?[{fn:s=>G.Vm*s/(G.Km+s),x0:0,color:'--bad',name:'MM-fit met remmer'},{pts:B.map(r=>[r.s,r.vi]),color:'--bad',hollow:true,name:'met remmer'}]:[])],legend:G?[['zonder remmer','--accent'],['met remmer','--bad']]:null});
   } else if(kPlot==='lb'){
     const xs=A.map(r=>1/r.s).concat(G?B.map(r=>1/r.s):[]), ys=A.map(r=>1/r.v).concat(G?B.map(r=>1/r.vi):[]);
     const xl=-Math.max(1/F.lb.K,G?1/G.lb.K:0)*1.15; const xmin=isFinite(xl)&&xl<0?xl:-0.1*Math.max(...xs), xmax=Math.max(...xs)*1.08;
@@ -1477,6 +1548,7 @@ function drawProfile(cv,steps,n){
   let prev=25; steps.forEach((s,i)=>{ const x0=pad.l+i*sw; if(i===0) ctx.moveTo(x0,Y(prev)); ctx.lineTo(x0+rw,Y(s[1])); ctx.lineTo(x0+sw,Y(s[1])); prev=s[1]; }); ctx.stroke();
   ctx.font='600 11px '+C('--font-ui'); ctx.textAlign='center';
   steps.forEach((s,i)=>{ const xc=pad.l+i*sw+rw+(sw-rw)/2; ctx.fillStyle=C('--ink'); ctx.textBaseline='bottom'; ctx.fillText(fmt(s[1],1)+'°',xc,Y(s[1])-5); ctx.fillStyle=C('--muted'); ctx.textBaseline='top'; ctx.font='11px '+C('--font-ui'); ctx.fillText(s[2]===Infinity?'∞':mmss2(s[2]).replace(' min','′'),xc,Y(s[1])+5); ctx.font='600 11px '+C('--font-ui'); });
+  cv._data={head:['stap','temperatuur (°C)','tijd (s)','cycli'],rows:steps.map(s=>[s[0],s[1],s[2]===Infinity?'∞':s[2],s[3]?n:1])};
   const x0=pad.l+sw, x1=pad.l+4*sw; ctx.strokeStyle=C('--muted'); ctx.lineWidth=1; ctx.setLineDash([4,3]); ctx.strokeRect(x0+2,pad.t-18,x1-x0-4,H-pad.t-pad.b+26); ctx.setLineDash([]);
   ctx.fillStyle=C('--accent'); ctx.textBaseline='bottom'; ctx.fillText(`× ${n} cycli`,(x0+x1)/2,H-4);
 }
@@ -1485,8 +1557,8 @@ function drawProfile(cv,steps,n){
 const gf={unit:'bp',src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null};
 const gcv=$('#gf-cv');
 function gfStatus(t){ $('#gf-status').textContent=t; }
-function gfLoadCanvas(c){ gf.src=c; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; $('#gf-rot').value=0; $('#gf-rotv').textContent='0°'; gfUpdate(true); }
-function gfFromImage(img){ const M=2400, s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); gfLoadCanvas(c); gfStatus(`Geladen: ${img.naturalWidth} × ${img.naturalHeight} px${s<1?' (verkleind voor bewerking)':''}. Klik op "Detecteer lanen".`); }
+function gfLoadCanvas(c){ gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; $('#gf-rot').value=0; $('#gf-rotv').textContent='0°'; gfUpdate(true); }
+function gfFromImage(img){ const M=2400, s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); gfLoadCanvas(c); gf.title=''; $('#gf-title').value=''; gf.marks=[]; gfDetectLanes(); if(gf.lanes.length>=2) gfDetectBands(); gfMarksTable(); gfStatus(`Geladen: ${img.naturalWidth} × ${img.naturalHeight} px${s<1?' (verkleind voor bewerking)':''}. ${gf.lanes.length} lanen gevonden. Staat de gel scheef? Gebruik "Automatisch rechtzetten".`); }
 function gfFile(f){ if(!f) return; const url=URL.createObjectURL(f); const img=new Image(); img.onload=()=>{ gfFromImage(img); URL.revokeObjectURL(url); }; img.onerror=()=>gfStatus('Dit bestand kan de browser niet openen (bijvoorbeeld TIFF). Exporteer de foto als PNG of JPG.'); img.src=url; }
 $('#gf-file').addEventListener('change',e=>gfFile(e.target.files[0]));
 $('#gf-stage').addEventListener('dragover',e=>e.preventDefault());
@@ -1506,7 +1578,7 @@ function gfDemo(){
   const id=x.getImageData(0,0,W,H), d=id.data; for(let i=0;i<d.length;i+=4){ const n=(Math.random()-0.5)*14; d[i]=Math.max(0,Math.min(255,d[i]+n)); d[i+1]=Math.max(0,Math.min(255,d[i+1]+n)); d[i+2]=Math.max(0,Math.min(255,d[i+2]+n)); } x.putImageData(id,0,0);
   gfLoadCanvas(c); gfStatus('Demo-gel geladen (getekend). Lanen en ladder zijn automatisch gedetecteerd.');
   gf.title='Demo: PCR-product, 1,5% agarose'; $('#gf-title').value=gf.title;
-  $('#gf-n').value=''; gfDetectLanes(); if(gf.lanes.length!==nL){ $('#gf-n').value=nL; gfDetectLanes(); } gf.lanes.forEach((l,i)=>l.label=i===0?'M':i===nL-1?'NTC':String(i)); gfDetectBands(); gfLanesTable();
+  $('#gf-n').value=''; gfDetectLanes(); gf.lanes.forEach((l,i)=>l.label=i===0?'M':i===nL-1?'NTC':String(i)); gfDetectBands(); gfLanesTable();
   if(gf.lanes[1]&&gf.bands.length>1){ const p=gfProc(); const y=gfPeakNear(gf.lanes[1].x,Ysz(650)*p.h/H); gf.marks=[{x:gf.lanes[1].x,y,bp:gfEst(y)}]; }
   gfRender(); gfMarksTable();
 }
@@ -1516,7 +1588,7 @@ function gfRotated(){
   const k=`${gf.rot90}|${gf.fine}|${gf.flip}`; if(gf.cache.rk===k) return gf.cache.rot;
   const s=gf.src, a=(gf.rot90*90+gf.fine)*Math.PI/180, cos=Math.abs(Math.cos(a)), sin=Math.abs(Math.sin(a));
   const W=Math.round(s.width*cos+s.height*sin), H=Math.round(s.width*sin+s.height*cos); const c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
-  const sm=s.getContext('2d').getImageData(0,0,s.width,s.height).data; let sum=0,cnt=0; for(let i=0;i<sm.length;i+=4*97){ sum+=sm[i]; cnt++; } x.fillStyle=sum/cnt>128?'#fff':'#000'; x.fillRect(0,0,W,H);
+  const sx=s.getContext('2d'), bd=[sx.getImageData(0,0,s.width,1).data,sx.getImageData(0,s.height-1,s.width,1).data,sx.getImageData(0,0,1,s.height).data,sx.getImageData(s.width-1,0,1,s.height).data]; let r=0,g=0,bb=0,cnt=0; bd.forEach(d=>{ for(let i=0;i<d.length;i+=4){ r+=d[i]; g+=d[i+1]; bb+=d[i+2]; cnt++; } }); x.fillStyle=`rgb(${Math.round(r/cnt)},${Math.round(g/cnt)},${Math.round(bb/cnt)})`; x.fillRect(0,0,W,H);
   x.translate(W/2,H/2); x.rotate(a); if(gf.flip) x.scale(-1,1); x.drawImage(s,-s.width/2,-s.height/2);
   gf.cache.rk=k; gf.cache.rot=c; return c;
 }
@@ -1537,35 +1609,74 @@ function peaks(a,minDist,minProm){ const idx=[]; for(let i=1;i<a.length-1;i++) i
   const prom=i=>{ let l=i,lm=a[i]; while(l>0&&a[l]<=a[i]){ l--; lm=Math.min(lm,a[l]); if(i-l>minDist*3) break; } let r=i,rm=a[i]; while(r<a.length-1&&a[r]<=a[i]){ r++; rm=Math.min(rm,a[r]); if(r-i>minDist*3) break; } return a[i]-Math.max(lm,rm); };
   const c=idx.map(i=>({i,v:a[i],p:prom(i)})).filter(o=>o.p>=minProm).sort((x,y)=>y.v-x.v); const out=[]; c.forEach(o=>{ if(out.every(q=>Math.abs(q.i-o.i)>=minDist)) out.push(o); }); return out; }
 function gfDetectLanes(){
-  if(!gf.src) return; const P=gfProc(), {w,h,sig}=P; const prof=new Float32Array(w); const y0=Math.floor(h*0.08), y1=Math.ceil(h*0.95);
+  if(!gf.src) return; const P=gfProc(), {w,h,sig}=P; const prof=new Float32Array(w); const y0=Math.floor(h*0.02), y1=Math.ceil(h*0.98);
   for(let x=0;x<w;x++){ let s=0; for(let y=y0;y<y1;y++) s+=sig[y*w+x]; prof[x]=s/(y1-y0); }
-  const bw=Math.max(5,Math.round(w/8)), bl=new Float32Array(w); for(let i=0;i<w;i++){ let m=Infinity; for(let k=Math.max(0,i-bw);k<=Math.min(w-1,i+bw);k++) m=Math.min(m,prof[k]); bl[i]=m; } const bls=smooth(bl,bw/2);
-  const flat=prof.map((v,i)=>Math.max(0,v-bls[i])); let mn=Infinity,mx=-Infinity; flat.forEach(v=>{ mn=Math.min(mn,v); mx=Math.max(mx,v); }); const sp=smooth(flat.map(v=>v-mn),Math.max(2,w/160));
-  const N=Math.round(num($('#gf-n').value)); let xs=[], lwSet=false;
-  let rad=w/20; const refine=i=>{ const a=Math.max(0,Math.round(i-rad)), b=Math.min(w-1,Math.round(i+rad)); let lo=Infinity; for(let k=a;k<=b;k++) lo=Math.min(lo,sp[k]); const half=(sp[i]+lo)/2; let l=i,r=i; while(l>a&&sp[l-1]>half) l--; while(r<b&&sp[r+1]>half) r++; return (l+r)/2; };
-  if(N>0){ rad=0.45*w/N; xs=peaks(sp,0.55*w/N,0).slice(0,N).map(o=>refine(o.i)); }
-  else { const thr=0.2*(mx-mn); let inR=false,st=0; const regs=[]; for(let x=0;x<w;x++){ if(sp[x]>thr&&!inR){ inR=true; st=x; } else if((sp[x]<=thr||x===w-1)&&inR){ inR=false; if(x-st>=w/150) regs.push([st,x]); } }
-    if(regs.length>=2){ xs=regs.map(r=>(r[0]+r[1])/2); const wd=regs.map(r=>r[1]-r[0]).sort((a,b)=>a-b); gf.lw=Math.round(wd[wd.length>>1]); lwSet=true; }
-    else xs=peaks(sp,w/40,0.15*(mx-mn)).map(o=>refine(o.i)); }
-  xs.sort((a,b)=>a-b);
-  if(xs.length>1&&!lwSet){ const d=[]; for(let i=1;i<xs.length;i++) d.push(xs[i]-xs[i-1]); d.sort((a,b)=>a-b); gf.lw=Math.round(d[d.length>>1]*0.7); }
+  /* achtergrond (ongelijke belichting) eraf, daarna gladstrijken */
+  const bw=Math.max(5,Math.round(w/16)), bl=new Float32Array(w); for(let i=0;i<w;i++){ let m=Infinity; for(let k=Math.max(0,i-bw);k<=Math.min(w-1,i+bw);k++) m=Math.min(m,prof[k]); bl[i]=m; } const bls=smooth(bl,bw/2);
+  const sp=smooth(prof.map((v,i)=>Math.max(0,v-bls[i])),Math.max(2,w/160));
+  /* ruisniveau uit de onderste helft van het profiel */
+  const dif=[]; for(let i=1;i<w;i++) dif.push(Math.abs(sp[i]-sp[i-1])); dif.sort((a,b)=>a-b);
+  const noise=(dif[dif.length>>1]||1e-6)*1.4826/Math.SQRT2*Math.sqrt(Math.max(2,w/160)), mx=Math.max(...sp);
+  const thr=Math.max(5*noise,0.03*mx), med=0;
+  const N=Math.round(num($('#gf-n').value));
+  const refine=(i,rad)=>{ const a=Math.max(0,Math.round(i-rad)), b=Math.min(w-1,Math.round(i+rad)); let lo=Infinity; for(let k=a;k<=b;k++) lo=Math.min(lo,sp[k]); const half=(sp[i]+lo)/2; let l=i,r=i; while(l>a&&sp[l-1]>half) l--; while(r<b&&sp[r+1]>half) r++; return {x:(l+r)/2,v:sp[i],wd:r-l}; };
+  let cand=peaks(sp,w/45,thr).filter(o=>o.v>=thr&&o.i>w*0.015&&o.i<w*0.985).map(o=>refine(o.i,w/30));
+  cand.sort((a,b)=>a.x-b.x);
+  /* kamregel: lanen liggen op gelijke afstand. Herhaalafstand via autocorrelatie, daarna een rooster over de gel leggen */
+  let pitch=NaN;
+  { const pos=[...sp].filter(v=>v>thr).sort((a,b)=>a-b), cap=(pos[pos.length>>1]||thr)*1.6, sc=sp.map(v=>Math.min(v,cap)); /* dempt de felle ladder */
+    const m=sc.reduce((a,b)=>a+b,0)/w, lo=Math.max(4,Math.round(w/40)), hi=Math.round(w/2.5); let bestL=0,bestV=-Infinity;
+    const ac=l=>{ let v=0; for(let i=0;i+l<w;i++) v+=(sc[i]-m)*(sc[i+l]-m); return v/(w-l); };
+    const acs=[]; for(let l=lo;l<=hi;l++) acs.push([l,ac(l)]);
+    const gmaxA=Math.max(...acs.map(a=>a[1])); /* eerste duidelijke lokale top = grondperiode (latere toppen zijn veelvouden) */
+    for(let k=1;k<acs.length-1;k++) if(acs[k][1]>acs[k-1][1]&&acs[k][1]>=acs[k+1][1]&&acs[k][1]>=0.5*gmaxA&&acs[k][1]>0){ bestV=acs[k][1]; bestL=acs[k][0]; break; }
+    if(bestL&&cand.length>=2){ /* verfijn met de kandidaten zelf */ const d=[]; for(let i=1;i<cand.length;i++){ const g=cand[i].x-cand[i-1].x, k=Math.round(g/bestL); if(k>=1&&Math.abs(g/k-bestL)<0.2*bestL) d.push(g/k); } pitch=d.length?d.reduce((a,b)=>a+b,0)/d.length:bestL; } }
+  if(isFinite(pitch)&&cand.length>=2){
+    const at=x=>{ const i=Math.max(0,Math.min(w-1,Math.round(x))); return sp[i]; };
+    /* zwaartepunt van elke lane binnen een halve kamafstand: stabiel bij platte, brede banden */
+    const cen=x=>{ const a=Math.max(0,Math.round(x-0.45*pitch)), b=Math.min(w-1,Math.round(x+0.45*pitch)); let lo=Infinity; for(let k=a;k<=b;k++) lo=Math.min(lo,sp[k]); let sw=0,sx=0; for(let k=a;k<=b;k++){ const v=sp[k]-lo; sw+=v; sx+=v*k; } return sw>0?sx/sw:x; };
+    cand.forEach(c=>{ c.x=cen(cen(c.x)); });
+    for(let i=1;i<cand.length;i++){ if(cand[i].x-cand[i-1].x<0.55*pitch){ const drop=cand[i].v<cand[i-1].v?i:i-1; cand.splice(drop,1); i--; } }
+    let x0b=0,sb=-Infinity; for(let x0=0;x0<pitch;x0+=0.5){ let sc=0; for(let x=x0;x<w;x+=pitch) sc+=at(x); if(sc>sb){sb=sc;x0b=x0;} }
+    { const on=cand.filter(c=>{ const k=Math.round((c.x-x0b)/pitch); return Math.abs(c.x-(x0b+k*pitch))<0.3*pitch; });
+      if(on.length>=3){ const r=linreg(on.map(c=>Math.round((c.x-x0b)/pitch)),on.map(c=>c.x)); if(r.b>0.85*pitch&&r.b<1.15*pitch){ pitch=r.b; x0b=((r.a%pitch)+pitch)%pitch; } } }
+    const all=[]; for(let x=x0b;x<w;x+=pitch) all.push(x);
+    const snap=all.map(gx=>{ const near=cand.filter(c=>Math.abs(c.x-gx)<pitch*0.25).sort((a,b)=>Math.abs(a.x-gx)-Math.abs(b.x-gx))[0]; return near?{...near}:{x:gx,v:0,fill:true}; });
+    const sup=snap.map((c,i)=>c.fill?-1:i).filter(i=>i>=0);
+    cand=sup.length?snap.slice(sup[0],sup[sup.length-1]+1):cand;
+  }
+  if(N>0){
+    if(cand.length>N){ cand=cand.slice().sort((a,b)=>b.v-a.v).slice(0,N).sort((a,b)=>a.x-b.x); }
+    while(cand.length<N&&isFinite(pitch)&&cand.length){ const L=cand[0].x-pitch, R=cand[cand.length-1].x+pitch; const roomL=L>pitch*0.35, roomR=R<w-pitch*0.35; if(!roomL&&!roomR) break; const sL=roomL?sp[Math.round(L)]:-1, sR=roomR?sp[Math.round(R)]:-1; if(sR>=sL) cand.push({x:R,v:0,fill:true}); else cand.unshift({x:L,v:0,fill:true}); }
+  }
+  const xs=cand.map(c=>c.x), filledN=cand.filter(c=>c.fill).length;
+  const wds=cand.filter(c=>!c.fill&&c.wd>2).map(c=>c.wd).sort((a,b)=>a-b);
+  gf.lw=Math.round(isFinite(pitch)?Math.min(pitch*0.7,(wds[wds.length>>1]||pitch*0.6)*1.1):(wds[wds.length>>1]||40));
   const old=gf.lanes; gf.lanes=xs.map((x,i)=>({x,label:old[i]?old[i].label:(i===0?'M':String(i))}));
   gf.lw=Math.max(4,Math.min(200,gf.lw||40)); $('#gf-lw').value=gf.lw; $('#gf-lwv').textContent=gf.lw;
   gf.ladder=Math.min(gf.ladder,Math.max(0,gf.lanes.length-1));
-  gfStatus(`${gf.lanes.length} lanen gevonden.${N>0?'':' Klopt het aantal niet? Vul het verwachte aantal in en detecteer opnieuw.'}`);
+  gfStatus(`${gf.lanes.length} lanen gevonden${filledN?` (waarvan ${filledN} lege lane${filledN>1?'n':''} aangevuld op basis van de vaste tussenafstand)`:''}.${N>0?'':' Klopt het aantal niet? Vul het verwachte aantal in en detecteer opnieuw.'}`);
   gfLanesTable(); gfRender();
 }
 function laneProfile(cx){ const P=gfProc(), {w,h,sig}=P; const half=Math.max(1,Math.round(gf.lw*0.3)); const x0=Math.max(0,Math.round(cx-half)), x1=Math.min(w-1,Math.round(cx+half)); const pr=new Float32Array(h); for(let y=0;y<h;y++){ let s=0; for(let x=x0;x<=x1;x++) s+=sig[y*w+x]; pr[y]=s/(x1-x0+1); }
   const win=Math.max(5,Math.round(h/12)); const base=new Float32Array(h); for(let y=0;y<h;y++){ let m=Infinity; for(let k=Math.max(0,y-win);k<=Math.min(h-1,y+win);k++) m=Math.min(m,pr[k]); base[y]=m; } const bs=smooth(base,win/2); return smooth(pr.map((v,i)=>v-bs[i]),Math.max(1,h/300)); }
 function gfPeakNear(cx,y){ const pr=laneProfile(cx); const r=Math.round(gfProc().h/40); let best=Math.round(y); for(let k=Math.max(0,Math.round(y)-r);k<=Math.min(pr.length-1,Math.round(y)+r);k++) if(pr[k]>pr[best]) best=k; return best; }
 function gfLadder(){ if(gf.ladKey==='custom') return nums($('#gf-ladc').value.replace(/;/g,' ')).filter(v=>v>0).sort((a,b)=>b-a); return LADDERS[gf.ladKey]; }
+function gfWellRows(){ const h=gfProc().h, ys=[]; gf.lanes.forEach(l=>{ const pr=laneProfile(l.x), m=Math.max(...pr); peaks(pr,h/90,0.1*m).filter(o=>o.i<h*0.25).forEach(o=>ys.push(o.i)); });
+  const rows=[]; ys.sort((a,b)=>a-b).forEach(y=>{ const r=rows.find(r=>Math.abs(r.y-y)<h/60); if(r){ r.n++; r.y=(r.y*(r.n-1)+y)/r.n; } else rows.push({y,n:1}); });
+  return rows.filter(r=>gf.lanes.length>=3&&r.n>=Math.max(3,gf.lanes.length*0.6)).map(r=>r.y); }
+const nearWell=(y,wells)=>wells.some(w=>Math.abs(w-y)<gfProc().h/50);
 function gfDetectBands(){
   if(!gf.lanes.length){ gfStatus('Detecteer eerst de lanen.'); return; }
+  if(gf.autoLadder){ let best=gf.ladder,bn=-1; gf.lanes.forEach((l,i)=>{ const pr=laneProfile(l.x), m=Math.max(...pr); const n=peaks(pr,pr.length/90,0.12*m).filter(o=>o.i>pr.length*0.04).length; if(n>bn){bn=n;best=i;} }); gf.ladder=best; gf.autoLadder=false; gfLanesTable(); }
   const L=gf.lanes[gf.ladder]; const pr=laneProfile(L.x); const mx=Math.max(...pr); const h=pr.length;
   const lad=gfLadder(); if(!lad||!lad.length){ gfStatus('Vul de bandgroottes van je ladder in.'); return; }
-  let pk=peaks(pr,h/90,0.12*mx).filter(o=>o.i>h*0.04);
-  pk=pk.sort((a,b)=>b.v-a.v).slice(0,lad.length+4).sort((a,b)=>a.i-b.i);
-  if(pk.length>lad.length){ pk=pk.sort((a,b)=>b.v-a.v).slice(0,lad.length).sort((a,b)=>a.i-b.i); }
+  const wells=gfWellRows();
+  let pk=peaks(pr,h/90,0.08*mx).filter(o=>o.i>h*0.02&&!nearWell(o.i,wells)).sort((a,b)=>a.i-b.i);
+  if(pk.length>lad.length){ /* kies de reeks die het best op het ladderpatroon past (log bp lineair met afstand) */
+    const cands=pk.slice().sort((a,b)=>b.v-a.v).slice(0,lad.length+6).sort((a,b)=>a.i-b.i); let best=null;
+    for(let st=0;st+lad.length<=cands.length;st++){ const win=cands.slice(st,st+lad.length); const r=linreg(win.map(o=>o.i),lad.map(v=>Math.log10(v))); const score=r.r2+0.02*Math.min(...win.map(o=>o.v))/mx; if(r.b<0&&(!best||score>best.score)) best={win,score}; }
+    pk=best?best.win:pk.sort((a,b)=>b.v-a.v).slice(0,lad.length).sort((a,b)=>a.i-b.i); }
   gf.bands=pk.map((o,i)=>({y:o.i,bp:lad[i]??NaN}));
   gfStatus(pk.length===lad.length?`${pk.length} ladderbanden gevonden en gekoppeld aan de ladder (bovenste band = grootste).`:`${pk.length} banden gevonden, ladder heeft er ${lad.length}. Controleer de waarden in de tabel, verwijder of voeg banden toe.`);
   gf.marks.forEach(m=>m.bp=gfEst(m.y)); gfBandsTable(); gfMarksTable(); gfRender();
@@ -1688,7 +1799,7 @@ $('#w-csv').addEventListener('click',()=>{ const {r,c}=dims(); const {lab}=label
 $('#q-csv').addEventListener('click',()=>dlMsg($('#q-copied'),()=>saveBlob('pcr-mastermix.csv',csvBlob(qText))));
 
 /* ================= PLAKKEN UIT EXCEL ================= */
-const ADDBTN={'s-std':'#s-addstd','s-unk':'#s-addunk','k-tbl':'#k-add','q-tbl':'#q-add','o-tbl':'#o-add'};
+const ADDBTN={'s-std':'#s-addstd','s-unk':'#s-addunk','k-tbl':'#k-add','q-tbl':'#q-add','o-tbl':'#o-add','qp-tbl':'#qp-add','gc-tbl':'#gc-add'};
 document.addEventListener('paste',e=>{
   const el=e.target; if(el.tagName!=='INPUT') return; const td=el.closest('td'), tb=el.closest('tbody'); if(!td||!tb) return;
   const txt=(e.clipboardData||window.clipboardData).getData('text')||''; if(!/[\t\n]/.test(txt.trim())) return;
@@ -1736,6 +1847,168 @@ try{ const t=JSON.parse(localStorage.getItem(TKEY)||'[]'); if(Array.isArray(t)&&
 let lastT='',lastC='';
 setInterval(()=>{ try{ const t=JSON.stringify(timers.map(x=>({...x,rem:Math.round(x.rem*10)/10}))); if(t!==lastT){ localStorage.setItem(TKEY,t); lastT=t; } const c=JSON.stringify({cats,hist:hist.slice(-500),preset:$('#c-preset').value}); if(c!==lastC){ localStorage.setItem(CKEY,c); lastC=c; } }catch(e){} },1000);
 
+/* ================= KOPIËREN NAAR EXCEL ================= */
+function cellText(td){ const ins=[...td.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select,textarea')]; if(ins.length) return ins.map(i=>i.tagName==='SELECT'?(i.options[i.selectedIndex]?i.options[i.selectedIndex].text:i.value):i.value).join(' ').trim();
+  const r=td.querySelector('input[type=radio],input[type=checkbox]'); if(r) return r.checked?'ja':'';
+  const c=td.cloneNode(true); c.querySelectorAll('button').forEach(b=>b.remove()); c.querySelectorAll('sup').forEach(x=>x.replaceWith('^'+x.textContent)); c.querySelectorAll('sub').forEach(x=>x.replaceWith(x.textContent));
+  return c.textContent.replace(/\u00ad/g,'').replace(/\s+/g,' ').trim(); }
+function xlParse(t){ const m=String(t).match(/^(-?\d{1,3}(?:\.\d{3})+(?:,\d+)?|-?\d+(?:,\d+)?)(?:\s*×\s*10\^(-?\d+))?\s*(.*)$/); if(!m) return null; const unit=m[3].trim(); if(/[\d:]/.test(unit)) return null; let n=Number(m[1].replace(/\./g,'').replace(',','.')); if(m[2]) n*=10**Number(m[2]); return isFinite(n)?{n,unit}:null; }
+function xlNum(n){ if(!isFinite(n)) return ''; const a=Math.abs(n); let s=(a!==0&&(a<1e-4||a>=1e9))?n.toExponential(6).replace(/\.?0+e/,'e').toUpperCase():String(Number(n.toPrecision(12))); return s.replace('.',','); }
+function tableData(tbl){
+  const EMPTY=v=>v===''||v==='–'||v==='-'; const rows=[...tbl.rows].map(r=>({head:!!r.closest('thead'),cells:[...r.cells].map(c=>{ const t=cellText(c); return EMPTY(t)&&!r.closest('thead')?'':t; })}));
+  const nc=Math.max(0,...rows.map(r=>r.cells.length));
+  const keep=[...Array(nc).keys()].filter(j=>rows.some(r=>(r.cells[j]||'')!==''));
+  const head=rows.filter(r=>r.head), body=rows.filter(r=>!r.head);
+  const colType=keep.map(j=>{ const vals=body.map(r=>r.cells[j]||'').filter(v=>v!==''); if(!vals.length) return null; const ps=vals.map(xlParse); if(ps.some(p=>!p)) return null; const units=[...new Set(ps.map(p=>p.unit))]; return units.length===1?units[0]:null; });
+  const H=head.map(r=>keep.map((j,k)=>{ const t=r.cells[j]||''; return colType[k]?`${t} (${colType[k]})`:t; }));
+  const B=body.map(r=>keep.map((j,k)=>{ const t=r.cells[j]||''; if(colType[k]!==null&&t!==''){ const p=xlParse(t); return p?{n:p.n}:t; } return t; }));
+  return {H,B};
+}
+function toTSV(H,B){ const f=v=>typeof v==='object'?xlNum(v.n):String(v).replace(/[\t\n]/g,' '); return [...H,...B].map(r=>r.map(f).join('\t')).join('\r\n'); }
+function toHTML(H,B){ const f=v=>esc(typeof v==='object'?xlNum(v.n):String(v)); return '<table>'+H.map(r=>'<tr>'+r.map(c=>`<th>${f(c)}</th>`).join('')+'</tr>').join('')+B.map(r=>'<tr>'+r.map(c=>`<td>${f(c)}</td>`).join('')+'</tr>').join('')+'</table>'; }
+function flashBtn(b,t){ const o=b.dataset.label||b.textContent; b.dataset.label=o; b.textContent=t; b.classList.add('done'); setTimeout(()=>{ b.textContent=o; b.classList.remove('done'); },1600); }
+async function copyRich(tsv,html,btn){ try{ if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write) await navigator.clipboard.write([new ClipboardItem({'text/plain':new Blob([tsv],{type:'text/plain'}),'text/html':new Blob([html],{type:'text/html'})})]); else await navigator.clipboard.writeText(tsv); flashBtn(btn,'Gekopieerd'); }
+  catch(e){ try{ await navigator.clipboard.writeText(tsv); flashBtn(btn,'Gekopieerd'); }catch(e2){ flashBtn(btn,'Geblokkeerd'); } } }
+function decorateXL(){
+  $$('main table').forEach(t=>{ if(t.dataset.xl) return; t.dataset.xl='1'; const anchor=t.closest('.tbl-wrap')||t; const bar=document.createElement('div'); bar.className='xlbar'; bar.innerHTML='<button type="button" class="xlbtn" data-xl-table title="Kopieert de tabel; plak in Excel met Ctrl+V">Kopieer naar Excel</button>'; anchor.parentNode.insertBefore(bar,anchor); });
+  $$('main canvas').forEach(cv=>{ if(cv.dataset.xl||cv.id==='gf-cv') return; cv.dataset.xl='1'; const bar=document.createElement('div'); bar.className='xlbar'; bar.innerHTML='<button type="button" class="xlbtn" data-xl-img title="Plak als afbeelding in Excel, Word of PowerPoint">Kopieer grafiek</button><button type="button" class="xlbtn" data-xl-data title="Kopieert de gegevens achter de grafiek; plak in Excel om zelf een grafiek te maken">Kopieer data</button>'; cv.after(bar); });
+}
+let xlT=null; new MutationObserver(()=>{ clearTimeout(xlT); xlT=setTimeout(decorateXL,60); }).observe($('main'),{childList:true,subtree:true});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-xl-table],[data-xl-img],[data-xl-data]'); if(!b) return;
+  if(b.hasAttribute('data-xl-table')){ let n=b.parentNode.nextElementSibling; const t=n&&(n.tagName==='TABLE'?n:n.querySelector('table')); if(!t) return; const {H,B}=tableData(t); copyRich(toTSV(H,B),toHTML(H,B),b); return; }
+  const cv=b.parentNode.previousElementSibling; if(!cv||cv.tagName!=='CANVAS') return;
+  if(b.hasAttribute('data-xl-img')){ const c=document.createElement('canvas'); c.width=cv.width; c.height=cv.height; const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(cv,0,0);
+    (async()=>{ try{ await navigator.clipboard.write([new ClipboardItem({'image/png':new Promise(r=>c.toBlob(r,'image/png'))})]); flashBtn(b,'Gekopieerd'); }catch(err){ flashBtn(b,'Geblokkeerd'); } })(); return; }
+  const D=cv._data; if(!D||!D.rows.length){ flashBtn(b,'Geen data'); return; }
+  const B=D.rows.map(r=>r.map(v=>typeof v==='number'?{n:v}:v)); copyRich(toTSV([D.head],B),toHTML([D.head],B),b);
+});
+
+/* ================= qPCR ΔΔCt ================= */
+const QPDATA=[['Controle',23.9,20.0],['Controle',24.0,20.1],['Controle',24.1,19.9],['Behandeld',21.4,20.2],['Behandeld',21.5,20.1],['Behandeld',21.6,20.3]];
+const qpRow=r=>`<tr><td><input class="txt" data-n value="${esc(r[0]??'')}" style="width:130px"></td><td>${inp(r[1],80,'data-t')}</td><td>${inp(r[2],80,'data-r')}</td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
+$('#qp-tbl tbody').innerHTML=QPDATA.map(qpRow).join('');
+$('#qp-add').addEventListener('click',()=>$('#qp-tbl tbody').insertAdjacentHTML('beforeend',qpRow(['','',''])));
+$('#qp-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); calc.qpcr(); }});
+function barChart(cv,cats,vals,lo,hi,o){
+  const W=480,H=300,dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=H*dpr; cv.style.width='100%'; cv.style.maxWidth=W+'px';
+  const x=cv.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,W,H); const cs=getComputedStyle(document.documentElement), C=k=>cs.getPropertyValue(k).trim();
+  const pad={l:58,r:14,t:16,b:46}; const ymax=Math.max(1.2,...vals.filter(isFinite),...hi.filter(isFinite))*1.12; const Y=v=>H-pad.b-v/ymax*(H-pad.t-pad.b);
+  x.font='11px '+C('--font-ui'); const st=niceStep(ymax,5); x.textAlign='right'; x.textBaseline='middle';
+  for(let t=0;t<=ymax+1e-9;t+=st){ x.strokeStyle=C('--line'); x.beginPath(); x.moveTo(pad.l,Y(t)); x.lineTo(W-pad.r,Y(t)); x.stroke(); x.fillStyle=C('--muted'); x.fillText(tickLabel(t),pad.l-6,Y(t)); }
+  const bw=(W-pad.l-pad.r)/Math.max(1,cats.length);
+  cats.forEach((c,i)=>{ const cx=pad.l+bw*(i+0.5), w=Math.min(56,bw*0.55); if(isFinite(vals[i])){ x.fillStyle=o.cal===c?C('--muted'):C('--accent'); x.fillRect(cx-w/2,Y(vals[i]),w,Y(0)-Y(vals[i])); }
+    if(isFinite(lo[i])&&isFinite(hi[i])&&hi[i]>lo[i]){ x.strokeStyle=C('--ink'); x.lineWidth=1.3; x.beginPath(); x.moveTo(cx,Y(lo[i])); x.lineTo(cx,Y(hi[i])); x.moveTo(cx-6,Y(lo[i])); x.lineTo(cx+6,Y(lo[i])); x.moveTo(cx-6,Y(hi[i])); x.lineTo(cx+6,Y(hi[i])); x.stroke(); x.lineWidth=1; }
+    x.fillStyle=C('--ink'); x.textAlign='center'; x.textBaseline='top'; x.fillText(c.length>14?c.slice(0,13)+'…':c,cx,H-pad.b+6); if(isFinite(vals[i])){ x.textBaseline='bottom'; x.fillText(sig(vals[i],3).replace(/<[^>]+>/g,''),cx,Y(Math.max(vals[i],isFinite(hi[i])?hi[i]:0))-3); } });
+  x.strokeStyle=C('--muted'); x.setLineDash([4,3]); x.beginPath(); x.moveTo(pad.l,Y(1)); x.lineTo(W-pad.r,Y(1)); x.stroke(); x.setLineDash([]);
+  x.beginPath(); x.moveTo(pad.l,pad.t); x.lineTo(pad.l,H-pad.b); x.lineTo(W-pad.r,H-pad.b); x.stroke();
+  x.save(); x.translate(14,(H-pad.b+pad.t)/2); x.rotate(-Math.PI/2); x.textAlign='center'; x.textBaseline='middle'; x.fillStyle=C('--muted'); x.font='12px '+C('--font-ui'); x.fillText(o.ylabel,0,0); x.restore();
+  cv._data={head:['monster',o.ylabel,'ondergrens','bovengrens'],rows:cats.map((c,i)=>[c,vals[i],lo[i],hi[i]])};
+}
+calc.qpcr=function(){
+  const eT=num($('#qp-et').value)||100, eR=num($('#qp-er').value)||100, Et=1+eT/100, Er=1+eR/100;
+  const groups=[]; const byName={};
+  $$('#qp-tbl tbody tr').forEach(tr=>{ const n=(tr.querySelector('[data-n]').value||'').trim(), t=num(tr.querySelector('[data-t]').value), r=num(tr.querySelector('[data-r]').value); if(!n||!isFinite(t)||!isFinite(r)) return; if(!byName[n]){ byName[n]={n,t:[],r:[]}; groups.push(byName[n]); } byName[n].t.push(t); byName[n].r.push(r); });
+  const sel=$('#qp-cal'), cur=sel.value; sel.innerHTML=groups.map(g=>`<option>${esc(g.n)}</option>`).join(''); if(groups.some(g=>g.n===cur)) sel.value=cur;
+  const res=$('#qp-res'), cv=$('#qp-cv');
+  if(groups.length<2){ res.innerHTML=note('info','Vul Ct-waarden in voor minstens twee monsters (kalibrator en een testmonster).'); return; }
+  groups.forEach(g=>{ g.mt=mean(g.t); g.mr=mean(g.r); const d=g.t.map((t,i)=>t-g.r[i]); g.dct=mean(d); g.sd=sd(d); });
+  const cal=byName[sel.value]||groups[0];
+  groups.forEach(g=>{ g.ddct=g.dct-cal.dct; g.fc=2**(-g.ddct); g.lo=2**(-(g.ddct+g.sd)); g.hi=2**(-(g.ddct-g.sd)); g.pf=Et**(cal.mt-g.mt)/Er**(cal.mr-g.mr); });
+  const mode=$('#qp-m').value, usePf=mode==='pfaffl'||(mode==='auto'&&(eT!==100||eR!==100));
+  barChart(cv,groups.map(g=>g.n),groups.map(g=>usePf?g.pf:g.fc),groups.map(g=>usePf?NaN:g.lo),groups.map(g=>usePf?NaN:g.hi),{ylabel:usePf?'relatieve expressie (Pfaffl)':'fold change (2^−ΔΔCt)',cal:cal.n});
+  const test=groups.filter(g=>g!==cal);
+  let h=`<div class="lbl" style="margin-top:8px">${esc(test[0].n)} t.o.v. ${esc(cal.n)}</div><div class="big">${sig(usePf?test[0].pf:test[0].fc,3)}<small>× ${usePf?'(Pfaffl)':'(2<sup>−ΔΔCt</sup>)'}</small></div>`;
+  h+=`<div class="tbl-wrap"><table class="mini"><thead><tr><th>Monster</th><th class="num">n</th><th class="num">Ct doel</th><th class="num">Ct ref</th><th class="num">ΔCt</th><th class="num">SD</th><th class="num">ΔΔCt</th><th class="num">2^−ΔΔCt</th><th class="num">Bereik</th><th class="num">Pfaffl</th><th class="num">log₂ FC</th></tr></thead><tbody>`+
+    groups.map(g=>`<tr${g===cal?' class="dim"':''}><td>${esc(g.n)}${g===cal?' (kalibrator)':''}</td><td class="num">${g.t.length}</td><td class="num">${fmt(g.mt,2)}</td><td class="num">${fmt(g.mr,2)}</td><td class="num">${fmt(g.dct,2)}</td><td class="num">${g.t.length>1?fmt(g.sd,2):''}</td><td class="num">${fmt(g.ddct,2)}</td><td class="num">${sig(g.fc,3)}</td><td class="num">${g.t.length>1?sig(g.lo,3)+' – '+sig(g.hi,3):''}</td><td class="num">${sig(g.pf,3)}</td><td class="num">${fmt(Math.log2(usePf?g.pf:g.fc),2)}</td></tr>`).join('')+`</tbody></table></div>`;
+  const n=[];
+  [['doelgen',eT],['referentiegen',eR]].forEach(([k,e])=>{ if(e<90||e>110) n.push(note('warn',`Efficiëntie ${k} ${fmt(e,0)}% valt buiten 90–110%; gebruik de Pfaffl-uitkomst en controleer de assay.`)); });
+  if(groups.some(g=>g.t.length<3)) n.push(note('info','Minder dan 3 herhalingen per monster: de spreiding is onbetrouwbaar.'));
+  res.innerHTML=h+n.join('')+`<div class="formula">Bereik = 2<sup>−(ΔΔCt ± SD)</sup>; doe statistiek op ΔCt-waarden, niet op fold changes.</div>`;
+};
+
+/* ================= GROEICURVE ================= */
+const GCDATA=[[0,0.05],[0.5,0.052],[1,0.058],[1.5,0.075],[2,0.11],[2.5,0.17],[3,0.26],[3.5,0.40],[4,0.60],[4.5,0.85],[5,1.10],[6,1.45],[7,1.55]];
+const gcRow=(r,i)=>`<tr><td class="num">${i+1}</td><td>${inp(r[0],80,'data-t')}</td><td>${inp(r[1],90,'data-y')}</td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
+$('#gc-tbl tbody').innerHTML=GCDATA.map(gcRow).join('');
+function gcRenum(){ $$('#gc-tbl tbody tr').forEach((tr,i)=>tr.cells[0].textContent=i+1); }
+$('#gc-add').addEventListener('click',()=>{ $('#gc-tbl tbody').insertAdjacentHTML('beforeend',gcRow(['',''],$$('#gc-tbl tbody tr').length)); });
+$('#gc-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); gcRenum(); calc.groei(); }});
+function bestWindow(t,ly){ const n=t.length, minL=n>=6?4:3; let best=null; for(let i=0;i<n;i++) for(let j=i+minL-1;j<n;j++){ const r=linreg(t.slice(i,j+1),ly.slice(i,j+1)); if(r.b>0&&r.r2>=0.98&&(!best||r.b>best.r.b*1.0001||(Math.abs(r.b-best.r.b)<=best.r.b*1e-4&&j-i>best.j-best.i))) best={i,j,r}; } return best; }
+calc.groei=function(){
+  const tu=$('#g2-tu').value, type=$('#g2-type').value, blank=type==='od'?(num($('#g2-blank').value)||0):0, fac=num($('#g2-fac').value);
+  const pts=$$('#gc-tbl tbody tr').map((tr,idx)=>({idx,t:num(tr.querySelector('[data-t]').value),y:num(tr.querySelector('[data-y]').value)})).filter(p=>isFinite(p.t)&&isFinite(p.y)).map(p=>({...p,v:p.y-blank})).sort((a,b)=>a.t-b.t);
+  const ok=pts.filter(p=>p.v>0), res=$('#gc-res'), cv=$('#gc-cv');
+  if(ok.length<3){ res.innerHTML=note('info','Vul minstens drie meetpunten met een waarde boven de blanco in.'); return; }
+  const th=ok.map(p=>tu==='min'?p.t/60:p.t), ly=ok.map(p=>Math.log(p.v));
+  let w;
+  if($('#g2-win').value==='man'){ const a=Math.max(1,Math.round(num($('#g2-from').value)||1))-1, b=Math.min(ok.length,Math.round(num($('#g2-to').value)||ok.length))-1; if(b-a<1){ res.innerHTML=note('bad','Kies minstens twee punten voor de exponentiële fase.'); return; } w={i:a,j:b,r:linreg(th.slice(a,b+1),ly.slice(a,b+1))}; }
+  else { w=bestWindow(th,ly); if(!w){ res.innerHTML=note('warn','Geen exponentiële fase gevonden (geen reeks van 3–4 punten met R² ≥ 0,98). Kies het venster zelf.'); return; } $('#g2-from').value=w.i+1; $('#g2-to').value=w.j+1; }
+  const mu=w.r.b, td=Math.log(2)/mu, lag=(ly[0]-w.r.a)/mu, tconv=v=>tu==='min'?v*60:v;
+  const inW=(i)=>i>=w.i&&i<=w.j;
+  const ymin=Math.min(...ok.map(p=>p.v))/1.6, ymax=Math.max(...ok.map(p=>p.v))*1.6;
+  chart(cv,{xmin:Math.min(...ok.map(p=>p.t)),xmax:Math.max(...ok.map(p=>p.t)),ymin,ymax,logy:true,xlabel:`tijd (${tu==='min'?'min':'uur'})`,ylabel:type==='od'?'OD₆₀₀ (log-schaal)':'KVE/mL (log-schaal)',
+    series:[{pts:ok.filter((p,i)=>!inW(i)).map(p=>[p.t,p.v]),color:'--muted',name:'meting'},{pts:ok.filter((p,i)=>inW(i)).map(p=>[p.t,p.v]),color:'--accent',r:4.5,name:'exponentiële fase'},{fn:t=>Math.exp(w.r.a+mu*(tu==='min'?t/60:t)),x0:ok[Math.max(0,w.i-1)].t,x1:ok[Math.min(ok.length-1,w.j+1)].t,color:'--bad',dash:[5,4],name:'exponentiële fit'}],
+    legend:[['exponentiële fase','--accent'],['fit','--bad']],legendPos:'br'});
+  const rows=[['Specifieke groeisnelheid µ',fmt(mu,3)+' h⁻¹'],['Verdubbelingstijd',fmt(td*60,1)+' min'],['Generaties per uur',fmt(1/td,2)],['Exponentiële fase',`punt ${ok[w.i].idx+1}–${ok[w.j].idx+1} (${fmt(ok[w.i].t,2)}–${fmt(ok[w.j].t,2)} ${tu==='min'?'min':'u'})`],['R² (ln-waarde)',fmt(w.r.r2,4)],['Lag-fase',lag>th[0]?fmt(tconv(lag),2)+(tu==='min'?' min':' u'):'geen'],['Maximum',sig(Math.max(...ok.map(p=>p.v)),3)]];
+  if(type==='od'&&isFinite(fac)) rows.push(['Cellen/mL aan einde exp. fase (schatting)',sci(ok[w.j].v*fac,2)]);
+  const n=[]; if(type==='od'&&ok[w.j].v>1.0) n.push(note('warn','Het venster loopt boven OD 1,0; daar is OD niet meer evenredig met het celaantal. Verdun of kies een eerder venster.')); if(w.j-w.i+1<4) n.push(note('info','Het venster bevat maar 3 punten; meet vaker in de exponentiële fase.'));
+  res.innerHTML=`<div class="lbl" style="margin-top:8px">Verdubbelingstijd</div><div class="big">${fmt(td*60,1)} <small>min</small></div>`+kv(rows)+n.join('')+`<div class="formula">ln(y) = ${fmt(w.r.a,3)} + ${fmt(mu,4)}·t (t in uur) · t<sub>d</sub> = ln 2 / µ</div>`;
+};
+
+/* ================= FORENSISCHE KWANTIFICATIE ================= */
+function fqCalc(){
+  const S=num($('#fq-s').value), L=num($('#fq-l').value), Yc=num($('#fq-y').value), ng=num($('#fq-ng').value), V=num($('#fq-v').value), out=$('#fq-out');
+  if(!(S>0)){ out.innerHTML=note('info','Vul minstens de concentratie van het kleine autosomale doel in.'); return; }
+  let h=''; const rows=[];
+  if(L>0){ const DI=S/L; const cls=DI<=1?['ok','intact']:DI<=10?['warn','matig gedegradeerd']:['bad','sterk gedegradeerd']; h+=`<div class="lbl">Degradatie-index</div><div class="big">${fmt(DI,2)} <span class="chip ${cls[0]}" style="vertical-align:middle">${cls[1]}</span></div>`; rows.push(['DI = klein / groot',fmt(DI,2)]);
+    if(DI>1) h+=note(DI>10?'bad':'warn',DI>10?'Sterke degradatie: een volledig STR-profiel is onwaarschijnlijk; overweeg mini-STR\'s of andere methoden.':'Mogelijke degradatie. Grote STR-loci vallen eerder weg; meer input kan helpen. Remming geeft een vergelijkbaar patroon, dus kijk ook naar de IPC.'); }
+  else h+=`<div class="lbl">Degradatie-index</div><div class="big">–</div>`+note('info','Geen groot autosomaal doel ingevuld (of niet gedetecteerd): DI niet te berekenen.');
+  if(isFinite(Yc)){ if(Yc>0){ const fem=Math.max(0,S-Yc); rows.push(['Mannelijk DNA (Y)',sig(Yc,3)+' ng/µL'],['Vrouwelijk deel (schatting)',sig(fem,3)+' ng/µL'],['Man : vrouw',fem>0?`1 : ${fmt(fem/Yc,1)}`:'alleen mannelijk']); if(fem/Yc>=100) h+=note('warn','Mannelijk deel is 1:100 of kleiner: autosomale STR\'s tonen de man waarschijnlijk niet; overweeg Y-STR\'s.'); }
+    else rows.push(['Mannelijk DNA (Y)','niet gedetecteerd']); }
+  if(isFinite(ng)&&ng>0){ const vd=ng/S; rows.push([`Extract voor ${fmt(ng,2)} ng`,isFinite(V)&&vd>V?`${vol(V)} (max., ${sig(S*V,3)} ng)`:vol(vd)]); if(isFinite(V)&&vd<=V) rows.push(['Aanvullen met water/TE',vol(V-vd)]); if(vd<1) h+=note('warn','Minder dan 1 µL extract: maak eerst een verdunning.'); }
+  out.innerHTML=h+kv(rows);
+}
+{ const _dna=calc.dna; calc.dna=function(e){ _dna(e); fqCalc(); }; }
+
+/* ================= GELFOTO: DENSITOMETRIE EN AUTOMATISCH METEN ================= */
+function gfIntensity(x,y){ const pr=laneProfile(x), h=pr.length, k=Math.max(0,Math.min(h-1,Math.round(y))), pk=pr[k]; if(!(pk>0)) return 0;
+  const half=pk/2, lim=Math.round(h/15); let l=k,r=k; while(l>0&&k-l<lim&&pr[l-1]>half) l--; while(r<h-1&&r-k<lim&&pr[r+1]>half) r++;
+  const hw=Math.max(1,(r-l)/2), L=Math.max(0,Math.round(k-2*hw)), R=Math.min(h-1,Math.round(k+2*hw)); let s=0; for(let i=L;i<=R;i++) s+=Math.max(0,pr[i]); return s*Math.max(1,Math.round(gf.lw*0.6)); }
+function gfMarkInt(){ gf.marks.forEach(m=>{ if(m.int==null) m.int=gfIntensity(m.x,m.y); }); }
+{ const _mt=gfMarksTable; gfMarksTable=function(){ gfMarkInt(); _mt(); const tb=$('#gf-marks table'); if(!tb) return; const mx=Math.max(...gf.marks.map(m=>m.int||0)); tb.tHead.rows[0].insertCell(3).outerHTML='<th class="num" title="Geïntegreerde bandintensiteit, relatief t.o.v. de sterkste meting">Rel. int.</th>'; [...tb.tBodies[0].rows].forEach((tr,i)=>{ const c=tr.insertCell(3); c.className='num'; c.textContent=mx>0?fmt((gf.marks[i].int||0)/mx*100,0)+'%':'–'; }); }; }
+$('#gf-measall').addEventListener('click',()=>{
+  if(gf.bands.filter(b=>isFinite(b.bp)).length<2){ gfStatus('Detecteer of vul eerst minstens twee ladderbanden in.'); return; }
+  const h=gfProc().h; const profs=gf.lanes.map(l=>laneProfile(l.x)); const gmax=Math.max(...profs.map(p=>Math.max(...p)));
+  const wells=gfWellRows(); let added=0; gf.lanes.forEach((l,li)=>{ if(li===gf.ladder) return; const pr=profs[li], mx=Math.max(...pr); peaks(pr,h/60,Math.max(0.2*mx,0.1*gmax)).filter(o=>o.i>h*0.02&&o.v>0.1*gmax&&!nearWell(o.i,wells)).forEach(o=>{ if(gf.marks.some(m=>Math.abs(m.x-l.x)<gf.lw/2&&Math.abs(m.y-o.i)<h/80)) return; gf.marks.push({x:l.x,y:o.i,bp:gfEst(o.i)}); added++; }); });
+  gfMarksTable(); gfRender(); gfStatus(`${added} banden gemeten in ${gf.lanes.length-1} lanen. Controleer de lijst; verwijder wat geen echte band is (bijvoorbeeld primer-dimeren).`); });
+$('#gf-clrmarks').addEventListener('click',()=>{ gf.marks=[]; gfMarksTable(); gfRender(); });
+
+/* ================= GELFOTO: AUTOMATISCH RECHTZETTEN ================= */
+function gfAutoStraighten(){
+  if(!gf.src) return; const s0=gf.src, sc=Math.min(1,420/Math.max(s0.width,s0.height)); const sw=Math.round(s0.width*sc), sh=Math.round(s0.height*sc);
+  const small=document.createElement('canvas'); small.width=sw; small.height=sh; small.getContext('2d').drawImage(s0,0,0,sw,sh);
+  const c=document.createElement('canvas'), x=c.getContext('2d',{willReadFrequently:true}); c.width=sw; c.height=sh;
+  const score=a=>{ x.setTransform(1,0,0,1,0,0); x.fillStyle='#808080'; x.fillRect(0,0,sw,sh); x.translate(sw/2,sh/2); x.rotate((gf.rot90*90+a)*Math.PI/180); if(gf.flip) x.scale(-1,1); x.drawImage(small,-sw/2,-sh/2);
+    const W2=Math.round(sw*0.8), H2=Math.round(sh*0.8), d=x.getImageData(Math.round(sw*0.1),Math.round(sh*0.1),W2,H2).data, col=new Float64Array(W2);
+    for(let yy=0;yy<H2;yy++) for(let xx=0;xx<W2;xx++) col[xx]+=d[(yy*W2+xx)*4];
+    let m=0; col.forEach(v=>m+=v); m/=W2; let v=0; for(let i=1;i<W2;i++) v+=(col[i]-col[i-1])**2; return v; };
+  let best=0,bs=-1; for(let a=-8;a<=8.0001;a+=0.5){ const sc2=score(a); if(sc2>bs){bs=sc2;best=a;} }
+  for(let a=best-0.5;a<=best+0.5001;a+=0.1){ const sc2=score(a); if(sc2>bs){bs=sc2;best=a;} }
+  best=Math.round(best*4)/4; $('#gf-rot').value=best; $('#gf-rot').dispatchEvent(new Event('input',{bubbles:true}));
+  gfStatus(`Rechtgezet met ${fmt(best,2)}°. Lanen en ladder worden opnieuw gedetecteerd.`);
+}
+$('#gf-auto').addEventListener('click',gfAutoStraighten);
+
+/* ================= SESSIE OPSLAAN / OPENEN ================= */
+$('#sess-save').addEventListener('click',()=>{ try{ localStorage.setItem(TBLKEY,JSON.stringify(tblSnap())); }catch(e){}
+  const data={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('labkit:')) data[k]=localStorage.getItem(k); } }catch(e){}
+  const d=new Date(), stamp=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  saveBlob(`labkit-sessie-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',versie:'1.4.0',opgeslagen:d.toISOString(),data},null,1)],{type:'application/json'})).catch(()=>{}); });
+$('#sess-open').addEventListener('click',()=>$('#sess-file').click());
+$('#sess-file').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const j=JSON.parse(t); if(!j||j.app!=='Labkit BML'||typeof j.data!=='object') throw 0; Object.entries(j.data).forEach(([k,v])=>{ if(k.startsWith('labkit:')) localStorage.setItem(k,v); }); location.reload(); }).catch(()=>alertBox('Dit bestand is geen Labkit-sessie.')); });
+function alertBox(t){ const n=document.createElement('div'); n.className='note bad'; n.style.cssText='position:fixed;left:16px;bottom:16px;z-index:50;max-width:320px'; n.textContent=t; document.body.appendChild(n); setTimeout(()=>n.remove(),4000); }
+
 /* ================= TABELLEN, PLAAT EN REEKS BEWAREN ================= */
 const TBLKEY='labkit:v1:tables';
 const TBLDEF={
@@ -1743,12 +2016,14 @@ const TBLDEF={
   's-unk':{row:sUnkRow,num:[1,2,3,4]},
   'k-tbl':{row:kRow,num:[0,1,2]},
   'q-tbl':{row:qRow,num:[1,2]},
-  'o-tbl':{row:oRow,num:[1,2]}
+  'o-tbl':{row:oRow,num:[1,2]},
+  'qp-tbl':{row:qpRow,num:[1,2]},
+  'gc-tbl':{row:(r)=>gcRow(r,0),num:[0,1]}
 };
 function tblSnap(){ const out={}; Object.keys(TBLDEF).forEach(id=>{ out[id]=[...document.querySelectorAll('#'+id+' tbody tr')].map(tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select')].map(e=>e.value)); });
   out.reeks=reeksCounts; out.plate={fmt:$('#w-fmt').value,wells,groups,title:$('#w-title').value}; out.curve={model:$('#s-model').value,unit:$('#s-unit').value,blank:$('#s-blank').checked,logx:$('#s-logx').checked}; return out; }
 function tblRestore(){ let d=null; try{ d=JSON.parse(localStorage.getItem(TBLKEY)||'null'); }catch(e){} if(!d) return;
-  Object.entries(TBLDEF).forEach(([id,def])=>{ const rows=d[id]; if(!Array.isArray(rows)||!rows.length) return; $('#'+id+' tbody').innerHTML=rows.map(r=>def.row(r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v))).join(''); });
+  Object.entries(TBLDEF).forEach(([id,def])=>{ const rows=d[id]; if(!Array.isArray(rows)||!rows.length) return; $('#'+id+' tbody').innerHTML=rows.map(r=>def.row(r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v))).join(''); }); gcRenum();
   if(d.curve){ $('#s-model').value=d.curve.model; $('#s-unit').value=d.curve.unit; $('#s-blank').checked=d.curve.blank; $('#s-logx').checked=d.curve.logx; }
   if(d.reeks&&typeof d.reeks==='object'){ reeksCounts=d.reeks; buildReeks(); }
   if(d.plate&&d.plate.wells){ $('#w-fmt').value=d.plate.fmt; groups=d.plate.groups&&d.plate.groups.length?d.plate.groups:groups; wells=d.plate.wells; if(d.plate.title!=null) $('#w-title').value=d.plate.title; renderPlate(); } }
@@ -1761,7 +2036,8 @@ buildReeks();
 sLoad('bradford');
 tblRestore();
 gfDemo();
-['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
+['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
+decorateXL();
 route();
 </script>
 </body>
