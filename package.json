@@ -1,0 +1,46 @@
+{
+  "name": "labkit-bml",
+  "productName": "Labkit BML",
+  "version": "1.1.0",
+  "description": "Rekentools, standaardcurves, enzymkinetiek, PCR en gelfoto-editor voor het biomedisch lab",
+  "main": "electron/main.js",
+  "author": "svgbml",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --publish never",
+    "web": "npx --yes serve web"
+  },
+  "devDependencies": {
+    "electron": "44.10.0",
+    "electron-builder": "26.18.1"
+  },
+  "build": {
+    "appId": "nl.svgbml.labkit",
+    "productName": "Labkit BML",
+    "files": [
+      "electron/**",
+      "web/**",
+      "build/icon.png"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "artifactName": "Labkit-BML-${version}-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "Labkit-BML-${version}-portable.${ext}"
+    }
+  }
+}
