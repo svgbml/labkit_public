@@ -26,45 +26,28 @@
   --font-mono:Consolas,"Cascadia Mono",ui-monospace,Menlo,monospace;
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#16191d; --surface:#1f2328; --ink:#e6e9ed; --muted:#9aa4b1; --line:#343a42;
-    --accent:#6ea8ff; --accent-soft:#1d2c44;
-    --ok:#62cc92; --ok-soft:#17321f; --warn:#eab45c; --warn-soft:#3a2c13; --bad:#ff8f86; --bad-soft:#3f1e1b;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#16191d; --surface:#1f2328; --ink:#e6e9ed; --muted:#9aa4b1; --line:#343a42;
-  --accent:#6ea8ff; --accent-soft:#1d2c44;
-  --ok:#62cc92; --ok-soft:#17321f; --warn:#eab45c; --warn-soft:#3a2c13; --bad:#ff8f86; --bad-soft:#3f1e1b;
-  color-scheme: dark;
-}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:14px;line-height:1.5;font-variant-numeric:tabular-nums}
 a{color:var(--accent)}
-header.top{position:sticky;top:0;z-index:10;height:52px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:20px;padding:0 20px}
-.logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);width:204px;flex:none}
-.logo svg{width:24px;height:24px;flex:none}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100%}
+nav.side{background:var(--surface);border-right:1px solid var(--line);padding:0 0 16px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidehead{position:sticky;top:0;z-index:2;background:var(--surface);padding:16px 16px 12px;border-bottom:1px solid var(--line);display:grid;gap:12px}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink)}
+.logo svg{width:26px;height:26px;flex:none}
 .logo b{font-size:17px;font-weight:700}
 .logo span{font-size:12px;color:var(--muted);font-weight:600;border:1px solid var(--line);border-radius:3px;padding:0 5px}
-.search{flex:1;max-width:360px}
-.search input{height:34px;font-family:var(--font-ui)}
-.ver{margin-left:auto;font-size:12px;color:var(--muted)}
-.app{display:grid;grid-template-columns:224px 1fr;min-height:calc(100% - 52px)}
-nav.side{background:var(--surface);border-right:1px solid var(--line);padding:10px 0 16px;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto}
-.brand{display:none}
+.sidehead input{height:32px}
 .navgroup{margin:14px 0 4px;padding:0 20px;font-size:12px;color:var(--muted);font-weight:600}
-nav.side a{display:block;padding:6px 20px 6px 17px;border-left:3px solid transparent;color:var(--ink);text-decoration:none;font-size:14px}
-nav.side a:hover{background:var(--bg)}
-nav.side a.active{background:var(--accent-soft);border-left-color:var(--accent);color:var(--accent);font-weight:600}
-nav.side a .k{display:none}
-nav.side a[hidden],.navgroup[hidden]{display:none}
+nav.side > a{display:block;padding:6px 20px 6px 17px;border-left:3px solid transparent;color:var(--ink);text-decoration:none;font-size:14px}
+nav.side > a:hover{background:var(--bg)}
+nav.side > a.active{background:var(--accent-soft);border-left-color:var(--accent);color:var(--accent);font-weight:600}
+nav.side > a .k{display:none}
+nav.side > a[hidden],.navgroup[hidden]{display:none}
 .navfoot{margin:16px 20px 0;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
-.navfoot span{display:none}
+.navfoot{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
 .navfoot button{font-size:12px;padding:0;border:0;background:none;color:var(--muted);font-weight:400;text-decoration:underline;cursor:pointer}
-main{padding:24px clamp(16px,2.5vw,32px) 56px;min-width:0}
+main{padding:24px clamp(16px,2.5vw,36px) 56px;min-width:0}
 .tool{display:none;max-width:1120px}
 .tool.active{display:block}
 .tool-head{border-bottom:1px solid var(--line);margin-bottom:18px;padding-bottom:12px}
@@ -99,7 +82,7 @@ button.primary:hover{filter:brightness(1.1)}
 button.ghost{border-color:transparent;background:transparent;padding:4px 6px;color:var(--muted)}
 button.ghost:hover{color:var(--bad);background:transparent}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.result{position:sticky;top:68px}
+.result{position:sticky;top:20px}
 .result .lbl{font-size:12.5px;color:var(--muted);font-weight:600}
 .big{font-size:26px;font-weight:600;line-height:1.25;margin:0 0 10px}
 .big small{font-size:15px;font-weight:400;color:var(--muted)}
@@ -174,33 +157,30 @@ canvas{max-width:100%}
 .gfwrap{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}
 .gfwrap .panel{padding:14px}
 .gfwrap .panel h3{margin-bottom:10px}
-#gf-stage{position:sticky;top:68px}
+#gf-stage{position:sticky;top:20px}
 #gf-cv{width:100%;height:auto;display:block;background:#fff;border-radius:3px;touch-action:none}
 .rng{display:grid;grid-template-columns:90px 1fr 44px;align-items:center;gap:8px;font-size:13px}
 .rng span:last-child{text-align:right;color:var(--muted)}
 @media (max-width:1100px){.gfwrap{grid-template-columns:1fr}#gf-stage{position:static;order:-1}}
 @media (max-width:900px){
   .app{grid-template-columns:1fr}
-  .logo{width:auto}
-  .ver{display:none}
-  nav.side{position:sticky;top:52px;height:auto;z-index:5;display:flex;overflow-x:auto;padding:0;border-right:0;border-bottom:1px solid var(--line)}
-  .navgroup,.navfoot{display:none}
-  nav.side a{white-space:nowrap;padding:9px 12px;border-left:0;border-bottom:3px solid transparent}
-  nav.side a.active{border-bottom-color:var(--accent)}
+  nav.side{position:sticky;top:0;height:auto;z-index:5;display:flex;align-items:center;overflow-x:auto;padding:0;border-right:0;border-bottom:1px solid var(--line)}
+  .sidehead{position:static;border:0;padding:8px 12px;display:flex}
+  .sidehead input,.logo span,.navgroup,.navfoot{display:none}
+  nav.side > a{white-space:nowrap;padding:12px;border-left:0;border-bottom:3px solid transparent}
+  nav.side > a.active{border-bottom-color:var(--accent)}
   .grid2{grid-template-columns:1fr}
   .result{position:static}
 }
 </style>
 </head>
 <body>
-<header class="top">
-  <a class="logo" href="#verdunning" aria-label="Labkit BML, naar begin"><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="96" fill="#1558b0"/><g fill="#fff"><rect x="120" y="140" width="80" height="26" rx="6"/><rect x="120" y="212" width="80" height="26" rx="6" opacity=".8"/><rect x="120" y="300" width="80" height="26" rx="6" opacity=".6"/><rect x="232" y="196" width="80" height="28" rx="6"/><rect x="344" y="268" width="80" height="28" rx="6"/></g><rect x="232" y="346" width="80" height="22" rx="6" fill="#f2b33d"/></svg><b>Labkit</b><span>BML</span></a>
-  <div class="search"><input id="nav-q" class="txt" type="search" placeholder="Zoek een tool…" aria-label="Zoek een tool" autocomplete="off"></div>
-  <span class="ver">Versie 1.2.0</span>
-</header>
 <div class="app">
 <nav class="side" id="nav" aria-label="Tools">
-  <div class="brand"><b>Labkit</b><span>BML · forensisch</span></div>
+  <div class="sidehead">
+    <a class="logo" href="#verdunning" aria-label="Labkit BML, naar begin"><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="96" fill="#1558b0"/><g fill="#fff"><rect x="120" y="140" width="80" height="26" rx="6"/><rect x="120" y="212" width="80" height="26" rx="6" opacity=".8"/><rect x="120" y="300" width="80" height="26" rx="6" opacity=".6"/><rect x="232" y="196" width="80" height="28" rx="6"/><rect x="344" y="268" width="80" height="28" rx="6"/></g><rect x="232" y="346" width="80" height="22" rx="6" fill="#f2b33d"/></svg><b>Labkit</b><span>BML</span></a>
+    <input id="nav-q" class="txt" type="search" placeholder="Zoek een tool…" aria-label="Zoek een tool" autocomplete="off">
+  </div>
   <div class="navgroup">Oplossingen</div>
   <a href="#verdunning"><span class="k">C₁V₁</span>Verdunning</a>
   <a href="#oplossing"><span class="k">g</span>Oplossing &amp; buffer</a>
@@ -222,7 +202,7 @@ canvas{max-width:100%}
   <a href="#centrifuge"><span class="k">×g</span>Centrifuge</a>
   <a href="#timers"><span class="k">⏱</span>Timers</a>
   <a href="#plaat"><span class="k">96</span>Plaatindeling</a>
-  <div class="navfoot"><button type="button" class="ghost" id="reset-store" title="Wist de onthouden invoer op dit apparaat">Opgeslagen invoer wissen</button><span>v1.2.0</span></div>
+  <div class="navfoot"><button type="button" class="ghost" id="reset-store" title="Wist de onthouden invoer op dit apparaat">Opgeslagen invoer wissen</button><span>Versie 1.3.0</span></div>
 </nav>
 
 <main>
@@ -417,7 +397,7 @@ canvas{max-width:100%}
       </div>
       <div class="row" style="margin-top:10px"><button type="button" id="q-add">+ Component</button><button type="button" id="q-copy">Kopieer tabel</button><button type="button" id="q-csv" class="dl-only" style="display:none">Download CSV</button><span id="q-copied" style="font-size:13px;color:var(--muted)"></span></div>
       <div id="q-msg"></div>
-      <div class="formula">volume = eindconc / stockconc × reactievolume · enzym: U per reactie / (U/µL) · water vult aan tot reactievolume</div>
+      <div class="formula">volume = eindconc / stockconc × reactievolume · enzym: (U per 50 µL × volume/50) / (U/µL) · water vult aan tot reactievolume</div>
     </div>
   </div>
   <p class="src">Standaardconcentraties volgens het NEB-protocol voor Taq DNA Polymerase (M0273): 1X buffer, 200 µM dNTP's, 0,2 µM per primer (0,05–1 µM), 1,25 U per 50 µL; Mg²⁺ 1,5–2,0 mM.</p>
@@ -623,7 +603,13 @@ canvas{max-width:100%}
         <h3>Primers <span class="example">voorbeeld</span></h3>
         <div class="f"><label for="y-f">Forward primer (5′→3′)</label><input id="y-f" class="mono" value="AGCTGACCTGAAGGCTCTGAAG"></div>
         <div class="f" style="margin-top:10px"><label for="y-r">Reverse primer (5′→3′)</label><input id="y-r" class="mono" value="TCGTCGTACTTGACCAGGCTAT"></div>
-        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Formules: korter dan 14 nt: 4·(G+C) + 2·(A+T); vanaf 14 nt: 64,9 + 41·(G+C − 16,4)/N. Beide houden geen rekening met zout- en primerconcentratie; de cyclerinstelling blijft een startpunt voor een gradiënt-PCR.</p>
+        <div class="fields" style="margin-top:12px">
+          <div class="f"><label for="y-na">Na⁺/K⁺</label><div class="inu"><input id="y-na" inputmode="decimal" value="50"><span class="u">mM</span></div></div>
+          <div class="f"><label for="y-mg">Mg²⁺</label><div class="inu"><input id="y-mg" inputmode="decimal" value="1,5"><span class="u">mM</span></div></div>
+          <div class="f"><label for="y-dntp">dNTP totaal</label><div class="inu"><input id="y-dntp" inputmode="decimal" value="0,8"><span class="u">mM</span></div></div>
+          <div class="f"><label for="y-pc">Primer</label><div class="inu"><input id="y-pc" inputmode="decimal" value="0,2"><span class="u">µM</span></div></div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">T<sub>m</sub> volgens nearest-neighbor (SantaLucia 1998) met correctie voor zout, Mg²⁺ en dNTP's, zoals moderne primerprogramma's. dNTP totaal = 4 × de concentratie per dNTP (200 µM elk = 0,8 mM). De eenvoudige GC-formule staat ter vergelijking ernaast.</p>
       </div>
       <div class="result" id="y-out"></div>
     </div>
@@ -666,7 +652,7 @@ canvas{max-width:100%}
       <div class="result" id="y-amp"></div>
     </div>
   </div>
-  <p class="src">Programma volgens NEB Taq-richtlijnen: initiële denaturatie 30 s bij 95 °C (kolonie-PCR 5 min), 25–35 cycli, annealing 15–60 s rond T<sub>m</sub> − 5 °C, extensie bij 68 °C met 1 min/kb (45–60 s onder 1 kb), eindextensie 5 min; T<sub>m</sub> van beide primers boven 45 °C en binnen 5 °C van elkaar. qPCR: E = 10<sup>−1/helling</sup> − 1, acceptabel 90–110% (helling −3,58 tot −3,10) en R² ≥ 0,98 (JoVE 54067).</p>
+  <p class="src">Programma volgens NEB Taq-richtlijnen: initiële denaturatie 30 s bij 95 °C (kolonie-PCR 5 min), 25–35 cycli, annealing 15–60 s rond T<sub>m</sub> − 5 °C, extensie bij 68 °C met 1 min/kb (45–60 s onder 1 kb), eindextensie 5 min; T<sub>m</sub> van beide primers boven 45 °C en binnen 5 °C van elkaar. Primer-T<sub>m</sub>: nearest-neighbor-parameters van SantaLucia (PNAS 1998), zoutcorrectie ΔS + 0,368·(N−1)·ln[Na⁺] met [Na⁺]<sub>eq</sub> = [Na⁺] + 120·√([Mg²⁺] − [dNTP]) (von Ahsen e.a., Clin Chem 2001), zoals in Primer3. qPCR: E = 10<sup>−1/helling</sup> − 1, acceptabel 90–110% (helling −3,58 tot −3,10) en R² ≥ 0,98 (JoVE 54067).</p>
 </section>
 
 <!-- ============ GELFOTO ============ -->
@@ -696,7 +682,7 @@ canvas{max-width:100%}
         <div class="row" style="margin-top:8px"><button type="button" id="gf-addlane">+ Lane (klik op foto)</button></div>
         <div class="rng" style="margin-top:8px"><label for="gf-lw">Lanebreedte</label><input type="range" id="gf-lw" min="4" max="200" value="40"><span id="gf-lwv">40</span></div>
         <div class="tbl-wrap" style="margin-top:8px;max-height:240px;overflow-y:auto"><table class="mini" id="gf-lanes"><thead><tr><th>#</th><th>Label</th><th title="Ladderlane">Ladder</th><th></th></tr></thead><tbody></tbody></table></div>
-        <p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Sleep een lanelijn op de foto om hem te verschuiven.</p>
+        <p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Sleep de blauwe driehoekjes onder de gel om een lane te verschuiven; de oranje driehoekjes links zijn de ladderbanden.</p>
       </div>
       <div class="panel">
         <h3>4 · Ladder &amp; banden meten</h3>
@@ -711,7 +697,7 @@ canvas{max-width:100%}
         <div class="f"><label for="gf-title">Titel</label><input id="gf-title" class="txt" value="PCR-product, 1,5% agarose"></div>
         <div class="rng" style="margin-top:8px"><label for="gf-fs">Lettergrootte</label><input type="range" id="gf-fs" min="10" max="48" value="18"><span id="gf-fsv">18</span></div>
         <div class="row" style="margin-top:8px"><div class="f"><label for="gf-ang">Labelhoek</label><select id="gf-ang"><option value="0">Horizontaal</option><option value="45">45°</option><option value="90">Verticaal</option></select></div><div class="f"><label for="gx-mcol">Kleur metingen</label><select id="gx-mcol"><option value="#e8a317">Oranje</option><option value="#d62828">Rood</option><option value="#1d5bc4">Blauw</option><option value="#111111">Zwart</option></select></div></div>
-        <label class="chk" style="margin-top:10px"><input type="checkbox" id="gf-help" checked> Hulplijnen tonen in editor</label>
+        <label class="chk" style="margin-top:10px"><input type="checkbox" id="gf-help" checked> Lane- en bandmarkeringen in de marge tonen</label>
       </div>
       <div class="panel">
         <h3>6 · Exporteren</h3>
@@ -723,7 +709,6 @@ canvas{max-width:100%}
           <label class="chk"><input type="checkbox" id="gx-ticks" checked> Streepjes ladder</label>
           <label class="chk"><input type="checkbox" id="gx-unit" checked> Eenheid (bp/kDa)</label>
           <label class="chk"><input type="checkbox" id="gx-marks" checked> Metingen</label>
-          <label class="chk"><input type="checkbox" id="gx-guides"> Lanelijnen</label>
           <label class="chk"><input type="checkbox" id="gx-pad" checked> Witte rand</label>
         </div>
         <div class="row" style="margin-top:10px">
@@ -732,7 +717,7 @@ canvas{max-width:100%}
         </div>
         <div class="f" style="margin-top:8px"><label for="gx-name">Bestandsnaam</label><input id="gx-name" class="txt" value="" placeholder="volgt de titel"></div>
         <div class="row" style="margin-top:10px"><button type="button" class="primary" id="gf-dl" style="display:none">Downloaden</button><button type="button" id="gf-copy">Kopieer afbeelding</button></div>
-        <p id="gf-exmsg" style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Hulplijnen uit de editor komen nooit in de export; alleen wat hierboven aan staat.</p>
+        <p id="gf-exmsg" style="font-size:12.5px;color:var(--muted);margin:8px 0 0">De gel zelf blijft onbewerkt: tekst, streepjes en metingen staan altijd in de witte marge eromheen. De blauwe en oranje markeringen in de editor komen niet in de export.</p>
       </div>
     </div>
     <div class="panel" id="gf-stage">
@@ -750,7 +735,7 @@ canvas{max-width:100%}
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
-function num(v){ if(v==null) return NaN; v=String(v).trim().replace(/\s/g,'').replace(',','.'); if(v==='') return NaN; const n=Number(v); return n; }
+function num(v){ if(v==null) return NaN; v=String(v).trim().replace(/[\s\u00a0]/g,''); if(v.includes('.')&&v.includes(',')) v=v.replace(/\./g,''); v=v.replace(',','.'); if(v==='') return NaN; const n=Number(v); return n; }
 const NL=(n,d)=>n.toLocaleString('nl-NL',{maximumFractionDigits:d,minimumFractionDigits:0});
 function fmt(n,d=2){ return isFinite(n)?NL(n,d):'–'; }
 function sig(n,s=3){ if(!isFinite(n)) return '–'; if(n===0) return '0'; const p=Math.floor(Math.log10(Math.abs(n))); const d=Math.max(0,Math.min(6,s-1-p)); return NL(Number(n.toFixed(d)),d); }
@@ -770,7 +755,7 @@ function route(){
   const h=(location.hash||'').slice(1);
   current=TOOLS.includes(h)?h:'verdunning';
   $$('.tool').forEach(s=>s.classList.toggle('active',s.id==='t-'+current));
-  $$('#nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+current));
+  $$('#nav > a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+current));
   if(calc[current]) calc[current]();
 }
 window.addEventListener('hashchange',route);
@@ -992,11 +977,11 @@ calc.dna=function(){
 
 /* ================= PCR ================= */
 const QPRE={
-  taq:[['10X reactiebuffer',10,1,'X'],['dNTP-mix',10,0.2,'mM'],['Primer F',10,0.2,'µM'],['Primer R',10,0.2,'µM'],['Taq-polymerase',5,0.625,'U']],
-  taqmg:[['10X buffer (Mg-vrij)',10,1,'X'],['MgCl₂',25,1.5,'mM'],['dNTP-mix',10,0.2,'mM'],['Primer F',10,0.2,'µM'],['Primer R',10,0.2,'µM'],['Taq-polymerase',5,0.625,'U']],
+  taq:[['10X reactiebuffer',10,1,'X'],['dNTP-mix',10,0.2,'mM'],['Primer F',10,0.2,'µM'],['Primer R',10,0.2,'µM'],['Taq-polymerase',5,1.25,'U/50 µL']],
+  taqmg:[['10X buffer (Mg-vrij)',10,1,'X'],['MgCl₂',25,1.5,'mM'],['dNTP-mix',10,0.2,'mM'],['Primer F',10,0.2,'µM'],['Primer R',10,0.2,'µM'],['Taq-polymerase',5,1.25,'U/50 µL']],
   mm2x:[['2X mastermix',2,1,'X'],['Primer F',10,0.2,'µM'],['Primer R',10,0.2,'µM']]
 };
-function qRow(r){ const [n,s,f,u]=r; const U=['X','mM','µM','U','µL']; return `<tr><td><input class="txt" data-k="n" value="${esc(n)}"></td><td><input data-k="s" inputmode="decimal" value="${isFinite(s)?String(s).replace('.',','):''}" style="text-align:right;width:80px"></td><td><input data-k="f" inputmode="decimal" value="${isFinite(f)?String(f).replace('.',','):''}" style="text-align:right;width:80px"></td><td><select data-k="u">${U.map(x=>`<option ${x===u?'selected':''}>${x}</option>`).join('')}</select></td><td class="num" data-k="pr">–</td><td class="num" data-k="mx">–</td><td><button type="button" class="ghost" data-del aria-label="Verwijder rij">✕</button></td></tr>`; }
+function qRow(r){ const [n,s,f,u]=r; const U=['X','mM','µM','U/50 µL','µL']; return `<tr><td><input class="txt" data-k="n" value="${esc(n)}"></td><td><input data-k="s" inputmode="decimal" value="${isFinite(s)?String(s).replace('.',','):''}" style="text-align:right;width:80px"></td><td><input data-k="f" inputmode="decimal" value="${isFinite(f)?String(f).replace('.',','):''}" style="text-align:right;width:80px"></td><td><select data-k="u">${U.map(x=>`<option ${x===u?'selected':''}>${x}</option>`).join('')}</select></td><td class="num" data-k="pr">–</td><td class="num" data-k="mx">–</td><td><button type="button" class="ghost" data-del aria-label="Verwijder rij">✕</button></td></tr>`; }
 function loadQ(k){ $('#q-tbl tbody').innerHTML=QPRE[k].map(qRow).join(''); calc.pcr(); }
 $('#q-preset').addEventListener('change',e=>loadQ(e.target.value));
 $('#q-add').addEventListener('click',()=>{ $('#q-tbl tbody').insertAdjacentHTML('beforeend',qRow(['Component',NaN,NaN,'µL'])); });
@@ -1009,9 +994,9 @@ calc.pcr=function(){
   $$('#q-tbl tbody tr').forEach(tr=>{
     const g=k=>tr.querySelector(`[data-k=${k}]`);
     const s=num(g('s').value), f=num(g('f').value), u=g('u').value;
-    g('f').closest('td').title=u==='U'?'U per reactie':u==='µL'?'µL per reactie':'';
+    g('f').closest('td').title=u==='U/50 µL'?'Units per 50 µL reactie (schaalt mee met het reactievolume)':u==='µL'?'µL per reactie':'';
     let pr=NaN;
-    if(u==='µL') pr=f; else if(u==='U') pr=f/s; else pr=f/s*V;
+    if(u==='µL') pr=f; else if(u==='U/50 µL') pr=f*(V/50)/s; else pr=f/s*V;
     g('pr').textContent=isFinite(pr)?vol(pr):'–'; g('mx').innerHTML=isFinite(pr)?`<b>${vol(pr*N)}</b>`:'–';
     if(isFinite(pr)){ sum+=pr; lines.push([g('n').value,pr]); }
   });
@@ -1416,11 +1401,23 @@ calc.enzym=function(){
 };
 
 /* ================= PCR-CYCLUS ================= */
+const NN={AA:[-7.9,-22.2],TT:[-7.9,-22.2],AT:[-7.2,-20.4],TA:[-7.2,-21.3],CA:[-8.5,-22.7],TG:[-8.5,-22.7],GT:[-8.4,-22.4],AC:[-8.4,-22.4],CT:[-7.8,-21.0],AG:[-7.8,-21.0],GA:[-8.2,-22.2],TC:[-8.2,-22.2],CG:[-10.6,-27.2],GC:[-9.8,-24.4],GG:[-8.0,-19.9],CC:[-8.0,-19.9]};
+function tmNN(seq,naMM,mgMM,dntpMM,primerUM){
+  if(seq.length<2||/[^ACGT]/.test(seq)) return NaN;
+  let H=0,S=0; for(let i=0;i<seq.length-1;i++){ const p=NN[seq.slice(i,i+2)]; H+=p[0]; S+=p[1]; }
+  [seq[0],seq[seq.length-1]].forEach(b=>{ if(b==='G'||b==='C'){ H+=0.1; S+=-2.8; } else { H+=2.3; S+=4.1; } });
+  const rc=seq.split('').reverse().map(b=>({A:'T',T:'A',G:'C',C:'G'})[b]).join(''); if(rc===seq) S+=-1.4;
+  let na=naMM; if(mgMM>dntpMM) na+=120*Math.sqrt(mgMM-dntpMM);
+  S+=0.368*(seq.length-1)*Math.log(Math.max(na,1e-3)/1000);
+  const C=primerUM*1e-6, x=1; /* primer in overmaat t.o.v. template (PCR): ln(C_primer) */
+  return H*1000/(S+1.987*Math.log(C/x))-273.15;
+}
 function primerInfo(s){
   const seq=String(s).toUpperCase().replace(/[^A-Z]/g,''); const N=seq.length; if(!N) return null;
   const c=b=>(seq.match(new RegExp(b,'g'))||[]).length; const A=c('A'),T=c('T'),G=c('G'),C=c('C'); const other=N-A-T-G-C;
-  const gc=G+C; const tm=N<14?4*gc+2*(A+T):64.9+41*(gc-16.4)/N;
-  return {seq,N,gc,gcp:gc/N*100,tm,other,rule:N<14?'4·GC + 2·AT':'64,9 + 41·(GC − 16,4)/N'};
+  const gc=G+C; const basic=N<14?4*gc+2*(A+T):64.9+41*(gc-16.4)/N;
+  const nn=tmNN(seq,num($('#y-na').value)||0,num($('#y-mg').value)||0,num($('#y-dntp').value)||0,num($('#y-pc').value)||0.2);
+  return {seq,N,gc,gcp:gc/N*100,tm:isFinite(nn)?nn:basic,basic,nn,other,clamp:/[GC]$/.test(seq),rule:isFinite(nn)?'Nearest-neighbor (SantaLucia 1998)':(N<14?'4·GC + 2·AT':'64,9 + 41·(GC − 16,4)/N')};
 }
 const mmss2=s=>{ s=Math.round(s); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60; return h?`${h} u ${String(m).padStart(2,'0')} min`:m?`${m}:${String(x).padStart(2,'0')} min`:`${x} s`; };
 let yTa=NaN, yProgText='';
@@ -1431,8 +1428,8 @@ calc.pcrcyclus=function(){
     const chip=(ok,t)=>`<span class="chip ${ok?'ok':'warn'}">${t}</span>`;
     const d=Math.abs(F.tm-R.tm); yTa=Math.min(F.tm,R.tm)-5;
     let h=`<div class="lbl">Startwaarde annealing</div><div class="big">${fmt(yTa,1)} <small>°C</small></div>`;
-    h+=`<div class="tbl-wrap"><table class="mini"><thead><tr><th></th><th class="num">Lengte</th><th class="num">GC</th><th class="num">T<sub>m</sub></th></tr></thead><tbody>`+
-      [['Forward',F],['Reverse',R]].map(([n,p])=>`<tr><td>${n}</td><td class="num">${chip(p.N>=18&&p.N<=40,p.N+' nt')}</td><td class="num">${chip(p.gcp>=40&&p.gcp<=60,fmt(p.gcp,0)+'%')}</td><td class="num">${chip(p.tm>45,fmt(p.tm,1)+' °C')}</td></tr>`).join('')+`</tbody></table></div>`;
+    h+=`<div class="tbl-wrap"><table class="mini"><thead><tr><th></th><th class="num">Lengte</th><th class="num">GC</th><th class="num">T<sub>m</sub></th><th class="num">GC-formule</th></tr></thead><tbody>`+
+      [['Forward',F],['Reverse',R]].map(([n,p])=>`<tr><td>${n}</td><td class="num">${chip(p.N>=18&&p.N<=40,p.N+' nt')}</td><td class="num">${chip(p.gcp>=40&&p.gcp<=60,fmt(p.gcp,0)+'%')}</td><td class="num">${chip(p.tm>45,fmt(p.tm,1)+' °C')}</td><td class="num" style="color:var(--muted)">${fmt(p.basic,1)} °C</td></tr>`).join('')+`</tbody></table></div>`;
     h+=kv([['ΔT<sub>m</sub>',chip(d<=5,fmt(d,1)+' °C')],['Formule',F.rule]]);
     const notes=[]; if(d>5) notes.push(note('warn','T<sub>m</sub> van de primers verschilt meer dan 5 °C.')); if(F.tm<=45||R.tm<=45) notes.push(note('warn','Een T<sub>m</sub> onder 45 °C is laag voor PCR.')); [F,R].forEach((p,i)=>{ if(p.gcp<40||p.gcp>60) notes.push(note('warn',`${i?'Reverse':'Forward'}: GC-gehalte buiten 40–60%.`)); if(p.other) notes.push(note('info',`${i?'Reverse':'Forward'}: ${p.other} niet-ACGT-teken(s) genegeerd.`)); });
     if(yTa>=65) notes.push(note('info','Annealing ≥ 65 °C: een 2-staps PCR (annealing en extensie samen) is mogelijk.'));
@@ -1542,7 +1539,8 @@ function peaks(a,minDist,minProm){ const idx=[]; for(let i=1;i<a.length-1;i++) i
 function gfDetectLanes(){
   if(!gf.src) return; const P=gfProc(), {w,h,sig}=P; const prof=new Float32Array(w); const y0=Math.floor(h*0.08), y1=Math.ceil(h*0.95);
   for(let x=0;x<w;x++){ let s=0; for(let y=y0;y<y1;y++) s+=sig[y*w+x]; prof[x]=s/(y1-y0); }
-  let mn=Infinity,mx=-Infinity; prof.forEach(v=>{ mn=Math.min(mn,v); mx=Math.max(mx,v); }); const sp=smooth(prof.map(v=>v-mn),Math.max(2,w/160));
+  const bw=Math.max(5,Math.round(w/8)), bl=new Float32Array(w); for(let i=0;i<w;i++){ let m=Infinity; for(let k=Math.max(0,i-bw);k<=Math.min(w-1,i+bw);k++) m=Math.min(m,prof[k]); bl[i]=m; } const bls=smooth(bl,bw/2);
+  const flat=prof.map((v,i)=>Math.max(0,v-bls[i])); let mn=Infinity,mx=-Infinity; flat.forEach(v=>{ mn=Math.min(mn,v); mx=Math.max(mx,v); }); const sp=smooth(flat.map(v=>v-mn),Math.max(2,w/160));
   const N=Math.round(num($('#gf-n').value)); let xs=[], lwSet=false;
   let rad=w/20; const refine=i=>{ const a=Math.max(0,Math.round(i-rad)), b=Math.min(w-1,Math.round(i+rad)); let lo=Infinity; for(let k=a;k<=b;k++) lo=Math.min(lo,sp[k]); const half=(sp[i]+lo)/2; let l=i,r=i; while(l>a&&sp[l-1]>half) l--; while(r<b&&sp[r+1]>half) r++; return (l+r)/2; };
   if(N>0){ rad=0.45*w/N; xs=peaks(sp,0.55*w/N,0).slice(0,N).map(o=>refine(o.i)); }
@@ -1586,25 +1584,31 @@ $('#gf-marks').addEventListener('click',e=>{ const b=e.target.closest('[data-md]
 /* render */
 const gfFmtSize=v=>!isFinite(v)?'–':gf.unit==='kDa'?NL(Number(v.toPrecision(3)),v<10?1:0):Math.round(v).toLocaleString('nl-NL');
 const gfLab=v=>gf.unit==='kDa'?NL(v,1):String(Math.round(v));
-function gxOpts(){ const g=id=>$('#'+id).checked; return {title:g('gx-title'),lanes:g('gx-lanes'),bp:g('gx-bp'),ticks:g('gx-ticks'),unit:g('gx-unit'),marks:g('gx-marks'),guides:g('gx-guides'),pad:g('gx-pad'),mcol:$('#gx-mcol').value,help:g('gf-help')}; }
+function gxOpts(){ const g=id=>$('#'+id).checked; return {title:g('gx-title'),lanes:g('gx-lanes'),bp:g('gx-bp'),ticks:g('gx-ticks'),unit:g('gx-unit'),marks:g('gx-marks'),pad:g('gx-pad'),mcol:$('#gx-mcol').value,help:g('gf-help')}; }
 function gfRender(exportMode,scale=1){
   const c=exportMode?document.createElement('canvas'):gcv, x=c.getContext('2d');
   if(!gf.src){ c.width=800; c.height=300; x.fillStyle='#f3f5f7'; x.fillRect(0,0,800,300); x.fillStyle='#5a6a78'; x.font='16px Segoe UI, Arial, sans-serif'; x.textAlign='center'; x.fillText('Kies een gelfoto of laad de demo-gel.',400,150); return c; }
-  if(gf.mode==='crop'&&!exportMode){ const r=gfRotated(); c.width=r.width; c.height=r.height; x.drawImage(r,0,0); const p=gf.pend; if(p){ x.fillStyle='rgba(0,0,0,.45)'; x.fillRect(0,0,r.width,p.y); x.fillRect(0,p.y+p.h,r.width,r.height-p.y-p.h); x.fillRect(0,p.y,p.x,p.h); x.fillRect(p.x+p.w,p.y,r.width-p.x-p.w,p.h); x.strokeStyle='#1d5bc4'; x.lineWidth=Math.max(2,r.width/300); x.strokeRect(p.x,p.y,p.w,p.h); } gf.layout={L:0,T:0,s:1,crop:true}; return c; }
-  const o=gxOpts(), P=gfProc(), fs=gf.fs, ang=gf.ang*Math.PI/180, U=gf.unit;
-  const font=`600 ${fs}px Segoe UI, Arial, sans-serif`, sfont=`500 ${fs*0.85}px Segoe UI, Arial, sans-serif`;
+  if(gf.mode==='crop'&&!exportMode){ const r=gfRotated(); c.width=r.width; c.height=r.height; x.drawImage(r,0,0); const p=gf.pend; if(p){ x.fillStyle='rgba(0,0,0,.45)'; x.fillRect(0,0,r.width,p.y); x.fillRect(0,p.y+p.h,r.width,r.height-p.y-p.h); x.fillRect(0,p.y,p.x,p.h); x.fillRect(p.x+p.w,p.y,r.width-p.x-p.w,p.h); x.strokeStyle='#1558b0'; x.lineWidth=Math.max(2,r.width/300); x.strokeRect(p.x,p.y,p.w,p.h); } gf.layout={L:0,T:0,s:1,crop:true}; return c; }
+  const o=gxOpts(), P=gfProc(), fs=gf.fs, ang=gf.ang*Math.PI/180, U=gf.unit, edit=!exportMode&&o.help;
+  const font=`600 ${fs}px Segoe UI, Arial, sans-serif`, sfont=`500 ${fs*0.85}px Segoe UI, Arial, sans-serif`, mfont=`600 ${fs*0.8}px Segoe UI, Arial, sans-serif`;
   x.font=font; const maxW=Math.max(0,...gf.lanes.map(l=>x.measureText(l.label||'').width));
-  const pad=o.pad?Math.round(fs*0.6):0;
+  const pad=o.pad?Math.round(fs*0.6):0, hs=Math.max(9,fs*0.55);
   const titleOn=o.title&&!!gf.title, lanesOn=o.lanes&&gf.lanes.length>0;
   const nb=gf.bands.filter(b=>isFinite(b.bp)); const bpOn=o.bp&&nb.length>0, tickOn=o.ticks&&gf.bands.length>0, unitOn=o.unit&&bpOn;
+  const marksOn=o.marks&&gf.marks.length>0;
+  const laneName=m=>{ let li=0,bd=Infinity; gf.lanes.forEach((l,j)=>{ const d=Math.abs(l.x-m.x); if(d<bd){bd=d;li=j;} }); return gf.lanes[li]?(gf.lanes[li].label||String(li+1)):''; };
+  const mText=m=>`${laneName(m)}: ${isFinite(m.bp)?'≈ '+gfFmtSize(m.bp)+' '+U:'?'}`;
+  x.font=mfont; const mW=marksOn?Math.max(...gf.marks.map(m=>x.measureText(mText(m)).width))+fs*1.1:0;
   const titleH=titleOn?fs*1.25*1.7:0;
   const labH=lanesOn?(gf.ang===0?fs*1.6:maxW*Math.sin(ang)+fs*Math.cos(ang)+fs*0.6):(unitOn?fs*1.3:0);
   x.font=sfont; const textW=bpOn?Math.max(...nb.map(b=>x.measureText(gfLab(b.bp)).width),unitOn?x.measureText(U).width:0)+fs*0.3:0;
   const tickW=tickOn?fs*0.45:0;
-  const Lm=Math.round(pad+textW+tickW+(bpOn||tickOn?fs*0.1:0)), T=Math.round(pad+titleH+labH), R=pad, B=pad;
-  c.width=Math.round((Lm+P.w+R)*scale); c.height=Math.round((T+P.h+B)*scale); x.setTransform(scale,0,0,scale,0,0);
-  x.fillStyle='#fff'; x.fillRect(0,0,Lm+P.w+R,T+P.h+B); x.imageSmoothingQuality='high'; x.drawImage(P.c,Lm,T);
-  if(!exportMode) gf.layout={L:Lm,T,s:1};
+  let Lm=Math.round(pad+textW+tickW+(bpOn||tickOn?fs*0.1:0)), T=Math.round(pad+titleH+labH), R=Math.round(pad+mW), B=pad;
+  if(edit){ Lm=Math.max(Lm,Math.round(hs*1.6)); T=Math.max(T,4); R=Math.max(R,Math.round(hs*1.6)); B=Math.max(B,Math.round(hs*1.6)); }
+  const W=Lm+P.w+R, H=T+P.h+B;
+  c.width=Math.round(W*scale); c.height=Math.round(H*scale); x.setTransform(scale,0,0,scale,0,0);
+  x.fillStyle='#fff'; x.fillRect(0,0,W,H); x.imageSmoothingQuality='high'; x.drawImage(P.c,Lm,T);
+  if(!exportMode) gf.layout={L:Lm,T,s:1,hs};
   x.fillStyle='#111'; x.textBaseline='alphabetic';
   if(titleOn){ x.font=`700 ${fs*1.25}px Segoe UI, Arial, sans-serif`; x.textAlign='left'; x.fillText(gf.title,Lm,pad+fs*1.25*1.25); }
   if(lanesOn){ x.font=font; gf.lanes.forEach(l=>{ const lx=Lm+l.x, ly=T-fs*0.45; x.save(); x.translate(lx,ly); if(gf.ang){ x.rotate(-ang); x.textAlign='left'; x.textBaseline='middle'; x.fillText(l.label||'',fs*0.1,0); } else { x.textAlign='center'; x.fillText(l.label||'',0,0); } x.restore(); }); }
@@ -1612,24 +1616,30 @@ function gfRender(exportMode,scale=1){
   if(bpOn){ x.font=sfont; x.textAlign='right'; x.textBaseline='middle'; nb.forEach(b=>x.fillText(gfLab(b.bp),tx,T+b.y)); }
   if(tickOn){ x.strokeStyle='#111'; x.lineWidth=Math.max(1,fs/14); gf.bands.forEach(b=>{ x.beginPath(); x.moveTo(Lm-tickW,T+b.y); x.lineTo(Lm-1,T+b.y); x.stroke(); }); }
   if(unitOn){ x.font=sfont; x.textAlign='right'; x.textBaseline='bottom'; x.fillText(U,tx,T-fs*0.2); }
-  if(o.guides){ x.strokeStyle='rgba(29,91,196,.65)'; x.lineWidth=Math.max(1,fs/14); gf.lanes.forEach(l=>{ x.beginPath(); x.moveTo(Lm+l.x,T); x.lineTo(Lm+l.x,T+P.h); x.stroke(); }); }
-  gf.marks.forEach(m=>{ const mx=Lm+m.x+gf.lw/2+fs*0.25, my=T+m.y;
-    if(!o.marks){ if(!exportMode&&o.help){ x.strokeStyle=o.mcol; x.lineWidth=2; x.setLineDash([3,3]); x.beginPath(); x.moveTo(mx-gf.lw-fs*0.25,my); x.lineTo(mx,my); x.stroke(); x.setLineDash([]); } return; }
-    x.fillStyle=o.mcol; x.beginPath(); x.moveTo(mx,my); x.lineTo(mx+fs*0.6,my-fs*0.35); x.lineTo(mx+fs*0.6,my+fs*0.35); x.closePath(); x.fill();
-    const t=isFinite(m.bp)?`≈ ${gfFmtSize(m.bp)} ${U}`:'?'; x.font=`600 ${fs*0.8}px Segoe UI, Arial, sans-serif`; const tw=x.measureText(t).width; const bx=Math.min(mx+fs*0.7,Lm+P.w+R-tw-fs*0.6); x.fillStyle='rgba(255,255,255,.92)'; x.fillRect(bx,my-fs*0.55,tw+fs*0.5,fs*1.1); x.fillStyle='#111'; x.textAlign='left'; x.textBaseline='middle'; x.fillText(t,bx+fs*0.25,my); });
-  if(!exportMode&&o.help){
-    const lw=Math.max(1.5,P.w/500);
-    gf.lanes.forEach((l,i)=>{ x.strokeStyle=i===gf.ladder?'rgba(232,163,23,.95)':'rgba(29,91,196,.9)'; x.lineWidth=lw; x.setLineDash([lw*4,lw*3]); x.beginPath(); x.moveTo(Lm+l.x,T); x.lineTo(Lm+l.x,T+P.h); x.stroke(); x.setLineDash([]); x.fillStyle=i===gf.ladder?'rgba(232,163,23,.10)':'rgba(29,91,196,.08)'; x.fillRect(Lm+l.x-gf.lw/2,T,gf.lw,P.h); });
-    const Ld=gf.lanes[gf.ladder]; if(Ld) gf.bands.forEach(b=>{ x.strokeStyle='#e8a317'; x.lineWidth=lw*1.5; x.beginPath(); x.moveTo(Lm+Ld.x-gf.lw/2,T+b.y); x.lineTo(Lm+Ld.x+gf.lw/2,T+b.y); x.stroke(); });
+  if(marksOn){
+    const ord=gf.marks.map(m=>({m,y:T+m.y})).sort((a,b)=>a.y-b.y); const gap=fs*1.05; for(let i=1;i<ord.length;i++) if(ord[i].y-ord[i-1].y<gap) ord[i].y=ord[i-1].y+gap;
+    const ex=Lm+P.w; x.font=mfont; x.textAlign='left'; x.textBaseline='middle';
+    ord.forEach(({m,y})=>{ const my=T+m.y; x.fillStyle=o.mcol; x.beginPath(); x.moveTo(ex+1,my); x.lineTo(ex+fs*0.55,my-fs*0.3); x.lineTo(ex+fs*0.55,my+fs*0.3); x.closePath(); x.fill();
+      if(Math.abs(y-my)>1){ x.strokeStyle=o.mcol; x.lineWidth=1; x.beginPath(); x.moveTo(ex+fs*0.55,my); x.lineTo(ex+fs*0.75,y); x.stroke(); }
+      x.fillStyle='#111'; x.fillText(mText(m),ex+fs*0.8,y); });
+  }
+  if(edit){
+    const tri=(cx,cy,dir,col)=>{ x.fillStyle=col; x.beginPath(); if(dir==='up'){ x.moveTo(cx,cy); x.lineTo(cx-hs*0.6,cy+hs); x.lineTo(cx+hs*0.6,cy+hs); } else if(dir==='right'){ x.moveTo(cx,cy); x.lineTo(cx-hs,cy-hs*0.6); x.lineTo(cx-hs,cy+hs*0.6); } else { x.moveTo(cx,cy); x.lineTo(cx+hs,cy-hs*0.6); x.lineTo(cx+hs,cy+hs*0.6); } x.closePath(); x.fill(); };
+    gf.lanes.forEach((l,i)=>tri(Lm+l.x,T+P.h+2,'up',i===gf.ladder?'#d98a00':'#1558b0'));
+    gf.bands.forEach(b=>tri(Lm-2,T+b.y,'right','#d98a00'));
+    if(!marksOn) gf.marks.forEach(m=>tri(Lm+P.w+2,T+m.y,'left',o.mcol));
   }
   return c;
 }
+let gfFine=0, gfFineT=null;
 function gfUpdate(){ gf.inv=$('#gf-inv').checked; gf.gray=$('#gf-gray').checked; gf.bri=+$('#gf-bri').value; gf.con=+$('#gf-con').value; gf.fine=+$('#gf-rot').value; gf.fs=+$('#gf-fs').value; gf.ang=+$('#gf-ang').value; gf.title=$('#gf-title').value; gf.lw=+$('#gf-lw').value; gf.ladKey=$('#gf-lad').value; gf.unit=$('#gf-unit').value;
   $('#gf-ladcw').style.display=gf.ladKey==='custom'?'':'none'; $('#gf-bt thead th:nth-child(2)').textContent=gf.unit;
-  $('#gf-briv').textContent=gf.bri; $('#gf-conv').textContent=fmt(gf.con,2); $('#gf-rotv').textContent=fmt(gf.fine,2)+'°'; $('#gf-fsv').textContent=gf.fs; $('#gf-lwv').textContent=gf.lw; gfMarksTable(); gfRender(); }
+  $('#gf-briv').textContent=gf.bri; $('#gf-conv').textContent=fmt(gf.con,2); $('#gf-rotv').textContent=fmt(gf.fine,2)+'°'; $('#gf-fsv').textContent=gf.fs; $('#gf-lwv').textContent=gf.lw; gfMarksTable(); gfRender();
+  if(gf.fine!==gfFine){ gfFine=gf.fine; clearTimeout(gfFineT); gfFineT=setTimeout(()=>{ if(gf.src) gfGeom(); },350); } }
 calc.gelfoto=e=>{ if(e&&e.target&&(e.target.closest('#gf-lanes')||e.target.closest('#gf-bt')||e.target.id==='gf-file'||e.target.id==='gf-n')) return; gfUpdate(); };
-$('#gf-r90').addEventListener('click',()=>{ gf.rot90=(gf.rot90+1)%4; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gfLanesTable(); gfBandsTable(); gfMarksTable(); gfRender(); });
-$('#gf-flip').addEventListener('click',()=>{ gf.flip=!gf.flip; gfRender(); });
+function gfGeom(){ const had=gf.lanes.length>0, hb=gf.bands.length>0; gf.marks=[]; gfMarksTable(); if(had){ gfDetectLanes(); if(hb) gfDetectBands(); } else { gfLanesTable(); gfBandsTable(); gfRender(); } }
+$('#gf-r90').addEventListener('click',()=>{ gf.rot90=(gf.rot90+1)%4; gf.crop=null; gfGeom(); });
+$('#gf-flip').addEventListener('click',()=>{ gf.flip=!gf.flip; gfGeom(); });
 $('#gf-detect').addEventListener('click',gfDetectLanes);
 $('#gf-bands').addEventListener('click',()=>{ gf.ladKey=$('#gf-lad').value; gfDetectBands(); });
 function setMode(m){ gf.mode=gf.mode===m?null:m; ['crop','addlane','addband','measure'].forEach(k=>{ const b=$({crop:'#gf-crop',addlane:'#gf-addlane',addband:'#gf-addband',measure:'#gf-measure'}[k]); b.classList.toggle('on',gf.mode===k); }); $('#gf-cropbar').style.display=gf.mode==='crop'?'flex':'none'; gcv.style.cursor=gf.mode?'crosshair':'default'; gf.pend=null; gfRender(); }
@@ -1637,9 +1647,9 @@ $('#gf-crop').addEventListener('click',()=>{ if(gf.src) setMode('crop'); });
 $('#gf-addlane').addEventListener('click',()=>setMode('addlane'));
 $('#gf-addband').addEventListener('click',()=>setMode('addband'));
 $('#gf-measure').addEventListener('click',()=>{ if(gf.bands.filter(b=>isFinite(b.bp)).length<2){ gfStatus('Je hebt minstens twee ladderbanden met bp-waarde nodig om te meten.'); return; } setMode('measure'); });
-$('#gf-uncrop').addEventListener('click',()=>{ gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gfLanesTable(); gfBandsTable(); gfMarksTable(); gfRender(); });
+$('#gf-uncrop').addEventListener('click',()=>{ if(!gf.crop) return; gf.crop=null; gfGeom(); });
 $('#gf-cropno').addEventListener('click',()=>setMode('crop'));
-$('#gf-cropok').addEventListener('click',()=>{ const p=gf.pend; if(p&&p.w>10&&p.h>10){ gf.crop={x:p.x,y:p.y,w:p.w,h:p.h}; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gfLanesTable(); gfBandsTable(); gfMarksTable(); } setMode('crop'); gfStatus('Bijgesneden. Detecteer nu de lanen.'); });
+$('#gf-cropok').addEventListener('click',()=>{ const p=gf.pend; if(p&&p.w>10&&p.h>10){ gf.crop={x:p.x,y:p.y,w:p.w,h:p.h}; setMode('crop'); gfGeom(); gfStatus('Bijgesneden; lanen en ladder zijn opnieuw gedetecteerd.'); return; } setMode('crop'); });
 function cvPt(e){ const r=gcv.getBoundingClientRect(), s=gcv.width/r.width; const lay=gf.layout||{L:0,T:0}; return {x:(e.clientX-r.left)*s-lay.L, y:(e.clientY-r.top)*s-lay.T, s}; }
 gcv.addEventListener('pointerdown',e=>{
   if(!gf.src) return; const p=cvPt(e); const P=gf.mode==='crop'?null:gfProc();
@@ -1648,12 +1658,12 @@ gcv.addEventListener('pointerdown',e=>{
   if(gf.mode==='addlane'&&inside){ gf.lanes.push({x:p.x,label:String(gf.lanes.length+1)}); gf.lanes.sort((a,b)=>a.x-b.x); gfLanesTable(); gfRender(); return; }
   if(gf.mode==='addband'&&inside&&gf.lanes[gf.ladder]){ const y=gfPeakNear(gf.lanes[gf.ladder].x,p.y); gf.bands.push({y,bp:NaN}); gf.bands.sort((a,b)=>a.y-b.y); gfBandsTable(); gfRender(); return; }
   if(gf.mode==='measure'&&inside){ let li=0,bd=Infinity; gf.lanes.forEach((l,j)=>{ const d=Math.abs(l.x-p.x); if(d<bd){bd=d;li=j;} }); const lx=gf.lanes.length&&bd<gf.lw?gf.lanes[li].x:p.x; const y=gfPeakNear(lx,p.y); gf.marks.push({x:lx,y,bp:gfEst(y)}); gfMarksTable(); gfRender(); return; }
-  const tol=8*p.s; const Ld=gf.lanes[gf.ladder];
-  if(Ld&&Math.abs(p.x-Ld.x)<gf.lw/2){ const bi=gf.bands.findIndex(b=>Math.abs(b.y-p.y)<tol); if(bi>=0){ gf.drag={t:'band',i:bi}; gcv.setPointerCapture(e.pointerId); return; } }
-  const li=gf.lanes.findIndex(l=>Math.abs(l.x-p.x)<tol); if(li>=0){ gf.drag={t:'lane',i:li}; gcv.setPointerCapture(e.pointerId); }
+  const tol=Math.max(8*p.s,(gf.layout.hs||9)); const Ld=gf.lanes[gf.ladder];
+  if(p.x<0||(Ld&&Math.abs(p.x-Ld.x)<gf.lw/2)){ let bi=-1,bd=tol; gf.bands.forEach((b,i)=>{ const d=Math.abs(b.y-p.y); if(d<bd){bd=d;bi=i;} }); if(bi>=0){ gf.drag={t:'band',i:bi}; gcv.setPointerCapture(e.pointerId); return; } }
+  let li=-1,ld=tol; gf.lanes.forEach((l,i)=>{ const d=Math.abs(l.x-p.x); if(d<ld){ld=d;li=i;} }); if(li>=0){ gf.drag={t:'lane',i:li}; gcv.setPointerCapture(e.pointerId); }
 });
 gcv.addEventListener('pointermove',e=>{
-  if(!gf.drag){ if(gf.src&&!gf.mode&&gf.layout&&!gf.layout.crop){ const p=cvPt(e); const near=gf.lanes.some(l=>Math.abs(l.x-p.x)<8*p.s)&&p.y>=0; gcv.style.cursor=near?'ew-resize':'default'; } return; }
+  if(!gf.drag){ if(gf.src&&!gf.mode&&gf.layout&&!gf.layout.crop){ const p=cvPt(e); const tol=Math.max(8*p.s,gf.layout.hs||9); const nearL=gf.lanes.some(l=>Math.abs(l.x-p.x)<tol); const nearB=p.x<0&&gf.bands.some(b=>Math.abs(b.y-p.y)<tol); gcv.style.cursor=nearB?'ns-resize':nearL?'ew-resize':'default'; } return; }
   const p=cvPt(e);
   if(gf.drag.t==='crop'){ const r=gfRotated(); const x0=Math.max(0,Math.min(gf.drag.x0,p.x)), y0=Math.max(0,Math.min(gf.drag.y0,p.y)); gf.pend={x:x0,y:y0,w:Math.min(r.width,Math.max(gf.drag.x0,p.x))-x0,h:Math.min(r.height,Math.max(gf.drag.y0,p.y))-y0}; gfRender(); }
   else if(gf.drag.t==='lane'){ gf.lanes[gf.drag.i].x=Math.max(0,Math.min(gfProc().w,p.x)); gfRender(); }
@@ -1712,7 +1722,7 @@ if(STANDALONE&&'serviceWorker' in navigator&&/^https?:/.test(location.protocol))
 /* ================= ZOEKEN IN TOOLS ================= */
 $('#nav-q').addEventListener('input',e=>{ const q=e.target.value.trim().toLowerCase(); const kids=[...$('#nav').children]; kids.forEach(el=>{ if(el.tagName==='A') el.hidden=!!q&&!el.textContent.toLowerCase().includes(q); });
   kids.forEach((el,i)=>{ if(!el.classList.contains('navgroup')) return; let any=false; for(let j=i+1;j<kids.length&&kids[j].tagName==='A';j++) if(!kids[j].hidden) any=true; el.hidden=!any; }); });
-$('#nav-q').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const a=$('#nav a:not([hidden])'); if(a){ location.hash=a.getAttribute('href'); e.target.value=''; e.target.dispatchEvent(new Event('input')); } } });
+$('#nav-q').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const a=$('#nav > a:not([hidden])'); if(a){ location.hash=a.getAttribute('href'); e.target.value=''; e.target.dispatchEvent(new Event('input')); } } });
 
 /* ================= TELKAMER: VAKKEN PER KAMER ================= */
 const KSQ={'0.1':[[1,'Groot vak 1 × 1 mm'],[0.04,'Groepsvak 0,2 × 0,2 mm'],[0.0025,'Kleinste vak 0,05 × 0,05 mm']],'0.1n':[[1,'Groot vak 1 × 1 mm'],[0.0625,'Hoekvakje 0,25 × 0,25 mm'],[0.04,'Groepsvak midden 0,2 × 0,2 mm'],[0.0025,'Kleinste vak 0,05 × 0,05 mm']],'0.2':[[1,'Groot vak 1 × 1 mm'],[0.0625,'Klein vak 0,25 × 0,25 mm']]};
@@ -1726,9 +1736,30 @@ try{ const t=JSON.parse(localStorage.getItem(TKEY)||'[]'); if(Array.isArray(t)&&
 let lastT='',lastC='';
 setInterval(()=>{ try{ const t=JSON.stringify(timers.map(x=>({...x,rem:Math.round(x.rem*10)/10}))); if(t!==lastT){ localStorage.setItem(TKEY,t); lastT=t; } const c=JSON.stringify({cats,hist:hist.slice(-500),preset:$('#c-preset').value}); if(c!==lastC){ localStorage.setItem(CKEY,c); lastC=c; } }catch(e){} },1000);
 
+/* ================= TABELLEN, PLAAT EN REEKS BEWAREN ================= */
+const TBLKEY='labkit:v1:tables';
+const TBLDEF={
+  's-std':{row:sStdRow,num:[0,1,2,3]},
+  's-unk':{row:sUnkRow,num:[1,2,3,4]},
+  'k-tbl':{row:kRow,num:[0,1,2]},
+  'q-tbl':{row:qRow,num:[1,2]},
+  'o-tbl':{row:oRow,num:[1,2]}
+};
+function tblSnap(){ const out={}; Object.keys(TBLDEF).forEach(id=>{ out[id]=[...document.querySelectorAll('#'+id+' tbody tr')].map(tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select')].map(e=>e.value)); });
+  out.reeks=reeksCounts; out.plate={fmt:$('#w-fmt').value,wells,groups,title:$('#w-title').value}; out.curve={model:$('#s-model').value,unit:$('#s-unit').value,blank:$('#s-blank').checked,logx:$('#s-logx').checked}; return out; }
+function tblRestore(){ let d=null; try{ d=JSON.parse(localStorage.getItem(TBLKEY)||'null'); }catch(e){} if(!d) return;
+  Object.entries(TBLDEF).forEach(([id,def])=>{ const rows=d[id]; if(!Array.isArray(rows)||!rows.length) return; $('#'+id+' tbody').innerHTML=rows.map(r=>def.row(r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v))).join(''); });
+  if(d.curve){ $('#s-model').value=d.curve.model; $('#s-unit').value=d.curve.unit; $('#s-blank').checked=d.curve.blank; $('#s-logx').checked=d.curve.logx; }
+  if(d.reeks&&typeof d.reeks==='object'){ reeksCounts=d.reeks; buildReeks(); }
+  if(d.plate&&d.plate.wells){ $('#w-fmt').value=d.plate.fmt; groups=d.plate.groups&&d.plate.groups.length?d.plate.groups:groups; wells=d.plate.wells; if(d.plate.title!=null) $('#w-title').value=d.plate.title; renderPlate(); } }
+let lastTbl='', tblDirty=false; ['input','change','click'].forEach(ev=>document.addEventListener(ev,()=>{ tblDirty=true; },true));
+setInterval(()=>{ try{ const t=JSON.stringify(tblSnap()); if(t!==lastTbl){ if(tblDirty) localStorage.setItem(TBLKEY,t); lastTbl=t; } }catch(e){} },1500);
+$('#reset-store').addEventListener('click',()=>{ try{ localStorage.removeItem(TBLKEY); }catch(e){} },true);
+
 /* ---------- init new tools ---------- */
 buildReeks();
 sLoad('bradford');
+tblRestore();
 gfDemo();
 ['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
 route();

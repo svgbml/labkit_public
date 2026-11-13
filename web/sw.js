@@ -1,6 +1,6 @@
 // Labkit BML service worker: maakt de web-app offline bruikbaar.
 // Verhoog CACHE bij elke release zodat gebruikers de nieuwe versie krijgen.
-const CACHE = 'labkit-v1.2.0';
+const CACHE = 'labkit-v1.3.0';
 const CORE = [
   './',
   './index.html',

@@ -15,7 +15,7 @@ Rekentools en een gelfoto-editor voor het biomedisch laboratorium. Gemaakt voor 
 **Oplossingen:** verdunning (C₁V₁ = C₂V₂), oplossing en buffer uit recept (PBS, TBE, Tris-NaCl).
 **Assays:** standaardcurve (lineair, kwadratisch, 4PL voor ELISA), enzymkinetiek (activiteit uit ΔA/min, Michaelis-Menten-fit, Lineweaver-Burk, Hanes-Woolf, remmingstype en Kᵢ).
 **Microbiologie en cellen:** verdunningsreeks en KVE/mL, telkamer (Bürker, Neubauer, Fuchs-Rosenthal), teller met toetsen 1–9.
-**DNA:** A₂₆₀-kwantificatie en normaliseren naar STR-input, PCR-mastermix, PCR-cyclus (Tₘ, programma, amplificatie, qPCR-efficiëntie), agarosegel en bandgrootte, gelfoto-editor, ligatie.
+**DNA:** A₂₆₀-kwantificatie en normaliseren naar STR-input, PCR-mastermix, PCR-cyclus (Tₘ via nearest-neighbor met zout- en Mg²⁺-correctie, programma, amplificatie, qPCR-efficiëntie), agarosegel en bandgrootte, gelfoto-editor, ligatie.
 **Bench:** centrifuge (rpm ↔ × g), meerdere timers met meldingen, plaatindeling.
 
 ### Gelfoto-editor
@@ -24,13 +24,14 @@ Rekentools en een gelfoto-editor voor het biomedisch laboratorium. Gemaakt voor 
 - Automatische lanedetectie; lanen verslepen, toevoegen en een naam geven
 - Automatische ladderdetectie met 100 bp-, 100 bp plus-, 1 kb-ladder of een eigen ladder (bp of kDa)
 - Banden meten met semi-logaritmische interpolatie
-- Export als PNG of JPG op 1×, 2× of 3× resolutie, met losse schakelaars voor titel, lanelabels, ladderwaarden, streepjes, eenheid, metingen, lanelijnen en witte rand
+- De gel zelf blijft onbewerkt: alle tekst, streepjes en metingen staan in de witte marge eromheen
+- Export als PNG of JPG op 1×, 2× of 3× resolutie, met losse schakelaars voor titel, lanelabels, ladderwaarden, streepjes, eenheid, metingen en witte rand
 
 ### Handig
 
 - Tabellen vullen door een blok te plakken uit Excel of de plaatlezer
 - Resultaten kopiëren of downloaden als CSV (Excel, met puntkomma)
-- Invoer wordt onthouden op het apparaat; wissen kan onderaan het menu
+- Invoer, tabellen, plaatindeling, timers en teller worden onthouden op het apparaat; wissen kan onderaan het menu
 
 ## Projectstructuur
 
