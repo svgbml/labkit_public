@@ -17,6 +17,8 @@ Alles draait lokaal op je eigen apparaat. Er gaan geen gegevens, metingen of fot
 - Verdunning (C₁V₁ = C₂V₂)
 - Oplossing en buffer uit een recept, met stappenschema als afbeelding
 - Eenheden omrekenen (M, g/L, % w/v, ppm)
+- Molmassa uit een formule (met haakjes en kristalwater)
+- pH-buffer (Henderson-Hasselbalch)
 
 **Assays**
 - Standaardcurve: lineair, kwadratisch, 4PL en 5PL, met LOD en LOQ en import van een 96-wells-plaatexport
@@ -38,6 +40,7 @@ Alles draait lokaal op je eigen apparaat. Er gaan geen gegevens, metingen of fot
 - Gelfoto-editor: automatische lane- en ladderdetectie, rechtzetten, bandgrootte, densitometrie met achtergrondcorrectie, Rf, massa per band uit de massaladder, DNA- en eiwitladders
 - Western blot-normalisatie
 - Ligatie, transformatie en blauw-witscreening
+- Forensische matchkans (Hardy-Weinberg, productregel, θ-correctie)
 
 **Data**
 - Statistiek met de volledige toetsingsprocedure:
@@ -57,17 +60,19 @@ Alles draait lokaal op je eigen apparaat. Er gaan geen gegevens, metingen of fot
 **Bench**
 - Centrifuge (rpm ↔ × g)
 - Timers met meldingen
-- Plaatindeling met tekst per putje en export als afbeelding
+- Plaatindeling met tekst per putje, eigen kleuren en paletten, ronde of vierkante putjes en export als afbeelding
+- Instellingen: thema (licht, donker, papier, hoog contrast, leisteen), dichtheid, tekstgrootte, accentkleur en kleurenpaletten
 
 ### Handig om te weten
 
+- De app controleert bij het starten of er een nieuwe versie is en meldt dat bovenaan. De web-app vernieuwt zichzelf; het Windows-programma haalt de nieuwe installer op. Uitzetten kan bij *Instellingen & updates*.
 - Tabellen en grafieken kopieer je met één klik naar Excel, met Nederlandse decimalen. Grafieken kun je ook als afbeelding kopiëren.
 - Een blok uit Excel of een plaatlezer kun je direct in een tabel plakken.
 - Invoer wordt op je apparaat onthouden. Met *Sessie opslaan* bewaar je alles als bestand, eventueel onder een projectnaam.
 
 ## Validatie
 
-Bij elke wijziging draait [`tests/validate.py`](tests/validate.py) automatisch. Het script voert gepubliceerde of onafhankelijk berekende data in via de echte interface en vergelijkt de uitkomst met de bron. Het resultaat staat per controle met bronvermelding in [`tests/VALIDATIE.md`](tests/VALIDATIE.md). Daarnaast controleert [`tests/layout_audit.py`](tests/layout_audit.py) elke tool op drie schermbreedtes op overlappende of afgesneden tekst, ook in de gegenereerde afbeeldingen.
+Bij elke wijziging draait [`tests/validate.py`](tests/validate.py) automatisch. Het script voert gepubliceerde of onafhankelijk berekende data in via de echte interface en vergelijkt de uitkomst met de bron. Het resultaat staat per controle met bronvermelding in [`tests/VALIDATIE.md`](tests/VALIDATIE.md). Daarnaast controleert [`tests/layout_audit.py`](tests/layout_audit.py) elke tool op drie schermbreedtes op overlappende of afgesneden tekst, ook in de gegenereerde afbeeldingen, en vult [`tests/robust_audit.py`](tests/robust_audit.py) elk invoerveld met randgevallen (leeg, nul, negatief, tekst, extreem groot) om vastlopers en onzinuitvoer te vinden.
 
 Referenties zijn onder meer:
 - FDA BAM, NIST, Cold Spring Harbor

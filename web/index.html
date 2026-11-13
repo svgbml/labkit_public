@@ -185,6 +185,25 @@ canvas{max-width:100%}
   .grid2{grid-template-columns:1fr}
   .result{position:static}
 }
+/* thema's en dichtheid */
+html[data-theme=donker]{--bg:#12161b;--surface:#1b2129;--ink:#e7eaee;--muted:#9da8b5;--line:#313a46;--accent:#6ea8f2;--accent-soft:#1c2f4a;--ok:#5fd08f;--ok-soft:#173526;--warn:#f0b955;--warn-soft:#3a2c10;--bad:#f28b82;--bad-soft:#40201d;color-scheme:dark}
+html[data-theme=papier]{--bg:#f4efe4;--surface:#fffdf7;--ink:#2a2520;--muted:#6b6257;--line:#ddd3c0;--accent:#8b4a12;--accent-soft:#f6e9d8}
+html[data-theme=papier] .tool-head h2,html[data-theme=papier] .logo b{font-family:Georgia,"Times New Roman",serif}
+html[data-theme=contrast]{--bg:#ffffff;--surface:#ffffff;--ink:#000000;--muted:#222222;--line:#000000;--accent:#0033cc;--accent-soft:#dfe7ff;--ok:#005a2b;--warn:#6b3d00;--bad:#a30000}
+html[data-theme=contrast] .panel,html[data-theme=contrast] .result{box-shadow:none;border-width:1.5px}
+html[data-theme=leisteen]{--bg:#e9edf1;--surface:#f8fafb;--ink:#17212b;--muted:#51606f;--line:#c5cfd9;--accent:#0f6b7a;--accent-soft:#dcf0f3}
+html[data-dens=compact] main{padding:14px clamp(10px,1.6vw,22px) 40px}
+html[data-dens=compact] .panel,html[data-dens=compact] .result{padding:10px}
+html[data-dens=compact] .grid2,html[data-dens=compact] .stack{gap:10px}
+html[data-dens=compact] .fields{gap:8px}
+html[data-dens=compact] th,html[data-dens=compact] td{padding:3px 6px}
+html[data-dens=compact] input,html[data-dens=compact] select,html[data-dens=compact] textarea{padding:4px 7px}
+html[data-dens=compact] nav.side > a{padding-top:3px;padding-bottom:3px}
+html[data-dens=compact] .tool-head{margin-bottom:10px;padding-bottom:8px}
+html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
+#upd-bar{display:none;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-soft);border:1px solid var(--accent);border-radius:6px;padding:8px 12px;margin-bottom:16px;font-size:13.5px}
+.grp input[type=color]{width:22px;height:22px;padding:0;border:1px solid var(--line);border-radius:4px;background:none;cursor:pointer;flex:none}
+.plate.sq .well{border-radius:5px}
 </style>
 </head>
 <body>
@@ -198,6 +217,8 @@ canvas{max-width:100%}
   <a href="#verdunning"><span class="k">C₁V₁</span>Verdunning</a>
   <a href="#oplossing"><span class="k">g</span>Oplossing &amp; buffer</a>
   <a href="#units"><span class="k">M</span>Eenheden omrekenen</a>
+  <a href="#molm"><span class="k">g/mol</span>Molmassa</a>
+  <a href="#hh"><span class="k">pH</span>pH-buffer</a>
   <div class="navgroup">Assays</div>
   <a href="#curve"><span class="k">y=f(x)</span>Standaardcurve</a>
   <a href="#enzym"><span class="k">Km</span>Enzymkinetiek</a>
@@ -221,6 +242,7 @@ canvas{max-width:100%}
   <a href="#wb"><span class="k">WB</span>Western blot-normalisatie</a>
   <a href="#ligatie"><span class="k">3:1</span>Ligatie</a>
   <a href="#transf"><span class="k">wit</span>Transformatie &amp; blauw-wit</a>
+  <a href="#rmp"><span class="k">RMP</span>Forensische matchkans</a>
   <div class="navgroup">Data</div>
   <a href="#stat"><span class="k">t</span>Statistiek</a>
   <div class="navgroup">Protocollen</div>
@@ -232,10 +254,12 @@ canvas{max-width:100%}
   <a href="#centrifuge"><span class="k">×g</span>Centrifuge</a>
   <a href="#timers"><span class="k">⏱</span>Timers</a>
   <a href="#plaat"><span class="k">96</span>Plaatindeling</a>
-  <div class="navfoot"><input id="sess-name" class="txt" placeholder="Projectnaam (optioneel)" style="height:28px;font-size:12.5px;margin-bottom:4px"><div class="row" style="gap:10px"><button type="button" class="ghost" id="sess-save" title="Bewaar alle invoer als bestand, bijvoorbeeld om naar een andere computer over te zetten">Sessie opslaan</button><button type="button" class="ghost" id="sess-open">Sessie openen</button><input type="file" id="sess-file" accept=".json,application/json" hidden></div><button type="button" class="ghost" id="reset-store" title="Wist de onthouden invoer op dit apparaat">Opgeslagen invoer wissen</button><span>Versie 1.9.0</span></div>
+  <a href="#inst"><span class="k">⚙</span>Instellingen &amp; updates</a>
+  <div class="navfoot"><input id="sess-name" class="txt" placeholder="Projectnaam (optioneel)" style="height:28px;font-size:12.5px;margin-bottom:4px"><div class="row" style="gap:10px"><button type="button" class="ghost" id="sess-save" title="Bewaar alle invoer als bestand, bijvoorbeeld om naar een andere computer over te zetten">Sessie opslaan</button><button type="button" class="ghost" id="sess-open">Sessie openen</button><input type="file" id="sess-file" accept=".json,application/json" hidden></div><button type="button" class="ghost" id="reset-store" title="Wist de onthouden invoer op dit apparaat">Opgeslagen invoer wissen</button><span id="appver">Versie</span></div>
 </nav>
 
 <main>
+<div id="upd-bar" role="status"></div>
 
 <!-- ============ VERDUNNING ============ -->
 <section class="tool" id="t-verdunning" data-tool="verdunning">
@@ -558,6 +582,7 @@ canvas{max-width:100%}
       <div class="row"><button type="button" id="w-addg">+ Groep</button><button type="button" id="w-erase">Gum</button><button type="button" id="w-textmode" title="Klik daarna op een putje en typ de tekst">Tekst per putje</button><button type="button" id="w-clear">Leegmaken</button><button type="button" class="primary" id="w-copy">Kopieer als tabel</button><button type="button" id="w-csv" class="dl-only" style="display:none">Download CSV</button></div>
     </div>
     <div class="legend" id="w-legend"></div>
+    <div class="row" style="margin-top:10px;gap:14px"><div class="f"><label for="w-pal">Kleurenpalet</label><select id="w-pal"><option value="std">Standaard</option><option value="okabe">Kleurenblind-veilig</option><option value="pastel">Pastel</option><option value="fel">Fel</option><option value="grijs">Grijstinten</option></select></div><div class="f"><label for="w-shape">Vorm putjes</label><select id="w-shape"><option value="rond">Rond</option><option value="vierkant">Vierkant</option></select></div><label class="chk" for="w-autolab"><input type="checkbox" id="w-autolab" checked> automatische labels (St1, Mo2 …)</label><label class="chk" for="w-leg"><input type="checkbox" id="w-leg" checked> legenda in afbeelding</label><span style="font-size:13px;color:var(--muted)">Klik op het kleurvakje van een groep voor een eigen kleur.</span></div>
     <div class="row" id="w-textbar" style="margin-top:10px;display:none"><span class="chip info" id="w-sel">geen putje</span><input id="w-wtext" class="txt" placeholder="Tekst in dit putje, bijv. S1 of 1:10" style="width:240px" maxlength="24"><button type="button" id="w-wclr">Tekst wissen</button><span style="font-size:13px;color:var(--muted)">Enter gaat naar het volgende putje.</span></div>
     <div class="tbl-wrap" style="margin-top:14px"><div class="plate" id="w-plate"></div></div>
     <div class="f" style="margin-top:12px"><label for="w-note">Eigen tekst onder de afbeelding (bijv. verdunningen, incubatietijden)</label><textarea id="w-note" rows="2">Standaarden in duplo in kolom 1–2; monsters in drievoud.</textarea></div>
@@ -1220,10 +1245,112 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
   <p class="src">OD<sub>cultuur</sub> = (gemeten − blanco) × verdunning; V<sub>cultuur</sub> = OD<sub>start</sub> × V<sub>eind</sub> / OD<sub>cultuur</sub> (C₁V₁ = C₂V₂). OD₆₀₀ is tot ongeveer 1,0 evenredig met het celaantal; ≈ 8 × 10⁸ E. coli-cellen/mL bij OD 1 is een vuistregel (Agilent, E. coli Cell Culture Concentration from OD600).</p>
 </section>
 
+<!-- ============ MOLMASSA ============ -->
+<section class="tool" id="t-molm" data-tool="molm">
+  <header class="tool-head"><h2>Molmassa</h2>
+  <p>Molmassa uit een brutoformule, inclusief haakjes en kristalwater, met de massasamenstelling en de af te wegen hoeveelheid.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="f"><label for="mm-f">Formule <span class="example">voorbeeld</span></label><input id="mm-f" class="mono" value="Na2HPO4·7H2O" spellcheck="false"></div>
+      <div class="row" style="margin-top:8px;gap:6px;font-size:13px"><span style="color:var(--muted)">Snel:</span><button type="button" class="xlbtn" data-mmf="NaCl">NaCl</button><button type="button" class="xlbtn" data-mmf="C4H11NO3">Tris</button><button type="button" class="xlbtn" data-mmf="C10H14N2Na2O8·2H2O">EDTA-Na₂·2H₂O</button><button type="button" class="xlbtn" data-mmf="C6H12O6">Glucose</button><button type="button" class="xlbtn" data-mmf="MgCl2·6H2O">MgCl₂·6H₂O</button><button type="button" class="xlbtn" data-mmf="Ca(OH)2">Ca(OH)₂</button></div>
+      <div class="fields" style="margin-top:12px">
+        <div class="f"><label for="mm-c">Concentratie</label><div class="inu"><input id="mm-c" inputmode="decimal" value="100"><select id="mm-cu"><option>M</option><option selected>mM</option><option>µM</option></select></div></div>
+        <div class="f"><label for="mm-v">Volume</label><div class="inu"><input id="mm-v" inputmode="decimal" value="500"><select id="mm-vu"><option selected>mL</option><option>L</option></select></div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Kristalwater schrijf je met een punt, ster of ·, bijvoorbeeld <span class="mono">CuSO4.5H2O</span>. Let op hoofdletters: <span class="mono">Co</span> is kobalt, <span class="mono">CO</span> is koolmonoxide.</p>
+    </div>
+    <div class="result" id="mm-out"></div>
+  </div>
+  <p class="src">Atoommassa's: IUPAC Commission on Isotopic Abundances and Atomic Weights, standaardatoomgewichten (afgekorte waarden, 2021). Controle: NaCl 58,44; Na₂HPO₄·7H₂O 268,07; Tris 121,14; EDTA-Na₂·2H₂O 372,24 g/mol (Sigma-Aldrich productspecificaties).</p>
+</section>
+
+<!-- ============ pH-BUFFER ============ -->
+<section class="tool" id="t-hh" data-tool="hh">
+  <header class="tool-head"><h2>pH-buffer</h2>
+  <p>Verhouding zuur en geconjugeerde base voor een gewenste pH met de vergelijking van Henderson-Hasselbalch, en de hoeveelheden voor jouw volume.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="hh-sys">Buffersysteem</label><select id="hh-sys" style="width:100%"><option value="4.76">Acetaat (pKₐ 4,76)</option><option value="6.10">MES (pKₐ 6,10)</option><option value="7.20" selected>Fosfaat H₂PO₄⁻/HPO₄²⁻ (pKₐ 7,20)</option><option value="7.48">HEPES (pKₐ 7,48)</option><option value="8.06">Tris (pKₐ 8,06)</option><option value="">Eigen pKₐ</option></select></div>
+        <div class="f"><label for="hh-pka">pKₐ (25 °C)</label><input id="hh-pka" inputmode="decimal" value="7,20"></div>
+        <div class="f"><label for="hh-ph">Gewenste pH</label><input id="hh-ph" inputmode="decimal" value="7,4"></div>
+        <div class="f"><label for="hh-c">Totale bufferconcentratie</label><div class="inu"><input id="hh-c" inputmode="decimal" value="100"><span class="u">mM</span></div></div>
+        <div class="f"><label for="hh-v">Volume</label><div class="inu"><input id="hh-v" inputmode="decimal" value="1000"><span class="u">mL</span></div></div>
+        <div class="f"><label for="hh-ma">Molmassa zuurvorm</label><div class="inu"><input id="hh-ma" inputmode="decimal" value="119,98"><span class="u">g/mol</span></div></div>
+        <div class="f"><label for="hh-mb">Molmassa basevorm</label><div class="inu"><input id="hh-mb" inputmode="decimal" value="141,96"><span class="u">g/mol</span></div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Voorbeeld: fosfaatbuffer uit NaH₂PO₄ (zuurvorm) en Na₂HPO₄ (basevorm). De molmassa's zijn optioneel.</p>
+    </div>
+    <div class="result" id="hh-out"></div>
+  </div>
+  <p class="src">pH = pKₐ + log([base]/[zuur]) (Henderson-Hasselbalch). Een buffer werkt goed binnen pKₐ ± 1. pKₐ-waarden bij 25 °C: azijnzuur 4,76; fosforzuur pKₐ₂ 7,20; MES 6,10; HEPES 7,48; Tris 8,06 (Sigma-Aldrich, Biological Buffers; Good e.a., Biochemistry 1966). De pKₐ hangt af van temperatuur en ionsterkte (Tris ongeveer −0,03 per °C); controleer de pH altijd met een pH-meter.</p>
+</section>
+
+<!-- ============ FORENSISCHE MATCHKANS ============ -->
+<section class="tool" id="t-rmp" data-tool="rmp">
+  <header class="tool-head"><h2>Forensische matchkans</h2>
+  <p>Genotypefrequentie per STR-locus volgens Hardy-Weinberg en de gecombineerde kans op een toevallige match (random match probability) voor een enkelvoudig profiel.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="rm-th">θ (subpopulatiecorrectie)</label><select id="rm-th" style="width:100%"><option value="0">0 (geen)</option><option value="0.01" selected>0,01</option><option value="0.03">0,03</option></select></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:12px"><table id="rm-tbl" class="mini"><thead><tr><th>Locus</th><th class="num">Frequentie allel 1</th><th class="num">Frequentie allel 2</th><th class="num">Genotypefrequentie</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:10px"><button type="button" id="rm-add">+ Locus</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Homozygoot: laat allel 2 leeg. Gebruik allelfrequenties uit de populatiedatabase van je opdracht; de voorbeeldfrequenties zijn verzonnen.</p>
+    </div>
+    <div class="result" id="rm-out"></div>
+  </div>
+  <p class="src">Heterozygoot: 2pq; homozygoot: p² + p(1 − p)θ (National Research Council, The Evaluation of Forensic DNA Evidence, 1996, aanbeveling 4.1). Gecombineerde matchkans = product over onafhankelijke loci (productregel); de bewijskracht voor een enkelvoudig profiel is LR = 1 / matchkans (Butler, Advanced Topics in Forensic DNA Typing: Interpretation, 2015).</p>
+</section>
+
+<!-- ============ INSTELLINGEN ============ -->
+<section class="tool" id="t-inst" data-tool="inst">
+  <header class="tool-head"><h2>Instellingen &amp; updates</h2>
+  <p>Uiterlijk van de app, kleuren van grafieken en schema's, en controleren op een nieuwe versie.</p></header>
+  <div class="grid2">
+    <div class="stack">
+      <div class="panel">
+        <h3>Uiterlijk</h3>
+        <div class="fields">
+          <div class="f"><label for="ui-theme">Thema</label><select id="ui-theme" style="width:100%"><option value="licht">Licht (standaard)</option><option value="donker">Donker</option><option value="papier">Papier (labjournaal)</option><option value="contrast">Hoog contrast</option><option value="leisteen">Leisteen (koel grijs)</option></select></div>
+          <div class="f"><label for="ui-dens">Dichtheid</label><select id="ui-dens" style="width:100%"><option value="ruim">Ruim</option><option value="compact">Compact (meer op één scherm)</option></select></div>
+          <div class="f"><label for="ui-fs">Tekstgrootte</label><select id="ui-fs" style="width:100%"><option value="13">Klein</option><option value="14" selected>Normaal</option><option value="15.5">Groot</option><option value="17">Extra groot</option></select></div>
+          <div class="f"><label for="ui-accent">Accentkleur</label><div class="row"><input type="color" id="ui-accent" value="#1558b0" style="width:52px;height:32px;padding:2px"><label class="chk" for="ui-accon"><input type="checkbox" id="ui-accon"> eigen kleur gebruiken</label></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Grafieken en schema's</h3>
+        <div class="fields">
+          <div class="f"><label for="ui-pal">Kleurenpalet grafieken</label><select id="ui-pal" style="width:100%"><option value="std">Standaard</option><option value="okabe">Kleurenblind-veilig (Okabe-Ito)</option><option value="pastel">Pastel</option><option value="fel">Fel</option><option value="grijs">Grijstinten (zwart-witprint)</option></select></div>
+          <div class="f"><label for="ui-schema">Kleur protocolschema's</label><input type="color" id="ui-schema" value="#1558b0" style="width:52px;height:32px;padding:2px"></div>
+        </div>
+        <div class="row" id="ui-swatches" style="margin-top:10px;gap:6px"></div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Het palet geldt voor grafieken met meerdere reeksen (groeicurves, smeltcurves, staafdiagrammen). De schemakleur geldt voor verdunnings-, pipetteer-, PCR- en gel-laadschema's.</p>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <h3>Updates</h3>
+        <div class="big" style="margin-bottom:6px">Versie <span id="upd-cur"></span></div>
+        <div class="row"><button type="button" class="primary" id="upd-check">Zoek naar updates</button><label class="chk" for="ui-autoupd"><input type="checkbox" id="ui-autoupd" checked> automatisch controleren bij het starten</label></div>
+        <div id="upd-status" style="margin-top:10px"></div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De controle vraagt alleen het versienummer van de laatste release op bij GitHub; er worden geen gegevens van jou verstuurd. De web-app haalt een nieuwe versie zelf op zodra je vernieuwt; het Windows-programma downloadt de nieuwe installer, die je daarna uitvoert.</p>
+      </div>
+      <div class="panel"><h3>Herstellen</h3><div class="row"><button type="button" id="ui-reset">Uiterlijk terug naar standaard</button></div></div>
+    </div>
+  </div>
+</section>
+
 </main>
 </div>
 
 <script>
+const APPVER='1.10.0';
+const hexRgb=h=>{ h=String(h).replace('#',''); if(h.length===3) h=[...h].map(c=>c+c).join(''); const n=parseInt(h,16); return [(n>>16)&255,(n>>8)&255,n&255]; };
+const rgbHex=a=>'#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
+const mixHex=(a,b,t)=>{ const A=hexRgb(a),B=hexRgb(b); return rgbHex(A.map((v,i)=>v*(1-t)+B[i]*t)); };
+const inkOn=h=>{ const [r,g,b]=hexRgb(h).map(v=>{ v/=255; return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4); }); return 0.2126*r+0.7152*g+0.0722*b>0.42?'#1f2933':'#ffffff'; };
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -1241,7 +1368,7 @@ const kv=rows=>`<dl class="kv">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`)
 const calc={};
 
 /* ---------- routing ---------- */
-const TOOLS=['verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','transf','stat','spec','units','inoc','mic','gcomp','wb','melt','pverd','ppip','pprog','plaad','centrifuge','timers','plaat'];
+const TOOLS=['verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','transf','stat','molm','hh','rmp','inst','spec','units','inoc','mic','gcomp','wb','melt','pverd','ppip','pprog','plaad','centrifuge','timers','plaat'];
 let current='verdunning';
 function route(){
   const h=(location.hash||'').slice(1);
@@ -1447,7 +1574,7 @@ calc.dna=function(){
   /* normalize */
   const mc=num($('#m-c').value), ng=num($('#m-ng').value), mv=num($('#m-v').value);
   const mo=$('#m-out');
-  if(isFinite(mc)&&isFinite(ng)&&isFinite(mv)&&mc>0){
+  if(isFinite(mc)&&isFinite(ng)&&isFinite(mv)&&mc>0&&ng>0&&mv>0){
     const vd=ng/mc, w=mv-vd;
     let h=`<div class="lbl">Pipetteer</div><div class="big">${vol(vd)} <small>DNA</small></div>`;
     h+=kv([['Water / TE',w>=0?vol(w):'–'],['Totaal',vol(mv)],['Eindconcentratie',sig(ng/mv,3)+' ng/µL'],['≈ diploïde genomen',fmt(ng*1000/6.6,0)],['≈ kopieën per autosomaal locus',fmt(ng*1000/6.6*2,0)]]);
@@ -1553,7 +1680,7 @@ function calcBands(){
   ctx.font='11px '+C('--font-ui'); ctx.fillStyle=C('--muted'); ctx.strokeStyle=C('--line'); ctx.lineWidth=1;
   [50,100,200,300,500,1000,2000,3000,5000,10000].forEach(t=>{ const lv=Math.log10(t); if(lv<ymin||lv>ymax) return; ctx.beginPath(); ctx.moveTo(pad.l,Y(lv)); ctx.lineTo(W-pad.r,Y(lv)); ctx.stroke(); ctx.textAlign='right'; ctx.textBaseline='middle'; ctx.fillText(t>=1000?(t/1000)+' kb':t,pad.l-6,Y(lv)); });
   ctx.textAlign='center'; ctx.textBaseline='top';
-  const step=(xmax-xmin)>40?10:5; for(let t=Math.ceil(xmin/step)*step;t<=xmax;t+=step){ ctx.fillText(t,X(t),H-pad.b+6); }
+  const raw=(xmax-xmin)/7||1, pw=10**Math.floor(Math.log10(raw)), fr=raw/pw, step=(fr<1.5?1:fr<3?2:fr<7?5:10)*pw; for(let t=Math.ceil(xmin/step)*step,k=0;t<=xmax&&k<40;t+=step,k++){ ctx.fillText(String(Number(t.toPrecision(6))).replace('.',','),X(t),H-pad.b+6); }
   ctx.fillText('afstand (mm)',(W+pad.l)/2,H-14);
   ctx.strokeStyle=C('--accent'); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X(xmin),Y(a+b*xmin)); ctx.lineTo(X(xmax),Y(a+b*xmax)); ctx.save(); ctx.rect(pad.l,pad.t,W-pad.l-pad.r,H-pad.t-pad.b); ctx.clip(); ctx.stroke(); ctx.restore();
   ctx.fillStyle=C('--ink'); pts.forEach(p=>{ ctx.beginPath(); ctx.arc(X(p.d),Y(Math.log10(p.bp)),3.5,0,7); ctx.fill(); });
@@ -1640,15 +1767,15 @@ let selG=0, wells={}, painting=false, eraser=false;
 function dims(){ const [r,c]=$('#w-fmt').value.split('x').map(Number); return {r,c}; }
 const RL='ABCDEFGHIJKLMNOP';
 function exampleWells(){ wells={}; const {r,c}=dims(); if(r!==8) return; for(let i=0;i<7;i++){ wells[RL[i]+1]=0; wells[RL[i]+2]=0; } wells['H1']=1; wells['H2']=1; for(let col=3;col<=8;col++) for(let i=0;i<8;i++) wells[RL[i]+col]=2; wells['H11']=3; wells['H12']=3; }
-function labels(){ const {r,c}=dims(); const cnt={}, nr={}, lab={}; for(let i=0;i<r;i++) for(let j=1;j<=c;j++){ const k=RL[i]+j; const g=wells[k]; if(g==null||!groups[g]) continue; cnt[g]=(cnt[g]||0)+1; if(typeof wText!=='undefined'&&wText[k]) continue; nr[g]=(nr[g]||0)+1; const short=groups[g].n.replace(/[^A-Za-zÀ-ÿ0-9]/g,'').slice(0,2)||'G'; lab[k]=short+nr[g]; } return {cnt,lab}; }
+function labels(){ const {r,c}=dims(); const cnt={}, nr={}, lab={}, auto=!$('#w-autolab')||$('#w-autolab').checked; for(let i=0;i<r;i++) for(let j=1;j<=c;j++){ const k=RL[i]+j; const g=wells[k]; if(g==null||!groups[g]) continue; cnt[g]=(cnt[g]||0)+1; if(!auto||(typeof wText!=='undefined'&&wText[k])) continue; nr[g]=(nr[g]||0)+1; const short=groups[g].n.replace(/[^A-Za-zÀ-ÿ0-9]/g,'').slice(0,2)||'G'; lab[k]=short+nr[g]; } return {cnt,lab}; }
 function renderPlate(){
   const {r,c}=dims(); const sz=c>=12?34:c>=8?42:56;
   const {cnt,lab}=labels();
   const p=$('#w-plate'); p.style.gridTemplateColumns=`22px repeat(${c},${sz}px)`; p.style.gridAutoRows=sz+'px';
   let h='<div></div>'; for(let j=1;j<=c;j++) h+=`<div class="hd">${j}</div>`;
-  for(let i=0;i<r;i++){ h+=`<div class="hd">${RL[i]}</div>`; for(let j=1;j<=c;j++){ const k=RL[i]+j, g=wells[k]; const on=g!=null&&groups[g]; h+=`<div class="well${on?' on':''}" data-w="${k}" title="${k}${on?' · '+esc(groups[g].n):''}" style="${on?`background:${groups[g].c}`:''}">${on?lab[k]:''}</div>`; } }
+  for(let i=0;i<r;i++){ h+=`<div class="hd">${RL[i]}</div>`; for(let j=1;j<=c;j++){ const k=RL[i]+j, g=wells[k]; const on=g!=null&&groups[g]; h+=`<div class="well${on?' on':''}" data-w="${k}" title="${k}${on?' · '+esc(groups[g].n):''}" style="${on?`background:${groups[g].c};color:${inkOn(groups[g].c)}`:''}">${on?(lab[k]||''):''}</div>`; } }
   p.innerHTML=h;
-  $('#w-legend').innerHTML=groups.map((g,i)=>`<div class="grp${i===selG&&!eraser?' sel':''}" data-g="${i}"><span class="sw" style="background:${g.c}"></span><input class="txt" value="${esc(g.n)}" data-gn="${i}" aria-label="Naam groep"><span class="cnt">${cnt[i]||0}</span></div>`).join('');
+  if(!(document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.gc!=null)) $('#w-legend').innerHTML=groups.map((g,i)=>`<div class="grp${i===selG&&!eraser?' sel':''}" data-g="${i}"><input type="color" data-gc="${i}" value="${/^#[0-9a-f]{6}$/i.test(g.c)?g.c:'#1558b0'}" aria-label="Kleur groep" title="Kleur kiezen"><input class="txt" value="${esc(g.n)}" data-gn="${i}" aria-label="Naam groep"><span class="cnt">${cnt[i]||0}</span></div>`).join('');
   $('#w-erase').classList.toggle('primary',eraser);
 }
 function paint(k){ if(eraser) delete wells[k]; else wells[k]=selG; }
@@ -1656,7 +1783,7 @@ $('#w-plate').addEventListener('pointerdown',e=>{ const w=e.target.closest('[dat
 $('#w-plate').addEventListener('pointerover',e=>{ if(!painting) return; const w=e.target.closest('[data-w]'); if(w){ paint(w.dataset.w); renderPlate(); }});
 window.addEventListener('pointerup',()=>painting=false);
 $('#w-plate').addEventListener('pointermove',e=>{ if(!painting||e.pointerType==='mouse') return; const el=document.elementFromPoint(e.clientX,e.clientY); const w=el&&el.closest&&el.closest('[data-w]'); if(w&&(wells[w.dataset.w]!==(eraser?undefined:selG))){ paint(w.dataset.w); renderPlate(); }});
-$('#w-legend').addEventListener('click',e=>{ const g=e.target.closest('[data-g]'); if(g){ selG=+g.dataset.g; eraser=false; renderPlate(); const inp=$(`[data-gn="${selG}"]`); if(e.target.tagName==='INPUT'&&inp){ inp.focus(); inp.setSelectionRange(inp.value.length,inp.value.length);} }});
+$('#w-legend').addEventListener('click',e=>{ if(e.target.dataset.gc!=null) return; const g=e.target.closest('[data-g]'); if(g){ selG=+g.dataset.g; eraser=false; renderPlate(); const inp=$(`[data-gn="${selG}"]`); if(e.target.tagName==='INPUT'&&inp){ inp.focus(); inp.setSelectionRange(inp.value.length,inp.value.length);} }});
 $('#w-legend').addEventListener('change',e=>{ if(e.target.dataset.gn!=null){ groups[+e.target.dataset.gn].n=e.target.value||'Groep'; renderPlate(); }});
 $('#w-addg').addEventListener('click',()=>{ groups.push({n:'Groep '+(groups.length+1),c:GCOL[groups.length%GCOL.length]}); selG=groups.length-1; eraser=false; renderPlate(); });
 $('#w-erase').addEventListener('click',()=>{ eraser=!eraser; renderPlate(); });
@@ -1665,7 +1792,7 @@ $('#w-fmt').addEventListener('change',()=>{ wells={}; renderPlate(); });
 $('#w-copy').addEventListener('click',async()=>{
   const {r,c}=dims(); const {lab}=labels();
   let t=$('#w-title').value+'\n\t'+Array.from({length:c},(_,j)=>j+1).join('\t')+'\n';
-  for(let i=0;i<r;i++){ t+=RL[i]; for(let j=1;j<=c;j++){ const k=RL[i]+j, g=wells[k]; t+='\t'+((typeof wText!=='undefined'&&wText[k])?wText[k]+(g!=null&&groups[g]?` (${groups[g].n})`:''):(g!=null&&groups[g]?`${groups[g].n} ${lab[k].replace(/^\D+/,'')}`:'')); } t+='\n'; }
+  for(let i=0;i<r;i++){ t+=RL[i]; for(let j=1;j<=c;j++){ const k=RL[i]+j, g=wells[k]; t+='\t'+((typeof wText!=='undefined'&&wText[k])?wText[k]+(g!=null&&groups[g]?` (${groups[g].n})`:''):(g!=null&&groups[g]?`${groups[g].n} ${(lab[k]||'').replace(/^\D+/,'')}`.trim():'')); } t+='\n'; }
   try{ await navigator.clipboard.writeText(t); $('#w-copied').textContent='Gekopieerd. Plak in Excel, Sheets of je labjournaal.'; $('#w-fallback').style.display='none'; }
   catch(e){ const f=$('#w-fallback'); f.value=t; f.style.display='block'; f.select(); $('#w-copied').textContent='Kopiëren werd geblokkeerd. Selecteer en kopieer de tekst hieronder.'; }
 });
@@ -1721,10 +1848,10 @@ function chart(cv,o){
   ctx.font='11px '+C('--font-ui'); ctx.lineWidth=1;
   const ys=niceStep(ymax-ymin,5); ctx.textAlign='right'; ctx.textBaseline='middle';
   if(logy){ for(let e=Math.floor(Math.log10(ymin));e<=Math.ceil(Math.log10(ymax));e++) [1,2,5].forEach(m=>{ const v=m*10**e; if(v<ymin||v>ymax) return; ctx.strokeStyle=C('--line'); ctx.beginPath(); ctx.moveTo(pad.l,Y(v)); ctx.lineTo(W-pad.r,Y(v)); ctx.stroke(); ctx.fillStyle=C('--muted'); ctx.fillText(tickLabel(v),pad.l-6,Y(v)); }); }
-  else for(let t=Math.ceil(ymin/ys)*ys;t<=ymax+ys*1e-6;t+=ys){ ctx.strokeStyle=C('--line'); ctx.beginPath(); ctx.moveTo(pad.l,Y(t)); ctx.lineTo(W-pad.r,Y(t)); ctx.stroke(); ctx.fillStyle=C('--muted'); ctx.fillText(tickLabel(t),pad.l-6,Y(t)); }
+  else for(let t=Math.ceil(ymin/ys)*ys,k=0;t<=ymax+ys*1e-6&&k<60;t+=ys,k++){ ctx.strokeStyle=C('--line'); ctx.beginPath(); ctx.moveTo(pad.l,Y(t)); ctx.lineTo(W-pad.r,Y(t)); ctx.stroke(); ctx.fillStyle=C('--muted'); ctx.fillText(tickLabel(t),pad.l-6,Y(t)); }
   ctx.textAlign='center'; ctx.textBaseline='top';
   if(logx){ for(let e=Math.floor(Math.log10(xmin));e<=Math.ceil(Math.log10(xmax));e++) [1,2,5].forEach(m=>{ const v=m*10**e; if(v<xmin||v>xmax) return; ctx.strokeStyle=C('--line'); ctx.beginPath(); ctx.moveTo(X(v),pad.t); ctx.lineTo(X(v),H-pad.b); ctx.stroke(); ctx.fillStyle=C('--muted'); ctx.fillText(tickLabel(v),X(v),H-pad.b+6); }); }
-  else { const xs=niceStep(xmax-xmin,6); for(let t=Math.ceil(xmin/xs)*xs;t<=xmax+xs*1e-6;t+=xs){ ctx.fillStyle=C('--muted'); ctx.fillText(tickLabel(t),X(t),H-pad.b+6); if(Math.abs(t)<xs*1e-6&&xmin<0){ ctx.strokeStyle=C('--muted'); ctx.beginPath(); ctx.moveTo(X(0),pad.t); ctx.lineTo(X(0),H-pad.b); ctx.stroke(); } } }
+  else { const xs=niceStep(xmax-xmin,6); for(let t=Math.ceil(xmin/xs)*xs,k=0;t<=xmax+xs*1e-6&&k<60;t+=xs,k++){ ctx.fillStyle=C('--muted'); ctx.fillText(tickLabel(t),X(t),H-pad.b+6); if(Math.abs(t)<xs*1e-6&&xmin<0){ ctx.strokeStyle=C('--muted'); ctx.beginPath(); ctx.moveTo(X(0),pad.t); ctx.lineTo(X(0),H-pad.b); ctx.stroke(); } } }
   if(!logy&&ymin<0&&ymax>0){ ctx.strokeStyle=C('--muted'); ctx.beginPath(); ctx.moveTo(pad.l,Y(0)); ctx.lineTo(W-pad.r,Y(0)); ctx.stroke(); }
   ctx.strokeStyle=C('--muted'); ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,H-pad.b); ctx.lineTo(W-pad.r,H-pad.b); ctx.stroke();
   ctx.fillStyle=C('--muted'); ctx.font='12px '+C('--font-ui'); ctx.fillText(o.xlabel||'',(W+pad.l)/2,H-16);
@@ -2230,7 +2357,7 @@ $('#w-csv').addEventListener('click',()=>{ const {r,c}=dims(); const {lab}=label
 $('#q-csv').addEventListener('click',()=>dlMsg($('#q-copied'),()=>saveBlob('pcr-mastermix.csv',csvBlob(qText))));
 
 /* ================= PLAKKEN UIT EXCEL ================= */
-const ADDBTN={'s-std':'#s-addstd','s-unk':'#s-addunk','k-tbl':'#k-add','q-tbl':'#q-add','o-tbl':'#o-add','qp-tbl':'#qp-add','gc-tbl':'#gc-add','tf-tbl':'#tf-add','mi-tbl':'#mi-add','mz-tbl':'#mz-add','wb-tbl':'#wb-add'};
+const ADDBTN={'s-std':'#s-addstd','s-unk':'#s-addunk','k-tbl':'#k-add','q-tbl':'#q-add','o-tbl':'#o-add','qp-tbl':'#qp-add','gc-tbl':'#gc-add','tf-tbl':'#tf-add','mi-tbl':'#mi-add','mz-tbl':'#mz-add','wb-tbl':'#wb-add','rm-tbl':'#rm-add'};
 document.addEventListener('paste',e=>{
   const el=e.target; if(el.tagName!=='INPUT') return; const td=el.closest('td'), tb=el.closest('tbody'); if(!td||!tb) return;
   const txt=(e.clipboardData||window.clipboardData).getData('text')||''; if(!/[\t\n]/.test(txt.trim())) return;
@@ -2309,7 +2436,7 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('[data-xl-table],[data-xl-img],[data-xl-data]'); if(!b) return;
   if(b.hasAttribute('data-xl-table')){ let n=b.parentNode.nextElementSibling; const t=n&&(n.tagName==='TABLE'?n:n.querySelector('table')); if(!t) return; const {H,B}=tableData(t); copyRich(toTSV(H,B),toHTML(H,B),b); return; }
   const cv=b.parentNode.previousElementSibling; if(!cv||cv.tagName!=='CANVAS') return;
-  if(b.hasAttribute('data-xl-img')){ const c=document.createElement('canvas'); c.width=cv.width; c.height=cv.height; const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(cv,0,0);
+  if(b.hasAttribute('data-xl-img')){ const c=document.createElement('canvas'); c.width=cv.width; c.height=cv.height; const x=c.getContext('2d'); x.fillStyle=cv._p?'#fff':(getComputedStyle(document.documentElement).getPropertyValue('--surface').trim()||'#fff'); x.fillRect(0,0,c.width,c.height); x.drawImage(cv,0,0);
     (async()=>{ try{ await navigator.clipboard.write([new ClipboardItem({'image/png':new Promise(r=>c.toBlob(r,'image/png'))})]); flashBtn(b,'Gekopieerd'); }catch(err){ flashBtn(b,'Geblokkeerd'); } })(); return; }
   const D=cv._data; if(!D||!D.rows.length){ flashBtn(b,'Geen data'); return; }
   const B=D.rows.map(r=>r.map(v=>typeof v==='number'?{n:v}:v)); copyRich(toTSV([D.head],B),toHTML([D.head],B),b);
@@ -2427,7 +2554,7 @@ function densArea(pr,k,mode,r){ const h=pr.length; k=Math.max(0,Math.min(h-1,Mat
   let bg; if(mode==='none'){ let m=Infinity; for(const v of pr) m=Math.min(m,v); bg=new Float64Array(h).fill(m); } else bg=rollingBall(pr,r||h/12);
   const c=Array.from(pr,(v,i)=>v-bg[i]), pk=c[k]; if(!(pk>0)) return {area:0,l:k,r:k};
   let l=k, rr=k; while(l>0&&k-l<lim&&c[l-1]>pk/2) l--; while(rr<h-1&&rr-k<lim&&c[rr+1]>pk/2) rr++; const hw=Math.max(1,(rr-l)/2), L=Math.max(0,Math.round(k-3*hw)), Rr=Math.min(h-1,Math.round(k+3*hw)); let s=0; for(let i=L;i<=Rr;i++) s+=Math.max(0,c[i]); return {area:s,l:L,r:Rr}; }
-gfIntensity=function(x,y){ const pr=laneProfileRaw(x), r=num($('#gf-ball').value); return densArea(pr,gfPeakNear(x,y),$('#gf-bg').value,isFinite(r)&&r>2?r:pr.length/12).area*Math.max(1,Math.round(gf.lw*0.6)); };
+gfIntensity=function(x,y){ const pr=laneProfileRaw(x), r=num($('#gf-ball').value); return densArea(pr,gfPeakNear(x,y),$('#gf-bg').value,isFinite(r)&&r>2?Math.min(r,pr.length):pr.length/12).area*Math.max(1,Math.round(gf.lw*0.6)); };
 function gfRf(y){ const h=gfProc().h, w=gfWellRows(), y0=w.length?Math.min(...w):0, fr=num($('#gf-front').value), y1=isFinite(fr)&&fr>y0?fr:h; return (y-y0)/(y1-y0); }
 { const _mt2=gfMarksTable; gfMarksTable=function(){ _mt2(); const tb=$('#gf-marks table'); if(!tb) return; tb.tHead.rows[0].insertCell(4).outerHTML='<th class="num" title="Looplengte vanaf het slotje gedeeld door de afstand tot het front">Rf</th>'; [...tb.tBodies[0].rows].forEach((tr,i)=>{ const c=tr.insertCell(4); c.className='num'; const v=gfRf(gf.marks[i].y); c.textContent=isFinite(v)?fmt(v,3):'–'; }); }; }
 ['gf-bg','gf-ball','gf-front'].forEach(id=>$('#'+id).addEventListener('input',()=>{ gf.marks.forEach(m=>m.int=null); gfMarksTable(); }));
@@ -2453,7 +2580,7 @@ $('#gf-auto').addEventListener('click',gfAutoStraighten);
 $('#sess-save').addEventListener('click',()=>{ try{ localStorage.setItem(TBLKEY,JSON.stringify(tblSnap())); }catch(e){}
   const data={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('labkit:')) data[k]=localStorage.getItem(k); } }catch(e){}
   const d=new Date(), stamp=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  const pn=($('#sess-name').value||'').trim(); saveBlob(`${pn?safeName(pn):'labkit-sessie'}-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',project:pn,versie:'1.9.0',opgeslagen:d.toISOString(),data},null,1)],{type:'application/json'})).catch(()=>{}); });
+  const pn=($('#sess-name').value||'').trim(); saveBlob(`${pn?safeName(pn):'labkit-sessie'}-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',project:pn,versie:APPVER,opgeslagen:d.toISOString(),data},null,1)],{type:'application/json'})).catch(()=>{}); });
 $('#sess-open').addEventListener('click',()=>$('#sess-file').click());
 $('#sess-file').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const j=JSON.parse(t); if(!j||j.app!=='Labkit BML'||typeof j.data!=='object') throw 0; Object.entries(j.data).forEach(([k,v])=>{ if(k.startsWith('labkit:')) localStorage.setItem(k,v); }); location.reload(); }).catch(()=>alertBox('Dit bestand is geen Labkit-sessie.')); });
 function alertBox(t){ const n=document.createElement('div'); n.className='note bad'; n.style.cssText='position:fixed;left:16px;bottom:16px;z-index:50;max-width:320px'; n.textContent=t; document.body.appendChild(n); setTimeout(()=>n.remove(),4000); }
@@ -2471,7 +2598,8 @@ const TBLDEF={
   'tf-tbl':{row:(r)=>tfRow(r),num:[1]},
   'mi-tbl':{row:(r)=>miRow(r),num:[2,3]},
   'mz-tbl':{row:(r)=>mzRow(r),num:[1,2,3]},
-  'wb-tbl':{row:(r)=>wbRow(r),num:[1,2]}
+  'wb-tbl':{row:(r)=>wbRow(r),num:[1,2]},
+  'rm-tbl':{row:(r)=>rmRow(r),num:[1,2]}
 };
 function tblSnap(){ const out={}; Object.keys(TBLDEF).forEach(id=>{ out[id]=[...document.querySelectorAll('#'+id+' tbody tr')].map(tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select')].map(e=>e.value)); });
   out.reeks=reeksCounts; out.plate={fmt:$('#w-fmt').value,wells,groups,title:$('#w-title').value}; out.curve={model:$('#s-model').value,unit:$('#s-unit').value,blank:$('#s-blank').checked,logx:$('#s-logx').checked}; return out; }
@@ -2721,7 +2849,8 @@ const PhiF=z=>0.5*erfcF(-z/Math.SQRT2);
 function prange(w,k){ if(w<=0) return 0; const a=-8, b=8, N=240, h=(b-a)/N; let s=0; for(let i=0;i<=N;i++){ const z=a+i*h, f=Math.exp(-z*z/2)/Math.sqrt(2*Math.PI)*Math.pow(Math.max(0,PhiF(z)-PhiF(z-w)),k-1); s+=f*(i===0||i===N?1:i%2?4:2); } return Math.min(1,k*s*h/3); }
 function ptukey(q,k,df){ if(q<=0) return 0; if(df>5000) return prange(q,k); const lg=Math.log(df)*df/2-gammaln(df/2)-(df/2-1)*Math.log(2); const hi=1+14/Math.sqrt(df)+ (df<4?6:0), N=200, h=hi/N; let s=0;
   for(let i=0;i<=N;i++){ const x=i*h; if(x<=0) continue; const g=Math.exp(lg+(df-1)*Math.log(x)-df*x*x/2); s+=g*prange(q*x,k)*(i===N?1:i%2?4:2); } return Math.min(1,s*h/3); }
-function qtukey(p,k,df){ let lo=0, hi=50; for(let i=0;i<40;i++){ const m=(lo+hi)/2; if(ptukey(m,k,df)<p) lo=m; else hi=m; } return (lo+hi)/2; }
+const qtCache=new Map();
+function qtukey(p,k,df){ const key=p+'|'+k+'|'+df; if(qtCache.has(key)) return qtCache.get(key); let lo=0, hi=50; for(let i=0;i<40&&hi-lo>1e-7;i++){ const m=(lo+hi)/2; if(ptukey(m,k,df)<p) lo=m; else hi=m; } const v=(lo+hi)/2; if(qtCache.size>200) qtCache.clear(); qtCache.set(key,v); return v; }
 function stGroups(txt){ return String(txt).split(/\n/).map((l,i)=>{ const m=l.match(/^\s*([^:\t]+?)\s*[:\t]\s*(.*)$/); const name=m&&!/^[-\d.,\s]+$/.test(m[1])?m[1]:`Groep ${i+1}`; const v=stNums(m&&!/^[-\d.,\s]+$/.test(m[1])?m[2]:l); return {name,v}; }).filter(g=>g.v.length); }
 function anovaCalc(G,alpha){ const k=G.length, N=G.reduce((a,g)=>a+g.v.length,0), gm=G.reduce((a,g)=>a+g.v.reduce((s,x)=>s+x,0),0)/N;
   const ms=G.map(g=>mean(g.v)); const SSB=G.reduce((a,g,i)=>a+g.v.length*(ms[i]-gm)**2,0), SSW=G.reduce((a,g,i)=>a+g.v.reduce((s,x)=>s+(x-ms[i])**2,0),0);
@@ -2748,7 +2877,7 @@ function pDrawNotes(x,lines,y){ x.textAlign='left'; x.fillStyle=PCOL.ink; x.font
 function pArrow(x,x0,y0,x1,y1,col){ x.strokeStyle=col; x.fillStyle=col; x.lineWidth=1.6; x.beginPath(); x.moveTo(x0,y0); x.quadraticCurveTo((x0+x1)/2,y0-28,x1,y1); x.stroke(); const a=Math.atan2(y1-(y0-14),x1-(x0+x1)/2); x.beginPath(); x.moveTo(x1,y1); x.lineTo(x1-8*Math.cos(a-0.4),y1-8*Math.sin(a-0.4)); x.lineTo(x1-8*Math.cos(a+0.4),y1-8*Math.sin(a+0.4)); x.closePath(); x.fill(); }
 function pTube(x,cx,top,h,w,fill,alpha){ const bw=w/2; x.lineWidth=1.6; x.strokeStyle=PCOL.ink;
   const body=()=>{ x.beginPath(); x.moveTo(cx-bw,top); x.lineTo(cx-bw,top+h*0.62); x.lineTo(cx,top+h); x.lineTo(cx+bw,top+h*0.62); x.lineTo(cx+bw,top); };
-  if(fill>0){ x.save(); body(); x.closePath(); x.clip(); x.fillStyle=`rgba(21,88,176,${alpha})`; x.fillRect(cx-bw-2,top+h*(1-fill),w+4,h*fill+2); x.restore(); }
+  if(fill>0){ x.save(); body(); x.closePath(); x.clip(); x.fillStyle=`rgba(${hexRgb(PCOL.liquid).join(',')},${alpha})`; x.fillRect(cx-bw-2,top+h*(1-fill),w+4,h*fill+2); x.restore(); }
   body(); x.stroke(); x.fillStyle=PCOL.soft; x.strokeStyle=PCOL.ink; x.beginPath(); x.rect(cx-bw-4,top-7,w+8,7); x.fill(); x.stroke(); }
 const supNum=n=>String(n).replace(/-/g,'⁻').replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);
 function pNum(v){ if(!isFinite(v)) return '–'; if(v===0) return '0'; const e=Math.floor(Math.log10(Math.abs(v))); if(e>=-2&&e<4) return sig(v,3); const m=v/10**e; const ms=NL(Number(m.toFixed(2)),2); return (ms==='1'?'':ms+' × ')+'10'+supNum(e); }
@@ -2911,13 +3040,13 @@ if(window.__TAURI__&&window.__TAURI__.opener){ document.addEventListener('click'
 /* ================= PLAATINDELING: TEKST PER PUTJE EN AFBEELDING ================= */
 let wText=pstore.get().wt||{}, wSel=null, wTextMode=false;
 function plateImg(){ const cv=$('#w-cv'); if(!cv) return; const {r,c}=dims(), {lab,cnt}=labels(), title=$('#w-title').value.trim(), sz=c>=12?44:c>=8?54:70, W=Math.max(560,60+c*sz+20);
-  const used=groups.map((g,i)=>[g,i]).filter(([g,i])=>cnt[i]); const NL_=pNotes('w',W), legRows=Math.ceil(used.length/3), H=(title?40:0)+30+r*sz+20+legRows*22+(NL_.length?NL_.length*17+12:0)+10;
+  const sq=$('#w-shape').value==='vierkant', used=$('#w-leg').checked?groups.map((g,i)=>[g,i]).filter(([g,i])=>cnt[i]):[]; const NL_=pNotes('w',W), legRows=Math.ceil(used.length/3), H=(title?40:0)+30+r*sz+20+legRows*22+(NL_.length?NL_.length*17+12:0)+10;
   pShow(cv,W,H,(x)=>{ const t0=pTitle(x,title,W), L=44, T=t0+26; x.font='600 12px '+PFONT(); x.fillStyle=PCOL.muted; x.textAlign='center';
     for(let j=1;j<=c;j++) x.fillText(String(j),L+(j-0.5)*sz,T-10); for(let i=0;i<r;i++) x.fillText(RL[i],L-14,T+(i+0.5)*sz);
     x.strokeStyle=PCOL.ink; x.lineWidth=1.2; x.beginPath(); x.roundRect?x.roundRect(L-6,T-4,c*sz+12,r*sz+8,10):x.rect(L-6,T-4,c*sz+12,r*sz+8); x.stroke();
     for(let i=0;i<r;i++) for(let j=1;j<=c;j++){ const k=RL[i]+j, g=wells[k], on=g!=null&&groups[g], cx=L+(j-0.5)*sz, cy=T+(i+0.5)*sz, rad=sz*0.42;
-      x.beginPath(); x.arc(cx,cy,rad,0,7); x.fillStyle=on?groups[g].c:'#f4f5f7'; x.fill(); x.strokeStyle=on?'rgba(0,0,0,.25)':PCOL.line; x.lineWidth=1; x.stroke();
-      const t=wText[k]!=null&&wText[k]!==''?wText[k]:on?lab[k]:''; if(t){ x.fillStyle=on?'#fff':PCOL.ink; wellLines(x,t,cx,cy,rad); } }
+      x.beginPath(); if(sq){ x.roundRect?x.roundRect(cx-rad,cy-rad,2*rad,2*rad,5):x.rect(cx-rad,cy-rad,2*rad,2*rad); } else x.arc(cx,cy,rad,0,7); x.fillStyle=on?groups[g].c:'#f4f5f7'; x.fill(); x.strokeStyle=on?'rgba(0,0,0,.25)':PCOL.line; x.lineWidth=1; x.stroke();
+      const t=wText[k]!=null&&wText[k]!==''?wText[k]:on?lab[k]:''; if(t){ x.fillStyle=on?inkOn(groups[g].c):PCOL.ink; wellLines(x,t,cx,cy,sq?rad*1.12:rad); } }
     let ly=T+r*sz+26; used.forEach(([g,i],q)=>{ const col=q%3, row=Math.floor(q/3), lx=L+col*Math.max(170,(W-L-20)/3), yy=ly+row*22; x.fillStyle=g.c; x.beginPath(); x.arc(lx+6,yy,6,0,7); x.fill(); x.fillStyle=PCOL.ink; x.font='12.5px '+PFONT(); x.textAlign='left'; x.fillText(`${g.n} (${cnt[i]})`,lx+18,yy); });
     if(NL_.length) pDrawNotes(x,NL_,ly+legRows*22+8); }); }
 function wellLines(x,t,cx,cy,rad){ const W=rad*1.72, set=fs=>{ x.font=`600 ${fs}px `+PFONT(); };
@@ -2928,7 +3057,7 @@ function wellLines(x,t,cx,cy,rad){ const W=rad*1.72, set=fs=>{ x.font=`600 ${fs}
   if(!L){ for(fs=Math.min(9,rad*0.45);fs>=5;fs-=0.5){ const c=wrap(fs,true); if(fits(c,fs)||fs<=5.5){ L=c; break; } } }
   set(fs); L.forEach((l,i)=>x.fillText(l,cx,cy+(i-(L.length-1)/2)*fs*1.1)); }
 function applyWellText(){ const sz=parseFloat(getComputedStyle($('#w-plate')).gridAutoRows)||34; $$('#w-plate [data-w]').forEach(el=>{ const k=el.dataset.w, t=wText[k]; if(t!=null&&t!==''){ el.innerHTML=`<span>${esc(t)}</span>`; el.classList.add('wtxt'); el.title=k+' · '+t; let fs=Math.min(11,sz*0.3); el.style.fontSize=fs+'px'; if(!el.classList.contains('on')) el.style.color='var(--ink)'; for(let i=0;i<12&&(el.scrollHeight>el.clientHeight+1||el.scrollWidth>el.clientWidth+1)&&fs>5.5;i++){ fs-=0.5; el.style.fontSize=fs+'px'; } } el.classList.toggle('wsel',wTextMode&&k===wSel); }); }
-{ const _rp=renderPlate; renderPlate=function(){ _rp(); applyWellText(); try{ plateImg(); }catch(e){} }; }
+{ const _rp=renderPlate; renderPlate=function(){ _rp(); $('#w-plate').classList.toggle('sq',$('#w-shape').value==='vierkant'); applyWellText(); try{ plateImg(); }catch(e){} }; }
 $('#w-plate').addEventListener('pointerdown',e=>{ if(!wTextMode) return; const w=e.target.closest('[data-w]'); if(!w) return; e.stopPropagation(); e.preventDefault(); wSel=w.dataset.w; $('#w-sel').textContent=wSel; $('#w-wtext').value=wText[wSel]||''; renderPlate(); setTimeout(()=>$('#w-wtext').focus(),0); },true);
 $('#w-textmode').addEventListener('click',()=>{ wTextMode=!wTextMode; $('#w-textmode').classList.toggle('primary',wTextMode); $('#w-textbar').style.display=wTextMode?'flex':'none'; if(wTextMode&&!wSel){ wSel='A1'; $('#w-sel').textContent=wSel; $('#w-wtext').value=wText[wSel]||''; } renderPlate(); });
 $('#w-wtext').addEventListener('input',e=>{ if(!wSel) return; const v=e.target.value; if(v) wText[wSel]=v; else delete wText[wSel]; pstore.set('wt',wText); renderPlate(); });
@@ -3123,15 +3252,100 @@ calc.inoc=function(){
   if(to>=odc){ out.innerHTML=note('bad','De gewenste OD is hoger dan die van de cultuur; laat de cultuur langer groeien of concentreer de cellen.'); return; }
   const vc=to*V/odc; out.innerHTML=`<div class="lbl">Pipetteer</div><div class="big">${vol(vc*1000)} <small>cultuur</small></div>`+kv([['Medium',vol((V-vc)*1000)],['OD cultuur (gecorrigeerd)',fmt(odc,3)],['Verdunning','1 : '+sig(odc/to,4)],['Cellen/mL bij start (schatting)',isFinite(fac)?sci(to*fac,2):'–']])+((od-bl)>1?note('warn','De meting ligt boven OD 1; daar is OD niet meer lineair. Meet in een verdunning.'):'')+`<div class="formula">V<sub>cultuur</sub> = ${fmt(to,3)} × ${fmt(V,1)} mL / ${fmt(odc,3)}</div>`;
 };
+/* ================= KLEUREN: HULPFUNCTIES ================= */
+const PALS={std:['#1558b0','#c2410c','#15803d','#7c3aed','#b91c1c','#0e7490','#a16207','#be185d'],okabe:['#0072B2','#D55E00','#009E73','#CC79A7','#E69F00','#56B4E9','#F0E442','#000000'],pastel:['#8fb8e8','#f2a98a','#9fd4a8','#c9b3ec','#f0a3a3','#93d3dc','#e6cf8a','#eeaacd'],fel:['#0057ff','#ff5a00','#00a43b','#9b1dff','#e6002d','#00a9c7','#d99a00','#ff1f8e'],grijs:['#1f2933','#4b5563','#6b7280','#9ca3af','#374151','#111827','#808891','#b6bcc4']};
+
+/* ================= INSTELLINGEN: UITERLIJK ================= */
+const UIDEF={'ui-theme':'licht','ui-dens':'ruim','ui-fs':'14','ui-accent':'#1558b0','ui-pal':'std','ui-schema':'#1558b0'};
+function applyUI(){ const R=document.documentElement, th=$('#ui-theme').value||'licht';
+  if(th==='licht') R.removeAttribute('data-theme'); else R.setAttribute('data-theme',th);
+  if($('#ui-dens').value==='compact') R.setAttribute('data-dens','compact'); else R.removeAttribute('data-dens');
+  document.body.style.fontSize=(num($('#ui-fs').value)||14)+'px';
+  R.style.removeProperty('--accent'); R.style.removeProperty('--accent-soft');
+  if($('#ui-accon').checked){ const a=$('#ui-accent').value, cs=getComputedStyle(R), sf=cs.getPropertyValue('--surface').trim()||'#ffffff'; R.style.setProperty('--accent',a); R.style.setProperty('--accent-soft',mixHex(sf.startsWith('#')?sf:'#ffffff',a,0.14)); }
+  const pal=PALS[$('#ui-pal').value]||PALS.std; SERCOL.splice(0,SERCOL.length,...pal);
+  const sc=$('#ui-schema').value||'#1558b0'; PCOL.acc=sc; PCOL.liquid=sc; PCOL.accSoft=mixHex('#ffffff',sc,0.1);
+  $('#ui-swatches').innerHTML=pal.map(c=>`<span title="${c}" style="width:26px;height:18px;border-radius:3px;background:${c};border:1px solid var(--line)"></span>`).join('');
+  const m=document.querySelector('meta[name=theme-color]'); if(m) m.content=getComputedStyle(R).getPropertyValue('--accent').trim();
+  try{ if(calc[current]&&current!=='inst') calc[current](); }catch(e){} }
+['ui-theme','ui-dens','ui-fs','ui-accent','ui-accon','ui-pal','ui-schema'].forEach(id=>{ $('#'+id).addEventListener('input',applyUI); $('#'+id).addEventListener('change',applyUI); });
+$('#ui-reset').addEventListener('click',()=>{ Object.entries(UIDEF).forEach(([id,v])=>{ const el=$('#'+id); el.value=v; el.dispatchEvent(new Event('change',{bubbles:true})); }); const a=$('#ui-accon'); a.checked=false; a.dispatchEvent(new Event('change',{bubbles:true})); });
+calc.inst=()=>{};
+
+/* ================= UPDATES ================= */
+const REPO='svgbml/labkit_public', UPDKEY='labkit:v1:upd';
+const cmpVer=(a,b)=>{ const A=String(a).split('.').map(Number), B=String(b).split('.').map(Number); for(let i=0;i<3;i++){ const d=(A[i]||0)-(B[i]||0); if(d) return d>0?1:-1; } return 0; };
+function openExt(u){ try{ if(window.__TAURI__&&window.__TAURI__.opener){ window.__TAURI__.opener.openUrl(u).catch(()=>window.open(u,'_blank','noopener')); return; } }catch(e){} window.open(u,'_blank','noopener'); }
+function updBanner(rel){ const ver=rel.tag_name.replace(/^v/,''), bar=$('#upd-bar'), desk=!!window.__TAURI__, asset=(rel.assets||[]).find(a=>/setup\.exe$/i.test(a.name));
+  bar.innerHTML=`<b>Versie ${esc(ver)} is beschikbaar</b><span>je gebruikt ${APPVER}</span>`+(desk?(asset?`<button type="button" class="primary" data-upd="dl">Installer downloaden</button>`:''):`<button type="button" class="primary" data-upd="reload">Nu vernieuwen</button>`)+`<button type="button" data-upd="notes">Wat is er nieuw</button><button type="button" class="ghost" data-upd="later">Later</button>`;
+  bar.style.display='flex'; bar.onclick=e=>{ const k=e.target.dataset&&e.target.dataset.upd; if(!k) return;
+    if(k==='dl'){ openExt(asset.browser_download_url); $('#upd-status').innerHTML=note('info','De installer wordt gedownload in je browser. Sluit Labkit, voer het bestand uit en start Labkit opnieuw; je invoer blijft bewaard.'); }
+    else if(k==='reload'){ const go=()=>location.reload(); try{ navigator.serviceWorker.getRegistration().then(r=>r?r.update():null).then(()=>caches.keys()).then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(go,go); }catch(err){ go(); } }
+    else if(k==='notes') openExt(rel.html_url);
+    else { bar.style.display='none'; try{ const s=JSON.parse(localStorage.getItem(UPDKEY)||'{}'); s.skip=ver; localStorage.setItem(UPDKEY,JSON.stringify(s)); }catch(err){} } }; }
+async function checkUpdate(manual){ const st=$('#upd-status'); let S={}; try{ S=JSON.parse(localStorage.getItem(UPDKEY)||'{}'); }catch(e){}
+  if(!STANDALONE){ if(manual) st.innerHTML=note('info','In deze voorvertoning is de updatecontrole uitgeschakeld; gebruik de web-app of het Windows-programma.'); return; }
+  if(!manual&&S.t&&Date.now()-S.t<6*3600*1000&&!S.pending) return;
+  if(manual) st.innerHTML=note('info','Bezig met controleren…');
+  try{ const r=await fetch(`https://api.github.com/repos/${REPO}/releases/latest`,{headers:{Accept:'application/vnd.github+json'},cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const rel=await r.json(), ver=String(rel.tag_name||'').replace(/^v/,'');
+    const newer=cmpVer(ver,APPVER)>0; S.t=Date.now(); S.pending=newer; try{ localStorage.setItem(UPDKEY,JSON.stringify(S)); }catch(e){}
+    if(newer){ if(manual||S.skip!==ver) updBanner(rel); if(manual) st.innerHTML=note('warn',`Versie ${esc(ver)} is beschikbaar (uitgebracht op ${new Date(rel.published_at).toLocaleDateString('nl-NL')}). Zie de melding bovenaan.`); }
+    else if(manual) st.innerHTML=note('info',`Je hebt de nieuwste versie (${APPVER}).`); }
+  catch(e){ if(manual) st.innerHTML=note('bad','Controleren lukte niet. Ben je offline, of is de limiet van GitHub bereikt? Probeer het later opnieuw.'); } }
+$('#upd-check').addEventListener('click',()=>checkUpdate(true));
+$('#upd-cur').textContent=APPVER; $('#appver').textContent='Versie '+APPVER;
+
+/* ================= PLAATINDELING: KLEUREN EN OPMAAK ================= */
+$('#w-legend').addEventListener('input',e=>{ const i=e.target.dataset.gc; if(i==null) return; groups[+i].c=e.target.value; renderPlate(); });
+$('#w-pal').addEventListener('change',e=>{ const p=PALS[e.target.value]; if(!p) return; groups.forEach((g,i)=>g.c=p[i%p.length]); GCOL.splice(0,GCOL.length,...p); renderPlate(); });
+['w-shape','w-autolab','w-leg'].forEach(id=>$('#'+id).addEventListener('change',()=>renderPlate()));
+
+/* ================= MOLMASSA ================= */
+const ATOM={H:1.008,He:4.0026,Li:6.94,B:10.81,C:12.011,N:14.007,O:15.999,F:18.998,Na:22.990,Mg:24.305,Al:26.982,Si:28.085,P:30.974,S:32.06,Cl:35.45,K:39.098,Ca:40.078,Cr:51.996,Mn:54.938,Fe:55.845,Co:58.933,Ni:58.693,Cu:63.546,Zn:65.38,As:74.922,Se:78.971,Br:79.904,Rb:85.468,Sr:87.62,Mo:95.95,Ag:107.868,Cd:112.414,Sn:118.71,I:126.904,Cs:132.905,Ba:137.327,W:183.84,Pt:195.084,Au:196.967,Hg:200.592,Pb:207.2};
+function parseFormula(txt){ const sub='₀₁₂₃₄₅₆₇₈₉'; let s=String(txt).replace(/[₀-₉]/g,c=>sub.indexOf(c)).replace(/\s+/g,''); if(!s) return {err:'Vul een formule in.'};
+  const tot={}; const add=(o,k)=>Object.entries(o).forEach(([e,n])=>tot[e]=(tot[e]||0)+n*k);
+  for(const part of s.split(/[·.*•]/)){ if(!part) continue; const m=part.match(/^(\d+)?(.*)$/); const mult=m[1]?+m[1]:1, body=m[2]; let i=0;
+    const grp=()=>{ const o={}; while(i<body.length&&body[i]!==')'){ if(body[i]==='('||body[i]==='['){ i++; const inner=grp(); if(body[i]!==')'&&body[i]!==']') throw new Error('Haakje niet gesloten.'); i++; let n=''; while(/\d/.test(body[i]||'')) n+=body[i++]; Object.entries(inner).forEach(([e,c])=>o[e]=(o[e]||0)+c*(n?+n:1)); }
+        else if(body[i]===']') break; else { const em=body.slice(i).match(/^[A-Z][a-z]?/); if(!em) throw new Error(`Onbekend teken "${body[i]}".`); const el=em[0]; if(!ATOM[el]) throw new Error(`Element "${el}" is onbekend.`); i+=el.length; let n=''; while(/\d/.test(body[i]||'')) n+=body[i++]; o[el]=(o[el]||0)+(n?+n:1); } } return o; };
+    try{ const o=grp(); if(i<body.length) throw new Error('Haakje te veel.'); add(o,mult); }catch(e){ return {err:e.message}; } }
+  const M=Object.entries(tot).reduce((a,[e,n])=>a+ATOM[e]*n,0); return {tot,M}; }
+$('#t-molm').addEventListener('click',e=>{ const b=e.target.closest('[data-mmf]'); if(b){ $('#mm-f').value=b.dataset.mmf; calc.molm(); } });
+calc.molm=function(){ const R=parseFormula($('#mm-f').value), out=$('#mm-out'); if(R.err){ out.innerHTML=note('bad',esc(R.err)); return; }
+  const c=num($('#mm-c').value)*({M:1,mM:1e-3,'µM':1e-6}[$('#mm-cu').value]), V=num($('#mm-v').value)*($('#mm-vu').value==='L'?1:1e-3), g=c*V*R.M;
+  out.innerHTML=`<div class="lbl">Molmassa</div><div class="big">${fmt(R.M,2)} <small>g/mol</small></div>`+kv([['Afwegen',isFinite(g)&&g>0?`<b>${mass(g)}</b> voor ${fmt(num($('#mm-c').value),3)} ${$('#mm-cu').value} in ${fmt(num($('#mm-v').value),2)} ${$('#mm-vu').value}`:'–']])+
+    `<div class="tbl-wrap" style="margin-top:10px"><table class="mini"><thead><tr><th>Element</th><th class="num">Aantal</th><th class="num">Atoommassa</th><th class="num">Massa-%</th></tr></thead><tbody>${Object.entries(R.tot).map(([e,n])=>`<tr><td>${e}</td><td class="num">${n}</td><td class="num">${fmt(ATOM[e],3)}</td><td class="num">${fmt(ATOM[e]*n/R.M*100,2)}</td></tr>`).join('')}</tbody></table></div><div class="formula">M = Σ aantal × atoommassa · massa = c × V × M</div>`; };
+
+/* ================= pH-BUFFER ================= */
+$('#hh-sys').addEventListener('change',e=>{ if(e.target.value){ $('#hh-pka').value=e.target.value.replace('.',','); const MW={'4.76':['60,05','82,03'],'6.10':['195,24','217,22'],'7.20':['119,98','141,96'],'7.48':['238,30','260,29'],'8.06':['157,60','121,14']}[e.target.value]; if(MW){ $('#hh-ma').value=MW[0]; $('#hh-mb').value=MW[1]; } } calc.hh(); });
+calc.hh=function(){ const pka=num($('#hh-pka').value), ph=num($('#hh-ph').value), C=num($('#hh-c').value), V=num($('#hh-v').value), ma=num($('#hh-ma').value), mb=num($('#hh-mb').value), out=$('#hh-out');
+  if(!isFinite(pka)||!isFinite(ph)){ out.innerHTML=note('info','Vul pKₐ en de gewenste pH in.'); return; }
+  const ratio=Math.pow(10,ph-pka), fb=ratio/(1+ratio), fa=1-fb, rows=[['Aandeel basevorm',fmt(fb*100,1)+' %'],['Aandeel zuurvorm',fmt(fa*100,1)+' %']];
+  if(C>0&&V>0){ const mmol=C*V/1000; rows.push(['Basevorm',`${sig(mmol*fb,4)} mmol`+(mb>0?` = <b>${mass(mmol*fb/1000*mb)}</b>`:'')],['Zuurvorm',`${sig(mmol*fa,4)} mmol`+(ma>0?` = <b>${mass(mmol*fa/1000*ma)}</b>`:'')]); }
+  out.innerHTML=`<div class="lbl">Verhouding base : zuur</div><div class="big">${ratio>=1?sig(ratio,3)+' : 1':'1 : '+sig(1/ratio,3)}</div>`+kv(rows)+(Math.abs(ph-pka)>1?note('warn','De gewenste pH ligt meer dan 1 eenheid van de pKₐ; dit systeem buffert daar slecht. Kies een buffer met een pKₐ dichter bij de pH.'):'')+`<div class="formula">[base]/[zuur] = 10<sup>pH − pKₐ</sup> = 10<sup>${fmt(ph-pka,2)}</sup></div>`; };
+
+/* ================= FORENSISCHE MATCHKANS ================= */
+const RMDATA=[['D3S1358',0.25,0.15],['vWA',0.10,0.20],['FGA',0.18,''],['TH01',0.22,0.31]];
+const rmRow=r=>`<tr><td><input class="txt" data-n value="${esc(r[0]??'')}" style="width:110px"></td><td>${inp(r[1],80,'data-p')}</td><td>${inp(r[2],80,'data-q')}</td><td class="num" data-g>–</td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
+$('#rm-tbl tbody').innerHTML=RMDATA.map(rmRow).join('');
+$('#rm-add').addEventListener('click',()=>{ $('#rm-tbl tbody').insertAdjacentHTML('beforeend',rmRow(['','',''])); });
+$('#rm-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); calc.rmp(); }});
+calc.rmp=function(){ const th=num($('#rm-th').value)||0, out=$('#rm-out'); let prod=1, n=0, bad=[];
+  $$('#rm-tbl tbody tr').forEach(tr=>{ const p=num(tr.querySelector('[data-p]').value), qr=tr.querySelector('[data-q]').value.trim(), q=num(qr), cell=tr.querySelector('[data-g]'), nm=tr.querySelector('[data-n]').value||'locus';
+    if(!isFinite(p)){ cell.textContent='–'; return; } if(!(p>0&&p<=1)||(qr!==''&&!(q>0&&q<=1))||(qr!==''&&p+q>1+1e-9)){ cell.innerHTML='<span class="chip bad">ongeldig</span>'; bad.push(nm); return; }
+    const hom=qr===''||!isFinite(q), g=hom?p*p+p*(1-p)*th:2*p*q; cell.innerHTML=`${sig(g,3)} <span style="color:var(--muted);font-size:12px">${hom?'hom.':'het.'}</span>`; prod*=g; n++; });
+  if(!n){ out.innerHTML=note('info','Vul per locus de allelfrequenties in (tussen 0 en 1).'); return; }
+  out.innerHTML=`<div class="lbl">Gecombineerde matchkans (${n} loci)</div><div class="big">1 op ${sci(1/prod,3)}</div>`+kv([['Matchkans',sci(prod,3)],['Bewijskracht LR (enkelvoudig profiel)',sci(1/prod,3)],['θ',fmt(th,2)]])+(bad.length?note('bad',`Ongeldige frequenties bij: ${bad.map(esc).join(', ')}. Een frequentie ligt tussen 0 en 1 en twee allelen samen zijn hooguit 1.`):'')+note('info','De productregel veronderstelt onafhankelijke loci en een populatie in Hardy-Weinberg-evenwicht. Geldt niet voor mengprofielen of verwanten.')+`<div class="formula">heterozygoot 2pq · homozygoot p² + p(1 − p)θ · matchkans = product over de loci</div>`; };
 /* ---------- init new tools ---------- */
 buildReeks();
 sLoad('bradford');
 tblRestore();
 gfDemo();
-['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei','transf','stat','pverd','ppip','pprog','plaad','mic','gcomp','wb','melt','spec','units','inoc'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
+['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei','transf','stat','pverd','ppip','pprog','plaad','mic','gcomp','wb','melt','spec','units','inoc','molm','hh','rmp'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
 ppBuild(); plBuild(); $('#qp-impgo').addEventListener('click',qpImport); { const _op=calc.oplossing; calc.oplossing=function(e){ _op(e); try{ bufImg(); }catch(err){} }; } ['o-btitle','o-note'].forEach(id=>$('#'+id).addEventListener('input',()=>bufImg())); try{ bufImg(); }catch(e){} try{ calc.ppip(); calc.plaad(); }catch(e){ console.error(e); }
+applyUI();
 decorateXL();
 route();
+if($('#ui-autoupd').checked) setTimeout(()=>checkUpdate(false),2500);
 </script>
 </body>
 </html>

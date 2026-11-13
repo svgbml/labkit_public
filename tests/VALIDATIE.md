@@ -1,9 +1,9 @@
 # Validatie Labkit BML
 
-Automatisch gegenereerd op 2026-11-13 door `tests/validate.py`.
+Automatisch gegenereerd op 2026-11-14 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 141 van 141 controles binnen tolerantie.**
+**Resultaat: 155 van 155 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -41,9 +41,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,942 | -0.26% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7812 | +0.44% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5559 | +0.06% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9432 | -0.13% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7853 | +0.97% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,561 | +0.97% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -148,5 +148,19 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Spectrofotometrie | ε₂₈₀ volgens Pace | ε₂₈₀ | 4,292e+04 | 4,292e+04 | +0.00% | ✅ | Pace e.a. 1995: ε = 5500·W + 1490·Y + 125·cystines; 2 W, 20 Y, 17 S–S → 11 000 + 29 800 + 2125 = 42 925 M⁻¹·cm⁻¹ |
 | Eenheden omrekenen | Fysiologisch zout | mM | 154 | 154 | +0.00% | ✅ | 0,9% NaCl (58,44 g/mol) = 9 g/L = 154 mmol/L |
 | Inoculum | Start-OD | mL cultuur | 1,613 | 1,613 | +0.01% | ✅ | C₁V₁ = C₂V₂: (1,6 − 0,05) × 1 → OD 1,55; 0,05 × 50 mL / 1,55 = 1,613 mL cultuur |
+| Molmassa | Formules met kristalwater en haakjes | NaCl | 58,44 | 58,44 | +0.00% | ✅ | Sigma-Aldrich productspecificaties: NaCl 58,44; Na₂HPO₄·7H₂O 268,07; EDTA-Na₂·2H₂O 372,24; Ca(OH)₂ 74,09 g/mol |
+| Molmassa | Formules met kristalwater en haakjes | Na2HPO4·7H2O | 268,1 | 268,1 | -0.00% | ✅ | Sigma-Aldrich productspecificaties: NaCl 58,44; Na₂HPO₄·7H₂O 268,07; EDTA-Na₂·2H₂O 372,24; Ca(OH)₂ 74,09 g/mol |
+| Molmassa | Formules met kristalwater en haakjes | C10H14N2Na2O8.2H2O | 372,2 | 372,2 | +0.00% | ✅ | Sigma-Aldrich productspecificaties: NaCl 58,44; Na₂HPO₄·7H₂O 268,07; EDTA-Na₂·2H₂O 372,24; Ca(OH)₂ 74,09 g/mol |
+| Molmassa | Formules met kristalwater en haakjes | Ca(OH)2 | 74,09 | 74,09 | +0.00% | ✅ | Sigma-Aldrich productspecificaties: NaCl 58,44; Na₂HPO₄·7H₂O 268,07; EDTA-Na₂·2H₂O 372,24; Ca(OH)₂ 74,09 g/mol |
+| pH-buffer | Henderson-Hasselbalch | base : zuur | 1,738 | 1,74 | +0.13% | ✅ | pH = pKₐ + log([base]/[zuur]): acetaat pKₐ 4,76 bij pH 5,00 → 10^0,24 = 1,738; fosfaat pKₐ 7,20 bij pH 7,40 → 61,3% base |
+| pH-buffer | Henderson-Hasselbalch | % basevorm | 61,31 | 61,3 | -0.02% | ✅ | pH = pKₐ + log([base]/[zuur]): acetaat pKₐ 4,76 bij pH 5,00 → 10^0,24 = 1,738; fosfaat pKₐ 7,20 bij pH 7,40 → 61,3% base |
+| Forensische matchkans | Productregel met θ | matchkans | 0,000436 | 0,000436 | +0.00% | ✅ | NRC II (1996) 4.1: het. 2pq = 2·0,1·0,2 = 0,04; hom. p² + p(1−p)θ = 0,01 + 0,1·0,9·0,01 = 0,0109; product 4,36 × 10⁻⁴ → 1 op 2294 |
+| Updates | Versievergelijking | 1.10.0 t.o.v. 1.9.0 | 1 | 1 | +0.00% | ✅ | Semantische versies: 1.10.0 > 1.9.0, 1.9.0 = 1.9.0, 1.9.1 < 1.10.0 |
+| Updates | Versievergelijking | gelijk | 0 | 0 | +0.00% | ✅ | Semantische versies: 1.10.0 > 1.9.0, 1.9.0 = 1.9.0, 1.9.1 < 1.10.0 |
+| Updates | Versievergelijking | 1.9.1 t.o.v. 1.10.0 | -1 | -1 | -0.00% | ✅ | Semantische versies: 1.10.0 > 1.9.0, 1.9.0 = 1.9.0, 1.9.1 < 1.10.0 |
+| Instellingen | Tekstkleur op achtergrond | geel → donkere tekst | 1 | 1 | +0.00% | ✅ | WCAG relatieve luminantie: donkere tekst op lichtgeel (#F0E442), witte tekst op donkerblauw (#1558b0) |
+| Instellingen | Tekstkleur op achtergrond | blauw → witte tekst | 1 | 1 | +0.00% | ✅ | WCAG relatieve luminantie: donkere tekst op lichtgeel (#F0E442), witte tekst op donkerblauw (#1558b0) |
+| Updates | Melding bij nieuwere release | melding bij v99.0.0 | 1 | 1 | +0.00% | ✅ | Nagebootst GitHub-antwoord (releases/latest) met tag v99.0.0 en met de huidige versie |
+| Updates | Melding bij nieuwere release | geen melding bij gelijke versie | 1 | 1 | +0.00% | ✅ | Nagebootst GitHub-antwoord (releases/latest) met tag v99.0.0 en met de huidige versie |
 
 Toleranties: rekenregels 0,1–0,5%; gepubliceerde receptgrammen (afgerond in de bron) 1–3%; densitometrie op de getekende demo-gel 5%.

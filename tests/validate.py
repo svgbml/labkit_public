@@ -509,6 +509,54 @@ def _(pg):
     return [('mL cultuur', pg.evaluate("__big('#io-out')"), 0.05*50/1.55, 0.002)]
 
 
+
+@case('Molmassa', 'Formules met kristalwater en haakjes', 'Sigma-Aldrich productspecificaties: NaCl 58,44; Na₂HPO₄·7H₂O 268,07; EDTA-Na₂·2H₂O 372,24; Ca(OH)₂ 74,09 g/mol')
+def _(pg):
+    out = []
+    for f, m in [('NaCl', 58.44), ('Na2HPO4·7H2O', 268.07), ('C10H14N2Na2O8.2H2O', 372.24), ('Ca(OH)2', 74.09)]:
+        pg.evaluate(f"__go('molm');__set('mm-f',{f!r})")
+        out.append((f, pg.evaluate("__big('#mm-out')"), m, 0.0002))
+    return out
+
+@case('pH-buffer', 'Henderson-Hasselbalch', 'pH = pKₐ + log([base]/[zuur]): acetaat pKₐ 4,76 bij pH 5,00 → 10^0,24 = 1,738; fosfaat pKₐ 7,20 bij pH 7,40 → 61,3% base')
+def _(pg):
+    pg.evaluate("__go('hh');__set('hh-pka','4,76');__set('hh-ph','5,00')")
+    r = pg.evaluate("__big('#hh-out')")
+    pg.evaluate("__set('hh-pka','7,20');__set('hh-ph','7,40')")
+    return [('base : zuur', r, 10**0.24, 0.002), ('% basevorm', pg.evaluate("__kv('#hh-out','Aandeel basevorm')"), 100*10**0.2/(1+10**0.2), 0.002)]
+
+@case('Forensische matchkans', 'Productregel met θ', 'NRC II (1996) 4.1: het. 2pq = 2·0,1·0,2 = 0,04; hom. p² + p(1−p)θ = 0,01 + 0,1·0,9·0,01 = 0,0109; product 4,36 × 10⁻⁴ → 1 op 2294')
+def _(pg):
+    pg.evaluate("__go('rmp');__set('rm-th','0.01');document.querySelector('#rm-tbl tbody').innerHTML=[['A',0.1,0.2],['B',0.1,'']].map(rmRow).join('');calc.rmp();")
+    v = pg.evaluate("__kv('#rm-out','Matchkans')")
+    return [('matchkans', v, 0.04*0.0109, 0.002)]
+
+@case('Updates', 'Versievergelijking', 'Semantische versies: 1.10.0 > 1.9.0, 1.9.0 = 1.9.0, 1.9.1 < 1.10.0')
+def _(pg):
+    v = pg.evaluate("[cmpVer('1.10.0','1.9.0'),cmpVer('1.9.0','1.9.0'),cmpVer('1.9.1','1.10.0')]")
+    return [('1.10.0 t.o.v. 1.9.0', v[0], 1, 0), ('gelijk', v[1], 0, 0), ('1.9.1 t.o.v. 1.10.0', v[2], -1, 0)]
+
+@case('Instellingen', 'Tekstkleur op achtergrond', 'WCAG relatieve luminantie: donkere tekst op lichtgeel (#F0E442), witte tekst op donkerblauw (#1558b0)')
+def _(pg):
+    v = pg.evaluate("[inkOn('#F0E442')==='#1f2933'?1:0, inkOn('#1558b0')==='#ffffff'?1:0]")
+    return [('geel → donkere tekst', v[0], 1, 0), ('blauw → witte tekst', v[1], 1, 0)]
+
+
+
+@case('Updates', 'Melding bij nieuwere release', 'Nagebootst GitHub-antwoord (releases/latest) met tag v99.0.0 en met de huidige versie')
+def _(pg):
+    import json
+    def mk(tag): return lambda route: route.fulfill(status=200, content_type='application/json', headers={'access-control-allow-origin': '*'}, body=json.dumps({'tag_name': tag, 'html_url': 'https://example.org/r', 'published_at': '2026-11-14T00:00:00Z', 'assets': [{'name': 'Labkit-BML-99.0.0-setup.exe', 'browser_download_url': 'https://example.org/x.exe'}]}))
+    pg.route('https://api.github.com/**', mk('v99.0.0'))
+    pg.evaluate("__go('inst');localStorage.removeItem('labkit:v1:upd');document.getElementById('upd-check').click()"); pg.wait_for_timeout(600)
+    shown = pg.evaluate("getComputedStyle(document.getElementById('upd-bar')).display!=='none' && /99\\.0\\.0/.test(document.getElementById('upd-bar').textContent) ? 1 : 0")
+    pg.unroute('https://api.github.com/**'); pg.route('https://api.github.com/**', mk('v' + pg.evaluate('APPVER')))
+    pg.evaluate("document.getElementById('upd-bar').style.display='none';document.getElementById('upd-check').click()"); pg.wait_for_timeout(600)
+    same = pg.evaluate("getComputedStyle(document.getElementById('upd-bar')).display==='none' && /nieuwste versie/.test(document.getElementById('upd-status').textContent) ? 1 : 0")
+    pg.unroute('https://api.github.com/**')
+    return [('melding bij v99.0.0', shown, 1, 0), ('geen melding bij gelijke versie', same, 1, 0)]
+
+
 def main():
     rows = []; fails = 0
     with sync_playwright() as p:
