@@ -45,7 +45,7 @@ build/icon.png  programma-icoon
 
 1. Pas `web/index.html` aan, verhoog `version` in `package.json` en `CACHE` in `web/sw.js`.
 2. Push naar `main`: de web-app wordt automatisch bijgewerkt.
-3. Maak een tag, bijvoorbeeld `git tag v1.2.0 && git push --tags`: GitHub Actions bouwt de Windows-installers en zet ze bij *Releases*.
+3. Zodra een nieuwe versie in `package.json` op `main` staat, bouwt GitHub Actions de Windows-installers en zet ze bij *Releases* (handmatig kan ook via Actions → "Windows-programma bouwen" → Run workflow).
 
 ## Bronnen voor de berekeningen
 
