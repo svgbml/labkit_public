@@ -1,77 +1,88 @@
 # Labkit BML
 
-Rekentools en een gelfoto-editor voor het biomedisch laboratorium. Gemaakt voor de praktijk bij Biomedisch Laboratoriumonderzoek, met de nadruk op microbiologie, DNA-werk en forensisch onderzoek. Alles draait lokaal: er gaan geen gegevens of foto's naar een server.
+Rekentools, statistiek, schema's en een gelfoto-editor voor het biomedisch laboratorium. Gemaakt voor de praktijk bij Biomedisch Laboratoriumonderzoek: microbiologie, celbiologie, DNA-werk en forensisch onderzoek.
 
-## Gebruiken
+Alles draait lokaal op je eigen apparaat. Er gaan geen gegevens, metingen of foto's naar een server.
+
+## Installeren
 
 | Vorm | Hoe |
 |---|---|
-| **Web-app** | Open `https://svgbml.github.io/labkit_public/`. In Chrome of Edge: menu → *App installeren*. Daarna werkt hij ook offline, op pc, laptop en telefoon. |
-| **Windows-programma** | Download onder *Releases* `Labkit-BML-x.y.z-setup.exe` (installatie) of `…-portable.exe` (zonder installatie). |
-| **Zelf starten** | `npm install` en daarna `npm start` (Electron), of `npm run web` voor de web-app op je eigen computer. |
+| **Web-app** | Open [svgbml.github.io/labkit_public](https://svgbml.github.io/labkit_public/). In Chrome of Edge kun je hem via het menu installeren (*App installeren*); daarna werkt hij ook offline. |
+| **Windows** | Download onder [Releases](../../releases/latest) `Labkit-BML-x.y.z-setup.exe` (installatie) of `…-portable.exe` (zonder installatie, gebruikt de WebView2 die in Windows 10 en 11 zit). Het programma is niet ondertekend: kies bij de Windows-waarschuwing *Meer informatie → Toch uitvoeren*. |
 
 ## Tools
 
-**Oplossingen:** verdunning (C₁V₁ = C₂V₂), oplossing en buffer uit recept (PBS, TBE, Tris-NaCl).
-**Assays:** standaardcurve (lineair, kwadratisch, 4PL voor ELISA), enzymkinetiek (activiteit uit ΔA/min, Michaelis-Menten-fit, Lineweaver-Burk, Hanes-Woolf, remmingstype en Kᵢ).
-**Microbiologie:** groeicurve (OD₆₀₀ of KVE, automatische exponentiële fase, µ, verdubbelingstijd, lag-fase).
-**qPCR-analyse:** relatieve expressie met 2^−ΔΔCt (Livak) en Pfaffl, met herhalingen, SD en grafiek.
-**Forensisch:** degradatie-index, man/vrouw-verhouding en STR-input uit een kwantificatiekit (DNA-kwantificatie).
-**Microbiologie en cellen:** verdunningsreeks en KVE/mL, telkamer (Bürker, Neubauer, Fuchs-Rosenthal), teller met toetsen 1–9.
-**DNA:** A₂₆₀-kwantificatie en normaliseren naar STR-input, PCR-mastermix, PCR-cyclus (Tₘ via nearest-neighbor met zout- en Mg²⁺-correctie, programma, amplificatie, qPCR-efficiëntie), agarosegel en bandgrootte, gelfoto-editor, ligatie, transformatie en blauw-witscreening (transformanten, % wit, transformatiefrequentie per µg vector).
-**Data:** statistiek volgens het Tabellenboek Statistiek: beschrijvend met betrouwbaarheidsinterval, normaliteit (Lilliefors), uitbijters (Grubbs, Dixon), t-toetsen (één steekproef, twee groepen met F-toets, gepaard), Wilcoxon-rangtekentoets, one-way ANOVA met Tukey-vergelijkingen, Kruskal-Wallis met Dunn-vergelijkingen (Bonferroni) en χ²-toets, telkens met de volledige toetsingsprocedure. De standaardcurve geeft bij een lineair model ook LOD en LOQ (ICH Q2), kent naast 4PL ook 5PL voor asymmetrische ELISA-curves en leest een 96-wells-plaatexport van de plaatlezer in.
-**Protocollen:** afbeeldingen voor protocollen en labjournaal: verdunningsschema (buizen, overdracht, uitplaten), pipetteerschema (met water aanvullen en mastermix), PCR-programma (temperatuurprofiel met cyclus) en gel-laadschema. Download als PNG of kopieer als afbeelding.
-**Bench:** centrifuge (rpm ↔ × g), meerdere timers met meldingen, plaatindeling.
+**Oplossingen**
+- Verdunning (C₁V₁ = C₂V₂)
+- Oplossing en buffer uit een recept, met stappenschema als afbeelding
 
-### Gelfoto-editor
+**Assays**
+- Standaardcurve: lineair, kwadratisch, 4PL en 5PL, met LOD en LOQ en import van een 96-wells-plaatexport
+- Enzymkinetiek: activiteit uit ΔA/min, Michaelis-Menten, Lineweaver-Burk, Hanes-Woolf, remmingstype
 
-- Contrast, helderheid, inverteren, rechtzetten, draaien, spiegelen en bijsnijden
-- Automatische lanedetectie; lanen verslepen, toevoegen en een naam geven
-- Automatische ladderdetectie met 100 bp-, 100 bp plus-, 1 kb-ladder of een eigen ladder (bp of kDa)
-- Automatisch rechtzetten en lanedetectie die ook lege lanen vindt (via de vaste kamafstand)
-- Banden meten met semi-logaritmische interpolatie, of alle banden in één keer meten; putjes worden overgeslagen
-- Densitometrie: relatieve bandintensiteit per meting, met achtergrondcorrectie via rolling ball of dal-tot-dal
-- Rf-waarde per gemeten band
-- De gel zelf blijft onbewerkt: alle tekst, streepjes en metingen staan in de witte marge eromheen
-- Export als PNG of JPG op 1×, 2× of 3× resolutie, met losse schakelaars voor titel, lanelabels, ladderwaarden, streepjes, eenheid, metingen en witte rand
+**Microbiologie en cellen**
+- Verdunningsreeks en KVE/mL
+- Groeicurve en groeicurves vergelijken (gemodificeerd Gompertz-model)
+- Antibiotica-gevoeligheid: MIC uit een microdilutiereeks en S/I/R uit MIC of remzone
+- Telkamer en teller
 
-### Handig
+**DNA en eiwit**
+- DNA-kwantificatie, inclusief forensische kwantificatie (degradatie-index)
+- PCR-mastermix en PCR-cyclus (Tm via nearest-neighbor)
+- qPCR-analyse (ΔΔCt en Pfaffl, met import van een Ct-export) en smeltcurve-analyse
+- Agarosegel en bandgrootte
+- Gelfoto-editor: automatische lane- en ladderdetectie, rechtzetten, bandgrootte, densitometrie met achtergrondcorrectie, Rf, massa per band uit de massaladder, DNA- en eiwitladders
+- Western blot-normalisatie
+- Ligatie, transformatie en blauw-witscreening
 
-- Elke tabel en grafiek heeft een knop **Kopieer naar Excel** (tabel of grafiekdata, met Nederlandse decimalen) of **Kopieer grafiek** (als afbeelding)
-- Tabellen vullen door een blok te plakken uit Excel of de plaatlezer
-- **Sessie opslaan / openen** als bestand, om je werk naar een andere computer mee te nemen
-- Resultaten kopiëren of downloaden als CSV (Excel, met puntkomma)
-- Invoer, tabellen, plaatindeling, timers en teller worden onthouden op het apparaat; wissen kan onderaan het menu
+**Data**
+- Statistiek met de volledige toetsingsprocedure:
+  - beschrijvende statistiek en betrouwbaarheidsinterval
+  - normaliteit (Lilliefors) en uitbijters (Grubbs, Dixon)
+  - t-toetsen en F-toets, Wilcoxon
+  - ANOVA met Tukey, Kruskal-Wallis met Dunn, tweeweg-ANOVA
+  - lineaire regressie, χ²-toets
+  - steekproefgrootte (power)
+
+**Protocollen** (afbeeldingen voor protocol en labjournaal, met eigen tekst)
+- Verdunningsschema
+- Pipetteerschema
+- PCR-programma
+- Gel-laadschema
+
+**Bench**
+- Centrifuge (rpm ↔ × g)
+- Timers met meldingen
+- Plaatindeling met tekst per putje en export als afbeelding
+
+### Handig om te weten
+
+- Tabellen en grafieken kopieer je met één klik naar Excel, met Nederlandse decimalen. Grafieken kun je ook als afbeelding kopiëren.
+- Een blok uit Excel of een plaatlezer kun je direct in een tabel plakken.
+- Invoer wordt op je apparaat onthouden. Met *Sessie opslaan* bewaar je alles als bestand, eventueel onder een projectnaam.
 
 ## Validatie
 
-`tests/validate.py` voert voor elke tool gepubliceerde ruwe data in via de echte interface en vergelijkt de uitkomst met de bron (FDA BAM, Cold Spring Harbor, NEB, iGEM, OriGene, Thermo Fisher, Sigma-Aldrich, R-datasets Puromycin, sleep en PlantGrowth, scikit-posthocs, Mendel, NIST, Livak/Pfaffl, Biopython, SciPy, statsmodels). Het resultaat staat in [`tests/VALIDATIE.md`](tests/VALIDATIE.md) en wordt bij elke wijziging opnieuw gecontroleerd door GitHub Actions.
+Bij elke wijziging draait [`tests/validate.py`](tests/validate.py) automatisch. Het script voert gepubliceerde of onafhankelijk berekende data in via de echte interface en vergelijkt de uitkomst met de bron. Het resultaat staat per controle met bronvermelding in [`tests/VALIDATIE.md`](tests/VALIDATIE.md).
 
-## Projectstructuur
+Referenties zijn onder meer:
+- FDA BAM, NIST, Cold Spring Harbor
+- NEB, Thermo Fisher, Bio-Rad, Sigma-Aldrich
+- Livak en Pfaffl, Zwietering
+- R-datasets en SciPy, statsmodels, scikit-posthocs en Biopython
+
+## Zelf bouwen
 
 ```
-web/            de app (één HTML-bestand) + manifest, service worker en iconen
-electron/       desktopschil die web/index.html laadt
-build/icon.png  programma-icoon
-.github/        workflows: web-app naar GitHub Pages, Windows-build bij een nieuwe versie, validatie bij elke wijziging
-tests/          validatiescript, testgel en validatierapport
+npm install
+npm run web      # web-app lokaal
+npm start        # desktopversie (Tauri; vereist Rust)
+npm run dist     # Windows-installer
 ```
 
-## Nieuwe versie uitbrengen
+Projectindeling: `web/` bevat de app (één HTML-bestand met manifest en service worker), `src-tauri/` de desktopschil, `tests/` de validatie en `.github/workflows/` de publicatie naar GitHub Pages, de Windows-build en de validatie.
 
-1. Pas `web/index.html` aan, verhoog `version` in `package.json` en `CACHE` in `web/sw.js`.
-2. Push naar `main`: de web-app wordt automatisch bijgewerkt.
-3. Zodra een nieuwe versie in `package.json` op `main` staat, bouwt GitHub Actions de Windows-installers en zet ze bij *Releases* (handmatig kan ook via Actions → "Windows-programma bouwen" → Run workflow).
+## Disclaimer
 
-## Bronnen voor de berekeningen
-
-Elke tool vermeldt onderaan zijn bron. De belangrijkste: FDA Bacteriological Analytical Manual (hoofdstuk 3), Marienfeld (telkamers), Eppendorf Application Note 279 (A₂₆₀), NEB-protocollen (PCR, ligatie), Thermo Fisher (gelpercentages, Bradford), Sigma-Aldrich (centrifuge, enzymassay), Cold Spring Harbor Protocols (PBS) en Bio-Rad (TBE).
-
-## Ideeën voor volgende versies
-
-- Protocolmodus met stappen, checklist en ingebouwde timers
-- Restrictieknip-planner die de verwachte banden op de gel voorspelt
-- Eén PDF-verslag voor je labjournaal met berekeningen, curves en gelfoto
-- Bandmassa schatten uit de ladder (ng per band) naast de relatieve intensiteit
-
-Berekeningen zijn hulpmiddelen; controleer resultaten altijd tegen het protocol van je practicum.
+Labkit is een hulpmiddel. Controleer uitkomsten altijd tegen het protocol van je practicum of laboratorium. Breekpunten, ladderwaarden en kitgegevens kunnen per versie of leverancier verschillen.

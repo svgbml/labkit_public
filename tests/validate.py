@@ -409,6 +409,81 @@ def _(pg):
     return [('Rf', v, 0.5, 0.0001)]
 
 
+
+@case('Statistiek', 'Tweeweg-ANOVA', 'Voorbeelddata (2 × 2, n = 4); referentie statsmodels ols + anova_lm (type 2)')
+def _(pg):
+    import pandas as pd, statsmodels.formula.api as smf
+    from statsmodels.stats.anova import anova_lm
+    D={('LB','30'):[0.82,0.79,0.85,0.80],('LB','37'):[1.21,1.18,1.25,1.19],('M9','30'):[0.41,0.44,0.39,0.43],('M9','37'):[0.55,0.52,0.58,0.54]}
+    df=pd.DataFrame([(a,b,v) for (a,b),vs in D.items() for v in vs],columns=['A','B','y'])
+    t=anova_lm(smf.ols('y ~ C(A)*C(B)',data=df).fit(),typ=2)
+    pg.evaluate("__go('stat');__set('st-alpha','0.05');__set('st-test','anova2')")
+    F=pg.evaluate("[...document.querySelectorAll('#st-a2 tbody tr')].slice(0,3).map(r=>__n(r.cells[4].textContent))")
+    return [('F medium', F[0], t.loc['C(A)','F'], 0.002), ('F temperatuur', F[1], t.loc['C(B)','F'], 0.002), ('F interactie', F[2], t.loc['C(A):C(B)','F'], 0.002)]
+
+@case('Statistiek', 'Lineaire regressie', 'Anscombe (1973), dataset I: helling 0,5001, intercept 3,0001, R² 0,6665; SE helling via SciPy linregress')
+def _(pg):
+    from scipy.stats import linregress
+    X=[10,8,13,9,11,14,6,4,12,7,5]; Y=[8.04,6.95,7.58,8.81,8.33,9.96,7.24,4.26,10.84,4.82,5.68]; r=linregress(X,Y)
+    xs=' '.join(str(v) for v in X); ys=' '.join(str(v).replace('.',',') for v in Y)
+    pg.evaluate(f"__go('stat');__set('st-a','{xs}');__set('st-b','{ys}');__set('st-test','reg')")
+    b=pg.evaluate("__kv('#st-out','Helling b')"); a=pg.evaluate("__kv('#st-out','Intercept a')")
+    se=pg.evaluate("__n(document.querySelector('#st-out dl dd').textContent.split('±')[1])")
+    return [('helling', b, r.slope, 0.001), ('intercept', a, r.intercept, 0.001), ('SE helling', se, r.stderr, 0.01)]
+
+@case('Statistiek', 'Steekproefgrootte (power)', 'statsmodels TTestIndPower/TTestPower: d = 0,5, α = 0,05 tweezijdig, power 80% → 63,8 → 64 per groep; één steekproef 33,4 → 34')
+def _(pg):
+    pg.evaluate("__go('stat');__set('st-alpha','0.05');__set('st-side','2');__set('st-pd','0,5');__set('st-psd','1');__set('st-pw','80');__set('st-ptype','2');__set('st-test','power')")
+    n2=pg.evaluate("__big('#st-out')")
+    pg.evaluate("__set('st-ptype','1')"); n1=pg.evaluate("__big('#st-out')")
+    return [('n per groep', n2, 64, 0), ('n (één steekproef)', n1, 34, 0)]
+
+@case('Antibiotica-gevoeligheid', 'MIC en S/I/R', 'Rekentest: reeks 64 → 0,125 mg/L (factor 2); eerste groei in put 6 → MIC = 4 mg/L; S ≤ 8 → S. Zone 15 mm met S ≥ 20, R < 17 → R')
+def _(pg):
+    pg.evaluate("__go('mic');__set('mi-c0','64');__set('mi-f','2');__set('mi-n','10')")
+    m=pg.evaluate("__n(document.querySelector('#mi-out tbody tr td:nth-child(2)').textContent)")
+    c=pg.evaluate("document.querySelector('#mi-out tbody tr td:nth-child(3)').textContent.trim()")
+    z=pg.evaluate("[...document.querySelectorAll('#mz-out tbody tr')][1].cells[2].textContent.trim()")
+    return [('MIC (mg/L)', m, 4, 0), ('interpretatie S (1 = ja)', 1 if c=='S' else 0, 1, 0), ('zone 15 mm → R (1 = ja)', 1 if z=='R' else 0, 1, 0)]
+
+@case('Groeicurves vergelijken', 'Gompertz-fit', 'Rekentest: data berekend met A = 3,5; µm = 0,8 h⁻¹; λ = 2 h (Zwietering 1990) moeten terugkomen')
+def _(pg):
+    import math
+    g=lambda t:3.5*math.exp(-math.exp(0.8*math.e/3.5*(2-t)+1))
+    txt='t\tS\n'+'\n'.join(f"{t/2}\t{0.05*math.exp(g(t/2)):.6f}".replace('.',',') for t in range(0,25))
+    pg.evaluate(f"__go('gcomp');__set('gm-blank','0');__set('gm-tu','h');__set('gm-data',{txt!r})")
+    v=pg.evaluate("[...document.querySelector('#gm-out tbody tr').cells].slice(1,5).map(c=>__n(c.textContent))")
+    return [('µm', v[0], 0.8, 0.005), ('lag λ', v[2], 2.0, 0.01), ('A', v[3], 3.5, 0.01)]
+
+@case('Western blot-normalisatie', 'Relatieve expressie', 'Rekentest voorbeelddata: (31500/30800 + 29800/29900)/2 gedeeld door controle-gemiddelde (15200/30100 + 14800/29500)/2')
+def _(pg):
+    pg.evaluate("__go('wb')")
+    v=pg.evaluate("__n([...document.querySelectorAll('#wb-out tbody tr')][1].cells[2].textContent)")
+    exp=((31500/30800+29800/29900)/2)/((15200/30100+14800/29500)/2)
+    return [('behandeling 1', v, exp, 0.002)]
+
+@case('qPCR-smeltcurve', 'Tm-bepaling', 'Rekentest: smeltcurven berekend met Tm 84,5 °C en een dimeerpiek bij 76,0 °C (stap 0,5 °C)')
+def _(pg):
+    pg.evaluate("__go('melt')")
+    v=pg.evaluate("[...document.querySelectorAll('#ml-res tbody tr')].map(r=>[__n(r.cells[1].textContent),__n(r.cells[2].textContent)])")
+    return [('Tm monster 1', v[0][0], 84.5, 0.002), ('dimeerpiek monster 2', v[1][1], 76.0, 0.004)]
+
+@case('qPCR-analyse', 'Ct-export inlezen', 'CASRAI-rekenvoorbeeld als export (Sample/Target/Cq): controle 24,0/20,0, behandeld 21,5/20,2 → 6,5×')
+def _(pg):
+    txt='Sample\tTarget\tCq\nControle\tdoel\t24,0\nControle\tGAPDH\t20,0\nBehandeld\tdoel\t21,5\nBehandeld\tGAPDH\t20,2'
+    pg.evaluate(f"__go('qpcr');__set('qp-et','100');__set('qp-er','100');__set('qp-imp',{txt!r});__set('qp-refname','GAPDH');document.getElementById('qp-impgo').click();")
+    pg.wait_for_timeout(200)
+    v=pg.evaluate("[...document.querySelectorAll('#qp-res table tbody tr')].map(r=>r.textContent).join('|')")
+    import re
+    m=re.findall(r'6,4\d|6,5\d?', v)
+    return [('fold change gevonden (1 = ja)', 1 if m else 0, 1, 0)]
+
+@case('Gelfoto-editor', 'Massa per band', 'NEB 100 bp DNA Ladder (N3231), 0,5 µg per laan: 1517–100 bp = 45, 35, 95, 27, 24, 21, 18, 97, 38, 29, 25, 48 ng (som 502 ng)')
+def _(pg):
+    v=pg.evaluate("stNums(LMASS.neb100).reduce((a,b)=>a+b,0)")
+    return [('som ladder (ng)', v, 502, 0)]
+
+
 def main():
     rows = []; fails = 0
     with sync_playwright() as p:
