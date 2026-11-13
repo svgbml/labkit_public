@@ -305,6 +305,57 @@ def _(pg):
     return [(f'df {d}', a, e, 0.0005) for d, a, e in zip([1,5,10,30], v, [12.706,2.571,2.228,2.042])]
 
 
+
+@case('Statistiek', 'One-way ANOVA + Tukey', 'R-dataset PlantGrowth (Dobson 1983); R aov/TukeyHSD: F = 4,846, p = 0,01591; trt2 − trt1 = 0,865 [0,174; 1,556], p = 0,012; trt1 − ctrl p = 0,391; trt2 − ctrl p = 0,198')
+def _(pg):
+    pg.evaluate("__go('stat');__set('st-alpha','0.05');__set('st-test','anova')")
+    F = pg.evaluate("__big('#st-out')")
+    p = pg.evaluate("__n([...document.querySelectorAll('#st-out li')].find(l=>l.textContent.includes('p-waarde')).textContent.split('=')[1])")
+    rows = pg.evaluate("[...document.querySelectorAll('#st-tukey tbody tr')].map(r=>[__n(r.cells[1].textContent),__n(r.cells[2].textContent.split('–')[0]),__n(r.cells[2].textContent.split('–')[1]),__n(r.cells[3].textContent)])")
+    return [('F', F, 4.846, 0.001), ('p', p, 0.01591, 0.01), ('trt1 − ctrl p', rows[0][3], 0.391, 0.01), ('trt2 − ctrl p', rows[1][3], 0.198, 0.01),
+            ('trt2 − trt1 verschil', rows[2][0], 0.865, 0.001), ('trt2 − trt1 BI onder', rows[2][1], 0.174, 0.01), ('trt2 − trt1 BI boven', rows[2][2], 1.556, 0.005), ('trt2 − trt1 p', rows[2][3], 0.012, 0.03)]
+
+@case('Statistiek', 'Tukey, studentized range', 'SciPy studentized_range.ppf(0,95; k, df) als referentie')
+def _(pg):
+    from scipy.stats import studentized_range
+    out = []
+    for k, df in [(3, 27), (4, 12), (5, 30)]:
+        out.append((f'q krit k={k}, df={df}', pg.evaluate(f"qtukey(0.95,{k},{df})"), studentized_range.ppf(0.95, k, df), 0.003))
+    return out
+
+@case('Standaardcurve', 'LOD en LOQ (lineair)', 'ICH Q2(R2): LOD = 3,3·σ/S, LOQ = 10·σ/S met σ = reststandaardafwijking; referentie NumPy polyfit op dezelfde punten')
+def _(pg):
+    import numpy as np
+    X = [0, 0, 5, 5, 10, 10, 20, 20, 40, 40]; Y = [0.002, 0.006, 0.101, 0.094, 0.197, 0.205, 0.389, 0.402, 0.811, 0.796]
+    b, a = np.polyfit(X, Y, 1); res = np.array(Y) - (a + b*np.array(X)); s = np.sqrt((res**2).sum()/(len(X)-2))
+    pg.evaluate("""__go('curve');__set('s-preset','leeg');__set('s-model','lin');__set('s-blank',false);__set('s-logx',false);
+      document.querySelector('#s-std tbody').innerHTML=[[0,0.002,0.006],[5,0.101,0.094],[10,0.197,0.205],[20,0.389,0.402],[40,0.811,0.796]].map(r=>sStdRow(r)).join(''); calc.curve();""")
+    lod = pg.evaluate("__kv('#s-res','LOD')"); loq = pg.evaluate("__kv('#s-res','LOQ')")
+    return [('LOD', lod, 3.3*s/b, 0.005), ('LOQ', loq, 10*s/b, 0.005)]
+
+# ---------------- Protocollen ----------------
+@case('Verdunningsschema', '1:10-reeks, 1 mL per buis', 'C₁V₁ = C₂V₂: overdracht V/f = 100 µL, verdunningsmiddel 900 µL; 6 buizen → 10⁻⁶')
+def _(pg):
+    pg.evaluate("__go('pverd');__set('pv-f','10');__set('pv-v','1000');__set('pv-n','6');__set('pv-c0','1e9')")
+    return [('overdracht (µL)', pg.evaluate("__kv('#pv-out','Overdracht')"), 100, 0.0001), ('verdunningsmiddel (µL)', pg.evaluate("__kv('#pv-out','Verdunningsmiddel per')"), 900, 0.0001)]
+
+@case('Pipetteerschema', 'Water aanvullen en mastermix', 'Optellen: 25 − (2,5 + 0,5 + 1 + 1 + 0,125 + 1) = 18,875 µL; mastermix 4 buizen + 10% = 4,4 × 18,875 = 83,05 µL')
+def _(pg):
+    pg.evaluate("localStorage.removeItem('labkit:v1:proto')")
+    pg.reload(); pg.wait_for_timeout(600); pg.evaluate(HELPERS)
+    pg.evaluate("__go('ppip');__set('pp-tot','25');__set('pp-mm','1');__set('pp-marge','10')")
+    d = pg.evaluate("document.getElementById('pp-cv')._data.rows.find(r=>/^Water/.test(r[0]))")
+    return [('water per buis (µL)', d[1], 18.875, 0.0001), ('water NTC (µL)', d[4], 19.875, 0.0001), ('water mastermix (µL)', d[5], 83.05, 0.001)]
+
+@case('PCR-programma', 'Looptijd', '2:00 + 35 × (0:30 + 0:30 + 1:00) + 5:00 = 77 min')
+def _(pg):
+    pg.evaluate("localStorage.removeItem('labkit:v1:proto')")
+    pg.reload(); pg.wait_for_timeout(600); pg.evaluate(HELPERS)
+    pg.evaluate("__go('pprog');__set('pg-cyc','35')")
+    t = pg.evaluate("(()=>{ const s=[...document.querySelectorAll('#pg-out dd')][1].textContent; const h=(s.match(/(\\d+) u/)||[0,0])[1], m=(s.match(/(\\d+) min/)||[0,0])[1]; return h*60+ +m; })()")
+    return [('minuten', t, 77, 0.0001)]
+
+
 def main():
     rows = []; fails = 0
     with sync_playwright() as p:

@@ -19,7 +19,8 @@ Rekentools en een gelfoto-editor voor het biomedisch laboratorium. Gemaakt voor 
 **Forensisch:** degradatie-index, man/vrouw-verhouding en STR-input uit een kwantificatiekit (DNA-kwantificatie).
 **Microbiologie en cellen:** verdunningsreeks en KVE/mL, telkamer (Bürker, Neubauer, Fuchs-Rosenthal), teller met toetsen 1–9.
 **DNA:** A₂₆₀-kwantificatie en normaliseren naar STR-input, PCR-mastermix, PCR-cyclus (Tₘ via nearest-neighbor met zout- en Mg²⁺-correctie, programma, amplificatie, qPCR-efficiëntie), agarosegel en bandgrootte, gelfoto-editor, ligatie, transformatie en blauw-witscreening (transformanten, % wit, transformatiefrequentie per µg vector).
-**Data:** statistiek volgens het Tabellenboek Statistiek: beschrijvend met betrouwbaarheidsinterval, normaliteit (Lilliefors), uitbijters (Grubbs, Dixon), t-toetsen (één steekproef, twee groepen met F-toets, gepaard), Wilcoxon-rangtekentoets en χ²-toets, telkens met de volledige toetsingsprocedure.
+**Data:** statistiek volgens het Tabellenboek Statistiek: beschrijvend met betrouwbaarheidsinterval, normaliteit (Lilliefors), uitbijters (Grubbs, Dixon), t-toetsen (één steekproef, twee groepen met F-toets, gepaard), Wilcoxon-rangtekentoets, one-way ANOVA met Tukey-vergelijkingen en χ²-toets, telkens met de volledige toetsingsprocedure. De standaardcurve geeft bij een lineair model ook LOD en LOQ (ICH Q2).
+**Protocollen:** afbeeldingen voor protocollen en labjournaal: verdunningsschema (buizen, overdracht, uitplaten), pipetteerschema (met water aanvullen en mastermix), PCR-programma (temperatuurprofiel met cyclus) en gel-laadschema. Download als PNG of kopieer als afbeelding.
 **Bench:** centrifuge (rpm ↔ × g), meerdere timers met meldingen, plaatindeling.
 
 ### Gelfoto-editor
@@ -43,7 +44,7 @@ Rekentools en een gelfoto-editor voor het biomedisch laboratorium. Gemaakt voor 
 
 ## Validatie
 
-`tests/validate.py` voert voor elke tool gepubliceerde ruwe data in via de echte interface en vergelijkt de uitkomst met de bron (FDA BAM, Cold Spring Harbor, NEB, iGEM, OriGene, Thermo Fisher, Sigma-Aldrich, R-datasets Puromycin en sleep, Mendel, NIST, Livak/Pfaffl, Biopython, SciPy, statsmodels). Het resultaat staat in [`tests/VALIDATIE.md`](tests/VALIDATIE.md) en wordt bij elke wijziging opnieuw gecontroleerd door GitHub Actions.
+`tests/validate.py` voert voor elke tool gepubliceerde ruwe data in via de echte interface en vergelijkt de uitkomst met de bron (FDA BAM, Cold Spring Harbor, NEB, iGEM, OriGene, Thermo Fisher, Sigma-Aldrich, R-datasets Puromycin, sleep en PlantGrowth, Mendel, NIST, Livak/Pfaffl, Biopython, SciPy, statsmodels). Het resultaat staat in [`tests/VALIDATIE.md`](tests/VALIDATIE.md) en wordt bij elke wijziging opnieuw gecontroleerd door GitHub Actions.
 
 ## Projectstructuur
 

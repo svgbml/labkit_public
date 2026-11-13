@@ -207,11 +207,16 @@ canvas{max-width:100%}
   <a href="#transf"><span class="k">wit</span>Transformatie &amp; blauw-wit</a>
   <div class="navgroup">Data</div>
   <a href="#stat"><span class="k">t</span>Statistiek</a>
+  <div class="navgroup">Protocollen</div>
+  <a href="#pverd"><span class="k">1:10</span>Verdunningsschema</a>
+  <a href="#ppip"><span class="k">µL</span>Pipetteerschema</a>
+  <a href="#pprog"><span class="k">°C</span>PCR-programma</a>
+  <a href="#plaad"><span class="k">gel</span>Gel-laadschema</a>
   <div class="navgroup">Bench</div>
   <a href="#centrifuge"><span class="k">×g</span>Centrifuge</a>
   <a href="#timers"><span class="k">⏱</span>Timers</a>
   <a href="#plaat"><span class="k">96</span>Plaatindeling</a>
-  <div class="navfoot"><div class="row" style="gap:10px"><button type="button" class="ghost" id="sess-save" title="Bewaar alle invoer als bestand, bijvoorbeeld om naar een andere computer over te zetten">Sessie opslaan</button><button type="button" class="ghost" id="sess-open">Sessie openen</button><input type="file" id="sess-file" accept=".json,application/json" hidden></div><button type="button" class="ghost" id="reset-store" title="Wist de onthouden invoer op dit apparaat">Opgeslagen invoer wissen</button><span>Versie 1.5.0</span></div>
+  <div class="navfoot"><div class="row" style="gap:10px"><button type="button" class="ghost" id="sess-save" title="Bewaar alle invoer als bestand, bijvoorbeeld om naar een andere computer over te zetten">Sessie opslaan</button><button type="button" class="ghost" id="sess-open">Sessie openen</button><input type="file" id="sess-file" accept=".json,application/json" hidden></div><button type="button" class="ghost" id="reset-store" title="Wist de onthouden invoer op dit apparaat">Opgeslagen invoer wissen</button><span>Versie 1.6.0</span></div>
 </nav>
 
 <main>
@@ -568,7 +573,7 @@ canvas{max-width:100%}
       <div class="row" style="margin-top:10px"><button type="button" id="s-addunk">+ Monster</button><button type="button" id="s-copy">Kopieer resultaten</button><button type="button" id="s-csv" class="dl-only" style="display:none">Download CSV</button><span id="s-copied" style="font-size:13px;color:var(--muted)"></span></div>
     </div>
   </div>
-  <p class="src">Bradford-voorbeeldwaarden: Thermo Fisher NanoDrop One Bradford-protocol (Coomassie Plus, BSA 0–2000 µg/mL); de BSA-respons is niet lineair over het hele bereik (Thermo Fisher Coomassie Plus gebruikershandleiding), daarom staat het voorbeeld op kwadratisch. 4PL: y = D + (A − D) / (1 + (x/C)<sup>B</sup>), A = onderste asymptoot, D = bovenste, C = buigpunt, B = helling. ELISA-voorbeelddata zijn verzonnen.</p>
+  <p class="src">Bradford-voorbeeldwaarden: Thermo Fisher NanoDrop One Bradford-protocol (Coomassie Plus, BSA 0–2000 µg/mL); de BSA-respons is niet lineair over het hele bereik (Thermo Fisher Coomassie Plus gebruikershandleiding), daarom staat het voorbeeld op kwadratisch. 4PL: y = D + (A − D) / (1 + (x/C)<sup>B</sup>), A = onderste asymptoot, D = bovenste, C = buigpunt, B = helling. ELISA-voorbeelddata zijn verzonnen. LOD en LOQ (alleen lineair model): 3,3·σ/S en 10·σ/S, met σ de reststandaardafwijking van de regressie en S de helling (ICH Q2(R2)).</p>
 </section>
 
 <!-- ============ ENZYMKINETIEK ============ -->
@@ -810,6 +815,7 @@ canvas{max-width:100%}
             <option value="t2">t-toets, twee onafhankelijke groepen</option>
             <option value="tp">t-toets, gepaarde waarnemingen</option>
             <option value="wil">Wilcoxon-rangtekentoets</option>
+            <option value="anova">ANOVA (één factor) + Tukey</option>
             <option value="chi">χ²-toets</option>
           </select></div>
           <div class="f"><label for="st-alpha">Significantieniveau α</label><select id="st-alpha" style="width:100%"><option value="0.05">0,05</option><option value="0.01">0,01</option><option value="0.10">0,10</option></select></div>
@@ -826,6 +832,12 @@ canvas{max-width:100%}
         </div>
         <p style="font-size:13px;color:var(--muted);margin:8px 0 0" id="st-hint">Bij een gepaarde toets horen de waarden op dezelfde plek bij elkaar (zelfde proefpersoon, monster of plaat).</p>
       </div>
+      <div class="panel" data-st-show="anova">
+        <div class="f"><label for="st-groups">Groepen: één groep per regel, eventueel met naam en dubbele punt <span class="example">voorbeeld</span></label><textarea id="st-groups" rows="5">ctrl: 4,17 5,58 5,18 6,11 4,50 4,61 5,17 4,53 5,33 5,14
+trt1: 4,81 4,17 4,41 3,59 5,87 3,83 6,03 4,89 4,32 4,69
+trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">Plakken uit Excel kan ook: per regel een naam, een tab en dan de waarden. Voorbeeld: drooggewicht van planten onder een controle en twee behandelingen (R-dataset PlantGrowth, Dobson 1983).</p>
+      </div>
       <div class="panel" data-st-show="chi">
         <div class="f"><label for="st-obs">Waargenomen aantallen <span class="example">voorbeeld</span></label><textarea id="st-obs" rows="3">315 108 101 32</textarea></div>
         <div class="f" style="margin-top:12px"><label for="st-exp">Verwachte verhouding of verwachte aantallen</label><input id="st-exp" class="mono" value="9 3 3 1"></div>
@@ -835,7 +847,7 @@ canvas{max-width:100%}
     <div class="result" id="st-out"></div>
   </div>
   <div class="panel" style="margin-top:16px" id="st-dpanel"><h3>Per groep</h3><div id="st-desc"></div></div>
-  <p class="src">Kritieke waarden zoals in het Tabellenboek Statistiek (J.P.M. Andries, Avans): t tweezijdig (Bijlage 4), F (5 en 6), χ² (7), Kolmogorov-Smirnov met geschatte µ en σ (Lilliefors, 8), Dixon Q (9), Grubbs tweezijdig (10), Wilcoxon (11). Grubbs: G = max|xᵢ − x̄| / s, voor n &gt; 10 G<sub>krit</sub> = (n−1)/√n · √(t²/(n−2+t²)) met t bij α/(2n) en n−2 vrijheidsgraden (NIST/SEMATECH e-Handbook 1.3.5.17.1). Dixon: Q = sprong / spreidingsbreedte (Rorabacher, Anal. Chem. 1991). Welch-toets: t = (x̄₁−x̄₂)/√(s₁²/n₁+s₂²/n₂) met Welch–Satterthwaite-vrijheidsgraden. p-waarden exact uit de t-, F- en χ²-verdeling; Wilcoxon exact zonder gelijke waarden, anders normale benadering met correctie. Voorbeelddata: Student (1908), slaapwinst van twee middelen bij 10 proefpersonen (Cushny &amp; Peebles); χ²: Mendel, erwten 315/108/101/32 tegen 9:3:3:1.</p>
+  <p class="src">Kritieke waarden zoals in het Tabellenboek Statistiek (J.P.M. Andries, Avans): t tweezijdig (Bijlage 4), F (5 en 6), χ² (7), Kolmogorov-Smirnov met geschatte µ en σ (Lilliefors, 8), Dixon Q (9), Grubbs tweezijdig (10), Wilcoxon (11). Grubbs: G = max|xᵢ − x̄| / s, voor n &gt; 10 G<sub>krit</sub> = (n−1)/√n · √(t²/(n−2+t²)) met t bij α/(2n) en n−2 vrijheidsgraden (NIST/SEMATECH e-Handbook 1.3.5.17.1). Dixon: Q = sprong / spreidingsbreedte (Rorabacher, Anal. Chem. 1991). Welch-toets: t = (x̄₁−x̄₂)/√(s₁²/n₁+s₂²/n₂) met Welch–Satterthwaite-vrijheidsgraden. p-waarden exact uit de t-, F- en χ²-verdeling; Wilcoxon exact zonder gelijke waarden, anders normale benadering met correctie. One-way ANOVA met Tukey-Kramer: q = |x̄ᵢ − x̄ⱼ| / √(MS<sub>binnen</sub>/2 · (1/nᵢ + 1/nⱼ)), p uit de studentized range-verdeling (zoals TukeyHSD in R, Tukey-post-hoc in JASP en GraphPad Prism). Voorbeelddata: Student (1908), slaapwinst van twee middelen bij 10 proefpersonen (Cushny &amp; Peebles); χ²: Mendel, erwten 315/108/101/32 tegen 9:3:3:1.</p>
 </section>
 
 <!-- ============ TRANSFORMATIE ============ -->
@@ -866,6 +878,88 @@ canvas{max-width:100%}
   <p class="src">Transformatie-efficiëntie = kolonies / µg DNA / fractie uitgeplaat (NEB FAQ C2925; iGEM Troubleshooting Transformations: 250 kolonies, 100 van 1000 µL, 0,05 ng → 5 × 10⁷ kve/µg). Wit = lacZα onderbroken door een insert; niet elke witte kolonie bevat het juiste insert en een blauwe kolonie kan soms toch een insert hebben (Promega pGEM-T Easy FAQ, TM042). Werkwijze en 5 ng vector per µL ligatie: Avans DNA toolbox, Lab 3–4 (electroporatie en blauw-witscreening).</p>
 </section>
 
+<!-- ============ PROTOCOLLEN: VERDUNNINGSSCHEMA ============ -->
+<section class="tool" id="t-pverd" data-tool="pverd">
+  <header class="tool-head"><h2>Verdunningsschema</h2>
+  <p>Tekent een seriële verdunningsreeks met buizen, overdrachtsvolumes en concentraties, eventueel met uitplaten. Download als afbeelding voor je protocol of labjournaal.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f" style="grid-column:1/-1"><label for="pv-title">Titel</label><input id="pv-title" class="txt" value="Decimale verdunningsreeks"></div>
+        <div class="f"><label for="pv-c0">Concentratie stock</label><input id="pv-c0" inputmode="decimal" value="1e9"></div>
+        <div class="f"><label for="pv-cu">Eenheid</label><input id="pv-cu" class="txt" value="KVE/mL"></div>
+        <div class="f"><label for="pv-f">Factor per stap</label><div class="inu"><span class="u" style="border-left:1px solid var(--line);border-radius:4px 0 0 4px;border-right:0">1 :</span><input id="pv-f" inputmode="decimal" value="10" style="border-radius:0 4px 4px 0"></div></div>
+        <div class="f"><label for="pv-n">Aantal buizen</label><input id="pv-n" inputmode="numeric" value="6"></div>
+        <div class="f"><label for="pv-v">Volume per buis</label><div class="inu"><input id="pv-v" inputmode="decimal" value="1000"><span class="u">µL</span></div></div>
+        <div class="f"><label for="pv-dil">Verdunningsmiddel</label><input id="pv-dil" class="txt" value="fysiologisch zout"></div>
+        <div class="f"><label for="pv-lab">Buislabels</label><select id="pv-lab" style="width:100%"><option value="exp">10⁻¹, 10⁻² …</option><option value="ratio">1:10, 1:100 …</option><option value="num">1, 2, 3 …</option></select></div>
+        <div class="f"><label for="pv-plate">Uitplaten uit laatste</label><div class="inu"><input id="pv-plate" inputmode="numeric" value="3"><span class="u">buizen</span></div></div>
+        <div class="f"><label for="pv-pv">Uitplaatvolume</label><div class="inu"><input id="pv-pv" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Zet "Uitplaten" op 0 als je geen platen wilt tekenen. Uit de laatste buis houd je het overdrachtsvolume over; dat staat als opmerking onder het schema.</p>
+    </div>
+    <div class="result"><canvas id="pv-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="pv">Download PNG</button></div><div id="pv-out"></div></div>
+  </div>
+</section>
+
+<!-- ============ PROTOCOLLEN: PIPETTEERSCHEMA ============ -->
+<section class="tool" id="t-ppip" data-tool="ppip">
+  <header class="tool-head"><h2>Pipetteerschema</h2>
+  <p>Maak een overzichtelijk pipetteerschema: componenten in rijen, buizen in kolommen, met automatisch aangevuld water, totalen en een optionele mastermix-kolom.</p></header>
+  <div class="stack">
+    <div class="panel">
+      <div class="fields">
+        <div class="f" style="grid-column:span 2"><label for="pp-title">Titel</label><input id="pp-title" class="txt" value="Pipetteerschema PCR (25 µL per reactie)"></div>
+        <div class="f"><label for="pp-tot">Eindvolume per buis</label><div class="inu"><input id="pp-tot" inputmode="decimal" value="25"><span class="u">µL</span></div></div>
+        <div class="f"><label for="pp-mm">Mastermix-kolom</label><select id="pp-mm" style="width:100%"><option value="1">ja, voor alle buizen + marge</option><option value="0">nee</option></select></div>
+        <div class="f"><label for="pp-marge">Marge mastermix</label><div class="inu"><input id="pp-marge" inputmode="decimal" value="10"><span class="u">%</span></div></div>
+        <div class="f"><label for="pp-unit">Eenheid</label><select id="pp-unit" style="width:100%"><option>µL</option><option>mL</option></select></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:14px"><table id="pp-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:10px"><button type="button" id="pp-addr">+ Component</button><button type="button" id="pp-addc">+ Buis</button><button type="button" id="pp-delc">− Laatste buis</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Laat de cellen van de rij <span class="mono">Water</span> leeg: die vult Labkit aan tot het eindvolume. Kolommen met "nee" bij <i>In mastermix</i> (zoals het template) worden per buis apart gepipetteerd. Je kunt een blok uit Excel plakken.</p>
+    </div>
+    <div class="result"><canvas id="pp-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="pp">Download PNG</button></div><div id="pp-out"></div></div>
+  </div>
+</section>
+
+<!-- ============ PROTOCOLLEN: PCR-PROGRAMMA ============ -->
+<section class="tool" id="t-pprog" data-tool="pprog">
+  <header class="tool-head"><h2>PCR-programma</h2>
+  <p>Tekent het temperatuurprofiel van een PCR- of incubatieprogramma met de cyclus aangegeven, zoals in protocollen en kitbijsluiters.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f" style="grid-column:1/-1"><label for="pg-title">Titel</label><input id="pg-title" class="txt" value="PCR-programma"></div>
+        <div class="f"><label for="pg-cyc">Aantal cycli</label><input id="pg-cyc" inputmode="numeric" value="35"></div>
+        <div class="f"><label for="pg-time">Tijden tonen als</label><select id="pg-time" style="width:100%"><option value="mmss">2:00, 0:30</option><option value="txt">2 min, 30 s</option></select></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:14px"><table id="pg-tbl" class="mini"><thead><tr><th>Stap</th><th class="num">Temp. (°C)</th><th class="num">Tijd (m:ss of ∞)</th><th>In cyclus</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:10px"><button type="button" id="pg-add">+ Stap</button><button type="button" id="pg-from">Neem over uit PCR-cyclus</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De aangevinkte stappen vormen samen de cyclus en moeten aaneengesloten zijn.</p>
+    </div>
+    <div class="result"><canvas id="pg-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="pg">Download PNG</button></div><div id="pg-out"></div></div>
+  </div>
+</section>
+
+<!-- ============ PROTOCOLLEN: GEL-LAADSCHEMA ============ -->
+<section class="tool" id="t-plaad" data-tool="plaad">
+  <header class="tool-head"><h2>Gel-laadschema</h2>
+  <p>Tekent welk monster in welk slotje gaat, met volumes en looprichting. Handig om naast de gelfoto in je labjournaal te zetten.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f" style="grid-column:1/-1"><label for="pl-title">Titel</label><input id="pl-title" class="txt" value="1% agarosegel, 1× TAE, 100 V, 40 min"></div>
+        <div class="f"><label for="pl-dye">Laadbuffer</label><input id="pl-dye" class="txt" value="6× Purple loading dye"></div>
+        <div class="f"><label for="pl-slots">Aantal slotjes op de gel</label><input id="pl-slots" inputmode="numeric" value="10"></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:14px"><table id="pl-tbl" class="mini"><thead><tr><th class="num">Laan</th><th>Monster</th><th class="num">Monster (µL)</th><th class="num">Laadbuffer (µL)</th><th>Ladder</th></tr></thead><tbody></tbody></table></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Laat de monsternaam leeg voor een lege laan.</p>
+    </div>
+    <div class="result"><canvas id="pl-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="pl">Download PNG</button></div><div id="pl-out"></div></div>
+  </div>
+</section>
+
 </main>
 </div>
 
@@ -887,7 +981,7 @@ const kv=rows=>`<dl class="kv">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`)
 const calc={};
 
 /* ---------- routing ---------- */
-const TOOLS=['verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','transf','stat','centrifuge','timers','plaat'];
+const TOOLS=['verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','transf','stat','pverd','ppip','pprog','plaad','centrifuge','timers','plaat'];
 let current='verdunning';
 function route(){
   const h=(location.hash||'').slice(1);
@@ -1457,7 +1551,8 @@ calc.curve=function(){
     series:[{fn:fit.f,x0:xmin,x1:xmax,name:'fit'},{pts:X.map((x,i)=>[x,Y[i]]),color:'--ink',name:'standaard'},{pts:out.filter(u=>isFinite(u.x)).map(u=>[u.x,u.m]),color:'--bad',r:5,hollow:true,name:'monster'}],
     legend:[['standaard','--ink'],['monster','--bad']]});
   const rcov=recov.length?Math.max(...recov.map(p=>Math.abs(p-100))):0;
-  res.innerHTML=`<div class="lbl" style="margin-top:8px">Fit</div>`+kv([['Model',$('#s-model').selectedOptions[0].text],['R²',`<span class="chip ${r2>=0.99?'ok':r2>=0.98?'warn':'bad'}">${fmt(r2,4)}</span>`],['Blanco',useBlank&&blank?fmt(blank,3):'niet afgetrokken'],['Signaalbereik std',`${fmt(ylo,3)} – ${fmt(yhi,3)}`]])+
+  let lodRows=[]; if(model==='lin'&&X.length>2){ const lr=linreg(X,Y), sres=Math.sqrt(Y.reduce((s,y,i)=>s+(y-(lr.a+lr.b*X[i]))**2,0)/(X.length-2)); if(lr.b!==0){ lodRows=[['LOD (3,3·σ/S)',sig(3.3*sres/Math.abs(lr.b),3)+' '+esc(unit)],['LOQ (10·σ/S)',sig(10*sres/Math.abs(lr.b),3)+' '+esc(unit)]]; } }
+  res.innerHTML=`<div class="lbl" style="margin-top:8px">Fit</div>`+kv([['Model',$('#s-model').selectedOptions[0].text],['R²',`<span class="chip ${r2>=0.99?'ok':r2>=0.98?'warn':'bad'}">${fmt(r2,4)}</span>`],['Blanco',useBlank&&blank?fmt(blank,3):'niet afgetrokken'],['Signaalbereik std',`${fmt(ylo,3)} – ${fmt(yhi,3)}`],...lodRows])+
     `<div class="formula">${fit.eq}</div>`+
     (rcov>15?note('warn','Een of meer standaarden wijken bij terugrekenen meer dan 15% af. Probeer een ander model of laat een afwijkend punt weg.'):'')+
     (model==='lin'&&rows.length>4&&r2<0.99?note('info','Bradford-curves buigen af bij hogere concentraties; probeer kwadratisch of beperk de standaarden tot het lineaire deel.'):'')+
@@ -2077,7 +2172,7 @@ $('#gf-auto').addEventListener('click',gfAutoStraighten);
 $('#sess-save').addEventListener('click',()=>{ try{ localStorage.setItem(TBLKEY,JSON.stringify(tblSnap())); }catch(e){}
   const data={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('labkit:')) data[k]=localStorage.getItem(k); } }catch(e){}
   const d=new Date(), stamp=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  saveBlob(`labkit-sessie-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',versie:'1.5.0',opgeslagen:d.toISOString(),data},null,1)],{type:'application/json'})).catch(()=>{}); });
+  saveBlob(`labkit-sessie-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',versie:'1.6.0',opgeslagen:d.toISOString(),data},null,1)],{type:'application/json'})).catch(()=>{}); });
 $('#sess-open').addEventListener('click',()=>$('#sess-file').click());
 $('#sess-file').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const j=JSON.parse(t); if(!j||j.app!=='Labkit BML'||typeof j.data!=='object') throw 0; Object.entries(j.data).forEach(([k,v])=>{ if(k.startsWith('labkit:')) localStorage.setItem(k,v); }); location.reload(); }).catch(()=>alertBox('Dit bestand is geen Labkit-sessie.')); });
 function alertBox(t){ const n=document.createElement('div'); n.className='note bad'; n.style.cssText='position:fixed;left:16px;bottom:16px;z-index:50;max-width:320px'; n.textContent=t; document.body.appendChild(n); setTimeout(()=>n.remove(),4000); }
@@ -2141,7 +2236,7 @@ function wilcoxDist(n){ const max=n*(n+1)/2; let f=new Float64Array(max+1); f[0]
 function wilcoxCrit(n,a){ if(n<1) return NaN; const cdf=wilcoxDist(n); let c=-1; for(let s=0;s<cdf.length;s++){ if(cdf[s]<=a+1e-12) c=s; else break; } return c; }
 function rankAbs(d){ const idx=d.map((v,i)=>[Math.abs(v),i]).sort((a,b)=>a[0]-b[0]); const r=new Array(d.length); let ties=0, tcorr=0; for(let i=0;i<idx.length;){ let j=i; while(j+1<idx.length&&idx[j+1][0]===idx[i][0]) j++; const rk=(i+j)/2+1; for(let k=i;k<=j;k++) r[idx[k][1]]=rk; const t=j-i+1; if(t>1){ ties++; tcorr+=t*t*t-t; } i=j+1; } return {r,ties,tcorr}; }
 const pfmt=p=>!isFinite(p)?'–':p<0.0001?'&lt; 0,0001':sig(p,3);
-function stShow(){ const t=$('#st-test').value; $$('[data-st-show]').forEach(el=>{ el.style.display=el.dataset.stShow.split(' ').includes(t)?'':'none'; }); $('#st-bopt').style.display=t==='desc'?'':'none'; $('#st-hint').style.display=t==='tp'||t==='wil'?'':'none'; }
+function stShow(){ const t=$('#st-test').value; $$('[data-st-show]').forEach(el=>{ el.style.display=el.dataset.stShow.split(' ').includes(t)?'':'none'; }); $('#st-bopt').style.display=t==='desc'?'':'none'; $('#st-dpanel').querySelector('h3').textContent='Per groep'; $('#st-hint').style.display=t==='tp'||t==='wil'?'':'none'; }
 calc.stat=function(){
   stShow();
   const T=$('#st-test').value, alpha=num($('#st-alpha').value), side=$('#st-side').value, mu0=num($('#st-mu').value)||0;
@@ -2149,7 +2244,8 @@ calc.stat=function(){
   const A=stNums($('#st-a').value), B=stNums($('#st-b').value), out=$('#st-out');
   const useB=['desc','t2','tp','wil'].includes(T)&&B.length>0;
   /* tabel per groep */
-  const groups=T==='chi'?[]:[[nA,A]].concat(useB?[[nB,B]]:[]);
+  const AG=T==='anova'?stGroups($('#st-groups').value):[];
+  const groups=T==='chi'?[]:T==='anova'?AG.map(g=>[g.name,g.v]):[[nA,A]].concat(useB?[[nB,B]]:[]);
   if(T==='tp'&&A.length===B.length&&A.length>1) groups.push([`Verschil (${nA} − ${nB})`,A.map((v,i)=>v-B[i])]);
   const D=groups.filter(g=>g[1].length>0).map(g=>[g[0],stDesc(g[1],alpha)]);
   $('#st-dpanel').style.display=D.length?'':'none';
@@ -2226,6 +2322,17 @@ calc.stat=function(){
       decide(rej,'Er is een significant verschil.','Er is geen significant verschil aangetoond.')+`</ol>`;
     out.innerHTML=h; return;
   }
+  if(T==='anova'){
+    if(AG.length<2||AG.some(g=>g.v.length<2)){ out.innerHTML=note('info','Vul minstens twee groepen in met elk minstens twee waarden.'); return; }
+    const R=anovaCalc(AG,alpha), rej=R.F>R.Fc;
+    h=head('One-way ANOVA',`F = ${fmt(R.F,3)} <small>p = ${pfmt(R.p)}</small>`)+`<ol class="steps">`+H0('alle groepsgemiddelden zijn gelijk','minstens één gemiddelde wijkt af')+
+      `<li><b>Toetsingsgrootheid.</b> F = MS<sub>tussen</sub> / MS<sub>binnen</sub> = ${sig(R.MSB,4)} / ${sig(R.MSW,4)} = <b>${fmt(R.F,3)}</b> (df ${R.dfB}; ${R.dfW})</li><li><b>Kritieke waarde</b> (F-verdeling, eenzijdig): F = ${fmt(R.Fc,3)}</li><li><b>p-waarde</b> = ${pfmt(R.p)}</li>`+decide(rej,'Minstens één groep verschilt significant; zie de Tukey-vergelijkingen.','Er is geen significant verschil tussen de groepen aangetoond.')+`</ol>`+
+      `<div class="tbl-wrap"><table class="mini"><thead><tr><th>Bron</th><th class="num">SS</th><th class="num">df</th><th class="num">MS</th><th class="num">F</th><th class="num">p</th></tr></thead><tbody><tr><td>Tussen groepen</td><td class="num">${sig(R.SSB,5)}</td><td class="num">${R.dfB}</td><td class="num">${sig(R.MSB,5)}</td><td class="num">${fmt(R.F,3)}</td><td class="num">${pfmt(R.p)}</td></tr><tr><td>Binnen groepen</td><td class="num">${sig(R.SSW,5)}</td><td class="num">${R.dfW}</td><td class="num">${sig(R.MSW,5)}</td><td></td><td></td></tr><tr><td>Totaal</td><td class="num">${sig(R.SSB+R.SSW,5)}</td><td class="num">${R.N-1}</td><td></td><td></td><td></td></tr></tbody></table></div>`+
+      `<div class="lbl" style="margin-top:12px">Tukey-vergelijkingen (q<sub>krit</sub> = ${fmt(R.qc,3)})</div><div class="tbl-wrap"><table class="mini" id="st-tukey"><thead><tr><th>Vergelijking</th><th class="num">Verschil</th><th class="num">${fmt((1-alpha)*100,0)}%-BI</th><th class="num">p (Tukey)</th><th></th></tr></thead><tbody>${R.pairs.map(q=>`<tr><td>${esc(q.a)} − ${esc(q.b)}</td><td class="num">${sig(q.d,4)}</td><td class="num">${sig(q.lo,3)} – ${sig(q.hi,3)}</td><td class="num">${pfmt(q.p)}</td><td>${q.p<alpha?'<span class="chip bad">verschil</span>':'<span class="chip ok">geen</span>'}</td></tr>`).join('')}</tbody></table></div>`+
+      kv([['Effectgrootte η²',fmt(R.eta,3)]]);
+    if(D.some(([,o])=>isFinite(o.lD)&&o.lD>o.lC)) h+=note('warn','Niet alle groepen lijken normaal verdeeld (Lilliefors); ANOVA veronderstelt normaliteit en gelijke varianties.');
+    out.innerHTML=h; return;
+  }
   if(T==='chi'){
     const lines=$('#st-obs').value.split('\n').map(stNums).filter(r=>r.length);
     if(!lines.length){ out.innerHTML=note('info','Vul waargenomen aantallen in.'); return; }
@@ -2282,12 +2389,170 @@ calc.transf=function(){
   out.innerHTML=h;
 };
 
+/* ================= ANOVA + TUKEY ================= */
+function erfcF(x){ const z=Math.abs(x), t=1/(1+0.5*z); const r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277))))))))); return x>=0?r:2-r; }
+const PhiF=z=>0.5*erfcF(-z/Math.SQRT2);
+function prange(w,k){ if(w<=0) return 0; const a=-8, b=8, N=240, h=(b-a)/N; let s=0; for(let i=0;i<=N;i++){ const z=a+i*h, f=Math.exp(-z*z/2)/Math.sqrt(2*Math.PI)*Math.pow(Math.max(0,PhiF(z)-PhiF(z-w)),k-1); s+=f*(i===0||i===N?1:i%2?4:2); } return Math.min(1,k*s*h/3); }
+function ptukey(q,k,df){ if(q<=0) return 0; if(df>5000) return prange(q,k); const lg=Math.log(df)*df/2-gammaln(df/2)-(df/2-1)*Math.log(2); const hi=1+14/Math.sqrt(df)+ (df<4?6:0), N=200, h=hi/N; let s=0;
+  for(let i=0;i<=N;i++){ const x=i*h; if(x<=0) continue; const g=Math.exp(lg+(df-1)*Math.log(x)-df*x*x/2); s+=g*prange(q*x,k)*(i===N?1:i%2?4:2); } return Math.min(1,s*h/3); }
+function qtukey(p,k,df){ let lo=0, hi=50; for(let i=0;i<40;i++){ const m=(lo+hi)/2; if(ptukey(m,k,df)<p) lo=m; else hi=m; } return (lo+hi)/2; }
+function stGroups(txt){ return String(txt).split(/\n/).map((l,i)=>{ const m=l.match(/^\s*([^:\t]+?)\s*[:\t]\s*(.*)$/); const name=m&&!/^[-\d.,\s]+$/.test(m[1])?m[1]:`Groep ${i+1}`; const v=stNums(m&&!/^[-\d.,\s]+$/.test(m[1])?m[2]:l); return {name,v}; }).filter(g=>g.v.length); }
+function anovaCalc(G,alpha){ const k=G.length, N=G.reduce((a,g)=>a+g.v.length,0), gm=G.reduce((a,g)=>a+g.v.reduce((s,x)=>s+x,0),0)/N;
+  const ms=G.map(g=>mean(g.v)); const SSB=G.reduce((a,g,i)=>a+g.v.length*(ms[i]-gm)**2,0), SSW=G.reduce((a,g,i)=>a+g.v.reduce((s,x)=>s+(x-ms[i])**2,0),0);
+  const dfB=k-1, dfW=N-k, MSB=SSB/dfB, MSW=SSW/dfW, F=MSB/MSW, p=1-fcdf(F,dfB,dfW);
+  const qc=qtukey(1-alpha,k,dfW), pairs=[];
+  for(let i=0;i<k;i++) for(let j=i+1;j<k;j++){ const d=ms[j]-ms[i], se=Math.sqrt(MSW/2*(1/G[i].v.length+1/G[j].v.length)), q=Math.abs(d)/se; pairs.push({a:G[j].name,b:G[i].name,d,lo:d-qc*se,hi:d+qc*se,q,p:Math.max(0,1-ptukey(q,k,dfW))}); }
+  return {k,N,SSB,SSW,dfB,dfW,MSB,MSW,F,p,Fc:finv(1-alpha,dfB,dfW),qc,pairs,ms,eta:SSB/(SSB+SSW)}; }
+
+/* ================= PROTOCOLLEN: GEDEELD ================= */
+const PKEY='labkit:v1:proto';
+const pstore={get(){ try{ return JSON.parse(localStorage.getItem(PKEY)||'{}'); }catch(e){ return {}; } },set(k,v){ try{ const s=this.get(); s[k]=v; localStorage.setItem(PKEY,JSON.stringify(s)); }catch(e){} }};
+$('#reset-store').addEventListener('click',()=>{ try{ localStorage.removeItem(PKEY); }catch(e){} },true);
+const PFONT=()=>getComputedStyle(document.documentElement).getPropertyValue('--font-ui');
+const PCOL={ink:'#1f2933',muted:'#5f6b7a',line:'#c9ced6',soft:'#eef0f3',acc:'#1558b0',accSoft:'#e8f0fb',liquid:'#1558b0',warn:'#c2410c'};
+/* teken met vaste logische maat; s = schaalfactor (scherm: devicePixelRatio, export: 3) */
+function pRender(cv,W,H,draw,s){ s=s||window.devicePixelRatio||1; cv.width=Math.round(W*s); cv.height=Math.round(H*s); const x=cv.getContext('2d'); x.setTransform(s,0,0,s,0,0); x.fillStyle='#fff'; x.fillRect(0,0,W,H); x.textBaseline='middle'; x.lineJoin='round'; x.lineCap='round'; draw(x,W,H); return x; }
+function pShow(cv,W,H,draw){ pRender(cv,W,H,draw); cv.style.width='100%'; cv.style.maxWidth=W+'px'; cv._p={W,H,draw}; }
+const PNGNAME={pv:'pv-title',pp:'pp-title',pg:'pg-title',pl:'pl-title'};
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-png]'); if(!b) return; const k=b.dataset.png, cv=$('#'+k+'-cv'); if(!cv||!cv._p) return; const c=document.createElement('canvas'); pRender(c,cv._p.W,cv._p.H,cv._p.draw,3); c.toBlob(bl=>{ if(bl) saveBlob(safeName($('#'+PNGNAME[k]).value||'schema')+'.png',bl).catch(()=>{}); },'image/png'); });
+function pTitle(x,t,W){ if(!t) return 0; x.fillStyle=PCOL.ink; x.font='600 16px '+PFONT(); x.textAlign='left'; x.fillText(t,20,22); return 40; }
+function pArrow(x,x0,y0,x1,y1,col){ x.strokeStyle=col; x.fillStyle=col; x.lineWidth=1.6; x.beginPath(); x.moveTo(x0,y0); x.quadraticCurveTo((x0+x1)/2,y0-28,x1,y1); x.stroke(); const a=Math.atan2(y1-(y0-14),x1-(x0+x1)/2); x.beginPath(); x.moveTo(x1,y1); x.lineTo(x1-8*Math.cos(a-0.4),y1-8*Math.sin(a-0.4)); x.lineTo(x1-8*Math.cos(a+0.4),y1-8*Math.sin(a+0.4)); x.closePath(); x.fill(); }
+function pTube(x,cx,top,h,w,fill,alpha){ const bw=w/2; x.lineWidth=1.6; x.strokeStyle=PCOL.ink;
+  const body=()=>{ x.beginPath(); x.moveTo(cx-bw,top); x.lineTo(cx-bw,top+h*0.62); x.lineTo(cx,top+h); x.lineTo(cx+bw,top+h*0.62); x.lineTo(cx+bw,top); };
+  if(fill>0){ x.save(); body(); x.closePath(); x.clip(); x.fillStyle=`rgba(21,88,176,${alpha})`; x.fillRect(cx-bw-2,top+h*(1-fill),w+4,h*fill+2); x.restore(); }
+  body(); x.stroke(); x.fillStyle=PCOL.soft; x.strokeStyle=PCOL.ink; x.beginPath(); x.rect(cx-bw-4,top-7,w+8,7); x.fill(); x.stroke(); }
+const supNum=n=>String(n).replace(/-/g,'⁻').replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);
+function pNum(v){ if(!isFinite(v)) return '–'; if(v===0) return '0'; const e=Math.floor(Math.log10(Math.abs(v))); if(e>=-2&&e<4) return sig(v,3); const m=v/10**e; const ms=NL(Number(m.toFixed(2)),2); return (ms==='1'?'':ms+' × ')+'10'+supNum(e); }
+
+/* ================= VERDUNNINGSSCHEMA ================= */
+calc.pverd=function(){
+  const c0=num($('#pv-c0').value), cu=$('#pv-cu').value.trim(), f=num($('#pv-f').value), n=Math.max(1,Math.min(10,Math.round(num($('#pv-n').value)||1))), V=num($('#pv-v').value), dil=$('#pv-dil').value.trim()||'verdunningsmiddel';
+  const np=Math.max(0,Math.min(n,Math.round(num($('#pv-plate').value)||0))), pvol=num($('#pv-pv').value), lab=$('#pv-lab').value, title=$('#pv-title').value.trim(), out=$('#pv-out');
+  if(!(f>1)||!(V>0)){ out.innerHTML=note('bad','Factor moet groter dan 1 zijn en het volume groter dan 0.'); return; }
+  const tr=V/f, dv=V-tr, step=118, W=Math.max(520,70+(n+1)*step), H=(title?40:0)+(np?405:300);
+  const label=i=>i===0?'stock':lab==='exp'&&f===10?'10'+supNum(-i):lab==='num'?String(i):'1 : '+pNum(f**i).replace(/ /g,'');
+  pShow($('#pv-cv'),W,H,(x)=>{ const t0=pTitle(x,title,W), top=t0+70, th=110, tw=40;
+    for(let i=0;i<=n;i++){ const cx=50+i*step+20; const fillA=Math.max(0.06,0.55*Math.pow(1/f,i*0.45));
+      pTube(x,cx,top,th,tw,0.6,i===0?0.6:fillA);
+      x.fillStyle=PCOL.ink; x.textAlign='center'; x.font='600 13px '+PFONT(); x.fillText(label(i),cx,top-22);
+      x.font='12px '+PFONT(); x.fillStyle=PCOL.ink; x.fillText(isFinite(c0)?pNum(c0*f**-i):'',cx,top+th+20); x.fillStyle=PCOL.muted; x.fillText(isFinite(c0)?cu:'',cx,top+th+36);
+      if(i>0){ x.fillStyle=PCOL.muted; x.font='11.5px '+PFONT(); x.fillText(vol(dv),cx,top+th+58); (()=>{ const ws=dil.split(' '); let ln='', yy=top+th+73, k=0; ws.forEach(w=>{ if((ln+' '+w).trim().length>14&&ln&&k<1){ x.fillText(ln,cx,yy); yy+=14; ln=w; k++; } else ln=(ln+' '+w).trim(); }); x.fillText(ln.length>16?ln.slice(0,15)+'…':ln,cx,yy); })();
+        pArrow(x,cx-step+12,top-34,cx-10,top-14,PCOL.acc); x.fillStyle=PCOL.acc; x.font='600 12px '+PFONT(); x.fillText(vol(tr),cx-step/2,top-58); }
+      if(np&&i>n-np){ const py=top+th+130, r=32; x.lineWidth=1.6; x.strokeStyle=PCOL.ink; x.fillStyle='#fbf7ec'; x.beginPath(); x.ellipse(cx,py,r,r*0.42,0,0,7); x.fill(); x.stroke(); x.beginPath(); x.ellipse(cx,py-5,r,r*0.42,0,Math.PI,2*Math.PI); x.stroke();
+        x.strokeStyle=PCOL.acc; x.setLineDash([3,3]); x.beginPath(); x.moveTo(cx,top+th+94); x.lineTo(cx,py-20); x.stroke(); x.setLineDash([]);
+        x.fillStyle=PCOL.ink; x.font='11.5px '+PFONT(); x.fillText(isFinite(pvol)?vol(pvol)+' uitplaten':'uitplaten',cx,py+28); }
+    }
+    x.textAlign='left'; x.fillStyle=PCOL.muted; x.font='11.5px '+PFONT(); x.fillText(`Per buis ${vol(dv)} ${dil} + ${vol(tr)} uit de vorige buis; meng goed en wissel van tip na elke stap. Uit de laatste buis blijft ${vol(tr)} over.`,20,H-14); });
+  out.innerHTML=kv([['Overdracht per stap',vol(tr)],['Verdunningsmiddel per buis',vol(dv)],['Laatste buis',`1 : ${pNum(f**n).replace(/ /g,'')}${isFinite(c0)?' → '+sig(c0*f**-n,3)+' '+esc(cu):''}`],['Totaal verdunningsmiddel',vol(dv*n)]]);
+};
+
+/* ================= PIPETTEERSCHEMA ================= */
+let ppState=pstore.get().pp||{cols:[{n:'Monster 1',mm:true},{n:'Monster 2',mm:true},{n:'Monster 3',mm:true},{n:'NTC',mm:true}],rows:[['10× PCR-buffer','2,5','2,5','2,5','2,5'],['dNTPs (10 mM)','0,5','0,5','0,5','0,5'],['Primer F (10 µM)','1','1','1','1'],['Primer R (10 µM)','1','1','1','1'],['Taq (5 U/µL)','0,125','0,125','0,125','0,125'],['Water','','','',''],['Template','1','1','1','0']],tmplRow:6};
+function ppBuild(){ const S=ppState; $('#pp-tbl thead').innerHTML=`<tr><th>Component</th>${S.cols.map((c,j)=>`<th><input class="txt" data-cn="${j}" value="${esc(c.n)}" style="width:96px;font-weight:600"></th>`).join('')}<th>In mastermix</th><th></th></tr>`;
+  $('#pp-tbl tbody').innerHTML=S.rows.map((r,i)=>`<tr><td><input class="txt" data-r="${i}" data-c="0" value="${esc(r[0])}" style="width:150px"></td>${S.cols.map((c,j)=>`<td><input data-r="${i}" data-c="${j+1}" inputmode="decimal" value="${esc(r[j+1]??'')}" style="text-align:right;width:96px"></td>`).join('')}<td><select data-mm="${i}"><option value="1" ${S.tmplRow===i?'':'selected'}>ja</option><option value="0" ${S.tmplRow===i?'selected':''}>nee</option></select></td><td><button type="button" class="ghost" data-pdel="${i}" aria-label="Verwijder">✕</button></td></tr>`).join(''); }
+$('#pp-tbl').addEventListener('input',e=>{ const t=e.target; if(t.dataset.cn!=null) ppState.cols[+t.dataset.cn].n=t.value; else if(t.dataset.r!=null) ppState.rows[+t.dataset.r][+t.dataset.c]=t.value; });
+$('#pp-tbl').addEventListener('change',e=>{ const t=e.target; if(t.dataset.mm!=null){ const i=+t.dataset.mm; if(t.value==='0') ppState.tmplRow=i; else if(ppState.tmplRow===i) ppState.tmplRow=-1; ppBuild(); calc.ppip(); } });
+$('#pp-tbl').addEventListener('click',e=>{ const b=e.target.closest('[data-pdel]'); if(!b) return; const i=+b.dataset.pdel; ppState.rows.splice(i,1); if(ppState.tmplRow===i) ppState.tmplRow=-1; else if(ppState.tmplRow>i) ppState.tmplRow--; ppBuild(); calc.ppip(); });
+$('#pp-tbl').addEventListener('paste',e=>{ const t=e.target; if(t.dataset.r==null) return; const txt=(e.clipboardData||window.clipboardData).getData('text')||''; if(!/[\t\n]/.test(txt.trim())) return; e.preventDefault();
+  const rows=txt.replace(/\r/g,'').replace(/\n+$/,'').split('\n').map(l=>l.split('\t')); const r0=+t.dataset.r, c0=+t.dataset.c;
+  rows.forEach((cells,k)=>{ const ri=r0+k; while(ppState.rows.length<=ri) ppState.rows.push(['',...ppState.cols.map(()=>'')]); cells.forEach((v,j)=>{ const ci=c0+j; if(ci<=ppState.cols.length) ppState.rows[ri][ci]=v.trim(); }); }); ppBuild(); calc.ppip(); });
+$('#pp-addr').addEventListener('click',()=>{ ppState.rows.push(['',...ppState.cols.map(()=>'')]); ppBuild(); calc.ppip(); });
+$('#pp-addc').addEventListener('click',()=>{ ppState.cols.push({n:'Buis '+(ppState.cols.length+1),mm:true}); ppState.rows.forEach(r=>r.push(r[ppState.cols.length-1]??'')); ppBuild(); calc.ppip(); });
+$('#pp-delc').addEventListener('click',()=>{ if(ppState.cols.length<=1) return; ppState.cols.pop(); ppState.rows.forEach(r=>r.pop()); ppBuild(); calc.ppip(); });
+const isWater=n=>/^(water|milli-?q|h2o|h₂o|aqua|nuclease[- ]?vrij water|demi)/i.test(String(n).trim());
+calc.ppip=function(){
+  const S=ppState, tot=num($('#pp-tot').value), u=$('#pp-unit').value, mmOn=$('#pp-mm').value==='1', marge=num($('#pp-marge').value)||0, title=$('#pp-title').value.trim(), out=$('#pp-out');
+  pstore.set('pp',S);
+  const nc=S.cols.length, V=S.rows.map(r=>S.cols.map((c,j)=>num(r[j+1]))), wi=S.rows.findIndex(r=>isWater(r[0])), warn=[];
+  if(wi>=0&&isFinite(tot)) S.cols.forEach((c,j)=>{ if(String(S.rows[wi][j+1]).trim()!=='') return; const s=V.reduce((a,r,i)=>i===wi?a:a+(isFinite(r[j])?r[j]:0),0); V[wi][j]=tot-s; if(tot-s<0) warn.push(`${esc(c.n)}: de componenten zijn samen meer dan ${fmt(tot,2)} ${u}.`); });
+  const colTot=S.cols.map((c,j)=>V.reduce((a,r)=>a+(isFinite(r[j])?r[j]:0),0));
+  const mmN=nc*(1+marge/100), wMin=wi>=0?Math.min(...V[wi].filter(isFinite)):NaN, mmCol=V.map((r,i)=>{ if(i===S.tmplRow) return NaN; if(i===wi&&isFinite(wMin)) return wMin*mmN; const f=r.filter(isFinite); if(!f.length) return NaN; const same=f.every(v=>Math.abs(v-f[0])<1e-9); return same?f[0]*mmN:f.reduce((a,b)=>a+b,0)*(1+marge/100); });
+  const varRows=V.map((r,i)=>{ const f=r.filter(isFinite); return i!==S.tmplRow&&i!==wi&&f.length>1&&!f.every(v=>Math.abs(v-f[0])<1e-9); });
+  if(mmOn&&varRows.some(Boolean)) warn.push('Een component in de mastermix heeft niet in elke buis hetzelfde volume; zet hem op "nee" bij In mastermix of maak aparte mixen.');
+  S.cols.forEach((c,j)=>{ if(isFinite(tot)&&Math.abs(colTot[j]-tot)>1e-6&&wi<0) warn.push(`${esc(c.n)}: totaal ${fmt(colTot[j],3)} ${u} wijkt af van ${fmt(tot,2)} ${u}.`); });
+  const hdr=[...S.cols.map(c=>c.n),...(mmOn?[`Mastermix (${fmt(mmN,1)}×)`]:[])];
+  const fv=v=>isFinite(v)?NL(Number(v.toFixed(3)),3):'–';
+  const body=S.rows.map((r,i)=>[r[0]||'',...V[i].map(fv),...(mmOn?[i===S.tmplRow?'apart':fv(mmCol[i])]:[])]);
+  const totRow=['Totaal',...colTot.map(fv),...(mmOn?[fv(mmCol.filter(isFinite).reduce((a,b)=>a+b,0))]:[])];
+  const nFoot=3, cw0=Math.max(170,...S.rows.map(r=>String(r[0]).length*7.4+30)), cw=Math.max(92,...hdr.map(h=>h.length*7.2+24)), W=Math.round(cw0+cw*hdr.length+40), rh=30, t0=title?40:0, H=t0+rh*(body.length+2)+66;
+  pShow($('#pp-cv'),W,H,(x)=>{ pTitle(x,title,W); const L=20, T=t0+6; const colX=j=>L+cw0+cw*j;
+    x.fillStyle=PCOL.accSoft; x.fillRect(L,T,W-40,rh); if(mmOn){ x.fillStyle='#fdf3e7'; x.fillRect(colX(nc),T+rh,cw,rh*(body.length+1)); }
+    x.font='600 12.5px '+PFONT(); x.fillStyle=PCOL.ink; x.textAlign='left'; x.fillText(`Component (${u})`,L+8,T+rh/2); x.textAlign='center'; hdr.forEach((h,j)=>x.fillText(h,colX(j)+cw/2,T+rh/2));
+    body.forEach((r,i)=>{ const y=T+rh*(i+1); if(i===S.tmplRow){ x.fillStyle='#f6f7f9'; x.fillRect(L,y,W-40,rh); } x.font=(isWater(r[0])?'italic ':'')+'12.5px '+PFONT(); x.fillStyle=PCOL.ink; x.textAlign='left'; x.fillText(r[0],L+8,y+rh/2); x.textAlign='center'; r.slice(1).forEach((v,j)=>{ x.fillStyle=String(v).startsWith('-')?PCOL.warn:PCOL.ink; x.fillText(v,colX(j)+cw/2,y+rh/2); }); });
+    const yt=T+rh*(body.length+1); x.font='600 12.5px '+PFONT(); x.fillStyle=PCOL.ink; x.textAlign='left'; x.fillText(totRow[0],L+8,yt+rh/2); x.textAlign='center'; totRow.slice(1).forEach((v,j)=>x.fillText(v,colX(j)+cw/2,yt+rh/2));
+    x.strokeStyle=PCOL.line; x.lineWidth=1; for(let i=0;i<=body.length+2;i++){ x.beginPath(); x.moveTo(L,T+rh*i); x.lineTo(W-20,T+rh*i); x.stroke(); }
+    x.strokeStyle=PCOL.ink; x.lineWidth=1.4; x.beginPath(); x.moveTo(L,yt); x.lineTo(W-20,yt); x.stroke(); x.beginPath(); x.moveTo(L,T+rh); x.lineTo(W-20,T+rh); x.stroke();
+    x.textAlign='left'; x.font='11.5px '+PFONT(); x.fillStyle=PCOL.muted;
+    const extra=wi>=0?S.cols.map((c,j)=>[c.n,V[wi][j]-wMin]).filter(e=>e[1]>1e-9):[], perTube=mmCol.filter(isFinite).reduce((a,b)=>a+b,0)/mmN;
+    const foot=[mmOn?`Mastermix: ${fmt(nc,0)} buizen + ${fmt(marge,0)}% marge; verdeel ${fv(perTube)} ${u} per buis${S.tmplRow>=0?` en voeg daarna ${esc(S.rows[S.tmplRow][0]||'template')} apart toe`:''}.`:'',mmOn&&extra.length?`Extra water apart: ${extra.map(e=>`${e[0]} ${fv(e[1])} ${u}`).join(', ')}.`:'',wi>=0?'Water vult aan tot het eindvolume. Enzym als laatste toevoegen en op ijs werken.':''].filter(Boolean);
+    foot.forEach((f,k)=>x.fillText(f.replace(/&[a-z]+;/g,''),L,T+rh*(body.length+2)+18+k*16)); });
+  $('#pp-cv')._data={head:['Component',...hdr],rows:[...body,totRow].map(r=>r.map((v,k)=>k&&isFinite(num(v))?num(v):v))};
+  out.innerHTML=warn.map(w=>note('warn',w)).join('');
+};
+
+/* ================= PCR-PROGRAMMA ================= */
+const PGDEF=[['Initiële denaturatie','95','2:00',false],['Denaturatie','95','0:30',true],['Annealing','54','0:30',true],['Extensie','72','1:00',true],['Eindextensie','72','5:00',false],['Bewaren','10','∞',false]];
+const pgRow=r=>`<tr><td><input class="txt" data-k="n" value="${esc(r[0])}" style="width:150px"></td><td><input data-k="t" inputmode="decimal" value="${esc(r[1])}" style="text-align:right;width:70px"></td><td><input data-k="d" value="${esc(r[2])}" style="text-align:right;width:80px"></td><td style="text-align:center"><input type="checkbox" data-k="c" ${r[3]?'checked':''} aria-label="In cyclus"></td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
+$('#pg-tbl tbody').innerHTML=(pstore.get().pg||PGDEF).map(pgRow).join('');
+$('#pg-add').addEventListener('click',()=>{ $('#pg-tbl tbody').insertAdjacentHTML('beforeend',pgRow(['Stap','72','1:00',false])); calc.pprog(); });
+$('#pg-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); calc.pprog(); }});
+$('#pg-tbl').addEventListener('change',e=>{ if(e.target.type==='checkbox') calc.pprog(); });
+$('#pg-from').addEventListener('click',()=>{ const rows=$$('#pg-tbl tbody tr'); const a=rows.find(r=>/anneal/i.test(r.querySelector('[data-k=n]').value)); if(a&&typeof yTa!=='undefined'&&isFinite(yTa)) a.querySelector('[data-k=t]').value=String(Math.round(yTa*10)/10).replace('.',','); calc.pprog(); });
+function pgSecs(t){ t=String(t).trim(); if(/^(∞|inf|oneindig|hold)$/i.test(t)) return Infinity; const m=t.match(/^(\d+):(\d{1,2})$/); if(m) return +m[1]*60+ +m[2]; const n=num(t.replace(/\s*(s|sec)$/i,'')); if(/min/i.test(t)) return num(t)*60; return n; }
+function pgFmt(s,mode){ if(s===Infinity) return '∞'; if(!isFinite(s)) return '?'; if(mode==='txt') return s>=60?(s%60?`${Math.floor(s/60)} min ${s%60} s`:`${s/60} min`):`${s} s`; return `${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,'0')}`; }
+calc.pprog=function(){
+  const steps=$$('#pg-tbl tbody tr').map(tr=>({n:tr.querySelector('[data-k=n]').value.trim(),t:num(tr.querySelector('[data-k=t]').value),d:tr.querySelector('[data-k=d]').value,s:pgSecs(tr.querySelector('[data-k=d]').value),c:tr.querySelector('[data-k=c]').checked}));
+  pstore.set('pg',steps.map(s=>[s.n,String(s.t).replace('.',','),s.d,s.c]));
+  const cyc=Math.max(1,Math.round(num($('#pg-cyc').value)||1)), mode=$('#pg-time').value, title=$('#pg-title').value.trim(), out=$('#pg-out');
+  const ok=steps.filter(s=>isFinite(s.t)); if(ok.length<1){ out.innerHTML=note('info','Vul minstens één stap met temperatuur in.'); return; }
+  const ci=steps.map((s,i)=>s.c?i:-1).filter(i=>i>=0); const contig=ci.length===0||ci[ci.length-1]-ci[0]===ci.length-1;
+  const sw=104, W=Math.max(520,90+steps.length*sw), H=(title?40:0)+320;
+  const tmin=Math.min(0,...ok.map(s=>s.t)), tmax=Math.max(100,...ok.map(s=>s.t));
+  pShow($('#pg-cv'),W,H,(x)=>{ const t0=pTitle(x,title,W), top=t0+64, bot=H-62, L=56; const Y=t=>bot-(t-tmin)/(tmax-tmin)*(bot-top);
+    x.font='11px '+PFONT(); x.textAlign='right'; x.fillStyle=PCOL.muted; x.strokeStyle=PCOL.soft; x.lineWidth=1; [0,25,50,75,100].forEach(v=>{ if(v<tmin||v>tmax) return; x.beginPath(); x.moveTo(L,Y(v)); x.lineTo(W-16,Y(v)); x.stroke(); x.fillText(v+' °C',L-6,Y(v)); });
+    if(contig&&ci.length){ const x0=L+ci[0]*sw+4, x1=L+(ci[ci.length-1]+1)*sw-4; x.fillStyle=PCOL.accSoft; x.fillRect(x0,top-44,x1-x0,bot-top+44); x.fillStyle=PCOL.acc; x.font='600 13px '+PFONT(); x.textAlign='center'; x.fillText(`${cyc}×`,(x0+x1)/2,top-50); x.strokeStyle=PCOL.acc; x.lineWidth=1.4; x.beginPath(); x.moveTo(x0+2,top-34); x.lineTo(x0+2,top-40); x.lineTo(x1-2,top-40); x.lineTo(x1-2,top-34); x.stroke(); }
+    x.strokeStyle=PCOL.ink; x.lineWidth=2.4; x.beginPath(); let prev=null;
+    steps.forEach((s,i)=>{ if(!isFinite(s.t)) return; const xa=L+i*sw+(prev==null?0:28), xb=L+(i+1)*sw, y=Y(s.t); if(prev==null) x.moveTo(xa,y); else x.lineTo(xa,y); x.lineTo(xb,y); prev=y; });
+    x.stroke();
+    steps.forEach((s,i)=>{ if(!isFinite(s.t)) return; const xm=L+i*sw+sw/2+14, y=Y(s.t); x.textAlign='center'; x.fillStyle=PCOL.ink; x.font='600 12.5px '+PFONT(); x.fillText(`${NL(s.t,1)} °C`,xm,y-11); x.font='12px '+PFONT(); x.fillText(pgFmt(s.s,mode),xm,y+13);
+      x.fillStyle=PCOL.muted; x.font='11.5px '+PFONT(); const words=(s.n||'').split(' '); let line='', ly=bot+20; words.forEach(w=>{ if((line+' '+w).trim().length>14&&line){ x.fillText(line,xm,ly); ly+=14; line=w; } else line=(line+' '+w).trim(); }); if(line) x.fillText(line,xm,ly); });
+  });
+  const tCyc=ci.reduce((a,i)=>a+(isFinite(steps[i].s)?steps[i].s:0),0), tOther=steps.filter((s,i)=>!s.c&&isFinite(s.s)).reduce((a,s)=>a+s.s,0);
+  out.innerHTML=(contig?'':note('bad','De aangevinkte stappen zijn niet aaneengesloten; de cyclus wordt niet getekend.'))+kv([['Stappen in cyclus',ci.length],['Looptijd zonder op- en afkoelen',mmss2(tCyc*cyc+tOther)]])+`<div class="formula">Looptijd = som van de staptijden; de echte tijd is langer door de opwarm- en afkoelsnelheid van het apparaat.</div>`;
+};
+
+/* ================= GEL-LAADSCHEMA ================= */
+let plRows=pstore.get().pl||[['100 bp ladder','5','1',true],['PCR monster 1','5','1',false],['PCR monster 2','5','1',false],['Gezuiverd 1','5','1',false],['Gezuiverd 2','5','1',false],['NTC','5','1',false]];
+const plRow=(r,i)=>`<tr><td class="num">${i+1}</td><td><input class="txt" data-k="n" value="${esc(r[0]??'')}" style="width:150px"></td><td><input data-k="v" inputmode="decimal" value="${esc(r[1]??'')}" style="text-align:right;width:60px"></td><td><input data-k="d" inputmode="decimal" value="${esc(r[2]??'')}" style="text-align:right;width:60px"></td><td style="text-align:center"><input type="checkbox" data-k="l" ${r[3]?'checked':''} aria-label="Ladder"></td></tr>`;
+function plBuild(){ const n=Math.max(1,Math.min(30,Math.round(num($('#pl-slots').value)||10))); while(plRows.length<n) plRows.push(['','','',false]); $('#pl-tbl tbody').innerHTML=plRows.slice(0,n).map(plRow).join(''); }
+$('#pl-slots').addEventListener('input',()=>{ plBuild(); });
+$('#pl-tbl').addEventListener('input',e=>{ const tr=e.target.closest('tr'); const i=[...tr.parentNode.children].indexOf(tr); const g=k=>tr.querySelector(`[data-k=${k}]`); plRows[i]=[g('n').value,g('v').value,g('d').value,g('l').checked]; });
+$('#pl-tbl').addEventListener('change',e=>{ if(e.target.type==='checkbox'){ e.target.dispatchEvent(new Event('input',{bubbles:true})); } });
+calc.plaad=function(){
+  const n=Math.max(1,Math.min(30,Math.round(num($('#pl-slots').value)||10))); if($$('#pl-tbl tbody tr').length!==n) plBuild();
+  pstore.set('pl',plRows);
+  const lanes=plRows.slice(0,n), title=$('#pl-title').value.trim(), dye=$('#pl-dye').value.trim(), out=$('#pl-out');
+  const lw=Math.max(34,Math.min(52,Math.round(560/n))), gap=Math.round(lw*0.45), gw=n*lw+(n+1)*gap, W=Math.max(520,gw+150), maxLab=Math.max(6,...lanes.map(r=>String(r[0]||'').length)), labH=Math.min(150,maxLab*6.2+20), t0=title?40:0, H=t0+labH+250;
+  pShow($('#pl-cv'),W,H,(x)=>{ pTitle(x,title,W); const gx=(W-gw)/2-30, gy=t0+labH+16, gh=170;
+    x.fillStyle='#e9edf2'; x.strokeStyle=PCOL.ink; x.lineWidth=1.4; x.beginPath(); x.rect(gx,gy,gw,gh); x.fill(); x.stroke();
+    lanes.forEach((r,i)=>{ const cx=gx+gap+i*(lw+gap)+lw/2, has=String(r[0]||'').trim()!=='';
+      x.fillStyle=has?(r[3]?'#f2b33d':PCOL.acc):'#fff'; x.strokeStyle=PCOL.ink; x.lineWidth=1.2; x.beginPath(); x.rect(cx-lw/2,gy+10,lw,9); x.fill(); x.stroke();
+      x.fillStyle=PCOL.ink; x.font='600 12px '+PFONT(); x.textAlign='center'; x.fillText(String(i+1),cx,gy+33);
+      if(has){ x.save(); x.translate(cx,gy-8); x.rotate(-Math.PI/4); x.textAlign='left'; x.font=(r[3]?'600 ':'')+'12px '+PFONT(); x.fillStyle=PCOL.ink; x.fillText(String(r[0]),0,0); x.restore();
+        const v=num(r[1]), d=num(r[2]); x.font='11px '+PFONT(); x.fillStyle=PCOL.muted; x.textAlign='center'; if(isFinite(v)) x.fillText(`${NL(v,1)} µL`,cx,gy+gh+16); if(isFinite(d)&&d>0) x.fillText(`+${NL(d,1)}`,cx,gy+gh+30); } });
+    const ax=gx+gw+30; x.strokeStyle=PCOL.ink; x.fillStyle=PCOL.ink; x.lineWidth=1.6; x.beginPath(); x.moveTo(ax,gy+20); x.lineTo(ax,gy+gh-20); x.stroke(); x.beginPath(); x.moveTo(ax,gy+gh-14); x.lineTo(ax-5,gy+gh-24); x.lineTo(ax+5,gy+gh-24); x.closePath(); x.fill();
+    x.font='600 15px '+PFONT(); x.textAlign='center'; x.fillText('−',ax,gy+6); x.fillText('+',ax,gy+gh+4); x.font='11px '+PFONT(); x.fillStyle=PCOL.muted; x.save(); x.translate(ax+14,gy+gh/2); x.rotate(Math.PI/2); x.fillText('looprichting DNA',0,0); x.restore();
+    x.textAlign='left'; x.font='11.5px '+PFONT(); x.fillStyle=PCOL.muted; x.fillText(`Onder de gel: µL monster${dye?` en + µL ${dye}`:''}. Geel = ladder.`,20,H-14); });
+  const used=lanes.filter(r=>String(r[0]||'').trim()); out.innerHTML=kv([['Gebruikte lanen',`${used.length} van ${n}`],['Totaal laadvolume per laan (max)',used.length?Math.max(...used.map(r=>(num(r[1])||0)+(num(r[2])||0)))+' µL':'–']]);
+};
+
 /* ---------- init new tools ---------- */
 buildReeks();
 sLoad('bradford');
 tblRestore();
 gfDemo();
-['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei','transf','stat'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
+['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei','transf','stat','pverd','ppip','pprog','plaad'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
+ppBuild(); plBuild(); try{ calc.ppip(); calc.plaad(); }catch(e){ console.error(e); }
 decorateXL();
 route();
 </script>
