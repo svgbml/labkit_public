@@ -6,7 +6,7 @@ Rekentools en een gelfoto-editor voor het biomedisch laboratorium. Gemaakt voor 
 
 | Vorm | Hoe |
 |---|---|
-| **Web-app** | Open `https://svgbml.github.io/labkit/`. In Chrome of Edge: menu → *App installeren*. Daarna werkt hij ook offline, op pc, laptop en telefoon. |
+| **Web-app** | Open `https://svgbml.github.io/labkit_public/`. In Chrome of Edge: menu → *App installeren*. Daarna werkt hij ook offline, op pc, laptop en telefoon. |
 | **Windows-programma** | Download onder *Releases* `Labkit-BML-x.y.z-setup.exe` (installatie) of `…-portable.exe` (zonder installatie). |
 | **Zelf starten** | `npm install` en daarna `npm start` (Electron), of `npm run web` voor de web-app op je eigen computer. |
 
