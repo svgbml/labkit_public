@@ -65,18 +65,19 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 - Centrifuge (rpm ↔ × g)
 - Timers met meldingen
 - Plaatindeling met tekst per putje, onbeperkt groepen met eigen kleuren en paletten, ronde of vierkante putjes en export als afbeelding
-- Instellingen: thema (licht, donker, papier, hoog contrast, leisteen), dichtheid, tekstgrootte, accentkleur en kleurenpaletten
+- Instellingen: taal (Nederlands of Engels), thema (licht, donker, papier, hoog contrast, leisteen), dichtheid, tekstgrootte, accentkleur en kleurenpaletten
 
 ### Handig om te weten
 
+- De app is beschikbaar in het Nederlands en het Engels (*Instellingen & updates → Taal / Language*). Bij de eerste start volgt de taal je browser of Windows. In het Engels gebruiken getallen een punt als decimaalteken, ook bij kopiëren naar Excel en in CSV-exports.
 - De app controleert bij het starten of er een nieuwe versie is en meldt dat bovenaan. De web-app vernieuwt zichzelf; het Windows-programma haalt de nieuwe installer op. Uitzetten kan bij *Instellingen & updates*.
-- Tabellen en grafieken kopieer je met één klik naar Excel, met Nederlandse decimalen. Grafieken kun je ook als afbeelding kopiëren.
+- Tabellen en grafieken kopieer je met één klik naar Excel, met decimalen in de gekozen taal. Grafieken kun je ook als afbeelding kopiëren.
 - Een blok uit Excel of een plaatlezer kun je direct in een tabel plakken.
 - Invoer wordt op je apparaat onthouden. Met *Sessie opslaan* bewaar je alles als bestand, eventueel onder een projectnaam.
 
 ## Validatie
 
-Bij elke wijziging draait [`tests/validate.py`](tests/validate.py) automatisch. Het script voert gepubliceerde of onafhankelijk berekende data in via de echte interface en vergelijkt de uitkomst met de bron. Het resultaat staat per controle met bronvermelding in [`tests/VALIDATIE.md`](tests/VALIDATIE.md). Daarnaast controleert [`tests/layout_audit.py`](tests/layout_audit.py) elke tool op drie schermbreedtes op overlappende of afgesneden tekst, ook in de gegenereerde afbeeldingen, en vult [`tests/robust_audit.py`](tests/robust_audit.py) elk invoerveld met randgevallen (leeg, nul, negatief, tekst, extreem groot) om vastlopers en onzinuitvoer te vinden.
+Bij elke wijziging draait [`tests/validate.py`](tests/validate.py) automatisch. Het script voert gepubliceerde of onafhankelijk berekende data in via de echte interface en vergelijkt de uitkomst met de bron. Het resultaat staat per controle met bronvermelding in [`tests/VALIDATIE.md`](tests/VALIDATIE.md). Daarnaast controleert [`tests/layout_audit.py`](tests/layout_audit.py) elke tool op drie schermbreedtes op overlappende of afgesneden tekst, ook in de gegenereerde afbeeldingen, en vult [`tests/robust_audit.py`](tests/robust_audit.py) elk invoerveld met randgevallen (leeg, nul, negatief, tekst, extreem groot) om vastlopers en onzinuitvoer te vinden. [`tests/i18n_collect.py`](tests/i18n_collect.py) doorloopt alle tools in het Engels en faalt zodra er een tekst zonder vertaling verschijnt; de vertalingen staan in [`i18n/en.json`](i18n/en.json) en worden met `python tools/build_i18n.py` in de app gezet.
 
 Referenties zijn onder meer:
 - FDA BAM, NIST, Cold Spring Harbor

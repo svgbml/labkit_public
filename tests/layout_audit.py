@@ -53,6 +53,7 @@ def main():
         b = p.chromium.launch()
         for W, H in [(1440, 900), (1024, 800), (390, 844)]:
             pg = b.new_page(viewport={'width': W, 'height': H}, device_scale_factor=1)
+            pg.add_init_script("try{localStorage.setItem('labkit:v1:lang','"+__import__('os').environ.get('LABKIT_LANG','nl')+"')}catch(e){}")
             pg.add_init_script(PATCH)
             errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
             pg.goto(URL); pg.wait_for_timeout(900)

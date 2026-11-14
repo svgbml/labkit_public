@@ -29,6 +29,12 @@ jobs:
         run: python tests/layout_audit.py
       - name: Robuustheidscontrole met randgevallen
         run: python tests/robust_audit.py
+      - name: Engelse vertaling compleet
+        run: python tests/i18n_collect.py
+      - name: Layoutcontrole in het Engels
+        run: python tests/layout_audit.py
+        env:
+          LABKIT_LANG: en
       - uses: actions/upload-artifact@v4
         if: always()
         with:

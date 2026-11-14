@@ -19,6 +19,7 @@ def main():
     issues = []
     with sync_playwright() as p:
         b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1400, 'height': 900})
+        pg.add_init_script("try{localStorage.setItem('labkit:v1:lang','"+__import__('os').environ.get('LABKIT_LANG','nl')+"')}catch(e){}")
         errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
         cdp = pg.context.new_cdp_session(pg)
         def boot(t, st):
