@@ -1602,6 +1602,31 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!-- NT:strchk -->
 <section class="tool" id="t-strchk" data-tool="strchk">
   <header class="tool-head"><h2>STR-profielcontrole</h2>
@@ -4550,8 +4575,8 @@ $('#cc-print').addEventListener('click',()=>printCanvas($('#cc-cv')));
 calc.coc=function(){ const IT=etGet('cc-it').filter(r=>r.some(v=>v.trim())), TR=etGet('cc-tr').filter(r=>r.some(v=>v.trim())), W=794, rowI=58, rowT=46, H=170+28+IT.length*rowI+60+TR.length*rowT+90;
   pShow($('#cc-cv'),W,H,(x)=>{ const L=36, R=W-36; x.fillStyle=PCOL.ink; x.textAlign='left'; x.textBaseline='alphabetic';
     x.font='700 20px '+PFONT(); x.fillText('Chain of custody',L,46); x.font='12px '+PFONT(); x.fillStyle=PCOL.muted; x.fillText($('#cc-org').value,L,66);
-    x.fillStyle=PCOL.ink; x.font='600 13px '+PFONT(); x.fillText('Zaaknummer:',L,96); x.font='13px '+PFONT(); x.fillText($('#cc-case').value,L+96,96); drawC39(x,$('#cc-case').value,R-260,78,26,1.2);
-    x.font='600 13px '+PFONT(); x.fillText('Omschrijving:',L,118); x.font='13px '+PFONT(); x.fillText($('#cc-desc').value.slice(0,90),L+96,118);
+    x.fillStyle=PCOL.ink; x.font='600 13px '+PFONT(); const lw=Math.max(x.measureText('Zaaknummer:').width,x.measureText('Omschrijving:').width)+10; x.fillText('Zaaknummer:',L,96); x.font='13px '+PFONT(); x.fillText(uv($('#cc-case').value),L+lw,96); drawC39(x,$('#cc-case').value,R-260,78,26,1.2);
+    x.font='600 13px '+PFONT(); x.fillText('Omschrijving:',L,118); x.font='13px '+PFONT(); x.fillText(uv($('#cc-desc').value.slice(0,90)),L+lw,118);
     let y=150; x.strokeStyle=PCOL.ink; x.lineWidth=1.2; x.beginPath(); x.moveTo(L,y); x.lineTo(R,y); x.stroke();
     x.font='700 14px '+PFONT(); x.fillText('Sporen',L,y+22); y+=34;
     const ci=[L,L+190,L+380,L+500,L+610]; x.font='600 11px '+PFONT(); x.fillStyle=PCOL.muted; ['Spoor-ID / barcode','Omschrijving','Vindplaats','Verzameld door','Datum/tijd · zegel'].forEach((t,i)=>x.fillText(t,ci[i],y)); y+=8;
@@ -4699,7 +4724,7 @@ calc.stain=function(){ const S=etGet('stn-tbl').filter(r=>r[0].trim()), title=$(
       x.fillStyle='#fff'; x.strokeStyle=PCOL.line; x.lineWidth=1; x.beginPath(); x.roundRect(X,Y,bw,bh,8); x.fill(); x.stroke();
       x.fillStyle=/^#|^[a-z]+$/i.test(r[2])?r[2]:'#999'; x.beginPath(); x.arc(X+22,Y+24,11,0,7); x.fill();
       x.fillStyle=PCOL.ink; x.font='600 12px '+PFONT(); x.textAlign='left'; x.textBaseline='middle'; x.fillText(String(i+1),X+44,Y+24);
-      const words=r[0].split(/\s+/); let ln='', ly=Y+48; x.font='12px '+PFONT(); words.forEach(w=>{ if(x.measureText(ln+' '+w).width>bw-16&&ln){ x.fillText(ln,X+10,ly); ly+=15; ln=w; } else ln=ln?ln+' '+w:w; }); x.fillText(ln,X+10,ly);
+      const words=r[0].split(/\s+/); let ln='', ly=Y+48; x.font='12px '+PFONT(); words.forEach(w=>{ if(x.measureText(uv(ln+' '+w)).width>bw-16&&ln){ x.fillText(uv(ln),X+10,ly); ly+=15; ln=w; } else ln=ln?ln+' '+w:w; }); x.fillText(uv(ln),X+10,ly);
       x.fillStyle=PCOL.muted; x.font='11px '+PFONT(); x.fillText(tt(r[1]),X+60,Y+24);
       if(i<S.length-1){ x.strokeStyle=PCOL.muted; x.lineWidth=1.5; if(c<per-1){ x.beginPath(); x.moveTo(X+bw+4,Y+bh/2); x.lineTo(X+bw+gap-6,Y+bh/2); x.stroke(); x.beginPath(); x.moveTo(X+bw+gap-6,Y+bh/2); x.lineTo(X+bw+gap-12,Y+bh/2-4); x.lineTo(X+bw+gap-12,Y+bh/2+4); x.closePath(); x.fillStyle=PCOL.muted; x.fill(); } } });
     if(res){ x.fillStyle=PCOL.ink; x.font='600 12.5px '+PFONT(); x.textAlign='left'; x.textBaseline='alphabetic'; x.fillText(res,20,H-16); } });
