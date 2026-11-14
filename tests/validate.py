@@ -339,13 +339,19 @@ def _(pg):
     pg.evaluate("__go('pverd');__set('pv-f','10');__set('pv-v','1000');__set('pv-n','6');__set('pv-c0','1e9')")
     return [('overdracht (µL)', pg.evaluate("__kv('#pv-out','Overdracht')"), 100, 0.0001), ('verdunningsmiddel (µL)', pg.evaluate("__kv('#pv-out','Verdunningsmiddel per')"), 900, 0.0001)]
 
-@case('Pipetteerschema', 'Water aanvullen en mastermix', 'Optellen: 25 − (2,5 + 0,5 + 1 + 1 + 0,125 + 1) = 18,875 µL; mastermix 4 buizen + 10% = 4,4 × 18,875 = 83,05 µL')
+@case('Pipetteerschema', 'PCR: water aanvullen en mastermix', 'C₁V₁ = C₂V₂: buffer 10X→1X = 2,5 µL, dNTP 10→0,2 mM = 0,5 µL, primers 10→0,4 µM = 1 µL; water 25 − (2,5 + 0,5 + 1 + 1 + 0,125 + 1) = 18,875 µL; mastermix 4 buizen + 10% = 4,4 × 18,875 = 83,05 µL')
 def _(pg):
     pg.evaluate("localStorage.removeItem('labkit:v1:proto')")
     pg.reload(); pg.wait_for_timeout(600); pg.evaluate(HELPERS)
     pg.evaluate("__go('ppip');__set('pp-tot','25');__set('pp-mm','1');__set('pp-marge','10')")
-    d = pg.evaluate("document.getElementById('pp-cv')._data.rows.find(r=>/^Water/.test(r[0]))")
-    return [('water per buis (µL)', d[1], 18.875, 0.0001), ('water NTC (µL)', d[4], 19.875, 0.0001), ('water mastermix (µL)', d[5], 83.05, 0.001)]
+    d = pg.evaluate("(()=>{ const D=document.getElementById('pp-cv')._data, h=D.head, r=D.rows.find(r=>/^Water/.test(r[0])), b=D.rows.find(r=>/buffer/.test(r[0])); return [r[h.indexOf('Monster 1')], r[h.indexOf('NTC')], r[h.findIndex(x=>/^Mastermix/.test(x))], b[h.indexOf('Monster 1')]]; })()")
+    return [('water per buis (µL)', d[0], 18.875, 0.0001), ('water NTC (µL)', d[1], 19.875, 0.0001), ('water mastermix (µL)', d[2], 83.05, 0.001), ('buffer 10X→1X (µL)', d[3], 2.5, 0.0001)]
+
+@case('Pipetteerschema', 'BSA-standaardreeks uit eindconcentraties', 'Pierce BCA-handleiding (2000 µg/mL stock): V = C × 100 µL / 2000; 1500 µg/mL → 75 µL BSA + 25 µL verdunningsmiddel; 125 µg/mL → 6,25 µL')
+def _(pg):
+    pg.evaluate("__go('ppip');document.getElementById('pp-preset').value='bca';document.getElementById('pp-load').click()")
+    d = pg.evaluate("(()=>{ const D=document.getElementById('pp-cv')._data, h=D.head, b=D.rows.find(r=>/^BSA/.test(r[0])), w=D.rows.find(r=>/^Verdunningsmiddel/.test(r[0])); return [b[h.indexOf('B')], w[h.indexOf('B')], b[h.indexOf('G')]]; })()")
+    return [('BSA voor 1500 µg/mL (µL)', d[0], 75, 0.0001), ('verdunningsmiddel (µL)', d[1], 25, 0.0001), ('BSA voor 125 µg/mL (µL)', d[2], 6.25, 0.0001)]
 
 @case('PCR-programma', 'Looptijd', '2:00 + 35 × (0:30 + 0:30 + 1:00) + 5:00 = 77 min')
 def _(pg):

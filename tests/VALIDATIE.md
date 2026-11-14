@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-14 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 165 van 165 controles binnen tolerantie.**
+**Resultaat: 169 van 169 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -41,9 +41,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9465 | +0.22% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7811 | +0.43% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5596 | +0.73% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9501 | +0.60% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,789 | +1.44% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5565 | +0.17% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -109,9 +109,13 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Standaardcurve | LOD en LOQ (lineair) | LOQ | 3,4 | 3,4 | -0.00% | ✅ | ICH Q2(R2): LOD = 3,3·σ/S, LOQ = 10·σ/S met σ = reststandaardafwijking; referentie NumPy polyfit op dezelfde punten |
 | Verdunningsschema | 1:10-reeks, 1 mL per buis | overdracht (µL) | 100 | 100 | +0.00% | ✅ | C₁V₁ = C₂V₂: overdracht V/f = 100 µL, verdunningsmiddel 900 µL; 6 buizen → 10⁻⁶ |
 | Verdunningsschema | 1:10-reeks, 1 mL per buis | verdunningsmiddel (µL) | 900 | 900 | +0.00% | ✅ | C₁V₁ = C₂V₂: overdracht V/f = 100 µL, verdunningsmiddel 900 µL; 6 buizen → 10⁻⁶ |
-| Pipetteerschema | Water aanvullen en mastermix | water per buis (µL) | 18,88 | 18,88 | +0.00% | ✅ | Optellen: 25 − (2,5 + 0,5 + 1 + 1 + 0,125 + 1) = 18,875 µL; mastermix 4 buizen + 10% = 4,4 × 18,875 = 83,05 µL |
-| Pipetteerschema | Water aanvullen en mastermix | water NTC (µL) | 19,88 | 19,88 | +0.00% | ✅ | Optellen: 25 − (2,5 + 0,5 + 1 + 1 + 0,125 + 1) = 18,875 µL; mastermix 4 buizen + 10% = 4,4 × 18,875 = 83,05 µL |
-| Pipetteerschema | Water aanvullen en mastermix | water mastermix (µL) | 83,05 | 83,05 | +0.00% | ✅ | Optellen: 25 − (2,5 + 0,5 + 1 + 1 + 0,125 + 1) = 18,875 µL; mastermix 4 buizen + 10% = 4,4 × 18,875 = 83,05 µL |
+| Pipetteerschema | PCR: water aanvullen en mastermix | water per buis (µL) | 18,88 | 18,88 | +0.00% | ✅ | C₁V₁ = C₂V₂: buffer 10X→1X = 2,5 µL, dNTP 10→0,2 mM = 0,5 µL, primers 10→0,4 µM = 1 µL; water 25 − (2,5 + 0,5 + 1 + 1 + 0,125 + 1) = 18,875 µL; mastermix 4 buizen + 10% = 4,4 × 18,875 = 83,05 µL |
+| Pipetteerschema | PCR: water aanvullen en mastermix | water NTC (µL) | 19,88 | 19,88 | +0.00% | ✅ | C₁V₁ = C₂V₂: buffer 10X→1X = 2,5 µL, dNTP 10→0,2 mM = 0,5 µL, primers 10→0,4 µM = 1 µL; water 25 − (2,5 + 0,5 + 1 + 1 + 0,125 + 1) = 18,875 µL; mastermix 4 buizen + 10% = 4,4 × 18,875 = 83,05 µL |
+| Pipetteerschema | PCR: water aanvullen en mastermix | water mastermix (µL) | 83,05 | 83,05 | +0.00% | ✅ | C₁V₁ = C₂V₂: buffer 10X→1X = 2,5 µL, dNTP 10→0,2 mM = 0,5 µL, primers 10→0,4 µM = 1 µL; water 25 − (2,5 + 0,5 + 1 + 1 + 0,125 + 1) = 18,875 µL; mastermix 4 buizen + 10% = 4,4 × 18,875 = 83,05 µL |
+| Pipetteerschema | PCR: water aanvullen en mastermix | buffer 10X→1X (µL) | 2,5 | 2,5 | +0.00% | ✅ | C₁V₁ = C₂V₂: buffer 10X→1X = 2,5 µL, dNTP 10→0,2 mM = 0,5 µL, primers 10→0,4 µM = 1 µL; water 25 − (2,5 + 0,5 + 1 + 1 + 0,125 + 1) = 18,875 µL; mastermix 4 buizen + 10% = 4,4 × 18,875 = 83,05 µL |
+| Pipetteerschema | BSA-standaardreeks uit eindconcentraties | BSA voor 1500 µg/mL (µL) | 75 | 75 | +0.00% | ✅ | Pierce BCA-handleiding (2000 µg/mL stock): V = C × 100 µL / 2000; 1500 µg/mL → 75 µL BSA + 25 µL verdunningsmiddel; 125 µg/mL → 6,25 µL |
+| Pipetteerschema | BSA-standaardreeks uit eindconcentraties | verdunningsmiddel (µL) | 25 | 25 | +0.00% | ✅ | Pierce BCA-handleiding (2000 µg/mL stock): V = C × 100 µL / 2000; 1500 µg/mL → 75 µL BSA + 25 µL verdunningsmiddel; 125 µg/mL → 6,25 µL |
+| Pipetteerschema | BSA-standaardreeks uit eindconcentraties | BSA voor 125 µg/mL (µL) | 6,25 | 6,25 | +0.00% | ✅ | Pierce BCA-handleiding (2000 µg/mL stock): V = C × 100 µL / 2000; 1500 µg/mL → 75 µL BSA + 25 µL verdunningsmiddel; 125 µg/mL → 6,25 µL |
 | PCR-programma | Looptijd | minuten | 77 | 77 | +0.00% | ✅ | 2:00 + 35 × (0:30 + 0:30 + 1:00) + 5:00 = 77 min |
 | Statistiek | Kruskal-Wallis + Dunn | H | 7,988 | 7,988 | -0.00% | ✅ | R-dataset PlantGrowth; R kruskal.test: H = 7,988, p = 0,01842; Dunn met Bonferroni: referentie scikit-posthocs posthoc_dunn |
 | Statistiek | Kruskal-Wallis + Dunn | p | 0,01842 | 0,0184 | -0.11% | ✅ | R-dataset PlantGrowth; R kruskal.test: H = 7,988, p = 0,01842; Dunn met Bonferroni: referentie scikit-posthocs posthoc_dunn |

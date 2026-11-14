@@ -57,7 +57,7 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 
 **Protocollen** (afbeeldingen voor protocol en labjournaal, met eigen tekst)
 - Verdunningsschema
-- Pipetteerschema
+- Pipetteerschema voor elke reactie of mengsel: volumes of stock- en eindconcentraties, automatisch aanvullen, mastermix en sjablonen (PCR, qPCR, restrictiedigest, ligatie, BSA-standaardreeks, kweekmedium)
 - PCR-programma
 - Gel-laadschema
 
@@ -69,6 +69,7 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 
 ### Handig om te weten
 
+- Elke tool heeft tags (bijvoorbeeld PCR, Eiwit, Kloneren). Klik op een tag om alle tools rond dat onderwerp te zien; de zoekbalk zoekt ook op tags.
 - De app is beschikbaar in het Nederlands en het Engels (*Instellingen & updates → Taal / Language*). Bij de eerste start volgt de taal je browser of Windows. In het Engels gebruiken getallen een punt als decimaalteken, ook bij kopiëren naar Excel en in CSV-exports.
 - De app controleert bij het starten of er een nieuwe versie is en meldt dat bovenaan. De web-app vernieuwt zichzelf; het Windows-programma haalt de nieuwe installer op. Uitzetten kan bij *Instellingen & updates*.
 - Tabellen en grafieken kopieer je met één klik naar Excel, met decimalen in de gekozen taal. Grafieken kun je ook als afbeelding kopiëren.
