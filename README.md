@@ -24,12 +24,15 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 - Titratiecurve (ook meerwaardige zuren, met equivalentiepunten)
 - Osmolariteit, ionsterkte en normaliteit
 - Kjeldahl: stikstof en ruw eiwit
+- Waterhardheid (EDTA-titratie), buffercapaciteit en oplosbaarheid (K<sub>sp</sub>)
 
 **Assays**
 - Standaardcurve: lineair, kwadratisch, 4PL en 5PL, met LOD en LOQ en import van een 96-wells-plaatexport
 - Enzymkinetiek: activiteit uit ΔA/min, Michaelis-Menten, Lineweaver-Burk, Hanes-Woolf, remmingstype
 - Spectrofotometrie: Lambert-Beer en eiwitconcentratie uit A₂₈₀ (ε uit de sequentie)
 - Dosis-respons: IC₅₀/EC₅₀ met een 4PL-fit
+- Chromatografie (plaatgetal, resolutie, tailing) en kalibratie met interne standaard of standaardadditie
+- Assaykwaliteit (Z′-factor)
 
 **Microbiologie en cellen**
 - Verdunningsreeks en KVE/mL
@@ -42,6 +45,7 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 - MPN (meest waarschijnlijk aantal) met betrouwbaarheidsinterval
 - Sterilisatie: D-waarde, z-waarde en F₀
 - Celpassageplanner (tijd tot confluent en splitratio)
+- Viabiliteit met trypaanblauw, transfectie met Lipofectamine 3000 en desinfectietests (log-reductie volgens EN 1276)
 
 **DNA en eiwit**
 - DNA-kwantificatie, inclusief forensische kwantificatie (degradatie-index)
@@ -61,6 +65,7 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 - Bloedvlekpatronen (inslaghoek, convergentie, hoogte van de oorsprong)
 - Tijd sinds overlijden (Henssge)
 - Chain of custody-formulier met barcodes
+- Bloedalcohol (Widmark, terugrekenen), lichaamslengte uit botten, entomologie (graaddagen), glasvergelijking (brekingsindex) en Hardy-Weinberg met forensische kengetallen
 
 **Kwaliteit**
 - Pipetkalibratie (gravimetrisch, ISO 8655)
@@ -76,6 +81,7 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
   - ANOVA met Tukey, Kruskal-Wallis met Dunn, tweeweg-ANOVA
   - lineaire regressie, χ²-toets
   - steekproefgrootte (power)
+- Bland-Altman, ROC-curve met AUC, Kaplan-Meier met log-ranktoets en significante cijfers/afronden
 
 **Protocollen** (afbeeldingen voor protocol en labjournaal, met eigen tekst)
 - Verdunningsschema
@@ -87,17 +93,21 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 
 **Organisatie**
 - Reagensvoorraad met waarschuwingen voor vervaldatum en minimumvoorraad
-- Experimentplanner (tijdlijn, wachtstappen als timers)
-- Rapport / labjournaal: invoer, uitkomsten en bronnen van meerdere tools in één afdrukbaar rapport
+- Experimentplanner (tijdlijn, wachtstappen als timers, export naar je agenda)
+- Vriezerdozen (plattegrond per doos, zoeken) en etikettenvellen met QR-code of barcode
+- Rapport / labjournaal: invoer, uitkomsten en bronnen van meerdere tools in één rapport (PDF, Word of HTML)
 
 **Bench**
 - Centrifuge (rpm ↔ × g)
 - Timers met meldingen
+- Welke pipet? (kleinste fout voor een volume)
 - Plaatindeling met tekst per putje, onbeperkt groepen met eigen kleuren en paletten, ronde of vierkante putjes en export als afbeelding
 - Instellingen: taal (Nederlands of Engels), thema (licht, donker, papier, hoog contrast, leisteen), dichtheid, tekstgrootte, accentkleur en kleurenpaletten
 
 ### Handig om te weten
 
+- Met Ctrl+K open je het opdrachtpalet: zoek een tool of actie en druk op Enter.
+- Elke tool heeft rechtsboven *Ongedaan maken* (ook Ctrl+Z) en *Delen*: de invoer van de tool als link of QR-code, zonder server.
 - Elke tool heeft tags (bijvoorbeeld PCR, Eiwit, Kloneren). Klik op een tag om alle tools rond dat onderwerp te zien; de zoekbalk zoekt ook op tags.
 - De app is beschikbaar in het Nederlands en het Engels (*Instellingen & updates → Taal / Language*). Bij de eerste start volgt de taal je browser of Windows. In het Engels gebruiken getallen een punt als decimaalteken, ook bij kopiëren naar Excel en in CSV-exports.
 - De app controleert bij het starten of er een nieuwe versie is en meldt dat bovenaan. De web-app vernieuwt zichzelf; het Windows-programma haalt de nieuwe installer op. Uitzetten kan bij *Instellingen & updates*.

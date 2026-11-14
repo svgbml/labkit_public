@@ -1,0 +1,18 @@
+<section class="tool" id="t-glass" data-tool="glass">
+  <header class="tool-head"><h2>Glasvergelijking (brekingsindex)</h2>
+  <p>Vergelijk de brekingsindex van glasfragmenten van een verdachte met referentieglas van de plaats delict: per fragment tegen een vergelijkingsinterval, en de groep met een t-toets van Welch.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f" style="grid-column:1/-1"><label for="gl-k">Bekend glas (referentie), n<sub>D</sub> <span class="example">voorbeeld</span></label><textarea id="gl-k" rows="3">1,51824 1,51828 1,51821 1,51830 1,51826 1,51823 1,51827 1,51825 1,51829 1,51822</textarea></div>
+        <div class="f" style="grid-column:1/-1"><label for="gl-r">Gevonden fragmenten, n<sub>D</sub></label><textarea id="gl-r" rows="2">1,51826 1,51829 1,51823 1,51852</textarea></div>
+        <div class="f"><label for="gl-crit">Vergelijkingsinterval</label><select id="gl-crit"><option value="4">gemiddelde ± 4 s</option><option value="3">gemiddelde ± 3 s</option><option value="2">gemiddelde ± 2 s</option><option value="r">bereik van het bekende glas</option></select></div>
+        <div class="f"><label for="gl-smin">Minimale s (meetprecisie)</label><input id="gl-smin" inputmode="decimal" value="0,00004"></div>
+        <div class="f"><label for="gl-a">Significantieniveau α</label><select id="gl-a"><option value="0.01">0,01</option><option value="0.05">0,05</option></select></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Gebruik genoeg referentiefragmenten (bij voorkeur 10 of meer) om de spreiding binnen de bron te dekken. Als de s van het bekende glas kleiner is dan de meetprecisie, wordt de minimale s gebruikt. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result"><canvas id="gl-cv"></canvas><div id="gl-out"></div></div>
+  </div>
+  <p class="src">ASTM E1967-19: gevonden fragmenten worden vergeleken met een interval uit de metingen van het bekende glas. Intervallen van 2–4 s en de minimale-s-benadering zijn geëvalueerd door Garvin &amp; Koons, J Forensic Sci 56:491–500 (2011). Groepsvergelijking met de t-toets van Welch (Curran, Hicks &amp; Buckleton, Forensic Interpretation of Glass Evidence, 2000). "Niet te onderscheiden" betekent niet dat het glas van dezelfde bron komt; de bewijswaarde hangt ook af van hoe vaak deze brekingsindex voorkomt.</p>
+</section>

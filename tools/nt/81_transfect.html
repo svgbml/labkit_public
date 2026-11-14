@@ -1,0 +1,20 @@
+<section class="tool" id="t-transfect" data-tool="transfect">
+  <header class="tool-head"><h2>Transfectie (Lipofectamine 3000)</h2>
+  <p>Hoeveelheden DNA of siRNA, P3000, Lipofectamine 3000 en Opti-MEM per putje en als mastermix voor een hele plaat, geschaald naar het kweekformaat volgens het protocol van de fabrikant.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="trf-type">Nucleïnezuur</label><select id="trf-type"><option value="dna">plasmide-DNA</option><option value="si">siRNA</option></select></div>
+        <div class="f"><label for="trf-fmt">Formaat</label><select id="trf-fmt"><option value="0.2">96-well</option><option value="0.5">48-well</option><option value="1" selected>24-well</option><option value="2">12-well</option><option value="5">6-well</option><option value="11.05">schaal 60 mm</option><option value="28.95">schaal 10 cm</option><option value="39.47">T-75</option><option value="92.11">T-175</option></select></div>
+        <div class="f"><label for="trf-dose">Lipofectamine-dosis</label><select id="trf-dose"><option value="hi">hoog (1,5 µL per 24-well)</option><option value="lo">laag (0,75 µL per 24-well)</option><option value="both">beide testen (optimalisatie)</option></select></div>
+        <div class="f"><label for="trf-n">Aantal putjes</label><input id="trf-n" inputmode="numeric" value="6"></div>
+        <div class="f"><label for="trf-x">Extra</label><div class="inu"><input id="trf-x" inputmode="decimal" value="10"><span class="u">%</span></div></div>
+        <div class="f"><label for="trf-st">Stock DNA</label><div class="inu"><input id="trf-st" inputmode="decimal" value="1"><span class="u">µg/µL</span></div></div>
+        <div class="f"><label for="trf-sist">Stock siRNA</label><div class="inu"><input id="trf-sist" inputmode="decimal" value="10"><span class="u">µM</span></div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Zaai de cellen zo dat ze bij transfectie 70–90% confluent zijn. Bepaal de beste Lipofectamine-dosis eerst met beide doses; schaal daarna met de vermenigvuldigingsfactor. Gebruik serumvrij Opti-MEM voor de complexen.</p>
+    </div>
+    <div class="result"><div id="trf-out"></div></div>
+  </div>
+  <p class="src">Thermo Fisher, Lipofectamine 3000 Reagent User Guide (MAN0009872) en de tabel "Scaling up or down Lipofectamine 3000 reagent transfections": per 24-well 2 × 25 µL Opti-MEM, 0,5 µg DNA, 1 µL P3000 (2 µL/µg DNA) en 0,75 of 1,5 µL Lipofectamine 3000, of 15 pmol siRNA zonder P3000; vermenigvuldigingsfactoren 0,2 (96-well) tot 92,11 (T-175). Voor de grote formaten noemt de tabel een DNA-bereik; hier staat de ondergrens. Complexen 10–15 min bij kamertemperatuur incuberen.</p>
+</section>

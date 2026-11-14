@@ -1,0 +1,28 @@
+<section class="tool" id="t-hwe" data-tool="hwe">
+  <header class="tool-head"><h2>Hardy-Weinberg &amp; forensische kengetallen</h2>
+  <p>Allelfrequenties, geobserveerde en verwachte heterozygotie, een exacte Hardy-Weinbergtoets en de forensische kengetallen (PM, PD, PIC, PE, TPI) voor één STR-locus uit je eigen populatiedata.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="hw-loc">Locus</label><input id="hw-loc" class="txt" value="D8S1179"></div>
+        <div class="f" style="grid-column:1/-1"><label for="hw-g">Genotypen, één per regel <span class="example">voorbeeld</span></label><textarea id="hw-g" rows="9">13 14 9
+12 13 6
+13 13 5
+14 15 5
+10 13 4
+11 14 4
+12 14 3
+13 15 3
+14 14 3
+10 14 2
+11 13 2
+12 12 1
+15 16 2
+13 16 1</textarea></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per regel twee allelen, gescheiden door een spatie of /, bijvoorbeeld <span class="mono">13 14</span> of <span class="mono">9.3/10</span>. Een derde getal is het aantal personen met dat genotype. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result"><div id="hw-out"></div></div>
+  </div>
+  <p class="src">Exacte toets: Monte-Carlopermutatie van de allelen (Guo &amp; Thompson, Biometrics 48:361–372, 1992), 10 000 permutaties met een vaste startwaarde; p = aandeel permutaties met een kans ≤ de waargenomen configuratie. H<sub>e</sub> = 2n/(2n−1) · (1 − Σp<sub>i</sub>²) (Nei 1978). PM = Σ (genotypefrequentie)², PD = 1 − PM (Fisher 1951), PIC = 1 − Σp<sub>i</sub>² − ΣΣ 2p<sub>i</sub>²p<sub>j</sub>², PE = h²(1 − 2hH²) en TPI = 1/(2H) met h en H de geobserveerde fractie hetero- en homozygoten (Brenner &amp; Morris 1990; Gouy &amp; Zieger, STRAF, Forensic Sci Int Genet 30:148–151, 2017).</p>
+</section>

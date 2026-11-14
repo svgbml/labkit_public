@@ -1,0 +1,11 @@
+/* ================= Z′-FACTOR ================= */
+calc.zprime=function(){ const P=numsC($('#zp-pos').value), N=numsC($('#zp-neg').value), S=numsC($('#zp-s').value), out=$('#zp-out'), cv=$('#zp-cv');
+  if(P.length<2||N.length<2){ out.innerHTML=note('info','Vul minstens twee waarden voor beide controles in.'); cv.style.display='none'; return; }
+  const mp=mean(P), sp=sd(P), mn=mean(N), sn=sd(N), d=Math.abs(mp-mn), z=d>0?1-3*(sp+sn)/d:-Infinity, cls=z>=1?['ok','ideaal']:z>=0.5?['ok','uitstekend']:z>=0?['warn','matig']:['bad','onbruikbaar'];
+  let h=`<div class="lbl">Z′-factor</div><div class="big">${isFinite(z)?fmt(z,3):'–'}<span class="chip ${cls[0]}" style="vertical-align:middle;margin-left:6px">${cls[1]}</span></div>`+kv([['Positief: gemiddelde ± SD',`${sig(mp,4)} ± ${sig(sp,3)} (CV ${fmt(sp/Math.abs(mp)*100,1)}%, n = ${P.length})`],['Negatief: gemiddelde ± SD',`${sig(mn,4)} ± ${sig(sn,3)} (CV ${fmt(sn/Math.abs(mn)*100,1)}%, n = ${N.length})`],['Signaal / achtergrond',mn!==0?fmt(mp/mn,2):'–'],['Signaal / ruis',sn>0?fmt(d/sn,1):'–'],['Scheidingsband',`${sig(d-3*(sp+sn),3)}`]]);
+  if(S.length>1){ const ms=mean(S), ss=sd(S), zs=Math.abs(ms-mn)>0?1-3*(ss+sn)/Math.abs(ms-mn):NaN; h+=kv([['Monsters: gemiddelde ± SD',`${sig(ms,4)} ± ${sig(ss,3)} (n = ${S.length})`],['Z-factor monsters',fmt(zs,3)]]); }
+  if(P.length<8||N.length<8) h+=note('info','Met minder dan 8 controles per groep is de Z′ onnauwkeurig.');
+  out.innerHTML=h+`<div class="formula">Z′ = 1 − 3(σ<sub>p</sub> + σ<sub>n</sub>) / |μ<sub>p</sub> − μ<sub>n</sub>| · banden: μ ± 3σ</div>`;
+  const all=[...P,...N,...S], y0=Math.min(...all,mn-3*sn,mp-3*sp), y1=Math.max(...all,mp+3*sp,mn+3*sn), pad=(y1-y0)*0.08, n=Math.max(P.length,N.length,S.length);
+  cv.style.display=''; const g=chart(cv,{xmin:0,xmax:n+1,ymin:y0-pad,ymax:y1+pad,xlabel:'putje',ylabel:'signaal',series:[{fn:()=>mp,name:'μ positief'},{fn:()=>mn,color:'--muted',name:'μ negatief'},{pts:P.map((v,i)=>[i+1,v]),name:'positief'},{pts:N.map((v,i)=>[i+1,v]),color:'--muted',name:'negatief'},{pts:S.map((v,i)=>[i+1,v]),color:'--warn',name:'monsters',hollow:true}]});
+  const c=cv.getContext('2d'); c.fillStyle='rgba(120,140,170,.15)'; [[mp,sp],[mn,sn]].forEach(([m,s])=>{ const a=g.Y(m+3*s), b=g.Y(m-3*s); c.fillRect(g.X(0),a,g.X(n+1)-g.X(0),b-a); }); };

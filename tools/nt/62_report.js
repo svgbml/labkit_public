@@ -20,3 +20,6 @@ $('#rp-dl').addEventListener('click',()=>{ const b=new Blob([rpHTML()],{type:'te
 document.addEventListener('change',e=>{ if(e.target.dataset&&e.target.dataset.rp!=null) calc.report(); });
 calc.report=function(){ const ids=[...document.querySelectorAll('[data-rp]:checked')].map(c=>c.dataset.rp), T=rpTools(), out=$('#rp-out');
   out.innerHTML=ids.length?`<div class="lbl">In het rapport</div><div class="big">${ids.length} <small>tools</small></div><ol class="steps">${ids.map(id=>`<li>${esc((T.find(t=>t.id===id)||{}).name||id)}</li>`).join('')}</ol>`:note('info','Vink de tools aan die in het rapport moeten.'); };
+
+$('#rp-docx').addEventListener('click',()=>{ const html=rpHTML(), d=new DOMParser().parseFromString(html,'text/html'), t=$('#rp-title').value||'Labjournaal'; d.querySelectorAll('style').forEach(x=>x.remove()); const host=document.createElement('div'); host.style.cssText='position:absolute;left:-99999px;top:0'; host.setAttribute('data-notr',''); host.innerHTML=d.body.innerHTML; document.body.appendChild(host);
+  const imgs=[...host.querySelectorAll('img')]; Promise.all(imgs.map(im=>im.complete?1:new Promise(r=>{ im.onload=im.onerror=r; }))).then(()=>{ try{ saveBlob((t.replace(/[^\w\- ]+/g,'').trim()||'labjournaal')+'.docx',htmlToDocx(host,t)).catch(()=>{}); } finally { host.remove(); } }); });

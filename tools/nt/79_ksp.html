@@ -1,0 +1,25 @@
+<section class="tool" id="t-ksp" data-tool="ksp">
+  <header class="tool-head"><h2>Oplosbaarheid (K<sub>sp</sub>)</h2>
+  <p>Oplosbaarheid van een slecht oplosbaar zout uit het oplosbaarheidsproduct, ook met een gemeenschappelijk ion, en of er neerslag ontstaat bij gegeven ionconcentraties.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="ks-pre">Zout</label><select id="ks-pre"></select></div>
+        <div class="f"><label for="ks-k">K<sub>sp</sub> (25 °C)</label><input id="ks-k" inputmode="decimal" value="1,77e-10"></div>
+        <div class="f"><label for="ks-x">Kationen per formule</label><input id="ks-x" inputmode="numeric" value="1"></div>
+        <div class="f"><label for="ks-y">Anionen per formule</label><input id="ks-y" inputmode="numeric" value="1"></div>
+        <div class="f"><label for="ks-m">Molmassa</label><div class="inu"><input id="ks-m" inputmode="decimal" value="143,32"><span class="u">g/mol</span></div></div>
+        <div class="f"><label for="ks-cc">Al aanwezig kation</label><div class="inu"><input id="ks-cc" inputmode="decimal" value="0"><span class="u">mol/L</span></div></div>
+        <div class="f"><label for="ks-ca">Al aanwezig anion</label><div class="inu"><input id="ks-ca" inputmode="decimal" value="0,01"><span class="u">mol/L</span></div></div>
+      </div>
+      <h3 style="margin:14px 0 6px;font-size:14px">Ontstaat er neerslag?</h3>
+      <div class="fields">
+        <div class="f"><label for="ks-qc">[kation] na mengen</label><div class="inu"><input id="ks-qc" inputmode="decimal" value="1e-4"><span class="u">mol/L</span></div></div>
+        <div class="f"><label for="ks-qa">[anion] na mengen</label><div class="inu"><input id="ks-qa" inputmode="decimal" value="1e-5"><span class="u">mol/L</span></div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De berekening gebruikt concentraties in plaats van activiteiten en negeert complexvorming en zuur-basereacties van de ionen (bijvoorbeeld carbonaat of hydroxide). Bij hogere ionsterkte is de echte oplosbaarheid groter.</p>
+    </div>
+    <div class="result"><div id="ks-out"></div></div>
+  </div>
+  <p class="src">K<sub>sp</sub> = [M]<sup>x</sup>·[A]<sup>y</sup>; zonder gemeenschappelijk ion s = (K<sub>sp</sub> / (x<sup>x</sup>·y<sup>y</sup>))<sup>1/(x+y)</sup>; met gemeenschappelijk ion wordt (x·s + c<sub>M</sub>)<sup>x</sup>·(y·s + c<sub>A</sub>)<sup>y</sup> = K<sub>sp</sub> numeriek opgelost. Neerslag als Q = [M]<sup>x</sup>[A]<sup>y</sup> &gt; K<sub>sp</sub>. K<sub>sp</sub>-waarden bij 25 °C: CRC Handbook of Chemistry and Physics, "Solubility Product Constants" (Harris, Quantitative Chemical Analysis, hfst. 6).</p>
+</section>

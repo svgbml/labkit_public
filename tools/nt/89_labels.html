@@ -1,0 +1,27 @@
+<section class="tool" id="t-labels" data-tool="labels">
+  <header class="tool-head"><h2>Etikettenvel</h2>
+  <p>Druk etiketten voor buisjes, flessen en platen op een standaard etikettenvel, met een QR-code of Code 39-barcode en een instelbare beginpositie voor een vel dat al deels gebruikt is.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="lb-sheet">Vel</label><select id="lb-sheet"><option value="L7651">Avery L7651 (65 per A4, 38,1 × 21,2 mm)</option><option value="eigen">eigen afmetingen</option></select></div>
+        <div class="f"><label for="lb-code">Code</label><select id="lb-code"><option value="qr">QR-code</option><option value="c39">Code 39-barcode</option><option value="">geen</option></select></div>
+        <div class="f"><label for="lb-start">Begin bij etiket</label><input id="lb-start" inputmode="numeric" value="1"></div>
+        <div class="f"><label for="lb-cp">Kopieën per regel</label><input id="lb-cp" inputmode="numeric" value="1"></div>
+        <div class="f"><label for="lb-cols">Kolommen × rijen</label><div class="row" style="gap:6px"><input id="lb-cols" inputmode="numeric" value="5" style="width:56px"><input id="lb-rows" inputmode="numeric" value="13" style="width:56px"></div></div>
+        <div class="f"><label for="lb-w">Etiket b × h (mm)</label><div class="row" style="gap:6px"><input id="lb-w" inputmode="decimal" value="38,1" style="width:64px"><input id="lb-h" inputmode="decimal" value="21,2" style="width:64px"></div></div>
+        <div class="f"><label for="lb-top">Marge boven × links (mm)</label><div class="row" style="gap:6px"><input id="lb-top" inputmode="decimal" value="10,7" style="width:64px"><input id="lb-left" inputmode="decimal" value="4,75" style="width:64px"></div></div>
+        <div class="f"><label for="lb-gx">Tussenruimte h × v (mm)</label><div class="row" style="gap:6px"><input id="lb-gx" inputmode="decimal" value="2,5" style="width:64px"><input id="lb-gy" inputmode="decimal" value="0" style="width:64px"></div></div>
+        <div class="f" style="grid-column:1/-1"><label for="lb-t">Etiketten, één per regel; regels binnen een etiket scheiden met ; <span class="example">voorbeeld</span></label><textarea id="lb-t" rows="7">S-001;Bloedspoor deurpost;14-11-2026 SG
+S-002;Schoenafdruk;14-11-2026 SG
+HEK293-P12;−80 °C doos 1 A1;03-11-2026
+HEK293-P12;−80 °C doos 1 A2;03-11-2026
+PBS-10X;Lot 2611-04;exp 14-05-2027</textarea></div>
+      </div>
+      <div class="row" style="margin-top:10px;gap:8px"><button type="button" id="lb-print" class="primary">Afdrukken / PDF</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De eerste regel van elk etiket gaat in de code. Druk af op 100% (niet "passend maken") en test eerst op gewoon papier tegen het licht. Code 39 kent alleen hoofdletters, cijfers en - . / + % en spatie. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result"><canvas id="lb-cv"></canvas><div id="lb-out"></div></div>
+  </div>
+  <p class="src">Avery L7651: A4, 5 × 13 etiketten van 38,1 × 21,2 mm (Avery UK, productspecificatie L7651); marges en tussenruimte volgen uit de A4-maat. QR-code volgens ISO/IEC 18004 (bytemodus, foutcorrectie M); Code 39 volgens ISO/IEC 16388. Controleer codes met een scanner voor gebruik.</p>
+</section>

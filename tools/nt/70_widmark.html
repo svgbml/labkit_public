@@ -1,0 +1,28 @@
+<section class="tool" id="t-widmark" data-tool="widmark">
+  <header class="tool-head"><h2>Bloedalcohol (Widmark)</h2>
+  <p>Schat het bloedalcoholgehalte in de tijd uit de gedronken hoeveelheid, en reken een gemeten waarde terug naar een eerder tijdstip met een bandbreedte voor de afbraaksnelheid.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="wd-sex">Geslacht</label><select id="wd-sex"><option value="m">man</option><option value="v">vrouw</option></select></div>
+        <div class="f"><label for="wd-w">Lichaamsgewicht</label><div class="inu"><input id="wd-w" inputmode="decimal" value="80"><span class="u">kg</span></div></div>
+        <div class="f"><label for="wd-h">Lengte</label><div class="inu"><input id="wd-h" inputmode="decimal" value="180"><span class="u">cm</span></div></div>
+        <div class="f"><label for="wd-rm">Verdelingsfactor r</label><select id="wd-rm"><option value="w">Widmark (man 0,68 / vrouw 0,55)</option><option value="s">Seidl (uit lengte en gewicht)</option><option value="e">eigen waarde</option></select></div>
+        <div class="f"><label for="wd-r">Eigen r</label><input id="wd-r" inputmode="decimal" value="0,68"></div>
+        <div class="f"><label for="wd-b">Afbraak β</label><div class="inu"><input id="wd-b" inputmode="decimal" value="0,15"><span class="u">g/L/h</span></div></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:12px"><table id="wd-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:8px"><button type="button" id="wd-tbl-add">+ Drankje</button></div>
+      <h3 style="margin:16px 0 6px;font-size:14px">Terugrekenen</h3>
+      <div class="fields">
+        <div class="f"><label for="wd-m">Gemeten in bloed</label><div class="inu"><input id="wd-m" inputmode="decimal" value="0,62"><span class="u">g/L</span></div></div>
+        <div class="f"><label for="wd-mt">Tijdstip bloedafname</label><input id="wd-mt" class="txt" value="01:30"></div>
+        <div class="f"><label for="wd-it">Tijdstip incident</label><input id="wd-it" class="txt" value="23:45"></div>
+        <div class="f"><label for="wd-b1">β laag – hoog</label><div class="row" style="gap:6px"><input id="wd-b1" inputmode="decimal" value="0,10" style="width:70px"><input id="wd-b2" inputmode="decimal" value="0,25" style="width:70px"></div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Tijden als uu:mm; na middernacht telt de klok door. De berekening gaat uit van directe, volledige opname; in werkelijkheid duurt de opname 30–90 minuten en ligt de piek lager en later. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result"><canvas id="wd-cv"></canvas><div id="wd-out"></div></div>
+  </div>
+  <p class="src">Widmark: c = A / (r · W) − β · t, met A de gram alcohol (volume × % vol × 0,789 g/mL), W het lichaamsgewicht en r de verdelingsfactor (Widmark, Die theoretischen Grundlagen und die praktische Verwendbarkeit der gerichtlich-medizinischen Alkoholbestimmung, 1932). c in g/kg bloed is omgerekend naar g/L met de bloeddichtheid 1,055 kg/L. r volgens Seidl: man 0,31608 − 0,004821·W + 0,004632·L, vrouw 0,31223 − 0,006446·W + 0,004466·L (Seidl, Jensen &amp; Alt, Int J Legal Med 114:71–77, 2000). Afbraaksnelheid bij drinkende bestuurders 0,10–0,25 g/L/h (Jones, Forensic Sci Rev 22:91–132, 2010). Terugrekenen geldt alleen in de afbraakfase, als de opname voorbij is. Een standaardglas in Nederland bevat 10 g alcohol (Trimbos-instituut). Wettelijke grens in Nederland: 0,5 g/L bloed, 0,2 g/L voor beginnende bestuurders.</p>
+</section>

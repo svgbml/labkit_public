@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-14 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 197 van 197 controles binnen tolerantie.**
+**Resultaat: 244 van 244 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -41,9 +41,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9457 | +0.13% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7797 | +0.25% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5563 | +0.13% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,942 | -0.26% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7732 | -0.59% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5536 | -0.34% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -204,5 +204,52 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | STR-profielcontrole | Piekhoogteverhouding | PHR (%) | 47,54 | 48 | +0.97% | ✅ | PHR = laagste/hoogste piek: 290/610 = 47,5%; 2 bijdragers bij 4 allelen |
 | STR-profielcontrole | Piekhoogteverhouding | min. bijdragers | 2 | 2 | +0.00% | ✅ | PHR = laagste/hoogste piek: 290/610 = 47,5%; 2 bijdragers bij 4 allelen |
 | qPCR-plaatindeling | Aantal wells | wells gebruikt | 30 | 30 | +0.00% | ✅ | 4 monsters × 3 replicaten + 1 NTC × 3 = 15 wells per doelgen; 2 doelgenen = 30 |
+| Bloedalcohol (Widmark) | Eén drankje, man 80 kg | piek (g/L) | 0,3825 | 0,38 | -0.66% | ✅ | Widmark: 500 mL × 5% × 0,789 = 19,725 g; 19,725/(0,68·80) × 1,055 = 0,3825 g/L; terugrekenen 0,62 + β·1,75 h; Seidl man: 0,31608 − 0,004821·80 + 0,004632·180 |
+| Bloedalcohol (Widmark) | Eén drankje, man 80 kg | teruggerekend laag | 0,795 | 0,8 | +0.63% | ✅ | Widmark: 500 mL × 5% × 0,789 = 19,725 g; 19,725/(0,68·80) × 1,055 = 0,3825 g/L; terugrekenen 0,62 + β·1,75 h; Seidl man: 0,31608 − 0,004821·80 + 0,004632·180 |
+| Bloedalcohol (Widmark) | Eén drankje, man 80 kg | teruggerekend hoog | 1,058 | 1,06 | +0.24% | ✅ | Widmark: 500 mL × 5% × 0,789 = 19,725 g; 19,725/(0,68·80) × 1,055 = 0,3825 g/L; terugrekenen 0,62 + β·1,75 h; Seidl man: 0,31608 − 0,004821·80 + 0,004632·180 |
+| Bloedalcohol (Widmark) | Eén drankje, man 80 kg | r Seidl | 0,7642 | 0,764 | -0.02% | ✅ | Widmark: 500 mL × 5% × 0,789 = 19,725 g; 19,725/(0,68·80) × 1,055 = 0,3825 g/L; terugrekenen 0,62 + β·1,75 h; Seidl man: 0,31608 − 0,004821·80 + 0,004632·180 |
+| Lichaamslengte uit botten | Femur man en tibia vrouw | man, femur (cm) | 175 | 175 | -0.02% | ✅ | Trotter (1970) via Bass (1995): 2,32 × 47,2 + 65,53 = 175,03 cm; vrouw: 2,90 × 36,0 + 61,53 = 165,93 cm, met leeftijdscorrectie −0,06·(50 − 30) |
+| Lichaamslengte uit botten | Femur man en tibia vrouw | vrouw, tibia, 50 jaar (cm) | 164,7 | 164,7 | -0.02% | ✅ | Trotter (1970) via Bass (1995): 2,32 × 47,2 + 65,53 = 175,03 cm; vrouw: 2,90 × 36,0 + 61,53 = 165,93 cm, met leeftijdscorrectie −0,06·(50 − 30) |
+| Entomologie (graaddagen) | Constante temperatuur | minimaal PMI (d) | 6,4 | 6,4 | +0.00% | ✅ | 10 dagen van 15 °C met drempel 10 °C geven 5 °C·d per dag; 32 °C·d is na 6,4 dagen bereikt |
+| Glasvergelijking (brekingsindex) | t-toets van Welch | t | 2,268 | 2,268 | +0.01% | ✅ | Onafhankelijk berekend met scipy.stats.ttest_ind(equal_var=False) |
+| Glasvergelijking (brekingsindex) | t-toets van Welch | p | 0,08691 | 0,087 | +0.10% | ✅ | Onafhankelijk berekend met scipy.stats.ttest_ind(equal_var=False) |
+| Hardy-Weinberg & forensische kengetallen | Kengetallen en exacte toets | exacte p | 0,04686 | 0,045 | -3.96% | ✅ | Onafhankelijk in Python: H_e (Nei), PD, PIC, PE = h²(1 − 2hH²); exacte HWE-toets voor twee allelen met de volledige verdeling (Wigginton e.a., Am J Hum Genet 76:887–893, 2005) |
+| Hardy-Weinberg & forensische kengetallen | Kengetallen en exacte toets | H_e | 0,4 | 0,4 | +0.00% | ✅ | Onafhankelijk in Python: H_e (Nei), PD, PIC, PE = h²(1 − 2hH²); exacte HWE-toets voor twee allelen met de volledige verdeling (Wigginton e.a., Am J Hum Genet 76:887–893, 2005) |
+| Hardy-Weinberg & forensische kengetallen | Kengetallen en exacte toets | PD | 0,66 | 0,66 | +0.00% | ✅ | Onafhankelijk in Python: H_e (Nei), PD, PIC, PE = h²(1 − 2hH²); exacte HWE-toets voor twee allelen met de volledige verdeling (Wigginton e.a., Am J Hum Genet 76:887–893, 2005) |
+| Hardy-Weinberg & forensische kengetallen | Kengetallen en exacte toets | PE | 0,1139 | 0,1139 | -0.02% | ✅ | Onafhankelijk in Python: H_e (Nei), PD, PIC, PE = h²(1 − 2hH²); exacte HWE-toets voor twee allelen met de volledige verdeling (Wigginton e.a., Am J Hum Genet 76:887–893, 2005) |
+| Chromatografie (HPLC/GC) | Plaatgetal en resolutie | k | 3,5 | 3,5 | +0.00% | ✅ | USP <621>: N = 5,54·(4,95/0,110)² = 11 219; R_s = 1,18·(4,95 − 3,42)/(0,082 + 0,110) = 9,40; k = (4,95 − 1,10)/1,10 = 3,50 |
+| Chromatografie (HPLC/GC) | Plaatgetal en resolutie | N | 1,122e+04 | 1,122e+04 | +0.00% | ✅ | USP <621>: N = 5,54·(4,95/0,110)² = 11 219; R_s = 1,18·(4,95 − 3,42)/(0,082 + 0,110) = 9,40; k = (4,95 − 1,10)/1,10 = 3,50 |
+| Chromatografie (HPLC/GC) | Plaatgetal en resolutie | R_s | 9,403 | 9,4 | -0.03% | ✅ | USP <621>: N = 5,54·(4,95/0,110)² = 11 219; R_s = 1,18·(4,95 − 3,42)/(0,082 + 0,110) = 9,40; k = (4,95 − 1,10)/1,10 = 3,50 |
+| Interne standaard & standaardadditie | Exacte lijnen | IS-monster | 3,5 | 3,5 | +0.00% | ✅ | IS: verhouding = 0,2·c, monster met verhouding 0,7 → 3,5; standaardadditie: signaal = 0,1 + 0,05·x geeft x_E = 2, × verdunning 5 = 10 |
+| Interne standaard & standaardadditie | Exacte lijnen | standaardadditie | 10 | 10 | +0.00% | ✅ | IS: verhouding = 0,2·c, monster met verhouding 0,7 → 3,5; standaardadditie: signaal = 0,1 + 0,05·x geeft x_E = 2, × verdunning 5 = 10 |
+| Waterhardheid (EDTA-titratie) | Totale hardheid | mmol/L | 2,46 | 2,46 | +0.00% | ✅ | ISO 6059: 0,0100 M × (12,35 − 0,05) mL / 50,00 mL = 2,460 mmol/L = 13,79 °dH (× 5,6077) |
+| Waterhardheid (EDTA-titratie) | Totale hardheid | °dH | 13,8 | 13,8 | +0.04% | ✅ | ISO 6059: 0,0100 M × (12,35 − 0,05) mL / 50,00 mL = 2,460 mmol/L = 13,79 °dH (× 5,6077) |
+| Buffercapaciteit | Eenwaardig zuur | β (mM/pH) | 23,45 | 23,4 | -0.22% | ✅ | Van Slyke: β = 2,303·(K_w/[H⁺] + [H⁺] + C·K_a[H⁺]/(K_a + [H⁺])²), pKₐ 7,20, C = 50 mM, pH 6,80 |
+| Oplosbaarheid (Ksp) | AgCl en CaF₂ | AgCl met Cl⁻ (mol/L) | 1,77e-08 | 1,77e-08 | +0.00% | ✅ | AgCl in 0,01 M Cl⁻: s = (−0,01 + √(10⁻⁴ + 4K_sp))/2; CaF₂ zuiver water: s = (K_sp/4)^(1/3) |
+| Oplosbaarheid (Ksp) | AgCl en CaF₂ | CaF₂ (mol/L) | 0,0002051 | 0,000205 | -0.04% | ✅ | AgCl in 0,01 M Cl⁻: s = (−0,01 + √(10⁻⁴ + 4K_sp))/2; CaF₂ zuiver water: s = (K_sp/4)^(1/3) |
+| Assaykwaliteit (Z′-factor) | Z′ | Z′ | 0,8875 | 0,887 | -0.05% | ✅ | Zhang e.a. (1999): Z′ = 1 − 3(σp + σn)/|μp − μn|, onafhankelijk berekend met numpy (SD met n − 1) |
+| Transfectie (Lipofectamine 3000) | 6-well | Opti-MEM per buis (µL) | 125 | 125 | +0.00% | ✅ | Thermo Fisher MAN0009872: 6-well 2 × 125 µL Opti-MEM, 2,5 µg DNA, 5 µL P3000, 7,5 µL Lipofectamine 3000 (hoog) |
+| Transfectie (Lipofectamine 3000) | 6-well | DNA (µL van 1 µg/µL) | 2,5 | 2,5 | +0.00% | ✅ | Thermo Fisher MAN0009872: 6-well 2 × 125 µL Opti-MEM, 2,5 µg DNA, 5 µL P3000, 7,5 µL Lipofectamine 3000 (hoog) |
+| Transfectie (Lipofectamine 3000) | 6-well | P3000 (µL) | 5 | 5 | +0.00% | ✅ | Thermo Fisher MAN0009872: 6-well 2 × 125 µL Opti-MEM, 2,5 µg DNA, 5 µL P3000, 7,5 µL Lipofectamine 3000 (hoog) |
+| Transfectie (Lipofectamine 3000) | 6-well | Lipofectamine 3000 (µL) | 7,5 | 7,5 | +0.00% | ✅ | Thermo Fisher MAN0009872: 6-well 2 × 125 µL Opti-MEM, 2,5 µg DNA, 5 µL P3000, 7,5 µL Lipofectamine 3000 (hoog) |
+| Viabiliteit (trypaanblauw) | Neubauer-telling | levend/mL | 9,1000e+05 | 9,1000e+05 | +0.00% | ✅ | Strober (2015): 182 levend / 4 vierkanten × 2 × 10⁴ = 9,10 × 10⁵ per mL; viabiliteit 182/196 = 92,86% |
+| Viabiliteit (trypaanblauw) | Neubauer-telling | viabiliteit (%) | 92,86 | 92,9 | +0.05% | ✅ | Strober (2015): 182 levend / 4 vierkanten × 2 × 10⁴ = 9,10 × 10⁵ per mL; viabiliteit 182/196 = 92,86% |
+| Desinfectietest (log-reductie) | EN 1276 | reductie (lg) | 5 | 5 | +0.00% | ✅ | N = 3,0 × 10⁸ kve/mL, N₀ = N/10, N_a = 300 kve/mL: R = lg(3 × 10⁷) − lg 300 = 5,00 |
+| Bland-Altman (methodevergelijking) | Bias en grenzen | bias | 0,2625 | 0,262 | -0.19% | ✅ | Bland & Altman (1986): d̄ ± 1,96·s_d, onafhankelijk berekend met numpy |
+| Bland-Altman (methodevergelijking) | Bias en grenzen | ondergrens | -0,2913 | -0,291 | -0.09% | ✅ | Bland & Altman (1986): d̄ ± 1,96·s_d, onafhankelijk berekend met numpy |
+| Bland-Altman (methodevergelijking) | Bias en grenzen | bovengrens | 0,8163 | 0,816 | -0.03% | ✅ | Bland & Altman (1986): d̄ ± 1,96·s_d, onafhankelijk berekend met numpy |
+| ROC-curve & diagnostische test | AUC | AUC | 0,9222 | 0,922 | -0.02% | ✅ | AUC = U/(n_p·n_n) uit scipy.stats.mannwhitneyu |
+| Overlevingscurve (Kaplan-Meier) | Mediaan en log-ranktoets | mediaan controle | 9 | 9 | +0.00% | ✅ | scipy.stats.ecdf (Kaplan-Meier) en scipy.stats.logrank op dezelfde gecensureerde data |
+| Overlevingscurve (Kaplan-Meier) | Mediaan en log-ranktoets | χ² | 4,05 | 4,05 | +0.01% | ✅ | scipy.stats.ecdf (Kaplan-Meier) en scipy.stats.logrank op dezelfde gecensureerde data |
+| Overlevingscurve (Kaplan-Meier) | Mediaan en log-ranktoets | p | 0,04418 | 0,044 | -0.41% | ✅ | scipy.stats.ecdf (Kaplan-Meier) en scipy.stats.logrank op dezelfde gecensureerde data |
+| Significante cijfers & afronden | Afronden en onzekerheid | half naar boven | 0,00457 | 0,00457 | +0.00% | ✅ | Half naar boven: 0,004565 → 0,00457; half naar even: 0,00456; 9,995 → 10,0; GUM §7.2.6: 0,0045650 ± 0,0000234 → 0,004565 ± 0,000023 |
+| Significante cijfers & afronden | Afronden en onzekerheid | half naar even | 0,00456 | 0,00456 | +0.00% | ✅ | Half naar boven: 0,004565 → 0,00457; half naar even: 0,00456; 9,995 → 10,0; GUM §7.2.6: 0,0045650 ± 0,0000234 → 0,004565 ± 0,000023 |
+| Significante cijfers & afronden | Afronden en onzekerheid | 9,995 → 3 cijfers | 1 | 1 | +0.00% | ✅ | Half naar boven: 0,004565 → 0,00457; half naar even: 0,00456; 9,995 → 10,0; GUM §7.2.6: 0,0045650 ± 0,0000234 → 0,004565 ± 0,000023 |
+| Significante cijfers & afronden | Afronden en onzekerheid | met onzekerheid | 1 | 1 | +0.00% | ✅ | Half naar boven: 0,004565 → 0,00457; half naar even: 0,00456; 9,995 → 10,0; GUM §7.2.6: 0,0045650 ± 0,0000234 → 0,004565 ± 0,000023 |
+| Welke pipet? | 15 µL | beste pipet | 20 | 20 | +0.00% | ✅ | ISO 8655-2 grenzen voor 20 µL: e_s 1% = 0,2 µL, CV 0,5% = 0,1 µL; P20 heeft de kleinste totale fout |
+| Welke pipet? | 15 µL | e_s (µL) | 0,2 | 0,2 | +0.00% | ✅ | ISO 8655-2 grenzen voor 20 µL: e_s 1% = 0,2 µL, CV 0,5% = 0,1 µL; P20 heeft de kleinste totale fout |
+| Etikettenvel | QR-code leesbaar | decodeert (5 tekens) | 1 | 1 | +0.00% | ✅ | QR-code volgens ISO/IEC 18004, gecontroleerd door de QR-decoder van OpenCV |
+| Etikettenvel | QR-code leesbaar | decodeert (54 tekens) | 1 | 1 | +0.00% | ✅ | QR-code volgens ISO/IEC 18004, gecontroleerd door de QR-decoder van OpenCV |
+| Etikettenvel | QR-code leesbaar | decodeert (300 tekens) | 1 | 1 | +0.00% | ✅ | QR-code volgens ISO/IEC 18004, gecontroleerd door de QR-decoder van OpenCV |
 
 Toleranties: rekenregels 0,1–0,5%; gepubliceerde receptgrammen (afgerond in de bron) 1–3%; densitometrie op de getekende demo-gel 5%.

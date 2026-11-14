@@ -703,6 +703,170 @@ def _(pg):
     pg.evaluate("__go('qplate');__set('qp2-fmt','96');__set('qp2-rep','3');__set('qp2-s','A, B, C, D');__set('qp2-t','G1, G2');__set('qp2-std','0');__set('qp2-ntc','1')")
     return [('wells gebruikt', pg.evaluate("__kv('#qp2-out','Wells gebruikt')"), 30, 0)]
 
+# ---------------- Nieuwe tools (v1.15) ----------------
+@case('Bloedalcohol (Widmark)', 'Eén drankje, man 80 kg', 'Widmark: 500 mL × 5% × 0,789 = 19,725 g; 19,725/(0,68·80) × 1,055 = 0,3825 g/L; terugrekenen 0,62 + β·1,75 h; Seidl man: 0,31608 − 0,004821·80 + 0,004632·180')
+def _(pg):
+    pg.evaluate("__go('widmark');__set('wd-sex','m');__set('wd-w','80');__set('wd-h','180');__set('wd-rm','w');__set('wd-b','0,15');__tbl('wd-tbl',[['Bier',500,5,'20:00']],'widmark');__set('wd-m','0,62');__set('wd-mt','01:30');__set('wd-it','23:45');__set('wd-b1','0,10');__set('wd-b2','0,25')")
+    peak = pg.evaluate("__big('#wd-out')")
+    lo = pg.evaluate("__n(document.querySelectorAll('#wd-out .big')[1].textContent)")
+    hi = pg.evaluate("__n(document.querySelectorAll('#wd-out .big')[1].textContent.split('–')[1])")
+    pg.evaluate("__set('wd-rm','s')"); r = pg.evaluate("__kv('#wd-out','Verdelingsfactor')")
+    return [('piek (g/L)', peak, 19.725/(0.68*80)*1.055, 0.02), ('teruggerekend laag', lo, 0.62+0.10*1.75, 0.01), ('teruggerekend hoog', hi, 0.62+0.25*1.75, 0.01), ('r Seidl', r, 0.31608-0.004821*80+0.004632*180, 0.002)]
+
+@case('Lichaamslengte uit botten', 'Femur man en tibia vrouw', 'Trotter (1970) via Bass (1995): 2,32 × 47,2 + 65,53 = 175,03 cm; vrouw: 2,90 × 36,0 + 61,53 = 165,93 cm, met leeftijdscorrectie −0,06·(50 − 30)')
+def _(pg):
+    pg.evaluate("__go('stature');['fib','hum','rad','uln','tib'].forEach(k=>__set('sl-'+k,''));__set('sl-sex','m');__set('sl-pop','w');__set('sl-age','');__set('sl-fem','47,2')")
+    m = pg.evaluate("__big('#sl-out')")
+    pg.evaluate("__set('sl-fem','');__set('sl-sex','v');__set('sl-tib','36');__set('sl-age','50')")
+    v = pg.evaluate("__big('#sl-out')")
+    return [('man, femur (cm)', m, 2.32*47.2+65.53, 0.001), ('vrouw, tibia, 50 jaar (cm)', v, 2.90*36+61.53-1.2, 0.001)]
+
+@case('Entomologie (graaddagen)', 'Constante temperatuur', '10 dagen van 15 °C met drempel 10 °C geven 5 °C·d per dag; 32 °C·d is na 6,4 dagen bereikt')
+def _(pg):
+    pg.evaluate("__go('ento');__set('en-base','10');__set('en-add','32');__set('en-off','0');__set('en-meth','avg');__set('en-t',Array(10).fill('15').join('\\n'))")
+    return [('minimaal PMI (d)', pg.evaluate("__big('#en-out')"), 6.4, 0.001)]
+
+@case('Glasvergelijking (brekingsindex)', 't-toets van Welch', 'Onafhankelijk berekend met scipy.stats.ttest_ind(equal_var=False)')
+def _(pg):
+    from scipy import stats
+    K = [1.51824, 1.51828, 1.51821, 1.51830, 1.51826, 1.51823, 1.51827, 1.51825, 1.51829, 1.51822]; R = [1.51826, 1.51834, 1.51829, 1.51837]
+    pg.evaluate(f"__go('glass');__set('gl-smin','0');__set('gl-crit','4');__set('gl-k','{' '.join(str(v).replace('.',',') for v in K)}');__set('gl-r','{' '.join(str(v).replace('.',',') for v in R)}')")
+    t = stats.ttest_ind(R, K, equal_var=False)
+    return [('t', pg.evaluate("__kv('#gl-out','t (Welch)')"), t.statistic, 0.002), ('p', pg.evaluate("__kv('#gl-out','p')"), t.pvalue, 0.01)]
+
+@case('Hardy-Weinberg & forensische kengetallen', 'Kengetallen en exacte toets', 'Onafhankelijk in Python: H_e (Nei), PD, PIC, PE = h²(1 − 2hH²); exacte HWE-toets voor twee allelen met de volledige verdeling (Wigginton e.a., Am J Hum Genet 76:887–893, 2005)')
+def _(pg):
+    import math
+    from collections import Counter
+    G = [('12','12',30),('12','13',40),('13','13',30)]
+    pg.evaluate("__go('hwe');__set('hw-g','12 12 30\\n12 13 40\\n13 13 30')")
+    n = 100; nA = 2*30+40; nAB = 40
+    def prob(h):
+        aa = (nA-h)//2; bb = n-aa-h
+        return math.lgamma(n+1)-math.lgamma(aa+1)-math.lgamma(h+1)-math.lgamma(bb+1)+h*math.log(2)+math.lgamma(nA+1)+math.lgamma(2*n-nA+1)-math.lgamma(2*n+1)
+    hs = [h for h in range(nA % 2, min(nA, 2*n-nA)+1, 2)]; P = {h: math.exp(prob(h)) for h in hs}; pex = sum(v for v in P.values() if v <= P[nAB]*(1+1e-9))
+    p = [0.5, 0.5]; He = 2*n/(2*n-1)*(1-sum(x*x for x in p)); PD = 1-sum((c/n)**2 for _,_,c in G); h = 0.4; Hh = 0.6
+    return [('exacte p', pg.evaluate("__big('#hw-out')"), pex, 0.06), ('H_e', pg.evaluate("__kv('#hw-out','H')"), 0.4, 0.001), ('PD', pg.evaluate("__kv('#hw-out','Discriminatiekracht')"), PD, 0.001), ('PE', pg.evaluate("__kv('#hw-out','Uitsluitingskans')"), h*h*(1-2*h*Hh*Hh), 0.002)]
+
+@case('Chromatografie (HPLC/GC)', 'Plaatgetal en resolutie', 'USP <621>: N = 5,54·(4,95/0,110)² = 11 219; R_s = 1,18·(4,95 − 3,42)/(0,082 + 0,110) = 9,40; k = (4,95 − 1,10)/1,10 = 3,50')
+def _(pg):
+    pg.evaluate("__go('chrom');__set('chr-t0','1,10');__set('chr-wt','h');__tbl('chr-tbl',[['a',3.42,0.082,'',''],['b',4.95,0.110,'','']],'chrom')")
+    row = pg.evaluate("[...[...document.querySelectorAll('#chr-out tbody tr')][1].cells].map(td=>__n(td.textContent))")
+    return [('k', row[2], 3.5, 0.002), ('N', row[3], 5.54*(4.95/0.110)**2, 0.001), ('R_s', row[7], 1.18*(4.95-3.42)/(0.082+0.110), 0.002)]
+
+@case('Interne standaard & standaardadditie', 'Exacte lijnen', 'IS: verhouding = 0,2·c, monster met verhouding 0,7 → 3,5; standaardadditie: signaal = 0,1 + 0,05·x geeft x_E = 2, × verdunning 5 = 10')
+def _(pg):
+    pg.evaluate("__go('istd');__set('isd-mode','is');__tbl('isd-tbl',[[1,2000,10000],[2,4000,10000],[5,10000,10000],[10,20000,10000]],'istd');__tbl('isd-unk',[['M',7000,10000,1]],'istd')")
+    a = pg.evaluate("__big('#isd-out')")
+    pg.evaluate("__set('isd-mode','sa');__set('isd-df','5');__tbl('isd-sa',[[0,0.1],[2,0.2],[4,0.3],[6,0.4]],'istd')")
+    return [('IS-monster', a, 3.5, 0.001), ('standaardadditie', pg.evaluate("__big('#isd-out')"), 10, 0.001)]
+
+@case('Waterhardheid (EDTA-titratie)', 'Totale hardheid', 'ISO 6059: 0,0100 M × (12,35 − 0,05) mL / 50,00 mL = 2,460 mmol/L = 13,79 °dH (× 5,6077)')
+def _(pg):
+    pg.evaluate("__go('edta');__set('ed-c','0,0100');__set('ed-vs','50');__set('ed-vt','12,35');__set('ed-vb','0,05');__set('ed-vca','')")
+    return [('mmol/L', pg.evaluate("__big('#ed-out')"), 2.46, 0.001), ('°dH', pg.evaluate("__kv('#ed-out','Duitse')"), 2.46*5.60774, 0.002)]
+
+@case('Buffercapaciteit', 'Eenwaardig zuur', 'Van Slyke: β = 2,303·(K_w/[H⁺] + [H⁺] + C·K_a[H⁺]/(K_a + [H⁺])²), pKₐ 7,20, C = 50 mM, pH 6,80')
+def _(pg):
+    import math
+    h = 10**-6.8; Ka = 10**-7.2; C = 0.05; b = 2.303*(1e-14/h + h + C*Ka*h/(Ka+h)**2)*1000
+    pg.evaluate("__go('bufcap');__set('bc-pka','7.20');__set('bc-c','50');__set('bc-ph','6,80')")
+    return [('β (mM/pH)', pg.evaluate("__big('#bc-out')"), b, 0.003)]
+
+@case('Oplosbaarheid (Ksp)', 'AgCl en CaF₂', 'AgCl in 0,01 M Cl⁻: s = (−0,01 + √(10⁻⁴ + 4K_sp))/2; CaF₂ zuiver water: s = (K_sp/4)^(1/3)')
+def _(pg):
+    import math
+    pg.evaluate("__go('ksp');__set('ks-k','1,77e-10');__set('ks-x','1');__set('ks-y','1');__set('ks-cc','0');__set('ks-ca','0,01');__set('ks-qc','');__set('ks-qa','')")
+    a = pg.evaluate("__big('#ks-out')")
+    pg.evaluate("__set('ks-k','3,45e-11');__set('ks-y','2');__set('ks-ca','0')")
+    c = pg.evaluate("__big('#ks-out')")
+    return [('AgCl met Cl⁻ (mol/L)', a, (-0.01+math.sqrt(1e-4+4*1.77e-10))/2, 0.005), ('CaF₂ (mol/L)', c, (3.45e-11/4)**(1/3), 0.005)]
+
+@case('Assaykwaliteit (Z′-factor)', 'Z′', 'Zhang e.a. (1999): Z′ = 1 − 3(σp + σn)/|μp − μn|, onafhankelijk berekend met numpy (SD met n − 1)')
+def _(pg):
+    import numpy as np
+    P = [1.80, 1.85, 1.90, 1.82, 1.88, 1.86, 1.79, 1.91]; N = [0.20, 0.22, 0.19, 0.21, 0.23, 0.20, 0.18, 0.22]
+    z = 1-3*(np.std(P, ddof=1)+np.std(N, ddof=1))/abs(np.mean(P)-np.mean(N))
+    pg.evaluate(f"__go('zprime');__set('zp-pos','{' '.join(str(v).replace('.',',') for v in P)}');__set('zp-neg','{' '.join(str(v).replace('.',',') for v in N)}');__set('zp-s','')")
+    return [('Z′', pg.evaluate("__big('#zp-out')"), z, 0.002)]
+
+@case('Transfectie (Lipofectamine 3000)', '6-well', 'Thermo Fisher MAN0009872: 6-well 2 × 125 µL Opti-MEM, 2,5 µg DNA, 5 µL P3000, 7,5 µL Lipofectamine 3000 (hoog)')
+def _(pg):
+    pg.evaluate("__go('transfect');__set('trf-type','dna');__set('trf-fmt','5');__set('trf-dose','hi');__set('trf-n','1');__set('trf-x','0');__set('trf-st','1')")
+    rows = pg.evaluate("[...document.querySelectorAll('#trf-out table')].map(t=>[...t.querySelectorAll('tbody tr')].map(r=>__n(r.cells[1].textContent)))")
+    return [('Opti-MEM per buis (µL)', rows[0][0], 125, 0.001), ('DNA (µL van 1 µg/µL)', rows[0][1], 2.5, 0.001), ('P3000 (µL)', rows[0][2], 5, 0.001), ('Lipofectamine 3000 (µL)', rows[1][1], 7.5, 0.001)]
+
+@case('Viabiliteit (trypaanblauw)', 'Neubauer-telling', 'Strober (2015): 182 levend / 4 vierkanten × 2 × 10⁴ = 9,10 × 10⁵ per mL; viabiliteit 182/196 = 92,86%')
+def _(pg):
+    pg.evaluate("__go('viab');__set('vb-l','182');__set('vb-d','14');__set('vb-sq','4');__set('vb-df','2')")
+    return [('levend/mL', pg.evaluate("__big('#vb-out')"), 9.1e5, 0.001), ('viabiliteit (%)', pg.evaluate("__kv('#vb-out','Viabiliteit')"), 182/196*100, 0.001)]
+
+@case('Desinfectietest (log-reductie)', 'EN 1276', 'N = 3,0 × 10⁸ kve/mL, N₀ = N/10, N_a = 300 kve/mL: R = lg(3 × 10⁷) − lg 300 = 5,00')
+def _(pg):
+    pg.evaluate("__go('desinf');__set('ds-req','5');__set('ds-dil','10');__set('ds-dl','140');__tbl('ds-tbl',[['org',3e8,300]],'desinf')")
+    r = pg.evaluate("__n(document.querySelector('#ds-out tbody tr').cells[3].textContent)")
+    return [('reductie (lg)', r, 5.0, 0.001)]
+
+@case('Bland-Altman (methodevergelijking)', 'Bias en grenzen', 'Bland & Altman (1986): d̄ ± 1,96·s_d, onafhankelijk berekend met numpy')
+def _(pg):
+    import numpy as np
+    A = [4.8, 6.2, 7.9, 5.5, 9.8, 3.1, 6.7, 8.4]; B = [5.1, 6.0, 8.3, 5.9, 10.4, 3.0, 7.2, 8.6]
+    d = np.array(B)-np.array(A); b = d.mean(); s = d.std(ddof=1)
+    pg.evaluate("__go('bland');__set('ba-m','abs');__set('ba-lim','');__set('ba-d',"+repr('\n'.join(f"{a} {c}".replace('.',',') for a,c in zip(A,B)))+")")
+    lo = pg.evaluate("__kv('#ba-out','Grenzen')"); hi = pg.evaluate("__n(([...document.querySelectorAll('#ba-out dt')].find(d=>d.textContent.startsWith('Grenzen')).nextElementSibling.textContent.split('–')[1]))")
+    return [('bias', pg.evaluate("__big('#ba-out')"), b, 0.002), ('ondergrens', lo, b-1.96*s, 0.003), ('bovengrens', hi, b+1.96*s, 0.003)]
+
+@case('ROC-curve & diagnostische test', 'AUC', 'AUC = U/(n_p·n_n) uit scipy.stats.mannwhitneyu')
+def _(pg):
+    from scipy import stats
+    P = [2.8, 3.5, 1.9, 4.2, 3.1, 2.4, 5.0, 3.8, 2.2]; N = [1.1, 0.8, 1.5, 2.0, 0.6, 2.4, 1.9, 0.9, 1.2, 2.6]
+    U = stats.mannwhitneyu(P, N).statistic
+    pg.evaluate(f"__go('roc');__set('ro-dir','hi');__set('ro-c','');__set('ro-p','{' '.join(str(v).replace('.',',') for v in P)}');__set('ro-n','{' '.join(str(v).replace('.',',') for v in N)}')")
+    return [('AUC', pg.evaluate("__big('#ro-out')"), U/(len(P)*len(N)), 0.002)]
+
+@case('Overlevingscurve (Kaplan-Meier)', 'Mediaan en log-ranktoets', 'scipy.stats.ecdf (Kaplan-Meier) en scipy.stats.logrank op dezelfde gecensureerde data')
+def _(pg):
+    from scipy import stats
+    import numpy as np
+    g1 = [(3,1),(5,1),(6,1),(6,0),(8,1),(9,1),(11,1),(12,0),(14,1),(15,0)]; g2 = [(5,1),(8,0),(10,1),(12,1),(14,0),(16,1),(18,0),(20,1),(22,0),(25,0)]
+    cd = lambda g: stats.CensoredData(uncensored=[t for t,e in g if e], right=[t for t,e in g if not e])
+    lr = stats.logrank(cd(g1), cd(g2))
+    sf = stats.ecdf(cd(g1)).sf; med = sf.quantiles[np.argmax(sf.probabilities <= 0.5)]
+    txt = '\\n'.join([f"controle {t} {e}" for t,e in g1]+[f"behandeld {t} {e}" for t,e in g2])
+    pg.evaluate(f"__go('km');__set('km-d','{txt}')")
+    chi = pg.evaluate("(()=>{ const dt=[...document.querySelectorAll('#km-out dt')].find(d=>d.textContent.startsWith('Log')); return __n(dt.nextElementSibling.textContent.split('=')[1]); })()")
+    p = pg.evaluate("(()=>{ const dt=[...document.querySelectorAll('#km-out dt')].find(d=>d.textContent.startsWith('Log')); return __n(dt.nextElementSibling.textContent.split('p')[1]); })()")
+    m = pg.evaluate("__n(document.querySelector('#km-out tbody tr').cells[3].textContent)")
+    return [('mediaan controle', m, float(med), 0.001), ('χ²', chi, lr.statistic**2, 0.005), ('p', p, lr.pvalue, 0.02)]
+
+@case('Significante cijfers & afronden', 'Afronden en onzekerheid', 'Half naar boven: 0,004565 → 0,00457; half naar even: 0,00456; 9,995 → 10,0; GUM §7.2.6: 0,0045650 ± 0,0000234 → 0,004565 ± 0,000023')
+def _(pg):
+    pg.evaluate("__go('sigfig');__set('sf-x','0,004565');__set('sf-n','3');__set('sf-m','up');__set('sf-u','')")
+    up = pg.evaluate("__big('#sf-out')")
+    pg.evaluate("__set('sf-m','even')"); ev = pg.evaluate("__big('#sf-out')")
+    pg.evaluate("__set('sf-m','up');__set('sf-x','9,995')"); nn = pg.evaluate("document.querySelector('#sf-out .big').textContent.trim()")
+    pg.evaluate("__set('sf-x','0,0045650');__set('sf-u','0,0000234');__set('sf-ud','2')"); u = pg.evaluate("document.querySelectorAll('#sf-out .big')[1].textContent.trim()")
+    return [('half naar boven', up, 0.00457, 0), ('half naar even', ev, 0.00456, 0), ('9,995 → 3 cijfers', 1 if nn=='10,0' else 0, 1, 0), ('met onzekerheid', 1 if u=='0,004565 ± 0,000023' else 0, 1, 0)]
+
+@case('Welke pipet?', '15 µL', 'ISO 8655-2 grenzen voor 20 µL: e_s 1% = 0,2 µL, CV 0,5% = 0,1 µL; P20 heeft de kleinste totale fout')
+def _(pg):
+    pg.evaluate("__go('pipkeus');__set('pk-v','15');__set('pk-set','2 10 20 100 200 1000')")
+    return [('beste pipet', pg.evaluate("__big('#pk-out')"), 20, 0), ('e_s (µL)', pg.evaluate("__kv('#pk-out','Systematische')"), 0.2, 0.001)]
+
+@case('Etikettenvel', 'QR-code leesbaar', 'QR-code volgens ISO/IEC 18004, gecontroleerd door de QR-decoder van OpenCV')
+def _(pg):
+    import base64, cv2, numpy as np
+    out = []
+    for t in ['S-001', 'https://svgbml.github.io/labkit_public/?d=zAbC#widmark', 'X'*300]:
+        u = pg.evaluate("t=>{ const n=qrMatrix(t,'M').length, s=Math.max(4,Math.ceil(800/(n+8))), c=document.createElement('canvas'); c.width=c.height=(n+8)*s; drawQR(c.getContext('2d'),t,0,0,c.width,'M'); return c.toDataURL(); }", t)
+        img = cv2.imdecode(np.frombuffer(base64.b64decode(u.split(',')[1]), np.uint8), cv2.IMREAD_GRAYSCALE)
+        v, _, _ = cv2.QRCodeDetector().detectAndDecode(img)
+        if v != t:
+            try: v, _, _ = cv2.QRCodeDetectorAruco().detectAndDecode(img)
+            except Exception: pass
+        out.append((f'decodeert ({len(t)} tekens)', 1 if v == t else 0, 1, 0))
+    return out
+
 def main():
     rows = []; fails = 0
     with sync_playwright() as p:

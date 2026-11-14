@@ -1,0 +1,30 @@
+<section class="tool" id="t-bland" data-tool="bland">
+  <header class="tool-head"><h2>Bland-Altman (methodevergelijking)</h2>
+  <p>Vergelijk twee meetmethoden op dezelfde monsters: gemiddeld verschil (bias), grenzen van overeenstemming met betrouwbaarheidsintervallen, en een controle op proportionele afwijking.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f" style="grid-column:1/-1"><label for="ba-d">Methode A en methode B, één monster per regel <span class="example">voorbeeld</span></label><textarea id="ba-d" rows="10">4,8 5,1
+6,2 6,0
+7,9 8,3
+5,5 5,9
+9,8 10,4
+3,1 3,0
+6,7 7,2
+8,4 8,6
+4,2 4,6
+7,1 7,0
+5,9 6,4
+10,6 11,1
+3,8 4,1
+6,0 6,1
+8,9 9,6</textarea></div>
+        <div class="f"><label for="ba-m">Verschil als</label><select id="ba-m"><option value="abs">B − A (absoluut)</option><option value="pct">(B − A) / gemiddelde (%)</option></select></div>
+        <div class="f"><label for="ba-lim">Klinisch aanvaardbaar verschil (optioneel)</label><input id="ba-lim" inputmode="decimal" value=""></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Twee kolommen plakken uit Excel kan. Een hoge correlatie zegt niets over overeenstemming; daarvoor is deze analyse bedoeld. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result"><canvas id="ba-cv"></canvas><div id="ba-out"></div></div>
+  </div>
+  <p class="src">Bias = gemiddeld verschil d̄; grenzen van overeenstemming d̄ ± 1,96·s<sub>d</sub>; 95%-interval van de bias d̄ ± t·s<sub>d</sub>/√n en van elke grens ± t·√(3s<sub>d</sub>²/n) (Bland &amp; Altman, Lancet 327:307–310, 1986; Stat Methods Med Res 8:135–160, 1999). Proportionele afwijking: regressie van het verschil op het gemiddelde (Bland &amp; Altman 1999, §3).</p>
+</section>

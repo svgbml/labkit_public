@@ -1,0 +1,18 @@
+<section class="tool" id="t-chrom" data-tool="chrom">
+  <header class="tool-head"><h2>Chromatografie (HPLC/GC)</h2>
+  <p>Retentiefactor, plaatgetal, schotelhoogte, tailingfactor, selectiviteit en resolutie uit retentietijden en piekbreedtes, met een nagebootst chromatogram en de gebruikelijke systeemgeschiktheidscriteria.</p></header>
+  <div class="stack">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="chr-t0">Dode tijd t<sub>0</sub></label><div class="inu"><input id="chr-t0" inputmode="decimal" value="1,10"><span class="u">min</span></div></div>
+        <div class="f"><label for="chr-L">Kolomlengte</label><div class="inu"><input id="chr-L" inputmode="decimal" value="150"><span class="u">mm</span></div></div>
+        <div class="f"><label for="chr-wt">Breedte gemeten als</label><select id="chr-wt"><option value="h">breedte op halve hoogte (W<sub>h</sub>)</option><option value="b">basisbreedte uit raaklijnen (W<sub>b</sub>)</option></select></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:12px"><table id="chr-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:8px"><button type="button" id="chr-tbl-add">+ Piek</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Tijden en breedtes in minuten, uit het integratierapport. Voor de tailingfactor: de piekbreedte op 5% van de hoogte (W<sub>0,05</sub>) en de afstand f van de voorkant van de piek tot het piekmaximum op die hoogte. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result"><canvas id="chr-cv"></canvas><div id="chr-out"></div></div>
+  </div>
+  <p class="src">USP &lt;621&gt; Chromatography en Ph. Eur. 2.2.46: k = (t<sub>R</sub> − t<sub>0</sub>)/t<sub>0</sub>; N = 5,54·(t<sub>R</sub>/W<sub>h</sub>)² of 16·(t<sub>R</sub>/W<sub>b</sub>)²; H = L/N; T = W<sub>0,05</sub>/(2f); α = k<sub>2</sub>/k<sub>1</sub>; R<sub>s</sub> = 1,18·(t<sub>R2</sub> − t<sub>R1</sub>)/(W<sub>h1</sub> + W<sub>h2</sub>) of 2·(t<sub>R2</sub> − t<sub>R1</sub>)/(W<sub>b1</sub> + W<sub>b2</sub>). Richtwaarden voor systeemgeschiktheid: R<sub>s</sub> &gt; 2, T ≤ 2, k &gt; 2, N &gt; 2000 (FDA CDER, Reviewer Guidance: Validation of Chromatographic Methods, 1994). Het chromatogram gaat uit van Gaussische pieken met gelijke hoogte.</p>
+</section>

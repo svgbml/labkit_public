@@ -8,8 +8,10 @@ Opent elke tool op drie schermbreedtes en zoekt naar:
 - tekst in canvas-afbeeldingen die buiten beeld valt of andere tekst overlapt.
 Gebruik: python tests/layout_audit.py   (exitcode 1 bij problemen)
 """
-import pathlib, sys, json
+import os, pathlib, sys, json
 from playwright.sync_api import sync_playwright
+# Optioneel ander lettertype (LABKIT_FONT) om CI-lettertypen na te bootsen
+FONTJS = """document.addEventListener('DOMContentLoaded',()=>{ const st=document.createElement('style'); st.textContent=":root,html[data-theme]{--font-ui:'%s' !important} body,input,button,select,textarea{font-family:'%s' !important}"; document.head.appendChild(st); });"""
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 URL = (ROOT / 'web' / 'index.html').as_uri()
 
@@ -55,6 +57,7 @@ def main():
             pg = b.new_page(viewport={'width': W, 'height': H}, device_scale_factor=1)
             pg.add_init_script("try{localStorage.setItem('labkit:v1:lang','"+__import__('os').environ.get('LABKIT_LANG','nl')+"')}catch(e){}")
             pg.add_init_script(PATCH)
+            if os.environ.get('LABKIT_FONT'): pg.add_init_script(FONTJS % (os.environ['LABKIT_FONT'], os.environ['LABKIT_FONT']))
             errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
             pg.goto(URL); pg.wait_for_timeout(900)
             tools = pg.evaluate("TOOLS")
