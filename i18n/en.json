@@ -3473,5 +3473,7 @@
 "tijd ({*})": "time ({*})",
 "concentratie ({*})": "concentration ({*})",
 "toegevoegd ({*})": "added ({*})",
-"Zoek een tool of opdracht": "Search for a tool or command"
+"Zoek een tool of opdracht": "Search for a tool or command",
+"breedte op halve hoogte": "width at half height",
+"basisbreedte uit raaklijnen": "base width from tangents"
 }
