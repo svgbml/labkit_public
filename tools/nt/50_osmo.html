@@ -1,0 +1,18 @@
+<section class="tool" id="t-osmo" data-tool="osmo">
+  <header class="tool-head"><h2>Osmolariteit &amp; ionsterkte</h2>
+  <p>Osmolariteit en ionsterkte van een oplossing uit de concentraties van de opgeloste stoffen, en de normaliteit van een zuur of base.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="tbl-wrap"><table id="os-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:8px"><button type="button" id="os-tbl-add">+ Stof</button></div>
+      <div class="fields" style="margin-top:12px">
+        <div class="f"><label for="os-phi">Osmotische coëfficiënt φ</label><input id="os-phi" inputmode="decimal" value="1"></div>
+        <div class="f"><label for="os-nb">Normaliteit: stof</label><select id="os-nb" style="width:100%"><option value="1">HCl, HNO₃, NaOH, KOH (1 eq/mol)</option><option value="2">H₂SO₄, Ca(OH)₂ (2 eq/mol)</option><option value="3">H₃PO₄ (3 eq/mol)</option><option value="5">KMnO₄ in zuur milieu (5 eq/mol)</option></select></div>
+        <div class="f"><label for="os-nm">Molariteit</label><div class="inu"><input id="os-nm" inputmode="decimal" value="0,05"><span class="u">M</span></div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Ionen worden automatisch ingevuld voor de stoffen in de lijst. Bij "eigen stof" geef je de ladingen van de ionen per formule-eenheid, bijvoorbeeld <span class="mono">+2 -1 -1</span> voor CaCl₂ of <span class="mono">0</span> voor een niet-elektrolyt. Voorbeeld: PBS.</p>
+    </div>
+    <div class="result" id="os-out"></div>
+  </div>
+  <p class="src">Ideale osmolariteit = Σ c<sub>i</sub>·ν<sub>i</sub> (ν = aantal deeltjes per formule-eenheid); ionsterkte I = ½ Σ c<sub>j</sub>·z<sub>j</sub>² over alle ionen (IUPAC Gold Book, "ionic strength"). Bij volledige dissociatie; de echte osmolaliteit is lager (φ &lt; 1, bijv. ongeveer 0,93 voor fysiologisch zout; Atkins, Physical Chemistry). Normaliteit N = M × aantal equivalenten per mol.</p>
+</section>

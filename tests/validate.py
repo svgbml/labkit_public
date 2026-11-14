@@ -22,6 +22,7 @@ window.__n=t=>{ t=String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' '); const m=
 window.__el=el=>{ if(!el) return ''; const c=el.cloneNode(true); c.querySelectorAll('small,span[style*=muted]').forEach(s=>s.remove()); c.querySelectorAll('sup').forEach(s=>s.replaceWith('^'+s.textContent.replace('−','-'))); return c.textContent; };
 window.__big=sel=>__n(__el(document.querySelector(sel+' .big')));
 window.__cells=sel=>[...document.querySelectorAll(sel)].map(e=>__n(__el(e)));
+window.__tbl=(id,rows,tool)=>{ document.querySelector("#"+id+" tbody").innerHTML=rows.map(TBLDEF[id].row).join(""); calc[tool](); };
 window.__kv=(sel,label)=>{ const dt=[...document.querySelectorAll(sel+' dt')].find(d=>d.textContent.trim().startsWith(label)); return dt?__n(__el(dt.nextElementSibling)):NaN; };
 """
 
@@ -593,6 +594,114 @@ def _(pg):
     pg.evaluate(f"groups.splice({n0}); selG=0; renderPlate()")
     return [('groepen erbij', v[0]-n0, 6, 0), ('unieke kleuren', v[1], v[0], 0)]
 
+
+# ---------------- Nieuwe tools (v1.14) ----------------
+@case('MPN', '3-buizenreeks 3-1-0', 'FDA BAM Appendix 2, tabel 1 (0,1/0,01/0,001 g): 3-1-0 → 43 MPN/g')
+def _(pg):
+    pg.evaluate("__go('mpn');__tbl('mp-tbl',[[0.1,3,3],[0.01,3,1],[0.001,3,0]],'mpn')")
+    return [('MPN per g', pg.evaluate("__big('#mp-out')"), 43, 0.03)]
+
+@case('MPN', '3-buizenreeks 2-1-0', 'FDA BAM Appendix 2, tabel 1: 2-1-0 → 15 MPN/g')
+def _(pg):
+    pg.evaluate("__tbl('mp-tbl',[[0.1,3,2],[0.01,3,1],[0.001,3,0]],'mpn')")
+    return [('MPN per g', pg.evaluate("__big('#mp-out')"), 15, 0.05)]
+
+@case('Titratiecurve', '25 mL 0,1 M azijnzuur met 0,1 M NaOH', 'Harris, Quantitative Chemical Analysis: pH start 2,88; ½-eq = pKₐ 4,76; equivalentiepunt 8,72')
+def _(pg):
+    pg.evaluate("__go('titr');__set('ti-type','acid');__set('ti-pka','4,76');__set('ti-ca','0,1');__set('ti-va','25');__set('ti-cb','0,1')")
+    v = pg.evaluate("[...document.querySelectorAll('#ti-out tbody tr')].map(r=>__n(r.cells[2].textContent))")
+    return [('pH start', v[0], 2.88, 0.005), ('pH ½-equivalentie', v[1], 4.76, 0.003), ('pH equivalentiepunt', v[2], 8.72, 0.003)]
+
+@case('Kjeldahl', 'Melk, factor 6,38', 'AOAC 991.20: %N = 1,4007·c·(V−Vb)/m → 1,4007·0,1·15,2/1,0025 = 2,1237%; eiwit ×6,38 = 13,549%')
+def _(pg):
+    pg.evaluate("__go('kjel');__set('kj-m','1,0025');__set('kj-c','0,1');__set('kj-vs','15,40');__set('kj-vb','0,20');__set('kj-f','6.38')")
+    return [('% eiwit', pg.evaluate("__big('#kj-out')"), 13.549, 0.001)]
+
+@case('Osmolariteit & ionsterkte', 'Fysiologisch zout 154 mM NaCl', 'Ideale osmolariteit 2 × 154 = 308 mOsm/L; ionsterkte ½(154·1 + 154·1) = 154 mM')
+def _(pg):
+    pg.evaluate("__go('osmo');__set('os-phi','1');__tbl('os-tbl',[['NaCl',154,'']],'osmo')")
+    return [('mOsm/L', pg.evaluate("__big('#os-out')"), 308, 0.001), ('ionsterkte (mM)', pg.evaluate("__kv('#os-out','Ionsterkte')"), 154, 0.001)]
+
+@case('Verwantschapsindex', 'Trio, obligaat allel', 'Butler (2015) hfst. 15: vader heterozygoot voor obligaat allel → PI = 1/(2p); homozygoot → 1/p; CPI = product')
+def _(pg):
+    pg.evaluate("__go('kin');__set('kn-mo','1');__tbl('kn-tbl',[['L1',15,17,0.26,0.20,15,16,17,18],['L2',21,24,0.17,0.14,22,24,21,21]],'kin')")
+    pis = pg.evaluate("[...document.querySelectorAll('#kn-out tbody tr')].map(r=>__n(r.cells[1].textContent))")
+    return [('PI heterozygote vader', pis[0], 2.5, 0.001), ('PI homozygote vader', pis[1], 1/0.17, 0.002), ('CPI', pg.evaluate("__big('#kn-out')"), 2.5/0.17, 0.003)]
+
+@case('Y-STR / mtDNA-frequentie', 'Niet waargenomen in 4500', 'SWGDAM Y-STR-richtlijnen: bovengrens 1 − 0,05^(1/N) = 6,655 × 10⁻⁴')
+def _(pg):
+    pg.evaluate("__go('ystr');__set('ys-x','0');__set('ys-n','4500');__set('ys-cl','0.95');__set('ys-th','0')")
+    return [('bovengrens', pg.evaluate("__big('#ys-out')"), 1-0.05**(1/4500), 0.002)]
+
+@case('Bloedvlekpatronen', 'Inslaghoek', 'Balthazard: arcsin(5/10) = 30°; arcsin(2,6/5,9) = 26,1°')
+def _(pg):
+    pg.evaluate("__go('bpa');__tbl('bp-tbl',[['a',5,10,'','',''],['b',2.6,5.9,'','','']],'bpa')")
+    a = pg.evaluate("[...document.querySelectorAll('#bp-out tbody tr')].map(r=>__n(r.cells[2].textContent))")
+    import math
+    return [('α vlek a (°)', a[0], 30.0, 0.002), ('α vlek b (°)', a[1], math.degrees(math.asin(2.6/5.9)), 0.003)]
+
+@case('Tijd sinds overlijden', 'Henssge, T_a 18 °C', 'Onafhankelijk opgelost met SciPy brentq uit de Henssge-vergelijking (Henssge & Madea 2004): T_r 30,5 °C, 75 kg, CF 1')
+def _(pg):
+    import math
+    from scipy.optimize import brentq
+    B = -1.2815*(75)**-0.625+0.0284; q = (30.5-18)/(37.2-18)
+    t = brentq(lambda t: 1.25*math.exp(B*t)-0.25*math.exp(5*B*t)-q, 0.01, 200)
+    pg.evaluate("__go('pmi');__set('pm-tr','30,5');__set('pm-ta','18');__set('pm-w','75');__set('pm-cf','1');__set('pm-at','')")
+    h = pg.evaluate("(()=>{ const t=document.querySelector('#pm-out .big').textContent; const m=t.match(/(\\d+)\\D+(\\d+)/); return +m[1]+ +m[2]/60; })()")
+    return [('PMI (h)', h, t, 0.005)]
+
+@case('Pipetkalibratie', 'INTEGRA-rekenvoorbeeld', 'INTEGRA, Calibration check: volumes 100,40/100,42/100,43/100,54/100,47 µL → V̄ 100,452 µL, e_s 0,45%')
+def _(pg):
+    z = 1.0029; ms = ' '.join(f"{v/z:.5f}".replace('.', ',') for v in [100.40, 100.42, 100.43, 100.54, 100.47])
+    pg.evaluate(f"__go('pipcal');__set('pc-v','100');__set('pc-nom','100');__set('pc-t','20');__set('pc-ch','1');__set('pc-m','{ms}')")
+    return [('gemiddeld volume (µL)', pg.evaluate("__big('#pc-out')"), 100.452, 0.0001), ('e_s (%)', pg.evaluate("__kv('#pc-out','Systematische')"), 0.45, 0.02)]
+
+@case('Dosis-respons (IC50/EC50)', '4PL zonder ruis', 'Data berekend uit y = 0,05 + 0,95/(1 + (x/3)^1,2): de fit moet IC50 = 3 teruggeven')
+def _(pg):
+    xs = [0.1, 0.3, 1, 3, 10, 30, 100]; f = lambda x: 0.05+0.95/(1+(x/3)**1.2)
+    rows = [[x, round(f(x), 6), round(f(x), 6), ''] for x in xs]
+    pg.evaluate(f"__go('ic50');__set('ic-norm','raw');__tbl('ic-tbl',{rows},'ic50')")
+    return [('IC50', pg.evaluate("__big('#ic-out')"), 3.0, 0.005)]
+
+@case('Sterilisatie (D, z, F₀)', 'F₀ van 15 min op 121,1 °C', 'Ph. Eur. 5.1.5: F₀ = Δt·Σ10^((T−121,1)/10) = 15 min; D uit log-lineaire overleving met D = 2,5 min')
+def _(pg):
+    pg.evaluate("__go('steril');__set('ste-dt','1');__set('ste-z','10');__set('ste-log','"+' '.join(['121,1']*15)+"');__set('ste-t','0 2,5 5 7,5');__set('ste-n','1e6 1e5 1e4 1e3')")
+    return [('F₀ (min)', pg.evaluate("__kv('#ste-out','F₀')"), 15, 0.001), ('D-waarde (min)', pg.evaluate("__kv('#ste-out','D-waarde')"), 2.5, 0.001)]
+
+@case('RNA-kwaliteit', 'Concentratie', 'Thermo Fisher T042: c = A260 × 40 × verdunning = 0,5 × 40 × 20 = 400 ng/µL')
+def _(pg):
+    pg.evaluate("__go('rnaq');__set('rq-a260','0,5');__set('rq-df','20');__set('rq-l','1')")
+    return [('ng/µL', pg.evaluate("__big('#rq-out')"), 400, 0.0001)]
+
+@case('cDNA-synthese (RT-mix)', 'RNA-volume en mix', 'High-Capacity cDNA RT Kit: 1000 ng uit 412 ng/µL = 2,427 µL; 2× mix per reactie 10 µL, 5 reacties + 10% = 55 µL')
+def _(pg):
+    pg.evaluate("__go('cdna');__set('cd-in','1000');__set('cd-vr','10');__set('cd-nort','1');__set('cd-mar','10');__tbl('cd-tbl',[['A',412],['B',388],['C',256],['D',1190]],'cdna')")
+    v = pg.evaluate("__n([...document.querySelectorAll('#cd-out table')][1].querySelector('tbody tr').cells[1].textContent)")
+    return [('RNA monster A (µL)', v, 1000/412, 0.002), ('mastermix (µL)', pg.evaluate("__big('#cd-out')"), 55, 0.001)]
+
+@case('Celpassageplanner', 'Splitsing 1:4', 'N = N₀·2^(t/t_d): 1:4 bij t_d 24 h → 48 h + 12 h herstel = 2 d 12 u')
+def _(pg):
+    pg.evaluate("__go('passage');__set('ps-td','24');__set('ps-lag','12');__set('ps-n','2e6')")
+    t = pg.evaluate("(()=>{ const r=[...document.querySelectorAll('#ps-out tbody tr')].find(r=>r.cells[0].textContent.trim()==='1:4'); const m=r.cells[2].textContent.match(/(\\d+) d (\\d+)/); return +m[1]*24+ +m[2]; })()")
+    return [('uren tot confluent', t, 60, 0.001)]
+
+@case('Meetonzekerheid', 'Relatieve onzekerheid', 'GUM/QUAM: √((0,0005/5,844)² + (0,005/√3/0,995)² + (0,4/√6/1000)²) = 0,2914%')
+def _(pg):
+    pg.evaluate("__go('munc');__set('mu-res','0,1');__set('mu-k','2');__tbl('mu-tbl',[['m',5.844,0.0005,MUT[0]],['P',0.995,0.005,MUT[1]],['V',1000,0.4,MUT[2]]],'munc')")
+    import math
+    ref = math.sqrt((0.0005/5.844)**2+(0.005/math.sqrt(3)/0.995)**2+(0.4/math.sqrt(6)/1000)**2)*100
+    return [('u_c,rel (%)', pg.evaluate("__kv('#mu-out','Relatieve')"), ref, 0.002)]
+
+@case('STR-profielcontrole', 'Piekhoogteverhouding', 'PHR = laagste/hoogste piek: 290/610 = 47,5%; 2 bijdragers bij 4 allelen')
+def _(pg):
+    pg.evaluate("__go('strchk');__tbl('sc-tbl',[['FGA',21,610],['FGA',24,290],['D8',12,880],['D8',13,930],['D8',14,410],['D8',15,380]],'strchk')")
+    phr = pg.evaluate("__n(document.querySelector('#sc-out tbody tr').cells[2].textContent)")
+    return [('PHR (%)', phr, 290/610*100, 0.02), ('min. bijdragers', pg.evaluate("__big('#sc-out')"), 2, 0)]
+
+@case('qPCR-plaatindeling', 'Aantal wells', '4 monsters × 3 replicaten + 1 NTC × 3 = 15 wells per doelgen; 2 doelgenen = 30')
+def _(pg):
+    pg.evaluate("__go('qplate');__set('qp2-fmt','96');__set('qp2-rep','3');__set('qp2-s','A, B, C, D');__set('qp2-t','G1, G2');__set('qp2-std','0');__set('qp2-ntc','1')")
+    return [('wells gebruikt', pg.evaluate("__kv('#qp2-out','Wells gebruikt')"), 30, 0)]
 
 def main():
     rows = []; fails = 0

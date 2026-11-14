@@ -1,0 +1,19 @@
+<section class="tool" id="t-strchk" data-tool="strchk">
+  <header class="tool-head"><h2>STR-profielcontrole</h2>
+  <p>Controleer een STR-profiel per locus: piekhoogteverhouding van heterozygoten, mogelijke stutterpieken, pieken onder de analytische drempel, mogelijke drop-out onder de stochastische drempel en het minimale aantal bijdragers.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="sc-at">Analytische drempel</label><div class="inu"><input id="sc-at" inputmode="decimal" value="50"><span class="u">RFU</span></div></div>
+        <div class="f"><label for="sc-st">Stochastische drempel</label><div class="inu"><input id="sc-st" inputmode="decimal" value="200"><span class="u">RFU</span></div></div>
+        <div class="f"><label for="sc-phr">Minimale piekhoogteverhouding</label><div class="inu"><input id="sc-phr" inputmode="decimal" value="60"><span class="u">%</span></div></div>
+        <div class="f"><label for="sc-stut">Stutterfilter (n−1)</label><div class="inu"><input id="sc-stut" inputmode="decimal" value="15"><span class="u">%</span></div></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:12px;max-height:440px;overflow-y:auto"><table id="sc-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:8px"><button type="button" id="sc-tbl-add">+ Piek</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Eén regel per piek. Plak drie kolommen uit de export van je analysesoftware (locus, allel, hoogte). Drempels zijn per lab en kit gevalideerd; de standaardwaarden zijn voorbeelden. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result" id="sc-out"></div>
+  </div>
+  <p class="src">Begrippen volgens de SWGDAM Interpretation Guidelines for Autosomal STR Typing (2017, rev. 2021): het lab stelt een analytische en stochastische drempel en verwachtingen voor de piekhoogteverhouding (PHR) vast. PHR = laagste / hoogste piek van een heterozygoot; vaak boven 60% (FBI Laboratory, BIO-574; San Diego PD Forensic Biology). Stutter: piek één repeat kleiner dan een allel, gefilterd onder een kit-specifiek percentage (NIST STRBase, bijv. 15%). Minimaal aantal bijdragers = afgerond omhoog (maximaal aantal allelen per locus / 2).</p>
+</section>

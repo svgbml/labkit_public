@@ -1,0 +1,18 @@
+<section class="tool" id="t-pipcal" data-tool="pipcal">
+  <header class="tool-head"><h2>Pipetkalibratie</h2>
+  <p>Gravimetrische controle van een pipet: weegresultaten omrekenen naar volume met de Z-factor, en de systematische en toevallige fout vergelijken met de grenzen uit ISO 8655.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="pc-v">Ingesteld volume</label><div class="inu"><input id="pc-v" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
+        <div class="f"><label for="pc-nom">Nominaal volume pipet</label><div class="inu"><input id="pc-nom" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
+        <div class="f"><label for="pc-t">Watertemperatuur</label><div class="inu"><input id="pc-t" inputmode="decimal" value="21,5"><span class="u">°C</span></div></div>
+        <div class="f"><label for="pc-ch">Type</label><select id="pc-ch" style="width:100%"><option value="1">enkelkanaals</option><option value="2">meerkanaals (grenzen × 2)</option></select></div>
+        <div class="f" style="grid-column:1/-1"><label for="pc-m">Wegingen (mg) <span class="example">voorbeeld</span></label><textarea id="pc-m" rows="4">99,61 99,72 99,58 99,80 99,66 99,70 99,63 99,75 99,69 99,60</textarea></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Minstens 4 wegingen voor een routinecheck, 10 voor een kalibratie. Laat pipet, tips en water vooraf op kamertemperatuur komen en gebruik een verdampingsval. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result" id="pc-out"></div>
+  </div>
+  <p class="src">V<sub>i</sub> = m<sub>i</sub> × Z; systematische fout e<sub>s</sub> = (V̄ − V<sub>s</sub>) / V<sub>s</sub> × 100%; toevallige fout CV = s / V̄ × 100% (ISO 8655-6; INTEGRA, Calibration check; Radwag, Gravimetric determination of pipette errors). Z-factor van gedestilleerd water bij 1 atm en maximaal toelaatbare fouten per nominaal volume: Mettler Toledo, SOP Pipette Quick Check (tabellen 3 en 4, ISO 8655). De grenzen gelden bij het nominale volume; fabrikantspecificaties zijn vaak strenger.</p>
+</section>

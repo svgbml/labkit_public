@@ -21,11 +21,15 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 - Eenheden omrekenen (M, g/L, % w/v, ppm)
 - Molmassa uit een formule (met haakjes en kristalwater)
 - pH-buffer (Henderson-Hasselbalch)
+- Titratiecurve (ook meerwaardige zuren, met equivalentiepunten)
+- Osmolariteit, ionsterkte en normaliteit
+- Kjeldahl: stikstof en ruw eiwit
 
 **Assays**
 - Standaardcurve: lineair, kwadratisch, 4PL en 5PL, met LOD en LOQ en import van een 96-wells-plaatexport
 - Enzymkinetiek: activiteit uit ΔA/min, Michaelis-Menten, Lineweaver-Burk, Hanes-Woolf, remmingstype
 - Spectrofotometrie: Lambert-Beer en eiwitconcentratie uit A₂₈₀ (ε uit de sequentie)
+- Dosis-respons: IC₅₀/EC₅₀ met een 4PL-fit
 
 **Microbiologie en cellen**
 - Verdunningsreeks en KVE/mL
@@ -35,6 +39,9 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 - Telkamer en teller
 - Cellen uitzaaien (plaat of fles op dichtheid inzetten)
 - Microscoop-kalibratie (oculairmicrometer ijken)
+- MPN (meest waarschijnlijk aantal) met betrouwbaarheidsinterval
+- Sterilisatie: D-waarde, z-waarde en F₀
+- Celpassageplanner (tijd tot confluent en splitratio)
 
 **DNA en eiwit**
 - DNA-kwantificatie, inclusief forensische kwantificatie (degradatie-index)
@@ -44,7 +51,22 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 - Gelfoto-editor: automatische lane- en ladderdetectie, rechtzetten, bandgrootte, densitometrie met achtergrondcorrectie, Rf, massa per band uit de massaladder, DNA- en eiwitladders
 - SDS-PAGE-laadschema en western blot-normalisatie
 - Ligatie, transformatie en blauw-witscreening
+- RNA-kwaliteit (concentratie, zuiverheid, 28S:18S), cDNA-synthese (RT-mix) en qPCR-plaatindeling
+
+**Forensisch**
 - Forensische matchkans (Hardy-Weinberg, productregel, θ-correctie)
+- STR-profielcontrole (PHR, stutter, drempels, aantal bijdragers)
+- Y-STR- en mtDNA-frequentie (telmethode met bovengrens)
+- Verwantschapsindex (PI, CPI, kans op vaderschap)
+- Bloedvlekpatronen (inslaghoek, convergentie, hoogte van de oorsprong)
+- Tijd sinds overlijden (Henssge)
+- Chain of custody-formulier met barcodes
+
+**Kwaliteit**
+- Pipetkalibratie (gravimetrisch, ISO 8655)
+- Westgard-regels en Levey-Jennings-kaart
+- Meetonzekerheid (onzekerheidsbudget)
+- Methodevalidatie (CV, terugvinding, lineariteit, LOD/LOQ)
 
 **Data**
 - Statistiek met de volledige toetsingsprocedure:
@@ -60,6 +82,13 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 - Pipetteerschema voor elke reactie of mengsel: volumes of stock- en eindconcentraties, automatisch aanvullen, mastermix en sjablonen (PCR, qPCR, restrictiedigest, ligatie, BSA-standaardreeks, kweekmedium)
 - PCR-programma
 - Gel-laadschema
+- Kleuringsschema (Gram, Ziehl-Neelsen, sporen of eigen kleuring)
+- GHS-etiket met pictogrammen en H- en P-zinnen
+
+**Organisatie**
+- Reagensvoorraad met waarschuwingen voor vervaldatum en minimumvoorraad
+- Experimentplanner (tijdlijn, wachtstappen als timers)
+- Rapport / labjournaal: invoer, uitkomsten en bronnen van meerdere tools in één afdrukbaar rapport
 
 **Bench**
 - Centrifuge (rpm ↔ × g)

@@ -1,0 +1,17 @@
+<section class="tool" id="t-westgard" data-tool="westgard">
+  <header class="tool-head"><h2>Westgard / Levey-Jennings</h2>
+  <p>Zet controlemetingen in een Levey-Jennings-kaart en controleer ze automatisch op de Westgard-regels.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="wg-m">Streefwaarde (gemiddelde)</label><input id="wg-m" inputmode="decimal" value="5,0"></div>
+        <div class="f"><label for="wg-s">Standaardafwijking</label><input id="wg-s" inputmode="decimal" value="0,2"></div>
+        <div class="f" style="grid-column:1/-1"><label for="wg-x">Controlemetingen in volgorde <span class="example">voorbeeld</span></label><textarea id="wg-x" rows="5">5,1 4,9 5,0 5,2 4,8 5,1 5,3 5,0 4,9 5,45 5,46 5,1 4,7 5,0 5,25 5,22 5,28 5,3 5,0 4,95 4,4</textarea></div>
+        <label class="chk" for="wg-est" style="grid-column:1/-1"><input type="checkbox" id="wg-est"> Gemiddelde en SD schatten uit de eerste 20 metingen</label>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Gebruik een streefwaarde en SD uit een eerdere stabiele periode (minstens 20 metingen), niet uit de reeks die je beoordeelt. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result"><canvas id="wg-cv"></canvas><div id="wg-out"></div></div>
+  </div>
+  <p class="src">Westgard-regels: 1<sub>2s</sub> waarschuwing; 1<sub>3s</sub>, 2<sub>2s</sub>, R<sub>4s</sub>, 4<sub>1s</sub> en 10<sub>x̄</sub> afkeuring (Westgard, Barry, Hunt &amp; Groth, Clin Chem 27:493–501, 1981; westgard.com, "Westgard Rules"). R<sub>4s</sub> hier toegepast op twee opeenvolgende metingen.</p>
+</section>

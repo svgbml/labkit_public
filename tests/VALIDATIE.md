@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-14 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 169 van 169 controles binnen tolerantie.**
+**Resultaat: 197 van 197 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -41,9 +41,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9501 | +0.60% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,789 | +1.44% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5565 | +0.17% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9457 | +0.13% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7797 | +0.25% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5563 | +0.13% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -176,5 +176,33 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Microscoop-kalibratie | IJkfactor | gezichtsveld (µm) | 500 | 500 | +0.00% | ✅ | Nikon MicroscopyU: 40 oculairdelen = 10 objectdelen van 10 µm → 2,5 µm per deel; gezichtsveld FN 20 / 40× = 500 µm |
 | Plaatindeling | Groepen toevoegen | groepen erbij | 6 | 6 | +0.00% | ✅ | Vier keer een kleur toevoegen geeft 8 groepen met 8 verschillende kleuren |
 | Plaatindeling | Groepen toevoegen | unieke kleuren | 10 | 10 | +0.00% | ✅ | Vier keer een kleur toevoegen geeft 8 groepen met 8 verschillende kleuren |
+| MPN | 3-buizenreeks 3-1-0 | MPN per g | 43 | 43 | +0.00% | ✅ | FDA BAM Appendix 2, tabel 1 (0,1/0,01/0,001 g): 3-1-0 → 43 MPN/g |
+| MPN | 3-buizenreeks 2-1-0 | MPN per g | 15 | 15 | +0.00% | ✅ | FDA BAM Appendix 2, tabel 1: 2-1-0 → 15 MPN/g |
+| Titratiecurve | 25 mL 0,1 M azijnzuur met 0,1 M NaOH | pH start | 2,88 | 2,88 | +0.00% | ✅ | Harris, Quantitative Chemical Analysis: pH start 2,88; ½-eq = pKₐ 4,76; equivalentiepunt 8,72 |
+| Titratiecurve | 25 mL 0,1 M azijnzuur met 0,1 M NaOH | pH ½-equivalentie | 4,76 | 4,76 | +0.00% | ✅ | Harris, Quantitative Chemical Analysis: pH start 2,88; ½-eq = pKₐ 4,76; equivalentiepunt 8,72 |
+| Titratiecurve | 25 mL 0,1 M azijnzuur met 0,1 M NaOH | pH equivalentiepunt | 8,72 | 8,73 | +0.11% | ✅ | Harris, Quantitative Chemical Analysis: pH start 2,88; ½-eq = pKₐ 4,76; equivalentiepunt 8,72 |
+| Kjeldahl | Melk, factor 6,38 | % eiwit | 13,55 | 13,55 | +0.01% | ✅ | AOAC 991.20: %N = 1,4007·c·(V−Vb)/m → 1,4007·0,1·15,2/1,0025 = 2,1237%; eiwit ×6,38 = 13,549% |
+| Osmolariteit & ionsterkte | Fysiologisch zout 154 mM NaCl | mOsm/L | 308 | 308 | +0.00% | ✅ | Ideale osmolariteit 2 × 154 = 308 mOsm/L; ionsterkte ½(154·1 + 154·1) = 154 mM |
+| Osmolariteit & ionsterkte | Fysiologisch zout 154 mM NaCl | ionsterkte (mM) | 154 | 154 | +0.00% | ✅ | Ideale osmolariteit 2 × 154 = 308 mOsm/L; ionsterkte ½(154·1 + 154·1) = 154 mM |
+| Verwantschapsindex | Trio, obligaat allel | PI heterozygote vader | 2,5 | 2,5 | +0.00% | ✅ | Butler (2015) hfst. 15: vader heterozygoot voor obligaat allel → PI = 1/(2p); homozygoot → 1/p; CPI = product |
+| Verwantschapsindex | Trio, obligaat allel | PI homozygote vader | 5,882 | 5,882 | -0.01% | ✅ | Butler (2015) hfst. 15: vader heterozygoot voor obligaat allel → PI = 1/(2p); homozygoot → 1/p; CPI = product |
+| Verwantschapsindex | Trio, obligaat allel | CPI | 14,71 | 14,7 | -0.04% | ✅ | Butler (2015) hfst. 15: vader heterozygoot voor obligaat allel → PI = 1/(2p); homozygoot → 1/p; CPI = product |
+| Y-STR / mtDNA-frequentie | Niet waargenomen in 4500 | bovengrens | 0,0006655 | 0,000665 | -0.07% | ✅ | SWGDAM Y-STR-richtlijnen: bovengrens 1 − 0,05^(1/N) = 6,655 × 10⁻⁴ |
+| Bloedvlekpatronen | Inslaghoek | α vlek a (°) | 30 | 30 | +0.00% | ✅ | Balthazard: arcsin(5/10) = 30°; arcsin(2,6/5,9) = 26,1° |
+| Bloedvlekpatronen | Inslaghoek | α vlek b (°) | 26,15 | 26,1 | -0.18% | ✅ | Balthazard: arcsin(5/10) = 30°; arcsin(2,6/5,9) = 26,1° |
+| Tijd sinds overlijden | Henssge, T_a 18 °C | PMI (h) | 11 | 11 | -0.01% | ✅ | Onafhankelijk opgelost met SciPy brentq uit de Henssge-vergelijking (Henssge & Madea 2004): T_r 30,5 °C, 75 kg, CF 1 |
+| Pipetkalibratie | INTEGRA-rekenvoorbeeld | gemiddeld volume (µL) | 100,5 | 100,5 | +0.00% | ✅ | INTEGRA, Calibration check: volumes 100,40/100,42/100,43/100,54/100,47 µL → V̄ 100,452 µL, e_s 0,45% |
+| Pipetkalibratie | INTEGRA-rekenvoorbeeld | e_s (%) | 0,45 | 0,45 | +0.00% | ✅ | INTEGRA, Calibration check: volumes 100,40/100,42/100,43/100,54/100,47 µL → V̄ 100,452 µL, e_s 0,45% |
+| Dosis-respons (IC50/EC50) | 4PL zonder ruis | IC50 | 3 | 3 | +0.00% | ✅ | Data berekend uit y = 0,05 + 0,95/(1 + (x/3)^1,2): de fit moet IC50 = 3 teruggeven |
+| Sterilisatie (D, z, F₀) | F₀ van 15 min op 121,1 °C | F₀ (min) | 15 | 15 | +0.00% | ✅ | Ph. Eur. 5.1.5: F₀ = Δt·Σ10^((T−121,1)/10) = 15 min; D uit log-lineaire overleving met D = 2,5 min |
+| Sterilisatie (D, z, F₀) | F₀ van 15 min op 121,1 °C | D-waarde (min) | 2,5 | 2,5 | +0.00% | ✅ | Ph. Eur. 5.1.5: F₀ = Δt·Σ10^((T−121,1)/10) = 15 min; D uit log-lineaire overleving met D = 2,5 min |
+| RNA-kwaliteit | Concentratie | ng/µL | 400 | 400 | +0.00% | ✅ | Thermo Fisher T042: c = A260 × 40 × verdunning = 0,5 × 40 × 20 = 400 ng/µL |
+| cDNA-synthese (RT-mix) | RNA-volume en mix | RNA monster A (µL) | 2,427 | 2,43 | +0.12% | ✅ | High-Capacity cDNA RT Kit: 1000 ng uit 412 ng/µL = 2,427 µL; 2× mix per reactie 10 µL, 5 reacties + 10% = 55 µL |
+| cDNA-synthese (RT-mix) | RNA-volume en mix | mastermix (µL) | 55 | 55 | +0.00% | ✅ | High-Capacity cDNA RT Kit: 1000 ng uit 412 ng/µL = 2,427 µL; 2× mix per reactie 10 µL, 5 reacties + 10% = 55 µL |
+| Celpassageplanner | Splitsing 1:4 | uren tot confluent | 60 | 60 | +0.00% | ✅ | N = N₀·2^(t/t_d): 1:4 bij t_d 24 h → 48 h + 12 h herstel = 2 d 12 u |
+| Meetonzekerheid | Relatieve onzekerheid | u_c,rel (%) | 0,2907 | 0,291 | +0.10% | ✅ | GUM/QUAM: √((0,0005/5,844)² + (0,005/√3/0,995)² + (0,4/√6/1000)²) = 0,2914% |
+| STR-profielcontrole | Piekhoogteverhouding | PHR (%) | 47,54 | 48 | +0.97% | ✅ | PHR = laagste/hoogste piek: 290/610 = 47,5%; 2 bijdragers bij 4 allelen |
+| STR-profielcontrole | Piekhoogteverhouding | min. bijdragers | 2 | 2 | +0.00% | ✅ | PHR = laagste/hoogste piek: 290/610 = 47,5%; 2 bijdragers bij 4 allelen |
+| qPCR-plaatindeling | Aantal wells | wells gebruikt | 30 | 30 | +0.00% | ✅ | 4 monsters × 3 replicaten + 1 NTC × 3 = 15 wells per doelgen; 2 doelgenen = 30 |
 
 Toleranties: rekenregels 0,1–0,5%; gepubliceerde receptgrammen (afgerond in de bron) 1–3%; densitometrie op de getekende demo-gel 5%.

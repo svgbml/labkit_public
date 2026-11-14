@@ -1,0 +1,23 @@
+<section class="tool" id="t-mval" data-tool="mval">
+  <header class="tool-head"><h2>Methodevalidatie</h2>
+  <p>Kernparameters van een analysemethode in één overzicht: herhaalbaarheid, juistheid via terugvinding, lineariteit en de detectie- en bepalingsgrens, met eigen acceptatiecriteria.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f" style="grid-column:1/-1"><label for="mv-rep">Herhaalde metingen van één monster <span class="example">voorbeeld</span></label><textarea id="mv-rep" rows="2">10,2 10,05 9,98 10,11 10,24 9,92</textarea></div>
+        <div class="f"><label for="mv-b">Gemeten zonder spike</label><input id="mv-b" inputmode="decimal" value="10,08"></div>
+        <div class="f"><label for="mv-sp">Gemeten met spike</label><input id="mv-sp" inputmode="decimal" value="14,86"></div>
+        <div class="f"><label for="mv-add">Toegevoegd (spike)</label><input id="mv-add" inputmode="decimal" value="5"></div>
+        <div class="f" style="grid-column:1/-1"><label for="mv-x">Lineariteit: concentraties</label><input id="mv-x" class="txt" value="0 2 4 6 8 10 12"></div>
+        <div class="f" style="grid-column:1/-1"><label for="mv-y">Signaal</label><input id="mv-y" class="txt" value="0,012 0,214 0,405 0,61 0,797 1,012 1,19"></div>
+        <div class="f"><label for="mv-cvmax">Max. CV</label><div class="inu"><input id="mv-cvmax" inputmode="decimal" value="5"><span class="u">%</span></div></div>
+        <div class="f"><label for="mv-rlo">Terugvinding van</label><div class="inu"><input id="mv-rlo" inputmode="decimal" value="90"><span class="u">%</span></div></div>
+        <div class="f"><label for="mv-rhi">tot</label><div class="inu"><input id="mv-rhi" inputmode="decimal" value="110"><span class="u">%</span></div></div>
+        <div class="f"><label for="mv-r2">Min. R²</label><input id="mv-r2" inputmode="decimal" value="0,995"></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Acceptatiecriteria verschillen per methode en concentratieniveau; neem ze over uit je validatieplan. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result"><canvas id="mv-cv"></canvas><div id="mv-out"></div></div>
+  </div>
+  <p class="src">Begrippen en LOD/LOQ: ICH Q2(R2) Validation of Analytical Procedures (2023): LOD = 3,3·σ/S, LOQ = 10·σ/S met σ de reststandaardafwijking van de regressie en S de helling. Terugvinding = (gemeten met spike − zonder spike) / toegevoegd × 100% (Eurachem Guide, The Fitness for Purpose of Analytical Methods, 2e ed., 2014). Herhaalbaarheid als CV = s / x̄.</p>
+</section>

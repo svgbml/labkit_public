@@ -1,0 +1,18 @@
+<section class="tool" id="t-munc" data-tool="munc">
+  <header class="tool-head"><h2>Meetonzekerheid</h2>
+  <p>Onzekerheidsbudget voor een resultaat dat uit een product of quotiënt van grootheden volgt, zoals een concentratie uit massa, zuiverheid en volume. Geeft de gecombineerde en uitgebreide onzekerheid en welke bron het meest bijdraagt.</p></header>
+  <div class="stack">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="mu-res">Resultaat</label><input id="mu-res" inputmode="decimal" value="0,1000"></div>
+        <div class="f"><label for="mu-unit">Eenheid</label><input id="mu-unit" class="txt" value="mol/L"></div>
+        <div class="f"><label for="mu-k">Dekkingsfactor k</label><input id="mu-k" inputmode="decimal" value="2"></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:12px"><table id="mu-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:8px"><button type="button" id="mu-tbl-add">+ Bron</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per bron de waarde en de onzekerheid zoals opgegeven: een standaardonzekerheid (bijvoorbeeld de SD van herhaalde metingen), een tolerantie ±a (certificaat of glaswerk) of een relatieve waarde in %. Voorbeeld: 0,1000 M NaCl uit 5,844 g in een maatkolf van 1 L.</p>
+    </div>
+    <div class="result"><canvas id="mu-cv"></canvas><div id="mu-out"></div></div>
+  </div>
+  <p class="src">GUM (JCGM 100:2008) en Eurachem/CITAC Guide CG 4, Quantifying Uncertainty in Analytical Measurement (QUAM, 3e ed., 2012): bij een product of quotiënt combineren relatieve standaardonzekerheden als u<sub>c</sub>/y = √Σ(u<sub>i</sub>/x<sub>i</sub>)²; tolerantie met rechthoekige verdeling u = a/√3, met driehoekige verdeling u = a/√6 (QUAM §8.1); uitgebreide onzekerheid U = k·u<sub>c</sub>, k = 2 geeft ongeveer 95%.</p>
+</section>

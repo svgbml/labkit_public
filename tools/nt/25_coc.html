@@ -1,0 +1,22 @@
+<section class="tool" id="t-coc" data-tool="coc">
+  <header class="tool-head"><h2>Chain of custody</h2>
+  <p>Maak een overdrachtsformulier voor sporen: zaakgegevens, een sporenlijst met barcodes en een logboek van overdrachten met handtekeningvakken. Download als afbeelding of druk af.</p></header>
+  <div class="stack">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="cc-case">Zaaknummer</label><input id="cc-case" class="txt" value="PRAKTIJK-2026-014"></div>
+        <div class="f"><label for="cc-org">Lab / afdeling</label><input id="cc-org" class="txt" value="Practicum forensisch onderzoek"></div>
+        <div class="f" style="grid-column:span 2"><label for="cc-desc">Omschrijving</label><input id="cc-desc" class="txt" value="Oefenzaak: inbraak, sporen van plaats delict"></div>
+      </div>
+      <h3 style="font-size:14px;margin:14px 0 6px">Sporen</h3>
+      <div class="tbl-wrap"><table id="cc-it" class="mini"><thead></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:8px"><button type="button" id="cc-it-add">+ Spoor</button></div>
+      <h3 style="font-size:14px;margin:14px 0 6px">Overdrachten</h3>
+      <div class="tbl-wrap"><table id="cc-tr" class="mini"><thead></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:8px"><button type="button" id="cc-tr-add">+ Overdracht</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Spoor-ID's worden als Code 39-barcode getekend (hoofdletters, cijfers en - . / + %). Controleer barcodes met een scanner voor gebruik. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result"><canvas id="cc-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="cc">Download PNG</button><button type="button" id="cc-print">Afdrukken</button></div></div>
+  </div>
+  <p class="src">Inhoud volgens de gangbare eisen aan een chain-of-custodyformulier: uniek kenmerk per spoor, wie het verzamelde en wanneer, verzegeling, en elke overdracht met datum, tijd, reden en handtekening van afgever en ontvanger (NIST, Biological Evidence Preservation Handbook, 2013; ISO/IEC 17025:2017 §7.4). Barcode: Code 39 (ISO/IEC 16388).</p>
+</section>

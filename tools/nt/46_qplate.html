@@ -1,0 +1,21 @@
+<section class="tool" id="t-qplate" data-tool="qplate">
+  <header class="tool-head"><h2>qPCR-plaatindeling</h2>
+  <p>Zet monsters, standaardreeksen en NTC's automatisch in replicaten op een 96- of 384-wells qPCR-plaat, per doelgen gekleurd, met het aantal reacties per mastermix en een exporteerbare plaatlijst.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="qp2-fmt">Plaat</label><select id="qp2-fmt" style="width:100%"><option value="96">96-wells (8 × 12)</option><option value="384">384-wells (16 × 24)</option></select></div>
+        <div class="f"><label for="qp2-rep">Replicaten</label><input id="qp2-rep" inputmode="numeric" value="3"></div>
+        <div class="f" style="grid-column:1/-1"><label for="qp2-s">Monsters (komma-gescheiden)</label><input id="qp2-s" class="txt" value="Controle 1, Controle 2, Behandeld 1, Behandeld 2"></div>
+        <div class="f" style="grid-column:1/-1"><label for="qp2-t">Doelgenen (komma-gescheiden)</label><input id="qp2-t" class="txt" value="GAPDH, IL6"></div>
+        <div class="f"><label for="qp2-std">Standaardreeks: aantal punten</label><input id="qp2-std" inputmode="numeric" value="0"></div>
+        <div class="f"><label for="qp2-ntc">NTC per doelgen</label><input id="qp2-ntc" inputmode="numeric" value="1"></div>
+        <div class="f"><label for="qp2-dir">Vullen per</label><select id="qp2-dir" style="width:100%"><option value="row">rij (A1, A2, …)</option><option value="col">kolom (A1, B1, …)</option></select></div>
+        <div class="f"><label for="qp2-mar">Marge mastermix</label><div class="inu"><input id="qp2-mar" inputmode="decimal" value="10"><span class="u">%</span></div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Elk doelgen begint op een nieuwe rij (of kolom), zodat je per gen één mastermix met een multichannelpipet kunt verdelen. De mix zelf reken je uit met het Pipetteerschema (sjabloon qPCR).</p>
+    </div>
+    <div class="result"><canvas id="qp2-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="qp2">Download PNG</button></div><div id="qp2-out"></div></div>
+  </div>
+  <p class="src">Indeling volgens de MIQE-richtlijnen: biologische monsters in technische replicaten, een no-template control (NTC) per assay en een standaardreeks voor efficiëntie (Bustin e.a., Clin Chem 55:611–622, 2009). De plaatlijst (well, monster, doel, taak) kun je kopiëren naar Excel of naar de importfunctie van de qPCR-software.</p>
+</section>
