@@ -1627,6 +1627,31 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!-- NT:strchk -->
 <section class="tool" id="t-strchk" data-tool="strchk">
   <header class="tool-head"><h2>STR-profielcontrole</h2>
@@ -4637,7 +4662,7 @@ calc.munc=function(){ const res=num($('#mu-res').value), k=num($('#mu-k').value)
   out.innerHTML=`<div class="lbl">Uitgebreide onzekerheid (k = ${fmt(k,1)})</div><div class="big">${isFinite(U)?sig(U,2)+' <small>'+esc(un)+'</small>':fmt(k*urel*100,2)+' <small>%</small>'}</div>`+kv([['Resultaat',isFinite(res)?`${sig(res,6)} ± ${sig(U,2)} ${esc(un)}`:'–'],['Relatieve gecombineerde onzekerheid',fmt(urel*100,3)+'%'],['Gecombineerde standaardonzekerheid u<sub>c</sub>',isFinite(uc)?sig(uc,3)+' '+esc(un):'–'],['Grootste bijdrage',`${ud(top.n)} (${fmt(top.c*100,0)}%)`]])+
    `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Bron</th><th class="num">u</th><th class="num">u/x (%)</th><th class="num">Bijdrage</th></tr></thead><tbody>${R.map(r=>`<tr><td>${ud(r.n)}</td><td class="num">${isFinite(r.u)?sig(r.u,3):'–'}</td><td class="num">${fmt(r.rel*100,4)}</td><td class="num">${fmt(r.c*100,1)}%</td></tr>`).join('')}</tbody></table></div><div class="formula">u<sub>c</sub>/y = √Σ(u<sub>i</sub>/x<sub>i</sub>)² · rechthoekig u = a/√3 · driehoekig u = a/√6 · U = k·u<sub>c</sub></div>`;
   cv.style.display=''; const W=480, bh=24, H=R.length*bh+50;
-  pShow(cv,W,H,(x)=>{ const L=170, mx=Math.max(...R.map(r=>r.c)); x.font='12px '+PFONT(); x.textBaseline='middle'; R.forEach((r,i)=>{ const y=20+i*bh; x.fillStyle=PCOL.ink; x.textAlign='right'; x.fillText(uv(r.n.length>26?r.n.slice(0,25)+'…':r.n),L-8,y+bh/2); x.fillStyle=r===top?PCOL.warn:PCOL.acc; const w=(W-L-60)*r.c/mx; x.fillRect(L,y+4,w,bh-8); x.fillStyle=PCOL.muted; x.textAlign='left'; x.fillText(fmt(r.c*100,0)+'%',L+w+6,y+bh/2); }); x.fillStyle=PCOL.muted; x.textAlign='left'; x.fillText('bijdrage aan u²',L,H-12); }); };
+  pShow(cv,W,H,(x)=>{ const L=170, mx=Math.max(...R.map(r=>r.c)); x.font='12px '+PFONT(); x.textBaseline='middle'; R.forEach((r,i)=>{ const y=20+i*bh; x.fillStyle=PCOL.ink; x.textAlign='right'; let lb=r.n; if(x.measureText(uv(lb)).width>L-16){ while(lb.length>1&&x.measureText(uv(lb+'…')).width>L-16) lb=lb.slice(0,-1); lb+='…'; } x.fillText(uv(lb),L-8,y+bh/2); x.fillStyle=r===top?PCOL.warn:PCOL.acc; const w=(W-L-60)*r.c/mx; x.fillRect(L,y+4,w,bh-8); x.fillStyle=PCOL.muted; x.textAlign='left'; x.fillText(fmt(r.c*100,0)+'%',L+w+6,y+bh/2); }); x.fillStyle=PCOL.muted; x.textAlign='left'; x.fillText('bijdrage aan u²',L,H-12); }); };
 /* /NT:munc */
 /* NT:mval */
 /* ================= METHODEVALIDATIE ================= */
