@@ -13,6 +13,8 @@ Alles draait lokaal op je eigen apparaat. Er gaan geen gegevens, metingen of fot
 
 ## Tools
 
+De startpagina toont alle tools per categorie, met zoeken, favorieten en je laatst gebruikte tools.
+
 **Oplossingen**
 - Verdunning (C₁V₁ = C₂V₂)
 - Oplossing en buffer uit een recept, met stappenschema als afbeelding
@@ -31,14 +33,16 @@ Alles draait lokaal op je eigen apparaat. Er gaan geen gegevens, metingen of fot
 - Inoculum: cultuur verdunnen naar een start-OD
 - Antibiotica-gevoeligheid: MIC uit een microdilutiereeks en S/I/R uit MIC of remzone
 - Telkamer en teller
+- Cellen uitzaaien (plaat of fles op dichtheid inzetten)
+- Microscoop-kalibratie (oculairmicrometer ijken)
 
 **DNA en eiwit**
 - DNA-kwantificatie, inclusief forensische kwantificatie (degradatie-index)
-- PCR-mastermix en PCR-cyclus (Tm via nearest-neighbor)
+- Primers oplossen, PCR-mastermix en PCR-cyclus (Tm via nearest-neighbor)
 - qPCR-analyse (ΔΔCt en Pfaffl, met import van een Ct-export) en smeltcurve-analyse
 - Agarosegel en bandgrootte
 - Gelfoto-editor: automatische lane- en ladderdetectie, rechtzetten, bandgrootte, densitometrie met achtergrondcorrectie, Rf, massa per band uit de massaladder, DNA- en eiwitladders
-- Western blot-normalisatie
+- SDS-PAGE-laadschema en western blot-normalisatie
 - Ligatie, transformatie en blauw-witscreening
 - Forensische matchkans (Hardy-Weinberg, productregel, θ-correctie)
 
@@ -60,7 +64,7 @@ Alles draait lokaal op je eigen apparaat. Er gaan geen gegevens, metingen of fot
 **Bench**
 - Centrifuge (rpm ↔ × g)
 - Timers met meldingen
-- Plaatindeling met tekst per putje, eigen kleuren en paletten, ronde of vierkante putjes en export als afbeelding
+- Plaatindeling met tekst per putje, onbeperkt groepen met eigen kleuren en paletten, ronde of vierkante putjes en export als afbeelding
 - Instellingen: thema (licht, donker, papier, hoog contrast, leisteen), dichtheid, tekstgrootte, accentkleur en kleurenpaletten
 
 ### Handig om te weten

@@ -557,6 +557,37 @@ def _(pg):
     return [('melding bij v99.0.0', shown, 1, 0), ('geen melding bij gelijke versie', same, 1, 0)]
 
 
+
+@case('Cellen uitzaaien', '24-wellsplaat', 'Rekentest: 5 × 10⁴ cellen × 24 putjes × 1,1 = 1,32 × 10⁶ cellen; bij 8 × 10⁵ cellen/mL → 1,65 mL suspensie in 13,2 mL totaal')
+def _(pg):
+    pg.evaluate("__go('seed');__set('sd-c','8e5');__set('sd-fmt','1.9|0.5');__set('sd-mode','well');__set('sd-n','5e4');__set('sd-v','0,5');__set('sd-w','24');__set('sd-x','10')")
+    return [('mL suspensie', pg.evaluate("__big('#sd-out')"), 1.65, 0.001)]
+
+@case('Primers oplossen', 'Stock 100 µM', 'IDT: V (µL) = nmol / µM × 1000 → 28,4 nmol in 284 µL; werkoplossing 10 µM, 100 µL → 10 µL stock')
+def _(pg):
+    pg.evaluate("__go('oligo');document.querySelector('#ol-tbl tbody').innerHTML=olRow(['F',28.4]);__set('ol-s','100');__set('ol-w','10');__set('ol-wv','100')")
+    return [('µL buffer', pg.evaluate("__n(document.querySelector('#ol-tbl [data-o]').textContent)"), 284, 0.001), ('µL stock', pg.evaluate("__big('#ol-out')"), 10, 0.001)]
+
+@case('SDS-PAGE monsters', 'Laadschema', 'Rekentest: 20 µg van 2,4 µg/µL = 8,33 µL; 4× buffer in 20 µL = 5 µL; water 6,67 µL')
+def _(pg):
+    pg.evaluate("__go('sds');document.querySelector('#ss-tbl tbody').innerHTML=ssRow(['A',2.4]);__set('ss-ug','20');__set('ss-x','4');__set('ss-v','20')")
+    v = pg.evaluate("[...document.querySelector('#ss-res tbody tr').cells].slice(1,4).map(c=>__n(c.textContent))")
+    return [('monster', v[0], 8.33, 0.002), ('buffer', v[1], 5, 0.001), ('water', v[2], 6.67, 0.002)]
+
+@case('Microscoop-kalibratie', 'IJkfactor', 'Nikon MicroscopyU: 40 oculairdelen = 10 objectdelen van 10 µm → 2,5 µm per deel; gezichtsveld FN 20 / 40× = 500 µm')
+def _(pg):
+    pg.evaluate("__go('micro');__set('mc-obj','40');__set('mc-fn','20');__set('mc-od','40');__set('mc-sd','10');__set('mc-su','10')")
+    return [('µm per schaaldeel', pg.evaluate("__big('#mc-out')"), 2.5, 0.001), ('gezichtsveld (µm)', pg.evaluate("__kv('#mc-out','Gezichtsvelddiameter')"), 500, 0.001)]
+
+@case('Plaatindeling', 'Groepen toevoegen', 'Vier keer een kleur toevoegen geeft 8 groepen met 8 verschillende kleuren')
+def _(pg):
+    pg.evaluate("__go('plaat')"); n0 = pg.evaluate("groups.length")
+    pg.evaluate("for(let i=0;i<6;i++) addGroup()")
+    v = pg.evaluate("[groups.length, new Set(groups.map(g=>g.c.toLowerCase())).size]")
+    pg.evaluate(f"groups.splice({n0}); selG=0; renderPlate()")
+    return [('groepen erbij', v[0]-n0, 6, 0), ('unieke kleuren', v[1], v[0], 0)]
+
+
 def main():
     rows = []; fails = 0
     with sync_playwright() as p:

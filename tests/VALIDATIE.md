@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-14 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 155 van 155 controles binnen tolerantie.**
+**Resultaat: 165 van 165 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -41,9 +41,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9432 | -0.13% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7853 | +0.97% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,561 | +0.97% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,937 | -0.79% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7818 | +0.52% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5565 | +0.17% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -162,5 +162,15 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Instellingen | Tekstkleur op achtergrond | blauw → witte tekst | 1 | 1 | +0.00% | ✅ | WCAG relatieve luminantie: donkere tekst op lichtgeel (#F0E442), witte tekst op donkerblauw (#1558b0) |
 | Updates | Melding bij nieuwere release | melding bij v99.0.0 | 1 | 1 | +0.00% | ✅ | Nagebootst GitHub-antwoord (releases/latest) met tag v99.0.0 en met de huidige versie |
 | Updates | Melding bij nieuwere release | geen melding bij gelijke versie | 1 | 1 | +0.00% | ✅ | Nagebootst GitHub-antwoord (releases/latest) met tag v99.0.0 en met de huidige versie |
+| Cellen uitzaaien | 24-wellsplaat | mL suspensie | 1,65 | 1,65 | +0.00% | ✅ | Rekentest: 5 × 10⁴ cellen × 24 putjes × 1,1 = 1,32 × 10⁶ cellen; bij 8 × 10⁵ cellen/mL → 1,65 mL suspensie in 13,2 mL totaal |
+| Primers oplossen | Stock 100 µM | µL buffer | 284 | 284 | +0.00% | ✅ | IDT: V (µL) = nmol / µM × 1000 → 28,4 nmol in 284 µL; werkoplossing 10 µM, 100 µL → 10 µL stock |
+| Primers oplossen | Stock 100 µM | µL stock | 10 | 10 | +0.00% | ✅ | IDT: V (µL) = nmol / µM × 1000 → 28,4 nmol in 284 µL; werkoplossing 10 µM, 100 µL → 10 µL stock |
+| SDS-PAGE monsters | Laadschema | monster | 8,33 | 8,33 | +0.00% | ✅ | Rekentest: 20 µg van 2,4 µg/µL = 8,33 µL; 4× buffer in 20 µL = 5 µL; water 6,67 µL |
+| SDS-PAGE monsters | Laadschema | buffer | 5 | 5 | +0.00% | ✅ | Rekentest: 20 µg van 2,4 µg/µL = 8,33 µL; 4× buffer in 20 µL = 5 µL; water 6,67 µL |
+| SDS-PAGE monsters | Laadschema | water | 6,67 | 6,67 | +0.00% | ✅ | Rekentest: 20 µg van 2,4 µg/µL = 8,33 µL; 4× buffer in 20 µL = 5 µL; water 6,67 µL |
+| Microscoop-kalibratie | IJkfactor | µm per schaaldeel | 2,5 | 2,5 | +0.00% | ✅ | Nikon MicroscopyU: 40 oculairdelen = 10 objectdelen van 10 µm → 2,5 µm per deel; gezichtsveld FN 20 / 40× = 500 µm |
+| Microscoop-kalibratie | IJkfactor | gezichtsveld (µm) | 500 | 500 | +0.00% | ✅ | Nikon MicroscopyU: 40 oculairdelen = 10 objectdelen van 10 µm → 2,5 µm per deel; gezichtsveld FN 20 / 40× = 500 µm |
+| Plaatindeling | Groepen toevoegen | groepen erbij | 6 | 6 | +0.00% | ✅ | Vier keer een kleur toevoegen geeft 8 groepen met 8 verschillende kleuren |
+| Plaatindeling | Groepen toevoegen | unieke kleuren | 10 | 10 | +0.00% | ✅ | Vier keer een kleur toevoegen geeft 8 groepen met 8 verschillende kleuren |
 
 Toleranties: rekenregels 0,1–0,5%; gepubliceerde receptgrammen (afgerond in de bron) 1–3%; densitometrie op de getekende demo-gel 5%.

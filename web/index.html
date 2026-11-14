@@ -204,15 +204,34 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 #upd-bar{display:none;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-soft);border:1px solid var(--accent);border-radius:6px;padding:8px 12px;margin-bottom:16px;font-size:13.5px}
 .grp input[type=color]{width:22px;height:22px;padding:0;border:1px solid var(--line);border-radius:4px;background:none;cursor:pointer;flex:none}
 .plate.sq .well{border-radius:5px}
+.bento{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;grid-auto-flow:dense}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.tile.wide{grid-column:span 2}.tile.hero{background:var(--accent);border-color:var(--accent);color:#fff}
+.tile.hero h2{margin:0;font-size:24px;font-weight:700}.tile.hero p{margin:0;opacity:.9;max-width:60ch}
+.tile.hero input{margin-top:6px;height:38px;border-color:transparent}
+.tile h3{margin:0;font-size:13px;font-weight:600;color:var(--muted);display:flex;justify-content:space-between;align-items:baseline}
+.tile h3 span{font-weight:400;font-size:12px}
+.tlist{display:grid;gap:2px}
+.tl{display:flex;align-items:center;gap:6px;border-radius:6px;padding:5px 6px;margin:0 -6px}
+.tl:hover{background:var(--bg)}
+.tl a{flex:1;min-width:0;color:var(--ink);text-decoration:none;font-size:14px;font-weight:500;overflow-wrap:anywhere}
+.tl a small{display:block;font-weight:400;font-size:12px;color:var(--muted);line-height:1.35}
+.tl button{border:0;background:none;padding:2px 4px;color:var(--line);font-size:15px;line-height:1}
+.tl button.on{color:#e0a100}.tl button:hover{color:var(--muted);background:none}
+.tile .empty{font-size:13px;color:var(--muted)}
+.grp .gdel{border:0;background:none;padding:0 2px;color:var(--muted);font-size:12px}
+.grp.addg{border-style:dashed;color:var(--accent);font-weight:600;font-size:13px;padding:4px 10px}
+@media (max-width:620px){.tile.wide{grid-column:span 1}}
 </style>
 </head>
 <body>
 <div class="app">
 <nav class="side" id="nav" aria-label="Tools">
   <div class="sidehead">
-    <a class="logo" href="#verdunning" aria-label="Labkit BML, naar begin"><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="96" fill="#1558b0"/><g fill="#fff"><rect x="120" y="140" width="80" height="26" rx="6"/><rect x="120" y="212" width="80" height="26" rx="6" opacity=".8"/><rect x="120" y="300" width="80" height="26" rx="6" opacity=".6"/><rect x="232" y="196" width="80" height="28" rx="6"/><rect x="344" y="268" width="80" height="28" rx="6"/></g><rect x="232" y="346" width="80" height="22" rx="6" fill="#f2b33d"/></svg><b>Labkit</b><span>BML</span></a>
+    <a class="logo" href="#start" aria-label="Labkit BML, naar begin"><svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="96" fill="#1558b0"/><g fill="#fff"><rect x="120" y="140" width="80" height="26" rx="6"/><rect x="120" y="212" width="80" height="26" rx="6" opacity=".8"/><rect x="120" y="300" width="80" height="26" rx="6" opacity=".6"/><rect x="232" y="196" width="80" height="28" rx="6"/><rect x="344" y="268" width="80" height="28" rx="6"/></g><rect x="232" y="346" width="80" height="22" rx="6" fill="#f2b33d"/></svg><b>Labkit</b><span>BML</span></a>
     <input id="nav-q" class="txt" type="search" placeholder="Zoek een tool…" aria-label="Zoek een tool" autocomplete="off">
   </div>
+  <a href="#start" style="margin-top:10px"><span class="k">⌂</span>Start</a>
   <div class="navgroup">Oplossingen</div>
   <a href="#verdunning"><span class="k">C₁V₁</span>Verdunning</a>
   <a href="#oplossing"><span class="k">g</span>Oplossing &amp; buffer</a>
@@ -229,16 +248,20 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
   <a href="#inoc"><span class="k">OD₀</span>Inoculum (OD verdunnen)</a>
   <a href="#telkamer"><span class="k">#</span>Telkamer</a>
   <a href="#teller"><span class="k">1–9</span>Teller</a>
+  <a href="#seed"><span class="k">cm²</span>Cellen uitzaaien</a>
+  <a href="#micro"><span class="k">µm</span>Microscoop-kalibratie</a>
   <a href="#gcomp"><span class="k">λ</span>Groeicurves vergelijken</a>
   <a href="#mic"><span class="k">MIC</span>Antibiotica-gevoeligheid</a>
   <div class="navgroup">DNA</div>
   <a href="#dna"><span class="k">A₂₆₀</span>DNA-kwantificatie</a>
+  <a href="#oligo"><span class="k">µM</span>Primers oplossen</a>
   <a href="#pcr"><span class="k">×n</span>PCR-mastermix</a>
   <a href="#pcrcyclus"><span class="k">Tm</span>PCR-cyclus</a>
   <a href="#qpcr"><span class="k">ΔΔCt</span>qPCR-analyse (ΔΔCt)</a>
   <a href="#melt"><span class="k">Tm</span>qPCR-smeltcurve</a>
   <a href="#gel"><span class="k">%</span>Agarosegel &amp; bandgrootte</a>
   <a href="#gelfoto"><span class="k">img</span>Gelfoto-editor</a>
+  <a href="#sds"><span class="k">µg</span>SDS-PAGE monsters</a>
   <a href="#wb"><span class="k">WB</span>Western blot-normalisatie</a>
   <a href="#ligatie"><span class="k">3:1</span>Ligatie</a>
   <a href="#transf"><span class="k">wit</span>Transformatie &amp; blauw-wit</a>
@@ -1342,11 +1365,100 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
   </div>
 </section>
 
+<!-- ============ START ============ -->
+<section class="tool" id="t-start" data-tool="start">
+  <div class="bento" id="bento"></div>
+</section>
+
+<!-- ============ CELKWEEK UITZAAIEN ============ -->
+<section class="tool" id="t-seed" data-tool="seed">
+  <header class="tool-head"><h2>Cellen uitzaaien</h2>
+  <p>Hoeveel celsuspensie en medium je nodig hebt om een plaat of fles op een gewenste dichtheid in te zetten.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="sd-c">Celconcentratie suspensie</label><div class="inu"><input id="sd-c" inputmode="decimal" value="8e5"><span class="u">cellen/mL</span></div></div>
+        <div class="f"><label for="sd-fmt">Kweekformaat</label><select id="sd-fmt" style="width:100%"><option value="0.32|0.1">96-wells (0,32 cm²)</option><option value="0.95|0.3">48-wells (0,95 cm²)</option><option value="1.9|0.5" selected>24-wells (1,9 cm²)</option><option value="3.8|1">12-wells (3,8 cm²)</option><option value="9.5|2">6-wells (9,5 cm²)</option><option value="25|5">T25-fles (25 cm²)</option><option value="75|15">T75-fles (75 cm²)</option></select></div>
+        <div class="f"><label for="sd-mode">Dichtheid opgeven als</label><select id="sd-mode" style="width:100%"><option value="well">cellen per putje/fles</option><option value="cm2">cellen per cm²</option></select></div>
+        <div class="f"><label for="sd-n">Gewenste dichtheid</label><input id="sd-n" inputmode="decimal" value="5e4"></div>
+        <div class="f"><label for="sd-v">Volume per putje/fles</label><div class="inu"><input id="sd-v" inputmode="decimal" value="0,5"><span class="u">mL</span></div></div>
+        <div class="f"><label for="sd-w">Aantal putjes/flessen</label><input id="sd-w" inputmode="numeric" value="24"></div>
+        <div class="f"><label for="sd-x">Extra marge</label><div class="inu"><input id="sd-x" inputmode="decimal" value="10"><span class="u">%</span></div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De celconcentratie haal je uit de tool Telkamer. Bij het kiezen van een formaat wordt het gebruikelijke werkvolume ingevuld.</p>
+    </div>
+    <div class="result" id="sd-out"></div>
+  </div>
+  <p class="src">Groeioppervlak en werkvolume per formaat: Corning, Cell Culture Surface Areas and Recommended Medium Volumes (96-wells 0,32 cm²; 24-wells 1,9 cm²; 6-wells 9,5 cm²; T25 25 cm²; T75 75 cm²). V<sub>suspensie</sub> = benodigde cellen / celconcentratie.</p>
+</section>
+
+<!-- ============ OLIGO OPLOSSEN ============ -->
+<section class="tool" id="t-oligo" data-tool="oligo">
+  <header class="tool-head"><h2>Primers oplossen</h2>
+  <p>Volume om een gevriesdroogde primer of probe op te lossen tot een stockconcentratie, en de verdunning naar een werkoplossing.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="tbl-wrap"><table id="ol-tbl" class="mini"><thead><tr><th>Primer</th><th class="num">Hoeveelheid (nmol)</th><th class="num">Buffer voor stock</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:10px"><button type="button" id="ol-add">+ Primer</button></div>
+      <div class="fields" style="margin-top:12px">
+        <div class="f"><label for="ol-s">Stockconcentratie</label><div class="inu"><input id="ol-s" inputmode="decimal" value="100"><span class="u">µM</span></div></div>
+        <div class="f"><label for="ol-w">Werkoplossing</label><div class="inu"><input id="ol-w" inputmode="decimal" value="10"><span class="u">µM</span></div></div>
+        <div class="f"><label for="ol-wv">Volume werkoplossing</label><div class="inu"><input id="ol-wv" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De hoeveelheid in nmol staat op het buisje of het specificatieblad. Centrifugeer het buisje kort voor het openen.</p>
+    </div>
+    <div class="result" id="ol-out"></div>
+  </div>
+  <p class="src">V (µL) = nmol / µM × 1000; voor een 100 µM-stock is dat nmol × 10 (IDT, Resuspension Calculator en richtlijn voor het oplossen van oligo's in TE of nucleasevrij water). Werkoplossing via C₁V₁ = C₂V₂.</p>
+</section>
+
+<!-- ============ SDS-PAGE MONSTERS ============ -->
+<section class="tool" id="t-sds" data-tool="sds">
+  <header class="tool-head"><h2>SDS-PAGE monsters</h2>
+  <p>Laadschema voor eiwitmonsters: evenveel eiwit per laan, aangevuld met monsterbuffer en water tot hetzelfde volume.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="ss-ug">Eiwit per laan</label><div class="inu"><input id="ss-ug" inputmode="decimal" value="20"><span class="u">µg</span></div></div>
+        <div class="f"><label for="ss-x">Monsterbuffer</label><select id="ss-x" style="width:100%"><option value="2">2×</option><option value="4" selected>4× (Laemmli)</option><option value="5">5×</option><option value="6">6×</option></select></div>
+        <div class="f"><label for="ss-v">Laadvolume per laan</label><div class="inu"><input id="ss-v" inputmode="decimal" value="20"><span class="u">µL</span></div></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:12px"><table id="ss-tbl" class="mini"><thead><tr><th>Monster</th><th class="num">Concentratie (µg/µL)</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:10px"><button type="button" id="ss-add">+ Monster</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Concentraties uit de Standaardcurve (Bradford of BCA); 1 mg/mL = 1 µg/µL. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result" id="ss-out"></div>
+  </div>
+  <p class="src">V<sub>monster</sub> = µg / concentratie; V<sub>buffer</sub> = laadvolume / bufferconcentratie (4× Laemmli: 1 deel buffer op 3 delen monster plus water); water vult aan. Daarna 5 min verhitten bij 95 °C (Bio-Rad, Laemmli Sample Buffer-instructies; Laemmli, Nature 227:680–685, 1970).</p>
+</section>
+
+<!-- ============ MICROSCOOP ============ -->
+<section class="tool" id="t-micro" data-tool="micro">
+  <header class="tool-head"><h2>Microscoop-kalibratie</h2>
+  <p>IJk het oculairmicrometer met een objectmicrometer en reken gemeten schaaldelen om naar micrometers. Per objectief een eigen ijkfactor.</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="mc-obj">Objectief</label><select id="mc-obj" style="width:100%"><option>4</option><option>10</option><option selected>40</option><option>100</option></select></div>
+        <div class="f"><label for="mc-oc">Oculair</label><div class="inu"><input id="mc-oc" inputmode="decimal" value="10"><span class="u">×</span></div></div>
+        <div class="f"><label for="mc-fn">Gezichtsveldgetal (FN)</label><div class="inu"><input id="mc-fn" inputmode="decimal" value="20"><span class="u">mm</span></div></div>
+        <div class="f"><label for="mc-od">Oculair-schaaldelen</label><input id="mc-od" inputmode="decimal" value="40"></div>
+        <div class="f"><label for="mc-sd">vallen samen met object-schaaldelen</label><input id="mc-sd" inputmode="decimal" value="10"></div>
+        <div class="f"><label for="mc-su">Eén object-schaaldeel</label><div class="inu"><input id="mc-su" inputmode="decimal" value="10"><span class="u">µm</span></div></div>
+      </div>
+      <div class="f" style="margin-top:12px"><label for="mc-m">Gemeten objecten, in oculair-schaaldelen <span class="example">voorbeeld</span></label><textarea id="mc-m" rows="2">3 3,5 2,8 3,2 3,1</textarea></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Een standaard-objectmicrometer is 1 mm verdeeld in 100 delen: één schaaldeel is 10 µm.</p>
+    </div>
+    <div class="result" id="mc-out"></div>
+  </div>
+  <p class="src">IJkfactor (µm per oculair-schaaldeel) = object-schaaldelen × µm per schaaldeel / oculair-schaaldelen; totale vergroting = objectief × oculair; gezichtsvelddiameter = gezichtsveldgetal / objectiefvergroting (Nikon MicroscopyU, Eyepiece reticle calibration en Field of view).</p>
+</section>
+
 </main>
 </div>
 
 <script>
-const APPVER='1.10.0';
+const APPVER='1.11.0';
 const hexRgb=h=>{ h=String(h).replace('#',''); if(h.length===3) h=[...h].map(c=>c+c).join(''); const n=parseInt(h,16); return [(n>>16)&255,(n>>8)&255,n&255]; };
 const rgbHex=a=>'#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
 const mixHex=(a,b,t)=>{ const A=hexRgb(a),B=hexRgb(b); return rgbHex(A.map((v,i)=>v*(1-t)+B[i]*t)); };
@@ -1368,11 +1480,11 @@ const kv=rows=>`<dl class="kv">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`)
 const calc={};
 
 /* ---------- routing ---------- */
-const TOOLS=['verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','transf','stat','molm','hh','rmp','inst','spec','units','inoc','mic','gcomp','wb','melt','pverd','ppip','pprog','plaad','centrifuge','timers','plaat'];
-let current='verdunning';
+const TOOLS=['start','seed','oligo','sds','micro','verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','transf','stat','molm','hh','rmp','inst','spec','units','inoc','mic','gcomp','wb','melt','pverd','ppip','pprog','plaad','centrifuge','timers','plaat'];
+let current='start';
 function route(){
   const h=(location.hash||'').slice(1);
-  current=TOOLS.includes(h)?h:'verdunning';
+  current=TOOLS.includes(h)?h:'start';
   $$('.tool').forEach(s=>s.classList.toggle('active',s.id==='t-'+current));
   $$('#nav > a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+current));
   if(calc[current]) calc[current]();
@@ -2357,7 +2469,7 @@ $('#w-csv').addEventListener('click',()=>{ const {r,c}=dims(); const {lab}=label
 $('#q-csv').addEventListener('click',()=>dlMsg($('#q-copied'),()=>saveBlob('pcr-mastermix.csv',csvBlob(qText))));
 
 /* ================= PLAKKEN UIT EXCEL ================= */
-const ADDBTN={'s-std':'#s-addstd','s-unk':'#s-addunk','k-tbl':'#k-add','q-tbl':'#q-add','o-tbl':'#o-add','qp-tbl':'#qp-add','gc-tbl':'#gc-add','tf-tbl':'#tf-add','mi-tbl':'#mi-add','mz-tbl':'#mz-add','wb-tbl':'#wb-add','rm-tbl':'#rm-add'};
+const ADDBTN={'s-std':'#s-addstd','s-unk':'#s-addunk','k-tbl':'#k-add','q-tbl':'#q-add','o-tbl':'#o-add','qp-tbl':'#qp-add','gc-tbl':'#gc-add','tf-tbl':'#tf-add','mi-tbl':'#mi-add','mz-tbl':'#mz-add','wb-tbl':'#wb-add','rm-tbl':'#rm-add','ol-tbl':'#ol-add','ss-tbl':'#ss-add'};
 document.addEventListener('paste',e=>{
   const el=e.target; if(el.tagName!=='INPUT') return; const td=el.closest('td'), tb=el.closest('tbody'); if(!td||!tb) return;
   const txt=(e.clipboardData||window.clipboardData).getData('text')||''; if(!/[\t\n]/.test(txt.trim())) return;
@@ -2599,7 +2711,9 @@ const TBLDEF={
   'mi-tbl':{row:(r)=>miRow(r),num:[2,3]},
   'mz-tbl':{row:(r)=>mzRow(r),num:[1,2,3]},
   'wb-tbl':{row:(r)=>wbRow(r),num:[1,2]},
-  'rm-tbl':{row:(r)=>rmRow(r),num:[1,2]}
+  'rm-tbl':{row:(r)=>rmRow(r),num:[1,2]},
+  'ol-tbl':{row:(r)=>olRow(r),num:[1]},
+  'ss-tbl':{row:(r)=>ssRow(r),num:[1]}
 };
 function tblSnap(){ const out={}; Object.keys(TBLDEF).forEach(id=>{ out[id]=[...document.querySelectorAll('#'+id+' tbody tr')].map(tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select')].map(e=>e.value)); });
   out.reeks=reeksCounts; out.plate={fmt:$('#w-fmt').value,wells,groups,title:$('#w-title').value}; out.curve={model:$('#s-model').value,unit:$('#s-unit').value,blank:$('#s-blank').checked,logx:$('#s-logx').checked}; return out; }
@@ -3335,12 +3449,80 @@ calc.rmp=function(){ const th=num($('#rm-th').value)||0, out=$('#rm-out'); let p
     const hom=qr===''||!isFinite(q), g=hom?p*p+p*(1-p)*th:2*p*q; cell.innerHTML=`${sig(g,3)} <span style="color:var(--muted);font-size:12px">${hom?'hom.':'het.'}</span>`; prod*=g; n++; });
   if(!n){ out.innerHTML=note('info','Vul per locus de allelfrequenties in (tussen 0 en 1).'); return; }
   out.innerHTML=`<div class="lbl">Gecombineerde matchkans (${n} loci)</div><div class="big">1 op ${sci(1/prod,3)}</div>`+kv([['Matchkans',sci(prod,3)],['Bewijskracht LR (enkelvoudig profiel)',sci(1/prod,3)],['θ',fmt(th,2)]])+(bad.length?note('bad',`Ongeldige frequenties bij: ${bad.map(esc).join(', ')}. Een frequentie ligt tussen 0 en 1 en twee allelen samen zijn hooguit 1.`):'')+note('info','De productregel veronderstelt onafhankelijke loci en een populatie in Hardy-Weinberg-evenwicht. Geldt niet voor mengprofielen of verwanten.')+`<div class="formula">heterozygoot 2pq · homozygoot p² + p(1 − p)θ · matchkans = product over de loci</div>`; };
+/* ================= PLAATINDELING: MEER GROEPEN ================= */
+function freshColor(){ const usedRgb=groups.map(g=>/^#[0-9a-f]{6}$/i.test(g.c)?hexRgb(g.c):[0,0,0]), far=h=>{ const r=hexRgb(h); return usedRgb.every(u=>Math.hypot(u[0]-r[0],u[1]-r[1],u[2]-r[2])>70); }, used={includes:h=>!far(h)}; const pal=PALS[$('#w-pal').value]||PALS.std; const c=pal.find(far); if(c) return c;
+  for(let k=0;k<40;k++){ const h=(groups.length*137.508+k*29)%360, s=0.62, l=0.45+((k%3)-1)*0.08, a=s*Math.min(l,1-l), f=n=>{ const q=(n+h/30)%12; return 255*(l-a*Math.max(-1,Math.min(q-3,9-q,1))); }, hex=rgbHex([f(0),f(8),f(4)]); if(!used.includes(hex)) return hex; } return '#555555'; }
+function addGroup(){ groups.push({n:'Groep '+(groups.length+1),c:freshColor()}); selG=groups.length-1; eraser=false; renderPlate(); const i=$(`[data-gn="${selG}"]`); if(i){ i.focus(); i.select(); } }
+{ const b=$('#w-addg'), nb=b.cloneNode(true); nb.textContent='+ Kleur / groep'; b.replaceWith(nb); nb.addEventListener('click',addGroup); }
+function legendExtras(){ const L=$('#w-legend'); if(!L||L.querySelector('.addg')) return; L.querySelectorAll('.grp').forEach(g=>{ if(groups.length>1&&!g.querySelector('.gdel')){ const x=document.createElement('button'); x.type='button'; x.className='gdel'; x.textContent='✕'; x.title='Groep verwijderen'; x.dataset.gdel=g.dataset.g; x.setAttribute('aria-label','Groep verwijderen'); g.appendChild(x); } });
+  const a=document.createElement('button'); a.type='button'; a.className='grp addg'; a.textContent='+ kleur toevoegen'; L.appendChild(a); }
+$('#w-legend').addEventListener('click',e=>{ if(e.target.closest('.addg')){ e.stopPropagation(); addGroup(); return; } const d=e.target.closest('[data-gdel]'); if(!d) return; e.stopPropagation(); const i=+d.dataset.gdel; groups.splice(i,1); Object.keys(wells).forEach(k=>{ if(wells[k]===i) delete wells[k]; else if(wells[k]>i) wells[k]--; }); selG=Math.max(0,Math.min(selG,groups.length-1)); renderPlate(); },true);
+{ const _rp2=renderPlate; renderPlate=function(){ _rp2(); legendExtras(); }; }
+
+/* ================= STARTPAGINA (BENTO) ================= */
+const RKEY='labkit:v1:recent', FKEY='labkit:v1:fav';
+const jget=(k,d)=>{ try{ return JSON.parse(localStorage.getItem(k)||'null')||d; }catch(e){ return d; } }, jset=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+function toolIndex(){ const out=[]; let grp=''; [...$('#nav').children].forEach(el=>{ if(el.classList.contains('navgroup')) grp=el.textContent; else if(el.tagName==='A'){ const id=el.getAttribute('href').slice(1), sec=$('#t-'+id); if(!sec||id==='start') return; const p=sec.querySelector('.tool-head p'); const name=[...el.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim(); out.push({id,grp,name,desc:p?p.textContent.split(/(?<=[.:])\s/)[0].replace(/[.:]$/,''):''}); } }); return out; }
+function bentoRender(q){ const T=toolIndex(), fav=jget(FKEY,[]), rec=jget(RKEY,[]).filter(id=>T.some(t=>t.id===id)), ql=(q||'').trim().toLowerCase();
+  const row=(t,d)=>`<div class="tl"><a href="#${t.id}">${esc(t.name)}${d?`<small>${esc(t.desc)}</small>`:''}</a><button type="button" class="${fav.includes(t.id)?'on':''}" data-fav="${t.id}" title="Favoriet" aria-label="Favoriet">★</button></div>`;
+  const by=id=>T.find(t=>t.id===id), groupsN=[...new Set(T.map(t=>t.grp))];
+  let h='';
+  if(ql){ const hits=T.filter(t=>(t.name+' '+t.desc+' '+t.grp).toLowerCase().includes(ql)); h+=`<div class="tile wide"><h3>Zoekresultaten <span>${hits.length}</span></h3><div class="tlist">${hits.map(t=>row(t,true)).join('')||'<div class="empty">Geen tool gevonden.</div>'}</div></div>`; }
+  else { h+=`<div class="tile"><h3>Favorieten</h3><div class="tlist">${fav.map(by).filter(Boolean).map(t=>row(t)).join('')||'<div class="empty">Klik op de ster bij een tool om hem hier vast te zetten.</div>'}</div></div>`;
+    h+=`<div class="tile"><h3>Laatst gebruikt</h3><div class="tlist">${rec.slice(0,6).map(by).map(t=>row(t)).join('')||'<div class="empty">Nog niets geopend.</div>'}</div></div>`;
+    groupsN.forEach(g=>{ const L=T.filter(t=>t.grp===g); h+=`<div class="tile${L.length>6?' wide':''}"><h3>${esc(g)} <span>${L.length}</span></h3><div class="tlist"${L.length>6?' style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));column-gap:14px"':''}>${L.map(t=>row(t,true)).join('')}</div></div>`; }); }
+  const B=$('#bento'); let hero=B.querySelector('.hero'); if(!hero){ B.innerHTML=`<div class="tile hero wide"><h2>Labkit BML</h2><p>${T.length} tools voor rekenen, analyseren en vastleggen in het lab. Alles blijft op je eigen apparaat.</p><input id="bento-q" class="txt" type="search" placeholder="Zoek een tool, bijvoorbeeld PCR, verdunning of ANOVA…" aria-label="Zoek een tool" autocomplete="off"></div><div id="bento-rest" style="display:contents"></div>`; $('#bento-q').addEventListener('input',e=>bentoRender(e.target.value)); $('#bento-q').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const a=$('#bento-rest .tl a'); if(a) location.hash=a.getAttribute('href'); } }); }
+  $('#bento-rest').innerHTML=h; }
+$('#bento').addEventListener('click',e=>{ const b=e.target.closest('[data-fav]'); if(!b) return; let f=jget(FKEY,[]); const id=b.dataset.fav; f=f.includes(id)?f.filter(x=>x!==id):[...f,id]; jset(FKEY,f); bentoRender($('#bento-q')?$('#bento-q').value:''); });
+calc.start=()=>bentoRender($('#bento-q')?$('#bento-q').value:'');
+window.addEventListener('hashchange',()=>{ const id=(location.hash||'').slice(1); if(!id||id==='start'||!TOOLS.includes(id)) return; const r=jget(RKEY,[]).filter(x=>x!==id); r.unshift(id); jset(RKEY,r.slice(0,8)); });
+$('#reset-store').addEventListener('click',()=>{ try{ localStorage.removeItem(RKEY); localStorage.removeItem(FKEY); }catch(e){} },true);
+
+/* ================= CELLEN UITZAAIEN ================= */
+$('#sd-fmt').addEventListener('change',e=>{ $('#sd-v').value=e.target.value.split('|')[1].replace('.',','); calc.seed(); });
+calc.seed=function(){ const C=num($('#sd-c').value), [area]=$('#sd-fmt').value.split('|').map(Number), mode=$('#sd-mode').value, d=num($('#sd-n').value), v=num($('#sd-v').value), n=Math.round(num($('#sd-w').value)), x=(num($('#sd-x').value)||0)/100, out=$('#sd-out');
+  if(!(C>0)||!(d>0)||!(v>0)||!(n>0)){ out.innerHTML=note('info','Vul celconcentratie, dichtheid, volume en aantal in.'); return; }
+  const per=mode==='cm2'?d*area:d, tot=n*v*(1+x), cells=per*n*(1+x), vs=cells/C;
+  if(vs>tot){ out.innerHTML=note('bad',`De suspensie is te verdund: je hebt ${vol(vs*1000)} nodig voor ${vol(tot*1000)} totaal. Centrifugeer de cellen en neem ze op in minder medium (minstens ${sci(cells/tot,2)} cellen/mL).`); return; }
+  out.innerHTML=`<div class="lbl">Celsuspensie</div><div class="big">${vol(vs*1000)}</div>`+kv([['Medium erbij',vol((tot-vs)*1000)],['Totaal mengsel',vol(tot*1000)+` (${n} × ${vol(v*1000)} + ${fmt(x*100,0)}%)`],['Cellen per putje/fles',sci(per,3)],['Dichtheid',sci(per/area,3)+' cellen/cm²'],['Concentratie mengsel',sci(per/v,3)+' cellen/mL']])+`<ol class="steps"><li>Meng ${vol(vs*1000)} celsuspensie met ${vol((tot-vs)*1000)} medium.</li><li>Verdeel ${vol(v*1000)} per putje of fles; meng de suspensie tussendoor.</li></ol><div class="formula">V<sub>suspensie</sub> = cellen per putje × aantal × (1 + marge) / celconcentratie</div>`; };
+
+/* ================= PRIMERS OPLOSSEN ================= */
+const OLDATA=[['Forward',28.4],['Reverse',31.9]];
+const olRow=r=>`<tr><td><input class="txt" data-n value="${esc(r[0]??'')}" style="width:140px"></td><td>${inp(r[1],90,'data-a')}</td><td class="num" data-o>–</td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
+$('#ol-tbl tbody').innerHTML=OLDATA.map(olRow).join('');
+$('#ol-add').addEventListener('click',()=>{ $('#ol-tbl tbody').insertAdjacentHTML('beforeend',olRow(['',''])); });
+$('#ol-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); calc.oligo(); }});
+calc.oligo=function(){ const S=num($('#ol-s').value), W=num($('#ol-w').value), WV=num($('#ol-wv').value), out=$('#ol-out');
+  $$('#ol-tbl tbody tr').forEach(tr=>{ const a=num(tr.querySelector('[data-a]').value); tr.querySelector('[data-o]').innerHTML=a>0&&S>0?`<b>${vol(a/S*1000)}</b>`:'–'; });
+  if(!(S>0)||!(W>0)||!(WV>0)){ out.innerHTML=note('info','Vul stock- en werkconcentratie in.'); return; }
+  if(W>S){ out.innerHTML=note('bad','De werkoplossing kan niet geconcentreerder zijn dan de stock.'); return; }
+  const v1=W*WV/S; out.innerHTML=`<div class="lbl">Werkoplossing ${fmt(W,2)} µM</div><div class="big">${vol(v1)} <small>stock</small></div>`+kv([['Water of TE',vol(WV-v1)],['Totaal',vol(WV)],['Verdunning','1 : '+sig(S/W,4)]])+`<div class="formula">V<sub>stock</sub> (µL) = nmol / µM × 1000 · werkoplossing: V₁ = C₂V₂ / C₁</div>`; };
+
+/* ================= SDS-PAGE MONSTERS ================= */
+const SSDATA=[['Lysaat A',2.4],['Lysaat B',1.6],['Lysaat C',3.1]];
+const ssRow=r=>`<tr><td><input class="txt" data-n value="${esc(r[0]??'')}" style="width:150px"></td><td>${inp(r[1],90,'data-c')}</td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
+$('#ss-tbl tbody').innerHTML=SSDATA.map(ssRow).join('');
+$('#ss-add').addEventListener('click',()=>{ $('#ss-tbl tbody').insertAdjacentHTML('beforeend',ssRow(['',''])); });
+$('#ss-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); calc.sds(); }});
+calc.sds=function(){ const ug=num($('#ss-ug').value), X=num($('#ss-x').value), V=num($('#ss-v').value), out=$('#ss-out');
+  if(!(ug>0)||!(V>0)){ out.innerHTML=note('info','Vul eiwit per laan en laadvolume in.'); return; }
+  const vb=V/X, room=V-vb, rows=$$('#ss-tbl tbody tr').map(tr=>({n:tr.querySelector('[data-n]').value||'monster',c:num(tr.querySelector('[data-c]').value)})).filter(r=>r.c>0);
+  if(!rows.length){ out.innerHTML=note('info','Vul concentraties in.'); return; }
+  const bad=rows.filter(r=>ug/r.c>room+1e-9);
+  out.innerHTML=`<div class="tbl-wrap"><table class="mini" id="ss-res"><thead><tr><th>Monster</th><th class="num">Monster (µL)</th><th class="num">${X}× buffer (µL)</th><th class="num">Water (µL)</th><th class="num">Totaal (µL)</th></tr></thead><tbody>${rows.map(r=>{ const vs=ug/r.c, w=room-vs; return `<tr><td>${esc(r.n)}</td><td class="num">${fmt(vs,2)}</td><td class="num">${fmt(vb,2)}</td><td class="num">${w>=0?fmt(w,2):'<span class="chip bad">past niet</span>'}</td><td class="num">${fmt(V,1)}</td></tr>`; }).join('')}</tbody></table></div>`+(bad.length?note('bad',`${bad.map(r=>esc(r.n)).join(', ')}: te verdund voor ${fmt(ug,1)} µg in ${fmt(V,1)} µL. Maximaal ${fmt(Math.min(...bad.map(r=>r.c))*room,1)} µg per laan, of vergroot het laadvolume.`):'')+rows.filter(r=>ug/r.c<1).map(r=>note('warn',`${esc(r.n)}: minder dan 1 µL monster; verdun het monster eerst.`)).join('')+`<div class="formula">monster = ${fmt(ug,1)} µg / concentratie · buffer = ${fmt(V,1)} / ${X} = ${fmt(vb,2)} µL · water vult aan</div>`; };
+
+/* ================= MICROSCOOP ================= */
+calc.micro=function(){ const obj=num($('#mc-obj').value), oc=num($('#mc-oc').value), fn=num($('#mc-fn').value), od=num($('#mc-od').value), sdv=num($('#mc-sd').value), su=num($('#mc-su').value), out=$('#mc-out');
+  if(!(od>0)||!(sdv>0)||!(su>0)){ out.innerHTML=note('info','Vul de samenvallende schaaldelen in.'); return; }
+  const k=sdv*su/od, m=stNums($('#mc-m').value).filter(v=>v>0).map(v=>v*k), rows=[['Totale vergroting',isFinite(obj*oc)?fmt(obj*oc,0)+'×':'–'],['Gezichtsvelddiameter',fn>0&&obj>0?fmt(fn/obj*1000,0)+' µm':'–']];
+  if(m.length){ rows.push(['Gemeten objecten (µm)',m.map(v=>fmt(v,1)).join(' · ')],['Gemiddelde',fmt(mean(m),2)+' µm'+(m.length>1?` ± ${fmt(sd(m),2)} (n = ${m.length})`:'')]); }
+  out.innerHTML=`<div class="lbl">IJkfactor bij ${fmt(obj,0)}× objectief</div><div class="big">${fmt(k,2)} <small>µm per schaaldeel</small></div>`+kv(rows)+`<div class="formula">ijkfactor = ${fmt(sdv,1)} × ${fmt(su,1)} µm / ${fmt(od,1)} · grootte = schaaldelen × ijkfactor</div>`+note('info','De ijkfactor geldt alleen voor dit objectief en deze microscoop; ijk elk objectief apart.'); };
 /* ---------- init new tools ---------- */
 buildReeks();
 sLoad('bradford');
 tblRestore();
 gfDemo();
-['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei','transf','stat','pverd','ppip','pprog','plaad','mic','gcomp','wb','melt','spec','units','inoc','molm','hh','rmp'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
+['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei','transf','stat','pverd','ppip','pprog','plaad','mic','gcomp','wb','melt','spec','units','inoc','molm','hh','rmp','seed','oligo','sds','micro'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
 ppBuild(); plBuild(); $('#qp-impgo').addEventListener('click',qpImport); { const _op=calc.oplossing; calc.oplossing=function(e){ _op(e); try{ bufImg(); }catch(err){} }; } ['o-btitle','o-note'].forEach(id=>$('#'+id).addEventListener('input',()=>bufImg())); try{ bufImg(); }catch(e){} try{ calc.ppip(); calc.plaad(); }catch(e){ console.error(e); }
 applyUI();
 decorateXL();
