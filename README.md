@@ -45,6 +45,7 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 - MPN (meest waarschijnlijk aantal) met betrouwbaarheidsinterval
 - Sterilisatie: D-waarde, z-waarde en F₀
 - Celpassageplanner (tijd tot confluent en splitratio)
+- Flowcytometrie: antilichaamcocktail, controlebuisjes, stain index en telbeads
 - Viabiliteit met trypaanblauw, transfectie met Lipofectamine 3000 en desinfectietests (log-reductie volgens EN 1276)
 
 **DNA en eiwit**
@@ -56,6 +57,7 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 - SDS-PAGE-laadschema en western blot-normalisatie
 - Ligatie, transformatie en blauw-witscreening
 - RNA-kwaliteit (concentratie, zuiverheid, 28S:18S), cDNA-synthese (RT-mix) en qPCR-plaatindeling
+- Restrictiedigestie (pipetteerschema, star-activiteit) en gradiënt-PCR (temperatuur per kolom)
 
 **Forensisch**
 - Forensische matchkans (Hardy-Weinberg, productregel, θ-correctie)
@@ -65,6 +67,7 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 - Bloedvlekpatronen (inslaghoek, convergentie, hoogte van de oorsprong)
 - Tijd sinds overlijden (Henssge)
 - Chain of custody-formulier met barcodes
+- Mengprofiel van twee personen: mengverhouding, heterozygote balans en likelihood ratio met θ-correctie
 - Bloedalcohol (Widmark, terugrekenen), lichaamslengte uit botten, entomologie (graaddagen), glasvergelijking (brekingsindex) en Hardy-Weinberg met forensische kengetallen
 
 **Kwaliteit**
@@ -106,6 +109,11 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 
 ### Handig om te weten
 
+- Zoeken (sneltoets `/`) vindt tools ook op trefwoorden zoals Bradford, Bürker of Lineweaver-Burk; met de ster rechts van een tool in het menu zet je hem bij je favorieten bovenaan.
+- Resultaten stuur je door naar een vervolgtool (bijvoorbeeld DNA-kwantificatie naar PCR, ligatie of cDNA; telkamer naar cellen uitzaaien).
+- *Kopieer berekeningslink* zet de invoer leesbaar in de link (`#verdunning?d-c1=50&d-c1u=mM…`).
+- Elke grafiek heeft *Download voor verslag*: wit, 300 dpi, desgewenst zonder titel.
+- Bij een pipetteervolume onder 1 µL krijg je een kant-en-klaar advies voor een tussenverdunning.
 - Met Ctrl+K open je het opdrachtpalet: zoek een tool of actie en druk op Enter.
 - Elke tool heeft rechtsboven *Ongedaan maken* (ook Ctrl+Z) en *Delen*: de invoer van de tool als link of QR-code, zonder server.
 - Elke tool heeft tags (bijvoorbeeld PCR, Eiwit, Kloneren). Klik op een tag om alle tools rond dat onderwerp te zien; de zoekbalk zoekt ook op tags.

@@ -35,7 +35,7 @@ def case(tool, name, source):
 # ---------------- Oplossingen ----------------
 @case('Verdunning', '50X TAE naar 500 mL 1X', 'C₁V₁ = C₂V₂; 50X-stock volgens Bio-Rad Bulletin 6205')
 def _(pg):
-    pg.evaluate("__go('verdunning');__set('d-cu','X');__set('d-c1','50');__set('d-c2','1');__set('d-v1','');__set('d-v2u','mL');__set('d-v1u','mL');__set('d-v2','500')")
+    pg.evaluate("__go('verdunning');__set('d-c1u','X');__set('d-c2u','X');__set('d-c1','50');__set('d-c2','1');__set('d-v1','');__set('d-v2u','mL');__set('d-v1u','mL');__set('d-v2','500')")
     return [('stock (mL)', pg.evaluate("__big('#d-out')"), 10.0, 0.001)]
 
 @case('Oplossing & buffer', 'PBS 1X, 1 L', 'Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄)')
@@ -102,7 +102,7 @@ def _(pg):
 
 @case('Telkamer', 'Neubauer, erytrocyten', 'ProSciTech: 528 cellen in 5 groepsvakken (0,2 mm²), 1:200 → 5,28 × 10⁶/µL')
 def _(pg):
-    pg.evaluate("__go('telkamer');__set('k-ch','0.1n');kSq();__set('k-sq','0.04');__set('k-live','105,6 105,6 105,6 105,6 105,6');__set('k-dead','');__set('k-df','200')")
+    pg.evaluate("__go('telkamer');__set('k-ch','0.1n');kSq();__set('k-sq','0.04');__set('k-live','105,106,105,106,106');__set('k-dead','');__set('k-df','200')")
     return [('cellen/mL', pg.evaluate("__big('#k-out')"), 5.28e9, 0.005)]
 
 @case('Telkamer', 'Neubauer, leukocyten', 'ProSciTech: 156 cellen in 4 grote vakken, 1:20 → 7800/µL')
@@ -866,6 +866,81 @@ def _(pg):
             except Exception: pass
         out.append((f'decodeert ({len(t)} tekens)', 1 if v == t else 0, 1, 0))
     return out
+
+# ---------------- v1.16: bugfixes en nieuwe modules ----------------
+@case('Verdunning', 'Eigen eenheid per concentratie', '50 mM naar 2,5 µM in 25 mL: V₁ = 2,5 × 10⁻⁶ × 25 mL / 0,050 = 1,25 µL; C₂ > C₁ geeft een foutmelding')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('d-c1u','mM');__set('d-c2u','µM');__set('d-c1','50');__set('d-c2','2,5');__set('d-v1','');__set('d-v2u','mL');__set('d-v2','25')")
+    v = pg.evaluate("__big('#d-out')")
+    pg.evaluate("__set('d-c2u','mM');__set('d-c2','80')"); bad = pg.evaluate("document.querySelector('#d-out').textContent.includes('niet hoger zijn dan')||document.querySelector('#d-out').textContent.includes('cannot be higher')")
+    pg.evaluate("__set('d-c1u','X');__set('d-c2u','X');__set('d-c1','50');__set('d-c2','1');__set('d-v2','500')")
+    return [('V₁ (µL)', v, 1.25, 0.001), ('foutmelding bij C₂ > C₁', 1 if bad else 0, 1, 0)]
+
+@case('Telkamer', 'Komma als scheidingsteken', '"12,15,14,18" zijn vier vaktellingen: gemiddeld 14,75 per vak')
+def _(pg):
+    pg.evaluate("__go('telkamer');__set('k-ch','0.1');kSq();__set('k-sq','1');__set('k-live','12,15,14,18');__set('k-dead','');__set('k-df','1')")
+    return [('vakken', pg.evaluate("__kv('#k-out','Vakken')"), 4, 0), ('cellen/mL', pg.evaluate("__big('#k-out')"), 14.75e4, 0.01)]
+
+@case('Verdunningsreeks & KVE', 'ISO 7218 en ontelbare platen', 'NEN-EN-ISO 7218 §10.3.2: N = ΣC / (V × (n₁ + 0,1·n₂) × d) = 422 / (0,1 × 2,2 × 10⁻²) = 1,9 × 10⁵; ">300" telt als ontelbaar')
+def _(pg):
+    pg.evaluate("__go('reeks');__set('r-f','10');__set('r-n','3');__set('r-pv','0,1');__set('r-range','10-300-iso')")
+    pg.evaluate("(()=>{ const s=(i,j,v)=>{ const el=document.querySelectorAll('#r-tbl tbody tr')[i].querySelectorAll('input')[j]; el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); }; s(0,0,'>300');s(0,1,'ontelbaar');s(1,0,'168');s(1,1,'215');s(2,0,'14');s(2,1,'25'); })()")
+    return [('KVE/mL', pg.evaluate("__big('#r-out')"), 422/(0.1*0.022), 0.03), ('telbare platen', pg.evaluate("__kv('#r-out','Telbare')"), 4, 0)]
+
+@case('DNA-kwantificatie', 'Ratio met A₃₂₀-correctie', '(A₂₆₀ − A₃₂₀)/(A₂₈₀ − A₃₂₀) = (1,00 − 0,05)/(0,55 − 0,05) = 1,90')
+def _(pg):
+    pg.evaluate("__go('dna');__set('n-a260','1,00');__set('n-a280','0,55');__set('n-a230','0,50');__set('n-a320','0,05')")
+    return [('260/280', pg.evaluate("__kv('#n-out','A₂₆₀/A₂₈₀')"), 1.9, 0.003), ('260/230', pg.evaluate("__kv('#n-out','A₂₆₀/A₂₃₀')"), 0.95/0.45, 0.003)]
+
+@case('Oplossing & buffer', 'Hydraatvariant', '10 mM Na₂HPO₄·7H₂O (268,07 g/mol) in 1 L = 2,681 g')
+def _(pg):
+    pg.evaluate("__go('oplossing');__set('o-v','1');__set('o-vu','L');__tbl('o-tbl',[['Na₂HPO₄',141.96,10,'mM']],'oplossing')")
+    pg.evaluate("(()=>{ const h=document.querySelector('#o-tbl tbody tr [data-k=h]'); h.value='2'; h.dispatchEvent(new Event('input',{bubbles:true})); })()")
+    return [('afwegen (g)', pg.evaluate("__n(document.querySelector('#o-tbl tbody tr [data-k=out]').textContent)"), 2.6807, 0.001)]
+
+@case('Enzymkinetiek', 'Eadie-Hofstee', 'Exacte Michaelis-Menten-data (V_max 100, K_m 2): v tegen v/[S] heeft helling −K_m en y-asafsnede V_max')
+def _(pg):
+    S = [0.5, 1, 2, 4, 8, 16]; rows = [[s, round(100*s/(2+s), 6), ''] for s in S]
+    pg.evaluate(f"__go('enzym');__tbl('k-tbl',{rows},'enzym')")
+    r = pg.evaluate("(()=>{ const tr=[...document.querySelectorAll('#k-res table')].pop().querySelectorAll('tbody tr')[2]; return [__n(tr.cells[2].textContent),__n(tr.cells[3].textContent)]; })()")
+    return [('helling', r[0], -2, 0.002), ('y-asafsnede', r[1], 100, 0.002)]
+
+@case('Restrictiedigestie', 'Enzymvolume en star-activiteit', '1 µg DNA × 10 U/µg / 20 U/µL = 0,5 µL per enzym; twee enzymen in 50 µL = 2% (glycerol 1%)')
+def _(pg):
+    pg.evaluate("__go('digest');__set('dg-c','250');__set('dg-ng','1000');__set('dg-v','50');__set('dg-u1','20');__set('dg-u2','20');__set('dg-upg','10');__set('dg-e2','HindIII')")
+    return [('enzymvolume (µL)', pg.evaluate("__kv('#dg-out','Enzymvolume')"), 1.0, 0.001), ('glycerol (%)', pg.evaluate("__kv('#dg-out','Glycerol')"), 1.0, 0.001)]
+
+@case('Eiwitzuiveringstabel', 'Zuiveringsfactor en ammoniumsulfaat', 'SA stap 4 / SA stap 1 = (480/0,9)/(40/12,5) = 166,7; opbrengst 4800/8000 = 60%; 0 → 40% bij 0 °C: 515,35 × 0,4/(1 − 0,2722 × 0,4) = 231,3 g/L (Wingfield 2016)')
+def _(pg):
+    pg.evaluate("__go('purif');__tbl('pf-tbl',[['a',200,12.5,40],['b',10,0.9,480]],'purif');__set('pf-s1','0');__set('pf-s2','40');__set('pf-t','0');__set('pf-v','50')")
+    return [('zuiveringsfactor', pg.evaluate("__big('#pf-out')"), (480/0.9)/(40/12.5), 0.003), ('g (NH₄)₂SO₄ per L', pg.evaluate("__n(document.querySelectorAll('#pf-out .big')[1].textContent)"), 515.35*0.4/(1-0.2722*0.4), 0.001)]
+
+@case('Gradiënt-PCR', 'Lineaire gradiënt', 'T₆ = 52 + 5 × (66 − 52)/11 = 58,36 °C')
+def _(pg):
+    pg.evaluate("__go('gradient');__set('gr-lo','52');__set('gr-hi','66');__set('gr-n','12');__set('gr-m','lin')")
+    return [('kolom 6 (°C)', pg.evaluate("__n(document.querySelector('#gr-out tbody tr').cells[6].textContent)"), 52+5*14/11, 0.002)]
+
+@case('ELISA-plaatanalyse', '4PL terugrekenen', 'Standaarden exact op y = 0,05 + 2,4/(1 + (x/180)^−1,15); monster met de absorptie van 100 pg/mL en verdunning 10 moet 1000 opleveren')
+def _(pg):
+    f = lambda x: 0.05+2.4/(1+(x/180)**-1.15); S = [1000, 500, 250, 125, 62.5, 31.25, 15.625]
+    A = ['\t'.join([f"{f(S[r]):.5f}" if r < 7 else '0', f"{f(100):.5f}" if r == 0 else '']+['']*10) for r in range(8)]
+    L = ['\t'.join([f"S{r+1}" if r < 7 else 'B', 'M1' if r == 0 else '-']+['-']*10) for r in range(8)]
+    pg.evaluate("([a,l])=>{ __go('elisa'); __set('el-r',''); __set('el-s','1000 500 250 125 62,5 31,25 15,625'); __set('el-fit','4pl'); __set('el-d','M1=10'); __set('el-l',l); __set('el-a',a); }", ['\n'.join(A).replace('.', ','), '\n'.join(L)])
+    return [('M1 (pg/mL)', pg.evaluate("__n(document.querySelector('#el-out tbody tr').cells[6].textContent)"), 1000, 0.01)]
+
+@case('Flowcytometrie (panel & controles)', 'Cocktail, stain index en telbeads', '50 µL / 200 = 0,25 µL; SI = (18500 − 210)/(2 × 95) = 96,3; cellen/µL = 24500/5200 × 1000 × 50/100 = 2356')
+def _(pg):
+    pg.evaluate("__go('facs');__set('fc-n','10');__set('fc-x','0');__set('fc-v','50');__tbl('fc-tbl',[['CD4','PE',200,'nee']],'facs');__set('fc-mp','18500');__set('fc-mn','210');__set('fc-sd','95');__set('fc-ce','24500');__set('fc-be','5200');__set('fc-bc','1000');__set('fc-bv','50');__set('fc-sv','100')")
+    b = pg.evaluate("[...document.querySelectorAll('#fc-out .big')].map(e=>__n(e.textContent))")
+    return [('antilichaam per test (µL)', pg.evaluate("__n(document.querySelector('#fc-out tbody tr').cells[2].textContent)"), 0.25, 0.001), ('stain index', b[1], 18290/190, 0.002), ('cellen/µL', b[2], 24500/5200*500, 0.002)]
+
+@case('Mengprofiel & LR', 'LR en mengverhouding', 'Vier allelen, slachtoffer 14/15, verdachte 16/18, θ = 0: LR = 1/(2·p₁₆·p₁₈) = 1/(2 × 0,25 × 0,15) = 13,3; M_x = (420 + 390)/3640 = 0,22. Met θ = 0,03 onafhankelijk in Python (Balding & Nichols 1994)')
+def _(pg):
+    pg.evaluate("__go('mix');__set('mx-th','0');__tbl('mx-tbl',[['D3','14 15 16 18','1450 1380 420 390','0,12 0,26 0,25 0,15','14 15','16 18']],'mix')")
+    c = pg.evaluate("[...document.querySelector('#mx-out tbody tr').cells].map(td=>__n(td.textContent))")
+    pg.evaluate("__set('mx-th','0,03')"); c2 = pg.evaluate("__n(document.querySelector('#mx-out tbody tr').cells[5].textContent)")
+    th = 0.03; p1 = (1*th+(1-th)*0.25)/(1+3*th); p2 = (1*th+(1-th)*0.15)/(1+4*th)
+    return [('LR (θ = 0)', c[5], 1/(2*0.25*0.15), 0.003), ('M_x', c[2], 810/3640, 0.03), ('LR (θ = 0,03)', c2, 1/(2*p1*p2), 0.005)]
 
 def main():
     rows = []; fails = 0

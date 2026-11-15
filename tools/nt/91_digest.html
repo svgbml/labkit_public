@@ -1,0 +1,24 @@
+<section class="tool" id="t-digest" data-tool="digest">
+  <header class="tool-head"><h2>Restrictiedigestie</h2>
+  <p>Pipetteerschema voor een enkele of dubbele restrictiedigestie, per reactie en als mastermix, met een controle op star-activiteit door te veel enzym (glycerol).</p></header>
+  <div class="grid2">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="dg-c">Concentratie DNA</label><div class="inu"><input id="dg-c" inputmode="decimal" value="250"><span class="u">ng/µL</span></div></div>
+        <div class="f"><label for="dg-ng">DNA per reactie</label><div class="inu"><input id="dg-ng" inputmode="decimal" value="1000"><span class="u">ng</span></div></div>
+        <div class="f"><label for="dg-v">Reactievolume</label><div class="inu"><input id="dg-v" inputmode="decimal" value="50"><span class="u">µL</span></div></div>
+        <div class="f"><label for="dg-e1">Enzym 1</label><select id="dg-e1"></select></div>
+        <div class="f"><label for="dg-u1">Activiteit enzym 1</label><div class="inu"><input id="dg-u1" inputmode="decimal" value="20"><span class="u">U/µL</span></div></div>
+        <div class="f"><label for="dg-e2">Enzym 2 (dubbele digestie)</label><select id="dg-e2"></select></div>
+        <div class="f"><label for="dg-u2">Activiteit enzym 2</label><div class="inu"><input id="dg-u2" inputmode="decimal" value="20"><span class="u">U/µL</span></div></div>
+        <div class="f"><label for="dg-upg">Enzym per µg DNA</label><div class="inu"><input id="dg-upg" inputmode="decimal" value="10"><span class="u">U</span></div></div>
+        <div class="f"><label for="dg-n">Aantal reacties</label><input id="dg-n" inputmode="numeric" value="4"></div>
+        <div class="f"><label for="dg-x">Extra marge</label><div class="inu"><input id="dg-x" inputmode="decimal" value="10"><span class="u">%</span></div></div>
+        <label class="chk" for="dg-bsa"><input type="checkbox" id="dg-bsa"> BSA toevoegen (100× stock)</label>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Eén unit knipt 1 µg DNA in 1 uur in 50 µL; 5–10 U per µg geeft een ruime overmaat. Controleer in de buffertabel van de fabrikant welke buffer beide enzymen van een dubbele digestie verdragen. Voorbeelddata zijn verzonnen.</p>
+    </div>
+    <div class="result"><div id="dg-out"></div></div>
+  </div>
+  <p class="src">Standaardreactie: 1 µg DNA, 1× buffer, 10 U enzym in 50 µL, 1 uur bij de optimale temperatuur van het enzym (NEB, Optimizing Restriction Endonuclease Reactions). Enzymen worden geleverd in 50% glycerol; het enzymvolume hoort niet meer dan 10% van het reactievolume te zijn, zodat de glycerolconcentratie onder 5% blijft en star-activiteit wordt voorkomen (NEB, Star Activity). Type uiteinde per enzym: NEB-productinformatie. BSA alleen als de buffer het niet al bevat.</p>
+</section>

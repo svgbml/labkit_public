@@ -1,0 +1,16 @@
+<section class="tool" id="t-mix" data-tool="mix">
+  <header class="tool-head"><h2>Mengprofiel &amp; LR</h2>
+  <p>Analyse van een STR-mengprofiel van twee personen: mengverhouding (M<sub>x</sub>) en heterozygote balans (H<sub>b</sub>) uit de piekhoogtes, en de likelihood ratio voor "slachtoffer + verdachte" tegenover "slachtoffer + onbekende", met optionele θ-correctie en de verbale schaal van het NFI.</p></header>
+  <div class="stack">
+    <div class="panel">
+      <div class="fields">
+        <div class="f"><label for="mx-th">θ (F<sub>ST</sub>, subpopulatiecorrectie)</label><input id="mx-th" inputmode="decimal" value="0,01"></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:12px"><table id="mx-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:8px"><button type="button" id="mx-tbl-add">+ Locus</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per locus de allelen van het mengprofiel met in dezelfde volgorde de piekhoogtes en de allelfrequenties, en de genotypen van slachtoffer (bekende bijdrager) en verdachte. Scheid waarden met spaties. Neem frequenties uit de populatiedatabase van je opdracht. Voorbeelddata en frequenties zijn verzonnen.</p>
+    </div>
+    <div class="result"><div id="mx-out"></div></div>
+  </div>
+  <p class="src">M<sub>x</sub> = som van de pieken van de kleinste bijdrager / totaal, bepaald op loci met vier allelen (twee laagste pieken); H<sub>b</sub> = laagste / hoogste piek binnen een bijdrager (Clayton e.a., Forensic Sci Int 91:55–70, 1998; Gill e.a., DNA commission of the ISFG: Recommendations on the interpretation of mixtures, Forensic Sci Int 160:90–101, 2006). LR per locus = 1 / Σ P(genotype onbekende), gesommeerd over alle genotypen die samen met het slachtoffer precies de waargenomen allelen verklaren, zonder piekhoogtes of drop-out (onbeperkt combinatorisch model). Met θ: P(allel a) = (m<sub>a</sub>θ + (1 − θ)p<sub>a</sub>) / (1 + (n − 1)θ), met m<sub>a</sub> het aantal keer dat a al gezien is bij slachtoffer en verdachte (Balding &amp; Nichols, Forensic Sci Int 64:125–140, 1994). Verbale schaal: NFI, Vakbijlage "De reeks waarschijnlijkheidstermen van het NFI". Voor echte zaken gebruikt het NFI probabilistische software die piekhoogtes en drop-out meeweegt.</p>
+</section>

@@ -1,9 +1,9 @@
 # Validatie Labkit BML
 
-Automatisch gegenereerd op 2026-11-14 door `tests/validate.py`.
+Automatisch gegenereerd op 2026-11-15 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 244 van 244 controles binnen tolerantie.**
+**Resultaat: 267 van 267 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -41,9 +41,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9516 | +0.76% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7877 | +1.27% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5582 | +0.47% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,937 | -0.79% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7683 | -1.21% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5474 | -1.47% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -251,5 +251,28 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Etikettenvel | QR-code leesbaar | decodeert (5 tekens) | 1 | 1 | +0.00% | ✅ | QR-code volgens ISO/IEC 18004, gecontroleerd door de QR-decoder van OpenCV |
 | Etikettenvel | QR-code leesbaar | decodeert (54 tekens) | 1 | 1 | +0.00% | ✅ | QR-code volgens ISO/IEC 18004, gecontroleerd door de QR-decoder van OpenCV |
 | Etikettenvel | QR-code leesbaar | decodeert (300 tekens) | 1 | 1 | +0.00% | ✅ | QR-code volgens ISO/IEC 18004, gecontroleerd door de QR-decoder van OpenCV |
+| Verdunning | Eigen eenheid per concentratie | V₁ (µL) | 1,25 | 1,25 | +0.00% | ✅ | 50 mM naar 2,5 µM in 25 mL: V₁ = 2,5 × 10⁻⁶ × 25 mL / 0,050 = 1,25 µL; C₂ > C₁ geeft een foutmelding |
+| Verdunning | Eigen eenheid per concentratie | foutmelding bij C₂ > C₁ | 1 | 1 | +0.00% | ✅ | 50 mM naar 2,5 µM in 25 mL: V₁ = 2,5 × 10⁻⁶ × 25 mL / 0,050 = 1,25 µL; C₂ > C₁ geeft een foutmelding |
+| Telkamer | Komma als scheidingsteken | vakken | 4 | 4 | +0.00% | ✅ | "12,15,14,18" zijn vier vaktellingen: gemiddeld 14,75 per vak |
+| Telkamer | Komma als scheidingsteken | cellen/mL | 1,4750e+05 | 1,4800e+05 | +0.34% | ✅ | "12,15,14,18" zijn vier vaktellingen: gemiddeld 14,75 per vak |
+| Verdunningsreeks & KVE | ISO 7218 en ontelbare platen | KVE/mL | 1,9182e+05 | 1,9000e+05 | -0.95% | ✅ | NEN-EN-ISO 7218 §10.3.2: N = ΣC / (V × (n₁ + 0,1·n₂) × d) = 422 / (0,1 × 2,2 × 10⁻²) = 1,9 × 10⁵; ">300" telt als ontelbaar |
+| Verdunningsreeks & KVE | ISO 7218 en ontelbare platen | telbare platen | 4 | 4 | +0.00% | ✅ | NEN-EN-ISO 7218 §10.3.2: N = ΣC / (V × (n₁ + 0,1·n₂) × d) = 422 / (0,1 × 2,2 × 10⁻²) = 1,9 × 10⁵; ">300" telt als ontelbaar |
+| DNA-kwantificatie | Ratio met A₃₂₀-correctie | 260/280 | 1,9 | 1,9 | +0.00% | ✅ | (A₂₆₀ − A₃₂₀)/(A₂₈₀ − A₃₂₀) = (1,00 − 0,05)/(0,55 − 0,05) = 1,90 |
+| DNA-kwantificatie | Ratio met A₃₂₀-correctie | 260/230 | 2,111 | 2,11 | -0.05% | ✅ | (A₂₆₀ − A₃₂₀)/(A₂₈₀ − A₃₂₀) = (1,00 − 0,05)/(0,55 − 0,05) = 1,90 |
+| Oplossing & buffer | Hydraatvariant | afwegen (g) | 2,681 | 2,681 | +0.01% | ✅ | 10 mM Na₂HPO₄·7H₂O (268,07 g/mol) in 1 L = 2,681 g |
+| Enzymkinetiek | Eadie-Hofstee | helling | -2 | -2 | -0.00% | ✅ | Exacte Michaelis-Menten-data (V_max 100, K_m 2): v tegen v/[S] heeft helling −K_m en y-asafsnede V_max |
+| Enzymkinetiek | Eadie-Hofstee | y-asafsnede | 100 | 100 | +0.00% | ✅ | Exacte Michaelis-Menten-data (V_max 100, K_m 2): v tegen v/[S] heeft helling −K_m en y-asafsnede V_max |
+| Restrictiedigestie | Enzymvolume en star-activiteit | enzymvolume (µL) | 1 | 1 | +0.00% | ✅ | 1 µg DNA × 10 U/µg / 20 U/µL = 0,5 µL per enzym; twee enzymen in 50 µL = 2% (glycerol 1%) |
+| Restrictiedigestie | Enzymvolume en star-activiteit | glycerol (%) | 1 | 1 | +0.00% | ✅ | 1 µg DNA × 10 U/µg / 20 U/µL = 0,5 µL per enzym; twee enzymen in 50 µL = 2% (glycerol 1%) |
+| Eiwitzuiveringstabel | Zuiveringsfactor en ammoniumsulfaat | zuiveringsfactor | 166,7 | 167 | +0.20% | ✅ | SA stap 4 / SA stap 1 = (480/0,9)/(40/12,5) = 166,7; opbrengst 4800/8000 = 60%; 0 → 40% bij 0 °C: 515,35 × 0,4/(1 − 0,2722 × 0,4) = 231,3 g/L (Wingfield 2016) |
+| Eiwitzuiveringstabel | Zuiveringsfactor en ammoniumsulfaat | g (NH₄)₂SO₄ per L | 231,3 | 231,3 | -0.01% | ✅ | SA stap 4 / SA stap 1 = (480/0,9)/(40/12,5) = 166,7; opbrengst 4800/8000 = 60%; 0 → 40% bij 0 °C: 515,35 × 0,4/(1 − 0,2722 × 0,4) = 231,3 g/L (Wingfield 2016) |
+| Gradiënt-PCR | Lineaire gradiënt | kolom 6 (°C) | 58,36 | 58,4 | +0.06% | ✅ | T₆ = 52 + 5 × (66 − 52)/11 = 58,36 °C |
+| ELISA-plaatanalyse | 4PL terugrekenen | M1 (pg/mL) | 1000 | 1000 | +0.00% | ✅ | Standaarden exact op y = 0,05 + 2,4/(1 + (x/180)^−1,15); monster met de absorptie van 100 pg/mL en verdunning 10 moet 1000 opleveren |
+| Flowcytometrie (panel & controles) | Cocktail, stain index en telbeads | antilichaam per test (µL) | 0,25 | 0,25 | +0.00% | ✅ | 50 µL / 200 = 0,25 µL; SI = (18500 − 210)/(2 × 95) = 96,3; cellen/µL = 24500/5200 × 1000 × 50/100 = 2356 |
+| Flowcytometrie (panel & controles) | Cocktail, stain index en telbeads | stain index | 96,26 | 96,3 | +0.04% | ✅ | 50 µL / 200 = 0,25 µL; SI = (18500 − 210)/(2 × 95) = 96,3; cellen/µL = 24500/5200 × 1000 × 50/100 = 2356 |
+| Flowcytometrie (panel & controles) | Cocktail, stain index en telbeads | cellen/µL | 2356 | 2356 | +0.01% | ✅ | 50 µL / 200 = 0,25 µL; SI = (18500 − 210)/(2 × 95) = 96,3; cellen/µL = 24500/5200 × 1000 × 50/100 = 2356 |
+| Mengprofiel & LR | LR en mengverhouding | LR (θ = 0) | 13,33 | 13,3 | -0.25% | ✅ | Vier allelen, slachtoffer 14/15, verdachte 16/18, θ = 0: LR = 1/(2·p₁₆·p₁₈) = 1/(2 × 0,25 × 0,15) = 13,3; M_x = (420 + 390)/3640 = 0,22. Met θ = 0,03 onafhankelijk in Python (Balding & Nichols 1994) |
+| Mengprofiel & LR | LR en mengverhouding | M_x | 0,2225 | 0,22 | -1.14% | ✅ | Vier allelen, slachtoffer 14/15, verdachte 16/18, θ = 0: LR = 1/(2·p₁₆·p₁₈) = 1/(2 × 0,25 × 0,15) = 13,3; M_x = (420 + 390)/3640 = 0,22. Met θ = 0,03 onafhankelijk in Python (Balding & Nichols 1994) |
+| Mengprofiel & LR | LR en mengverhouding | LR (θ = 0,03) | 12,76 | 12,8 | +0.29% | ✅ | Vier allelen, slachtoffer 14/15, verdachte 16/18, θ = 0: LR = 1/(2·p₁₆·p₁₈) = 1/(2 × 0,25 × 0,15) = 13,3; M_x = (420 + 390)/3640 = 0,22. Met θ = 0,03 onafhankelijk in Python (Balding & Nichols 1994) |
 
 Toleranties: rekenregels 0,1–0,5%; gepubliceerde receptgrammen (afgerond in de bron) 1–3%; densitometrie op de getekende demo-gel 5%.
