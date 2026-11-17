@@ -23,7 +23,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 |---|---|---|---|
 | S1 | 1 | Assign every tool to one or more stages (Prepare · Do · Analyse) in a `STAGES` map | ✅ `STAGES` in `tools/nt/99y_stage.js`; `tests/stages_check.py` (in `tools/check.py`) lists tools without one |
 | S2 | 1 | Stage tabs above the sidebar; selecting a stage filters the nav and start page | ✅ Tabs in the sidebar head filter nav and start page; choice kept in `labkit:v1:stage` |
-| S3 | 4, 17 | Stage accent colours and a breadcrumb (Stage › Group › Tool) in the tool header | Colours in all themes, breadcrumb links work |
+| S3 | 4, 17 | Stage accent colours and a breadcrumb (Stage › Group › Tool) in the tool header | ✅ `--stv/--stu/--sta` per theme (5 checked), breadcrumb chip + group link + nav accent |
 | S4 | 8 | "Next tool" suggestions at the bottom of each tool (hand-picked map) | Shown on ~40 tools, translated |
 | S5 | 10 | Search and command palette show the description and tags of each hit | Preview visible in both languages |
 | S6 | 11 | Pinned tools bar (up to 6 icons in the header), pin from the tool toolbar | Pins persist; works on phone header |

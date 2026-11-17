@@ -33,12 +33,14 @@ const stageHas=(id,s)=>!s||STAGE_NONE.includes(id)||(STAGES[id]||'').includes(s)
 /* ---------- fasetabs boven de navigatie: filteren de tools in de zijbalk en op de startpagina ---------- */
 const STKEY='labkit:v1:stage';
 const stageCur=()=>{ const s=jget(STKEY,''); return STAGE_NAME[s]?s:''; };
+let stageMark=()=>{};
+function stageSet(st){ jset(STKEY,STAGE_NAME[st]?st:''); stageMark(); navStageApply(); if(current==='start'&&calc.start) calc.start(); }
 { const sh=$('.sidehead');
   sh.insertAdjacentHTML('beforeend',`<div class="lk-st" role="tablist" aria-label="Fase van het experiment">`+
     [['','Alle fasen'],...STAGE_DEF].map(([k,n])=>`<button type="button" role="tab" data-st="${k}" aria-selected="false" title="${n}">${n}</button>`).join('')+`</div>`);
   const tabs=[...sh.querySelectorAll('.lk-st button')];
   const mark=()=>{ const st=stageCur(); tabs.forEach(b=>{ const on=b.dataset.st===st; b.setAttribute('aria-selected',on?'true':'false'); b.tabIndex=on?0:-1; }); document.documentElement.dataset.stage=st; };
-  function stageSet(st){ jset(STKEY,STAGE_NAME[st]?st:''); mark(); navStageApply(); if(current==='start'&&calc.start) calc.start(); }
+  stageMark=mark;
   sh.querySelector('.lk-st').addEventListener('click',e=>{ const b=e.target.closest('button[data-st]'); if(b) stageSet(b.dataset.st); });
   sh.querySelector('.lk-st').addEventListener('keydown',e=>{ const d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0; if(!d) return; e.preventDefault();
     const i=tabs.findIndex(b=>b.getAttribute('aria-selected')==='true'), n=tabs[(i+d+tabs.length)%tabs.length]; stageSet(n.dataset.st); n.focus(); });
@@ -54,3 +56,23 @@ if(typeof bentoRender==='function'){ const _brs=bentoRender, _ti=toolIndex;
   bentoRender=function(q){ const st=stageCur(); if(st) toolIndex=()=>_ti().filter(t=>stageHas(t.id,st));
     try{ return _brs.apply(this,arguments); } finally{ toolIndex=_ti; } }; }
 navStageApply();
+
+/* ---------- kruimelpad (Fase > Groep > Tool) in de kop van elke tool, met de kleur van de fase ---------- */
+{ const GRP={}, GFIRST={}, NM={}; toolIndex().forEach(t=>{ GRP[t.id]=t.grp; NM[t.id]=t.name; if(!GFIRST[t.grp]) GFIRST[t.grp]=t.id; });
+  $$('#nav > a').forEach(a=>{ const st=stagesOf((a.getAttribute('href')||'').slice(1))[0]; if(st) a.dataset.st=st; });
+  $$('section.tool[data-tool]').forEach(sec=>{ const id=sec.dataset.tool; if(id==='start') return;
+    const h=sec.querySelector('.tool-head'), h2=h&&h.querySelector('h2'); if(!h2||h.querySelector('.lk-crumb')) return;
+    const st=stagesOf(id)[0]||'', g=GRP[id]||'', nm=NM[id]||h2.textContent.trim(), bits=[];
+    if(st) h.dataset.st=st;
+    if(st) bits.push(`<a class="lk-cr-st" data-st="${st}" href="#start" data-crumb-st="${st}" title="Alleen de tools van deze fase laten zien">${STAGE_NAME[st]}</a>`);
+    if(g&&GFIRST[g]) bits.push(`<a href="#start" data-crumb-grp="${esc(GFIRST[g])}">${esc(g)}</a>`);
+    bits.push(`<span aria-current="page">${esc(nm)}</span>`);
+    h2.insertAdjacentHTML('beforebegin',`<nav class="lk-crumb" aria-label="Kruimelpad">${bits.join('<i aria-hidden="true">›</i>')}</nav>`); }); }
+document.addEventListener('click',e=>{
+  const s=e.target.closest('[data-crumb-st]'); if(s){ stageSet(s.dataset.crumbSt); return; }
+  const g=e.target.closest('[data-crumb-grp]'); if(!g) return; const first=g.dataset.crumbGrp;
+  const tile=()=>$$('#bento-rest > .tile').find(x=>x.querySelector(`.tl a[href="#${first}"]`));
+  setTimeout(()=>{ let t=tile();
+    if(!t&&stageCur()){ stageSet(''); t=tile(); } /* de gekozen fase verbergt deze groep: dan alle fasen laten zien */
+    if(!t) return;
+    t.scrollIntoView({behavior:'smooth',block:'center'}); t.classList.add('lk-hl'); setTimeout(()=>t.classList.remove('lk-hl'),1600); },140); });

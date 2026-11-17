@@ -3975,5 +3975,7 @@
 "Voorbereiden": "Prepare",
 "Uitvoeren": "Perform",
 "Analyseren": "Analyse",
-"Fase van het experiment": "Stage of the experiment"
+"Fase van het experiment": "Stage of the experiment",
+"Kruimelpad": "Breadcrumb",
+"Alleen de tools van deze fase laten zien": "Show only the tools of this stage"
 }
