@@ -9,8 +9,8 @@ import os, subprocess, sys, time
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PY = sys.executable
 BUILD = [['tools/build_validated.py'], ['tools/insert_tools.py'], ['tools/build_i18n.py']]
-QUICK = [['tests/perf_budget.py'], ['tests/i18n_collect.py']]
-FULL = [['tests/validate.py'], ['tests/layout_audit.py'], ['tests/robust_audit.py'], ['tests/i18n_collect.py'],
+QUICK = [['tests/stages_check.py'], ['tests/perf_budget.py'], ['tests/i18n_collect.py']]
+FULL = [['tests/stages_check.py'], ['tests/validate.py'], ['tests/layout_audit.py'], ['tests/robust_audit.py'], ['tests/i18n_collect.py'],
         ['tests/perf_budget.py'], ('en', ['tests/layout_audit.py'])]
 
 def step(args, lang=None):

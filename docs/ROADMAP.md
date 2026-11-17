@@ -21,7 +21,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 ## Phase 1: navigation and app shell (12 steps)
 | Step | Ideas | What | Done when |
 |---|---|---|---|
-| S1 | 1 | Assign every tool to one or more stages (Prepare · Do · Analyse) in a `STAGES` map | Every tool has a stage; a check script lists tools without one |
+| S1 | 1 | Assign every tool to one or more stages (Prepare · Do · Analyse) in a `STAGES` map | ✅ `STAGES` in `tools/nt/99y_stage.js`; `tests/stages_check.py` (in `tools/check.py`) lists tools without one |
 | S2 | 1 | Stage tabs above the sidebar; selecting a stage filters the nav and start page | Switching tabs filters correctly, remembered per user |
 | S3 | 4, 17 | Stage accent colours and a breadcrumb (Stage › Group › Tool) in the tool header | Colours in all themes, breadcrumb links work |
 | S4 | 8 | "Next tool" suggestions at the bottom of each tool (hand-picked map) | Shown on ~40 tools, translated |
