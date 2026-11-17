@@ -28,7 +28,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | S5 | 10 | Search and command palette show the description and tags of each hit | ✅ Description + tags on search hits and in the palette, checked in NL and EN |
 | S6 | 11 | Pinned tools bar (up to 6 icons in the header), pin from the tool toolbar | ✅ Max 6 pins in `labkit:v1:pins`, pin button in the tool toolbar; the bar sits at the top of the work area (the sticky phone bar has no room at 375 px) and scrolls sideways |
 | S7 | 16 | Icon set: a small consistent SVG icon per tool (part 1: 45 tools) | ✅ 45 tools; icons are a CSS mask on `::before` (an injected `<svg>` would break the translation keys of a nav link); sources in `tools/icons/`, built by `tools/build_icons.py` |
-| S8 | 16 | Icons part 2 (remaining tools) + dark-theme check | All tools have an icon |
+| S8 | 16 | Icons part 2 (remaining tools) + dark-theme check | ✅ All 87 nav entries have an icon (77 shapes); checked in the dark and contrast themes |
 | S9 | 12 | Simple/expert toggle infrastructure (`data-expert` fields hidden in simple mode) + apply to 5 tools | Toggle per tool, remembered |
 | S10 | 12 | Apply simple/expert to 15 more tools with many fields | Advanced fields hidden by default |
 | S11 | 14 | Onboarding tour (4 steps: search, stages, workflows, settings) on first visit | Shown once, can be replayed from Settings |
