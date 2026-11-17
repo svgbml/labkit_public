@@ -200,13 +200,14 @@ const xpDefault=el=>el.type==='checkbox'?el.defaultChecked:el.tagName==='SELECT'
 const xpChanged=box=>[...box.querySelectorAll('input,select,textarea')].some(el=>el.type==='checkbox'?el.checked!==el.defaultChecked:String(el.value)!==String(xpDefault(el)));
 function xpApply(id){ const sec=$('#t-'+id); if(!sec) return; const on=xpOn(id);
   sec.querySelectorAll('[data-expert]').forEach(box=>{ box.hidden=!on&&!xpChanged(box); });
-  const b=sec.querySelector('[data-xp]'); if(!b) return;
-  b.setAttribute('aria-pressed',on?'true':'false');
-  const t=on?'Minder instellingen':'Meer instellingen'; if(b.dataset.lkx!==t){ b.dataset.lkx=t; b.textContent=t; } }
+  const t=on?'Minder instellingen':'Meer instellingen';
+  sec.querySelectorAll('[data-xp]').forEach(b=>{ b.setAttribute('aria-pressed',on?'true':'false');
+    if(b.dataset.lkx!==t){ b.dataset.lkx=t; b.textContent=t; } }); }
 function xpToggle(id){ const all=jget(XKEY,{}); if(all[id]) delete all[id]; else all[id]=1; jset(XKEY,all); xpApply(id); }
-$$('section.tool[data-tool]').forEach(sec=>{ const ex=sec.querySelectorAll('[data-expert]'); if(!ex.length) return;
-  const id=sec.dataset.tool, host=ex[ex.length-1].closest('.fields')||ex[ex.length-1];
-  host.insertAdjacentHTML('afterend',`<div class="lk-xp-row"><button type="button" class="lk-xp" data-xp="${id}" aria-pressed="false" title="Toon of verberg de geavanceerde instellingen van deze tool">Meer instellingen</button></div>`);
+$$('section.tool[data-tool]').forEach(sec=>{ const ex=[...sec.querySelectorAll('[data-expert]')]; if(!ex.length) return;
+  const id=sec.dataset.tool, hosts=[];
+  ex.forEach(e=>{ const h=e.closest('.fields')||e; if(!hosts.includes(h)) hosts.push(h); });
+  hosts.forEach(h=>h.insertAdjacentHTML('afterend',`<div class="lk-xp-row"><button type="button" class="lk-xp" data-xp="${id}" aria-pressed="false" title="Toon of verberg de geavanceerde instellingen van deze tool">Meer instellingen</button></div>`));
   xpApply(id); });
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-xp]'); if(b) xpToggle(b.dataset.xp); });
 window.addEventListener('hashchange',()=>setTimeout(()=>xpApply(current),0));

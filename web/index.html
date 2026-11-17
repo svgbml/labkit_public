@@ -583,8 +583,8 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
       <div class="f" style="margin-top:12px"><label for="k-dead">Dode cellen (blauw, trypaanblauw) per vak, optioneel</label><textarea id="k-dead" rows="2">4 6 3 5</textarea></div>
       <div class="fields" style="margin-top:12px">
         <div class="f"><label for="k-df">Verdunningsfactor</label><input id="k-df" inputmode="decimal" value="2"></div>
-        <div class="f"><label for="k-sv">Volume suspensie</label><div class="inu"><input id="k-sv" inputmode="decimal" value="10"><span class="u">mL</span></div></div>
-        <div class="f"><label for="k-need">Nodig: cellen</label><input id="k-need" inputmode="decimal" value="1e5"></div>
+        <div class="f" data-expert=""><label for="k-sv">Volume suspensie</label><div class="inu"><input id="k-sv" inputmode="decimal" value="10"><span class="u">mL</span></div></div>
+        <div class="f" data-expert=""><label for="k-need">Nodig: cellen</label><input id="k-need" inputmode="decimal" value="1e5"></div>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Trypaanblauw 1:1 = factor 2. Tel per vak hele cellen; scheid de tellingen met een spatie, komma, puntkomma of enter.</p>
     </div>
@@ -717,9 +717,9 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
         </div>
         <h3 style="margin-top:16px">Loopbuffer</h3>
         <div class="fields">
-          <div class="f"><label for="g-bs">Stock</label><select id="g-bs" style="width:100%"><option value="50">50X TAE</option><option value="10">10X TBE</option><option value="5">5X TBE</option></select></div>
-          <div class="f"><label for="g-bw">Werkconcentratie</label><select id="g-bw" style="width:100%"><option value="1">1X</option><option value="0.5">0,5X</option></select></div>
-          <div class="f"><label for="g-bv">Volume</label><div class="inu"><input id="g-bv" inputmode="decimal" value="500"><span class="u">mL</span></div></div>
+          <div class="f" data-expert=""><label for="g-bs">Stock</label><select id="g-bs" style="width:100%"><option value="50">50X TAE</option><option value="10">10X TBE</option><option value="5">5X TBE</option></select></div>
+          <div class="f" data-expert=""><label for="g-bw">Werkconcentratie</label><select id="g-bw" style="width:100%"><option value="1">1X</option><option value="0.5">0,5X</option></select></div>
+          <div class="f" data-expert=""><label for="g-bv">Volume</label><div class="inu"><input id="g-bv" inputmode="decimal" value="500"><span class="u">mL</span></div></div>
         </div>
       </div>
       <div class="result" id="g-out"></div>
@@ -885,10 +885,10 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
           <div class="f"><label for="e-dab">ΔA/min blanco</label><input id="e-dab" inputmode="decimal" value="0,005"></div>
           <div class="f"><label for="e-epsp">Chromofoor</label><select id="e-epsp" style="width:100%"><option value="6.22">NADH / NADPH, 340 nm</option><option value="">Eigen waarde</option></select></div>
           <div class="f"><label for="e-eps">ε</label><div class="inu"><input id="e-eps" inputmode="decimal" value="6,22"><span class="u">mM⁻¹cm⁻¹</span></div></div>
-          <div class="f"><label for="e-l">Weglengte</label><div class="inu"><input id="e-l" inputmode="decimal" value="1"><span class="u">cm</span></div></div>
+          <div class="f" data-expert=""><label for="e-l">Weglengte</label><div class="inu"><input id="e-l" inputmode="decimal" value="1"><span class="u">cm</span></div></div>
           <div class="f"><label for="e-vt">Totaalvolume cuvet</label><div class="inu"><input id="e-vt" inputmode="decimal" value="3"><span class="u">mL</span></div></div>
           <div class="f"><label for="e-ve">Volume enzym</label><div class="inu"><input id="e-ve" inputmode="decimal" value="0,1"><span class="u">mL</span></div></div>
-          <div class="f"><label for="e-df">Verdunningsfactor enzym</label><input id="e-df" inputmode="decimal" value="1"></div>
+          <div class="f" data-expert=""><label for="e-df">Verdunningsfactor enzym</label><input id="e-df" inputmode="decimal" value="1"></div>
           <div class="f"><label for="e-prot">Eiwitconc. enzymoplossing</label><div class="inu"><input id="e-prot" inputmode="decimal" value="0,5"><span class="u">mg/mL</span></div></div>
         </div>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Gebruik de helling uit het lineaire begin van de meting. Afname of toename maakt niet uit; de waarde wordt absoluut genomen. Eiwitconcentratie kun je uit de Standaardcurve halen.</p>
@@ -928,10 +928,10 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
         <div class="f"><label for="y-f">Forward primer (5′→3′)</label><input id="y-f" class="mono" value="AGCTGACCTGAAGGCTCTGAAG"></div>
         <div class="f" style="margin-top:10px"><label for="y-r">Reverse primer (5′→3′)</label><input id="y-r" class="mono" value="TCGTCGTACTTGACCAGGCTAT"></div>
         <div class="fields" style="margin-top:12px">
-          <div class="f"><label for="y-na">Na⁺/K⁺</label><div class="inu"><input id="y-na" inputmode="decimal" value="50"><span class="u">mM</span></div></div>
-          <div class="f"><label for="y-mg">Mg²⁺</label><div class="inu"><input id="y-mg" inputmode="decimal" value="1,5"><span class="u">mM</span></div></div>
-          <div class="f"><label for="y-dntp">dNTP totaal</label><div class="inu"><input id="y-dntp" inputmode="decimal" value="0,8"><span class="u">mM</span></div></div>
-          <div class="f"><label for="y-pc">Primer</label><div class="inu"><input id="y-pc" inputmode="decimal" value="0,2"><span class="u">µM</span></div></div>
+          <div class="f" data-expert=""><label for="y-na">Na⁺/K⁺</label><div class="inu"><input id="y-na" inputmode="decimal" value="50"><span class="u">mM</span></div></div>
+          <div class="f" data-expert=""><label for="y-mg">Mg²⁺</label><div class="inu"><input id="y-mg" inputmode="decimal" value="1,5"><span class="u">mM</span></div></div>
+          <div class="f" data-expert=""><label for="y-dntp">dNTP totaal</label><div class="inu"><input id="y-dntp" inputmode="decimal" value="0,8"><span class="u">mM</span></div></div>
+          <div class="f" data-expert=""><label for="y-pc">Primer</label><div class="inu"><input id="y-pc" inputmode="decimal" value="0,2"><span class="u">µM</span></div></div>
         </div>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">T<sub>m</sub> volgens nearest-neighbor (SantaLucia 1998) met correctie voor zout, Mg²⁺ en dNTP's, zoals moderne primerprogramma's. dNTP totaal = 4 × de concentratie per dNTP (200 µM elk = 0,8 mM). De eenvoudige GC-formule staat ter vergelijking ernaast.</p>
       </div>
@@ -950,7 +950,7 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
           <div class="f"><label for="y-as">Tijd annealing</label><div class="inu"><input id="y-as" inputmode="numeric" value="30"><span class="u">s</span></div></div>
           <div class="f"><label for="y-et">Extensie</label><div class="inu"><input id="y-et" inputmode="decimal" value="68"><span class="u">°C</span></div></div>
           <div class="f"><label for="y-es">Tijd extensie</label><div class="inu"><input id="y-es" inputmode="numeric" value="" placeholder="auto"><span class="u">s</span></div></div>
-          <div class="f"><label for="y-ramp">Opwarm-/afkoelsnelheid</label><div class="inu"><input id="y-ramp" inputmode="decimal" value="3"><span class="u">°C/s</span></div></div>
+          <div class="f" data-expert=""><label for="y-ramp">Opwarm-/afkoelsnelheid</label><div class="inu"><input id="y-ramp" inputmode="decimal" value="3"><span class="u">°C/s</span></div></div>
         </div>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Laat annealing en extensietijd leeg voor een automatische waarde. De opwarmsnelheid verschilt per cycler; zie de handleiding voor de echte waarde.</p>
       </div>
@@ -1085,8 +1085,8 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
       <div class="fields">
         <div class="f"><label for="g2-tu">Tijdseenheid</label><select id="g2-tu" style="width:100%"><option value="h">uur</option><option value="min">minuten</option></select></div>
         <div class="f"><label for="g2-type">Meetwaarde</label><select id="g2-type" style="width:100%"><option value="od">OD₆₀₀</option><option value="kve">KVE/mL of cellen/mL</option></select></div>
-        <div class="f"><label for="g2-blank">Blanco (medium)</label><input id="g2-blank" inputmode="decimal" value="0"></div>
-        <div class="f"><label for="g2-fac">Cellen/mL bij OD 1,0</label><input id="g2-fac" inputmode="decimal" value="8e8"></div>
+        <div class="f" data-expert=""><label for="g2-blank">Blanco (medium)</label><input id="g2-blank" inputmode="decimal" value="0"></div>
+        <div class="f" data-expert=""><label for="g2-fac">Cellen/mL bij OD 1,0</label><input id="g2-fac" inputmode="decimal" value="8e8"></div>
         <div class="f"><label for="g2-win">Exponentiële fase</label><select id="g2-win" style="width:100%"><option value="auto">Automatisch</option><option value="man">Zelf kiezen</option></select></div>
         <div class="f"><label for="g2-from">Van punt / tot punt</label><div class="inu"><input id="g2-from" inputmode="numeric" value="4" style="border-radius:4px 0 0 4px"><input id="g2-to" inputmode="numeric" value="9" style="border-radius:0 4px 4px 0;border-left:0"></div></div>
       </div>
@@ -1106,8 +1106,8 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
   <div class="grid2">
     <div class="panel">
       <div class="fields">
-        <div class="f"><label for="qp-et">Efficiëntie doelgen</label><div class="inu"><input id="qp-et" inputmode="decimal" value="100"><span class="u">%</span></div></div>
-        <div class="f"><label for="qp-er">Efficiëntie referentiegen</label><div class="inu"><input id="qp-er" inputmode="decimal" value="100"><span class="u">%</span></div></div>
+        <div class="f" data-expert=""><label for="qp-et">Efficiëntie doelgen</label><div class="inu"><input id="qp-et" inputmode="decimal" value="100"><span class="u">%</span></div></div>
+        <div class="f" data-expert=""><label for="qp-er">Efficiëntie referentiegen</label><div class="inu"><input id="qp-er" inputmode="decimal" value="100"><span class="u">%</span></div></div>
         <div class="f"><label for="qp-cal">Kalibrator (controle)</label><select id="qp-cal" style="width:100%"></select></div>
         <div class="f"><label for="qp-m">Grafiek toont</label><select id="qp-m" style="width:100%"><option value="auto">Automatisch</option><option value="livak">2^−ΔΔCt (Livak)</option><option value="pfaffl">Pfaffl</option></select></div>
       </div>
@@ -1116,7 +1116,7 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
       <div class="row" style="margin-top:10px"><button type="button" id="qp-add">+ Rij</button></div>
       <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:13.5px">Ct-export van het qPCR-apparaat inlezen</summary>
         <div class="f" style="margin-top:8px"><label for="qp-imp">Plak de export (kolommen monster, target en Ct of Cq; met kopregel)</label><textarea id="qp-imp" rows="5" spellcheck="false" placeholder="Sample&#9;Target&#9;Cq&#10;Controle&#9;GAPDH&#9;20,1"></textarea></div>
-        <div class="row" style="margin-top:8px"><div class="f"><label for="qp-refname">Naam referentiegen in de export</label><input id="qp-refname" class="txt" value="GAPDH" style="width:140px"></div><button type="button" id="qp-impgo" style="align-self:flex-end">Inlezen</button></div><div id="qp-impmsg"></div>
+        <div class="row" style="margin-top:8px"><div class="f" data-expert=""><label for="qp-refname">Naam referentiegen in de export</label><input id="qp-refname" class="txt" value="GAPDH" style="width:140px"></div><button type="button" id="qp-impgo" style="align-self:flex-end">Inlezen</button></div><div id="qp-impmsg"></div>
       </details>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Efficiëntie haal je uit een verdunningsreeks (PCR-cyclus → qPCR-efficiëntie). Laat beide op 100% voor de klassieke 2<sup>−ΔΔCt</sup>.</p>
     </div>
@@ -1328,7 +1328,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
           <div class="f"><label for="mi-f">Verdunningsfactor</label><input id="mi-f" inputmode="decimal" value="2"></div>
           <div class="f"><label for="mi-n">Aantal putjes</label><input id="mi-n" inputmode="numeric" value="10"></div>
           <div class="f"><label for="mi-u">Eenheid</label><input id="mi-u" class="txt" value="mg/L"></div>
-          <div class="f"><label for="mi-od">Groei bij OD ≥</label><input id="mi-od" inputmode="decimal" value="0,1"></div>
+          <div class="f" data-expert=""><label for="mi-od">Groei bij OD ≥</label><input id="mi-od" inputmode="decimal" value="0,1"></div>
         </div>
         <div class="tbl-wrap" style="margin-top:12px"><table id="mi-tbl" class="mini"><thead><tr><th>Isolaat / antibioticum</th><th>Groei per putje (+/− of OD's)</th><th class="num">S ≤</th><th class="num">R &gt;</th><th></th></tr></thead><tbody></tbody></table></div>
         <div class="row" style="margin-top:10px"><button type="button" id="mi-add">+ Rij</button></div>
@@ -1401,8 +1401,8 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
   <div class="grid2">
     <div class="panel">
       <div class="fields">
-        <div class="f"><label for="ml-min">Tweede piek melden vanaf</label><div class="inu"><input id="ml-min" inputmode="decimal" value="20"><span class="u">% van hoofdpiek</span></div></div>
-        <div class="f"><label for="ml-sm">Gladstrijken</label><select id="ml-sm" style="width:100%"><option value="1">licht</option><option value="2" selected>normaal</option><option value="4">sterk</option></select></div>
+        <div class="f" data-expert=""><label for="ml-min">Tweede piek melden vanaf</label><div class="inu"><input id="ml-min" inputmode="decimal" value="20"><span class="u">% van hoofdpiek</span></div></div>
+        <div class="f" data-expert=""><label for="ml-sm">Gladstrijken</label><select id="ml-sm" style="width:100%"><option value="1">licht</option><option value="2" selected>normaal</option><option value="4">sterk</option></select></div>
       </div>
       <div class="f" style="margin-top:12px"><label for="ml-data">Data: eerste kolom temperatuur (°C), daarna fluorescentie per monster (eerste regel = namen) <span class="example">voorbeeld</span></label><textarea id="ml-data" rows="10" spellcheck="false"></textarea></div>
       <p style="font-size:13px;color:var(--muted);margin:8px 0 0">Exporteer de smeltcurve (Melt Curve Raw Data) uit de qPCR-software en plak de kolommen hier. De voorbeelddata zijn berekend.</p>
@@ -1476,11 +1476,11 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
     <div class="panel">
       <div class="fields">
         <div class="f"><label for="io-od">Gemeten OD₆₀₀ (cultuur)</label><input id="io-od" inputmode="decimal" value="1,6"></div>
-        <div class="f"><label for="io-df">Gemeten in verdunning</label><div class="inu"><span class="u" style="border-left:1px solid var(--line);border-radius:4px 0 0 4px;border-right:0">1 :</span><input id="io-df" inputmode="decimal" value="1" style="border-radius:0 4px 4px 0"></div></div>
-        <div class="f"><label for="io-bl">Blanco (medium)</label><input id="io-bl" inputmode="decimal" value="0,05"></div>
+        <div class="f" data-expert=""><label for="io-df">Gemeten in verdunning</label><div class="inu"><span class="u" style="border-left:1px solid var(--line);border-radius:4px 0 0 4px;border-right:0">1 :</span><input id="io-df" inputmode="decimal" value="1" style="border-radius:0 4px 4px 0"></div></div>
+        <div class="f" data-expert=""><label for="io-bl">Blanco (medium)</label><input id="io-bl" inputmode="decimal" value="0,05"></div>
         <div class="f"><label for="io-to">Gewenste start-OD</label><input id="io-to" inputmode="decimal" value="0,05"></div>
         <div class="f"><label for="io-v">Eindvolume</label><div class="inu"><input id="io-v" inputmode="decimal" value="50"><span class="u">mL</span></div></div>
-        <div class="f"><label for="io-fac">Cellen/mL bij OD 1,0</label><input id="io-fac" inputmode="decimal" value="8e8"></div>
+        <div class="f" data-expert=""><label for="io-fac">Cellen/mL bij OD 1,0</label><input id="io-fac" inputmode="decimal" value="8e8"></div>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Meet boven OD ≈ 1 in een verdunning (bijv. 1:10) voor een betrouwbare waarde.</p>
     </div>
@@ -2690,7 +2690,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       <div class="fields">
         <div class="f"><label for="pc-v">Ingesteld volume</label><div class="inu"><input id="pc-v" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
         <div class="f"><label for="pc-nom">Nominaal volume pipet</label><div class="inu"><input id="pc-nom" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
-        <div class="f"><label for="pc-t">Watertemperatuur</label><div class="inu"><input id="pc-t" inputmode="decimal" value="21,5"><span class="u">°C</span></div></div>
+        <div class="f" data-expert=""><label for="pc-t">Watertemperatuur</label><div class="inu"><input id="pc-t" inputmode="decimal" value="21,5"><span class="u">°C</span></div></div>
         <div class="f"><label for="pc-ch">Type</label><select id="pc-ch" style="width:100%"><option value="1">enkelkanaals</option><option value="2">meerkanaals (grenzen × 2)</option></select></div>
         <div class="f" style="grid-column:1/-1"><label for="pc-m">Wegingen (mg) <span class="example">voorbeeld</span></label><textarea id="pc-m" rows="4">99,61 99,72 99,58 99,80 99,66 99,70 99,63 99,75 99,69 99,60</textarea></div>
       </div>
@@ -2731,7 +2731,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       <div class="fields">
         <div class="f"><label for="mu-res">Resultaat</label><input id="mu-res" inputmode="decimal" value="0,1000"></div>
         <div class="f"><label for="mu-unit">Eenheid</label><input id="mu-unit" class="txt" value="mol/L"></div>
-        <div class="f"><label for="mu-k">Dekkingsfactor k</label><input id="mu-k" inputmode="decimal" value="2"></div>
+        <div class="f" data-expert=""><label for="mu-k">Dekkingsfactor k</label><input id="mu-k" inputmode="decimal" value="2"></div>
       </div>
       <div class="tbl-wrap" style="margin-top:12px"><table id="mu-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
       <div class="row" style="margin-top:8px"><button type="button" id="mu-tbl-add">+ Bron</button></div>
@@ -2882,9 +2882,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       <div class="fields">
         <div class="f"><label for="cd-in">RNA per reactie</label><div class="inu"><input id="cd-in" inputmode="decimal" value="1000"><span class="u">ng</span></div></div>
         <div class="f"><label for="cd-vr">RNA + water per reactie</label><div class="inu"><input id="cd-vr" inputmode="decimal" value="10"><span class="u">µL</span></div></div>
-        <div class="f"><label for="cd-inh">RNase-remmer in de mix</label><select id="cd-inh" style="width:100%"><option value="0">nee</option><option value="1">ja (1 µL)</option></select></div>
-        <div class="f"><label for="cd-nort">No-RT-controles</label><input id="cd-nort" inputmode="numeric" value="1"></div>
-        <div class="f"><label for="cd-mar">Marge</label><div class="inu"><input id="cd-mar" inputmode="decimal" value="10"><span class="u">%</span></div></div>
+        <div class="f" data-expert=""><label for="cd-inh">RNase-remmer in de mix</label><select id="cd-inh" style="width:100%"><option value="0">nee</option><option value="1">ja (1 µL)</option></select></div>
+        <div class="f" data-expert=""><label for="cd-nort">No-RT-controles</label><input id="cd-nort" inputmode="numeric" value="1"></div>
+        <div class="f" data-expert=""><label for="cd-mar">Marge</label><div class="inu"><input id="cd-mar" inputmode="decimal" value="10"><span class="u">%</span></div></div>
       </div>
       <div class="tbl-wrap" style="margin-top:12px"><table id="cd-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
       <div class="row" style="margin-top:8px"><button type="button" id="cd-tbl-add">+ Monster</button></div>
@@ -2953,7 +2953,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       <div class="tbl-wrap"><table id="os-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
       <div class="row" style="margin-top:8px"><button type="button" id="os-tbl-add">+ Stof</button></div>
       <div class="fields" style="margin-top:12px">
-        <div class="f"><label for="os-phi">Osmotische coëfficiënt φ</label><input id="os-phi" inputmode="decimal" value="1"></div>
+        <div class="f" data-expert=""><label for="os-phi">Osmotische coëfficiënt φ</label><input id="os-phi" inputmode="decimal" value="1"></div>
         <div class="f"><label for="os-nb">Normaliteit: stof</label><select id="os-nb" style="width:100%"><option value="1">HCl, HNO₃, NaOH, KOH (1 eq/mol)</option><option value="2">H₂SO₄, Ca(OH)₂ (2 eq/mol)</option><option value="3">H₃PO₄ (3 eq/mol)</option><option value="5">KMnO₄ in zuur milieu (5 eq/mol)</option></select></div>
         <div class="f"><label for="os-nm">Molariteit</label><div class="inu"><input id="os-nm" inputmode="decimal" value="0,05"><span class="u">M</span></div></div>
       </div>
@@ -3698,7 +3698,7 @@ behandeld 25 0</textarea></div>
         <div class="f"><label for="sd-n">Gewenste dichtheid</label><input id="sd-n" inputmode="decimal" value="5e4"></div>
         <div class="f"><label for="sd-v">Volume per putje/fles</label><div class="inu"><input id="sd-v" inputmode="decimal" value="0,5"><span class="u">mL</span></div></div>
         <div class="f"><label for="sd-w">Aantal putjes/flessen</label><input id="sd-w" inputmode="numeric" value="24"></div>
-        <div class="f"><label for="sd-x">Extra marge</label><div class="inu"><input id="sd-x" inputmode="decimal" value="10"><span class="u">%</span></div></div>
+        <div class="f" data-expert=""><label for="sd-x">Extra marge</label><div class="inu"><input id="sd-x" inputmode="decimal" value="10"><span class="u">%</span></div></div>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De celconcentratie haal je uit de tool Telkamer. Bij het kiezen van een formaat wordt het gebruikelijke werkvolume ingevuld.</p>
     </div>
@@ -3735,7 +3735,7 @@ behandeld 25 0</textarea></div>
     <div class="panel">
       <div class="fields">
         <div class="f"><label for="ss-ug">Eiwit per laan</label><div class="inu"><input id="ss-ug" inputmode="decimal" value="20"><span class="u">µg</span></div></div>
-        <div class="f"><label for="ss-x">Monsterbuffer</label><select id="ss-x" style="width:100%"><option value="2">2×</option><option value="4" selected>4× (Laemmli)</option><option value="5">5×</option><option value="6">6×</option></select></div>
+        <div class="f" data-expert=""><label for="ss-x">Monsterbuffer</label><select id="ss-x" style="width:100%"><option value="2">2×</option><option value="4" selected>4× (Laemmli)</option><option value="5">5×</option><option value="6">6×</option></select></div>
         <div class="f"><label for="ss-v">Laadvolume per laan</label><div class="inu"><input id="ss-v" inputmode="decimal" value="20"><span class="u">µL</span></div></div>
       </div>
       <div class="tbl-wrap" style="margin-top:12px"><table id="ss-tbl" class="mini"><thead><tr><th>Monster</th><th class="num">Concentratie (µg/µL)</th><th></th></tr></thead><tbody></tbody></table></div>
@@ -7513,13 +7513,14 @@ const xpDefault=el=>el.type==='checkbox'?el.defaultChecked:el.tagName==='SELECT'
 const xpChanged=box=>[...box.querySelectorAll('input,select,textarea')].some(el=>el.type==='checkbox'?el.checked!==el.defaultChecked:String(el.value)!==String(xpDefault(el)));
 function xpApply(id){ const sec=$('#t-'+id); if(!sec) return; const on=xpOn(id);
   sec.querySelectorAll('[data-expert]').forEach(box=>{ box.hidden=!on&&!xpChanged(box); });
-  const b=sec.querySelector('[data-xp]'); if(!b) return;
-  b.setAttribute('aria-pressed',on?'true':'false');
-  const t=on?'Minder instellingen':'Meer instellingen'; if(b.dataset.lkx!==t){ b.dataset.lkx=t; b.textContent=t; } }
+  const t=on?'Minder instellingen':'Meer instellingen';
+  sec.querySelectorAll('[data-xp]').forEach(b=>{ b.setAttribute('aria-pressed',on?'true':'false');
+    if(b.dataset.lkx!==t){ b.dataset.lkx=t; b.textContent=t; } }); }
 function xpToggle(id){ const all=jget(XKEY,{}); if(all[id]) delete all[id]; else all[id]=1; jset(XKEY,all); xpApply(id); }
-$$('section.tool[data-tool]').forEach(sec=>{ const ex=sec.querySelectorAll('[data-expert]'); if(!ex.length) return;
-  const id=sec.dataset.tool, host=ex[ex.length-1].closest('.fields')||ex[ex.length-1];
-  host.insertAdjacentHTML('afterend',`<div class="lk-xp-row"><button type="button" class="lk-xp" data-xp="${id}" aria-pressed="false" title="Toon of verberg de geavanceerde instellingen van deze tool">Meer instellingen</button></div>`);
+$$('section.tool[data-tool]').forEach(sec=>{ const ex=[...sec.querySelectorAll('[data-expert]')]; if(!ex.length) return;
+  const id=sec.dataset.tool, hosts=[];
+  ex.forEach(e=>{ const h=e.closest('.fields')||e; if(!hosts.includes(h)) hosts.push(h); });
+  hosts.forEach(h=>h.insertAdjacentHTML('afterend',`<div class="lk-xp-row"><button type="button" class="lk-xp" data-xp="${id}" aria-pressed="false" title="Toon of verberg de geavanceerde instellingen van deze tool">Meer instellingen</button></div>`));
   xpApply(id); });
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-xp]'); if(b) xpToggle(b.dataset.xp); });
 window.addEventListener('hashchange',()=>setTimeout(()=>xpApply(current),0));
