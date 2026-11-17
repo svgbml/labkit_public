@@ -222,6 +222,13 @@ nav.side > a.nav-col{display:none!important}
   html.nav-open nav.side > .navgroup{display:flex;margin:0;padding:16px 16px 6px 20px;font-size:12.5px}
   html.nav-open .lk-menu{background:var(--accent-soft)}
 }
+/* eenvoudig of uitgebreid: geavanceerde velden verbergen */
+[data-expert][hidden]{display:none!important}
+.lk-xp-row{margin-top:10px}
+.lk-xp{border:0;background:none;padding:2px 0;color:var(--accent);font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.lk-xp::before{content:"+ "}
+.lk-xp[aria-pressed=true]::before{content:"\2212 "}
+.lk-xp:hover{background:none;color:var(--accent)}
 /* pictogram per tool (de maskers zelf staan in tools/nt/99ya_icon.js) */
 #nav > a::before{margin-top:3px}
 #nav > a:hover::before,#nav > a.active::before{opacity:1!important}
@@ -549,7 +556,7 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
         <h3>2 · Tellingen invullen <span class="example">voorbeeld</span></h3>
         <div class="fields">
           <div class="f"><label for="r-pv">Uitgeplaat volume</label><div class="inu"><input id="r-pv" inputmode="decimal" value="0,1"><span class="u">mL</span></div></div>
-          <div class="f"><label for="r-range">Telbaar bereik per plaat</label><select id="r-range"><option value="30-300">30–300 (AOAC / USDA)</option><option value="25-250">25–250 (APHA)</option><option value="15-300">15–300 (BAM 2025)</option><option value="10-300-iso">10–300 (NEN-EN-ISO 7218, twee opeenvolgende verdunningen)</option></select></div>
+          <div class="f" data-expert=""><label for="r-range">Telbaar bereik per plaat</label><select id="r-range"><option value="30-300">30–300 (AOAC / USDA)</option><option value="25-250">25–250 (APHA)</option><option value="15-300">15–300 (BAM 2025)</option><option value="10-300-iso">10–300 (NEN-EN-ISO 7218, twee opeenvolgende verdunningen)</option></select></div>
         </div>
         <div class="tbl-wrap" style="margin-top:12px">
           <table id="r-tbl"><thead><tr><th>Buis</th><th class="num">Verdunning</th><th class="num">Plaat 1</th><th class="num">Plaat 2</th><th>Status</th></tr></thead><tbody></tbody></table>
@@ -617,10 +624,10 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
           <div class="f"><label for="n-a260">A₂₆₀</label><input id="n-a260" inputmode="decimal" value="0,85"></div>
           <div class="f"><label for="n-a280">A₂₈₀</label><input id="n-a280" inputmode="decimal" value="0,46"></div>
           <div class="f"><label for="n-a230">A₂₃₀</label><input id="n-a230" inputmode="decimal" value="0,41"></div>
-          <div class="f"><label for="n-a320">A₃₂₀ (achtergrond)</label><input id="n-a320" inputmode="decimal" value="" placeholder="optioneel"></div>
+          <div class="f" data-expert=""><label for="n-a320">A₃₂₀ (achtergrond)</label><input id="n-a320" inputmode="decimal" value="" placeholder="optioneel"></div>
           <div class="f"><label for="n-type">Type</label><select id="n-type" style="width:100%"><option value="50">dsDNA (50)</option><option value="33">ssDNA (33)</option><option value="40">RNA (40)</option></select></div>
           <div class="f"><label for="n-df">Verdunningsfactor</label><input id="n-df" inputmode="decimal" value="10"></div>
-          <div class="f"><label for="n-pl">Weglengte</label><div class="inu"><input id="n-pl" inputmode="decimal" value="1"><span class="u">cm</span></div></div>
+          <div class="f" data-expert=""><label for="n-pl">Weglengte</label><div class="inu"><input id="n-pl" inputmode="decimal" value="1"><span class="u">cm</span></div></div>
           <div class="f"><label for="n-vol">Elutievolume</label><div class="inu"><input id="n-vol" inputmode="decimal" value="50"><span class="u">µL</span></div></div>
         </div>
       </div>
@@ -678,7 +685,7 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
         <div class="fields" style="flex:1;max-width:760px">
           <div class="f"><label for="q-n">Monsters</label><input id="q-n" inputmode="numeric" value="8"></div>
           <div class="f"><label for="q-ctrl">Controles (NTC, positief)</label><input id="q-ctrl" inputmode="numeric" value="2"></div>
-          <div class="f"><label for="q-extra">Extra marge</label><div class="inu"><input id="q-extra" inputmode="decimal" value="10"><span class="u">%</span></div></div>
+          <div class="f" data-expert=""><label for="q-extra">Extra marge</label><div class="inu"><input id="q-extra" inputmode="decimal" value="10"><span class="u">%</span></div></div>
           <div class="f"><label for="q-v">Reactievolume</label><div class="inu"><input id="q-v" inputmode="decimal" value="25"><span class="u">µL</span></div></div>
           <div class="f"><label for="q-t">Template per reactie</label><div class="inu"><input id="q-t" inputmode="decimal" value="2"><span class="u">µL</span></div></div>
         </div>
@@ -1416,9 +1423,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
         <div class="fields">
           <div class="f"><label for="sp-a">Absorbantie A</label><input id="sp-a" inputmode="decimal" value="0,311"></div>
           <div class="f"><label for="sp-e">ε (M⁻¹·cm⁻¹)</label><input id="sp-e" inputmode="decimal" value="6220"></div>
-          <div class="f"><label for="sp-l">Weglengte</label><div class="inu"><input id="sp-l" inputmode="decimal" value="1"><span class="u">cm</span></div></div>
+          <div class="f" data-expert=""><label for="sp-l">Weglengte</label><div class="inu"><input id="sp-l" inputmode="decimal" value="1"><span class="u">cm</span></div></div>
           <div class="f"><label for="sp-c">Concentratie</label><div class="inu"><input id="sp-c" inputmode="decimal" value="" placeholder="berekenen"><span class="u">mM</span></div></div>
-          <div class="f"><label for="sp-df">Verdunningsfactor</label><input id="sp-df" inputmode="decimal" value="1"></div>
+          <div class="f" data-expert=""><label for="sp-df">Verdunningsfactor</label><input id="sp-df" inputmode="decimal" value="1"></div>
         </div>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Laat A of de concentratie leeg; dat veld wordt berekend.</p>
       </div>
@@ -3710,8 +3717,8 @@ behandeld 25 0</textarea></div>
       <div class="row" style="margin-top:10px"><button type="button" id="ol-add">+ Primer</button></div>
       <div class="fields" style="margin-top:12px">
         <div class="f"><label for="ol-s">Stockconcentratie</label><div class="inu"><input id="ol-s" inputmode="decimal" value="100"><span class="u">µM</span></div></div>
-        <div class="f"><label for="ol-w">Werkoplossing</label><div class="inu"><input id="ol-w" inputmode="decimal" value="10"><span class="u">µM</span></div></div>
-        <div class="f"><label for="ol-wv">Volume werkoplossing</label><div class="inu"><input id="ol-wv" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
+        <div class="f" data-expert=""><label for="ol-w">Werkoplossing</label><div class="inu"><input id="ol-w" inputmode="decimal" value="10"><span class="u">µM</span></div></div>
+        <div class="f" data-expert=""><label for="ol-wv">Volume werkoplossing</label><div class="inu"><input id="ol-wv" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De hoeveelheid in nmol staat op het buisje of het specificatieblad. Centrifugeer het buisje kort voor het openen.</p>
     </div>
@@ -3773,7 +3780,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=236c06e491"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=095658d1b7"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -7495,6 +7502,27 @@ document.addEventListener('click',e=>{ const p=e.target.closest('[data-pin]'); i
   const u=e.target.closest('[data-unpin]'); if(u) pinToggle(u.dataset.unpin); });
 window.addEventListener('hashchange',()=>setTimeout(pinsRender,0));
 pinsRender();
+
+/* ---------- eenvoudig of uitgebreid: velden met data-expert staan standaard verborgen ----------
+   Een verborgen veld blijft in de DOM staan, dus de berekening gebruikt gewoon de standaardwaarde.
+   Staat er een afwijkende waarde in (bijvoorbeeld uit een deellink of de geschiedenis), dan blijft
+   het veld zichtbaar, zodat niemand rekent met een getal dat hij niet ziet. */
+const XKEY='labkit:v1:expert';
+const xpOn=id=>!!jget(XKEY,{})[id];
+const xpDefault=el=>el.type==='checkbox'?el.defaultChecked:el.tagName==='SELECT'?(([...el.options].find(o=>o.defaultSelected)||el.options[0]||{}).value):el.defaultValue;
+const xpChanged=box=>[...box.querySelectorAll('input,select,textarea')].some(el=>el.type==='checkbox'?el.checked!==el.defaultChecked:String(el.value)!==String(xpDefault(el)));
+function xpApply(id){ const sec=$('#t-'+id); if(!sec) return; const on=xpOn(id);
+  sec.querySelectorAll('[data-expert]').forEach(box=>{ box.hidden=!on&&!xpChanged(box); });
+  const b=sec.querySelector('[data-xp]'); if(!b) return;
+  b.setAttribute('aria-pressed',on?'true':'false');
+  const t=on?'Minder instellingen':'Meer instellingen'; if(b.dataset.lkx!==t){ b.dataset.lkx=t; b.textContent=t; } }
+function xpToggle(id){ const all=jget(XKEY,{}); if(all[id]) delete all[id]; else all[id]=1; jset(XKEY,all); xpApply(id); }
+$$('section.tool[data-tool]').forEach(sec=>{ const ex=sec.querySelectorAll('[data-expert]'); if(!ex.length) return;
+  const id=sec.dataset.tool, host=ex[ex.length-1].closest('.fields')||ex[ex.length-1];
+  host.insertAdjacentHTML('afterend',`<div class="lk-xp-row"><button type="button" class="lk-xp" data-xp="${id}" aria-pressed="false" title="Toon of verberg de geavanceerde instellingen van deze tool">Meer instellingen</button></div>`);
+  xpApply(id); });
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-xp]'); if(b) xpToggle(b.dataset.xp); });
+window.addEventListener('hashchange',()=>setTimeout(()=>xpApply(current),0));
 /* /NT:ux */
 buildReeks();
 sLoad('bradford');

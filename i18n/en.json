@@ -3985,5 +3985,8 @@
 "Vastzetten": "Pin",
 "Losmaken": "Unpin",
 "Deze tool vastzetten boven het werkvlak": "Pin this tool above the work area",
-"Je kunt maximaal zes tools vastzetten. Maak er eerst een los.": "You can pin at most six tools. Unpin one first."
+"Je kunt maximaal zes tools vastzetten. Maak er eerst een los.": "You can pin at most six tools. Unpin one first.",
+"Meer instellingen": "More settings",
+"Minder instellingen": "Fewer settings",
+"Toon of verberg de geavanceerde instellingen van deze tool": "Show or hide the advanced settings of this tool"
 }
