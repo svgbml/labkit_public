@@ -337,8 +337,16 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 .tl:hover{background:var(--bg)}
 .tl a{flex:1;min-width:0;color:var(--ink);text-decoration:none;font-size:14px;font-weight:500;overflow-wrap:anywhere}
 .tl a small{display:block;font-weight:400;font-size:12px;color:var(--muted);line-height:1.35}
+.tl a .tl-tags{display:block;font-weight:600;font-size:11px;color:var(--accent);line-height:1.4;opacity:.9}
+.tl a .tl-tags > span + span::before,.lk-cmdl [role=option] em > span + span::before{content:" \00b7 ";opacity:.7}
 .tl button{border:0;background:none;padding:2px 4px;color:var(--line);font-size:15px;line-height:1}
 .tl button.on{color:#e0a100}.tl button:hover{color:var(--muted);background:none}
+/* opdrachtpalet: naam met beschrijving en tags per treffer */
+.lk-cmdl [role=option]{display:flex;justify-content:space-between;gap:12px;padding:7px 10px;border-radius:6px;cursor:pointer}
+.lk-cmdl [role=option] > span:first-child{min-width:0;flex:1}
+.lk-cmdl [role=option] small{display:block;font-size:12px;color:var(--muted);line-height:1.35;overflow-wrap:anywhere}
+.lk-cmdl [role=option] .lk-cmd-m{flex:none;max-width:38%;text-align:right;color:var(--muted);font-size:12.5px}
+.lk-cmdl [role=option] .lk-cmd-m em{display:block;font-style:normal;font-size:11px;color:var(--accent);font-weight:600;opacity:.9;overflow-wrap:anywhere}
 .tile .empty{font-size:13px;color:var(--muted)}
 .grp .gdel{border:0;background:none;padding:0 2px;color:var(--muted);font-size:12px}
 .grp.addg{border-style:dashed;color:var(--accent);font-weight:600;font-size:13px;padding:4px 10px}
@@ -6128,10 +6136,10 @@ const RKEY='labkit:v1:recent', FKEY='labkit:v1:fav';
 const jget=(k,d)=>{ try{ return JSON.parse(localStorage.getItem(k)||'null')||d; }catch(e){ return d; } }, jset=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
 function toolIndex(){ const out=[]; let grp=''; [...$('#nav').children].forEach(el=>{ if(el.classList.contains('navgroup')) grp=el.textContent; else if(el.tagName==='A'){ const id=el.getAttribute('href').slice(1), sec=$('#t-'+id); if(!sec||id==='start') return; const p=sec.querySelector('.tool-head p'); const name=[...el.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim(); out.push({id,grp,name,tags:tagsOf(id),desc:p?p.textContent.split(/(?<=[.:])\s/)[0].replace(/[.:]$/,''):''}); } }); return out; }
 function bentoRender(q){ const T=toolIndex(), fav=jget(FKEY,[]), rec=jget(RKEY,[]).filter(id=>T.some(t=>t.id===id)), ql=(q||'').trim().toLowerCase();
-  const row=(t,d)=>`<div class="tl"><a href="#${t.id}">${esc(t.name)}${d?`<small>${esc(t.desc)}</small>`:''}</a><button type="button" class="${fav.includes(t.id)?'on':''}" data-fav="${t.id}" title="Favoriet" aria-label="Favoriet">★</button></div>`;
+  const row=(t,d,tg)=>`<div class="tl"><a href="#${t.id}">${esc(t.name)}${d?`<small>${esc(t.desc)}</small>`:''}${tg&&t.tags.length?`<span class="tl-tags">${t.tags.slice(0,4).map(g=>`<span>${esc(g)}</span>`).join('')}</span>`:''}</a><button type="button" class="${fav.includes(t.id)?'on':''}" data-fav="${t.id}" title="Favoriet" aria-label="Favoriet">★</button></div>`;
   const by=id=>T.find(t=>t.id===id), groupsN=[...new Set(T.map(t=>t.grp))];
   let h='';
-  if(ql){ const hits=T.filter(t=>(t.name+' '+t.desc+' '+t.grp+' '+t.tags.map(g=>g+' '+trPlain(g,true)).join(' ')).toLowerCase().includes(ql)); h+=`<div class="tile wide"><h3>Zoekresultaten <span>${hits.length}</span></h3><div class="tlist">${hits.map(t=>row(t,true)).join('')||'<div class="empty">Geen tool gevonden.</div>'}</div></div>`; }
+  if(ql){ const hits=T.filter(t=>(t.name+' '+t.desc+' '+t.grp+' '+t.tags.map(g=>g+' '+trPlain(g,true)).join(' ')).toLowerCase().includes(ql)); h+=`<div class="tile wide"><h3>Zoekresultaten <span>${hits.length}</span></h3><div class="tlist">${hits.map(t=>row(t,true,true)).join('')||'<div class="empty">Geen tool gevonden.</div>'}</div></div>`; }
   else if(curTag()){ const tg=curTag(), L=T.filter(t=>t.tags.includes(tg)); h+=`<div class="tile" style="grid-column:1/-1"><h3><span class="tags" style="margin:0">${tagChip(tg,true)}</span><span>${L.length}</span></h3><div class="tlist" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));column-gap:14px">${L.map(t=>row(t,true)).join('')||'<div class="empty">Geen tool gevonden.</div>'}</div></div>`;}
   else { h+=`<div class="tile"><h3>Favorieten</h3><div class="tlist">${fav.map(by).filter(Boolean).map(t=>row(t)).join('')||'<div class="empty">Klik op de ster bij een tool om hem hier vast te zetten.</div>'}</div></div>`;
     h+=`<div class="tile"><h3>Laatst gebruikt</h3><div class="tlist">${rec.slice(0,6).map(by).map(t=>row(t)).join('')||'<div class="empty">Nog niets geopend.</div>'}</div></div>`;
@@ -7024,7 +7032,7 @@ function appModal(html,onClose){ const ov=document.createElement('div'); ov.clas
 
 /* --- opdrachtpalet (Ctrl+K) --- */
 const fold=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-function cmdItems(){ const T=toolIndex().map(t=>({k:'tool',id:t.id,n:t.name,s:t.grp,h:[t.name,t.grp,t.desc,...t.tags].join(' ')}));
+function cmdItems(){ const T=toolIndex().map(t=>({k:'tool',id:t.id,n:t.name,s:t.grp,d:t.desc,g:t.tags,h:[t.name,t.grp,t.desc,...t.tags].join(' ')}));
   const A=[['share','Deze tool delen (link of QR-code)'],['undo','Ongedaan maken in deze tool'],['save','Sessie opslaan als bestand'],['open','Sessie openen'],['inst','Instellingen & updates'],['report','Rapport / labjournaal maken'],['start','Startpagina']].map(([id,n])=>({k:'act',id,n:trPlain(n),s:trPlain('opdracht'),h:trPlain(n)}));
   return [...A,...T]; }
 function cmdRun(it){ if(it.k==='tool'){ location.hash='#'+it.id; return; } const c=current;
@@ -7033,7 +7041,7 @@ function cmdOpen(){ if(document.querySelector('.lk-modal')) return; const items=
   const m=appModal(`<input type="search" class="txt lk-cmdq" placeholder="Zoek een tool of opdracht…" aria-label="Zoek een tool of opdracht" autocomplete="off" style="width:100%;height:38px;font-size:15px"><div class="lk-cmdl" role="listbox" data-notr="" style="margin-top:8px"></div><div style="font-size:12px;color:var(--muted);margin-top:8px">↑ ↓ kiezen · Enter openen · Esc sluiten</div>`);
   const q=m.box.querySelector('.lk-cmdq'), L=m.box.querySelector('.lk-cmdl'); let sel=0, shown=[];
   const render=()=>{ const w=fold(q.value).split(/\s+/).filter(Boolean); shown=items.filter(it=>w.every(x=>fold(it.h).includes(x))).slice(0,12); if(!w.length) shown=items.filter(it=>it.k==='act').concat(items.filter(it=>it.k==='tool').slice(0,7)); sel=Math.min(sel,Math.max(0,shown.length-1));
-    L.innerHTML=shown.length?shown.map((it,i)=>`<div role="option" data-i="${i}" aria-selected="${i===sel}" style="display:flex;justify-content:space-between;gap:12px;padding:7px 10px;border-radius:6px;cursor:pointer;${i===sel?'background:var(--accent-soft);':''}"><span>${esc(it.n)}</span><span style="color:var(--muted);font-size:12.5px">${it.s}</span></div>`).join(''):`<div style="padding:8px 10px;color:var(--muted)">${trPlain('Niets gevonden.')}</div>`; };
+    L.innerHTML=shown.length?shown.map((it,i)=>`<div role="option" data-i="${i}" aria-selected="${i===sel}"${i===sel?' style="background:var(--accent-soft)"':''}><span>${esc(it.n)}${it.d?`<small>${esc(it.d)}</small>`:''}</span><span class="lk-cmd-m">${it.s}${it.g&&it.g.length?`<em>${it.g.slice(0,3).map(g=>`<span>${esc(trPlain(g,true))}</span>`).join('')}</em>`:''}</span></div>`).join(''):`<div style="padding:8px 10px;color:var(--muted)">${trPlain('Niets gevonden.')}</div>`; };
   q.addEventListener('input',()=>{ sel=0; render(); }); q.addEventListener('keydown',e=>{ if(e.key==='ArrowDown'){ e.preventDefault(); sel=Math.min(sel+1,shown.length-1); render(); } else if(e.key==='ArrowUp'){ e.preventDefault(); sel=Math.max(sel-1,0); render(); } else if(e.key==='Enter'&&shown[sel]){ e.preventDefault(); const it=shown[sel]; m.close(); cmdRun(it); } });
   L.addEventListener('click',e=>{ const r=e.target.closest('[data-i]'); if(r){ const it=shown[+r.dataset.i]; m.close(); cmdRun(it); } }); render(); setTimeout(()=>q.focus(),0); }
 document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&!e.altKey&&(e.key==='k'||e.key==='K')){ e.preventDefault(); cmdOpen(); } });
