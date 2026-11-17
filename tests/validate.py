@@ -853,7 +853,7 @@ def _(pg):
     pg.evaluate("__go('pipkeus');__set('pk-v','15');__set('pk-set','2 10 20 100 200 1000')")
     return [('beste pipet', pg.evaluate("__big('#pk-out')"), 20, 0), ('e_s (µL)', pg.evaluate("__kv('#pk-out','Systematische')"), 0.2, 0.001)]
 
-@case('Etikettenvel', 'QR-code leesbaar', 'QR-code volgens ISO/IEC 18004, gecontroleerd door de QR-decoder van OpenCV')
+@case('QR-code (delen)', 'QR-code leesbaar', 'QR-code volgens ISO/IEC 18004, gecontroleerd door de QR-decoder van OpenCV')
 def _(pg):
     import base64, cv2, numpy as np
     out = []

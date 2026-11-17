@@ -122,6 +122,12 @@ De startpagina toont alle tools per categorie, met zoeken, favorieten en je laat
 - Tabellen en grafieken kopieer je met één klik naar Excel, met decimalen in de gekozen taal. Grafieken kun je ook als afbeelding kopiëren.
 - Een blok uit Excel of een plaatlezer kun je direct in een tabel plakken.
 - Invoer wordt op je apparaat onthouden. Met *Sessie opslaan* bewaar je alles als bestand, eventueel onder een projectnaam.
+- *Geschiedenis* (rechtsboven in elke tool) zet eerdere invoer terug: Labkit bewaart de laatste 8 keer dat je een tool hebt aangepast. *Afdrukken* maakt een A4 met invoer, uitkomst en bron van alleen die tool.
+- Typ een eenheid achter een getal, bijvoorbeeld `50 mM`, `0,1 mL` of `250 ng/µL`: Labkit rekent om naar de eenheid van het veld of zet de eenheidskeuze goed.
+- *Werkstromen* op de startpagina leiden je stap voor stap door een heel experiment (bijvoorbeeld van DNA tot gel, kloneren of qPCR).
+- Tools met de groene badge *Gevalideerd* worden bij elke wijziging getoetst aan gepubliceerde referentiedata.
+- Op de telefoon opent de knop *Tools* alle tools per categorie, en blijft de belangrijkste uitkomst onderin zichtbaar terwijl je invult. In de zijbalk klap je categorieën in door op de naam te klikken.
+- Het thema *Automatisch* volgt de licht/donker-instelling van je systeem.
 
 ## Validatie
 
@@ -142,7 +148,7 @@ npm start        # desktopversie (Tauri; vereist Rust)
 npm run dist     # Windows-installer
 ```
 
-Projectindeling: `web/` bevat de app (één HTML-bestand met manifest en service worker), `src-tauri/` de desktopschil, `tests/` de validatie en `.github/workflows/` de publicatie naar GitHub Pages, de Windows-build en de validatie.
+Projectindeling: `web/` bevat de app (één HTML-bestand met manifest en service worker, plus het Engelse woordenboek `i18n-en.js` dat alleen in het Engels wordt geladen), `src-tauri/` de desktopschil, `tests/` de validatie en `.github/workflows/` de publicatie naar GitHub Pages, de Windows-build en de validatie.
 
 ## Disclaimer
 

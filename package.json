@@ -8,7 +8,9 @@
   "scripts": {
     "start": "tauri dev",
     "dist": "tauri build",
-    "web": "npx --yes serve web"
+    "web": "npx --yes serve web",
+    "check": "python tools/check.py",
+    "check:quick": "python tools/check.py --quick"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"

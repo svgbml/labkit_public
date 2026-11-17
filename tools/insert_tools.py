@@ -9,7 +9,7 @@ for f in sorted(glob.glob(os.path.join(R,'tools','nt','*.json'))):
     m['_js']=open(base+'.js',encoding='utf8').read().strip() if os.path.exists(base+'.js') else ''
     mods.append(m)
 # 1. oude invoegingen weg
-s=re.sub(r'\n?<!-- NT:(\w+) -->.*?<!-- /NT:\1 -->','',s,flags=re.S)
+s=re.sub(r'<!-- NT:(\w+) -->.*?<!-- /NT:\1 -->\n\n?','',s,flags=re.S)  # precies wat stap 3 invoegt, zodat herhaald draaien geen lege regels toevoegt
 s=re.sub(r'\n?/\* NT:(\w+) \*/.*?/\* /NT:\1 \*/','',s,flags=re.S)
 s=re.sub(r'\n?  <a href="#\w+" data-nt=""><span class="k">.*?</span>.*?</a>','',s)
 s=re.sub(r'\n?  <div class="navgroup" data-nt="">.*?</div>','',s)
