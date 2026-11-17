@@ -145,3 +145,27 @@ $$('.lk-tbar').forEach(bar=>{ const id=bar.querySelector('[data-share]').dataset
 document.addEventListener('click',e=>{
   const h=e.target.closest('[data-hist]'); if(h){ histOpen(h.dataset.hist); return; }
   const p=e.target.closest('[data-tprint]'); if(p&&typeof rpDoc==='function'){ const id=p.dataset.tprint; rpPrint(rpDoc([id],true,true,$('#t-'+id+' .tool-head h2').textContent,$('#sess-name')?$('#sess-name').value:'')); } });
+
+/* ---------- "volgende tool": handgekozen vervolgstappen onder aan elke tool ---------- */
+const NEXT={
+  verdunning:['oplossing','pverd','pipkeus'],oplossing:['hh','osmo','pverd'],units:['verdunning','molm'],molm:['oplossing','verdunning'],hh:['bufcap','titr','oplossing'],
+  osmo:['oplossing','seed'],titr:['hh','bufcap'],kjel:['curve','spec'],edta:['titr','sigfig'],bufcap:['hh','titr'],
+  ksp:['oplossing','units'],curve:['spec','mval','stat'],enzym:['curve','stat'],spec:['curve','dna'],ic50:['curve','stat'],
+  chrom:['istd','mval'],istd:['chrom','munc'],zprime:['elisa','mval'],purif:['sds','wb'],elisa:['curve','zprime','roc'],
+  reeks:['mpn','groei'],groei:['gcomp','inoc'],inoc:['groei','seed'],telkamer:['viab','seed'],teller:['telkamer','reeks'],
+  seed:['passage','transfect'],micro:['telkamer','stain'],gcomp:['groei','stat'],mic:['desinf','stat'],mpn:['reeks','stat'],
+  steril:['desinf','timers'],passage:['seed','viab'],transfect:['viab','facs'],viab:['seed','telkamer'],desinf:['mic','steril'],
+  facs:['plaat','viab'],dna:['oligo','pcr','gel'],oligo:['pcr','pcrcyclus'],pcr:['pcrcyclus','ppip','plaad'],pcrcyclus:['gradient','pprog','pcr'],
+  gradient:['pcrcyclus','gel'],qpcr:['melt','stat'],melt:['qpcr','gel'],gel:['plaad','gelfoto','digest'],gelfoto:['gel','wb'],
+  sds:['wb','purif'],wb:['curve','stat'],ligatie:['transf','digest'],transf:['ligatie','reeks'],cdna:['qplate','qpcr'],
+  qplate:['qpcr','ppip'],rnaq:['cdna','dna'],digest:['gel','ligatie'],rmp:['hwe','mix','kin'],strchk:['mix','rmp'],
+  bpa:['report','stat'],pmi:['ento','report'],ystr:['rmp','hwe'],kin:['rmp','hwe'],widmark:['report','sigfig'],
+  stature:['report','stat'],ento:['pmi','report'],glass:['stat','munc'],hwe:['rmp','ystr'],mix:['rmp','strchk'],
+  stat:['sigfig','bland','report'],bland:['mval','munc'],roc:['stat','elisa'],km:['stat','report'],sigfig:['munc','stat'],
+  pipcal:['munc','westgard'],westgard:['munc','mval'],munc:['sigfig','mval'],mval:['munc','westgard','bland'],pverd:['verdunning','reeks'],
+  ppip:['pcr','plaat'],pprog:['pcrcyclus','pcr'],plaad:['gel','gelfoto'],stain:['micro','teller'],centrifuge:['timers','pipkeus'],
+  timers:['centrifuge','plan'],plaat:['ppip','elisa'],plan:['report','timers'],report:['plan','stat'],pipkeus:['pipcal','ppip']
+};
+{ const NM={}; toolIndex().forEach(t=>{ NM[t.id]=t.name; });
+  Object.entries(NEXT).forEach(([id,list])=>{ const sec=$('#t-'+id), L=list.filter(x=>NM[x]&&$('#t-'+x)); if(!sec||!L.length||sec.querySelector('.lk-next')) return;
+    sec.insertAdjacentHTML('beforeend',`<nav class="lk-next" aria-label="Volgende tool"><b>Hierna vaak</b>${L.map(x=>`<a href="#${x}">${esc(NM[x])}</a>`).join('')}</nav>`); }); }

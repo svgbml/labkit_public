@@ -222,6 +222,12 @@ nav.side > a.nav-col{display:none!important}
   html.nav-open nav.side > .navgroup{display:flex;margin:0;padding:16px 16px 6px 20px;font-size:12.5px}
   html.nav-open .lk-menu{background:var(--accent-soft)}
 }
+/* "volgende tool": vervolgstappen onder aan een tool */
+.lk-next{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:24px 0 0;padding-top:14px;border-top:1px solid var(--line)}
+.lk-next b{font-size:12.5px;color:var(--muted);font-weight:600}
+.lk-next a{padding:5px 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--accent);text-decoration:none;font-size:13px;font-weight:600}
+.lk-next a::after{content:" \2192";opacity:.55}
+.lk-next a:hover,.lk-next a:focus-visible{border-color:var(--accent);background:var(--accent-soft)}
 /* fasekleuren: een accent per fase, per thema apart zodat het in alle vijf thema's leesbaar blijft */
 :root{--stv:#0b6b58;--stv-soft:#dff1ec;--stu:#8a4b00;--stu-soft:#fbeedd;--sta:#4b3bb3;--sta-soft:#e8e6fa}
 html[data-theme=donker]{--stv:#5fd0a8;--stv-soft:#113329;--stu:#e8aa4e;--stu-soft:#3a2a10;--sta:#a9a0f5;--sta-soft:#262245}
@@ -3737,7 +3743,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=e2cc72f8fa"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=89e0f1a386"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -7406,6 +7412,30 @@ $$('.lk-tbar').forEach(bar=>{ const id=bar.querySelector('[data-share]').dataset
 document.addEventListener('click',e=>{
   const h=e.target.closest('[data-hist]'); if(h){ histOpen(h.dataset.hist); return; }
   const p=e.target.closest('[data-tprint]'); if(p&&typeof rpDoc==='function'){ const id=p.dataset.tprint; rpPrint(rpDoc([id],true,true,$('#t-'+id+' .tool-head h2').textContent,$('#sess-name')?$('#sess-name').value:'')); } });
+
+/* ---------- "volgende tool": handgekozen vervolgstappen onder aan elke tool ---------- */
+const NEXT={
+  verdunning:['oplossing','pverd','pipkeus'],oplossing:['hh','osmo','pverd'],units:['verdunning','molm'],molm:['oplossing','verdunning'],hh:['bufcap','titr','oplossing'],
+  osmo:['oplossing','seed'],titr:['hh','bufcap'],kjel:['curve','spec'],edta:['titr','sigfig'],bufcap:['hh','titr'],
+  ksp:['oplossing','units'],curve:['spec','mval','stat'],enzym:['curve','stat'],spec:['curve','dna'],ic50:['curve','stat'],
+  chrom:['istd','mval'],istd:['chrom','munc'],zprime:['elisa','mval'],purif:['sds','wb'],elisa:['curve','zprime','roc'],
+  reeks:['mpn','groei'],groei:['gcomp','inoc'],inoc:['groei','seed'],telkamer:['viab','seed'],teller:['telkamer','reeks'],
+  seed:['passage','transfect'],micro:['telkamer','stain'],gcomp:['groei','stat'],mic:['desinf','stat'],mpn:['reeks','stat'],
+  steril:['desinf','timers'],passage:['seed','viab'],transfect:['viab','facs'],viab:['seed','telkamer'],desinf:['mic','steril'],
+  facs:['plaat','viab'],dna:['oligo','pcr','gel'],oligo:['pcr','pcrcyclus'],pcr:['pcrcyclus','ppip','plaad'],pcrcyclus:['gradient','pprog','pcr'],
+  gradient:['pcrcyclus','gel'],qpcr:['melt','stat'],melt:['qpcr','gel'],gel:['plaad','gelfoto','digest'],gelfoto:['gel','wb'],
+  sds:['wb','purif'],wb:['curve','stat'],ligatie:['transf','digest'],transf:['ligatie','reeks'],cdna:['qplate','qpcr'],
+  qplate:['qpcr','ppip'],rnaq:['cdna','dna'],digest:['gel','ligatie'],rmp:['hwe','mix','kin'],strchk:['mix','rmp'],
+  bpa:['report','stat'],pmi:['ento','report'],ystr:['rmp','hwe'],kin:['rmp','hwe'],widmark:['report','sigfig'],
+  stature:['report','stat'],ento:['pmi','report'],glass:['stat','munc'],hwe:['rmp','ystr'],mix:['rmp','strchk'],
+  stat:['sigfig','bland','report'],bland:['mval','munc'],roc:['stat','elisa'],km:['stat','report'],sigfig:['munc','stat'],
+  pipcal:['munc','westgard'],westgard:['munc','mval'],munc:['sigfig','mval'],mval:['munc','westgard','bland'],pverd:['verdunning','reeks'],
+  ppip:['pcr','plaat'],pprog:['pcrcyclus','pcr'],plaad:['gel','gelfoto'],stain:['micro','teller'],centrifuge:['timers','pipkeus'],
+  timers:['centrifuge','plan'],plaat:['ppip','elisa'],plan:['report','timers'],report:['plan','stat'],pipkeus:['pipcal','ppip']
+};
+{ const NM={}; toolIndex().forEach(t=>{ NM[t.id]=t.name; });
+  Object.entries(NEXT).forEach(([id,list])=>{ const sec=$('#t-'+id), L=list.filter(x=>NM[x]&&$('#t-'+x)); if(!sec||!L.length||sec.querySelector('.lk-next')) return;
+    sec.insertAdjacentHTML('beforeend',`<nav class="lk-next" aria-label="Volgende tool"><b>Hierna vaak</b>${L.map(x=>`<a href="#${x}">${esc(NM[x])}</a>`).join('')}</nav>`); }); }
 /* /NT:ux */
 buildReeks();
 sLoad('bradford');
