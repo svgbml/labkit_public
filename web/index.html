@@ -222,6 +222,23 @@ nav.side > a.nav-col{display:none!important}
   html.nav-open nav.side > .navgroup{display:flex;margin:0;padding:16px 16px 6px 20px;font-size:12.5px}
   html.nav-open .lk-menu{background:var(--accent-soft)}
 }
+/* vastgezette tools boven het werkvlak (maximaal zes) */
+.lk-pins{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 16px;font-size:13px}
+.lk-pins[hidden]{display:none}
+.lk-pins > b{font-size:12px;color:var(--muted);font-weight:600;flex:none}
+.lk-pin{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.lk-pin > a{padding:4px 2px 4px 11px;color:var(--ink);text-decoration:none;font-weight:600;max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lk-pin.on{border-color:var(--stc,var(--accent));background:var(--stc-soft,var(--accent-soft))}
+.lk-pin.on > a{color:var(--stc,var(--accent))}
+.lk-pin > button{border:0;background:none;color:var(--muted);padding:4px 9px 4px 5px;font-size:14px;line-height:1;cursor:pointer;border-radius:0 999px 999px 0}
+.lk-pin > button:hover{color:var(--bad);background:none}
+.lk-tbar [data-pin][aria-pressed=true]{color:var(--accent);font-weight:600}
+@media (max-width:620px){
+  .lk-pins{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .lk-pins > *{flex:none}
+  .lk-pins::-webkit-scrollbar{display:none}
+  .lk-pin > a{max-width:60vw}
+}
 /* "volgende tool": vervolgstappen onder aan een tool */
 .lk-next{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:24px 0 0;padding-top:14px;border-top:1px solid var(--line)}
 .lk-next b{font-size:12.5px;color:var(--muted);font-weight:600}
@@ -3751,7 +3768,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=89e0f1a386"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=236c06e491"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -7444,6 +7461,26 @@ const NEXT={
 { const NM={}; toolIndex().forEach(t=>{ NM[t.id]=t.name; });
   Object.entries(NEXT).forEach(([id,list])=>{ const sec=$('#t-'+id), L=list.filter(x=>NM[x]&&$('#t-'+x)); if(!sec||!L.length||sec.querySelector('.lk-next')) return;
     sec.insertAdjacentHTML('beforeend',`<nav class="lk-next" aria-label="Volgende tool"><b>Hierna vaak</b>${L.map(x=>`<a href="#${x}">${esc(NM[x])}</a>`).join('')}</nav>`); }); }
+
+/* ---------- vastgezette tools: maximaal zes snelkoppelingen boven het werkvlak ---------- */
+const PINKEY='labkit:v1:pins', PINMAX=6;
+const pinsGet=()=>jget(PINKEY,[]).filter(id=>$('#t-'+id)).slice(0,PINMAX);
+$('main').insertAdjacentHTML('afterbegin','<nav id="lk-pins" class="lk-pins" aria-label="Vastgezette tools" hidden></nav>');
+function pinsRender(){ const bar=$('#lk-pins'), P=pinsGet(), NM={}; toolIndex().forEach(t=>{ NM[t.id]=t.name; });
+  bar.hidden=!P.length;
+  if(P.length) bar.innerHTML='<b>Vastgezet</b>'+P.map(id=>`<span class="lk-pin${current===id?' on':''}" data-st="${stagesOf(id)[0]||''}"><a href="#${id}">${esc(NM[id]||id)}</a><button type="button" data-unpin="${id}" title="Losmaken" aria-label="Losmaken">×</button></span>`).join('');
+  $$('[data-pin]').forEach(b=>{ const on=P.includes(b.dataset.pin), t=on?'Losmaken':'Vastzetten';
+    b.setAttribute('aria-pressed',on?'true':'false'); if(b.dataset.lkp!==t){ b.dataset.lkp=t; b.textContent=t; } }); }
+function pinToggle(id){ let P=jget(PINKEY,[]).filter(x=>$('#t-'+x));
+  if(P.includes(id)) P=P.filter(x=>x!==id);
+  else { if(P.length>=PINMAX){ alertBox(trPlain('Je kunt maximaal zes tools vastzetten. Maak er eerst een los.')); return; } P.push(id); }
+  jset(PINKEY,P); pinsRender(); }
+$$('.lk-tbar').forEach(bar=>{ const id=bar.querySelector('[data-share]').dataset.share;
+  bar.insertAdjacentHTML('afterbegin',`<button type="button" class="ghost" data-pin="${id}" aria-pressed="false" title="Deze tool vastzetten boven het werkvlak">Vastzetten</button>`); });
+document.addEventListener('click',e=>{ const p=e.target.closest('[data-pin]'); if(p){ pinToggle(p.dataset.pin); return; }
+  const u=e.target.closest('[data-unpin]'); if(u) pinToggle(u.dataset.unpin); });
+window.addEventListener('hashchange',()=>setTimeout(pinsRender,0));
+pinsRender();
 /* /NT:ux */
 buildReeks();
 sLoad('bradford');

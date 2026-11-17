@@ -26,7 +26,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | S3 | 4, 17 | Stage accent colours and a breadcrumb (Stage › Group › Tool) in the tool header | ✅ `--stv/--stu/--sta` per theme (5 checked), breadcrumb chip + group link + nav accent |
 | S4 | 8 | "Next tool" suggestions at the bottom of each tool (hand-picked map) | ✅ `NEXT` map in `99z_ux.js` on 85 tools, translated |
 | S5 | 10 | Search and command palette show the description and tags of each hit | ✅ Description + tags on search hits and in the palette, checked in NL and EN |
-| S6 | 11 | Pinned tools bar (up to 6 icons in the header), pin from the tool toolbar | Pins persist; works on phone header |
+| S6 | 11 | Pinned tools bar (up to 6 icons in the header), pin from the tool toolbar | ✅ Max 6 pins in `labkit:v1:pins`, pin button in the tool toolbar; the bar sits at the top of the work area (the sticky phone bar has no room at 375 px) and scrolls sideways |
 | S7 | 16 | Icon set: a small consistent SVG icon per tool (part 1: 45 tools) | Icons in nav and cards |
 | S8 | 16 | Icons part 2 (remaining tools) + dark-theme check | All tools have an icon |
 | S9 | 12 | Simple/expert toggle infrastructure (`data-expert` fields hidden in simple mode) + apply to 5 tools | Toggle per tool, remembered |

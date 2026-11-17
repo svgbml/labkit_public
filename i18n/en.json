@@ -3979,5 +3979,11 @@
 "Kruimelpad": "Breadcrumb",
 "Alleen de tools van deze fase laten zien": "Show only the tools of this stage",
 "Hierna vaak": "Often next",
-"Volgende tool": "Next tool"
+"Volgende tool": "Next tool",
+"Vastgezette tools": "Pinned tools",
+"Vastgezet": "Pinned",
+"Vastzetten": "Pin",
+"Losmaken": "Unpin",
+"Deze tool vastzetten boven het werkvlak": "Pin this tool above the work area",
+"Je kunt maximaal zes tools vastzetten. Maak er eerst een los.": "You can pin at most six tools. Unpin one first."
 }

@@ -169,3 +169,23 @@ const NEXT={
 { const NM={}; toolIndex().forEach(t=>{ NM[t.id]=t.name; });
   Object.entries(NEXT).forEach(([id,list])=>{ const sec=$('#t-'+id), L=list.filter(x=>NM[x]&&$('#t-'+x)); if(!sec||!L.length||sec.querySelector('.lk-next')) return;
     sec.insertAdjacentHTML('beforeend',`<nav class="lk-next" aria-label="Volgende tool"><b>Hierna vaak</b>${L.map(x=>`<a href="#${x}">${esc(NM[x])}</a>`).join('')}</nav>`); }); }
+
+/* ---------- vastgezette tools: maximaal zes snelkoppelingen boven het werkvlak ---------- */
+const PINKEY='labkit:v1:pins', PINMAX=6;
+const pinsGet=()=>jget(PINKEY,[]).filter(id=>$('#t-'+id)).slice(0,PINMAX);
+$('main').insertAdjacentHTML('afterbegin','<nav id="lk-pins" class="lk-pins" aria-label="Vastgezette tools" hidden></nav>');
+function pinsRender(){ const bar=$('#lk-pins'), P=pinsGet(), NM={}; toolIndex().forEach(t=>{ NM[t.id]=t.name; });
+  bar.hidden=!P.length;
+  if(P.length) bar.innerHTML='<b>Vastgezet</b>'+P.map(id=>`<span class="lk-pin${current===id?' on':''}" data-st="${stagesOf(id)[0]||''}"><a href="#${id}">${esc(NM[id]||id)}</a><button type="button" data-unpin="${id}" title="Losmaken" aria-label="Losmaken">×</button></span>`).join('');
+  $$('[data-pin]').forEach(b=>{ const on=P.includes(b.dataset.pin), t=on?'Losmaken':'Vastzetten';
+    b.setAttribute('aria-pressed',on?'true':'false'); if(b.dataset.lkp!==t){ b.dataset.lkp=t; b.textContent=t; } }); }
+function pinToggle(id){ let P=jget(PINKEY,[]).filter(x=>$('#t-'+x));
+  if(P.includes(id)) P=P.filter(x=>x!==id);
+  else { if(P.length>=PINMAX){ alertBox(trPlain('Je kunt maximaal zes tools vastzetten. Maak er eerst een los.')); return; } P.push(id); }
+  jset(PINKEY,P); pinsRender(); }
+$$('.lk-tbar').forEach(bar=>{ const id=bar.querySelector('[data-share]').dataset.share;
+  bar.insertAdjacentHTML('afterbegin',`<button type="button" class="ghost" data-pin="${id}" aria-pressed="false" title="Deze tool vastzetten boven het werkvlak">Vastzetten</button>`); });
+document.addEventListener('click',e=>{ const p=e.target.closest('[data-pin]'); if(p){ pinToggle(p.dataset.pin); return; }
+  const u=e.target.closest('[data-unpin]'); if(u) pinToggle(u.dataset.unpin); });
+window.addEventListener('hashchange',()=>setTimeout(pinsRender,0));
+pinsRender();
