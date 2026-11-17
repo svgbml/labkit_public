@@ -29,3 +29,28 @@ const STAGES={
 const STAGE_NAME={}; STAGE_DEF.forEach(([k,n])=>{ STAGE_NAME[k]=n; });
 const stagesOf=id=>[...(STAGES[id]||'')];
 const stageHas=(id,s)=>!s||STAGE_NONE.includes(id)||(STAGES[id]||'').includes(s);
+
+/* ---------- fasetabs boven de navigatie: filteren de tools in de zijbalk en op de startpagina ---------- */
+const STKEY='labkit:v1:stage';
+const stageCur=()=>{ const s=jget(STKEY,''); return STAGE_NAME[s]?s:''; };
+{ const sh=$('.sidehead');
+  sh.insertAdjacentHTML('beforeend',`<div class="lk-st" role="tablist" aria-label="Fase van het experiment">`+
+    [['','Alle fasen'],...STAGE_DEF].map(([k,n])=>`<button type="button" role="tab" data-st="${k}" aria-selected="false" title="${n}">${n}</button>`).join('')+`</div>`);
+  const tabs=[...sh.querySelectorAll('.lk-st button')];
+  const mark=()=>{ const st=stageCur(); tabs.forEach(b=>{ const on=b.dataset.st===st; b.setAttribute('aria-selected',on?'true':'false'); b.tabIndex=on?0:-1; }); document.documentElement.dataset.stage=st; };
+  function stageSet(st){ jset(STKEY,STAGE_NAME[st]?st:''); mark(); navStageApply(); if(current==='start'&&calc.start) calc.start(); }
+  sh.querySelector('.lk-st').addEventListener('click',e=>{ const b=e.target.closest('button[data-st]'); if(b) stageSet(b.dataset.st); });
+  sh.querySelector('.lk-st').addEventListener('keydown',e=>{ const d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0; if(!d) return; e.preventDefault();
+    const i=tabs.findIndex(b=>b.getAttribute('aria-selected')==='true'), n=tabs[(i+d+tabs.length)%tabs.length]; stageSet(n.dataset.st); n.focus(); });
+  mark(); }
+/* zijbalk: een tool is zichtbaar als hij bij de zoekterm én bij de gekozen fase past */
+function navStageApply(){ const st=stageCur(), q=($('#nav-q').value||'').trim().toLowerCase(), kids=[...$('#nav').children];
+  kids.forEach(el=>{ if(el.tagName!=='A') return; const id=(el.getAttribute('href')||'').slice(1); el.hidden=(!!q&&!navMatch(el,q))||!stageHas(id,st); });
+  kids.forEach((el,i)=>{ if(!el.classList.contains('navgroup')) return; let any=false; for(let j=i+1;j<kids.length&&kids[j].tagName==='A';j++) if(!kids[j].hidden) any=true; el.hidden=!any; }); }
+$('#nav-q').addEventListener('input',navStageApply);
+if(typeof navFavs==='function'){ const _nf2=navFavs; navFavs=function(){ const r=_nf2.apply(this,arguments); navStageApply(); return r; }; }
+/* startpagina: dezelfde fase toepassen op de tegels */
+if(typeof bentoRender==='function'){ const _brs=bentoRender, _ti=toolIndex;
+  bentoRender=function(q){ const st=stageCur(); if(st) toolIndex=()=>_ti().filter(t=>stageHas(t.id,st));
+    try{ return _brs.apply(this,arguments); } finally{ toolIndex=_ti; } }; }
+navStageApply();

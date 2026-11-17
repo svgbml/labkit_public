@@ -3970,5 +3970,10 @@
 "stap {#} van {#}": "step {#} of {#}",
 "← Vorige": "← Previous",
 "✓ Gevalideerd ({#} controle)": "✓ Validated ({#} check)",
-"✓ Gevalideerd ({#} controles)": "✓ Validated ({#} checks)"
+"✓ Gevalideerd ({#} controles)": "✓ Validated ({#} checks)",
+"Alle fasen": "All stages",
+"Voorbereiden": "Prepare",
+"Uitvoeren": "Perform",
+"Analyseren": "Analyse",
+"Fase van het experiment": "Stage of the experiment"
 }
