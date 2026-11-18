@@ -240,6 +240,13 @@ nav.side > a.nav-col{display:none!important}
 .pld .pld-mc b{color:var(--ink);font-weight:600}
 .pld .pld-mc .mcb{margin-top:4px;color:var(--ink)}
 .pld .pld-bar .chk{align-self:center;margin-bottom:5px}
+.pld .pld-warn{margin:10px 0 0;font-size:12.5px;display:grid;gap:3px;max-width:70ch;padding:9px 11px;border:1px solid var(--line);border-left:3px solid var(--warn,#c2410c);border-radius:4px;background:var(--surface)}
+.pld .pld-warn:empty{display:none}
+.pld .pld-warn b{font-weight:600}
+.pld-key{border-collapse:collapse;font-size:12.5px;width:100%}
+.pld-key th,.pld-key td{border:1px solid var(--line);padding:2px 7px;text-align:left}
+.pld-key th{background:var(--soft,var(--surface));font-weight:600}
+.lk-modal .pld-key{display:block;max-height:46vh;overflow:auto}
 /* gedeelde opmaak voor tekentools: tekening boven/links, instellingen ernaast */
 .picwrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;align-items:start}
 .picwrap > *{min-width:0}
@@ -3864,7 +3871,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=e78a05a971"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=bc4ece1f68"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -6559,6 +6566,13 @@ function pRack(x, X, Y, W, tubes, opts) {
    MIC-titratie, buitenrij als buffer). "Plaatkaart" drukt de plaat op A4 af met de legenda,
    het aantal putjes per groep en een tabel van alle gelabelde putjes.
 
+   Randomiseren (S32): "Randomiseren…" wisselt de gevulde putjes onderling van groep en label,
+   met een sleutelnummer erbij zodat dezelfde indeling later opnieuw te maken is. Je kunt de
+   hele plaat door elkaar halen of alleen één groep, zodat standaarden en controles op hun
+   plek blijven staan. "Sleutel…" laat zien waar elk label terecht is gekomen; die lijst hoort
+   uitgeprint of opgeslagen te worden vóór de meting, anders is de blindering niets waard.
+   Daaronder staat een waarschuwing als er putjes op de buitenrand in gebruik zijn.
+
    Vulorde (S31): met "Vulorde" aan staat in elk gevuld putje het nummer van de stap. De orde
    loopt per groep (alle standaarden, dan alle blanco's, …), want zo pipetteer je ook: één
    keer tips pakken per groep. Binnen een groep volgt hij de gekozen richting. Eronder staat
@@ -6623,6 +6637,7 @@ function plateDesigner(host, opts) {
     fmt: opts.fmt || '8x12',
     wells: {},                                   /* "A1" -> index in groups */
     vals: {},                                    /* "A1" -> label, bv. een concentratie */
+    seed: null,                                  /* sleutelnummer van de laatste randomisatie */
     groups: (opts.groups || [{n: 'Standaard', c: PLCOL[0]}, {n: 'Blanco', c: PLCOL[8]},
       {n: 'Monster', c: PLCOL[1]}, {n: 'Controle', c: PLCOL[2]}]).map(g => ({...g}))
   };
@@ -6640,6 +6655,8 @@ function plateDesigner(host, opts) {
       <button type="button" data-pl="add">+ Groep</button>
       <button type="button" data-pl="tpl">Sjabloon…</button>
       <button type="button" data-pl="series">Reeks…</button>
+      <button type="button" data-pl="rnd">Randomiseren…</button>
+      <button type="button" data-pl="keyv" hidden>Sleutel…</button>
       <button type="button" data-pl="erase" aria-pressed="false">Gum</button>
       <button type="button" data-pl="clear">Leegmaken</button>
       <button type="button" data-pl="print" title="De plaatkaart op A4 afdrukken">Plaatkaart</button>
@@ -6648,6 +6665,7 @@ function plateDesigner(host, opts) {
     <div class="legend" data-pl="legend"></div>
     <div class="tbl-wrap"><div class="plate" data-pl="grid" role="group" aria-label="Putjes van de plaat"></div></div>
     <div class="pld-mc" data-pl="mc"></div>
+    <div class="pld-warn" data-pl="warn"></div>
     <p class="pld-hint">Sleep over de putjes om te vullen. Met <b>Herhalingen</b> vul je replica's in één beweging; een klik op een rij- of kolomkop vult die hele rij of kolom.</p>`;
 
   const q = n => host.querySelector(`[data-pl="${n}"]`);
@@ -6679,6 +6697,50 @@ function plateDesigner(host, opts) {
     const n = Object.keys(S.wells).length;
     return {r, c, n, cols, rows, mixedC, mixedR,
       colSteps: cols.length + (n - cols.length * r), rowSteps: rows.length + (n - rows.length * c)};
+  }
+
+  /* ---- randomiseren met een sleutelnummer (S32) ----
+     xorshift32: klein, en met hetzelfde sleutelnummer komt er precies dezelfde indeling uit,
+     zodat een indeling later te controleren of over te doen is. */
+  function plRnd(seed) { let x = (seed >>> 0) || 1;
+    return () => { x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; }; }
+  function randomise(seed, scope) {
+    const ks = Object.keys(S.wells).filter(k => scope == null || S.wells[k] === scope);
+    if (ks.length < 2) return 0;
+    const pay = ks.map(k => ({g: S.wells[k], v: S.vals[k]})), R = plRnd(seed);
+    for (let i = pay.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); const t = pay[i]; pay[i] = pay[j]; pay[j] = t; }
+    ks.forEach((k, i) => { S.wells[k] = pay[i].g; if (pay[i].v == null) delete S.vals[k]; else S.vals[k] = pay[i].v; });
+    S.seed = seed; render(); return ks.length;
+  }
+
+  /* ---- randeffect (S32) ----
+     De buitenrand van een plaat verdampt sneller en loopt in temperatuur achter, dus daar
+     meet je systematisch anders. Dat is pas echt een probleem als de ene groep er veel meer
+     op de rand staat dan de andere: dan zit het verschil deels in de plaats, niet in je
+     behandeling. Daarom wordt per groep gekeken welk deel op de rand staat. */
+  function edgeInfo() {
+    const {r, c} = dims(); if (r < 3 || c < 3) return null;
+    const isEdge = k => { const {i, j} = pos(k); return i === 0 || j === 0 || i === r - 1 || j === c - 1; };
+    const per = S.groups.map(() => ({n: 0, e: 0}));
+    let n = 0, e = 0;
+    Object.keys(S.wells).forEach(k => { const g = S.wells[k]; if (!per[g]) return;
+      per[g].n++; n++; if (isEdge(k)) { per[g].e++; e++; } });
+    if (!e) return null;
+    const used = per.map((p, i) => ({...p, i})).filter(p => p.n);
+    const sh = used.map(p => p.e / p.n), spread = Math.max(...sh) - Math.min(...sh);
+    return {n, e, used, spread, uneven: used.length > 1 && spread > 0.25,
+      worst: used.slice().sort((a, b) => b.e / b.n - a.e / a.n)[0],
+      best: used.slice().sort((a, b) => a.e / a.n - b.e / b.n)[0]};
+  }
+
+  function warnText() {
+    const w = edgeInfo(); if (!w) return '';
+    const pc = x => Math.round(x * 100);
+    const head = `<b>Randeffect:</b> ${w.e} van de ${w.n} gevulde putjes liggen op de buitenrand. Daar verdampt meer en loopt de temperatuur achter, dus die metingen wijken systematisch af.`;
+    const det = w.uneven
+      ? `Van <b>${ud(trPlain(S.groups[w.worst.i].n, true))}</b> staat ${pc(w.worst.e / w.worst.n)}% op de rand en van <b>${ud(trPlain(S.groups[w.best.i].n, true))}</b> ${pc(w.best.e / w.best.n)}%: een verschil tussen die groepen zit dan deels in de plaats op de plaat.`
+      : 'De groepen staan ongeveer evenredig op de rand, dus ze schuiven samen op; voor een vergelijking tussen groepen is dat minder erg dan voor een absolute waarde.';
+    return `<div>${head}</div><div>${det}</div><div class="row" style="margin-top:6px"><button type="button" data-pl="edgeclr">Buitenrand leegmaken</button></div>`;
   }
 
   function mcText() {
@@ -6720,6 +6782,8 @@ function plateDesigner(host, opts) {
         `<div class="grp${i === sel && !erase ? ' sel' : ''}" data-plg="${i}"><i style="background:${x.c}"></i>` +
         `<input data-plgn="${i}" value="${esc(x.n)}" aria-label="Naam van de groep"><button type="button" class="gdel" data-pldel="${i}" aria-label="Verwijder">✕</button></div>`).join('');
     q('mc').innerHTML = mcText();
+    q('warn').innerHTML = warnText();
+    q('keyv').hidden = S.seed == null;
     q('erase').setAttribute('aria-pressed', erase ? 'true' : 'false');
     q('erase').classList.toggle('primary', erase);
     fire();
@@ -6760,12 +6824,18 @@ function plateDesigner(host, opts) {
     else if (b.dataset.pl === 'erase') { erase = !erase; render(); }
     else if (b.dataset.pl === 'series') seriesDialog();
     else if (b.dataset.pl === 'tpl') tplDialog();
+    else if (b.dataset.pl === 'rnd') rndDialog();
+    else if (b.dataset.pl === 'keyv') keyDialog();
+    else if (b.dataset.pl === 'edgeclr') { const {r, c} = dims();
+      for (let i = 0; i < r; i++) for (let j = 0; j < c; j++)
+        if (i === 0 || j === 0 || i === r - 1 || j === c - 1) { const k = key(i, j); delete S.wells[k]; delete S.vals[k]; }
+      render(); }
     else if (b.dataset.pl === 'print') printCard();
-    else if (b.dataset.pl === 'clear') { S.wells = {}; S.vals = {}; render(); }
+    else if (b.dataset.pl === 'clear') { S.wells = {}; S.vals = {}; S.seed = null; render(); }
   });
   host.addEventListener('change', e => {
     if (e.target.dataset.plgn != null) { S.groups[+e.target.dataset.plgn].n = e.target.value || trPlain('Groep'); render(); }
-    else if (e.target.dataset.pl === 'fmt') { S.fmt = e.target.value; S.wells = {}; S.vals = {}; render(); }
+    else if (e.target.dataset.pl === 'fmt') { S.fmt = e.target.value; S.wells = {}; S.vals = {}; S.seed = null; render(); }
     else if (e.target.dataset.pl === 'order' || e.target.dataset.pl === 'dir') render();
   });
 
@@ -6821,6 +6891,57 @@ function plateDesigner(host, opts) {
       sel = 0; erase = false; m.close(); render(); });
   }
 
+  /* ---- randomiseren: sleutelnummer en bereik ---- */
+  function rndDialog() {
+    const n = Object.keys(S.wells).length;
+    const m = appModal(`<h3 style="margin:0 0 4px;font-size:16px">Indeling randomiseren</h3>
+      <p style="margin:0 0 12px;color:var(--muted);font-size:13px">De gevulde putjes wisselen onderling van groep en label; welke putjes gevuld zijn blijft hetzelfde. Bewaar of print de sleutel vóór de meting, anders kun je de plaat later niet meer uitlezen.</p>
+      <div class="fields">
+        <div class="f"><label for="plr-s-${id}">Sleutelnummer</label><input id="plr-s-${id}" data-r="s" inputmode="numeric" value="${Math.floor(Math.random() * 900000 + 100000)}"></div>
+        <div class="f"><label for="plr-g-${id}">Wat randomiseren</label><select id="plr-g-${id}" data-r="g"><option value="">alle gevulde putjes</option>${S.groups.map((g, i) => `<option value="${i}">${esc(g.n)}</option>`).join('')}</select></div>
+      </div>
+      <p style="margin:10px 0 0;font-size:12.5px;color:var(--muted)">Kies één groep om de standaarden en controles op hun plek te laten staan en alleen de monsters door elkaar te halen.</p>
+      <p data-r="err" style="margin:8px 0 0;font-size:13px;color:var(--warn,#c2410c)"></p>
+      <div class="row" style="justify-content:flex-end;margin-top:12px;gap:6px"><button type="button" data-r="no">Annuleren</button><button type="button" class="primary" data-r="ok">Randomiseren</button></div>`);
+    const f = x => m.box.querySelector(`[data-r="${x}"]`);
+    f('no').addEventListener('click', m.close);
+    f('ok').addEventListener('click', () => {
+      const sd = Math.round(num(f('s').value)), g = f('g').value === '' ? null : +f('g').value;
+      if (!isFinite(sd) || sd <= 0) { f('err').textContent = 'Vul een sleutelnummer groter dan 0 in.'; return; }
+      if (n < 2) { f('err').textContent = 'Vul eerst minstens twee putjes.'; return; }
+      if (!randomise(sd, g)) { f('err').textContent = 'Deze groep heeft te weinig putjes om door elkaar te halen.'; return; }
+      m.close(); keyDialog();
+    });
+    setTimeout(() => f('ok').focus(), 0);
+  }
+
+  /* ---- de sleutel: van label naar putje ---- */
+  function keyDialog() {
+    const ord = k => PLROW.indexOf(k.charAt(0)) * 100 + (+k.slice(1));
+    const rows = Object.keys(S.wells).sort((a, b) => ord(a) - ord(b)).map(k =>
+      ({w: k, g: (S.groups[S.wells[k]] || {}).n || '', v: S.vals[k] || ''}));
+    const byLab = rows.filter(x => x.v).sort((a, b) => String(a.v).localeCompare(String(b.v), undefined, {numeric: true}));
+    /* de koppen blijven Nederlands in de HTML: de vertaallaag pakt ze zelf op. Zelf vertalen
+       zou in het Engels een tweede, onbekende sleutel opleveren. */
+    const tbl = (list, byLabel) => `<table class="pld-key"><thead><tr><th>${byLabel ? 'Label' : 'Putje'}</th><th>Putje</th><th>Groep</th></tr></thead><tbody data-notr="">${
+      list.map(x => `<tr><td>${esc(byLabel ? x.v : x.w)}</td><td>${esc(x.w)}</td><td>${esc(trPlain(x.g, true))}</td></tr>`).join('')}</tbody></table>`;
+    const m = appModal(`<h3 style="margin:0 0 4px;font-size:16px">Sleutel van de plaat</h3>
+      <p style="margin:0 0 10px;color:var(--muted);font-size:13px">${S.seed != null ? 'Sleutelnummer ' + ud(String(S.seed)) + ': met datzelfde nummer en dezelfde beginindeling komt deze plaat er weer precies zo uit.' : 'Deze plaat is niet gerandomiseerd.'}</p>
+      ${byLab.length ? tbl(byLab, true) : '<p style="margin:0 0 8px;font-size:13px">Geen van de putjes heeft een label, dus de sleutel loopt alleen per putje.</p>' + tbl(rows, false)}
+      <div class="row" style="justify-content:flex-end;margin-top:12px;gap:6px"><button type="button" data-k="print">Sleutel afdrukken</button><button type="button" class="primary" data-k="no">Sluiten</button></div>`);
+    m.box.querySelector('[data-k="no"]').addEventListener('click', m.close);
+    m.box.querySelector('[data-k="print"]').addEventListener('click', () => {
+      const T = x => esc(trPlain(x));
+      rpPrint(`<!doctype html><meta charset="utf-8"><title>${T('Sleutel van de plaat')}</title><style>
+        @page{margin:14mm}body{margin:0;font:13px system-ui,sans-serif;color:#1f2933}
+        h1{font-size:18px;margin:0 0 2px}p{margin:0 0 10px;color:#5f6b7a;font-size:12px}
+        table{border-collapse:collapse;font-size:12px}th,td{border:1px solid #c9ced6;padding:3px 7px;text-align:left}th{background:#eef0f3}
+        </style><h1>${T(opts.name || 'Plaatkaart')} — ${T('Sleutel van de plaat')}</h1>
+        <p>${S.seed != null ? T('Sleutelnummer') + ' ' + esc(String(S.seed)) + ' · ' : ''}${T('Datum')}: ________________</p>
+        ${m.box.querySelector('.pld-key').outerHTML}`);
+    });
+  }
+
   /* ---- plaatkaart op A4: de tekening, de legenda en de gelabelde putjes ---- */
   function printCard() {
     const {r, c} = dims(), sz = c >= 16 ? 30 : c >= 12 ? 56 : 72, dim = size(sz);
@@ -6834,12 +6955,16 @@ function plateDesigner(host, opts) {
        blijft dan ongewijzigd; `true` houdt hem uit de lijst met ontbrekende vertalingen */
     const G = s => esc(trPlain(String(s), true));
     const head = `<h1>${T(opts.name || 'Plaatkaart')}</h1>
-      <p class="meta">${T(r * c + ' putjes')} · ${T('gevuld')}: <b>${Object.keys(S.wells).length}</b> · ${T('Datum')}: ________________ · ${T('Uitgevoerd door')}: ________________</p>`;
+      <p class="meta">${T(r * c + ' putjes')} · ${T('gevuld')}: <b>${Object.keys(S.wells).length}</b>${
+        S.seed != null ? ' · ' + T('Sleutelnummer') + ': <b>' + esc(String(S.seed)) + '</b>' : ''
+      } · ${T('Datum')}: ________________ · ${T('Uitgevoerd door')}: ________________</p>`;
     const leg = `<table><thead><tr><th>${T('Groep')}</th><th>${T('Putjes')}</th></tr></thead><tbody>` +
       S.groups.map((g, i) => `<tr><td><i style="background:${esc(g.c)}"></i>${G(g.n)}</td><td>${cnt[i] || 0}</td></tr>`).join('') + '</tbody></table>';
     /* het advies staat al vertaald in de pagina; dat nemen we over, zodat de vertaling niet
        twee keer hoeft te worden opgezocht voor een document zonder vertaallaag */
     const mcHtml = (q('mc') || {}).innerHTML || '';
+    const wHtml = (q('warn') || {}).innerHTML.replace(/<div class="row"[\s\S]*?<\/div>/, '');
+    const wn = wHtml.trim() ? `<h2>${T('Let op')}</h2><div class="mc">${wHtml}</div>` : '';
     const mc = mcHtml ? `<h2>${T('Met een meerkanaalspipet')}</h2><div class="mc">${mcHtml}</div>` : '';
     const tbl = lab.length ? `<h2>${T('Gelabelde putjes')}</h2><table class="wl"><thead><tr><th>${T('Putje')}</th><th>${T('Groep')}</th><th>${T('Label')}</th></tr></thead><tbody>` +
       lab.map(k => `<tr><td>${esc(k)}</td><td>${G((S.groups[S.wells[k]] || {}).n || '')}</td><td>${esc(S.vals[k])}</td></tr>`).join('') + '</tbody></table>' : '';
@@ -6857,7 +6982,7 @@ function plateDesigner(host, opts) {
       .mc{font-size:12px;color:#1f2933}.mc div{margin:0 0 2px}.mc span[data-v]{font-weight:600}
       .wl{column-count:4;column-gap:10px;display:block}
       .wl tbody,.wl thead{display:block}.wl tr{display:flex}.wl th,.wl td{flex:1}
-      </style>${head}<div class="cols"><img src="${cv.toDataURL('image/png')}"><div>${leg}${mc}</div></div>${tbl}`);
+      </style>${head}<div class="cols"><img src="${cv.toDataURL('image/png')}"><div>${leg}${mc}${wn}</div></div>${tbl}`);
   }
 
   /* de plaat op een canvas tekenen; geeft de gebruikte hoogte terug */
@@ -6894,19 +7019,20 @@ function plateDesigner(host, opts) {
   render();
   return {
     id, el: host, dims, rows: () => dims().r, cols: () => dims().c,
-    get: () => ({fmt: S.fmt, wells: {...S.wells}, vals: {...S.vals}, groups: S.groups.map(g => ({...g}))}),
+    get: () => ({fmt: S.fmt, wells: {...S.wells}, vals: {...S.vals}, seed: S.seed, groups: S.groups.map(g => ({...g}))}),
     set(v) { if (!v) return;
       if (v.fmt && PLFMT.some(([f]) => f === v.fmt)) { S.fmt = v.fmt; const f = q('fmt'); if (f) f.value = S.fmt; }
       if (v.groups && v.groups.length) S.groups = v.groups.map(g => ({n: g.n || 'Groep', c: g.c || PLCOL[0]}));
       if (v.wells) S.wells = {...v.wells};
       S.vals = v.vals ? {...v.vals} : {};
+      S.seed = v.seed != null ? v.seed : null;
       sel = Math.min(sel, S.groups.length - 1); render(); },
     selected: () => sel, label: (k, v) => { if (v == null || v === '') delete S.vals[k]; else S.vals[k] = String(v); },
     template(id) { const t = PLTPL.find(x => x.id === id); if (!t) return false;
       if (t.fmt) { S.fmt = t.fmt; const f = q('fmt'); if (f) f.value = S.fmt; }
       const d = dims(), o = t.make(d.r, d.c);
       S.groups = o.groups.map(g => ({...g})); S.wells = {...o.wells}; S.vals = {...o.vals}; sel = 0; render(); return true; },
-    print: printCard, order: orderSeq, multi, draw, size, render
+    print: printCard, order: orderSeq, multi, randomise, edge: edgeInfo, draw, size, render
   };
 }
 /* /NT:plate */
