@@ -731,6 +731,7 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
     </div>
   </div>
   <p class="src">Standaardconcentraties volgens het NEB-protocol voor Taq DNA Polymerase (M0273): 1X buffer, 200 µM dNTP's, 0,2 µM per primer (0,05–1 µM), 1,25 U per 50 µL; Mg²⁺ 1,5–2,0 mM.</p>
+  <div class="result" style="margin-top:16px"><h3 style="margin:0 0 10px;font-size:14px">Buizenrek</h3><canvas id="qr-cv"></canvas><div class="pic-bar" data-picbar="qr"></div></div>
 </section>
 
 <!-- ============ GEL ============ -->
@@ -1304,6 +1305,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0"><b>Soort</b>: bij <i>volume</i> typ je per buis het volume; bij <i>eindconc.</i> vul je de stockconcentratie in en per buis de gewenste eindconcentratie (zelfde eenheid), dan volgt het volume uit C₁V₁ = C₂V₂; <i>aanvullen</i> vult de buis aan tot het eindvolume (laat de cellen leeg). Componenten met "nee" bij <i>In mix</i> pipetteer je per buis apart. Je kunt een blok uit Excel plakken.</p>
     </div>
   </div>
+  <div class="result" style="margin-top:16px"><h3 style="margin:0 0 10px;font-size:14px">Buizenrek</h3><canvas id="ppr-cv"></canvas><div class="pic-bar" data-picbar="ppr"></div></div>
 </section>
 
 <!-- ============ PROTOCOLLEN: PCR-PROGRAMMA ============ -->
@@ -3844,7 +3846,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=a99e1b8666"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=ef11a0ab29"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -4236,6 +4238,23 @@ $('#q-preset').addEventListener('change',e=>loadQ(e.target.value));
 $('#q-add').addEventListener('click',()=>{ $('#q-tbl tbody').insertAdjacentHTML('beforeend',qRow(['Component',NaN,NaN,'µL'])); });
 $('#q-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); calc.pcr(); }});
 let qText='';
+/* ---------- buizenrek bij de PCR-mastermix: de mix en elke reactiebuis ---------- */
+function qRack(n,V,T,mix){ const cv=$('#qr-cv'); if(!cv||typeof pRack!=='function') return;
+  /* harde bovengrens: een rek met duizenden buizen heeft geen zin en zou de tekening
+     laten vastlopen bij een extreme invoer */
+  const RMAX=48, ns0=Math.max(0,Math.round(num($('#q-n').value)||0)), nc0=Math.max(0,Math.round(num($('#q-ctrl').value)||0));
+  const ns=Math.min(ns0,RMAX), nc=Math.min(nc0,Math.max(0,RMAX-ns));
+  const tubes=[{n:'Mastermix',v:isFinite(mix)?mix*n:NaN,c:'#5f6b7a',f:0.8,sub:trPlain('voor alle buizen')}];
+  for(let i=1;i<=ns;i++) tubes.push({n:`Monster ${i}`,v:V,c:PCOL.acc,f:0.5});
+  for(let i=1;i<=nc;i++) tubes.push({n:i===1?'NTC':`Controle ${i-1}`,v:V,c:i===1?'#b0271f':'#17693d',f:0.5});
+  if(tubes.length<2||!isFinite(V)){ cv.style.display='none'; return; }
+  cv.style.display='';
+  const cut=(ns0+nc0)>RMAX;
+  const per=Math.min(8,tubes.length), rows=Math.ceil(tubes.length/per), W=Math.max(520,per*104+40), H=pRackH(rows)+(cut?22:0);
+  pShow(cv,W,H,(x)=>{ pRack(x,20,20,W-40,tubes,{per});
+    if(cut){ x.fillStyle=PCOL.muted; x.font='11.5px '+PFONT(); x.textAlign='left'; x.textBaseline='alphabetic';
+      x.fillText(`Alleen de eerste ${RMAX} buizen zijn getekend.`,20,H-8); } });
+}
 calc.pcr=function(){
   const n=(num($('#q-n').value)||0)+(num($('#q-ctrl').value)||0), extra=num($('#q-extra').value)||0, V=num($('#q-v').value), T=num($('#q-t').value)||0;
   const N=n*(1+extra/100);
@@ -4258,6 +4277,7 @@ calc.pcr=function(){
   if(water<0) m+=note('bad',`De componenten passen niet in ${vol(V)}: ${vol(-water)} te veel. Verlaag het templatevolume of gebruik geconcentreerdere stocks.`);
   m+=note('info',`Mix voor ${fmt(N,1)} reacties (${n} buizen + ${fmt(extra,0)}%). Verdeel ${vol(V-T)} mix per buis en voeg ${vol(T)} template toe; NTC krijgt ${vol(T)} water. Polymerase als laatste toevoegen, alles op ijs.`);
   $('#q-msg').innerHTML=m;
+  qRack(n,V,T,V-T);
   qText=['Component\tPer reactie (µL)\tMix (µL)',...lines.map(([nm,pr])=>`${nm}\t${fmt(pr,3)}\t${fmt(pr*N,2)}`),`Water\t${fmt(water,3)}\t${fmt(water*N,2)}`,`Mix totaal\t${fmt(V-T,3)}\t${fmt((V-T)*N,2)}`,`Template (apart)\t${fmt(T,3)}\t`].join('\n');
 };
 $('#q-copy').addEventListener('click',async()=>{ try{ await navigator.clipboard.writeText(i18nTSV(qText)); $('#q-copied').textContent='Gekopieerd.'; }catch(e){ $('#q-copied').textContent='Kopiëren geblokkeerd; selecteer de tabel handmatig.'; } });
@@ -5758,6 +5778,20 @@ $('#pp-addc').addEventListener('click',()=>{ ppState.cols.push({n:'Buis '+(ppSta
 $('#pp-delc').addEventListener('click',()=>{ if(ppState.cols.length<=1) return; ppState.cols.pop(); ppState.rows.forEach(r=>r.v.pop()); ppBuild(); calc.ppip(); });
 $('#pp-load').addEventListener('click',()=>{ const k=$('#pp-preset').value, P=PPRE[k]; if(!P) return; ppState=ppFromPreset(k); $('#pp-title').value=P.t; $('#pp-tot').value=P.tot; $('#pp-unit').value=P.u; $('#pp-mm').value=P.mm; ppBuild(); ['pp-title','pp-tot'].forEach(id=>$('#'+id).dispatchEvent(new Event('input',{bubbles:true}))); ['pp-unit','pp-mm'].forEach(id=>$('#'+id).dispatchEvent(new Event('change',{bubbles:true}))); calc.ppip(); });
 const ppEnzyme=n=>/(polymerase|taq|ligase|enzym|-hf\b|\bU\/µL|\bri\b|EcoRI|HindIII|BamHI|NotI|XhoI|PstI)/i.test(String(n));
+/* ---------- buizenrek bij het pipetteerschema: elke kolom is een buis ---------- */
+function ppRack(S,V,tot,u,mmOn,mmV){ const cv=$('#ppr-cv'); if(!cv||typeof pRack!=='function') return;
+  const RMAX=24, cols=S.cols.slice(0,RMAX);
+  const tubes=cols.map((c,j)=>{ const sum=V.reduce((a,r)=>a+(isFinite(r[j])?r[j]:0),0);
+    return {n:c.n||'buis',v:NaN,c:PCOL.acc,f:0.5,sub:isFinite(sum)&&sum>0?`${NL(Number(sum.toPrecision(4)),9)} ${u}`:''}; });
+  if(mmOn&&isFinite(mmV)&&mmV>0) tubes.unshift({n:'Mastermix',v:NaN,c:'#5f6b7a',f:0.8,sub:`${NL(Number(mmV.toPrecision(4)),9)} ${u}`});
+  if(!tubes.length){ cv.style.display='none'; return; }
+  cv.style.display='';
+  const cut=S.cols.length>RMAX, per=Math.min(8,tubes.length), rows=Math.ceil(tubes.length/per);
+  const W=Math.max(520,per*104+40), H=pRackH(rows)+(cut?22:0);
+  pShow(cv,W,H,(x)=>{ pRack(x,20,20,W-40,tubes,{per});
+    if(cut){ x.fillStyle=PCOL.muted; x.font='11.5px '+PFONT(); x.textAlign='left'; x.textBaseline='alphabetic';
+      x.fillText(`Alleen de eerste ${RMAX} buizen zijn getekend.`,20,H-8); } });
+}
 calc.ppip=function(){
   const S=ppState, tot=num($('#pp-tot').value), u=$('#pp-unit').value, mmOn=$('#pp-mm').value==='1', marge=num($('#pp-marge').value)||0, title=$('#pp-title').value.trim(), out=$('#pp-out');
   $$('[data-ppu]').forEach(x=>x.textContent=u); pstore.set('pp',S);
@@ -5785,7 +5819,9 @@ calc.ppip=function(){
   const fv=v=>isFinite(v)?NL(Number(v.toFixed(3)),3):'–';
   const body=S.rows.map((r,i)=>[r.n||'',...V[i].map(fv),...(mmOn?[r.mm?fv(mmCol[i]):'apart']:[])]);
   const totRow=['Totaal',...colTot.map(fv),...(mmOn?[fv(mmCol.filter(isFinite).reduce((a,b)=>a+b,0))]:[])];
-  const perTube=mmCol.filter(isFinite).reduce((a,b)=>a+b,0)/mmN, apart=S.rows.filter(r=>!r.mm&&r.n), fillN=wi>=0?(S.rows[wi].n||'Water'):'';
+  const mmTot=mmCol.filter(isFinite).reduce((a,b)=>a+b,0);
+  ppRack(S,V,tot,u,mmOn,mmTot);
+  const perTube=mmTot/mmN, apart=S.rows.filter(r=>!r.mm&&r.n), fillN=wi>=0?(S.rows[wi].n||'Water'):'';
   const extra=wi>=0&&S.rows[wi].mm?S.cols.map((c,j)=>[c.n,V[wi][j]-wMin]).filter(e=>e[1]>1e-9):[];
   const ord=S.rows.map((r,i)=>i).filter(i=>S.rows[i].n&&(!mmOn||S.rows[i].mm)).sort((a,b)=>(a===wi?-1:b===wi?1:0)||(ppEnzyme(S.rows[a].n)-ppEnzyme(S.rows[b].n))||a-b);
   const hasEnz=S.rows.some(r=>r.n&&ppEnzyme(r.n));
@@ -6456,6 +6492,39 @@ document.addEventListener('click', e => {
     rpPrint(`<!doctype html><meta charset="utf-8"><title>${t}</title><style>@page{margin:14mm}body{margin:0;font:13px system-ui}img{max-width:100%;height:auto}</style><img src="${o.toDataURL('image/png')}">`); }
 });
 $$('[data-picbar]').forEach(b => { b.innerHTML = picBar(b.dataset.picbar); });
+
+/* ---------- buizenrek: gekleurde buizen met label en volume ----------
+   tubes = [{n:'naam', v:volume in µL, c:'#kleur', sub:'tweede regel'}]
+   Geeft de hoogte terug die is gebruikt, zodat de aanroeper het canvas kan maten. */
+function pRackH(rows) { return 26 + rows * 146; }
+function pRack(x, X, Y, W, tubes, opts) {
+  opts = opts || {};
+  const per = Math.max(1, Math.min(opts.per || 10, tubes.length || 1));
+  const rows = Math.ceil(tubes.length / per), cw = W / per, th = 78, tw = Math.min(34, cw * 0.46);
+  for (let r = 0; r < rows; r++) {
+    const part = tubes.slice(r * per, (r + 1) * per), Yr = Y + r * 146;
+    /* het rek zelf: de buizen steken er aan de onderkant doorheen, zoals in een echt rek */
+    x.fillStyle = '#eef1f4'; x.strokeStyle = PCOL.line; x.lineWidth = 1.2;
+    x.beginPath(); x.roundRect(X, Yr + 24, cw * part.length, th * 0.48, 6); x.fill(); x.stroke();
+    part.forEach((t, i) => {
+      const cx = X + cw * i + cw / 2, col = /^#[0-9a-f]{3,8}$/i.test(t.c || '') ? t.c : PCOL.acc;
+      const full = Math.max(0, Math.min(1, (t.f == null ? 0.55 : t.f)));
+      pTube(x, cx, Yr + 8, th, tw, full, 0.75, col);
+      x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+      x.fillStyle = PCOL.ink; x.font = '600 11.5px ' + PFONT();
+      const room = cw - 6, words = trCanvas(String(t.n || '')).split(' ');
+      let line = '', ly = Yr + th + 26, lines = 0;
+      words.forEach(w => { const t2 = (line + ' ' + w).trim();
+        if (x.measureText(uv(t2)).width > room && line) { if (lines < 1) { x.fillText(uv(line), cx, ly); ly += 13; lines++; line = w; } else line = t2; }
+        else line = t2; });
+      if (line) { let r2 = line; while (r2.length > 1 && x.measureText(uv(r2 + '…')).width > room) r2 = r2.slice(0, -1);
+        x.fillText(uv(r2 === line ? line : r2 + '…'), cx, ly); ly += 14; }
+      if (t.v != null && isFinite(t.v)) { x.fillStyle = PCOL.acc; x.font = '600 11.5px ' + PFONT(); x.fillText(vol(t.v), cx, ly); ly += 13; }
+      if (t.sub) { x.fillStyle = PCOL.muted; x.font = '10.5px ' + PFONT(); x.fillText(t.sub, cx, ly); }
+    });
+  }
+  return pRackH(rows);
+}
 /* /NT:pic */
 /* NT:strchk */
 /* ================= STR-PROFIELCONTROLE ================= */

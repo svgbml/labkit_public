@@ -144,3 +144,36 @@ document.addEventListener('click', e => {
     rpPrint(`<!doctype html><meta charset="utf-8"><title>${t}</title><style>@page{margin:14mm}body{margin:0;font:13px system-ui}img{max-width:100%;height:auto}</style><img src="${o.toDataURL('image/png')}">`); }
 });
 $$('[data-picbar]').forEach(b => { b.innerHTML = picBar(b.dataset.picbar); });
+
+/* ---------- buizenrek: gekleurde buizen met label en volume ----------
+   tubes = [{n:'naam', v:volume in µL, c:'#kleur', sub:'tweede regel'}]
+   Geeft de hoogte terug die is gebruikt, zodat de aanroeper het canvas kan maten. */
+function pRackH(rows) { return 26 + rows * 146; }
+function pRack(x, X, Y, W, tubes, opts) {
+  opts = opts || {};
+  const per = Math.max(1, Math.min(opts.per || 10, tubes.length || 1));
+  const rows = Math.ceil(tubes.length / per), cw = W / per, th = 78, tw = Math.min(34, cw * 0.46);
+  for (let r = 0; r < rows; r++) {
+    const part = tubes.slice(r * per, (r + 1) * per), Yr = Y + r * 146;
+    /* het rek zelf: de buizen steken er aan de onderkant doorheen, zoals in een echt rek */
+    x.fillStyle = '#eef1f4'; x.strokeStyle = PCOL.line; x.lineWidth = 1.2;
+    x.beginPath(); x.roundRect(X, Yr + 24, cw * part.length, th * 0.48, 6); x.fill(); x.stroke();
+    part.forEach((t, i) => {
+      const cx = X + cw * i + cw / 2, col = /^#[0-9a-f]{3,8}$/i.test(t.c || '') ? t.c : PCOL.acc;
+      const full = Math.max(0, Math.min(1, (t.f == null ? 0.55 : t.f)));
+      pTube(x, cx, Yr + 8, th, tw, full, 0.75, col);
+      x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+      x.fillStyle = PCOL.ink; x.font = '600 11.5px ' + PFONT();
+      const room = cw - 6, words = trCanvas(String(t.n || '')).split(' ');
+      let line = '', ly = Yr + th + 26, lines = 0;
+      words.forEach(w => { const t2 = (line + ' ' + w).trim();
+        if (x.measureText(uv(t2)).width > room && line) { if (lines < 1) { x.fillText(uv(line), cx, ly); ly += 13; lines++; line = w; } else line = t2; }
+        else line = t2; });
+      if (line) { let r2 = line; while (r2.length > 1 && x.measureText(uv(r2 + '…')).width > room) r2 = r2.slice(0, -1);
+        x.fillText(uv(r2 === line ? line : r2 + '…'), cx, ly); ly += 14; }
+      if (t.v != null && isFinite(t.v)) { x.fillStyle = PCOL.acc; x.font = '600 11.5px ' + PFONT(); x.fillText(vol(t.v), cx, ly); ly += 13; }
+      if (t.sub) { x.fillStyle = PCOL.muted; x.font = '10.5px ' + PFONT(); x.fillText(t.sub, cx, ly); }
+    });
+  }
+  return pRackH(rows);
+}
