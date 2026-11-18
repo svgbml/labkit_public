@@ -30,6 +30,21 @@ Elke regel is één zin in het Nederlands en heeft een vertaling nodig in `i18n/
 - Het kleuringsschema is een tijdlijn met een druppel per reagens geworden.
 - Bij de PCR-mastermix en het pipetteerschema staat een tekening van het buizenrek.
 - Je kunt de kleur van een verdunningsreeks zelf kiezen.
+- De plaatontwerper vult replica's in één beweging en zet een verdunningsreeks met een concentratie per putje neer.
+- Een klik op een rij- of kolomkop van een plaat vult die hele rij of kolom.
+- Vier plaatsjablonen: ELISA-standaardcurve, qPCR in triplo, een MIC-titratie en de buitenrij als buffer.
+- De plaatkaart is op A4 af te drukken, met de legenda en alle gelabelde putjes erbij.
+- Met "Vulorde" staat in elk putje het nummer van de pipetteerstap, per groep geteld.
+- Onder de plaat staat wat er met een meerkanaalspipet in één keer kan en welke richting het snelst is.
+- Een plaatindeling is te randomiseren met een sleutelnummer, zodat dezelfde indeling later weer te maken is.
+- De sleutel van een gerandomiseerde plaat is te bekijken en af te drukken voordat je gaat meten.
+- Labkit waarschuwt als putjes op de buitenrand van een plaat in gebruik zijn, en zegt welke groep daar vaker staat.
+- De Plaatindeling gebruikt nu dezelfde plaatontwerper als de andere plaattools, met 384 putjes erbij.
+- In de ELISA-plaatanalyse kun je de plaatindeling ook op de plaat aanwijzen in plaats van typen.
+- Aangrenzende putjes van dezelfde soort zijn één replicaat en krijgen in de ELISA-plaat samen één nummer.
+- De qPCR-plaatindeling is na het genereren met de hand bij te stellen.
+- De qPCR-plaatlijst is te downloaden in de kolomvorm van Applied Biosystems of Bio-Rad CFX.
+- Eén monsterlijst: namen die je één keer plakt, gebruik je in de Plaatindeling, de Gelplanner en de qPCR-plaatindeling.
 
 ## 1.18.1 — 2026-11-16
 

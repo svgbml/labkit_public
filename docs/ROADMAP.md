@@ -5,7 +5,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Status:** ✅ done · ⏳ planned · ✖ dropped
 **Total:** 201 steps (S1–S201) ≈ 100 hours. Every chosen idea number appears in at least one step. Steps within a phase are in a sensible order; steps marked *(needs Sx)* depend on an earlier step.
 
-**Progress:** S0 done. **Phase 1 (S1–S12) done**, **phase 2 (S13–S20) done**, phase 3 running: S21–S28 done, S29–S36 still to do. After each phase the full `python tools/check.py` passed (validation, layout in Dutch and English, robustness, translations, startup). Phases 12–14 (S147–S201) were added later and have not been started.
+**Progress:** S0 done. **Phase 1 (S1–S12) done**, **phase 2 (S13–S20) done**, **phase 3 (S21–S36) done**, phase 4 (S37–S47) next. After each phase the full `python tools/check.py` passed (validation, layout in Dutch and English, robustness, translations, startup). Phases 12–14 (S147–S201) were added later and have not been started.
 
 ## Decisions
 - **#13 shared layout** applies per *type* of tool. Picture-generating tools (schemes, diagrams, gel figures) share one layout; calculators keep their own.

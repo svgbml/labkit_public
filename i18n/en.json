@@ -4267,5 +4267,20 @@
 "{#} naam in de lijst.": "{#} name in the list.",
 "{#} namen in de lijst.": "{#} names in the list.",
 "Alleen bewaren": "Only save",
-"Bewaren en hier gebruiken": "Save and use here"
+"Bewaren en hier gebruiken": "Save and use here",
+"De plaatontwerper vult replica's in één beweging en zet een verdunningsreeks met een concentratie per putje neer.": "The plate designer fills replicates in one movement and lays out a dilution series with a concentration per well.",
+"Een klik op een rij- of kolomkop van een plaat vult die hele rij of kolom.": "Clicking a row or column header of a plate fills that whole row or column.",
+"Vier plaatsjablonen: ELISA-standaardcurve, qPCR in triplo, een MIC-titratie en de buitenrij als buffer.": "Four plate templates: ELISA standard curve, qPCR in triplicate, an MIC titration and the outer ring as buffer.",
+"De plaatkaart is op A4 af te drukken, met de legenda en alle gelabelde putjes erbij.": "The plate map can be printed on A4, with the legend and all labelled wells alongside.",
+"Met \"Vulorde\" staat in elk putje het nummer van de pipetteerstap, per groep geteld.": "With \"Fill order\" every well shows the number of the pipetting step, counted per group.",
+"Onder de plaat staat wat er met een meerkanaalspipet in één keer kan en welke richting het snelst is.": "Below the plate it says what can be done in one go with a multichannel pipette and which direction is quickest.",
+"Een plaatindeling is te randomiseren met een sleutelnummer, zodat dezelfde indeling later weer te maken is.": "A plate layout can be randomised with a key number, so the same layout can be made again later.",
+"De sleutel van een gerandomiseerde plaat is te bekijken en af te drukken voordat je gaat meten.": "The key to a randomised plate can be viewed and printed before you start measuring.",
+"Labkit waarschuwt als putjes op de buitenrand van een plaat in gebruik zijn, en zegt welke groep daar vaker staat.": "Labkit warns when wells on the outer ring of a plate are in use, and says which group sits there more often.",
+"De Plaatindeling gebruikt nu dezelfde plaatontwerper als de andere plaattools, met 384 putjes erbij.": "Plate layout now uses the same plate designer as the other plate tools, with 384 wells added.",
+"In de ELISA-plaatanalyse kun je de plaatindeling ook op de plaat aanwijzen in plaats van typen.": "In ELISA plate analysis you can also mark the plate layout on the plate instead of typing it.",
+"Aangrenzende putjes van dezelfde soort zijn één replicaat en krijgen in de ELISA-plaat samen één nummer.": "Neighbouring wells of the same kind are one replicate and share one number on the ELISA plate.",
+"De qPCR-plaatindeling is na het genereren met de hand bij te stellen.": "The qPCR plate layout can be adjusted by hand after it has been generated.",
+"De qPCR-plaatlijst is te downloaden in de kolomvorm van Applied Biosystems of Bio-Rad CFX.": "The qPCR plate list can be downloaded in the column form of Applied Biosystems or Bio-Rad CFX.",
+"Eén monsterlijst: namen die je één keer plakt, gebruik je in de Plaatindeling, de Gelplanner en de qPCR-plaatindeling.": "One sample list: names you paste once are used in Plate layout, the Gel planner and the qPCR plate layout."
 }
