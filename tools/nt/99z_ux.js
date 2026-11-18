@@ -211,3 +211,52 @@ $$('section.tool[data-tool]').forEach(sec=>{ const ex=[...sec.querySelectorAll('
   xpApply(id); });
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-xp]'); if(b) xpToggle(b.dataset.xp); });
 window.addEventListener('hashchange',()=>setTimeout(()=>xpApply(current),0));
+
+/* ---------- rondleiding bij het eerste bezoek (vier stappen), opnieuw te starten in Instellingen ---------- */
+const TOURKEY='labkit:v1:tour', TOURV=1;
+const TOUR=[
+  {sel:'#bento-q,#nav-q',t:'Zoek een tool',d:'Typ een deel van een naam, een tag of een synoniem: "verdunnen", "ANOVA", "Bradford". Met Ctrl+K open je overal het opdrachtpalet.'},
+  {sel:'.lk-st',t:'Fase van je experiment',d:'Kies Voorbereiden, Uitvoeren of Analyseren. De zijbalk en de startpagina laten dan alleen de tools van die fase zien.'},
+  {sel:'.lk-wf-tile',t:'Werkstromen',d:'Een werkstroom loopt de tools van een heel experiment op volgorde af, van DNA tot gel. Je invoer blijft per tool bewaard.'},
+  {sel:'#nav > a[href="#inst"]',t:'Instellingen',d:'Hier kies je taal, thema en de instellingen voor grafieken. Je kunt deze rondleiding daar ook opnieuw starten.'}
+];
+let tourAt=-1, tourKeys=null;
+function tourBox(){ let b=$('#lk-tour'); if(b) return b;
+  document.body.insertAdjacentHTML('beforeend',`<div id="lk-tour" class="lk-tour" role="dialog" aria-modal="true" aria-labelledby="lk-tour-t" hidden><div class="lk-tour-ring" aria-hidden="true"></div><div class="lk-tour-card"><h3 id="lk-tour-t"></h3><p class="lk-tour-d"></p><div class="lk-tour-foot"><span class="lk-tour-dots" aria-hidden="true"></span><button type="button" class="ghost" data-tour="stop">Overslaan</button><button type="button" data-tour="prev">Vorige</button><button type="button" class="primary" data-tour="next">Volgende</button></div></div></div>`);
+  b=$('#lk-tour');
+  b.addEventListener('click',e=>{ const t=e.target.closest('[data-tour]'); if(!t){ if(e.target===b) tourStop(); return; }
+    if(t.dataset.tour==='stop') tourStop(); else tourGo(tourAt+(t.dataset.tour==='prev'?-1:1)); });
+  return b; }
+function tourGo(i){ if(i<0) return; if(i>=TOUR.length){ tourStop(); return; }
+  /* het eerste doel dat echt zichtbaar is: op een telefoon is bijvoorbeeld het zoekveld
+     in de zijbalk verborgen en dat in de startpagina juist niet */
+  tourAt=i; const b=tourBox(), s=TOUR[i],
+    el=s.sel.split(',').map(x=>document.querySelector(x.trim())).find(e=>e&&e.offsetParent!==null);
+  b.hidden=false; document.documentElement.classList.add('lk-tour-on');
+  $('#lk-tour-t').textContent=s.t; b.querySelector('.lk-tour-d').textContent=s.d;
+  b.querySelector('.lk-tour-dots').innerHTML=TOUR.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('');
+  b.querySelector('[data-tour=prev]').disabled=i===0;
+  const nx=b.querySelector('[data-tour=next]'), last=i===TOUR.length-1, t=last?'Klaar':'Volgende';
+  if(nx.dataset.lkt!==t){ nx.dataset.lkt=t; nx.textContent=t; }
+  const ring=b.querySelector('.lk-tour-ring'), card=b.querySelector('.lk-tour-card');
+  const r=el&&el.offsetParent!==null?el.getBoundingClientRect():null;
+  if(r&&r.width&&r.height){ if(el.scrollIntoView&&(r.top<0||r.bottom>innerHeight)){ el.scrollIntoView({block:'center'}); }
+    const q=el.getBoundingClientRect();
+    ring.hidden=false; ring.style.cssText=`left:${q.left-6}px;top:${q.top-6}px;width:${q.width+12}px;height:${q.height+12}px`;
+    const w=Math.min(340,innerWidth-24);
+    card.style.cssText=`width:${w}px;left:${Math.max(12,Math.min(innerWidth-w-12,q.left+q.width/2-w/2))}px;top:0`;
+    const ch=card.offsetHeight; /* hoogte pas bekend na het zetten van de breedte */
+    let top=q.bottom+16; if(top+ch>innerHeight-12) top=q.top-16-ch; /* anders erboven */
+    card.style.top=Math.max(12,Math.min(innerHeight-ch-12,top))+'px'; }
+  else { ring.hidden=true; card.style.cssText=`width:min(340px,calc(100% - 24px));left:50%;top:50%;transform:translate(-50%,-50%)`; }
+  setTimeout(()=>nx.focus(),0); }
+function tourStop(){ const b=$('#lk-tour'); if(b) b.hidden=true; document.documentElement.classList.remove('lk-tour-on');
+  tourAt=-1; if(tourKeys){ document.removeEventListener('keydown',tourKeys,true); tourKeys=null; }
+  jset(TOURKEY,{v:TOURV}); }
+function tourStart(){ if(current!=='start'){ location.hash='#start'; }
+  setTimeout(()=>{ if(!tourKeys){ tourKeys=e=>{ if($('#lk-tour')&&$('#lk-tour').hidden) return;
+      if(e.key==='Escape'){ e.preventDefault(); tourStop(); } else if(e.key==='ArrowRight'){ e.preventDefault(); tourGo(tourAt+1); } else if(e.key==='ArrowLeft'){ e.preventDefault(); tourGo(tourAt-1); } };
+    document.addEventListener('keydown',tourKeys,true); } tourGo(0); },current==='start'?0:200); }
+document.addEventListener('click',e=>{ if(e.target.closest('[data-tour-start]')) tourStart(); });
+addEventListener('resize',()=>{ if(tourAt>=0) tourGo(tourAt); });
+if(!jget(TOURKEY,{}).v) setTimeout(()=>{ if(!jget(TOURKEY,{}).v&&current==='start'&&!document.querySelector('.lk-modal')) tourStart(); },900);

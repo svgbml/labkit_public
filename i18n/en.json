@@ -3988,5 +3988,17 @@
 "Je kunt maximaal zes tools vastzetten. Maak er eerst een los.": "You can pin at most six tools. Unpin one first.",
 "Meer instellingen": "More settings",
 "Minder instellingen": "Fewer settings",
-"Toon of verberg de geavanceerde instellingen van deze tool": "Show or hide the advanced settings of this tool"
+"Toon of verberg de geavanceerde instellingen van deze tool": "Show or hide the advanced settings of this tool",
+"Typ een deel van een naam, een tag of een synoniem: \"verdunnen\", \"ANOVA\", \"Bradford\". Met Ctrl+K open je overal het opdrachtpalet.": "Type part of a name, a tag or a synonym: \"dilute\", \"ANOVA\", \"Bradford\". Ctrl+K opens the command palette anywhere.",
+"Fase van je experiment": "Stage of your experiment",
+"Kies Voorbereiden, Uitvoeren of Analyseren. De zijbalk en de startpagina laten dan alleen de tools van die fase zien.": "Choose Prepare, Perform or Analyse. The sidebar and the start page then show only the tools of that stage.",
+"Een werkstroom loopt de tools van een heel experiment op volgorde af, van DNA tot gel. Je invoer blijft per tool bewaard.": "A workflow walks through the tools of a whole experiment in order, from DNA to gel. Your input is kept per tool.",
+"Instellingen": "Settings",
+"Hier kies je taal, thema en de instellingen voor grafieken. Je kunt deze rondleiding daar ook opnieuw starten.": "This is where you choose language, theme and the settings for charts. You can also restart this tour there.",
+"Overslaan": "Skip",
+"Vorige": "Previous",
+"Volgende": "Next",
+"Rondleiding": "Tour",
+"Vier korte stappen door het zoeken, de fasen, de werkstromen en deze instellingen.": "Four short steps through search, the stages, the workflows and these settings.",
+"Rondleiding opnieuw starten": "Restart the tour"
 }
