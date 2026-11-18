@@ -7,6 +7,9 @@
         <div class="f" style="grid-column:1/-1"><label for="el-a">Absorptie meetgolflengte (bijv. 450 nm), 8 rijen × 12 kolommen <span class="example">voorbeeld</span></label><textarea id="el-a" rows="8" class="mono" style="font-size:12px;white-space:pre;overflow-x:auto"></textarea></div>
         <div class="f" style="grid-column:1/-1"><label for="el-r">Referentiegolflengte (bijv. 570 of 620 nm), optioneel</label><textarea id="el-r" rows="3" class="mono" style="font-size:12px;white-space:pre;overflow-x:auto"></textarea></div>
         <div class="f" style="grid-column:1/-1"><label for="el-l">Plaatindeling: B = blanco, S1…Sn = standaard, M1…Mn = monster, leeg of - = niet gebruikt</label><textarea id="el-l" rows="8" class="mono" style="font-size:12px;white-space:pre;overflow-x:auto"></textarea></div>
+        <div class="f" style="grid-column:1/-1"><label>Of wijs de wells aan op de plaat</label>
+          <div id="el-pld"></div>
+          <div class="row" style="margin-top:8px"><button type="button" id="el-renum">Replicaten opnieuw nummeren</button><span style="font-size:12.5px;color:var(--muted);max-width:60ch">Putjes van dezelfde soort die aan elkaar grenzen zijn één replicaat en krijgen samen één nummer; de richting bepaalt of dat naast of onder elkaar is. Typ een naam in "Tekst per putje" om er zelf één te kiezen.</span></div></div>
         <div class="f" style="grid-column:span 2"><label for="el-s">Concentraties standaarden S1, S2, …</label><input id="el-s" class="txt" value="1000 500 250 125 62,5 31,25 15,625"></div>
         <div class="f"><label for="el-u">Eenheid</label><input id="el-u" class="txt" value="pg/mL"></div>
         <div class="f"><label for="el-fit">Curve</label><select id="el-fit"><option value="4pl">4PL (vierparameter-logistisch)</option><option value="lin">lineair</option></select></div>

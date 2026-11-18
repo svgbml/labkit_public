@@ -3,6 +3,38 @@
   for(let r=0;r<8;r++){ const a=[], l=[]; for(let c=0;c<12;c++){ let v=NaN, n='-'; if(c<2){ if(r<7){ n='S'+(r+1); v=f(S[r]); } else { n='B'; v=0.06; } } else if(c<4){ n='M'+(r+1); v=f(smp[r]); } if(isFinite(v)){ v*=1+(rnd()-0.5)*0.05; if(n==='M7'&&c===3) v*=1.3; } a.push(isFinite(v)?v.toFixed(3).replace('.',','):''); l.push(n); } A.push(a.join('\t')); L.push(l.join('\t')); }
   if(!$('#el-a').value) $('#el-a').value=A.join('\n'); if(!$('#el-l').value) $('#el-l').value=L.join('\n'); }
 function elGrid(txt,numeric){ return String(txt).split(/\n/).filter(l=>l.trim()!=='').slice(0,8).map(l=>{ let c=l.split('\t'); if(c.length<2) c=l.trim().split(numeric?/[\s;]+/:/[\s;]+/); return c.slice(0,12).map(t=>numeric?num(t.trim()):t.trim().toUpperCase()); }); }
+/* ---------- de plaat als tekening (S34) ----------
+   De plaatindeling in het tekstvak blijft de bron voor de berekening: er verandert niets aan
+   de uitkomsten. De gedeelde plaatontwerper is een tweede manier om datzelfde vak te vullen.
+   De soort (blanco, standaard, monster) is de groep waarmee je verft; het nummer erachter
+   komt van de replicaatblokken: putjes van dezelfde soort die aan elkaar grenzen horen bij
+   elkaar en krijgen samen één nummer. Een naam die je zelf typt gaat daar altijd voor. */
+const ELKIND=['B','S','M'], ELGRP=[{n:'Blanco',c:'#4b5563'},{n:'Standaard',c:'#1d5bc4'},{n:'Monster',c:'#c2410c'}];
+let elPld=null, elSync=false;
+/* nummert de replicaatblokken in de gekozen richting; blanco's houden allemaal de naam B */
+function elBlocks(st){
+  const out={}, cnt={S:0,M:0}, down=st.dir==='v';
+  const kk=(i,j)=>'ABCDEFGHIJKLMNOP'[i]+(j+1);
+  const outer=down?st.c:st.r, inner=down?st.r:st.c;
+  for(let a=0;a<outer;a++){ let prev=null;
+    for(let b=0;b<inner;b++){ const k=down?kk(b,a):kk(a,b), g=st.wells[k];
+      if(g==null){ prev=null; continue; }
+      const kind=ELKIND[g]||'M';
+      if(g!==prev&&kind!=='B') cnt[kind]=(cnt[kind]||0)+1;
+      out[k]=kind==='B'?'B':kind+cnt[kind]; prev=g; } }
+  return out;
+}
+const elName=(st,lab,k)=>st.vals[k]||lab[k]||'';
+/* plaat -> tekstvak */
+function elToText(){ if(!elPld||elSync) return; const st=elPld.get(), lab=elPld.labels().lab, rows=[];
+  for(let i=0;i<8;i++){ const row=[]; for(let j=1;j<=12;j++){ const k='ABCDEFGH'[i]+j; row.push(elName({vals:st.vals},lab,k)||'-'); } rows.push(row.join('\t')); }
+  elSync=true; try{ $('#el-l').value=rows.join('\n'); calc.elisa(); } finally { elSync=false; } }
+/* tekstvak -> plaat */
+function elToPlate(){ if(!elPld||elSync) return; const L=elGrid($('#el-l').value,false), wells={}, vals={};
+  for(let i=0;i<8;i++) for(let j=0;j<12;j++){ const n=((L[i]||[])[j]||'').trim(); if(!n||n==='-') continue;
+    const g=ELKIND.indexOf(n.charAt(0)); if(g<0) continue; wells['ABCDEFGH'[i]+(j+1)]=g; vals['ABCDEFGH'[i]+(j+1)]=n; }
+  elSync=true; try{ elPld.set({fmt:'8x12',wells,vals,groups:ELGRP}); } finally { elSync=false; } }
+
 calc.elisa=function(){ const out=$('#el-out'), cv=$('#el-cv2'), A=elGrid($('#el-a').value,true), R=elGrid($('#el-r').value,true), L=elGrid($('#el-l').value,false), un=$('#el-u').value, fit=$('#el-fit').value, cvmax=num($('#el-cv').value)||10;
   const SC=numsC($('#el-s').value), DF={}; $('#el-d').value.toUpperCase().split(/[\s;,]+(?=M)/).forEach(t=>{ const m=t.match(/^(M\d+)\s*[=:]\s*([\d.,eE+-]+)/); if(m) DF[m[1]]=num(m[2]); });
   const W={}; let nw=0; for(let r=0;r<8;r++) for(let c=0;c<12;c++){ const n=(L[r]||[])[c], a=(A[r]||[])[c]; if(!n||n==='-'||!isFinite(a)) continue; const rf=(R[r]||[])[c]; (W[n]=W[n]||[]).push({w:'ABCDEFGH'[r]+(c+1),a:a-(isFinite(rf)?rf:0)}); nw++; }
@@ -22,3 +54,10 @@ calc.elisa=function(){ const out=$('#el-out'), cv=$('#el-cv2'), A=elGrid($('#el-
    `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Monster</th><th>Wells</th><th class="num">Gem. A (gecorr.)</th><th class="num">CV (%)</th><th class="num">Uit curve</th><th class="num">Verdunning</th><th class="num">Concentratie (${ud(un)})</th><th>Opmerking</th></tr></thead><tbody>${M.map(m=>`<tr><td>${m.n}</td><td>${m.wells}</td><td class="num">${fmt(m.m,3)}</td><td class="num">${isFinite(m.cv)?fmt(m.cv,1):'–'}</td><td class="num">${isFinite(m.x)?sig(m.x,4):'–'}</td><td class="num">${fmt(m.df,1)}</td><td class="num">${isFinite(m.c)?sig(m.c,4):m.above?'&gt; '+sig(xs[xs.length-1]*m.df,4):m.below?'&lt; '+sig(xs[0]*m.df,4):'–'}</td><td>${(m.bad?chip('warn','CV te hoog'):'')+(m.above?chip('bad','boven de curve'):'')+(m.below?chip('warn','onder de curve'):'')||chip('ok','in orde')}</td></tr>`).join('')}</tbody></table></div>`+
    `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Standaard</th><th class="num">Concentratie</th><th class="num">Gem. A (gecorr.)</th><th class="num">CV (%)</th><th class="num">Teruggerekend</th><th class="num">Terugvinding (%)</th></tr></thead><tbody>${ST.map(s=>{ const b=inv(s.m); return `<tr><td>${s.n}</td><td class="num">${sig(s.x,4)}</td><td class="num">${fmt(s.m,3)}</td><td class="num">${isFinite(s.cv)?fmt(s.cv,1):'–'}</td><td class="num">${isFinite(b)?sig(b,4):'–'}</td><td class="num">${isFinite(b)?fmt(b/s.x*100,0):'–'}</td></tr>`; }).join('')}</tbody></table></div>`+(ST.some(s=>s.cv>cvmax)?note('warn','Een standaard heeft een CV boven de grens; de curve is daardoor minder betrouwbaar.'):'')+`<div class="formula">A = (A<sub>meet</sub> − A<sub>ref</sub>) − blanco · c = c<sub>curve</sub> × verdunning</div>`;
   cv.style.display=''; const ok=M.filter(m=>isFinite(m.x)); chart(cv,{logx:fit==='4pl',xmin:fit==='4pl'?xs[0]/2:0,xmax:xs[xs.length-1]*(fit==='4pl'?1.5:1.08),ymin:Math.min(0,...ys),ymax:Math.max(...ys,...M.map(m=>m.m))*1.1,xlabel:`concentratie (${uv(un)})`,ylabel:'absorptie (gecorrigeerd)',series:[{fn,name:'fit'},{pts:ST.flatMap(s=>s.v.map(v=>[s.x,v])),color:'--ink',name:'standaarden'},{pts:ok.map(m=>[m.x,m.m]),color:'--warn',hollow:true,name:'monsters'}]}); };
+
+elPld=plateDesigner($('#el-pld'),{fmt:'8x12',groups:ELGRP,autoLabel:elBlocks,name:()=>trPlain('ELISA-plaatanalyse'),
+  onChange(){ elToText(); }});
+$('#el-l').addEventListener('input',()=>elToPlate());
+$('#el-renum').addEventListener('click',()=>{ if(!elPld) return; const st=elPld.get();
+  elSync=true; try{ elPld.set({fmt:st.fmt,wells:st.wells,vals:{},groups:st.groups}); } finally { elSync=false; } elToText(); });
+elToPlate();

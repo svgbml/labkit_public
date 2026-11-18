@@ -15,6 +15,8 @@
    Voor de tools die hun eigen plaattekening maken (S33) kan de ontwerper ook:
      opts.shape 'rond'|'vierkant'  of P.shape(v)   vorm van de putjes
      opts.autoLabel true|false     of P.autoLabel(v)  automatische labels St1, Mo2, …
+                    of een functie {wells,vals,groups,r,c,dir} -> {A1:'S1',…} voor een tool
+                    met zijn eigen namen (de ELISA-plaat nummert per blok replicaten)
      opts.palette [...hex]         of P.palette(a)  kleurenpool voor nieuwe groepen
      P.labels()                    {cnt per groep, lab per putje} voor eigen tekeningen
      P.text()                      de tekst die in een putje hoort (eigen tekst > autolabel)
@@ -98,7 +100,7 @@ function plateDesigner(host, opts) {
   };
   let sel = 0, erase = false, painting = false, tmode = false, wsel = null;
   let shape = opts.shape === 'vierkant' ? 'vierkant' : 'rond';
-  let autoLab = opts.autoLabel !== false;
+  let autoLab = typeof opts.autoLabel === 'function' ? opts.autoLabel : opts.autoLabel !== false;
   let pool = (opts.palette && opts.palette.length ? opts.palette : PLCOL).slice();
   const dims = () => { const [r, c] = S.fmt.split('x').map(Number); return {r: r || 8, c: c || 12}; };
   const key = (i, j) => PLROW[i] + (j + 1);
@@ -138,10 +140,14 @@ function plateDesigner(host, opts) {
      van de groepsnaam: St1, St2, Mo1, … Een putje met eigen tekst houdt die tekst. */
   function labels() {
     const {r, c} = dims(), cnt = {}, nr = {}, lab = {};
+    /* een tool mag zijn eigen nummering meegeven; die krijgt de hele toestand te zien */
+    const own = typeof autoLab === 'function'
+      ? (autoLab({wells: {...S.wells}, vals: {...S.vals}, groups: S.groups.map(g => ({...g})), r, c, dir: dir()}) || {}) : null;
     for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) {
       const k = key(i, j), g = S.wells[k];
       if (g == null || !S.groups[g]) continue;
       cnt[g] = (cnt[g] || 0) + 1;
+      if (own) { if (own[k] != null && !S.vals[k]) lab[k] = String(own[k]); continue; }
       if (!autoLab || S.vals[k]) continue;
       nr[g] = (nr[g] || 0) + 1;
       const short = trPlain(S.groups[g].n, true).replace(/[^A-Za-zÀ-ÿ0-9]/g, '').slice(0, 2) || 'G';
@@ -558,7 +564,8 @@ function plateDesigner(host, opts) {
     selected: () => sel, label: (k, v) => { if (v == null || v === '') delete S.vals[k]; else S.vals[k] = String(v); },
     labels, text: k => textOf(k, labels().lab),
     shape(v) { if (v != null) { shape = v === 'vierkant' ? 'vierkant' : 'rond'; render(); } return shape; },
-    autoLabel(v) { if (v != null) { autoLab = !!v; render(); } return autoLab; },
+    autoLabel(v) { if (v != null) { autoLab = typeof v === 'function' ? v : !!v; render(); } return autoLab; },
+    dir,
     palette(a) { if (a && a.length) { pool = a.slice(); S.groups.forEach((g, i) => g.c = a[i % a.length]); render(); } return pool.slice(); },
     template(id) { const t = PLTPL.find(x => x.id === id); if (!t) return false;
       if (t.fmt) { S.fmt = t.fmt; const f = q('fmt'); if (f) f.value = S.fmt; }

@@ -3698,6 +3698,9 @@ behandeld 25 0</textarea></div>
         <div class="f" style="grid-column:1/-1"><label for="el-a">Absorptie meetgolflengte (bijv. 450 nm), 8 rijen × 12 kolommen <span class="example">voorbeeld</span></label><textarea id="el-a" rows="8" class="mono" style="font-size:12px;white-space:pre;overflow-x:auto"></textarea></div>
         <div class="f" style="grid-column:1/-1"><label for="el-r">Referentiegolflengte (bijv. 570 of 620 nm), optioneel</label><textarea id="el-r" rows="3" class="mono" style="font-size:12px;white-space:pre;overflow-x:auto"></textarea></div>
         <div class="f" style="grid-column:1/-1"><label for="el-l">Plaatindeling: B = blanco, S1…Sn = standaard, M1…Mn = monster, leeg of - = niet gebruikt</label><textarea id="el-l" rows="8" class="mono" style="font-size:12px;white-space:pre;overflow-x:auto"></textarea></div>
+        <div class="f" style="grid-column:1/-1"><label>Of wijs de wells aan op de plaat</label>
+          <div id="el-pld"></div>
+          <div class="row" style="margin-top:8px"><button type="button" id="el-renum">Replicaten opnieuw nummeren</button><span style="font-size:12.5px;color:var(--muted);max-width:60ch">Putjes van dezelfde soort die aan elkaar grenzen zijn één replicaat en krijgen samen één nummer; de richting bepaalt of dat naast of onder elkaar is. Typ een naam in "Tekst per putje" om er zelf één te kiezen.</span></div></div>
         <div class="f" style="grid-column:span 2"><label for="el-s">Concentraties standaarden S1, S2, …</label><input id="el-s" class="txt" value="1000 500 250 125 62,5 31,25 15,625"></div>
         <div class="f"><label for="el-u">Eenheid</label><input id="el-u" class="txt" value="pg/mL"></div>
         <div class="f"><label for="el-fit">Curve</label><select id="el-fit"><option value="4pl">4PL (vierparameter-logistisch)</option><option value="lin">lineair</option></select></div>
@@ -3866,7 +3869,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=3752f70764"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=c3cc4d4546"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -6486,6 +6489,8 @@ function pRack(x, X, Y, W, tubes, opts) {
    Voor de tools die hun eigen plaattekening maken (S33) kan de ontwerper ook:
      opts.shape 'rond'|'vierkant'  of P.shape(v)   vorm van de putjes
      opts.autoLabel true|false     of P.autoLabel(v)  automatische labels St1, Mo2, …
+                    of een functie {wells,vals,groups,r,c,dir} -> {A1:'S1',…} voor een tool
+                    met zijn eigen namen (de ELISA-plaat nummert per blok replicaten)
      opts.palette [...hex]         of P.palette(a)  kleurenpool voor nieuwe groepen
      P.labels()                    {cnt per groep, lab per putje} voor eigen tekeningen
      P.text()                      de tekst die in een putje hoort (eigen tekst > autolabel)
@@ -6569,7 +6574,7 @@ function plateDesigner(host, opts) {
   };
   let sel = 0, erase = false, painting = false, tmode = false, wsel = null;
   let shape = opts.shape === 'vierkant' ? 'vierkant' : 'rond';
-  let autoLab = opts.autoLabel !== false;
+  let autoLab = typeof opts.autoLabel === 'function' ? opts.autoLabel : opts.autoLabel !== false;
   let pool = (opts.palette && opts.palette.length ? opts.palette : PLCOL).slice();
   const dims = () => { const [r, c] = S.fmt.split('x').map(Number); return {r: r || 8, c: c || 12}; };
   const key = (i, j) => PLROW[i] + (j + 1);
@@ -6609,10 +6614,14 @@ function plateDesigner(host, opts) {
      van de groepsnaam: St1, St2, Mo1, … Een putje met eigen tekst houdt die tekst. */
   function labels() {
     const {r, c} = dims(), cnt = {}, nr = {}, lab = {};
+    /* een tool mag zijn eigen nummering meegeven; die krijgt de hele toestand te zien */
+    const own = typeof autoLab === 'function'
+      ? (autoLab({wells: {...S.wells}, vals: {...S.vals}, groups: S.groups.map(g => ({...g})), r, c, dir: dir()}) || {}) : null;
     for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) {
       const k = key(i, j), g = S.wells[k];
       if (g == null || !S.groups[g]) continue;
       cnt[g] = (cnt[g] || 0) + 1;
+      if (own) { if (own[k] != null && !S.vals[k]) lab[k] = String(own[k]); continue; }
       if (!autoLab || S.vals[k]) continue;
       nr[g] = (nr[g] || 0) + 1;
       const short = trPlain(S.groups[g].n, true).replace(/[^A-Za-zÀ-ÿ0-9]/g, '').slice(0, 2) || 'G';
@@ -7029,7 +7038,8 @@ function plateDesigner(host, opts) {
     selected: () => sel, label: (k, v) => { if (v == null || v === '') delete S.vals[k]; else S.vals[k] = String(v); },
     labels, text: k => textOf(k, labels().lab),
     shape(v) { if (v != null) { shape = v === 'vierkant' ? 'vierkant' : 'rond'; render(); } return shape; },
-    autoLabel(v) { if (v != null) { autoLab = !!v; render(); } return autoLab; },
+    autoLabel(v) { if (v != null) { autoLab = typeof v === 'function' ? v : !!v; render(); } return autoLab; },
+    dir,
     palette(a) { if (a && a.length) { pool = a.slice(); S.groups.forEach((g, i) => g.c = a[i % a.length]); render(); } return pool.slice(); },
     template(id) { const t = PLTPL.find(x => x.id === id); if (!t) return false;
       if (t.fmt) { S.fmt = t.fmt; const f = q('fmt'); if (f) f.value = S.fmt; }
@@ -8082,6 +8092,38 @@ calc.gradient=function(){ const lo=num($('#gr-lo').value), hi=num($('#gr-hi').va
   for(let r=0;r<8;r++){ const a=[], l=[]; for(let c=0;c<12;c++){ let v=NaN, n='-'; if(c<2){ if(r<7){ n='S'+(r+1); v=f(S[r]); } else { n='B'; v=0.06; } } else if(c<4){ n='M'+(r+1); v=f(smp[r]); } if(isFinite(v)){ v*=1+(rnd()-0.5)*0.05; if(n==='M7'&&c===3) v*=1.3; } a.push(isFinite(v)?v.toFixed(3).replace('.',','):''); l.push(n); } A.push(a.join('\t')); L.push(l.join('\t')); }
   if(!$('#el-a').value) $('#el-a').value=A.join('\n'); if(!$('#el-l').value) $('#el-l').value=L.join('\n'); }
 function elGrid(txt,numeric){ return String(txt).split(/\n/).filter(l=>l.trim()!=='').slice(0,8).map(l=>{ let c=l.split('\t'); if(c.length<2) c=l.trim().split(numeric?/[\s;]+/:/[\s;]+/); return c.slice(0,12).map(t=>numeric?num(t.trim()):t.trim().toUpperCase()); }); }
+/* ---------- de plaat als tekening (S34) ----------
+   De plaatindeling in het tekstvak blijft de bron voor de berekening: er verandert niets aan
+   de uitkomsten. De gedeelde plaatontwerper is een tweede manier om datzelfde vak te vullen.
+   De soort (blanco, standaard, monster) is de groep waarmee je verft; het nummer erachter
+   komt van de replicaatblokken: putjes van dezelfde soort die aan elkaar grenzen horen bij
+   elkaar en krijgen samen één nummer. Een naam die je zelf typt gaat daar altijd voor. */
+const ELKIND=['B','S','M'], ELGRP=[{n:'Blanco',c:'#4b5563'},{n:'Standaard',c:'#1d5bc4'},{n:'Monster',c:'#c2410c'}];
+let elPld=null, elSync=false;
+/* nummert de replicaatblokken in de gekozen richting; blanco's houden allemaal de naam B */
+function elBlocks(st){
+  const out={}, cnt={S:0,M:0}, down=st.dir==='v';
+  const kk=(i,j)=>'ABCDEFGHIJKLMNOP'[i]+(j+1);
+  const outer=down?st.c:st.r, inner=down?st.r:st.c;
+  for(let a=0;a<outer;a++){ let prev=null;
+    for(let b=0;b<inner;b++){ const k=down?kk(b,a):kk(a,b), g=st.wells[k];
+      if(g==null){ prev=null; continue; }
+      const kind=ELKIND[g]||'M';
+      if(g!==prev&&kind!=='B') cnt[kind]=(cnt[kind]||0)+1;
+      out[k]=kind==='B'?'B':kind+cnt[kind]; prev=g; } }
+  return out;
+}
+const elName=(st,lab,k)=>st.vals[k]||lab[k]||'';
+/* plaat -> tekstvak */
+function elToText(){ if(!elPld||elSync) return; const st=elPld.get(), lab=elPld.labels().lab, rows=[];
+  for(let i=0;i<8;i++){ const row=[]; for(let j=1;j<=12;j++){ const k='ABCDEFGH'[i]+j; row.push(elName({vals:st.vals},lab,k)||'-'); } rows.push(row.join('\t')); }
+  elSync=true; try{ $('#el-l').value=rows.join('\n'); calc.elisa(); } finally { elSync=false; } }
+/* tekstvak -> plaat */
+function elToPlate(){ if(!elPld||elSync) return; const L=elGrid($('#el-l').value,false), wells={}, vals={};
+  for(let i=0;i<8;i++) for(let j=0;j<12;j++){ const n=((L[i]||[])[j]||'').trim(); if(!n||n==='-') continue;
+    const g=ELKIND.indexOf(n.charAt(0)); if(g<0) continue; wells['ABCDEFGH'[i]+(j+1)]=g; vals['ABCDEFGH'[i]+(j+1)]=n; }
+  elSync=true; try{ elPld.set({fmt:'8x12',wells,vals,groups:ELGRP}); } finally { elSync=false; } }
+
 calc.elisa=function(){ const out=$('#el-out'), cv=$('#el-cv2'), A=elGrid($('#el-a').value,true), R=elGrid($('#el-r').value,true), L=elGrid($('#el-l').value,false), un=$('#el-u').value, fit=$('#el-fit').value, cvmax=num($('#el-cv').value)||10;
   const SC=numsC($('#el-s').value), DF={}; $('#el-d').value.toUpperCase().split(/[\s;,]+(?=M)/).forEach(t=>{ const m=t.match(/^(M\d+)\s*[=:]\s*([\d.,eE+-]+)/); if(m) DF[m[1]]=num(m[2]); });
   const W={}; let nw=0; for(let r=0;r<8;r++) for(let c=0;c<12;c++){ const n=(L[r]||[])[c], a=(A[r]||[])[c]; if(!n||n==='-'||!isFinite(a)) continue; const rf=(R[r]||[])[c]; (W[n]=W[n]||[]).push({w:'ABCDEFGH'[r]+(c+1),a:a-(isFinite(rf)?rf:0)}); nw++; }
@@ -8101,6 +8143,13 @@ calc.elisa=function(){ const out=$('#el-out'), cv=$('#el-cv2'), A=elGrid($('#el-
    `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Monster</th><th>Wells</th><th class="num">Gem. A (gecorr.)</th><th class="num">CV (%)</th><th class="num">Uit curve</th><th class="num">Verdunning</th><th class="num">Concentratie (${ud(un)})</th><th>Opmerking</th></tr></thead><tbody>${M.map(m=>`<tr><td>${m.n}</td><td>${m.wells}</td><td class="num">${fmt(m.m,3)}</td><td class="num">${isFinite(m.cv)?fmt(m.cv,1):'–'}</td><td class="num">${isFinite(m.x)?sig(m.x,4):'–'}</td><td class="num">${fmt(m.df,1)}</td><td class="num">${isFinite(m.c)?sig(m.c,4):m.above?'&gt; '+sig(xs[xs.length-1]*m.df,4):m.below?'&lt; '+sig(xs[0]*m.df,4):'–'}</td><td>${(m.bad?chip('warn','CV te hoog'):'')+(m.above?chip('bad','boven de curve'):'')+(m.below?chip('warn','onder de curve'):'')||chip('ok','in orde')}</td></tr>`).join('')}</tbody></table></div>`+
    `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Standaard</th><th class="num">Concentratie</th><th class="num">Gem. A (gecorr.)</th><th class="num">CV (%)</th><th class="num">Teruggerekend</th><th class="num">Terugvinding (%)</th></tr></thead><tbody>${ST.map(s=>{ const b=inv(s.m); return `<tr><td>${s.n}</td><td class="num">${sig(s.x,4)}</td><td class="num">${fmt(s.m,3)}</td><td class="num">${isFinite(s.cv)?fmt(s.cv,1):'–'}</td><td class="num">${isFinite(b)?sig(b,4):'–'}</td><td class="num">${isFinite(b)?fmt(b/s.x*100,0):'–'}</td></tr>`; }).join('')}</tbody></table></div>`+(ST.some(s=>s.cv>cvmax)?note('warn','Een standaard heeft een CV boven de grens; de curve is daardoor minder betrouwbaar.'):'')+`<div class="formula">A = (A<sub>meet</sub> − A<sub>ref</sub>) − blanco · c = c<sub>curve</sub> × verdunning</div>`;
   cv.style.display=''; const ok=M.filter(m=>isFinite(m.x)); chart(cv,{logx:fit==='4pl',xmin:fit==='4pl'?xs[0]/2:0,xmax:xs[xs.length-1]*(fit==='4pl'?1.5:1.08),ymin:Math.min(0,...ys),ymax:Math.max(...ys,...M.map(m=>m.m))*1.1,xlabel:`concentratie (${uv(un)})`,ylabel:'absorptie (gecorrigeerd)',series:[{fn,name:'fit'},{pts:ST.flatMap(s=>s.v.map(v=>[s.x,v])),color:'--ink',name:'standaarden'},{pts:ok.map(m=>[m.x,m.m]),color:'--warn',hollow:true,name:'monsters'}]}); };
+
+elPld=plateDesigner($('#el-pld'),{fmt:'8x12',groups:ELGRP,autoLabel:elBlocks,name:()=>trPlain('ELISA-plaatanalyse'),
+  onChange(){ elToText(); }});
+$('#el-l').addEventListener('input',()=>elToPlate());
+$('#el-renum').addEventListener('click',()=>{ if(!elPld) return; const st=elPld.get();
+  elSync=true; try{ elPld.set({fmt:st.fmt,wells:st.wells,vals:{},groups:st.groups}); } finally { elSync=false; } elToText(); });
+elToPlate();
 /* /NT:elisa */
 /* NT:facs */
 /* ================= FLOWCYTOMETRIE ================= */

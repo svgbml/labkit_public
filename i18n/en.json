@@ -4242,5 +4242,8 @@
 "Geen van de putjes heeft een label, dus de sleutel loopt alleen per putje.": "None of the wells has a label, so the key runs per well only.",
 "Let op": "Take note",
 "Tekst in dit putje": "Text in this well",
-"Kleur van de groep": "Colour of the group"
+"Kleur van de groep": "Colour of the group",
+"Of wijs de wells aan op de plaat": "Or mark the wells on the plate",
+"Replicaten opnieuw nummeren": "Number the replicates again",
+"Putjes van dezelfde soort die aan elkaar grenzen zijn één replicaat en krijgen samen één nummer; de richting bepaalt of dat naast of onder elkaar is. Typ een naam in \"Tekst per putje\" om er zelf één te kiezen.": "Wells of the same kind that sit next to each other are one replicate and share one number; the direction decides whether that is side by side or one below the other. Type a name under \"Text in this well\" to choose one yourself."
 }
