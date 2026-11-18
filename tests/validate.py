@@ -50,6 +50,26 @@ def _(pg):
     vals = pg.evaluate("__cells('#o-tbl tbody tr [data-k=out]')")
     return [('Tris (g)', vals[0], 108, 0.01), ('boorzuur (g)', vals[1], 55, 0.01)]
 
+@case('Oplossing & buffer', 'TAE 50X, 1 L', 'Sambrook & Russell, Molecular Cloning (3e druk), Appendix 1: 242 g Tris-base en 18,6 g EDTA-Na₂·2H₂O (= 50 mM) per liter 50x TAE')
+def _(pg):
+    pg.evaluate("__go('oplossing');__set('o-v','1');__set('o-vu','L');__set('o-preset','tae50')")
+    vals = pg.evaluate("__cells('#o-tbl tbody tr [data-k=out]')")
+    return [('Tris (g)', vals[0], 242.28, 0.01), ('EDTA-Na₂·2H₂O (g)', vals[1], 18.61, 0.01)]
+
+@case('Oplossing & buffer', 'Tris-glycine-SDS 10X, 1 L', 'Laemmli, Nature 227:680-685 (1970), 10x voorraad: 30,3 g Tris, 144 g glycine en 10 g SDS per liter')
+def _(pg):
+    pg.evaluate("__go('oplossing');__set('o-v','1');__set('o-vu','L');__set('o-preset','laemmli10')")
+    vals = pg.evaluate("__cells('#o-tbl tbody tr [data-k=out]')")
+    return [('Tris (g)', vals[0], 30.3, 0.01), ('glycine (g)', vals[1], 144.1, 0.01), ('SDS (g)', vals[2], 10, 0.01)]
+
+@case('Oplossing & buffer', 'SOC-medium, 1 L', 'Hanahan, J Mol Biol 166:557-580 (1983): 20 g trypton, 5 g gistextract, 0,58 g NaCl (10 mM), 3,6 g glucose (20 mM) per liter')
+def _(pg):
+    pg.evaluate("__go('oplossing');__set('o-v','1');__set('o-vu','L');__set('o-preset','soc')")
+    # kleine hoeveelheden laat de tool in mg zien, dus de eenheid moet mee
+    vals = pg.evaluate("[...document.querySelectorAll('#o-tbl tbody tr [data-k=out]')].map(td=>{ const t=td.textContent; const n=__n(t); return t.includes('mg')?n/1000:n; })")
+    return [('trypton (g)', vals[0], 20, 0.001), ('gistextract (g)', vals[1], 5, 0.001),
+            ('NaCl (g)', vals[2], 0.5844, 0.01), ('glucose (g)', vals[6], 3.603, 0.01)]
+
 # ---------------- Assays ----------------
 @case('Standaardcurve', 'Bradford, kwadratisch', 'Thermo Fisher NanoDrop One Bradford-protocol (BSA 0–1500 µg/mL); referentie: NumPy polyfit')
 def _(pg):

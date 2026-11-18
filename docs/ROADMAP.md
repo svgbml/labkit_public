@@ -75,7 +75,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 ## Phase 4: preparation, recipes and sequences (11 steps)
 | Step | Ideas | What | Done when |
 |---|---|---|---|
-| S37 | 40 | Recipe library data: 15 common buffers and media with sources | Data file + validation of 3 recipes |
+| S37 | 40 | Recipe library data: 15 common buffers and media with sources | ✅ `tools/nt/03_recipe.js`: 16 recepten (`RECIPES`), met per recept een naam, een stap over pH/vloeistof/steriliseren en de bron (`RECNAME`, `PH`, `RECSRC`). Nieuw: TBS, TBS-T, TE, TAE 50×, SSC 20×, Tris-glycine-SDS 10×, Towbin, carbonaat-, citraat- en fosfaatbuffer, LB, LB-agar en SOC. De keuzelijst wordt uit de bibliotheek gebouwd en de bron staat onder de stappen. Validatie van 4 recepten (TAE 50×, Tris-glycine-SDS 10×, SOC naast de bestaande PBS en TBE) tegen de gepubliceerde g/L. Drie i18n-lekken opgeruimd: de componentlijst in de stap en de afgebroken regels van het stappenschema op het canvas leverden eerder een sleutel per recept op, en een volume ≤ 0 geeft nu geen massa meer |
 | S38 | 40, 153 | Recipe library UI in *Oplossing & buffer*: scale to volume, tick-off per component, printable card | Card prints |
 | S39 | 43, 45, 154 | Hydrate options, autoclave/filter advice, weighing order tips | Shown per recipe |
 | S40 | 44, 53 | pH adjustment helper and cell culture media prep | Both calculators |

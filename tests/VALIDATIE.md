@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-18 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 267 van 267 controles binnen tolerantie.**
+**Resultaat: 276 van 276 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -14,6 +14,15 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Oplossing & buffer | PBS 1X, 1 L | KH₂PO₄ (g) | 0,24 | 0,245 | +2.07% | ✅ | Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄) |
 | Oplossing & buffer | TBE 10X, 1 L | Tris (g) | 108 | 107,8 | -0.17% | ✅ | Bio-Rad Bulletin 6205 (108 g Tris, 55 g boorzuur per liter) |
 | Oplossing & buffer | TBE 10X, 1 L | boorzuur (g) | 55 | 55,03 | +0.05% | ✅ | Bio-Rad Bulletin 6205 (108 g Tris, 55 g boorzuur per liter) |
+| Oplossing & buffer | TAE 50X, 1 L | Tris (g) | 242,3 | 242,3 | +0.00% | ✅ | Sambrook & Russell, Molecular Cloning (3e druk), Appendix 1: 242 g Tris-base en 18,6 g EDTA-Na₂·2H₂O (= 50 mM) per liter 50x TAE |
+| Oplossing & buffer | TAE 50X, 1 L | EDTA-Na₂·2H₂O (g) | 18,61 | 18,61 | +0.01% | ✅ | Sambrook & Russell, Molecular Cloning (3e druk), Appendix 1: 242 g Tris-base en 18,6 g EDTA-Na₂·2H₂O (= 50 mM) per liter 50x TAE |
+| Oplossing & buffer | Tris-glycine-SDS 10X, 1 L | Tris (g) | 30,3 | 30,29 | -0.05% | ✅ | Laemmli, Nature 227:680-685 (1970), 10x voorraad: 30,3 g Tris, 144 g glycine en 10 g SDS per liter |
+| Oplossing & buffer | Tris-glycine-SDS 10X, 1 L | glycine (g) | 144,1 | 144,1 | +0.02% | ✅ | Laemmli, Nature 227:680-685 (1970), 10x voorraad: 30,3 g Tris, 144 g glycine en 10 g SDS per liter |
+| Oplossing & buffer | Tris-glycine-SDS 10X, 1 L | SDS (g) | 10 | 10 | +0.00% | ✅ | Laemmli, Nature 227:680-685 (1970), 10x voorraad: 30,3 g Tris, 144 g glycine en 10 g SDS per liter |
+| Oplossing & buffer | SOC-medium, 1 L | trypton (g) | 20 | 20 | +0.00% | ✅ | Hanahan, J Mol Biol 166:557-580 (1983): 20 g trypton, 5 g gistextract, 0,58 g NaCl (10 mM), 3,6 g glucose (20 mM) per liter |
+| Oplossing & buffer | SOC-medium, 1 L | gistextract (g) | 5 | 5 | +0.00% | ✅ | Hanahan, J Mol Biol 166:557-580 (1983): 20 g trypton, 5 g gistextract, 0,58 g NaCl (10 mM), 3,6 g glucose (20 mM) per liter |
+| Oplossing & buffer | SOC-medium, 1 L | NaCl (g) | 0,5844 | 0,5844 | +0.00% | ✅ | Hanahan, J Mol Biol 166:557-580 (1983): 20 g trypton, 5 g gistextract, 0,58 g NaCl (10 mM), 3,6 g glucose (20 mM) per liter |
+| Oplossing & buffer | SOC-medium, 1 L | glucose (g) | 3,603 | 3,603 | +0.00% | ✅ | Hanahan, J Mol Biol 166:557-580 (1983): 20 g trypton, 5 g gistextract, 0,58 g NaCl (10 mM), 3,6 g glucose (20 mM) per liter |
 | Standaardcurve | Bradford, kwadratisch | Lysaat A in meetbuis (µg/mL) | 468,2 | 468 | -0.04% | ✅ | Thermo Fisher NanoDrop One Bradford-protocol (BSA 0–1500 µg/mL); referentie: NumPy polyfit |
 | Standaardcurve | ELISA, 4PL | terugberekend (IU/L) | 300 | 300 | +0.00% | ✅ | Kim e.a., Biol Proced Online 2018 (A = −0,00767; B = 0,942; C = 710; D = 4,17) |
 | Enzymkinetiek | Puromycin (behandeld) | Vmax | 212,7 | 213 | +0.15% | ✅ | Treloar 1974 via R-dataset Puromycin (Bates & Watts 1988); referentie: SciPy curve_fit |
@@ -41,9 +50,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9397 | -0.51% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7827 | +0.63% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5559 | +0.06% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9395 | -0.52% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,78 | +0.29% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5526 | -0.52% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
