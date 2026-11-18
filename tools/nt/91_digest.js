@@ -1,13 +1,119 @@
-/* ================= RESTRICTIEDIGESTIE ================= */
+/* ================= RESTRICTIEDIGESTIE =================
+   Vierde tool op Vue 3 (zie 00a_vue.js), declaratief opgebouwd met de gedeelde componenten uit 00b_ui.js, met keuzelijsten uit data en
+   een veld dat alleen bij een dubbele digestie te zien is. Het rekenwerk is onveranderd.
+
+   De enzymnaam is zelf de waarde van de optie, dus hij mag niet vertaald worden: in de
+   template staat `:value="k"` naast de tekst, zodat de waarde los staat van wat er te lezen
+   is. Het type uiteinde erachter is wel gewone tekst en gaat door t().
+
+   De id's dg-c, dg-ng, dg-v, dg-e1, dg-u1, dg-e2, dg-u2, dg-upg, dg-n, dg-x, dg-bsa en
+   dg-out blijven zoals ze waren. */
 const DGE={BamHI:['5′-overhang',37],EcoRI:['5′-overhang',37],HindIII:['5′-overhang',37],PstI:['3′-overhang',37],NdeI:['5′-overhang',37],XhoI:['5′-overhang',37],NotI:['5′-overhang',37],SmaI:['stomp (blunt)',25],'ander enzym':['zie productinformatie',37]};
-$('#dg-e1').innerHTML=Object.keys(DGE).map((k,i)=>`<option${i===1?' selected':''}>${k}</option>`).join(''); $('#dg-e2').innerHTML='<option value="">geen (enkele digestie)</option>'+Object.keys(DGE).map((k,i)=>`<option${i===2?' selected':''}>${k}</option>`).join('');
-calc.digest=function(){ const c=num($('#dg-c').value), ng=num($('#dg-ng').value), V=num($('#dg-v').value), e1=$('#dg-e1').value, e2=$('#dg-e2').value, u1=num($('#dg-u1').value), u2=num($('#dg-u2').value), upg=num($('#dg-upg').value), n=Math.round(num($('#dg-n').value))||1, x=(num($('#dg-x').value)||0)/100, bsa=$('#dg-bsa').checked, out=$('#dg-out'); $('#dg-u2').closest('.f').style.display=e2?'':'none';
-  if(![c,ng,V,u1,upg].every(v=>v>0)||(e2&&!(u2>0))||n>1000){ out.innerHTML=note('info','Vul DNA-concentratie, hoeveelheid DNA, reactievolume en de enzymactiviteit in.'); return; }
-  const U=upg*ng/1000, vd=ng/c, v1=U/u1, v2=e2?U/u2:0, vb=V/10, vbsa=bsa?V/100:0, enz=v1+v2, water=V-vd-vb-vbsa-enz, m=n*(1+x), gly=enz/V*50;
-  const L=[['Milli-Q',water,1],['10× buffer',vb,1],...(bsa?[['BSA (100×)',vbsa,1]]:[]),[ud(e1)+` (${fmt(u1,0)} U/µL)`,v1,1],...(e2?[[ud(e2)+` (${fmt(u2,0)} U/µL)`,v2,1]]:[]),['DNA (apart per buis)',vd,0]];
-  let h=`<div class="lbl">${e2?`Dubbele digestie · ${ud(e1)} + ${ud(e2)}`:`Enkele digestie · ${ud(e1)}`}</div><div class="big">${vol(V)} <small>per reactie</small></div>`+kv([['Enzym per reactie',`${fmt(U,1)} U per enzym`],['Enzymvolume',`${vol(enz)} (${fmt(enz/V*100,1)}% van het volume)`],['Glycerol in de reactie',fmt(gly,1)+'%'],[`Uiteinden ${ud(e1)}`,DGE[e1][0]],...(e2?[[`Uiteinden ${ud(e2)}`,DGE[e2][0]]]:[]),['Incubatie',e2&&DGE[e2][1]!==DGE[e1][1]?`1 uur bij ${DGE[e1][1]} °C en daarna bij ${DGE[e2][1]} °C (verschillende optima: na elkaar incuberen)`:`1 uur bij ${DGE[e1][1]} °C`]]);
-  h+=`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Component</th><th class="num">Per reactie</th><th class="num">Mastermix (${fmt(m,1)}×)</th></tr></thead><tbody>${L.map(l=>`<tr><td>${l[0]}</td><td class="num">${vol(l[1])}</td><td class="num">${l[2]?vol(l[1]*m):'–'}</td></tr>`).join('')}<tr class="hl"><td>Mastermix per buis</td><td class="num">${vol(V-vd)}</td><td class="num">${vol((V-vd)*m)}</td></tr></tbody></table></div>`;
-  if(enz/V>0.1) h+=note('bad',`Star-activiteit: het enzymvolume is ${fmt(enz/V*100,1)}% van de reactie (glycerol ${fmt(gly,1)}%). Houd het onder 10% (glycerol onder 5%): gebruik minder enzym of een groter reactievolume.`);
-  if(water<0) h+=note('bad','De componenten passen niet in het reactievolume: het DNA is te verdund of het volume te klein.');
-  if(Math.min(v1,v2||9)<0.5) h+=note('info','Per reactie minder dan 0,5 µL enzym: pipetteer het enzym via de mastermix of verdun het in de bijbehorende verdunningsbuffer.');
-  out.innerHTML=h+`<ol class="steps"><li>Maak de mastermix op ijs; voeg het enzym als laatste toe en meng door pipetteren (niet vortexen).</li><li>Verdeel de mix (${ud(vol(V-vd))}) per buis en voeg het DNA (${ud(vol(vd))}) toe.</li><li>Incubeer en stop de reactie met laadbuffer of door hitte-inactivatie volgens de productinformatie.</li></ol><div class="formula">V<sub>enzym</sub> = U per µg × µg DNA / (U/µL) · glycerol = V<sub>enzym</sub>/V × 50%</div>`; };
+
+const DG_TPL = `<div class="grid2">
+  <div class="panel">
+    <div class="fields">
+      <lk-field v-model="c" :label="t('Concentratie DNA')" for-id="dg-c" unit="ng/µL"/>
+      <lk-field v-model="ng" :label="t('DNA per reactie')" for-id="dg-ng" unit="ng"/>
+      <lk-field v-model="v" :label="t('Reactievolume')" for-id="dg-v" unit="µL"/>
+      <div class="f"><label for="dg-e1">{{ t('Enzym 1') }}</label><select id="dg-e1" v-model="e1"><option v-for="k in enzymes" :key="k" :value="k">{{ k }}</option></select></div>
+      <lk-field v-model="u1" :label="t('Activiteit enzym 1')" for-id="dg-u1" unit="U/µL"/>
+      <div class="f"><label for="dg-e2">{{ t('Enzym 2 (dubbele digestie)') }}</label><select id="dg-e2" v-model="e2"><option value="">{{ t('geen (enkele digestie)') }}</option><option v-for="k in enzymes" :key="k" :value="k">{{ k }}</option></select></div>
+      <lk-field v-show="e2" v-model="u2" :label="t('Activiteit enzym 2')" for-id="dg-u2" unit="U/µL"/>
+      <lk-field v-model="upg" :label="t('Enzym per µg DNA')" for-id="dg-upg" unit="U"/>
+      <lk-field v-model="n" :label="t('Aantal reacties')" for-id="dg-n" inputmode="numeric"/>
+      <lk-field v-model="x" :label="t('Extra marge')" for-id="dg-x" unit="%"/>
+      <label class="chk" for="dg-bsa"><input type="checkbox" id="dg-bsa" v-model="bsa"> {{ t('BSA toevoegen (100× stock)') }}</label>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Eén unit knipt 1 µg DNA in 1 uur in 50 µL; 5–10 U per µg geeft een ruime overmaat. Controleer in de buffertabel van de fabrikant welke buffer beide enzymen van een dubbele digestie verdragen. Voorbeelddata zijn verzonnen.') }}</p>
+  </div>
+  <div class="result"><div id="dg-out">
+    <lk-note v-if="!valid" kind="info">{{ t('Vul DNA-concentratie, hoeveelheid DNA, reactievolume en de enzymactiviteit in.') }}</lk-note>
+    <template v-else>
+      <lk-big :label="headLabel" :value="volText" :sub="t('per reactie')"/>
+      <lk-kv :rows="rows"/>
+      <lk-table :cols="cols" :rows="mixRows"/>
+      <lk-note v-if="warnStar" kind="bad">{{ warnStar }}</lk-note>
+      <lk-note v-if="warnFit" kind="bad">{{ warnFit }}</lk-note>
+      <lk-note v-if="warnSmall" kind="info">{{ warnSmall }}</lk-note>
+      <lk-steps :steps="steps"/>
+      <lk-formula :html="tHtml('V&lt;sub&gt;enzym&lt;/sub&gt; = U per µg × µg DNA / (U/µL) · glycerol = V&lt;sub&gt;enzym&lt;/sub&gt;/V × 50%')"/>
+    </template>
+  </div></div>
+</div>`;
+
+const dgVue = lkVueMount('#dg-app', {
+  template: DG_TPL,
+  data() { return {c: lkNumIn('250'), ng: lkNumIn('1000'), v: lkNumIn('50'), e1: 'EcoRI', u1: lkNumIn('20'),
+    e2: 'HindIII', u2: lkNumIn('20'), upg: lkNumIn('10'), n: '4', x: lkNumIn('10'), bsa: false}; },
+  computed: {
+    enzymes() { return Object.keys(DGE); },
+    /* alle afgeleide maten op een plek, zodat elke regel hieronder er alleen uit leest */
+    m() {
+      const c = num(this.c), ng = num(this.ng), V = num(this.v);
+      const u1 = num(this.u1), u2 = num(this.u2), upg = num(this.upg);
+      const n = Math.round(num(this.n)) || 1, x = (num(this.x) || 0) / 100;
+      const U = upg * ng / 1000, vd = ng / c, v1 = U / u1, v2 = this.e2 ? U / u2 : 0;
+      const vb = V / 10, vbsa = this.bsa ? V / 100 : 0, enz = v1 + v2;
+      return {c, ng, V, u1, u2, upg, n, x, U, vd, v1, v2, vb, vbsa, enz,
+        water: V - vd - vb - vbsa - enz, mult: n * (1 + x), gly: enz / V * 50};
+    },
+    valid() {
+      const m = this.m;
+      return [m.c, m.ng, m.V, m.u1, m.upg].every(a => a > 0) && (!this.e2 || m.u2 > 0) && m.n <= 1000;
+    },
+    volText() { return lkNumIn(vol(this.m.V)); },
+    headLabel() {
+      return this.e2 ? this.t('Dubbele digestie') + ' · ' + this.e1 + ' + ' + this.e2
+        : this.t('Enkele digestie') + ' · ' + this.e1;
+    },
+    rows() {
+      const t = this.t, m = this.m, F = (a, d) => lkNumIn(fmt(a, d)), VL = a => lkNumIn(vol(a));
+      const inc = this.e2 && DGE[this.e2][1] !== DGE[this.e1][1]
+        ? t('1 uur bij ' + DGE[this.e1][1] + ' °C en daarna bij ' + DGE[this.e2][1] + ' °C (verschillende optima: na elkaar incuberen)')
+        : t('1 uur bij ' + DGE[this.e1][1] + ' °C');
+      return [[t('Enzym per reactie'), `${F(m.U, 1)} ${t('U per enzym')}`],
+        [t('Enzymvolume'), `${VL(m.enz)} (${F(m.enz / m.V * 100, 1)}% ${t('van het volume')})`],
+        [t('Glycerol in de reactie'), F(m.gly, 1) + '%'],
+        [`${t('Uiteinden')} ${this.e1}`, t(DGE[this.e1][0])],
+        this.e2 ? [`${t('Uiteinden')} ${this.e2}`, t(DGE[this.e2][0])] : null,
+        [t('Incubatie'), inc]].filter(Boolean);
+    },
+    cols() {
+      return [{h: this.t('Component')}, {h: this.t('Per reactie'), num: true},
+        {h: this.t('Mastermix') + ' (' + lkNumIn(fmt(this.m.mult, 1)) + '×)', num: true}];
+    },
+    mixRows() {
+      const t = this.t, m = this.m, F = (a, d) => lkNumIn(fmt(a, d)), VL = a => lkNumIn(vol(a));
+      const L = [[t('Milli-Q'), m.water, 1], [t('10× buffer'), m.vb, 1],
+        ...(this.bsa ? [[t('BSA (100×)'), m.vbsa, 1]] : []),
+        [`${this.e1} (${F(m.u1, 0)} U/µL)`, m.v1, 1],
+        ...(this.e2 ? [[`${this.e2} (${F(m.u2, 0)} U/µL)`, m.v2, 1]] : []),
+        [t('DNA (apart per buis)'), m.vd, 0]];
+      return [...L.map(l => [l[0], VL(l[1]), l[2] ? VL(l[1] * m.mult) : '–']),
+        {cls: 'hl', cells: [t('Mastermix per buis'), VL(m.V - m.vd), VL((m.V - m.vd) * m.mult)]}];
+    },
+    warnStar() {
+      const m = this.m; if (m.enz / m.V <= 0.1) return '';
+      return this.t('Star-activiteit: het enzymvolume is ' + lkNumIn(fmt(m.enz / m.V * 100, 1))
+        + '% van de reactie (glycerol ' + lkNumIn(fmt(m.gly, 1))
+        + '%). Houd het onder 10% (glycerol onder 5%): gebruik minder enzym of een groter reactievolume.');
+    },
+    warnFit() {
+      return this.m.water < 0
+        ? this.t('De componenten passen niet in het reactievolume: het DNA is te verdund of het volume te klein.') : '';
+    },
+    warnSmall() {
+      const m = this.m;
+      return Math.min(m.v1, m.v2 || 9) < 0.5
+        ? this.t('Per reactie minder dan 0,5 µL enzym: pipetteer het enzym via de mastermix of verdun het in de bijbehorende verdunningsbuffer.') : '';
+    },
+    steps() {
+      const t = this.t, m = this.m, VL = a => lkNumIn(vol(a));
+      return [t('Maak de mastermix op ijs; voeg het enzym als laatste toe en meng door pipetteren (niet vortexen).'),
+        t('Verdeel de mix (' + uv(VL(m.V - m.vd)) + ') per buis en voeg het DNA (' + uv(VL(m.vd)) + ') toe.'),
+        t('Incubeer en stop de reactie met laadbuffer of door hitte-inactivatie volgens de productinformatie.')];
+    }
+  }
+});
+calc.digest = () => {};

@@ -52,6 +52,7 @@ function lkVueMount(sel, options) {
     app.config.globalProperties.uv = uv;
     app.config.globalProperties.esc = esc;
     app.config.errorHandler = (err, inst, info) => { console.error('Vue-fout in ' + sel, info, err); };
+    if (typeof lkUiInstall === 'function') lkUiInstall(app);   /* de gedeelde componenten, zie 00b_ui.js */
     return {app, vm: app.mount(host)};
   } catch (e) { console.error('Vue kon ' + sel + ' niet opzetten', e); return null; }
 }

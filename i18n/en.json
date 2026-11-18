@@ -4378,5 +4378,13 @@
 "onbruikbaar": "unusable",
 "Monsters: gemiddelde ± SD": "Samples: mean ± SD",
 "Z-factor monsters": "Z-factor of the samples",
-"Met minder dan {#} controles per groep is de Z′ onnauwkeurig.": "With fewer than {#} controls per group the Z′ is imprecise."
+"Met minder dan {#} controles per groep is de Z′ onnauwkeurig.": "With fewer than {#} controls per group the Z′ is imprecise.",
+"Dubbele digestie": "Double digest",
+"Enkele digestie": "Single digest",
+"per reactie": "per reaction",
+"U per enzym": "U per enzyme",
+"van het volume": "of the volume",
+"Uiteinden": "Ends",
+"5′-overhang": "5′ overhang",
+"3′-overhang": "3′ overhang"
 }

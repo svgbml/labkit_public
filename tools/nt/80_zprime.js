@@ -1,9 +1,9 @@
 /* ================= Z′-FACTOR =================
-   Derde tool op Vue 3 (zie 00a_vue.js), en de eerste met een tekening erbij. De tekening
-   blijft met de gewone tekencontext gemaakt: Vue beheert de velden en de uitkomst, en na elke
-   render wordt het canvas opnieuw getekend. Een virtuele DOM heeft op een <canvas> geen nut,
-   en de tekst die op een canvas komt loopt al door trCanvas(), dus die wordt nog gewoon
-   vertaald en door tests/i18n_collect.py gezien.
+   Op Vue 3 met de gedeelde componenten uit 00b_ui.js, en de eerste tool met een tekening
+   erbij. Het canvas blijft met de gewone tekencontext gemaakt: Vue beheert de velden en de
+   uitkomst en tekent na elke render opnieuw. Een virtuele DOM heeft op een <canvas> geen nut,
+   en tekst die op een canvas komt loopt al door trCanvas(), dus die wordt nog gewoon vertaald
+   en door tests/i18n_collect.py gezien.
 
    De id's zp-pos, zp-neg, zp-s, zp-cv en zp-out blijven zoals ze waren. */
 const ZP_TPL = `<div class="grid2">
@@ -15,7 +15,16 @@ const ZP_TPL = `<div class="grid2">
     </div>
     <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Getallen scheiden met spaties of regels; plakken uit Excel mag. Gebruik minstens 8 en liefst 16 of meer controleputjes, verspreid over de plaat. Voorbeelddata zijn verzonnen.') }}</p>
   </div>
-  <div class="result"><canvas id="zp-cv" v-show="ok"></canvas><div id="zp-out" v-html="out"></div></div>
+  <div class="result"><canvas id="zp-cv" v-show="ok"></canvas><div id="zp-out">
+    <lk-note v-if="!ok" kind="info">{{ t('Vul minstens twee waarden voor beide controles in.') }}</lk-note>
+    <template v-else>
+      <lk-big :label="t('Z′-factor')" :value="zText" :chip="grade.text" :chip-kind="grade.kind"/>
+      <lk-kv :rows="rows"/>
+      <lk-kv v-if="sampleRows.length" :rows="sampleRows"/>
+      <lk-note v-if="few" kind="info">{{ t('Met minder dan 8 controles per groep is de Z′ onnauwkeurig.') }}</lk-note>
+      <lk-formula :html="tHtml('Z′ = 1 − 3(σ&lt;sub&gt;p&lt;/sub&gt; + σ&lt;sub&gt;n&lt;/sub&gt;) / |μ&lt;sub&gt;p&lt;/sub&gt; − μ&lt;sub&gt;n&lt;/sub&gt;| · banden: μ ± 3σ')"/>
+    </template>
+  </div></div>
 </div>`;
 
 const zpVue = lkVueMount('#zp-app', {
@@ -28,27 +37,35 @@ const zpVue = lkVueMount('#zp-app', {
   computed: {
     sets() { return {P: numsC(this.pos), N: numsC(this.neg), S: numsC(this.smp)}; },
     ok() { const {P, N} = this.sets; return P.length >= 2 && N.length >= 2; },
-    out() {
-      const t = this.t, tH = this.tHtml, {P, N, S} = this.sets;
-      const F = (x, d) => lkNumIn(fmt(x, d)), G = (x, d) => lkNumIn(sig(x, d));
-      if (!this.ok) return note('info', t('Vul minstens twee waarden voor beide controles in.'));
-      const mp = mean(P), sp = sd(P), mn = mean(N), sn = sd(N), d = Math.abs(mp - mn);
-      const z = d > 0 ? 1 - 3 * (sp + sn) / d : -Infinity;
-      const cls = z >= 1 ? ['ok', t('ideaal')] : z >= 0.5 ? ['ok', t('uitstekend')]
-        : z >= 0 ? ['warn', t('matig')] : ['bad', t('onbruikbaar')];
-      let h = `<div class="lbl">${t('Z′-factor')}</div><div class="big">${isFinite(z) ? F(z, 3) : '–'}`
-        + `<span class="chip ${cls[0]}" style="vertical-align:middle;margin-left:6px">${cls[1]}</span></div>`
-        + kv([[t('Positief: gemiddelde ± SD'), `${G(mp, 4)} ± ${G(sp, 3)} (${t('CV')} ${F(sp / Math.abs(mp) * 100, 1)}%, n = ${P.length})`],
-          [t('Negatief: gemiddelde ± SD'), `${G(mn, 4)} ± ${G(sn, 3)} (${t('CV')} ${F(sn / Math.abs(mn) * 100, 1)}%, n = ${N.length})`],
-          [t('Signaal / achtergrond'), mn !== 0 ? F(mp / mn, 2) : '–'],
-          [t('Signaal / ruis'), sn > 0 ? F(d / sn, 1) : '–'],
-          [t('Scheidingsband'), G(d - 3 * (sp + sn), 3)]]);
-      if (S.length > 1) { const ms = mean(S), ss = sd(S),
-        zs = Math.abs(ms - mn) > 0 ? 1 - 3 * (ss + sn) / Math.abs(ms - mn) : NaN;
-        h += kv([[t('Monsters: gemiddelde ± SD'), `${G(ms, 4)} ± ${G(ss, 3)} (n = ${S.length})`],
-          [t('Z-factor monsters'), F(zs, 3)]]); }
-      if (P.length < 8 || N.length < 8) h += note('info', t('Met minder dan 8 controles per groep is de Z′ onnauwkeurig.'));
-      return h + `<div class="formula">${tH('Z′ = 1 − 3(σ<sub>p</sub> + σ<sub>n</sub>) / |μ<sub>p</sub> − μ<sub>n</sub>| · banden: μ ± 3σ')}</div>`;
+    few() { const {P, N} = this.sets; return P.length < 8 || N.length < 8; },
+    stats() {
+      const {P, N} = this.sets, mp = mean(P), sp = sd(P), mn = mean(N), sn = sd(N);
+      const d = Math.abs(mp - mn);
+      return {mp, sp, mn, sn, d, z: d > 0 ? 1 - 3 * (sp + sn) / d : -Infinity};
+    },
+    zText() { const z = this.stats.z; return isFinite(z) ? lkNumIn(fmt(z, 3)) : '–'; },
+    grade() {
+      const z = this.stats.z, t = this.t;
+      if (z >= 1) return {kind: 'ok', text: t('ideaal')};
+      if (z >= 0.5) return {kind: 'ok', text: t('uitstekend')};
+      if (z >= 0) return {kind: 'warn', text: t('matig')};
+      return {kind: 'bad', text: t('onbruikbaar')};
+    },
+    rows() {
+      const t = this.t, {P, N} = this.sets, {mp, sp, mn, sn, d} = this.stats;
+      const F = (x, dd) => lkNumIn(fmt(x, dd)), G = (x, dd) => lkNumIn(sig(x, dd));
+      return [[t('Positief: gemiddelde ± SD'), `${G(mp, 4)} ± ${G(sp, 3)} (${t('CV')} ${F(sp / Math.abs(mp) * 100, 1)}%, n = ${P.length})`],
+        [t('Negatief: gemiddelde ± SD'), `${G(mn, 4)} ± ${G(sn, 3)} (${t('CV')} ${F(sn / Math.abs(mn) * 100, 1)}%, n = ${N.length})`],
+        [t('Signaal / achtergrond'), mn !== 0 ? F(mp / mn, 2) : '–'],
+        [t('Signaal / ruis'), sn > 0 ? F(d / sn, 1) : '–'],
+        [t('Scheidingsband'), G(d - 3 * (sp + sn), 3)]];
+    },
+    sampleRows() {
+      const {S} = this.sets; if (S.length <= 1) return [];
+      const t = this.t, {mn, sn} = this.stats, ms = mean(S), ss = sd(S);
+      const zs = Math.abs(ms - mn) > 0 ? 1 - 3 * (ss + sn) / Math.abs(ms - mn) : NaN;
+      return [[t('Monsters: gemiddelde ± SD'), `${lkNumIn(sig(ms, 4))} ± ${lkNumIn(sig(ss, 3))} (n = ${S.length})`],
+        [t('Z-factor monsters'), lkNumIn(fmt(zs, 3))]];
     }
   },
   /* de tekening wordt na elke render bijgewerkt; dat is goedkoop en houdt canvas en uitkomst
@@ -58,8 +75,7 @@ const zpVue = lkVueMount('#zp-app', {
   methods: {
     draw() {
       const cv = document.getElementById('zp-cv'); if (!cv || !this.ok) return;
-      const {P, N, S} = this.sets, mp = mean(P), sp = sd(P), mn = mean(N), sn = sd(N);
-      const all = [...P, ...N, ...S];
+      const {P, N, S} = this.sets, {mp, sp, mn, sn} = this.stats, all = [...P, ...N, ...S];
       const y0 = Math.min(...all, mn - 3 * sn, mp - 3 * sp), y1 = Math.max(...all, mp + 3 * sp, mn + 3 * sn);
       const pad = (y1 - y0) * 0.08, n = Math.max(P.length, N.length, S.length);
       const g = chart(cv, {xmin: 0, xmax: n + 1, ymin: y0 - pad, ymax: y1 + pad, xlabel: 'putje', ylabel: 'signaal',

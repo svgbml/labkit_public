@@ -3617,25 +3617,8 @@ behandeld 25 0</textarea></div>
 <section class="tool" id="t-digest" data-tool="digest">
   <header class="tool-head"><h2>Restrictiedigestie</h2>
   <p>Pipetteerschema voor een enkele of dubbele restrictiedigestie, per reactie en als mastermix, met een controle op star-activiteit door te veel enzym (glycerol).</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="dg-c">Concentratie DNA</label><div class="inu"><input id="dg-c" inputmode="decimal" value="250"><span class="u">ng/µL</span></div></div>
-        <div class="f"><label for="dg-ng">DNA per reactie</label><div class="inu"><input id="dg-ng" inputmode="decimal" value="1000"><span class="u">ng</span></div></div>
-        <div class="f"><label for="dg-v">Reactievolume</label><div class="inu"><input id="dg-v" inputmode="decimal" value="50"><span class="u">µL</span></div></div>
-        <div class="f"><label for="dg-e1">Enzym 1</label><select id="dg-e1"></select></div>
-        <div class="f"><label for="dg-u1">Activiteit enzym 1</label><div class="inu"><input id="dg-u1" inputmode="decimal" value="20"><span class="u">U/µL</span></div></div>
-        <div class="f"><label for="dg-e2">Enzym 2 (dubbele digestie)</label><select id="dg-e2"></select></div>
-        <div class="f"><label for="dg-u2">Activiteit enzym 2</label><div class="inu"><input id="dg-u2" inputmode="decimal" value="20"><span class="u">U/µL</span></div></div>
-        <div class="f"><label for="dg-upg">Enzym per µg DNA</label><div class="inu"><input id="dg-upg" inputmode="decimal" value="10"><span class="u">U</span></div></div>
-        <div class="f"><label for="dg-n">Aantal reacties</label><input id="dg-n" inputmode="numeric" value="4"></div>
-        <div class="f"><label for="dg-x">Extra marge</label><div class="inu"><input id="dg-x" inputmode="decimal" value="10"><span class="u">%</span></div></div>
-        <label class="chk" for="dg-bsa"><input type="checkbox" id="dg-bsa"> BSA toevoegen (100× stock)</label>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Eén unit knipt 1 µg DNA in 1 uur in 50 µL; 5–10 U per µg geeft een ruime overmaat. Controleer in de buffertabel van de fabrikant welke buffer beide enzymen van een dubbele digestie verdragen. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><div id="dg-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie 91_digest.js). -->
+  <div id="dg-app"></div>
   <p class="src">Standaardreactie: 1 µg DNA, 1× buffer, 10 U enzym in 50 µL, 1 uur bij de optimale temperatuur van het enzym (NEB, Optimizing Restriction Endonuclease Reactions). Enzymen worden geleverd in 50% glycerol; het enzymvolume hoort niet meer dan 10% van het reactievolume te zijn, zodat de glycerolconcentratie onder 5% blijft en star-activiteit wordt voorkomen (NEB, Star Activity). Type uiteinde per enzym: NEB-productinformatie. BSA alleen als de buffer het niet al bevat.</p>
 </section>
 <!-- /NT:digest -->
@@ -3869,7 +3852,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=623738b61a"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=623b8cbd79"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -6358,6 +6341,7 @@ function lkVueMount(sel, options) {
     app.config.globalProperties.uv = uv;
     app.config.globalProperties.esc = esc;
     app.config.errorHandler = (err, inst, info) => { console.error('Vue-fout in ' + sel, info, err); };
+    if (typeof lkUiInstall === 'function') lkUiInstall(app);   /* de gedeelde componenten, zie 00b_ui.js */
     return {app, vm: app.mount(host)};
   } catch (e) { console.error('Vue kon ' + sel + ' niet opzetten', e); return null; }
 }
@@ -6368,6 +6352,141 @@ function lkVueMount(sel, options) {
 const lkNumIn = v => (LANG === 'en' && typeof i18nNum === 'function'
   ? String(v).replace(/\d+(?:[.,]\d+)*/g, m => i18nNum(m)) : String(v));
 /* /NT:vuelayer */
+/* NT:vueui */
+/* ================= GEDEELDE VUE-COMPONENTEN =================
+   De eerste omgezette tools bouwden hun uitkomst nog als een string HTML en zetten die met
+   v-html in de pagina. Dat werkt, maar het is geen Vue: je raakt het declaratieve renderen
+   kwijt, je bouwt opmaak met plakwerk en elke tool herhaalt dezelfde stukjes.
+
+   Hieronder staan die stukjes één keer, als echte componenten. Ze zijn met h() geschreven in
+   plaats van met een template, zodat ze geen compilatie per gebruik kosten.
+
+     <lk-note kind="warn">tekst</lk-note>        een melding (info, warn, bad, ok)
+     <lk-kv :rows="[[label, waarde], …]">        de definitielijst met uitkomsten
+     <lk-field label="…" for="x-id" unit="µL">   een veld met label en eenheid
+     <lk-table :cols="…" :rows="…">              een tabel met koppen en getalkolommen
+     <lk-big :value="…" sub="per reactie">       het grote getal bovenaan een uitkomst
+
+   Afspraken die hier gelden:
+   - Een label of kop die een gewone tekst is, gaat door t(). Geef je een waarde door die al
+     opgemaakt is (een getal uit fmt(), vol() of sig()), dan blijft die staan zoals hij is.
+   - Een waarde mag HTML zijn, want de tools maken die zelf; dat is dezelfde afspraak als bij
+     de oude kv()-helper. Tekst van de gebruiker hoort daarom door esc() voordat hij hier
+     binnenkomt.
+   - De klassen zijn precies die van de bestaande opmaak (note, kv, big, mini, f, inu), zodat
+     alle thema's en tests/layout_audit.py blijven werken. */
+
+const LKUI = {};
+
+/* een melding: info (neutraal), warn (let op), bad (fout), ok (in orde) */
+LKUI.note = {
+  props: {kind: {type: String, default: 'info'}, html: {type: String, default: ''}},
+  setup(props, {slots}) {
+    return () => LKVUE.h('div', {class: 'note ' + props.kind},
+      props.html ? [LKVUE.h('span', {innerHTML: props.html})] : (slots.default ? slots.default() : []));
+  }
+};
+
+/* de uitkomstenlijst: rows is [[label, waarde], …]. Een waarde mag HTML bevatten. */
+LKUI.kv = {
+  props: {rows: {type: Array, default: () => []}},
+  setup(props) {
+    return () => LKVUE.h('dl', {class: 'kv'}, props.rows.filter(Boolean).flatMap(([k, v]) => [
+      LKVUE.h('dt', {innerHTML: String(k)}),
+      LKVUE.h('dd', {innerHTML: v == null ? '–' : String(v)})
+    ]));
+  }
+};
+
+/* het grote getal bovenaan, met een label erboven en eventueel een klein woord erachter */
+LKUI.big = {
+  props: {label: String, value: [String, Number], sub: String, chip: String, chipKind: String,
+    cls: String, top: String},
+  setup(props) {
+    return () => LKVUE.h('div', null, [
+      props.label ? LKVUE.h('div', {class: 'lbl', style: props.top ? 'margin-top:' + props.top : null}, props.label) : null,
+      LKVUE.h('div', {class: 'big' + (props.cls ? ' ' + props.cls : '')}, [
+        String(props.value == null ? '–' : props.value),
+        props.sub ? LKVUE.h('small', null, ' ' + props.sub) : null,
+        props.chip ? LKVUE.h('span', {class: 'chip ' + (props.chipKind || 'ok'),
+          style: 'vertical-align:middle;margin-left:6px'}, props.chip) : null
+      ])
+    ]);
+  }
+};
+
+/* een invoerveld met label en, als je die meegeeft, een eenheid erachter.
+   Gebruik het met v-model: <lk-field v-model="v" label="…" for-id="dg-v" unit="µL"/> */
+LKUI.field = {
+  props: {modelValue: [String, Number], label: String, forId: String, unit: String,
+    inputmode: {type: String, default: 'decimal'}, span: [String, Number], cls: String},
+  emits: ['update:modelValue'],
+  setup(props, {emit}) {
+    const input = () => LKVUE.h('input', {
+      id: props.forId, inputmode: props.inputmode, class: props.cls,
+      value: props.modelValue,
+      onInput: e => emit('update:modelValue', e.target.value)
+    });
+    return () => LKVUE.h('div', {class: 'f', style: props.span ? 'grid-column:span ' + props.span : null}, [
+      LKVUE.h('label', {for: props.forId}, props.label),
+      props.unit
+        ? LKVUE.h('div', {class: 'inu'}, [input(), LKVUE.h('span', {class: 'u'}, props.unit)])
+        : input()
+    ]);
+  }
+};
+
+/* een tabel. cols is [{h:'kop', num:true}, …] en rows is [[cel, …], …] of
+   {cells:[…], cls:'hl'}. Een cel mag HTML zijn. */
+LKUI.table = {
+  props: {cols: {type: Array, default: () => []}, rows: {type: Array, default: () => []}, wrap: {type: Boolean, default: true}},
+  setup(props) {
+    const table = () => LKVUE.h('table', {class: 'mini'}, [
+      LKVUE.h('thead', null, LKVUE.h('tr', null, props.cols.map(c =>
+        LKVUE.h('th', {class: c.num ? 'num' : null, innerHTML: String(c.h == null ? '' : c.h)})))),
+      LKVUE.h('tbody', null, props.rows.filter(Boolean).map(r => {
+        const cells = Array.isArray(r) ? r : r.cells;
+        return LKVUE.h('tr', {class: Array.isArray(r) ? null : r.cls}, cells.map((v, i) =>
+          LKVUE.h('td', {class: props.cols[i] && props.cols[i].num ? 'num' : null,
+            innerHTML: v == null ? '–' : String(v)})));
+      }))
+    ]);
+    return () => props.wrap
+      ? LKVUE.h('div', {class: 'tbl-wrap', style: 'margin-top:12px'}, table())
+      : table();
+  }
+};
+
+/* de formuleregel onderaan een uitkomst */
+LKUI.formula = {
+  props: {html: String},
+  setup(props, {slots}) {
+    return () => LKVUE.h('div', {class: 'formula'},
+      props.html ? [LKVUE.h('span', {innerHTML: props.html})] : (slots.default ? slots.default() : []));
+  }
+};
+
+/* een genummerde werkwijze; steps is een lijst strings die HTML mogen bevatten */
+LKUI.steps = {
+  props: {steps: {type: Array, default: () => []}},
+  setup(props) {
+    return () => LKVUE.h('ol', {class: 'steps'},
+      props.steps.filter(Boolean).map(s => LKVUE.h('li', {innerHTML: String(s)})));
+  }
+};
+
+/* Zet de gedeelde componenten op een app. lkVueMount() doet dit zelf, dus een tool hoeft er
+   niets voor te doen. */
+function lkUiInstall(app) {
+  app.component('lk-note', LKUI.note);
+  app.component('lk-kv', LKUI.kv);
+  app.component('lk-big', LKUI.big);
+  app.component('lk-field', LKUI.field);
+  app.component('lk-table', LKUI.table);
+  app.component('lk-formula', LKUI.formula);
+  app.component('lk-steps', LKUI.steps);
+}
+/* /NT:vueui */
 /* NT:pic */
 /* ================= GEDEELDE OPMAAK VOOR TEKENTOOLS =================
    Elke tool die een afbeelding maakt gebruikt dezelfde indeling (tekening boven of links,
@@ -8358,11 +8477,11 @@ calc.ksp=function(){ const K=num($('#ks-k').value), x=Math.round(num($('#ks-x').
 /* /NT:ksp */
 /* NT:zprime */
 /* ================= Z′-FACTOR =================
-   Derde tool op Vue 3 (zie 00a_vue.js), en de eerste met een tekening erbij. De tekening
-   blijft met de gewone tekencontext gemaakt: Vue beheert de velden en de uitkomst, en na elke
-   render wordt het canvas opnieuw getekend. Een virtuele DOM heeft op een <canvas> geen nut,
-   en de tekst die op een canvas komt loopt al door trCanvas(), dus die wordt nog gewoon
-   vertaald en door tests/i18n_collect.py gezien.
+   Op Vue 3 met de gedeelde componenten uit 00b_ui.js, en de eerste tool met een tekening
+   erbij. Het canvas blijft met de gewone tekencontext gemaakt: Vue beheert de velden en de
+   uitkomst en tekent na elke render opnieuw. Een virtuele DOM heeft op een <canvas> geen nut,
+   en tekst die op een canvas komt loopt al door trCanvas(), dus die wordt nog gewoon vertaald
+   en door tests/i18n_collect.py gezien.
 
    De id's zp-pos, zp-neg, zp-s, zp-cv en zp-out blijven zoals ze waren. */
 const ZP_TPL = `<div class="grid2">
@@ -8374,7 +8493,16 @@ const ZP_TPL = `<div class="grid2">
     </div>
     <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Getallen scheiden met spaties of regels; plakken uit Excel mag. Gebruik minstens 8 en liefst 16 of meer controleputjes, verspreid over de plaat. Voorbeelddata zijn verzonnen.') }}</p>
   </div>
-  <div class="result"><canvas id="zp-cv" v-show="ok"></canvas><div id="zp-out" v-html="out"></div></div>
+  <div class="result"><canvas id="zp-cv" v-show="ok"></canvas><div id="zp-out">
+    <lk-note v-if="!ok" kind="info">{{ t('Vul minstens twee waarden voor beide controles in.') }}</lk-note>
+    <template v-else>
+      <lk-big :label="t('Z′-factor')" :value="zText" :chip="grade.text" :chip-kind="grade.kind"/>
+      <lk-kv :rows="rows"/>
+      <lk-kv v-if="sampleRows.length" :rows="sampleRows"/>
+      <lk-note v-if="few" kind="info">{{ t('Met minder dan 8 controles per groep is de Z′ onnauwkeurig.') }}</lk-note>
+      <lk-formula :html="tHtml('Z′ = 1 − 3(σ&lt;sub&gt;p&lt;/sub&gt; + σ&lt;sub&gt;n&lt;/sub&gt;) / |μ&lt;sub&gt;p&lt;/sub&gt; − μ&lt;sub&gt;n&lt;/sub&gt;| · banden: μ ± 3σ')"/>
+    </template>
+  </div></div>
 </div>`;
 
 const zpVue = lkVueMount('#zp-app', {
@@ -8387,27 +8515,35 @@ const zpVue = lkVueMount('#zp-app', {
   computed: {
     sets() { return {P: numsC(this.pos), N: numsC(this.neg), S: numsC(this.smp)}; },
     ok() { const {P, N} = this.sets; return P.length >= 2 && N.length >= 2; },
-    out() {
-      const t = this.t, tH = this.tHtml, {P, N, S} = this.sets;
-      const F = (x, d) => lkNumIn(fmt(x, d)), G = (x, d) => lkNumIn(sig(x, d));
-      if (!this.ok) return note('info', t('Vul minstens twee waarden voor beide controles in.'));
-      const mp = mean(P), sp = sd(P), mn = mean(N), sn = sd(N), d = Math.abs(mp - mn);
-      const z = d > 0 ? 1 - 3 * (sp + sn) / d : -Infinity;
-      const cls = z >= 1 ? ['ok', t('ideaal')] : z >= 0.5 ? ['ok', t('uitstekend')]
-        : z >= 0 ? ['warn', t('matig')] : ['bad', t('onbruikbaar')];
-      let h = `<div class="lbl">${t('Z′-factor')}</div><div class="big">${isFinite(z) ? F(z, 3) : '–'}`
-        + `<span class="chip ${cls[0]}" style="vertical-align:middle;margin-left:6px">${cls[1]}</span></div>`
-        + kv([[t('Positief: gemiddelde ± SD'), `${G(mp, 4)} ± ${G(sp, 3)} (${t('CV')} ${F(sp / Math.abs(mp) * 100, 1)}%, n = ${P.length})`],
-          [t('Negatief: gemiddelde ± SD'), `${G(mn, 4)} ± ${G(sn, 3)} (${t('CV')} ${F(sn / Math.abs(mn) * 100, 1)}%, n = ${N.length})`],
-          [t('Signaal / achtergrond'), mn !== 0 ? F(mp / mn, 2) : '–'],
-          [t('Signaal / ruis'), sn > 0 ? F(d / sn, 1) : '–'],
-          [t('Scheidingsband'), G(d - 3 * (sp + sn), 3)]]);
-      if (S.length > 1) { const ms = mean(S), ss = sd(S),
-        zs = Math.abs(ms - mn) > 0 ? 1 - 3 * (ss + sn) / Math.abs(ms - mn) : NaN;
-        h += kv([[t('Monsters: gemiddelde ± SD'), `${G(ms, 4)} ± ${G(ss, 3)} (n = ${S.length})`],
-          [t('Z-factor monsters'), F(zs, 3)]]); }
-      if (P.length < 8 || N.length < 8) h += note('info', t('Met minder dan 8 controles per groep is de Z′ onnauwkeurig.'));
-      return h + `<div class="formula">${tH('Z′ = 1 − 3(σ<sub>p</sub> + σ<sub>n</sub>) / |μ<sub>p</sub> − μ<sub>n</sub>| · banden: μ ± 3σ')}</div>`;
+    few() { const {P, N} = this.sets; return P.length < 8 || N.length < 8; },
+    stats() {
+      const {P, N} = this.sets, mp = mean(P), sp = sd(P), mn = mean(N), sn = sd(N);
+      const d = Math.abs(mp - mn);
+      return {mp, sp, mn, sn, d, z: d > 0 ? 1 - 3 * (sp + sn) / d : -Infinity};
+    },
+    zText() { const z = this.stats.z; return isFinite(z) ? lkNumIn(fmt(z, 3)) : '–'; },
+    grade() {
+      const z = this.stats.z, t = this.t;
+      if (z >= 1) return {kind: 'ok', text: t('ideaal')};
+      if (z >= 0.5) return {kind: 'ok', text: t('uitstekend')};
+      if (z >= 0) return {kind: 'warn', text: t('matig')};
+      return {kind: 'bad', text: t('onbruikbaar')};
+    },
+    rows() {
+      const t = this.t, {P, N} = this.sets, {mp, sp, mn, sn, d} = this.stats;
+      const F = (x, dd) => lkNumIn(fmt(x, dd)), G = (x, dd) => lkNumIn(sig(x, dd));
+      return [[t('Positief: gemiddelde ± SD'), `${G(mp, 4)} ± ${G(sp, 3)} (${t('CV')} ${F(sp / Math.abs(mp) * 100, 1)}%, n = ${P.length})`],
+        [t('Negatief: gemiddelde ± SD'), `${G(mn, 4)} ± ${G(sn, 3)} (${t('CV')} ${F(sn / Math.abs(mn) * 100, 1)}%, n = ${N.length})`],
+        [t('Signaal / achtergrond'), mn !== 0 ? F(mp / mn, 2) : '–'],
+        [t('Signaal / ruis'), sn > 0 ? F(d / sn, 1) : '–'],
+        [t('Scheidingsband'), G(d - 3 * (sp + sn), 3)]];
+    },
+    sampleRows() {
+      const {S} = this.sets; if (S.length <= 1) return [];
+      const t = this.t, {mn, sn} = this.stats, ms = mean(S), ss = sd(S);
+      const zs = Math.abs(ms - mn) > 0 ? 1 - 3 * (ss + sn) / Math.abs(ms - mn) : NaN;
+      return [[t('Monsters: gemiddelde ± SD'), `${lkNumIn(sig(ms, 4))} ± ${lkNumIn(sig(ss, 3))} (n = ${S.length})`],
+        [t('Z-factor monsters'), lkNumIn(fmt(zs, 3))]];
     }
   },
   /* de tekening wordt na elke render bijgewerkt; dat is goedkoop en houdt canvas en uitkomst
@@ -8417,8 +8553,7 @@ const zpVue = lkVueMount('#zp-app', {
   methods: {
     draw() {
       const cv = document.getElementById('zp-cv'); if (!cv || !this.ok) return;
-      const {P, N, S} = this.sets, mp = mean(P), sp = sd(P), mn = mean(N), sn = sd(N);
-      const all = [...P, ...N, ...S];
+      const {P, N, S} = this.sets, {mp, sp, mn, sn} = this.stats, all = [...P, ...N, ...S];
       const y0 = Math.min(...all, mn - 3 * sn, mp - 3 * sp), y1 = Math.max(...all, mp + 3 * sp, mn + 3 * sn);
       const pad = (y1 - y0) * 0.08, n = Math.max(P.length, N.length, S.length);
       const g = chart(cv, {xmin: 0, xmax: n + 1, ymin: y0 - pad, ymax: y1 + pad, xlabel: 'putje', ylabel: 'signaal',
@@ -8521,14 +8656,14 @@ calc.km=function(){ const un=$('#km-u').value, out=$('#km-out'), cv=$('#km-cv');
 /* /NT:km */
 /* NT:sigfig */
 /* ================= SIGNIFICANTE CIJFERS =================
-   Eerste tool op Vue 3 (zie 00a_vue.js voor de laag eronder). Het rekenwerk hieronder is
-   onveranderd: het telt met BigInt op de getypte cijfers, niet met een afgeronde
-   computerwaarde, dus 0,004565 rondt af op wat er staat en niet op wat een double ervan maakt.
+   Op Vue 3 en declaratief opgebouwd met de gedeelde componenten uit 00b_ui.js.
 
-   De component houdt de element-id's van de oude tool aan (sf-x, sf-n, sf-m, sf-u, sf-ud,
-   sf-out). Daarmee blijven het delen van een link, ongedaan maken, de invoeropslag en
-   tests/validate.py werken: die zetten .value en sturen een input-event, en v-model luistert
-   daarnaar. Alle tekst loopt door t(), want binnen een Vue-boom komt de vertaallaag niet. */
+   Het rekenwerk hieronder is onveranderd: het telt met BigInt op de getypte cijfers, niet met
+   een afgeronde computerwaarde, dus 0,004565 rondt af op wat er staat en niet op wat een
+   double ervan maakt.
+
+   De id's sf-x, sf-n, sf-m, sf-u, sf-ud en sf-out blijven zoals ze waren, zodat delen via een
+   link, ongedaan maken, de invoeropslag en tests/validate.py blijven werken. */
 function sfParse(s){ s=String(s).trim().replace(/\s/g,'').replace(/×10\^?/,'e').replace(',','.'); const m=s.match(/^([+-]?)(\d*)(?:\.(\d*))?(?:[eE]([+-]?\d+))?$/); if(!m||(!m[2]&&!m[3])) return null;
   const ip=m[2]||'', fp=m[3]||'', all=(ip+fp).replace(/^0+/,''); let e=-(fp.length)+(m[4]?+m[4]:0); if(!all) return {neg:false,D:0n,e,sf:fp?Math.max(1,fp.length):1,amb:false,zero:true};
   const D=BigInt(all), lead=all.length, trailInt=!m[3]&&!m[4]?(ip.match(/0+$/)||[''])[0].length:0; return {neg:m[1]==='-',D,e,sf:lead,amb:trailInt>0,min:lead-trailInt,zero:false}; }
@@ -8537,22 +8672,30 @@ function sfRoundAt(D,e,p,mode){ if(p<=e) return {D:D*10n**BigInt(e-p),e:p}; cons
 function sfRoundSig(x,n,mode){ if(x.zero) return {D:0n,e:0}; const msd=x.e+sfLen(x.D)-1; let r=sfRoundAt(x.D,x.e,msd-n+1,mode); if(sfLen(r.D)>n) r=sfRoundAt(r.D,r.e,r.e+1,mode); return r; }
 function sfStr(D,e,neg){ let s=D.toString(); if(e>=0) s=s+'0'.repeat(e); else { s=s.padStart(-e+1,'0'); s=s.slice(0,s.length+e)+','+s.slice(s.length+e); } return (neg&&D!==0n?'−':'')+s; }
 function sfSci(D,e,neg){ const s=D.toString(), ex=e+s.length-1; return `${neg?'−':''}${s[0]}${s.length>1?','+s.slice(1):''} × 10<sup>${ex}</sup>`; }
-/* een uitkomst is een getal van de gebruiker: in de Engelse modus met een punt, en nooit als
-   vertaalbare tekst opgevat */
-const sfOut=s=>lkNumIn(s);
 
 const SF_TPL = `<div class="grid2">
   <div class="panel">
     <div class="fields">
-      <div class="f"><label for="sf-x">{{ t('Getal of meetwaarde') }}</label><input id="sf-x" class="txt mono" v-model="x"></div>
-      <div class="f"><label for="sf-n">{{ t('Afronden op') }}</label><div class="inu"><input id="sf-n" inputmode="numeric" v-model="n"><span class="u">{{ t('sign. cijfers') }}</span></div></div>
+      <lk-field v-model="x" :label="t('Getal of meetwaarde')" for-id="sf-x" cls="txt mono" inputmode="text"/>
+      <lk-field v-model="n" :label="t('Afronden op')" for-id="sf-n" :unit="t('sign. cijfers')" inputmode="numeric"/>
       <div class="f"><label for="sf-m">{{ t('Regel bij precies de helft') }}</label><select id="sf-m" v-model="mode"><option value="up">{{ t('half naar boven (weg van nul)') }}</option><option value="even">{{ t('half naar even (bankiers)') }}</option></select></div>
-      <div class="f"><label for="sf-u">{{ t('Onzekerheid (optioneel)') }}</label><input id="sf-u" class="txt mono" v-model="u"></div>
+      <lk-field v-model="u" :label="t('Onzekerheid (optioneel)')" for-id="sf-u" cls="txt mono" inputmode="text"/>
       <div class="f"><label for="sf-ud">{{ t('Cijfers in de onzekerheid') }}</label><select id="sf-ud" v-model="ud"><option value="2">{{ t('2 (aanbevolen)') }}</option><option value="1">1</option></select></div>
     </div>
     <p style="font-size:13px;color:var(--muted);margin:10px 0 0" v-html="hint"></p>
   </div>
-  <div class="result"><div id="sf-out" v-html="out"></div></div>
+  <div class="result"><div id="sf-out">
+    <lk-note v-if="err" kind="info">{{ err }}</lk-note>
+    <template v-else>
+      <lk-big :label="roundLabel" :value="rounded" cls="mono"/>
+      <lk-kv :rows="rows"/>
+      <template v-if="unc">
+        <lk-big :label="t('Meetwaarde met onzekerheid')" :value="unc.big" cls="mono" top="14px"/>
+        <lk-kv :rows="unc.rows"/>
+      </template>
+      <lk-formula :html="formula"/>
+    </template>
+  </div></div>
 </div>`;
 
 const sfVue = lkVueMount('#sf-app', {
@@ -8563,29 +8706,45 @@ const sfVue = lkVueMount('#sf-app', {
     hint() {
       return this.tHtml('Komma of punt als decimaalteken; wetenschappelijke notatie mag (bijv. <span class="mono">4,565e-3</span>). Er wordt met de getypte cijfers gerekend, niet met een afgeronde computerwaarde.');
     },
-    out() {
-      const t = this.t, x = sfParse(this.x), n = Math.round(num(this.n)), mode = this.mode, nd = +this.ud;
-      if (!x) return note('info', t('Vul een getal in, bijvoorbeeld 0,004565 of 4,565e-3.'));
-      if (!(n >= 1 && n <= 20)) return note('info', t('Kies 1 tot 20 significante cijfers.'));
+    parsed() { return sfParse(this.x); },
+    digits() { return Math.round(num(this.n)); },
+    err() {
+      if (!this.parsed) return this.t('Vul een getal in, bijvoorbeeld 0,004565 of 4,565e-3.');
+      if (!(this.digits >= 1 && this.digits <= 20)) return this.t('Kies 1 tot 20 significante cijfers.');
+      return '';
+    },
+    roundLabel() { return this.t('Afgerond op ' + this.digits + ' significante cijfers'); },
+    rounded() {
+      const r = sfRoundSig(this.parsed, this.digits, this.mode);
+      return lkNumIn(sfStr(r.D, r.e, this.parsed.neg));
+    },
+    rows() {
+      const t = this.t, x = this.parsed, n = this.digits, mode = this.mode;
       const r = sfRoundSig(x, n, mode), alt = sfRoundSig(x, n, mode === 'up' ? 'even' : 'up');
       const rs = sfStr(r.D, r.e, x.neg), as = sfStr(alt.D, alt.e, x.neg);
-      let h = `<div class="lbl">${t('Afgerond op ' + n + ' significante cijfers')}</div><div class="big mono">${sfOut(rs)}</div>`
-        + kv([[t('Wetenschappelijk'), x.zero ? '0' : sfOut(sfSci(r.D, r.e, x.neg))],
-          [t('Significante cijfers in de invoer'), x.zero ? '–'
-            : x.amb ? t(x.min + ' tot ' + x.sf + ' (nullen aan het eind van een geheel getal zijn dubbelzinnig)')
-              : sfOut(String(x.sf))],
-          [t('Met de andere halveringsregel'), sfOut(as) + (as === rs ? ' ' + t('(zelfde)') : ' ' + t('(anders)'))]]);
-      const u = sfParse(this.u);
-      if (u && !u.zero && !u.neg) {
-        const ru = sfRoundSig(u, nd, 'up'), up = ru.e + sfLen(ru.D) - nd,
-          ux = sfRoundAt(ru.D, ru.e, up, 'up'), xv = x.zero ? {D: 0n, e: up} : sfRoundAt(x.D, x.e, up, mode);
-        const conc = `${sfStr(xv.D, xv.e, x.neg)}(${ux.D.toString()})`;
-        h += `<div class="lbl" style="margin-top:14px">${t('Meetwaarde met onzekerheid')}</div>`
-          + `<div class="big mono">${sfOut(sfStr(xv.D, xv.e, x.neg))} ± ${sfOut(sfStr(ux.D, ux.e, false))}</div>`
-          + kv([[t('Beknopte notatie'), sfOut(conc)], [t('Decimalen'), sfOut(String(Math.max(0, -up)))]]);
-      }
-      return h + `<div class="formula">${t(nd > 1 ? 'onzekerheid op ' + nd + ' cijfers · waarde op dezelfde decimaal'
-        : 'onzekerheid op ' + nd + ' cijfer · waarde op dezelfde decimaal')}</div>`;
+      return [[t('Wetenschappelijk'), x.zero ? '0' : lkNumIn(sfSci(r.D, r.e, x.neg))],
+        [t('Significante cijfers in de invoer'), x.zero ? '–'
+          : x.amb ? t(x.min + ' tot ' + x.sf + ' (nullen aan het eind van een geheel getal zijn dubbelzinnig)')
+            : lkNumIn(String(x.sf))],
+        [t('Met de andere halveringsregel'),
+          lkNumIn(as) + (as === rs ? ' ' + t('(zelfde)') : ' ' + t('(anders)'))]];
+    },
+    unc() {
+      const x = this.parsed, u = sfParse(this.u), nd = +this.ud, t = this.t;
+      if (!u || u.zero || u.neg) return null;
+      const ru = sfRoundSig(u, nd, 'up'), up = ru.e + sfLen(ru.D) - nd;
+      const ux = sfRoundAt(ru.D, ru.e, up, 'up');
+      const xv = x.zero ? {D: 0n, e: up} : sfRoundAt(x.D, x.e, up, this.mode);
+      return {
+        big: `${lkNumIn(sfStr(xv.D, xv.e, x.neg))} ± ${lkNumIn(sfStr(ux.D, ux.e, false))}`,
+        rows: [[t('Beknopte notatie'), lkNumIn(`${sfStr(xv.D, xv.e, x.neg)}(${ux.D.toString()})`)],
+          [t('Decimalen'), lkNumIn(String(Math.max(0, -up)))]]
+      };
+    },
+    formula() {
+      const nd = +this.ud;
+      return this.t(nd > 1 ? 'onzekerheid op ' + nd + ' cijfers · waarde op dezelfde decimaal'
+        : 'onzekerheid op ' + nd + ' cijfer · waarde op dezelfde decimaal');
     }
   }
 });
@@ -8595,7 +8754,10 @@ calc.sigfig = () => {};
 /* /NT:sigfig */
 /* NT:pipkeus */
 /* ================= WELKE PIPET? =================
-   Tweede tool op Vue 3 (zie 00a_vue.js): een tool waarvan de uitkomst een tabel is.
+   Op Vue 3, en declaratief opgebouwd met de gedeelde componenten uit 00b_ui.js: geen HTML
+   meer die als string in elkaar wordt geplakt. De uitkomst is een tabel, dus deze tool is
+   het voorbeeld voor <lk-table>, <lk-kv>, <lk-big>, <lk-note> en <lk-field>.
+
    Het rekenwerk is onveranderd. De grenzen komen uit ISO 8655-2 bij het nominale volume
    (ISOLIM); de absolute fout van het nominale volume wordt over het hele bereik aangenomen,
    dus bij een klein volume wordt de relatieve fout groter. Bij k keer pipetteren tellen
@@ -8605,7 +8767,7 @@ calc.sigfig = () => {};
    maken, de invoeropslag en tests/validate.py blijven werken. */
 function pkLim(nom){ let r=ISOLIM[0]; for(const x of ISOLIM) if(x[0]<=nom) r=x; return r; }
 
-/* de pipetten uit de set, met per pipet hoe vaak je moet pipetteren en welke fout dat geeft */
+/* per pipet: hoe vaak je moet pipetteren en welke fout dat geeft */
 function pkRows(V, set){
   return set.map(nom => { const [, sp, rp] = pkLim(nom), es = sp / 100 * nom, s = rp / 100 * nom;
     const k = V > nom ? Math.ceil(V / nom - 1e-9) : 1, sub = V / k, ok = sub >= nom * 0.1 - 1e-9;
@@ -8616,62 +8778,178 @@ function pkRows(V, set){
 const PK_TPL = `<div class="grid2">
   <div class="panel">
     <div class="fields">
-      <div class="f"><label for="pk-v">{{ t('Te pipetteren volume') }}</label><div class="inu"><input id="pk-v" inputmode="decimal" v-model="v"><span class="u">µL</span></div></div>
-      <div class="f" style="grid-column:span 2"><label for="pk-set">{{ t('Pipetten in je set (nominaal, µL)') }}</label><input id="pk-set" class="txt" v-model="set"></div>
+      <lk-field v-model="v" :label="t('Te pipetteren volume')" for-id="pk-v" unit="µL"/>
+      <lk-field v-model="set" :label="t('Pipetten in je set (nominaal, µL)')" for-id="pk-set" cls="txt" inputmode="text" :span="2"/>
     </div>
     <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Een pipet met variabel volume werkt tussen 10% en 100% van het nominale volume. Kalibreer je eigen pipetten met de Pipetkalibratie; de echte fouten zijn meestal kleiner dan de ISO-grenzen.') }}</p>
   </div>
-  <div class="result"><div id="pk-out" v-html="out"></div></div>
+  <div class="result"><div id="pk-out">
+    <lk-note v-if="!valid" kind="info">{{ t('Vul een volume en minstens één pipet in.') }}</lk-note>
+    <template v-else>
+      <lk-big v-if="best" :label="t('Beste keuze')" :value="bestName" :sub="bestSub"/>
+      <lk-note v-else kind="warn">{{ t('Geen pipet in je set kan dit volume binnen 10–100% van zijn bereik afmeten.') }}</lk-note>
+      <lk-kv v-if="best" :rows="bestRows"/>
+      <lk-table :cols="cols" :rows="rows"/>
+      <lk-formula :html="tHtml('totaal = (k·e&lt;sub&gt;s&lt;/sub&gt; + 2·√k·s) / V')"/>
+    </template>
+  </div></div>
 </div>`;
 
 const pkVue = lkVueMount('#pk-app', {
   template: PK_TPL,
   data() { return {v: lkNumIn('15'), set: '2 10 20 100 200 1000 5000'}; },
   computed: {
-    out() {
-      const t = this.t, tH = this.tHtml, V = num(this.v);
-      /* fmt() en vol() geven altijd Nederlandse getallen; binnen een Vue-boom komt de
-         vertaallaag niet, dus ze gaan hier zelf door lkNumIn() */
-      const F = (x, d) => lkNumIn(fmt(x, d)), VL = x => lkNumIn(vol(x));
-      const set = [...new Set(String(this.set).split(/[\s;,]+/).map(num).filter(x => x > 0 && x <= 1e5))].sort((a, b) => a - b);
-      if (!(V > 0) || !set.length) return note('info', t('Vul een volume en minstens één pipet in.'));
-      const R = pkRows(V, set), can = R.filter(r => r.ok && r.k <= 20);
-      const best = can.length ? can.reduce((a, b) =>
+    V() { return num(this.v); },
+    pipettes() { return [...new Set(String(this.set).split(/[\s;,]+/).map(num).filter(x => x > 0 && x <= 1e5))].sort((a, b) => a - b); },
+    valid() { return this.V > 0 && this.pipettes.length > 0; },
+    all() { return this.valid ? pkRows(this.V, this.pipettes) : []; },
+    best() {
+      const can = this.all.filter(r => r.ok && r.k <= 20);
+      return can.length ? can.reduce((a, b) =>
         b.rel < a.rel - 1e-12 || (Math.abs(b.rel - a.rel) < 1e-12 && b.k < a.k) ? b : a) : null;
-      const head = best
-        ? `<div class="lbl">${t('Beste keuze')}</div><div class="big">P${F(best.nom, 0)}${
-            best.k > 1 ? ` <small>${best.k} × ${VL(best.sub)}</small>` : ''}</div>`
-          + kv([[t('Systematische fout (max.)'), `± ${VL(best.es)} (${F(best.es / V * 100, 2)}%)`],
-            [t('Toevallige fout (max., SD)'), `${VL(best.s)} (${F(best.s / V * 100, 2)}%)`]])
-        : note('warn', t('Geen pipet in je set kan dit volume binnen 10–100% van zijn bereik afmeten.'));
+    },
+    bestName() { return this.best ? 'P' + lkNumIn(fmt(this.best.nom, 0)) : '–'; },
+    bestSub() { return this.best && this.best.k > 1 ? this.best.k + ' × ' + lkNumIn(vol(this.best.sub)) : ''; },
+    bestRows() {
+      const b = this.best; if (!b) return [];
+      const F = (x, d) => lkNumIn(fmt(x, d)), VL = x => lkNumIn(vol(x));
+      return [[this.t('Systematische fout (max.)'), `± ${VL(b.es)} (${F(b.es / this.V * 100, 2)}%)`],
+        [this.t('Toevallige fout (max., SD)'), `${VL(b.s)} (${F(b.s / this.V * 100, 2)}%)`]];
+    },
+    cols() {
+      return [{h: this.t('Pipet')}, {h: this.t('Keer'), num: true}, {h: this.t('Per keer'), num: true},
+        {h: this.tHtml('e<sub>s</sub> max.'), num: true}, {h: this.t('s max.'), num: true},
+        {h: this.tHtml('Totaal (e<sub>s</sub> + 2s)'), num: true}, {h: this.t('Bruikbaar')}];
+    },
+    rows() {
+      const t = this.t, F = (x, d) => lkNumIn(fmt(x, d)), VL = x => lkNumIn(vol(x));
       const why = r => r.ok ? (r.k > 20 ? t('te vaak') : t('ja')) : t('onder 10% van bereik');
-      return head + `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr>`
-        + `<th>${t('Pipet')}</th><th class="num">${t('Keer')}</th><th class="num">${t('Per keer')}</th>`
-        + `<th class="num">${tH('e<sub>s</sub> max.')}</th><th class="num">${t('s max.')}</th>`
-        + `<th class="num">${tH('Totaal (e<sub>s</sub> + 2s)')}</th><th>${t('Bruikbaar')}</th></tr></thead><tbody>`
-        + R.map(r => `<tr><td>P${F(r.nom, 0)}</td><td class="num">${r.k}</td><td class="num">${VL(r.sub)}</td>`
-          + `<td class="num">${VL(r.es)}</td><td class="num">${VL(r.s)}</td>`
-          + `<td class="num">${F(r.rel, 2)}%</td><td>${why(r)}</td></tr>`).join('')
-        + `</tbody></table></div><div class="formula">${tH('totaal = (k·e<sub>s</sub> + 2·√k·s) / V')}</div>`;
+      return this.all.map(r => ['P' + F(r.nom, 0), r.k, VL(r.sub), VL(r.es), VL(r.s), F(r.rel, 2) + '%', why(r)]);
     }
   }
 });
 calc.pipkeus = () => {};
 /* /NT:pipkeus */
 /* NT:digest */
-/* ================= RESTRICTIEDIGESTIE ================= */
+/* ================= RESTRICTIEDIGESTIE =================
+   Vierde tool op Vue 3 (zie 00a_vue.js), declaratief opgebouwd met de gedeelde componenten uit 00b_ui.js, met keuzelijsten uit data en
+   een veld dat alleen bij een dubbele digestie te zien is. Het rekenwerk is onveranderd.
+
+   De enzymnaam is zelf de waarde van de optie, dus hij mag niet vertaald worden: in de
+   template staat `:value="k"` naast de tekst, zodat de waarde los staat van wat er te lezen
+   is. Het type uiteinde erachter is wel gewone tekst en gaat door t().
+
+   De id's dg-c, dg-ng, dg-v, dg-e1, dg-u1, dg-e2, dg-u2, dg-upg, dg-n, dg-x, dg-bsa en
+   dg-out blijven zoals ze waren. */
 const DGE={BamHI:['5′-overhang',37],EcoRI:['5′-overhang',37],HindIII:['5′-overhang',37],PstI:['3′-overhang',37],NdeI:['5′-overhang',37],XhoI:['5′-overhang',37],NotI:['5′-overhang',37],SmaI:['stomp (blunt)',25],'ander enzym':['zie productinformatie',37]};
-$('#dg-e1').innerHTML=Object.keys(DGE).map((k,i)=>`<option${i===1?' selected':''}>${k}</option>`).join(''); $('#dg-e2').innerHTML='<option value="">geen (enkele digestie)</option>'+Object.keys(DGE).map((k,i)=>`<option${i===2?' selected':''}>${k}</option>`).join('');
-calc.digest=function(){ const c=num($('#dg-c').value), ng=num($('#dg-ng').value), V=num($('#dg-v').value), e1=$('#dg-e1').value, e2=$('#dg-e2').value, u1=num($('#dg-u1').value), u2=num($('#dg-u2').value), upg=num($('#dg-upg').value), n=Math.round(num($('#dg-n').value))||1, x=(num($('#dg-x').value)||0)/100, bsa=$('#dg-bsa').checked, out=$('#dg-out'); $('#dg-u2').closest('.f').style.display=e2?'':'none';
-  if(![c,ng,V,u1,upg].every(v=>v>0)||(e2&&!(u2>0))||n>1000){ out.innerHTML=note('info','Vul DNA-concentratie, hoeveelheid DNA, reactievolume en de enzymactiviteit in.'); return; }
-  const U=upg*ng/1000, vd=ng/c, v1=U/u1, v2=e2?U/u2:0, vb=V/10, vbsa=bsa?V/100:0, enz=v1+v2, water=V-vd-vb-vbsa-enz, m=n*(1+x), gly=enz/V*50;
-  const L=[['Milli-Q',water,1],['10× buffer',vb,1],...(bsa?[['BSA (100×)',vbsa,1]]:[]),[ud(e1)+` (${fmt(u1,0)} U/µL)`,v1,1],...(e2?[[ud(e2)+` (${fmt(u2,0)} U/µL)`,v2,1]]:[]),['DNA (apart per buis)',vd,0]];
-  let h=`<div class="lbl">${e2?`Dubbele digestie · ${ud(e1)} + ${ud(e2)}`:`Enkele digestie · ${ud(e1)}`}</div><div class="big">${vol(V)} <small>per reactie</small></div>`+kv([['Enzym per reactie',`${fmt(U,1)} U per enzym`],['Enzymvolume',`${vol(enz)} (${fmt(enz/V*100,1)}% van het volume)`],['Glycerol in de reactie',fmt(gly,1)+'%'],[`Uiteinden ${ud(e1)}`,DGE[e1][0]],...(e2?[[`Uiteinden ${ud(e2)}`,DGE[e2][0]]]:[]),['Incubatie',e2&&DGE[e2][1]!==DGE[e1][1]?`1 uur bij ${DGE[e1][1]} °C en daarna bij ${DGE[e2][1]} °C (verschillende optima: na elkaar incuberen)`:`1 uur bij ${DGE[e1][1]} °C`]]);
-  h+=`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Component</th><th class="num">Per reactie</th><th class="num">Mastermix (${fmt(m,1)}×)</th></tr></thead><tbody>${L.map(l=>`<tr><td>${l[0]}</td><td class="num">${vol(l[1])}</td><td class="num">${l[2]?vol(l[1]*m):'–'}</td></tr>`).join('')}<tr class="hl"><td>Mastermix per buis</td><td class="num">${vol(V-vd)}</td><td class="num">${vol((V-vd)*m)}</td></tr></tbody></table></div>`;
-  if(enz/V>0.1) h+=note('bad',`Star-activiteit: het enzymvolume is ${fmt(enz/V*100,1)}% van de reactie (glycerol ${fmt(gly,1)}%). Houd het onder 10% (glycerol onder 5%): gebruik minder enzym of een groter reactievolume.`);
-  if(water<0) h+=note('bad','De componenten passen niet in het reactievolume: het DNA is te verdund of het volume te klein.');
-  if(Math.min(v1,v2||9)<0.5) h+=note('info','Per reactie minder dan 0,5 µL enzym: pipetteer het enzym via de mastermix of verdun het in de bijbehorende verdunningsbuffer.');
-  out.innerHTML=h+`<ol class="steps"><li>Maak de mastermix op ijs; voeg het enzym als laatste toe en meng door pipetteren (niet vortexen).</li><li>Verdeel de mix (${ud(vol(V-vd))}) per buis en voeg het DNA (${ud(vol(vd))}) toe.</li><li>Incubeer en stop de reactie met laadbuffer of door hitte-inactivatie volgens de productinformatie.</li></ol><div class="formula">V<sub>enzym</sub> = U per µg × µg DNA / (U/µL) · glycerol = V<sub>enzym</sub>/V × 50%</div>`; };
+
+const DG_TPL = `<div class="grid2">
+  <div class="panel">
+    <div class="fields">
+      <lk-field v-model="c" :label="t('Concentratie DNA')" for-id="dg-c" unit="ng/µL"/>
+      <lk-field v-model="ng" :label="t('DNA per reactie')" for-id="dg-ng" unit="ng"/>
+      <lk-field v-model="v" :label="t('Reactievolume')" for-id="dg-v" unit="µL"/>
+      <div class="f"><label for="dg-e1">{{ t('Enzym 1') }}</label><select id="dg-e1" v-model="e1"><option v-for="k in enzymes" :key="k" :value="k">{{ k }}</option></select></div>
+      <lk-field v-model="u1" :label="t('Activiteit enzym 1')" for-id="dg-u1" unit="U/µL"/>
+      <div class="f"><label for="dg-e2">{{ t('Enzym 2 (dubbele digestie)') }}</label><select id="dg-e2" v-model="e2"><option value="">{{ t('geen (enkele digestie)') }}</option><option v-for="k in enzymes" :key="k" :value="k">{{ k }}</option></select></div>
+      <lk-field v-show="e2" v-model="u2" :label="t('Activiteit enzym 2')" for-id="dg-u2" unit="U/µL"/>
+      <lk-field v-model="upg" :label="t('Enzym per µg DNA')" for-id="dg-upg" unit="U"/>
+      <lk-field v-model="n" :label="t('Aantal reacties')" for-id="dg-n" inputmode="numeric"/>
+      <lk-field v-model="x" :label="t('Extra marge')" for-id="dg-x" unit="%"/>
+      <label class="chk" for="dg-bsa"><input type="checkbox" id="dg-bsa" v-model="bsa"> {{ t('BSA toevoegen (100× stock)') }}</label>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Eén unit knipt 1 µg DNA in 1 uur in 50 µL; 5–10 U per µg geeft een ruime overmaat. Controleer in de buffertabel van de fabrikant welke buffer beide enzymen van een dubbele digestie verdragen. Voorbeelddata zijn verzonnen.') }}</p>
+  </div>
+  <div class="result"><div id="dg-out">
+    <lk-note v-if="!valid" kind="info">{{ t('Vul DNA-concentratie, hoeveelheid DNA, reactievolume en de enzymactiviteit in.') }}</lk-note>
+    <template v-else>
+      <lk-big :label="headLabel" :value="volText" :sub="t('per reactie')"/>
+      <lk-kv :rows="rows"/>
+      <lk-table :cols="cols" :rows="mixRows"/>
+      <lk-note v-if="warnStar" kind="bad">{{ warnStar }}</lk-note>
+      <lk-note v-if="warnFit" kind="bad">{{ warnFit }}</lk-note>
+      <lk-note v-if="warnSmall" kind="info">{{ warnSmall }}</lk-note>
+      <lk-steps :steps="steps"/>
+      <lk-formula :html="tHtml('V&lt;sub&gt;enzym&lt;/sub&gt; = U per µg × µg DNA / (U/µL) · glycerol = V&lt;sub&gt;enzym&lt;/sub&gt;/V × 50%')"/>
+    </template>
+  </div></div>
+</div>`;
+
+const dgVue = lkVueMount('#dg-app', {
+  template: DG_TPL,
+  data() { return {c: lkNumIn('250'), ng: lkNumIn('1000'), v: lkNumIn('50'), e1: 'EcoRI', u1: lkNumIn('20'),
+    e2: 'HindIII', u2: lkNumIn('20'), upg: lkNumIn('10'), n: '4', x: lkNumIn('10'), bsa: false}; },
+  computed: {
+    enzymes() { return Object.keys(DGE); },
+    /* alle afgeleide maten op een plek, zodat elke regel hieronder er alleen uit leest */
+    m() {
+      const c = num(this.c), ng = num(this.ng), V = num(this.v);
+      const u1 = num(this.u1), u2 = num(this.u2), upg = num(this.upg);
+      const n = Math.round(num(this.n)) || 1, x = (num(this.x) || 0) / 100;
+      const U = upg * ng / 1000, vd = ng / c, v1 = U / u1, v2 = this.e2 ? U / u2 : 0;
+      const vb = V / 10, vbsa = this.bsa ? V / 100 : 0, enz = v1 + v2;
+      return {c, ng, V, u1, u2, upg, n, x, U, vd, v1, v2, vb, vbsa, enz,
+        water: V - vd - vb - vbsa - enz, mult: n * (1 + x), gly: enz / V * 50};
+    },
+    valid() {
+      const m = this.m;
+      return [m.c, m.ng, m.V, m.u1, m.upg].every(a => a > 0) && (!this.e2 || m.u2 > 0) && m.n <= 1000;
+    },
+    volText() { return lkNumIn(vol(this.m.V)); },
+    headLabel() {
+      return this.e2 ? this.t('Dubbele digestie') + ' · ' + this.e1 + ' + ' + this.e2
+        : this.t('Enkele digestie') + ' · ' + this.e1;
+    },
+    rows() {
+      const t = this.t, m = this.m, F = (a, d) => lkNumIn(fmt(a, d)), VL = a => lkNumIn(vol(a));
+      const inc = this.e2 && DGE[this.e2][1] !== DGE[this.e1][1]
+        ? t('1 uur bij ' + DGE[this.e1][1] + ' °C en daarna bij ' + DGE[this.e2][1] + ' °C (verschillende optima: na elkaar incuberen)')
+        : t('1 uur bij ' + DGE[this.e1][1] + ' °C');
+      return [[t('Enzym per reactie'), `${F(m.U, 1)} ${t('U per enzym')}`],
+        [t('Enzymvolume'), `${VL(m.enz)} (${F(m.enz / m.V * 100, 1)}% ${t('van het volume')})`],
+        [t('Glycerol in de reactie'), F(m.gly, 1) + '%'],
+        [`${t('Uiteinden')} ${this.e1}`, t(DGE[this.e1][0])],
+        this.e2 ? [`${t('Uiteinden')} ${this.e2}`, t(DGE[this.e2][0])] : null,
+        [t('Incubatie'), inc]].filter(Boolean);
+    },
+    cols() {
+      return [{h: this.t('Component')}, {h: this.t('Per reactie'), num: true},
+        {h: this.t('Mastermix') + ' (' + lkNumIn(fmt(this.m.mult, 1)) + '×)', num: true}];
+    },
+    mixRows() {
+      const t = this.t, m = this.m, F = (a, d) => lkNumIn(fmt(a, d)), VL = a => lkNumIn(vol(a));
+      const L = [[t('Milli-Q'), m.water, 1], [t('10× buffer'), m.vb, 1],
+        ...(this.bsa ? [[t('BSA (100×)'), m.vbsa, 1]] : []),
+        [`${this.e1} (${F(m.u1, 0)} U/µL)`, m.v1, 1],
+        ...(this.e2 ? [[`${this.e2} (${F(m.u2, 0)} U/µL)`, m.v2, 1]] : []),
+        [t('DNA (apart per buis)'), m.vd, 0]];
+      return [...L.map(l => [l[0], VL(l[1]), l[2] ? VL(l[1] * m.mult) : '–']),
+        {cls: 'hl', cells: [t('Mastermix per buis'), VL(m.V - m.vd), VL((m.V - m.vd) * m.mult)]}];
+    },
+    warnStar() {
+      const m = this.m; if (m.enz / m.V <= 0.1) return '';
+      return this.t('Star-activiteit: het enzymvolume is ' + lkNumIn(fmt(m.enz / m.V * 100, 1))
+        + '% van de reactie (glycerol ' + lkNumIn(fmt(m.gly, 1))
+        + '%). Houd het onder 10% (glycerol onder 5%): gebruik minder enzym of een groter reactievolume.');
+    },
+    warnFit() {
+      return this.m.water < 0
+        ? this.t('De componenten passen niet in het reactievolume: het DNA is te verdund of het volume te klein.') : '';
+    },
+    warnSmall() {
+      const m = this.m;
+      return Math.min(m.v1, m.v2 || 9) < 0.5
+        ? this.t('Per reactie minder dan 0,5 µL enzym: pipetteer het enzym via de mastermix of verdun het in de bijbehorende verdunningsbuffer.') : '';
+    },
+    steps() {
+      const t = this.t, m = this.m, VL = a => lkNumIn(vol(a));
+      return [t('Maak de mastermix op ijs; voeg het enzym als laatste toe en meng door pipetteren (niet vortexen).'),
+        t('Verdeel de mix (' + uv(VL(m.V - m.vd)) + ') per buis en voeg het DNA (' + uv(VL(m.vd)) + ') toe.'),
+        t('Incubeer en stop de reactie met laadbuffer of door hitte-inactivatie volgens de productinformatie.')];
+    }
+  }
+});
+calc.digest = () => {};
 /* /NT:digest */
 /* NT:purif */
 /* ================= EIWITZUIVERINGSTABEL ================= */

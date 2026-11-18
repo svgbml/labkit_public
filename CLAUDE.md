@@ -25,6 +25,18 @@ Lab calculator and gel-editor web app (Dutch first, English via a runtime transl
 - **Houd de element-id's van de oude tool aan.** Delen via een link, ongedaan maken, de invoeropslag en `tests/validate.py` zetten `.value` en sturen een `input`- en `change`-event; daar reageert `v-model` op. Verander je een id, dan breekt dat alles.
 - `calc.<tool>` blijft bestaan (als lege functie mag), want de rest van de app roept dat aan na delen, ongedaan maken en bij het openen.
 - Een omgezette tool houdt zijn validatiegeval in `tests/validate.py`: de uitkomsten mogen niet veranderen.
+- **Het rekenwerk gaat ongewijzigd mee.** Die functies staan achter de 276 validatiegevallen met gepubliceerde referentiewaarden (ISO 8655, GUM, NEB, Laemmli, Hanahan); opnieuw uitschrijven levert niets op en zet die waarden op het spel. Alleen de weergave wordt opnieuw opgebouwd.
+
+## De gedeelde Vue-componenten (`tools/nt/00b_ui.js`)
+- **Bouw een uitkomst niet als string HTML met `v-html`.** Dat was de snelle weg bij de eerste tools en is teruggedraaid: je raakt het declaratieve renderen kwijt en elke tool herhaalt dezelfde stukjes. Gebruik de componenten, die `lkVueMount()` zelf registreert:
+  - `<lk-note kind="info|warn|bad|ok">` een melding · `<lk-kv :rows="[[label, waarde], …]">` de uitkomstenlijst
+  - `<lk-big :label :value :sub :chip :chip-kind :cls :top>` het grote getal bovenaan
+  - `<lk-field v-model="x" :label for-id unit inputmode cls :span>` een veld met label en eenheid
+  - `<lk-table :cols="[{h, num}]" :rows="[[cel, …] | {cells, cls}]">` een tabel · `<lk-steps :steps>` een werkwijze · `<lk-formula :html>` de formuleregel
+- De klassen zijn die van de bestaande opmaak (`note`, `kv`, `big`, `mini`, `f`, `inu`), zodat alle thema's en `tests/layout_audit.py` blijven werken.
+- Een waarde mag HTML zijn, want de tool maakt die zelf; tekst van de gebruiker hoort daarom eerst door `esc()`.
+- Zet de berekende maten in één `computed` (bijv. `m()`) en laat de andere computeds daar alleen uit lezen; dan staat het rekenwerk één keer in het bestand.
+- Opmaak in een template-string hoort geschreven te worden als `&lt;sub&gt;`: anders ziet de template-compiler er een element in. Vue geeft het gedecodeerd door, dus `tHtml()` krijgt gewoon `<sub>`.
 
 ## Translation in Vue
 - De DOM-vertaallaag komt niet in een Vue-boom (die heeft `data-notr`), dus de component vertaalt zelf:

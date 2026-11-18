@@ -28,9 +28,21 @@ DYN = re.compile(r"""(?<![\w$.])t\(\s*(['"])((?:(?!\1)[^\\])*)\1\s*\+""")
 WORDS = re.compile(r'[A-Za-zÀ-ÿ]{2,}')
 
 
+UNESC = [('&lt;', '<'), ('&gt;', '>'), ('&quot;', '"'), ('&#39;', "'"), ('&amp;', '&')]
+
+
+def unescape(text):
+    """In een Vue-template staat opmaak als &lt;sub&gt;, want anders ziet de compiler er een
+    element in. Vue geeft de tekst gedecodeerd door, dus de sleutel hoort ook gedecodeerd te
+    zijn. &amp; gaat als laatste, anders decodeert hij de andere entiteiten dubbel."""
+    for a, b in UNESC:
+        text = text.replace(a, b)
+    return text
+
+
 def key(text):
     """Dezelfde sleutel als i18nKey() in de app: getallen worden {#}."""
-    return NUM.sub('{#}', text)
+    return NUM.sub('{#}', unescape(text))
 
 
 def has_words(k):
