@@ -28,7 +28,11 @@ window.__mlbig=()=>{ const t=__el(document.querySelector('#pa-out .big')); const
   return /µL/.test(t)?n/1000:n; };
 window.__mass=sel=>[...document.querySelectorAll(sel)].map(td=>{ const b=td.querySelector('b'); const t=__el(b||td); const n=__n(t); return /\bmg\b/.test(t)?n/1000:n; });
 window.__cells=sel=>[...document.querySelectorAll(sel)].map(e=>__n(__el(e)));
-window.__tbl=(id,rows,tool)=>{ document.querySelector("#"+id+" tbody").innerHTML=rows.map(TBLDEF[id].row).join(""); calc[tool](); };
+window.__tbl=(id,rows,tool)=>{ const def=TBLDEF[id];
+  /* een tabel die Vue rendert geeft een set() mee, net als bij tblRestore() in de app:
+     innerHTML zou Vue bij de volgende render terugdraaien */
+  if(def.set) def.set(rows); else document.querySelector("#"+id+" tbody").innerHTML=rows.map(def.row).join("");
+  calc[tool](); };
 window.__kv=(sel,label)=>{ const dt=[...document.querySelectorAll(sel+' dt')].find(d=>d.textContent.trim().startsWith(label)); return dt?__n(__el(dt.nextElementSibling)):NaN; };
 """
 

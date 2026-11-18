@@ -18,6 +18,7 @@ import Pipkeus from './tools/Pipkeus.vue';
 import Digest from './tools/Digest.vue';
 import Phadj from './tools/Phadj.vue';
 import Medium from './tools/Medium.vue';
+import Oplossing from './tools/Oplossing.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -36,3 +37,9 @@ calc.phadj = () => {};
 
 mountTool('#md-app', Medium);
 calc.medium = () => {};
+
+/* Oplossing & buffer houdt de rijen van #o-tbl bij. web/index.html heeft die component nodig:
+   loadRecipe() zet er een recept in, en TBLDEF['o-tbl'] zet er een opgeslagen tabel in terug of
+   duwt er een rij uit het molmassa-gereedschap in. Daarom staat de instantie op window. */
+const op = mountTool('#o-app', Oplossing);
+if (op) window.__oplosVm = op.vm;

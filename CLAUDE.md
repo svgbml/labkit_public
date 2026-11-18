@@ -45,6 +45,12 @@ Lab calculator and gel-editor web app (Dutch first, English via a runtime transl
 - Zet de berekende maten in één `computed` (bijv. `m()`) en laat de andere computeds daar alleen uit lezen; dan staat het rekenwerk één keer in het bestand.
 - Opmaak in een template-string hoort geschreven te worden als `&lt;sub&gt;`: anders ziet de template-compiler er een element in. Vue geeft het gedecodeerd door, dus `tHtml()` krijgt gewoon `<sub>`.
 
+## Een bewerkbare tabel in Vue
+- Drie dingen buiten de tool schrijven in een `tbody`: `tblRestore()` zet een bewaarde tabel terug, `addRow(tbl,row,tool)` laat een andere tool er een rij in duwen, en het plakken van een blok uit Excel vult de invoervelden. Bij een tabel die Vue rendert draait `innerHTML` bij de volgende render terug.
+- Daarom mag een `TBLDEF`-ingang `set(vals)` en `push(row)` meegeven; die wijzen naar de component. Zet de instantie op `window` (`window.__oplosVm`) zodat `index.html` erbij kan, en laat `row` een lege functie zijn — niemand gebruikt die dan nog.
+- Plakken zet de waarden rechtstreeks en stuurt sinds S202 **per cel** een `input`-event, want `v-model` ziet de andere cellen anders niet veranderen.
+- **Let op waar de code staat.** `addRow()` staat in `tools/nt/99_app.js`, dus binnen de NT-markers: een haak die je in `web/index.html` zet is bij de volgende `tools/insert_tools.py` weer weg. `tblRestore()` en de plak-handler staan wel echt in `index.html`.
+
 ## Translation in Vue
 - De DOM-vertaallaag komt niet in een Vue-boom (die heeft `data-notr`), dus de component vertaalt zelf:
   - `t('tekst')` voor platte tekst. Zelfde sleutels als de rest van de app, dus `i18n/en.json` blijft gewoon gelden. Een getal in de tekst wordt `{#}`, dus `t('Kies ' + n + ' cijfers')` zoekt `Kies {#} cijfers` op.

@@ -5,7 +5,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Status:** ✅ done · ⏳ planned · ✖ dropped
 **Total:** 263 steps (S1–S263) ≈ 130 hours. Every chosen idea number appears in at least one step. Steps within a phase are in a sensible order; steps marked *(needs Sx)* depend on an earlier step.
 
-**Progress:** S0 done. **Phase 1 (S1–S12) done**, **phase 2 (S13–S20) done**, **phase 3 (S21–S36) done**, phase 4 (S37–S47) next. After each phase the full `python tools/check.py` passed (validation, layout in Dutch and English, robustness, translations, startup). Phases 12–14 (S147–S201) were added later and have not been started. Phase 15 (S202–S263) is the Vue migration of the tools that are not on Vue yet; four tools and the layer underneath are done (see `CLAUDE.md`).
+**Progress:** S0 done. **Phase 1 (S1–S12) done**, **phase 2 (S13–S20) done**, **phase 3 (S21–S36) done**, phase 4 (S37–S47) next. After each phase the full `python tools/check.py` passed (validation, layout in Dutch and English, robustness, translations, startup). Phases 12–14 (S147–S201) were added later and have not been started. Phase 15 (S202–S263) is the Vue migration of the tools that are not on Vue yet; the layer underneath plus *Significante cijfers*, *Pipetkeuze*, *Z-factor*, *Restrictiedigest*, *pH bijstellen*, *Celkweekmedium* and *Oplossing & buffer* are done (see `CLAUDE.md`).
 
 ## Decisions
 - **Vue 3 (besloten tijdens de run van fase 4).** De app gaat op Vue, met Vue als los bestand in `web/vendor/` zodat er geen CDN en geen bouwstap bij komt en de app vanaf `file://` blijft werken. De omzetting gaat per tool; de rest van de app blijft intussen werken. De vertaallaag van de DOM kan niet in een Vue-boom komen, dus een component vertaalt zelf met `t()` / `tHtml()` tegen dezelfde `i18n/en.json`, en `tests/i18n_vue.py` controleert dat statisch. Een omgezette tool houdt zijn element-id's en zijn validatiegeval, zodat delen, ongedaan maken, de invoeropslag en de validatie blijven werken. Zie `CLAUDE.md`.
@@ -367,7 +367,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 
 | Step | Ideas | What | Done when |
 |---|---|---|---|
-| S202 | — | *Oplossing & buffer* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S202 | ✅ | *Oplossing & buffer* naar Vue | `src/tools/Oplossing.vue`; de tabel, de stappen, het advies en de receptkaart zitten in de component, `oBalance()` en de hydraatvormen blijven in `tools/nt/05_oplos.js`. `addRow()` in `tools/nt/99_app.js` en `tblRestore()` gaan via de `push`/`set`-haken op `TBLDEF`. Het stappenschema op het canvas blijft gewone HTML |
 | S203 | — | *Buffercapaciteit*, *Oplosbaarheid (Ksp)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
 | S204 | — | *Verdunning*, *Osmolariteit & ionsterkte* naar Vue | Zelfde uitkomsten; validatie blijft staan |
 | S205 | — | *Titratiecurve*, *pH-buffer* naar Vue | Zelfde uitkomsten; validatie blijft staan |

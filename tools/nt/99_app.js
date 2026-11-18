@@ -153,7 +153,11 @@ navFavs();
 /* ================= FASE 2.2: DOORSTUREN NAAR EEN VERVOLGTOOL ================= */
 const bigNum=el=>{ if(!el) return NaN; const c=el.cloneNode(true); c.querySelectorAll('small,.chip').forEach(x=>x.remove()); const t=c.innerHTML.replace(/<sup>(.*?)<\/sup>/g,'e$1').replace(/<[^>]+>/g,'').replace(/−/g,'-').replace(/\s*×\s*10e/,'e').replace(/&[a-z]+;/g,''); const m=t.match(/-?[\d.]+(?:,\d+)?(?:e-?\d+)?/); if(!m) return NaN; return Number(m[0].replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.')); };
 const setV=(id,v)=>{ const el=$('#'+id); if(!el) return; el.value=typeof v==='number'?String(Number(v.toPrecision(5))).replace('.',','):v; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); };
-const addRow=(tbl,row,tool)=>{ const tb=$('#'+tbl+' tbody'), def=TBLDEF[tbl]; if(!tb||!def) return; const empty=[...tb.rows].find(r=>[...r.querySelectorAll('input')].every(i=>!i.value.trim())); if(empty) empty.remove(); tb.insertAdjacentHTML('beforeend',def.row(row)); if(calc[tool]) calc[tool](); };
+const addRow=(tbl,row,tool)=>{ const tb=$('#'+tbl+' tbody'), def=TBLDEF[tbl]; if(!tb||!def) return;
+  /* een tabel die Vue rendert geeft een push() mee: innerHTML erbij zetten zou Vue bij de
+     volgende render terugdraaien */
+  if(def.push){ def.push(row); if(calc[tool]) calc[tool](); return; }
+  const empty=[...tb.rows].find(r=>[...r.querySelectorAll('input')].every(i=>!i.value.trim())); if(empty) empty.remove(); tb.insertAdjacentHTML('beforeend',def.row(row)); if(calc[tool]) calc[tool](); };
 const SEND={
   dna:{out:'#n-out',get:()=>bigNum($('#n-out .big')),to:[
     ['PCR-mastermix','pcr',c=>{ const ng=num($('#m-ng').value)>0?num($('#m-ng').value):10, v=ng/c; setV('q-t',Math.max(Number(v.toPrecision(3)),0.01)); return `Template per reactie: ${vol(v)} (= ${sig(ng,3)} ng bij ${sig(c,3)} ng/µL).`; }],
