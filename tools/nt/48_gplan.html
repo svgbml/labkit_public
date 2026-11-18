@@ -1,7 +1,12 @@
 <section class="tool" id="t-gplan" data-tool="gplan">
   <header class="tool-head"><h2>Gelplanner</h2>
   <p>Tekent de gel van bovenaf: de geldrager, de kam en elk slotje met monsternaam, kleur en volume. Zet de afbeelding naast je gelfoto in het labjournaal.</p></header>
-  <div class="stack">
+  <div class="picwrap">
+    <div class="pic-prev">
+      <div class="result"><canvas id="gp-cv"></canvas><div class="pic-bar" data-picbar="gp"></div><div id="gp-out"></div></div>
+      <div class="result" style="margin-top:16px"><h3 style="margin:0 0 10px;font-size:14px">Verwachte gel</h3><canvas id="gpp-cv"></canvas><div class="pic-bar" data-picbar="gpp"></div><div id="gpp-out"></div></div>
+    </div>
+    <div>
     <div class="panel">
       <div class="fields">
         <div class="f" style="grid-column:1/-1"><label for="gp-title">Titel</label><input id="gp-title" class="txt" value="1% agarosegel, 1× TAE, 100 V"></div>
@@ -33,10 +38,9 @@
       <div class="row" style="margin-top:8px"><button type="button" id="gp-tbl-add">+ Laan</button></div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De lanen worden van links naar rechts in de slotjes gezet. Laat de naam leeg om een slotje over te slaan. Zet bij <i>Verwachte banden</i> de grootten die je verwacht, gescheiden door een spatie; die worden in de verwachte gel getekend.</p>
     </div>
-    <div class="result"><canvas id="gp-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="gp">Download PNG</button></div><div id="gp-out"></div></div>
-    <div class="result" id="gp-cast"></div>
-    <div class="result" id="gp-run"></div>
-    <div class="result"><h3 style="margin:0 0 10px;font-size:14px">Verwachte gel</h3><canvas id="gpp-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="gpp">Download PNG</button></div><div id="gpp-out"></div></div>
+    <div class="result" id="gp-cast" style="margin-top:16px"></div>
+    <div class="result" id="gp-run" style="margin-top:16px"></div>
+    </div>
   </div>
   <p class="src">Bandposities volgen uit lineaire interpolatie van log(grootte) tegen de loopafstand tussen de grootste en de kleinste band van de gekozen ladder; dat is hetzelfde verband als de standaardcurve in <i>Agarosegel &amp; bandgrootte</i>. Prestained eiwitladders: Bio-Rad Precision Plus Protein Dual Color (alle banden blauw, 75 en 25 kDa rood) en Thermo Scientific PageRuler Plus Prestained (alle banden blauw, 70 kDa groen en 25 kDa rood). Maten van veelgebruikte geldragers en kammen van Bio-Rad (Mini-Sub Cell GT en Wide Mini-Sub Cell GT, instructiehandleiding) en Thermo Scientific (Owl EasyCast B1/B2). Het slotvolume volgt uit de slotmaten: breedte × kamdikte × (geldikte − 1 mm bodem), waarbij 1 mm³ = 1 µL; er wordt tot 80% gevuld, want een vol slotje loopt over in de buurlaan. De loopbuffer in een 6× laadbuffer betekent 1 deel buffer op 5 delen monster. Scheidingsbereik per agarosepercentage naar dezelfde tabel als de tool <i>Agarosegel &amp; bandgrootte</i>. Kleuring: GelRed en SYBR Safe worden als 1× uit een 10 000×-stock in de gel gebruikt; ethidiumbromide op 0,5 µg/mL uit een stock van 10 mg/mL. De looptijd is een schatting: de snelheid van het blauwe front is evenredig met de veldsterkte en neemt af bij een hoger agarosepercentage, geijkt op een minigel die bij 10 V/cm in ongeveer 35 minuten 6 cm loopt; reken op een marge van ongeveer een derde. Richtlijn 5–10 V/cm uit de gangbare protocollen (Sambrook &amp; Russell; Bio-Rad, Mini-Sub Cell GT). Posities van de kleurfronten in TAE/TBE naar NEB (Gel Loading Dye, Purple 6X) en Sambrook &amp; Russell, Molecular Cloning, tabel bij agarosegelelektroforese.</p>
 </section>

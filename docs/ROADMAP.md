@@ -49,7 +49,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 ## Phase 3: preparation, picture tools and plates (16 steps)
 | Step | Ideas | What | Done when |
 |---|---|---|---|
-| S21 | 13 | Shared layout for picture tools: preview left/top, options panel, export bar (PNG/SVG/copy/print) | Component used by Gelplanner |
+| S21 | 13 | Shared layout for picture tools: preview left/top, options panel, export bar (PNG/SVG/copy/print) | ✅ `.picwrap` + `data-picbar` in `tools/nt/01_pic.js`; export bar PNG/SVG/copy/print, with a real canvas→SVG recorder (vectors, not a wrapped bitmap). Gelplanner converted |
 | S22 | 13 | Move dilution scheme, pipetting scheme and PCR programme onto the shared layout | 3 tools converted, tests pass |
 | S23 | 13 | Move staining scheme and plate layout onto the shared layout | All picture tools consistent |
 | S24 | 34, 225 | Dilution series drawing: tubes, arrows, volumes, colour fading | Drawing in the dilution scheme |

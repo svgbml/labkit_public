@@ -4135,5 +4135,8 @@
 "De verwachte gel laat zien waar je banden komen te staan, met de kleurfronten van de laadbuffer.": "The expected gel shows where your bands will end up, with the dye fronts of the loading buffer.",
 "De Gelplanner rekent het slotvolume, de laadbuffer per laan en de looptijd uit.": "The gel planner calculates the well volume, the loading dye per lane and the run time.",
 "Het Gel-laadschema is opgegaan in de Gelplanner; oude links verwijzen door.": "The gel loading scheme has been merged into the gel planner; old links redirect.",
-"SDS-PAGE-monsters gaan met een klik door naar de Gelplanner.": "SDS-PAGE samples go to the gel planner with one click."
+"SDS-PAGE-monsters gaan met een klik door naar de Gelplanner.": "SDS-PAGE samples go to the gel planner with one click.",
+"SVG": "SVG",
+"Deze tekening kan niet als SVG worden opgeslagen; gebruik PNG.": "This drawing cannot be saved as SVG; use PNG.",
+"Kopiëren lukte niet in deze browser; gebruik PNG.": "Copying did not work in this browser; use PNG."
 }
