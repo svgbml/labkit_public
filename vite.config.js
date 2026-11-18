@@ -22,9 +22,9 @@ export default defineConfig({
     __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false'
   },
   resolve: {
-    /* Zolang een component zijn template als string meegeeft, is de template-compiler nodig.
-       Zodra alles een .vue-bestand is, kan dit naar de runtime-build (kleiner). */
-    alias: {vue: 'vue/dist/vue.esm-bundler.js'}
+    /* Elke template staat nu in een .vue-bestand en wordt door @vitejs/plugin-vue vooraf
+       gecompileerd, dus de template-compiler hoeft niet mee: de runtime-build is kleiner. */
+    alias: {vue: 'vue/dist/vue.runtime.esm-bundler.js'}
   },
   build: {
     outDir: 'build',

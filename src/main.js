@@ -8,10 +8,23 @@
    als globale namen. Dat is geen toeval maar de afspraak: de tools die nog niet op Vue staan
    gebruiken die helpers ook, en ze hoeven niet twee keer te bestaan.
 
-   De volgorde hieronder is de volgorde waarin de tools zich opzetten; elke tool zoekt zijn
-   eigen host (#sf-app, #pk-app, #zp-app, #dg-app) in de pagina. */
-import './lib/bridge.js';
-import './tools/sigfig.js';
-import './tools/zprime.js';
-import './tools/pipkeus.js';
-import './tools/digest.js';
+   Elke tool heeft een eigen host in de pagina, bij de kop en de bronregel die gewone HTML
+   blijven. calc[tool] blijft bestaan omdat de rest van de app dat aanroept na het delen van
+   een link, ongedaan maken en bij het openen; een component rekent zelf opnieuw. */
+import {mountTool} from './lib/bridge.js';
+import Sigfig from './tools/Sigfig.vue';
+import Zprime from './tools/Zprime.vue';
+import Pipkeus from './tools/Pipkeus.vue';
+import Digest from './tools/Digest.vue';
+
+mountTool('#sf-app', Sigfig);
+calc.sigfig = () => {};
+
+const zp = mountTool('#zp-app', Zprime);
+calc.zprime = () => { if (zp && zp.vm) zp.vm.draw(); };
+
+mountTool('#pk-app', Pipkeus);
+calc.pipkeus = () => {};
+
+mountTool('#dg-app', Digest);
+calc.digest = () => {};

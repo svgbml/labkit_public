@@ -35,9 +35,14 @@ import {lkUiInstall} from './ui.js';
    web/vendor/ en kwam hij via een globale `Vue` binnen. */
 const LKVUE = {createApp};
 
-/* Zet een component op een host binnen een tool. Geeft {app, vm} terug, of null als Vue er
-   niet is; in dat laatste geval blijft de rest van de app gewoon werken. */
-export function lkVueMount(sel, options) {
+/* Zet een component op een host binnen een tool en geeft {app, vm} terug, of null als de host
+   niet bestaat; in dat laatste geval blijft de rest van de app gewoon werken.
+
+   Dit is het stuk dat niet in een component zelf kan: de hosts (#sf-app, #pk-app, #zp-app,
+   #dg-app) staan in web/index.html bij de kop en de bronregel van de tool, de host moet
+   `data-notr` krijgen zodat de vertaallaag van de DOM eraf blijft, en elke app heeft t(),
+   tHtml() en de gedeelde componenten nodig. */
+export function mountTool(sel, options) {
   const host = document.querySelector(sel);
   if (!host) { console.error('geen host voor ' + sel); return null; }
   host.setAttribute('data-notr', '');   /* Vue bezit deze DOM: de vertaallaag blijft eraf */
