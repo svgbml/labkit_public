@@ -4207,5 +4207,16 @@
 "Uitgevoerd door": "Performed by",
 "Putjes": "Wells",
 "Gelabelde putjes": "Labelled wells",
-"Putje": "Well"
+"Putje": "Well",
+"Vulorde": "Fill order",
+"stap {#}": "step {#}",
+"Met een meerkanaalspipet": "With a multichannel pipette",
+"<b>Per kolom</b> ({#} putjes tegelijk): {#} volle kolom(men) — {*} — en {#} losse putjes, samen {#} stappen.": "<b>Per column</b> ({#} wells at a time): {#} full column(s) — {*} — and {#} single wells, {#} steps in all.",
+"<b>Per kolom</b> ({#} putjes tegelijk): geen enkele kolom is helemaal één groep, dus alle {#} putjes gaan los.": "<b>Per column</b> ({#} wells at a time): not one column is a single group all the way down, so all {#} wells go one by one.",
+"<b>Per rij</b> ({#} putjes tegelijk): {#} volle rij(en) — {*} — en {#} losse putjes, samen {#} stappen.": "<b>Per row</b> ({#} wells at a time): {#} full row(s) — {*} — and {#} single wells, {#} steps in all.",
+"<b>Per rij</b> ({#} putjes tegelijk): geen enkele rij is helemaal één groep, dus alle {#} putjes gaan los.": "<b>Per row</b> ({#} wells at a time): not one row is a single group all the way across, so all {#} wells go one by one.",
+"De snelste richting is per kolom: {#} stappen in plaats van {#}.": "The quickest direction is per column: {#} steps instead of {#}.",
+"De snelste richting is per rij: {#} stappen in plaats van {#}.": "The quickest direction is per row: {#} steps instead of {#}.",
+"Kolom {*} heeft meer dan één groep en kan niet in één streek.": "Column {*} holds more than one group and cannot be done in a single stroke.",
+"Zet een hele kolom of rij op één groep om de meerkanaalspipet te kunnen gebruiken.": "Put a whole column or row on one group to be able to use the multichannel pipette."
 }

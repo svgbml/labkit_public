@@ -12,6 +12,12 @@
    MIC-titratie, buitenrij als buffer). "Plaatkaart" drukt de plaat op A4 af met de legenda,
    het aantal putjes per groep en een tabel van alle gelabelde putjes.
 
+   Vulorde (S31): met "Vulorde" aan staat in elk gevuld putje het nummer van de stap. De orde
+   loopt per groep (alle standaarden, dan alle blanco's, …), want zo pipetteer je ook: één
+   keer tips pakken per groep. Binnen een groep volgt hij de gekozen richting. Eronder staat
+   wat er met een meerkanaalspipet in één keer kan: volle kolommen, volle rijen en wat er los
+   overblijft.
+
    Vullen (S29): slepen vult putjes. Staat "Herhalingen" op 2–8, dan vult één klik of sleep
    meteen zoveel putjes naast of onder elkaar: replica's in één beweging. Een klik op een
    rij- of kolomkop vult die hele rij of kolom. "Reeks…" zet een verdunningsreeks neer en
@@ -90,31 +96,83 @@ function plateDesigner(host, opts) {
       <button type="button" data-pl="erase" aria-pressed="false">Gum</button>
       <button type="button" data-pl="clear">Leegmaken</button>
       <button type="button" data-pl="print" title="De plaatkaart op A4 afdrukken">Plaatkaart</button>
+      <label class="chk"><input type="checkbox" data-pl="order"> Vulorde</label>
     </div>
     <div class="legend" data-pl="legend"></div>
     <div class="tbl-wrap"><div class="plate" data-pl="grid" role="group" aria-label="Putjes van de plaat"></div></div>
+    <div class="pld-mc" data-pl="mc"></div>
     <p class="pld-hint">Sleep over de putjes om te vullen. Met <b>Herhalingen</b> vul je replica's in één beweging; een klik op een rij- of kolomkop vult die hele rij of kolom.</p>`;
 
   const q = n => host.querySelector(`[data-pl="${n}"]`);
   const rep = () => { const v = +(q('rep') || {}).value; return Math.max(1, Math.min(8, v || 1)); };
   const dir = () => ((q('dir') || {}).value === 'v' ? 'v' : 'h');
+  const ordOn = () => !!(q('order') || {}).checked;
+
+  /* ---- vulorde: per groep, want per groep pak je één keer tips (S31) ---- */
+  function orderSeq() {
+    const {r, c} = dims(), d = dir(), seq = {}; let n = 0;
+    S.groups.forEach((g, gi) => {
+      if (d === 'v') { for (let j = 0; j < c; j++) for (let i = 0; i < r; i++) { const k = key(i, j); if (S.wells[k] === gi) seq[k] = ++n; } }
+      else { for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) { const k = key(i, j); if (S.wells[k] === gi) seq[k] = ++n; } }
+    });
+    return seq;
+  }
+
+  /* ---- wat kan er met een meerkanaalspipet in één keer? (S31) ----
+     Een kolom of rij kan alleen in één keer als élk putje erin dezelfde groep heeft: anders
+     zou één streek twee verschillende dingen pipetteren. Wat overblijft gaat los. */
+  function multi() {
+    const {r, c} = dims(), cols = [], rows = [], mixedC = [], mixedR = [];
+    for (let j = 0; j < c; j++) { const g = S.wells[key(0, j)]; let full = g != null, any = false, mix = false;
+      for (let i = 0; i < r; i++) { const v = S.wells[key(i, j)]; if (v != null) any = true; if (v !== g) { full = false; if (v != null) mix = true; } }
+      if (full) cols.push(j + 1); else if (any && (mix || g != null)) mixedC.push(j + 1); }
+    for (let i = 0; i < r; i++) { const g = S.wells[key(i, 0)]; let full = g != null, any = false, mix = false;
+      for (let j = 0; j < c; j++) { const v = S.wells[key(i, j)]; if (v != null) any = true; if (v !== g) { full = false; if (v != null) mix = true; } }
+      if (full) rows.push(PLROW[i]); else if (any && (mix || g != null)) mixedR.push(PLROW[i]); }
+    const n = Object.keys(S.wells).length;
+    return {r, c, n, cols, rows, mixedC, mixedR,
+      colSteps: cols.length + (n - cols.length * r), rowSteps: rows.length + (n - rows.length * c)};
+  }
+
+  function mcText() {
+    const m = multi(); if (!m.n) return '';
+    const list = a => a.join(', ');
+    const col = m.cols.length
+      ? `<b>Per kolom</b> (${m.r} putjes tegelijk): ${m.cols.length} volle kolom(men) — ${ud(list(m.cols))} — en ${m.n - m.cols.length * m.r} losse putjes, samen ${m.colSteps} stappen.`
+      : `<b>Per kolom</b> (${m.r} putjes tegelijk): geen enkele kolom is helemaal één groep, dus alle ${m.n} putjes gaan los.`;
+    const row = m.rows.length
+      ? `<b>Per rij</b> (${m.c} putjes tegelijk): ${m.rows.length} volle rij(en) — ${ud(list(m.rows))} — en ${m.n - m.rows.length * m.c} losse putjes, samen ${m.rowSteps} stappen.`
+      : `<b>Per rij</b> (${m.c} putjes tegelijk): geen enkele rij is helemaal één groep, dus alle ${m.n} putjes gaan los.`;
+    const best = m.cols.length || m.rows.length
+      ? `De snelste richting is ${m.colSteps <= m.rowSteps ? 'per kolom' : 'per rij'}: ${Math.min(m.colSteps, m.rowSteps)} stappen in plaats van ${m.n}.`
+      : 'Zet een hele kolom of rij op één groep om de meerkanaalspipet te kunnen gebruiken.';
+    /* het losse putje-advies staat in een eigen regel: zo blijft elke zin één vertaalsleutel
+       in plaats van een sleutel per combinatie van zinnen */
+    const mix = (m.mixedC.length && m.cols.length) ? `<div>Kolom ${ud(list(m.mixedC))} heeft meer dan één groep en kan niet in één streek.</div>` : '';
+    return `<div>${col}</div><div>${row}</div><div class="mcb">${best}</div>${mix}`;
+  }
 
   function render() {
     const {r, c} = dims(), sz = c >= 16 ? 24 : c >= 12 ? 34 : c >= 8 ? 42 : 56;
     const g = q('grid'), lab = sz >= 34;                 /* bij 384 putjes is er geen ruimte voor een label */
+    const on = ordOn(), seq = on ? orderSeq() : null;
     g.style.gridTemplateColumns = `22px repeat(${c},${sz}px)`;
     g.style.gridAutoRows = sz + 'px';
     let h = '<div></div>';
     for (let j = 1; j <= c; j++) h += `<button type="button" class="hd" data-plc="${j - 1}" title="Kolom ${j} vullen"><span data-notr="">${j}</span></button>`;
     for (let i = 0; i < r; i++) { h += `<button type="button" class="hd" data-plr="${i}" title="Rij ${uv(PLROW[i])} vullen"><span data-notr="">${PLROW[i]}</span></button>`;
-      for (let j = 0; j < c; j++) { const k = key(i, j), gi = S.wells[k], on = gi != null && S.groups[gi], v = S.vals[k];
-        h += `<div class="well${on ? ' on' : ''}${v && lab ? ' wtxt' : ''}" data-notr="" data-w="${k}" title="${k}${on ? ' · ' + esc(S.groups[gi].n) : ''}${v ? ' · ' + esc(v) : ''}"${on ? ` style="--wc:${S.groups[gi].c}"` : ''}>${v && lab ? `<span>${esc(v)}</span>` : ''}</div>`; } }
+      for (let j = 0; j < c; j++) { const k = key(i, j), gi = S.wells[k], fill = gi != null && S.groups[gi], v = S.vals[k];
+        const txt = on ? (seq[k] != null ? String(seq[k]) : '') : (v || '');
+        const tip = [k, fill ? trPlain(S.groups[gi].n, true) : '', v || '', on && seq[k] != null ? trPlain('stap ' + seq[k]) : '']
+          .filter(Boolean).join(' · ');
+        h += `<div class="well${fill ? ' on' : ''}${txt && lab ? ' wtxt' : ''}" data-notr="" data-w="${k}" title="${esc(tip)}"${fill ? ` style="--wc:${S.groups[gi].c}"` : ''}>${txt && lab ? `<span>${esc(txt)}</span>` : ''}</div>`; } }
     g.innerHTML = h;
     const act = document.activeElement;
     if (!(act && act.dataset && act.dataset.plgn != null))
       q('legend').innerHTML = S.groups.map((x, i) =>
         `<div class="grp${i === sel && !erase ? ' sel' : ''}" data-plg="${i}"><i style="background:${x.c}"></i>` +
         `<input data-plgn="${i}" value="${esc(x.n)}" aria-label="Naam van de groep"><button type="button" class="gdel" data-pldel="${i}" aria-label="Verwijder">✕</button></div>`).join('');
+    q('mc').innerHTML = mcText();
     q('erase').setAttribute('aria-pressed', erase ? 'true' : 'false');
     q('erase').classList.toggle('primary', erase);
     fire();
@@ -161,6 +219,7 @@ function plateDesigner(host, opts) {
   host.addEventListener('change', e => {
     if (e.target.dataset.plgn != null) { S.groups[+e.target.dataset.plgn].n = e.target.value || trPlain('Groep'); render(); }
     else if (e.target.dataset.pl === 'fmt') { S.fmt = e.target.value; S.wells = {}; S.vals = {}; render(); }
+    else if (e.target.dataset.pl === 'order' || e.target.dataset.pl === 'dir') render();
   });
 
   /* ---- verdunningsreeks over een rij of kolom ---- */
@@ -231,6 +290,10 @@ function plateDesigner(host, opts) {
       <p class="meta">${T(r * c + ' putjes')} · ${T('gevuld')}: <b>${Object.keys(S.wells).length}</b> · ${T('Datum')}: ________________ · ${T('Uitgevoerd door')}: ________________</p>`;
     const leg = `<table><thead><tr><th>${T('Groep')}</th><th>${T('Putjes')}</th></tr></thead><tbody>` +
       S.groups.map((g, i) => `<tr><td><i style="background:${esc(g.c)}"></i>${G(g.n)}</td><td>${cnt[i] || 0}</td></tr>`).join('') + '</tbody></table>';
+    /* het advies staat al vertaald in de pagina; dat nemen we over, zodat de vertaling niet
+       twee keer hoeft te worden opgezocht voor een document zonder vertaallaag */
+    const mcHtml = (q('mc') || {}).innerHTML || '';
+    const mc = mcHtml ? `<h2>${T('Met een meerkanaalspipet')}</h2><div class="mc">${mcHtml}</div>` : '';
     const tbl = lab.length ? `<h2>${T('Gelabelde putjes')}</h2><table class="wl"><thead><tr><th>${T('Putje')}</th><th>${T('Groep')}</th><th>${T('Label')}</th></tr></thead><tbody>` +
       lab.map(k => `<tr><td>${esc(k)}</td><td>${G((S.groups[S.wells[k]] || {}).n || '')}</td><td>${esc(S.vals[k])}</td></tr>`).join('') + '</tbody></table>' : '';
     rpPrint(`<!doctype html><meta charset="utf-8"><title>${T(opts.name || 'Plaatkaart')}</title><style>
@@ -244,9 +307,10 @@ function plateDesigner(host, opts) {
       th{background:#eef0f3}
       td i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
       .cols{display:flex;gap:16px;align-items:flex-start}
+      .mc{font-size:12px;color:#1f2933}.mc div{margin:0 0 2px}.mc span[data-v]{font-weight:600}
       .wl{column-count:4;column-gap:10px;display:block}
       .wl tbody,.wl thead{display:block}.wl tr{display:flex}.wl th,.wl td{flex:1}
-      </style>${head}<div class="cols"><img src="${cv.toDataURL('image/png')}"><div>${leg}</div></div>${tbl}`);
+      </style>${head}<div class="cols"><img src="${cv.toDataURL('image/png')}"><div>${leg}${mc}</div></div>${tbl}`);
   }
 
   /* de plaat op een canvas tekenen; geeft de gebruikte hoogte terug */
@@ -258,13 +322,14 @@ function plateDesigner(host, opts) {
     for (let i = 0; i < r; i++) x.fillText(PLROW[i], L - 14, T + (i + 0.5) * sz);
     x.strokeStyle = PCOL.ink; x.lineWidth = 1.2;
     x.beginPath(); x.roundRect(L - 6, T - 4, c * sz + 12, r * sz + 8, 10); x.stroke();
+    const seq = ordOn() ? orderSeq() : null;
     for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) {
       const k = key(i, j), gi = S.wells[k], on = gi != null && S.groups[gi];
       const cx = L + (j + 0.5) * sz, cy = T + (i + 0.5) * sz, rad = sz * 0.42;
       x.beginPath(); x.arc(cx, cy, rad, 0, 7);
       x.fillStyle = on ? S.groups[gi].c : '#f4f5f7'; x.fill();
       x.strokeStyle = on ? S.groups[gi].c : PCOL.line; x.lineWidth = 1; x.stroke();
-      const v = S.vals[k];
+      const v = seq ? (seq[k] != null ? String(seq[k]) : '') : S.vals[k];
       if (v && sz >= 34) {                       /* het label past alleen in een ruim putje */
         x.font = '600 ' + Math.min(10, sz * 0.2) + 'px ' + PFONT();
         x.fillStyle = on ? inkOn(S.groups[gi].c) : PCOL.ink;
@@ -294,6 +359,6 @@ function plateDesigner(host, opts) {
       if (t.fmt) { S.fmt = t.fmt; const f = q('fmt'); if (f) f.value = S.fmt; }
       const d = dims(), o = t.make(d.r, d.c);
       S.groups = o.groups.map(g => ({...g})); S.wells = {...o.wells}; S.vals = {...o.vals}; sel = 0; render(); return true; },
-    print: printCard, draw, size, render
+    print: printCard, order: orderSeq, multi, draw, size, render
   };
 }
