@@ -563,6 +563,15 @@ function plateDesigner(host, opts) {
       sel = Math.min(sel, S.groups.length - 1); render(); },
     selected: () => sel, label: (k, v) => { if (v == null || v === '') delete S.vals[k]; else S.vals[k] = String(v); },
     labels, text: k => textOf(k, labels().lab),
+    /* aangrenzende putjes van dezelfde groep zijn één blok (één replicaat), in de gekozen
+       richting; met gi erbij alleen die ene groep. Gebruikt door de monsterlijst (S36). */
+    blocks(gi) { const {r, c} = dims(), d = dir(), out = {}; let n = -1;
+      const outer = d === 'v' ? c : r, inner = d === 'v' ? r : c;
+      for (let a = 0; a < outer; a++) { let prev = null;
+        for (let b = 0; b < inner; b++) { const i = d === 'v' ? b : a, j = d === 'v' ? a : b, k = key(i, j), g = S.wells[k];
+          if (g == null || (gi != null && g !== gi)) { prev = null; continue; }
+          if (g !== prev) n++; out[k] = n; prev = g; } }
+      return out; },
     shape(v) { if (v != null) { shape = v === 'vierkant' ? 'vierkant' : 'rond'; render(); } return shape; },
     autoLabel(v) { if (v != null) { autoLab = typeof v === 'function' ? v : !!v; render(); } return autoLab; },
     dir,

@@ -861,7 +861,7 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
   <div class="panel">
     <div class="row" style="justify-content:space-between;margin-bottom:12px">
       <div class="f"><label for="w-title">Titel</label><input id="w-title" class="txt" value="ELISA / qPCR — plaat 1" style="width:240px"></div>
-      <div class="row"><button type="button" class="primary" id="w-copy">Kopieer als tabel</button><button type="button" id="w-csv" class="dl-only" style="display:none">Download CSV</button></div>
+      <div class="row"><button type="button" data-smp="plaat">Monsters…</button><button type="button" class="primary" id="w-copy">Kopieer als tabel</button><button type="button" id="w-csv" class="dl-only" style="display:none">Download CSV</button></div>
     </div>
     <div id="w-pld"></div>
     <div class="row" style="margin-top:12px;gap:14px"><div class="f"><label for="w-pal">Kleurenpalet</label><select id="w-pal"><option value="std">Standaard</option><option value="okabe">Kleurenblind-veilig</option><option value="pastel">Pastel</option><option value="fel">Fel</option><option value="grijs">Grijstinten</option></select></div><div class="f"><label for="w-shape">Vorm putjes</label><select id="w-shape"><option value="rond">Rond</option><option value="vierkant">Vierkant</option></select></div><label class="chk" for="w-autolab"><input type="checkbox" id="w-autolab" checked> automatische labels (St1, Mo2 …)</label><label class="chk" for="w-leg"><input type="checkbox" id="w-leg" checked> legenda in afbeelding</label><span style="font-size:13px;color:var(--muted)">Klik op het kleurvakje van een groep voor een eigen kleur.</span></div>
@@ -2942,7 +2942,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       <div class="fields">
         <div class="f"><label for="qp2-fmt">Plaat</label><select id="qp2-fmt" style="width:100%"><option value="96">96-wells (8 × 12)</option><option value="384">384-wells (16 × 24)</option></select></div>
         <div class="f"><label for="qp2-rep">Replicaten</label><input id="qp2-rep" inputmode="numeric" value="3"></div>
-        <div class="f" style="grid-column:1/-1"><label for="qp2-s">Monsters (komma-gescheiden)</label><input id="qp2-s" class="txt" value="Controle 1, Controle 2, Behandeld 1, Behandeld 2"></div>
+        <div class="f" style="grid-column:1/-1"><label for="qp2-s">Monsters (komma-gescheiden)</label><div class="row" style="gap:6px"><input id="qp2-s" class="txt" value="Controle 1, Controle 2, Behandeld 1, Behandeld 2" style="flex:1;min-width:0"><button type="button" data-smp="qplate">Monsters…</button></div></div>
         <div class="f" style="grid-column:1/-1"><label for="qp2-t">Doelgenen (komma-gescheiden)</label><input id="qp2-t" class="txt" value="GAPDH, IL6"></div>
         <div class="f"><label for="qp2-std">Standaardreeks: aantal punten</label><input id="qp2-std" inputmode="numeric" value="0"></div>
         <div class="f"><label for="qp2-ntc">NTC per doelgen</label><input id="qp2-ntc" inputmode="numeric" value="1"></div>
@@ -3029,7 +3029,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
         <label class="chk" for="gp-auto" style="grid-column:1/-1"><input type="checkbox" id="gp-auto" checked> Standaardtoelichting tonen</label>
       </div>
       <div class="tbl-wrap" style="margin-top:12px"><table id="gp-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="gp-tbl-add">+ Laan</button></div>
+      <div class="row" style="margin-top:8px"><button type="button" id="gp-tbl-add">+ Laan</button><button type="button" data-smp="gplan">Monsters…</button></div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De lanen worden van links naar rechts in de slotjes gezet. Laat de naam leeg om een slotje over te slaan. Zet bij <i>Verwachte banden</i> de grootten die je verwacht, gescheiden door een spatie; die worden in de verwachte gel getekend.</p>
     </div>
     <div class="result" id="gp-cast" style="margin-top:16px"></div>
@@ -3879,7 +3879,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=f94af374f9"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=a5f3941de7"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -7047,6 +7047,15 @@ function plateDesigner(host, opts) {
       sel = Math.min(sel, S.groups.length - 1); render(); },
     selected: () => sel, label: (k, v) => { if (v == null || v === '') delete S.vals[k]; else S.vals[k] = String(v); },
     labels, text: k => textOf(k, labels().lab),
+    /* aangrenzende putjes van dezelfde groep zijn één blok (één replicaat), in de gekozen
+       richting; met gi erbij alleen die ene groep. Gebruikt door de monsterlijst (S36). */
+    blocks(gi) { const {r, c} = dims(), d = dir(), out = {}; let n = -1;
+      const outer = d === 'v' ? c : r, inner = d === 'v' ? r : c;
+      for (let a = 0; a < outer; a++) { let prev = null;
+        for (let b = 0; b < inner; b++) { const i = d === 'v' ? b : a, j = d === 'v' ? a : b, k = key(i, j), g = S.wells[k];
+          if (g == null || (gi != null && g !== gi)) { prev = null; continue; }
+          if (g !== prev) n++; out[k] = n; prev = g; } }
+      return out; },
     shape(v) { if (v != null) { shape = v === 'vierkant' ? 'vierkant' : 'rond'; render(); } return shape; },
     autoLabel(v) { if (v != null) { autoLab = typeof v === 'function' ? v : !!v; render(); } return autoLab; },
     dir,
@@ -8868,6 +8877,50 @@ document.addEventListener('click',e=>{ if(e.target.closest('[data-news]')) newsO
 { const seen=jget(NKEY,'');
   if(!seen) jset(NKEY,APPVER); /* eerste bezoek: niets melden, alleen onthouden */
   else if(nvCmp(seen,APPVER)<0) setTimeout(()=>{ if(!document.querySelector('.lk-modal')&&!document.querySelector('#lk-tour:not([hidden])')) newsOpen(false); },1200); }
+
+/* ---------- monsterlijst: één keer plakken, in meerdere tools gebruiken (S36) ----------
+   De lijst staat in localStorage onder labkit:v1:samples en is dus in elke tool dezelfde.
+   Een tool meldt met smpUse(id, fn) hoe hij de namen toepast; de knop <button data-smp="id">
+   opent het venster. Namen zijn invoer van de gebruiker: ze worden nooit vertaald. */
+const SMPKEY='labkit:v1:samples';
+const smpGet=()=>{ const v=jget(SMPKEY,null); return Array.isArray(v)?v.filter(x=>typeof x==='string'&&x.trim()).map(x=>x.trim()):[]; };
+const smpSet=a=>jset(SMPKEY,a.slice(0,384));
+const smpParse=t=>String(t).split(/[\n;,\t]+/).map(s=>s.trim()).filter(Boolean).slice(0,384);
+const SMPUSE={};
+function smpUse(id,fn){ SMPUSE[id]=fn; }
+function smpOpen(id){
+  if(document.querySelector('.lk-modal')) return;
+  const cur=smpGet(), has=!!SMPUSE[id];
+  const m=appModal(`<h3 style="margin:0 0 4px;font-size:16px">Monsterlijst</h3>
+    <p style="margin:0 0 10px;color:var(--muted);font-size:13px">Eén naam per regel (of gescheiden door komma's of puntkomma's). De lijst blijft op dit apparaat bewaard en is in de Plaatindeling, de Gelplanner en de qPCR-plaatindeling dezelfde.</p>
+    <textarea data-smp-t class="mono" rows="8" data-notr="" style="width:100%;font-size:13px" placeholder="Monster 1&#10;Monster 2&#10;Controle">${esc(cur.join('\n'))}</textarea>
+    <p data-smp-n style="margin:6px 0 0;font-size:12.5px;color:var(--muted)"></p>
+    <div class="row" style="justify-content:flex-end;margin-top:12px;gap:6px"><button type="button" data-smp-x>Annuleren</button><button type="button" data-smp-s>Alleen bewaren</button>${has?'<button type="button" class="primary" data-smp-go>Bewaren en hier gebruiken</button>':''}</div>`);
+  const T=m.box.querySelector('[data-smp-t]'), N=m.box.querySelector('[data-smp-n]');
+  const count=()=>{ const n=smpParse(T.value).length; N.textContent=n===1?trPlain('1 naam in de lijst.'):trPlain(n+' namen in de lijst.'); };
+  T.addEventListener('input',count); count();
+  m.box.querySelector('[data-smp-x]').addEventListener('click',m.close);
+  m.box.querySelector('[data-smp-s]').addEventListener('click',()=>{ smpSet(smpParse(T.value)); m.close(); });
+  const go=m.box.querySelector('[data-smp-go]');
+  if(go) go.addEventListener('click',()=>{ const a=smpParse(T.value); smpSet(a); m.close(); try{ SMPUSE[id](a); }catch(e){} });
+  setTimeout(()=>T.focus(),0);
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-smp]'); if(b){ e.preventDefault(); smpOpen(b.dataset.smp); } });
+
+/* Plaatindeling: elk replicaatblok van de gekozen groep krijgt de volgende naam uit de lijst */
+smpUse('plaat',names=>{ if(typeof wPld==='undefined'||!wPld||!names.length) return;
+  const gi=wPld.selected(), bl=wPld.blocks(gi), st=wPld.get();
+  Object.keys(bl).forEach(k=>{ const n=names[bl[k]]; if(n) st.vals[k]=n; else delete st.vals[k]; });
+  wPld.set(st); });
+/* Gelplanner: één laan per naam, met de volumes en kleur van de eerste laan */
+smpUse('gplan',names=>{ if(typeof gpT==='undefined'||!gpT||!names.length) return;
+  const old=etGet('gp-tbl'), base=old[0]||['','10','','#1558b0'];
+  gpT.set(names.map((n,i)=>{ const r=(old[i]||base).slice(); r[0]=n; return r; })); });
+/* qPCR-plaatindeling: het komma-gescheiden veld met monsters */
+smpUse('qplate',names=>{ const el=$('#qp2-s'); if(!el||!names.length) return;
+  el.value=names.join(', '); el.__typed=true;
+  el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));
+  try{ calc.qplate(); }catch(e){} });
 /* /NT:ux */
 buildReeks();
 sLoad('bradford');

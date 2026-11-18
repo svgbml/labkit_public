@@ -279,3 +279,47 @@ document.addEventListener('click',e=>{ if(e.target.closest('[data-news]')) newsO
 { const seen=jget(NKEY,'');
   if(!seen) jset(NKEY,APPVER); /* eerste bezoek: niets melden, alleen onthouden */
   else if(nvCmp(seen,APPVER)<0) setTimeout(()=>{ if(!document.querySelector('.lk-modal')&&!document.querySelector('#lk-tour:not([hidden])')) newsOpen(false); },1200); }
+
+/* ---------- monsterlijst: één keer plakken, in meerdere tools gebruiken (S36) ----------
+   De lijst staat in localStorage onder labkit:v1:samples en is dus in elke tool dezelfde.
+   Een tool meldt met smpUse(id, fn) hoe hij de namen toepast; de knop <button data-smp="id">
+   opent het venster. Namen zijn invoer van de gebruiker: ze worden nooit vertaald. */
+const SMPKEY='labkit:v1:samples';
+const smpGet=()=>{ const v=jget(SMPKEY,null); return Array.isArray(v)?v.filter(x=>typeof x==='string'&&x.trim()).map(x=>x.trim()):[]; };
+const smpSet=a=>jset(SMPKEY,a.slice(0,384));
+const smpParse=t=>String(t).split(/[\n;,\t]+/).map(s=>s.trim()).filter(Boolean).slice(0,384);
+const SMPUSE={};
+function smpUse(id,fn){ SMPUSE[id]=fn; }
+function smpOpen(id){
+  if(document.querySelector('.lk-modal')) return;
+  const cur=smpGet(), has=!!SMPUSE[id];
+  const m=appModal(`<h3 style="margin:0 0 4px;font-size:16px">Monsterlijst</h3>
+    <p style="margin:0 0 10px;color:var(--muted);font-size:13px">Eén naam per regel (of gescheiden door komma's of puntkomma's). De lijst blijft op dit apparaat bewaard en is in de Plaatindeling, de Gelplanner en de qPCR-plaatindeling dezelfde.</p>
+    <textarea data-smp-t class="mono" rows="8" data-notr="" style="width:100%;font-size:13px" placeholder="Monster 1&#10;Monster 2&#10;Controle">${esc(cur.join('\n'))}</textarea>
+    <p data-smp-n style="margin:6px 0 0;font-size:12.5px;color:var(--muted)"></p>
+    <div class="row" style="justify-content:flex-end;margin-top:12px;gap:6px"><button type="button" data-smp-x>Annuleren</button><button type="button" data-smp-s>Alleen bewaren</button>${has?'<button type="button" class="primary" data-smp-go>Bewaren en hier gebruiken</button>':''}</div>`);
+  const T=m.box.querySelector('[data-smp-t]'), N=m.box.querySelector('[data-smp-n]');
+  const count=()=>{ const n=smpParse(T.value).length; N.textContent=n===1?trPlain('1 naam in de lijst.'):trPlain(n+' namen in de lijst.'); };
+  T.addEventListener('input',count); count();
+  m.box.querySelector('[data-smp-x]').addEventListener('click',m.close);
+  m.box.querySelector('[data-smp-s]').addEventListener('click',()=>{ smpSet(smpParse(T.value)); m.close(); });
+  const go=m.box.querySelector('[data-smp-go]');
+  if(go) go.addEventListener('click',()=>{ const a=smpParse(T.value); smpSet(a); m.close(); try{ SMPUSE[id](a); }catch(e){} });
+  setTimeout(()=>T.focus(),0);
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-smp]'); if(b){ e.preventDefault(); smpOpen(b.dataset.smp); } });
+
+/* Plaatindeling: elk replicaatblok van de gekozen groep krijgt de volgende naam uit de lijst */
+smpUse('plaat',names=>{ if(typeof wPld==='undefined'||!wPld||!names.length) return;
+  const gi=wPld.selected(), bl=wPld.blocks(gi), st=wPld.get();
+  Object.keys(bl).forEach(k=>{ const n=names[bl[k]]; if(n) st.vals[k]=n; else delete st.vals[k]; });
+  wPld.set(st); });
+/* Gelplanner: één laan per naam, met de volumes en kleur van de eerste laan */
+smpUse('gplan',names=>{ if(typeof gpT==='undefined'||!gpT||!names.length) return;
+  const old=etGet('gp-tbl'), base=old[0]||['','10','','#1558b0'];
+  gpT.set(names.map((n,i)=>{ const r=(old[i]||base).slice(); r[0]=n; return r; })); });
+/* qPCR-plaatindeling: het komma-gescheiden veld met monsters */
+smpUse('qplate',names=>{ const el=$('#qp2-s'); if(!el||!names.length) return;
+  el.value=names.join(', '); el.__typed=true;
+  el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));
+  try{ calc.qplate(); }catch(e){} });
