@@ -19,6 +19,8 @@ import Digest from './tools/Digest.vue';
 import Phadj from './tools/Phadj.vue';
 import Medium from './tools/Medium.vue';
 import Oplossing from './tools/Oplossing.vue';
+import Bufcap from './tools/Bufcap.vue';
+import Ksp from './tools/Ksp.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -43,3 +45,11 @@ calc.medium = () => {};
    duwt er een rij uit het molmassa-gereedschap in. Daarom staat de instantie op window. */
 const op = mountTool('#o-app', Oplossing);
 if (op) window.__oplosVm = op.vm;
+
+/* Buffercapaciteit tekent een curve, dus calc.bufcap() laat de component opnieuw tekenen;
+   Oplosbaarheid heeft geen tekening en rekent zelf al opnieuw. */
+const bc = mountTool('#bc-app', Bufcap);
+calc.bufcap = () => { if (bc && bc.vm) bc.vm.draw(); };
+
+mountTool('#ks-app', Ksp);
+calc.ksp = () => {};

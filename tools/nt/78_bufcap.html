@@ -1,20 +1,8 @@
 <section class="tool" id="t-bufcap" data-tool="bufcap">
   <header class="tool-head"><h2>Buffercapaciteit</h2>
   <p>Buffercapaciteit β van een (meerwaardig) zuur-basesysteem bij elke pH, en hoeveel sterke base of zuur nodig is om een buffer van de ene naar de andere pH te brengen.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="bc-pre">Buffer</label><select id="bc-pre"><option value="">eigen</option><option value="7.20">fosfaat (pKₐ₂ 7,20)</option><option value="8.07">Tris (8,07)</option><option value="7.48">HEPES (7,48)</option><option value="4.76">acetaat (4,76)</option><option value="6.40 10.33">carbonaat (6,40; 10,33)</option><option value="3.13 4.76 6.40">citraat (3,13; 4,76; 6,40)</option></select></div>
-        <div class="f"><label for="bc-pka">pKₐ-waarden</label><input id="bc-pka" class="txt" value="7.20"></div>
-        <div class="f"><label for="bc-c">Totale bufferconcentratie</label><div class="inu"><input id="bc-c" inputmode="decimal" value="50"><span class="u">mM</span></div></div>
-        <div class="f"><label for="bc-ph">pH nu</label><input id="bc-ph" inputmode="decimal" value="6,80"></div>
-        <div class="f"><label for="bc-pt">Gewenste pH</label><input id="bc-pt" inputmode="decimal" value="7,40"></div>
-        <div class="f"><label for="bc-v">Volume</label><div class="inu"><input id="bc-v" inputmode="decimal" value="500"><span class="u">mL</span></div></div>
-        <div class="f"><label for="bc-cs">Titrant (NaOH of HCl)</label><div class="inu"><input id="bc-cs" inputmode="decimal" value="1"><span class="u">mol/L</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">pKₐ-waarden bij 25 °C, gescheiden door spaties (punt of komma). De berekening gebruikt concentraties zonder activiteitscorrectie; bij hoge ionsterkte wijkt de echte pH een paar tienden af. Controleer altijd met een pH-meter.</p>
-    </div>
-    <div class="result"><canvas id="bc-cv"></canvas><div id="bc-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Bufcap.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="bc-app"></div>
   <p class="src">β = dC<sub>b</sub>/dpH, met C<sub>b</sub>(pH) = C · n̄(pH) + [OH⁻] − [H⁺] en n̄ het gemiddelde aantal afgestane protonen uit de fracties van alle protoneringsvormen; voor een eenwaardig zuur geeft dit β = 2,303·(K<sub>w</sub>/[H⁺] + [H⁺] + C·K<sub>a</sub>[H⁺]/(K<sub>a</sub> + [H⁺])²) (Van Slyke, J Biol Chem 52:525–570, 1922; Harris, Quantitative Chemical Analysis, hfst. 8–10). pKₐ-waarden: Goldberg, Kishore &amp; Lennen, J Phys Chem Ref Data 31:231–370 (2002).</p>
 </section>

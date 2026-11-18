@@ -48,12 +48,15 @@ LKUI.kv = {
 /* het grote getal bovenaan, met een label erboven en eventueel een klein woord erachter */
 LKUI.big = {
   props: {label: String, value: [String, Number], sub: String, chip: String, chipKind: String,
-    cls: String, top: String},
+    cls: String, top: String,
+    /* html in plaats van value als het getal opmaak bevat, zoals de exponent uit sci():
+       "1,33 × 10<sup>-5</sup>". Dezelfde afspraak als bij lk-note en lk-formula. */
+    html: String},
   setup(props) {
     return () => h('div', null, [
       props.label ? h('div', {class: 'lbl', style: props.top ? 'margin-top:' + props.top : null}, props.label) : null,
       h('div', {class: 'big' + (props.cls ? ' ' + props.cls : '')}, [
-        String(props.value == null ? '–' : props.value),
+        props.html ? h('span', {innerHTML: props.html}) : String(props.value == null ? '–' : props.value),
         props.sub ? h('small', null, ' ' + props.sub) : null,
         props.chip ? h('span', {class: 'chip ' + (props.chipKind || 'ok'),
           style: 'vertical-align:middle;margin-left:6px'}, props.chip) : null
@@ -66,7 +69,9 @@ LKUI.big = {
    Gebruik het met v-model: <lk-field v-model="v" label="…" for-id="dg-v" unit="µL"/> */
 LKUI.field = {
   props: {modelValue: [String, Number], label: String, forId: String, unit: String,
-    inputmode: {type: String, default: 'decimal'}, span: [String, Number], cls: String},
+    inputmode: {type: String, default: 'decimal'}, span: [String, Number], cls: String,
+    /* labelHtml voor een label met opmaak erin, zoals K<sub>sp</sub>; geef het al vertaald mee */
+    labelHtml: String},
   emits: ['update:modelValue'],
   setup(props, {emit}) {
     const input = () => h('input', {
@@ -75,7 +80,9 @@ LKUI.field = {
       onInput: e => emit('update:modelValue', e.target.value)
     });
     return () => h('div', {class: 'f', style: props.span ? 'grid-column:span ' + props.span : null}, [
-      h('label', {for: props.forId}, props.label),
+      props.labelHtml
+        ? h('label', {for: props.forId, innerHTML: props.labelHtml})
+        : h('label', {for: props.forId}, props.label),
       props.unit
         ? h('div', {class: 'inu'}, [input(), h('span', {class: 'u'}, props.unit)])
         : input()

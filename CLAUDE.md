@@ -37,8 +37,8 @@ Lab calculator and gel-editor web app (Dutch first, English via a runtime transl
 ## De gedeelde Vue-componenten (`src/lib/ui.js`)
 - **Bouw een uitkomst niet als string HTML met `v-html`.** Dat was de snelle weg bij de eerste tools en is teruggedraaid: je raakt het declaratieve renderen kwijt en elke tool herhaalt dezelfde stukjes. Gebruik de componenten, die `lkVueMount()` zelf registreert:
   - `<lk-note kind="info|warn|bad|ok">` een melding · `<lk-kv :rows="[[label, waarde], …]">` de uitkomstenlijst
-  - `<lk-big :label :value :sub :chip :chip-kind :cls :top>` het grote getal bovenaan
-  - `<lk-field v-model="x" :label for-id unit inputmode cls :span>` een veld met label en eenheid
+  - `<lk-big :label :value :sub :chip :chip-kind :cls :top>` het grote getal bovenaan; bevat het getal opmaak (de exponent uit `sci()`), geef het dan als `:html` mee in plaats van `:value`
+  - `<lk-field v-model="x" :label for-id unit inputmode cls :span>` een veld met label en eenheid; `:label-html` voor een label met opmaak erin (`K<sub>sp</sub>`), al vertaald meegegeven
   - `<lk-table :cols="[{h, num}]" :rows="[[cel, …] | {cells, cls}]">` een tabel · `<lk-steps :steps>` een werkwijze · `<lk-formula :html>` de formuleregel
 - De klassen zijn die van de bestaande opmaak (`note`, `kv`, `big`, `mini`, `f`, `inu`), zodat alle thema's en `tests/layout_audit.py` blijven werken.
 - Een waarde mag HTML zijn, want de tool maakt die zelf; tekst van de gebruiker hoort daarom eerst door `esc()`.

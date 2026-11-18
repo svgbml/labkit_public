@@ -368,7 +368,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | Step | Ideas | What | Done when |
 |---|---|---|---|
 | S202 | ✅ | *Oplossing & buffer* naar Vue | `src/tools/Oplossing.vue`; de tabel, de stappen, het advies en de receptkaart zitten in de component, `oBalance()` en de hydraatvormen blijven in `tools/nt/05_oplos.js`. `addRow()` in `tools/nt/99_app.js` en `tblRestore()` gaan via de `push`/`set`-haken op `TBLDEF`. Het stappenschema op het canvas blijft gewone HTML |
-| S203 | — | *Buffercapaciteit*, *Oplosbaarheid (Ksp)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S203 | ✅ | *Buffercapaciteit*, *Oplosbaarheid (Ksp)* naar Vue | `src/tools/Bufcap.vue` en `src/tools/Ksp.vue`; het rekenwerk (`bcNbar`/`bcCb`/`bcBeta`, `KSP`/`kspSolve`) blijft onveranderd in de modules staan. `lk-field` kreeg `label-html` en `lk-big` een `html`-waarde, want `sci()` levert een exponent in een `<sup>` |
 | S204 | — | *Verdunning*, *Osmolariteit & ionsterkte* naar Vue | Zelfde uitkomsten; validatie blijft staan |
 | S205 | — | *Titratiecurve*, *pH-buffer* naar Vue | Zelfde uitkomsten; validatie blijft staan |
 | S206 | — | *Waterhardheid (EDTA-titratie)*, *Molmassa* naar Vue | Zelfde uitkomsten; validatie blijft staan |
