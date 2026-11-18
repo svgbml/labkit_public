@@ -16,6 +16,9 @@ LabKit organised around the four stages of lab work, plus a rework pass over the
 | [5. Internal work](#5-internal-work-candidates-for-removal) | 236–242 |
 | [6. Performance](#6-performance) | 243–275 |
 | [7. Quality, accessibility and dev](#7-quality-accessibility-and-development) | 276–295 |
+| [8. Sanger and SNP analysis](#8-sanger-sequencing-and-snp-analysis) | 296–333 |
+| [9. Alignment and Clustal Omega](#9-multiple-alignment-and-clustal-omega) | 334–368 |
+| [10. Sequence toolbox and NCBI](#10-sequence-toolbox-and-ncbi-lookups) | 369–390 |
 
 ---
 
@@ -28,6 +31,11 @@ LabKit organised around the four stages of lab work, plus a rework pass over the
 - **#121** Figure maker and **#124** significance brackets.
 - **#236** Remove the internal tools.
 - **#243** Lazy-initialise tools and **#244** template the hidden tools.
+- **#296–#298, #306–#309** Chromatogram reader with automatic, editable base labels and heterozygote calling.
+- **#321–#324** HIrisPlex-S genotype sheet with checks and export.
+- **#334, #336, #337, #347** Alignment viewer with ClustalX colours and an identity matrix.
+- **#369, #370** Reverse complement tool. Small, quick, and useful every week.
+- **#378, #380, #382** NCBI lookups: rs numbers, reference sequences and automatic strand handling.
 
 ---
 
@@ -452,6 +460,167 @@ Measured on the current branch (localhost, Chromium): the page is 830 KB of HTML
 | 293 | **Teacher mode:** share a link that locks inputs to an exercise and hides the answer until submitted. | 🟡 | ⭐⭐ |
 | 294 | **Usage-free analytics alternative:** an optional, local "most used tools" overview to decide what to improve next. | 🟢 | ⭐ |
 | 295 | **CLAUDE.md for the repo** describing the build, the NT modules and the i18n rules, so future changes stay consistent. | 🟢 | ⭐⭐ |
+
+## 8. Sanger sequencing and SNP analysis
+
+Reading `.ab1` chromatograms, calling SNPs from them and preparing a HIrisPlex-S genotype sheet. Inspiration: Chromas (trace viewing and editing) and the SeqStudio / Sequencing Analysis workflow. Everything runs locally in the browser: the ABIF format is documented and the basecalls and peak positions are already in the file, so no sequencer software or library is needed.
+
+### Reading and viewing a chromatogram
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 296 | **ABIF (.ab1) reader:** parse the big-endian header and tag directory; show sample name, run date, instrument, dye set, read length. | 🟡 | ⭐⭐⭐ |
+| 297 | **Trace viewer on canvas:** the four dye channels, zoom, pan, scrollbar, per-channel scaling, and a mini-overview of the whole read. | 🟡 | ⭐⭐⭐ |
+| 298 | **Automatic base labels:** draw the sequencer's own basecalls (`PBAS.2`) at its own peak positions (`PLOC.2`) above the peaks, and keep every label editable. | 🟢 | ⭐⭐⭐ |
+| 299 | **Quality bars** from `PCON.2` per base, colour-coded, with a trim suggestion (sliding window, adjustable Q threshold). | 🟢 | ⭐⭐ |
+| 300 | **Sequence panel under the trace,** synced both ways: click a base and the trace jumps there; select a range and copy it as FASTA. | 🟡 | ⭐⭐ |
+| 301 | **Reverse complement view** so a reverse read reads along with the forward one. | 🟢 | ⭐⭐ |
+| 302 | **Several reads in one view** (forward and reverse of the same sample) with tabs and a shared position. | 🟡 | ⭐⭐ |
+| 303 | **Import without a trace:** `.scf`, FASTA or pasted text into the sequence panel. | 🟢 | ⭐ |
+| 304 | **Export:** PNG/SVG of the visible window, FASTA of the trimmed read, and the trace region into the figure maker (#121). | 🟢 | ⭐⭐ |
+| 305 | **Print layout** with the trace in rows of 60 bases, like a Chromas printout. | 🟡 | ⭐⭐ |
+
+### Calling SNPs
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 306 | **Secondary-peak detection:** per peak position, the ratio of the second-highest channel to the highest; above a threshold (default 0.2, adjustable) it is a heterozygote. | 🟡 | ⭐⭐⭐ |
+| 307 | **IUPAC codes** (R, Y, S, W, K, M) for heterozygous positions, both in the sequence and on the trace. | 🟢 | ⭐⭐⭐ |
+| 308 | **SNP table per read:** position, genotype, the four peak heights, the ratio, the quality score and any flags. | 🟡 | ⭐⭐⭐ |
+| 309 | **Manual override of every call,** with the original call kept and the position marked as edited. | 🟢 | ⭐⭐⭐ |
+| 310 | **Warning flags:** weak signal, saturated peak, broad peak, dye blob, `N` call, and a double peak right after a mononucleotide repeat (slippage, a classic false heterozygote). | 🟡 | ⭐⭐⭐ |
+| 311 | **Reference sequence:** paste or load one, then an anchored banded alignment of the read against it. | 🔴 | ⭐⭐⭐ |
+| 312 | **Variant list** in reference coordinates, written as `g.` notation, clearly labelled as educational and not a clinical report. | 🟡 | ⭐⭐ |
+| 313 | **rs-number annotation:** the assay file says where each SNP sits in the amplicon, so a mismatch is named instead of only numbered. | 🟢 | ⭐⭐⭐ |
+| 314 | **Forward/reverse confirmation:** both reads of a sample must give the same genotype; disagreements are highlighted instead of silently picked. | 🟡 | ⭐⭐⭐ |
+| 315 | **Batch:** drop 10–20 `.ab1` files at once and get one genotype row per sample. | 🟡 | ⭐⭐⭐ |
+| 316 | **Per-SNP overlay:** the same SNP position stacked across all samples, to see het/hom patterns at a glance. | 🟡 | ⭐⭐ |
+
+### Assays and panels
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 317 | **Assay definition:** a small file with the amplicon reference, and per SNP the rs number, position, both alleles and the strand. | 🟢 | ⭐⭐⭐ |
+| 318 | **Panel editor** for your own assay, plus one built-in teaching panel to start from. | 🟡 | ⭐⭐ |
+| 319 | **Strand handling:** mark per SNP whether the read is on the NCBI forward strand and flip automatically (rs6119471 is the known trap). | 🟢 | ⭐⭐⭐ |
+| 320 | **SNaPshot / SBE mode:** a single-base-extension run gives one peak per SNP by dye and size, not a sequence, so it needs its own reading mode. | 🔴 | ⭐⭐ |
+
+### HIrisPlex-S
+LabKit prepares and checks the input and reports the outcome; the prediction itself stays with the Erasmus MC webtool. See the decision note in the roadmap for why.
+
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 321 | **Genotype sheet** with all 41 HIrisPlex-S SNPs in the official order, `0` / `1` / `2` / `NA` per SNP. | 🟡 | ⭐⭐⭐ |
+| 322 | **Allele check per SNP:** only that SNP's two alleles are offered, and the input allele is shown, so `0/1/2` can't be entered the wrong way round. | 🟢 | ⭐⭐⭐ |
+| 323 | **Completeness check:** count the `NA`s and warn per sub-model (eye, hair, skin use different subsets) when too much is missing for a usable prediction. | 🟢 | ⭐⭐⭐ |
+| 324 | **Export in the webtool's own `.csv` layout** (sample id plus one column per SNP) and a copy button. | 🟢 | ⭐⭐⭐ |
+| 325 | **Hand-off:** a link to the webtool with a short explanation of what comes back (eye, hair and skin categories with probabilities) and the 0.7 probability convention. | 🟢 | ⭐⭐ |
+| 326 | **Result sheet** to paste the returned probabilities into, with a readable summary and a figure for the report. | 🟡 | ⭐⭐ |
+| 327 | **Honest note** in the tool: the model coefficients are not public, so LabKit does not predict and does not replace the webtool. | 🟢 | ⭐⭐⭐ |
+| 328 | **Panel switch** between IrisPlex (eye), HIrisPlex (eye and hair) and HIrisPlex-S (all three), because the webtool has all three. | 🟢 | ⭐⭐ |
+| 329 | **Worked example** with a complete set of genotypes, so the whole path can be followed without a sequencer. | 🟢 | ⭐⭐⭐ |
+| 330 | **Save a case:** reads, calls, assay, sheet and results together in one LabKit project file. | 🟡 | ⭐⭐ |
+
+### Performance for this section
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 331 | **Worker:** parse files and run the alignment in a Web Worker, so dropping 20 files doesn't freeze the UI. | 🟡 | ⭐⭐⭐ |
+| 332 | **Trace drawing with decimation:** never draw more than about two points per pixel, so zooming and panning stay smooth over 1000+ bases. | 🟡 | ⭐⭐⭐ |
+| 333 | **Lazy module:** load the chromatogram code only when a file is dropped, so startup time stays as it is now. | 🟢 | ⭐⭐⭐ |
+
+## 9. Multiple alignment and Clustal Omega
+
+Reading, viewing and analysing alignments, and preparing the input for Clustal Omega. Clustal Omega itself is a compiled C program with its own clustering and HMM alignment; that is not going into a single HTML file. So LabKit reads and analyses its output, converts between formats, prepares and checks its input, and has a small alignment engine of its own for a handful of short sequences.
+
+### Reading and viewing an alignment
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 334 | **Clustal (`.aln`) reader:** the blocks, the names, the per-position conservation line (`*` `:` `.`) and the numbering. | 🟡 | ⭐⭐⭐ |
+| 335 | **Other formats in:** aligned FASTA, PHYLIP, NEXUS, MSF and PIR, all into one internal alignment model. | 🟡 | ⭐⭐ |
+| 336 | **Alignment viewer:** fixed-width grid, sticky name column, position ruler, smooth horizontal scrolling. | 🟡 | ⭐⭐⭐ |
+| 337 | **Colour schemes:** ClustalX-style by residue group and conservation, a nucleotide scheme, shading by identity to the consensus, and a colourblind-safe option. | 🟡 | ⭐⭐⭐ |
+| 338 | **Conservation row and plot:** show the `* : .` line, recompute it, and plot a conservation score per column. | 🟡 | ⭐⭐⭐ |
+| 339 | **Consensus sequence** with an adjustable agreement threshold. | 🟢 | ⭐⭐ |
+| 340 | **Gap statistics** per sequence and per column, flagging sequences that are mostly gaps. | 🟢 | ⭐⭐ |
+| 341 | **Overview strip:** the whole alignment squeezed into one bar, to jump to a region. | 🟡 | ⭐⭐ |
+| 342 | **Column details on click:** which residue in which sequence, the counts and the conservation score. | 🟢 | ⭐⭐ |
+| 343 | **Motif search** through the alignment, with every hit highlighted. | 🟢 | ⭐⭐ |
+| 344 | **Trim and mask:** hide columns above a gap percentage, crop to a region, and export the trimmed alignment. | 🟡 | ⭐⭐ |
+| 345 | **Reorder sequences** by name, by identity to a chosen reference, or by hand. | 🟢 | ⭐⭐ |
+| 346 | **Difference view:** pick one sequence as reference and show the rest as dots except where they differ. | 🟢 | ⭐⭐⭐ |
+
+### Getting numbers out
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 347 | **Percent identity matrix** computed from the alignment, as a table and a heatmap, comparable to Clustal's `.pim`. | 🟡 | ⭐⭐⭐ |
+| 348 | **Pairwise identity and similarity** for a chosen pair, with a choice of how gaps count. | 🟢 | ⭐⭐ |
+| 349 | **Conserved region finder:** the longest stretches above a conservation threshold, ready to send to the primer tools (#46, #47). | 🟡 | ⭐⭐⭐ |
+| 350 | **Variant table:** every column where the sequences differ, numbered in a chosen reference's coordinates. | 🟡 | ⭐⭐⭐ |
+| 351 | **Your own read in the alignment:** drop a called Sanger read (#306–#309) in among reference sequences and see your variant in context. | 🟡 | ⭐⭐⭐ |
+| 352 | **Translate to protein** in a chosen frame, with a codon-aware column view for nucleotide alignments. | 🟡 | ⭐⭐ |
+
+### Tree
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 353 | **Newick / `.dnd` reader** for the guide tree Clustal returns. | 🟢 | ⭐⭐ |
+| 354 | **Tree drawing** (rectangular and radial), branch lengths, labels, PNG/SVG export. | 🟡 | ⭐⭐⭐ |
+| 355 | **Neighbour-joining tree** computed from the identity matrix, for when you only have an alignment. | 🔴 | ⭐⭐ |
+| 356 | **Tree beside the alignment,** sharing one row order. | 🟡 | ⭐⭐⭐ |
+
+### LabKit's own alignment engine
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 357 | **Pairwise alignment:** Needleman-Wunsch (global) and Smith-Waterman (local) for two sequences. | 🟡 | ⭐⭐⭐ |
+| 358 | **Small progressive multiple alignment:** pairwise distances, a guide tree, then progressive merging — for a handful of short sequences. | 🔴 | ⭐⭐ |
+| 359 | **Scoring:** BLOSUM62, PAM250, a simple DNA match/mismatch scheme, and adjustable gap open/extend. | 🟢 | ⭐⭐ |
+| 360 | **Honest note:** for many or long sequences, use Clustal Omega at EBI. LabKit's own engine is for small jobs and says so. | 🟢 | ⭐⭐⭐ |
+
+### Hand-off, conversion and export
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 361 | **FASTA input builder** with checks before you upload: duplicate names, illegal characters, mixed DNA and protein, over-long names, empty sequences, line endings. | 🟡 | ⭐⭐⭐ |
+| 362 | **Hand-off to EBI Clustal Omega:** copy button, link to the form, and a note on which result files to bring back (`.aln`, `.pim`, `.dnd`). | 🟢 | ⭐⭐⭐ |
+| 363 | **Format conversion** between Clustal, FASTA, PHYLIP, NEXUS, MSF and PIR, both ways. | 🟡 | ⭐⭐⭐ |
+| 364 | **Figure export:** the alignment or a chosen region as PNG/SVG, adjustable block width, plus a print layout. | 🟡 | ⭐⭐⭐ |
+| 365 | **Save the work:** alignment, tree and settings in one LabKit project file. | 🟢 | ⭐⭐ |
+
+### Performance for this section
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 366 | **Virtual rendering:** draw only the visible rows and columns, so a 5000-column alignment stays smooth. | 🟡 | ⭐⭐⭐ |
+| 367 | **Worker:** parse the file and compute the identity matrix off the main thread. | 🟡 | ⭐⭐⭐ |
+| 368 | **Lazy module,** loaded only when an alignment is opened. | 🟢 | ⭐⭐⭐ |
+
+## 10. Sequence toolbox and NCBI lookups
+
+A small, fast sequence tool (reverse complement and the rest), plus optional online lookups at NCBI. The lookups are off by default and LabKit keeps working without them.
+
+### Sequence toolbox
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 369 | **Reverse complement tool:** paste a sequence and get reverse, complement and reverse complement, with the IUPAC ambiguity codes handled properly (N, R, Y, S, W, K, M, B, D, H, V). | 🟢 | ⭐⭐⭐ |
+| 370 | **Clean up on paste:** strip position numbers, spaces and line breaks, recognise FASTA headers, and handle a multi-FASTA record by record. | 🟢 | ⭐⭐⭐ |
+| 371 | **Output options:** DNA ↔ RNA (T/U), upper or lower case, line width 60/70/80, plain text or FASTA. | 🟢 | ⭐⭐ |
+| 372 | **Sequence facts:** length, GC%, base counts, molecular weight and a melting temperature estimate. | 🟢 | ⭐⭐ |
+| 373 | **Translation in six frames** with a choice of genetic code, showing open reading frames and stop codons. | 🟡 | ⭐⭐ |
+| 374 | **Restriction sites** marked in the sequence, reusing the enzyme list from the in-silico digest (#49). | 🟢 | ⭐⭐ |
+| 375 | **Send to:** push the result straight into the chromatogram reference, the alignment tool or the primer tools. | 🟢 | ⭐⭐⭐ |
+| 376 | **Receive from anywhere:** a sequence selected in another LabKit tool can be sent to this one. | 🟢 | ⭐⭐ |
+
+### NCBI lookups (optional, off by default)
+| # | Idea | Size | Value |
+|---|---|---|---|
+| 377 | **One switch for online lookups** through NCBI E-utilities, off by default, with a plain explanation of what leaves your computer. | 🟢 | ⭐⭐⭐ |
+| 378 | **rs-number lookup in dbSNP:** gene, chromosome and position, reference allele and alternatives, HGVS names and functional class. | 🟡 | ⭐⭐⭐ |
+| 379 | **Allele frequencies per population** from the same lookup, as a small table. | 🟢 | ⭐⭐ |
+| 380 | **Reference sequence by accession** (`NM_`, `NC_`, `NG_` …) straight into the reference field of the chromatogram or alignment tool. | 🟡 | ⭐⭐⭐ |
+| 381 | **Region fetch:** only the piece around a SNP instead of a whole chromosome record. | 🟡 | ⭐⭐⭐ |
+| 382 | **Automatic allele and strand labelling:** use dbSNP's reference allele and orientation to label your two peaks correctly, so the strand trap is solved by data instead of by hand. | 🟡 | ⭐⭐⭐ |
+| 383 | **Local cache** of every lookup, so the same rs number is instant next time and the tool keeps working offline afterwards. | 🟢 | ⭐⭐⭐ |
+| 384 | **Built-in rate limiting:** a request queue at 3 per second, 10 with your own NCBI API key, and a field to put that key in. | 🟢 | ⭐⭐⭐ |
+| 385 | **Polite identification:** send a tool name only. An e-mail address is optional, typed by you, and never filled in automatically. | 🟢 | ⭐⭐⭐ |
+| 386 | **Clear failure:** no internet, blocked by the browser, or NCBI down → say so plainly and fall back to pasting the sequence by hand. | 🟢 | ⭐⭐⭐ |
+| 387 | **Fill an assay panel** from a pasted list of rs numbers in one go, through the queue and the cache. | 🟡 | ⭐⭐⭐ |
+| 388 | **Check the whole HIrisPlex-S panel** against dbSNP in one batch, so all 41 SNPs get their alleles, positions and strands verified. | 🟡 | ⭐⭐⭐ |
+| 389 | **Honest note:** a looked-up genotype is a proposal built from your own peaks plus NCBI's allele definitions. You confirm it. | 🟢 | ⭐⭐⭐ |
+| 390 | **Offline pack:** export what you have cached, so a classroom without internet can still work with the same SNP data. | 🟢 | ⭐⭐ |
 
 ---
 

@@ -3,14 +3,18 @@
 The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps of about 30 minutes each**. Each step ends with a working app and runs `python tools/check.py --quick` (the full `tools/check.py` at the end of every phase). Then you can say "do step S12" or "do the next 3 steps".
 
 **Status:** ✅ done · ⏳ planned · ✖ dropped
-**Total:** 146 steps (S1–S146) ≈ 73 hours. Every chosen idea number appears in at least one step. Steps within a phase are in a sensible order; steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 201 steps (S1–S201) ≈ 100 hours. Every chosen idea number appears in at least one step. Steps within a phase are in a sensible order; steps marked *(needs Sx)* depend on an earlier step.
 
-**Progress:** S0 done. **Phase 1 (S1–S12) done**, **phase 2 (S13–S20) done**, phase 3 running: S21–S28 done, S29–S36 still to do. After each phase the full `python tools/check.py` passed (validation, layout in Dutch and English, robustness, translations, startup).
+**Progress:** S0 done. **Phase 1 (S1–S12) done**, **phase 2 (S13–S20) done**, phase 3 running: S21–S28 done, S29–S36 still to do. After each phase the full `python tools/check.py` passed (validation, layout in Dutch and English, robustness, translations, startup). Phases 12–14 (S147–S201) were added later and have not been started.
 
 ## Decisions
 - **#13 shared layout** applies per *type* of tool. Picture-generating tools (schemes, diagrams, gel figures) share one layout; calculators keep their own.
 - **Gel editor:** keep automatic ladder band detection, and keep editing the numbers/text next to each ladder band.
 - **Removed:** chain of custody, reagent stock, freezer boxes, label sheets and the GHS label. Organisation is merged into Bench. The experiment planner stays (#240 was not chosen).
+- **HIrisPlex-S:** LabKit prepares, checks and exports the genotype sheet and reports the outcome, but does **not** predict eye, hair or skin colour itself. The regression coefficients behind the system are not published and part of the method is covered by a patent, so the prediction stays with the Erasmus MC webtool. Re-implementing it from guessed coefficients would produce numbers that look official and are wrong.
+- **NCBI:** lookups go straight from the browser to NCBI's E-utilities, which do send `Access-Control-Allow-Origin: *`, so no proxy or server is needed. They are optional and off by default, they send only an rs number or accession plus a tool name (**never an e-mail address unless the user types one**), everything is cached locally, and the request queue respects 3 requests per second (10 with a user-supplied API key). From a `file://` copy the browser blocks them; that is handled as a normal failure case, not a bug.
+- **Clustal Omega:** stays at EBI. It is a compiled program with its own clustering and HMM alignment, so LabKit reads and analyses its output (`.aln`, `.pim`, `.dnd`), converts between alignment formats and checks the input before you upload it. LabKit's own engine does pairwise alignment and small multiple alignments, and says plainly that it is not a replacement.
+- **Chromatograms:** no re-basecalling. The `.ab1` file already contains the sequencer's basecalls and peak positions, so LabKit reads those, labels them automatically and lets you edit every label. Heterozygotes are called on top of that from the peak heights.
 - **✖ Dropped:** #230 GHS label sizes (tool removed), #86 spill card (needed GHS data).
 
 ---
@@ -209,6 +213,126 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S142 | 292 | Desktop auto-update via the Tauri updater |
 | S143–S146 | 276, 277 | Split source from build and move all in-place tools into modules (4 steps, best done last or right before Phase 10) |
 
+## Phase 12: Sanger and SNP analysis (23 steps)
+
+New block from ideas #296–#333. Needs nothing from the other phases, so it can run on its own; S154 and S162 are nicer after the figure maker (S87) and the batch mode, but work without them.
+
+### Who does what (phase 12, in plain words)
+
+| Step | Who does it |
+|---|---|
+| 1. Open the `.ab1` file and draw the four coloured traces | LabKit |
+| 2. Put the letters above the peaks | LabKit — they are already in the file, it only reads them |
+| 3. Correct a letter that is wrong | You. LabKit keeps the original next to it |
+| 4. Decide whether a position is a heterozygote | LabKit proposes it from the peak heights, you confirm |
+| 5. Say which allele is which, on the right strand | LabKit, from the assay file or from dbSNP (S199) |
+| 6. Check the forward read against the reverse read | LabKit |
+| 7. Fill in and check the HIrisPlex-S sheet | LabKit |
+| 8. **Predict eye, hair and skin colour** | **The Erasmus MC webtool. LabKit does not do this** |
+| 9. Summary and figure for the report | LabKit |
+
+**Deliberately not in LabKit:** basecalling from scratch (the sequencer already did it), the colour prediction itself (the formula is not public), and any result presented as a clinical or forensic conclusion. Every automatic call is a proposal you can see the evidence for and change.
+
+| Step | Ideas | What | Done when |
+|---|---|---|---|
+| S147 | 296 | ABIF parser as a lib module: big-endian header, tag directory, typed values; metadata out (sample, date, instrument, dye set) | A test `.ab1` gives the right sample name and read length |
+| S148 | 296 | Read the data tags: channel order from `FWO_`, traces `DATA.9–12`, basecalls `PBAS.2`, peak positions `PLOC.2`, quality `PCON.2` | One object with 4 traces and n bases = n positions |
+| S149 | 296, 303 | New *Chromatogram* tool: drop/choose a file, metadata card, sequence panel; FASTA and pasted text as fallback | File opens, sequence readable |
+| S150 | 297, 332 | Canvas trace rendering: 4 channels, zoom, pan, overview strip, decimation to ~2 points per pixel | Smooth over a 900-base read |
+| S151 | 298, 309 | Automatic base labels at the peak positions, each one editable, original call kept and the edit marked | Label changes and stays after a reload |
+| S152 | 299 | Quality bars per base, colour-coded, plus a trim suggestion with an adjustable window and threshold | Trim marks the expected ends on a test read |
+| S153 | 300, 301 | Sequence panel synced to the trace both ways, range selection, copy as FASTA, reverse complement toggle | Click-to-trace and copy both work |
+| S154 | 304, 305 | Export PNG/SVG of the window, trimmed FASTA, and a print layout in rows of 60 bases | One printed page looks right |
+| S155 | 306, 307 | Secondary-peak ratio per position with an adjustable threshold, heterozygotes as IUPAC codes in sequence and trace | A known het sample is called R/Y correctly |
+| S156 | 308, 310 | SNP table per read (position, genotype, 4 peak heights, ratio, quality) and the warning flags, slippage included | Table exports; flags fire on a bad read |
+| S157 | 309 | Override panel: change any call by hand, see what was original, reset per position or all | Overrides survive a reload |
+| S158 | 311 | Reference sequence input and an anchored banded alignment of the read against it | Alignment finds the right offset on a shifted test read |
+| S159 | 312, 313 | Variant list in reference coordinates with `g.` notation and rs numbers from the assay | Known SNP shows up with its rs number |
+| S160 | 317, 318, 319 | Assay definition format (amplicon, SNPs, alleles, strand), an editor for your own panel, one built-in teaching panel, automatic strand flip | Own panel can be saved and reused |
+| S161 | 302, 314 | Two reads of one sample side by side and forward/reverse confirmation with disagreements highlighted | A deliberate mismatch is flagged |
+| S162 | 315, 316 | Batch drop of many files to a genotype table per sample, and the per-SNP overlay across samples | 10 files give 10 rows |
+| S163 | 331, 333 | Move parsing and alignment into a Web Worker and load the whole module lazily | `perf_budget.py` startup unchanged; UI stays responsive on 20 files |
+| S164 | 321, 322, 328 | HIrisPlex-S genotype sheet: 41 SNPs in order, `0/1/2/NA`, per-SNP allele check, panel switch IrisPlex / HIrisPlex / HIrisPlex-S | Sheet fills and validates by hand |
+| S165 | 321, 323 | Fill the sheet from the called genotypes (needs S160), count `NA`s and warn per sub-model | Autofill matches a hand-filled sheet |
+| S166 | 324, 325, 327 | Export in the webtool's `.csv` layout, copy button, link and explanation, and the note about not predicting locally | Exported file matches the official template header |
+| S167 | 326 | Result sheet for the returned probabilities, with a summary and a figure for the report | Report section renders |
+| S168 | 329, 330 | Worked example sample and saving a whole case (reads, calls, assay, sheet, results) as one project file | Example runs end to end without a sequencer |
+| S169 | 320 | SNaPshot / SBE mode: read peaks per dye and size instead of per base | A `.fsa`-style SBE run gives one genotype per SNP |
+
+## Phase 13: alignment and Clustal Omega (21 steps)
+
+Ideas #334–#368. Clustal Omega itself stays at EBI: it is a compiled program with its own clustering and HMM alignment, so LabKit reads and analyses its output, converts formats, checks its input, and has a small alignment engine for a handful of short sequences. S180 is better after S158 (the alignment code from phase 12 is reused).
+
+### Who does what (phase 13, in plain words)
+
+| Step | Who does it |
+|---|---|
+| 1. Collect the sequences and check them (names, characters, DNA or protein) | LabKit |
+| 2. Make a clean FASTA to upload | LabKit |
+| 3. **Align many or long sequences** | **Clustal Omega at EBI. LabKit does not do this** |
+| 4. Align two sequences, or a few short ones | LabKit itself, no internet needed |
+| 5. Read the `.aln`, `.pim` and `.dnd` files back in | LabKit |
+| 6. Colours, conservation, consensus, identity matrix, variant table, tree | LabKit |
+| 7. Figure and print layout for the report | LabKit |
+
+**Deliberately not in LabKit:** a copy of Clustal Omega's own alignment algorithm. LabKit's engine is for small jobs and says so where you use it.
+
+| Step | Ideas | What | Done when |
+|---|---|---|---|
+| S170 | 334, 335 | Parsers for Clustal `.aln`, aligned FASTA, PHYLIP, NEXUS, MSF and PIR into one alignment model | A real `.aln` opens with the right names and length |
+| S171 | 336, 366 | Alignment viewer: grid, sticky name column, position ruler, virtual rendering of visible cells only | Smooth on a 5000-column alignment |
+| S172 | 337 | Colour schemes: ClustalX groups, nucleotides, identity shading, colourblind-safe variant | All four work in all five themes |
+| S173 | 338, 339 | Conservation row and plot per column, consensus with an adjustable threshold | Recomputed row matches the file's own `* : .` line |
+| S174 | 340, 341, 342 | Gap statistics per sequence and column, overview strip, column details on click | Clicking a column shows the counts |
+| S175 | 343, 345 | Motif search with highlights; reorder by name, by identity or by hand | Search finds a known motif in every sequence |
+| S176 | 346 | Difference view against a chosen reference (dots where identical) | Toggle switches cleanly |
+| S177 | 344 | Trim and mask: gap-percentage filter, crop to a region, export the trimmed alignment | Trimmed export reopens correctly |
+| S178 | 347, 348 | Percent identity matrix with heatmap, and pairwise identity with gap-handling options | Matrix matches a Clustal `.pim` for a test set |
+| S179 | 349 | Conserved region finder with a threshold, sending a region to the primer tools (needs S42) | Region lands in the primer card |
+| S180 | 350, 351 | Variant table in reference numbering, and inserting a called Sanger read into the alignment (needs S158) | Own read shows its variant in context |
+| S181 | 352 | Translate a nucleotide alignment to protein in a chosen frame, codon-aware columns | Protein view matches a known translation |
+| S182 | 353, 354 | Newick / `.dnd` reader, tree drawing (rectangular and radial) with branch lengths and export | A Clustal guide tree draws correctly |
+| S183 | 355, 356 | Neighbour-joining tree from the identity matrix, and tree beside the alignment in one row order | NJ tree matches a worked example |
+| S184 | 357, 359 | Pairwise Needleman-Wunsch and Smith-Waterman with BLOSUM62/PAM250/DNA scoring and gap settings | Validation case against a published alignment |
+| S185 | 358, 360 | Small progressive multiple alignment for a handful of short sequences, with the note on when to use EBI instead | Five short sequences align sensibly; note visible |
+| S186 | 361 | FASTA input builder with checks: duplicate names, illegal characters, mixed types, long names, empty sequences, line endings | Every check fires on a deliberately broken input |
+| S187 | 362, 363 | Hand-off to EBI (copy, link, which files to bring back) and format conversion both ways | Round trip Clustal → FASTA → Clustal is lossless |
+| S188 | 364 | Figure export of the alignment or a region as PNG/SVG with adjustable block width, plus print layout | One printed page looks right |
+| S189 | 365 | Project file holding alignment, tree and settings | Reopens with everything in place |
+| S190 | 367, 368 | Parsing and the identity matrix in a Web Worker; load the module only when an alignment is opened | `perf_budget.py` startup unchanged |
+
+## Phase 14: sequence toolbox and NCBI lookups (11 steps)
+
+Ideas #369–#390. **S191 is cheap and independent**, so it is a good one to pull forward: the reverse complement tool needs nothing from any other step. The NCBI part (S195–S201) is optional online behaviour; LabKit keeps working with the switch off.
+
+### Who does what (phase 14, in plain words)
+
+| Step | Who does it |
+|---|---|
+| 1. Reverse complement, translation, GC%, cleaning up a pasted sequence | LabKit, always, offline |
+| 2. Look up what an rs number means (gene, position, which alleles exist) | NCBI, if you turn the switch on. LabKit asks and shows the answer |
+| 3. Fetch a reference sequence by accession number | NCBI, same switch |
+| 4. Decide your genotype from the peaks | LabKit, as before |
+| 5. Match your two peaks to the right alleles and the right strand | LabKit, using NCBI's allele definitions |
+| 6. Confirm the genotype | You |
+
+**What leaves your computer:** the rs number or accession you ask about, and a tool name. No e-mail address unless you type one in yourself, and nothing about your samples, your results or you.
+**Needs internet, and the published site or the Windows app.** Opened as a plain local file the browser blocks the request; LabKit then says so and you paste the sequence by hand.
+
+| Step | Ideas | What | Done when |
+|---|---|---|---|
+| S191 | 369, 370 | New *Sequentie* tool: reverse, complement, reverse complement with full IUPAC handling; paste clean-up of numbers, spaces and FASTA headers, multi-FASTA record by record | Reverse complement of an ambiguous test sequence is correct |
+| S192 | 371, 372 | Output options (DNA/RNA, case, line width, plain or FASTA) and the facts panel (length, GC%, counts, MW, Tm) | GC% and MW match a validation case |
+| S193 | 373 | Six-frame translation with a genetic code choice, ORFs and stop codons marked | Known ORF found in a test sequence |
+| S194 | 374, 375, 376 | Restriction sites from the digest enzyme list (needs S45), send-to buttons, and receiving a selection from other tools | Sequence travels to the alignment tool |
+| S195 | 377, 385, 386 | The online switch with its explanation, identification by tool name only, and the three failure cases handled plainly | Switch off = no requests at all; failures show a readable message |
+| S196 | 378, 379 | dbSNP lookup by rs number: gene, chromosome position, reference and alternative alleles, HGVS, functional class, frequency table | rs1805007 returns MC1R, chr16 and its alleles |
+| S197 | 380, 381 | Reference sequence and region fetch by accession, into the reference field of the chromatogram and alignment tools | An `NM_` accession lands as the reference |
+| S198 | 383, 384 | Local cache of all lookups and a rate-limited request queue (3/s, 10/s with a key) with an API key field | Second lookup of the same rs number makes no request |
+| S199 | 382 | Automatic allele and strand labelling of called peaks from dbSNP data (needs S160) | A reverse-strand SNP is labelled correctly without manual flipping |
+| S200 | 387, 388 | Fill an assay panel from a list of rs numbers, and batch-verify the 41 HIrisPlex-S SNPs against dbSNP (needs S164) | All 41 come back with alleles and positions |
+| S201 | 389, 390 | The confirmation note on every looked-up genotype, and exporting the cache as an offline pack | Offline pack reopens with the switch off |
+
 ---
 
 ## Suggested start
@@ -216,3 +340,6 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 2. **S13–S18** Gelplanner (the most-wanted visual for preparation).
 3. **S62–S69** gel editor quick wins before the big rebuild.
 4. **S134, S137** safety nets (size budget, error reports) early, because they're cheap.
+5. **S191** the reverse complement tool. One step, no dependencies, useful immediately.
+6. **S170–S173** the alignment viewer, if you mostly need to read `.aln` files: four steps give a coloured alignment with conservation.
+7. **S147–S151** the chromatogram reader, if SNP work is the nearest practical: these five steps already give a working trace viewer with automatic, editable base labels.

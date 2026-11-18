@@ -10,6 +10,14 @@ Lab calculator and gel-editor web app (Dutch first, English via a runtime transl
 - Work on the branch you were started on. Never push to or merge into `main`; never change GitHub Pages or release settings.
 - If a step turns out much bigger than 30 minutes, finish a sensible part, mark it 🔨 with what is left, and stop.
 
+## Cloud runs and model use
+- A cloud session cannot choose its own model, so it runs on the environment's default. This account is on a plan where every session shares one usage limit, so **hand mechanical work to cheaper subagents** (`Agent` with `model: "haiku"` or `"sonnet"`) and keep the expensive reasoning for yourself.
+- **Haiku:** collecting lists (tool ids, names, existing strings), bulk searches, running a test suite and reporting its output, repeating one clearly-specified edit across many files, drafting translations for strings you hand over.
+- **Sonnet:** a self-contained step whose design is already settled, writing a validation case from a source you name, moving a tool onto a layout that already exists.
+- **Yourself:** designing a new tool or layout, anything touching the i18n rules, the gel editor, performance work, and any step where you still have to decide what "done" means.
+- Check a subagent's work before committing it, and run `python tools/check.py --quick` yourself rather than trusting a report of it.
+- At most about three subagents at a time; parallel work multiplies usage instead of saving it.
+
 ## How the app is built
 - `web/index.html` is both source and build output (~830 KB). Older tools are edited in place.
 - Newer tools are modules in `tools/nt/` (`NN_id.json` + `.html` + `.js`), injected by `python tools/insert_tools.py` between `<!-- NT:id -->` / `/* NT:id */` markers. **Never edit inside those markers in `index.html`**: change the module file and re-run the insert. A module with `"lib":true` is JS only.
