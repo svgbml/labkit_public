@@ -85,5 +85,7 @@
  "report": "document",
  "pipkeus": "pipette",
  "inst": "gear",
- "gplan": "comb"
+ "gplan": "comb",
+ "phadj": "ph",
+ "medium": "cells"
 }

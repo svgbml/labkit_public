@@ -6,12 +6,12 @@ const STAGE_DEF=[['v','Voorbereiden'],['u','Uitvoeren'],['a','Analyseren']];
 const STAGE_NONE=['start','inst'];
 const STAGES={
   /* Oplossingen */
-  verdunning:'v',oplossing:'v',units:'va',molm:'v',hh:'v',osmo:'v',titr:'ua',kjel:'a',edta:'a',bufcap:'va',ksp:'v',
+  verdunning:'v',oplossing:'v',units:'va',molm:'v',hh:'v',phadj:'v',osmo:'v',titr:'ua',kjel:'a',edta:'a',bufcap:'va',ksp:'v',
   /* Assays */
   curve:'a',enzym:'a',spec:'a',ic50:'a',chrom:'a',istd:'a',zprime:'a',purif:'a',elisa:'a',
   /* Microbiologie & cellen */
   reeks:'ua',groei:'a',inoc:'vu',telkamer:'ua',teller:'u',seed:'vu',micro:'u',gcomp:'a',mic:'a',mpn:'a',
-  steril:'va',passage:'v',transfect:'v',viab:'ua',desinf:'a',facs:'v',
+  steril:'va',passage:'v',medium:'v',transfect:'v',viab:'ua',desinf:'a',facs:'v',
   /* DNA */
   dna:'a',oligo:'v',pcr:'v',pcrcyclus:'v',qpcr:'a',melt:'a',gel:'va',gelfoto:'a',sds:'v',wb:'a',
   ligatie:'v',transf:'ua',cdna:'v',qplate:'v',rnaq:'a',digest:'v',gradient:'v',

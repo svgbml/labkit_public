@@ -148,12 +148,12 @@ document.addEventListener('click',e=>{
 
 /* ---------- "volgende tool": handgekozen vervolgstappen onder aan elke tool ---------- */
 const NEXT={
-  verdunning:['oplossing','pverd','pipkeus'],oplossing:['hh','osmo','pverd'],units:['verdunning','molm'],molm:['oplossing','verdunning'],hh:['bufcap','titr','oplossing'],
+  verdunning:['oplossing','pverd','pipkeus'],oplossing:['hh','osmo','pverd'],units:['verdunning','molm'],molm:['oplossing','verdunning'],hh:['bufcap','titr','phadj'],phadj:['hh','oplossing','titr'],
   osmo:['oplossing','seed'],titr:['hh','bufcap'],kjel:['curve','spec'],edta:['titr','sigfig'],bufcap:['hh','titr'],
   ksp:['oplossing','units'],curve:['spec','mval','stat'],enzym:['curve','stat'],spec:['curve','dna'],ic50:['curve','stat'],
   chrom:['istd','mval'],istd:['chrom','munc'],zprime:['elisa','mval'],purif:['sds','wb'],elisa:['curve','zprime','roc'],
   reeks:['mpn','groei'],groei:['gcomp','inoc'],inoc:['groei','seed'],telkamer:['viab','seed'],teller:['telkamer','reeks'],
-  seed:['passage','transfect'],micro:['telkamer','stain'],gcomp:['groei','stat'],mic:['desinf','stat'],mpn:['reeks','stat'],
+  medium:['seed','passage','viab'],seed:['passage','transfect'],micro:['telkamer','stain'],gcomp:['groei','stat'],mic:['desinf','stat'],mpn:['reeks','stat'],
   steril:['desinf','timers'],passage:['seed','viab'],transfect:['viab','facs'],viab:['seed','telkamer'],desinf:['mic','steril'],
   facs:['plaat','viab'],dna:['oligo','pcr','gel'],oligo:['pcr','pcrcyclus'],pcr:['pcrcyclus','ppip','gplan'],pcrcyclus:['gradient','pprog','pcr'],
   gradient:['pcrcyclus','gel'],qpcr:['melt','stat'],melt:['qpcr','gel'],gel:['gplan','gelfoto','digest'],gelfoto:['gel','wb'],

@@ -23,6 +23,9 @@ window.__el=el=>{ if(!el) return ''; const c=el.cloneNode(true); c.querySelector
 window.__big=sel=>__n(__el(document.querySelector(sel+' .big')));
 /* De afweegcel bevat behalve de massa ook het balansadvies, waarin "mg" kan staan. De massa
    zelf staat in de <b>; kleine hoeveelheden laat de tool in mg zien, dus die worden omgerekend. */
+/* het grote getal van pH bijstellen staat in mL of in µL; altijd als mL teruggeven */
+window.__mlbig=()=>{ const t=__el(document.querySelector('#pa-out .big')); const n=__n(t);
+  return /µL/.test(t)?n/1000:n; };
 window.__mass=sel=>[...document.querySelectorAll(sel)].map(td=>{ const b=td.querySelector('b'); const t=__el(b||td); const n=__n(t); return /\bmg\b/.test(t)?n/1000:n; });
 window.__cells=sel=>[...document.querySelectorAll(sel)].map(e=>__n(__el(e)));
 window.__tbl=(id,rows,tool)=>{ document.querySelector("#"+id+" tbody").innerHTML=rows.map(TBLDEF[id].row).join(""); calc[tool](); };
@@ -997,6 +1000,35 @@ def main():
     (ROOT / 'tests' / 'VALIDATIE.md').write_text('\n'.join(md) + '\n', encoding='utf-8')
     if errs: print('Paginafouten:', errs); fails += 1
     print(f"\n{len(rows) - fails} / {len(rows)} geslaagd"); sys.exit(1 if fails else 0)
+# ---------------- Nieuwe tools (S40) ----------------
+@case('pH bijstellen', 'Tris-Cl uit Tris-base', 'Sambrook & Russell, Molecular Cloning (3e druk), Appendix 1: 1 L 1 M Tris-Cl uit Tris-base vraagt ongeveer 70 / 60 / 42 mL geconcentreerd HCl (12,1 M) voor pH 7,4 / 7,6 / 8,0')
+def _(pg):
+    pg.evaluate("__go('phadj')")
+    out = []
+    for ph, exp, tol in (('7,4', 70, 0.05), ('7,6', 60, 0.05), ('8,0', 42, 0.06)):
+        pg.evaluate("ph=>{__set('pa-sys','8.06');__set('pa-pka','8,06');__set('pa-ph',ph);"
+                    "__set('pa-c','1000');__set('pa-v','1000');__set('pa-start','base');__set('pa-titr','12,1');}", ph)
+        out.append(('HCl bij pH ' + ph + ' (mL)', pg.evaluate("__mlbig()"), exp, tol))
+    return out
+
+
+@case('pH bijstellen', 'Acetaatbuffer met NaOH', 'Henderson-Hasselbalch: 100 mL 0,1 M azijnzuur naar pH 4,76 (= pKa) vraagt de helft aan NaOH, dus 5,0 mmol; uit 1 M is dat 5,0 mL')
+def _(pg):
+    pg.evaluate("__go('phadj')")
+    pg.evaluate("__set('pa-sys','4.76');__set('pa-pka','4,76');__set('pa-ph','4,76');"
+                "__set('pa-c','100');__set('pa-v','100');__set('pa-start','acid');__set('pa-titr','1')")
+    return [('NaOH (mL)', pg.evaluate("__mlbig()"), 5.0, 0.002),
+            ('omgezet deel (%)', pg.evaluate("__kv('#pa-out','Deel van de buffer')"), 50, 0.002)]
+
+
+@case('Celkweekmedium klaarmaken', '500 mL met 10% FBS', 'Thermo Fisher, Cell Culture Basics: percentages gaan over het eindvolume, dus 500 mL met 10% FBS, 1x pen/strep uit 100x en 2 mM glutamine uit 200 mM geeft 50 + 5 + 5 mL supplement en 440 mL basismedium')
+def _(pg):
+    pg.evaluate("__go('medium');__set('md-v','500');__set('md-fbs','10');__set('md-ps','1');__set('md-gln','2')")
+    rows = pg.evaluate("[...document.querySelectorAll('#md-out tbody tr')].map(r=>__n(r.cells[2].textContent))")
+    return [('basismedium (mL)', rows[0], 440, 0.001), ('FBS (mL)', rows[1], 50, 0.001),
+            ('pen/strep (mL)', rows[2], 5, 0.001), ('glutamine (mL)', rows[3], 5, 0.001),
+            ('totaal (mL)', rows[4], 500, 0.001)]
+
 
 if __name__ == '__main__':
     main()

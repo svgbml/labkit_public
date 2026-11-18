@@ -1,0 +1,7 @@
+<section class="tool" id="t-phadj" data-tool="phadj">
+  <header class="tool-head"><h2>pH bijstellen</h2>
+  <p>Hoeveel zuur of base je ongeveer nodig hebt om een buffer op de gewenste pH te krijgen: je lost het zout of de vrije vorm op en titreert naar de doel-pH, en deze tool zegt hoeveel mmol en hoeveel milliliter van je voorraad dat ongeveer is.</p></header>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Phadj.vue). -->
+  <div id="pa-app"></div>
+  <p class="src">Uit Henderson-Hasselbalch volgt welk deel van de buffer geprotoneerd moet zijn: f<sub>zuur</sub> = 1 / (1 + 10<sup>pH − pKₐ</sup>). Begin je bij de vrije base, dan is de benodigde hoeveelheid sterk zuur n = c × V × f<sub>zuur</sub>; begin je bij het vrije zuur, dan is de hoeveelheid sterke base n = c × V × (1 − f<sub>zuur</sub>). Controleregel: 1 M Tris-Cl van 1 liter vraagt volgens Sambrook &amp; Russell, Molecular Cloning (3e druk), Appendix 1 ongeveer 70, 60 en 42 mL geconcentreerd HCl voor pH 7,4, 7,6 en 8,0; deze berekening geeft 68, 61 en 44 mL. pKₐ-waarden bij 25 °C: Sigma-Aldrich, Biological Buffers. Dit is een schatting: de pKₐ schuift met temperatuur en ionsterkte (Tris ongeveer −0,03 per °C) en activiteitscoëfficiënten zitten er niet in. Titreer altijd met een pH-meter erbij en gebruik dit alleen om te weten hoeveel je ongeveer moet klaarzetten.</p>
+</section>

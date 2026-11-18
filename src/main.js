@@ -16,6 +16,8 @@ import Sigfig from './tools/Sigfig.vue';
 import Zprime from './tools/Zprime.vue';
 import Pipkeus from './tools/Pipkeus.vue';
 import Digest from './tools/Digest.vue';
+import Phadj from './tools/Phadj.vue';
+import Medium from './tools/Medium.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -28,3 +30,9 @@ calc.pipkeus = () => {};
 
 mountTool('#dg-app', Digest);
 calc.digest = () => {};
+
+mountTool('#pa-app', Phadj);
+calc.phadj = () => {};
+
+mountTool('#md-app', Medium);
+calc.medium = () => {};

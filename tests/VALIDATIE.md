@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-18 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 276 van 276 controles binnen tolerantie.**
+**Resultaat: 286 van 286 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -50,9 +50,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9469 | +0.26% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7773 | -0.07% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5615 | +1.07% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9392 | -0.55% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7748 | -0.38% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5531 | -0.44% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -283,5 +283,15 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Mengprofiel & LR | LR en mengverhouding | LR (θ = 0) | 13,33 | 13,3 | -0.25% | ✅ | Vier allelen, slachtoffer 14/15, verdachte 16/18, θ = 0: LR = 1/(2·p₁₆·p₁₈) = 1/(2 × 0,25 × 0,15) = 13,3; M_x = (420 + 390)/3640 = 0,22. Met θ = 0,03 onafhankelijk in Python (Balding & Nichols 1994) |
 | Mengprofiel & LR | LR en mengverhouding | M_x | 0,2225 | 0,22 | -1.14% | ✅ | Vier allelen, slachtoffer 14/15, verdachte 16/18, θ = 0: LR = 1/(2·p₁₆·p₁₈) = 1/(2 × 0,25 × 0,15) = 13,3; M_x = (420 + 390)/3640 = 0,22. Met θ = 0,03 onafhankelijk in Python (Balding & Nichols 1994) |
 | Mengprofiel & LR | LR en mengverhouding | LR (θ = 0,03) | 12,76 | 12,8 | +0.29% | ✅ | Vier allelen, slachtoffer 14/15, verdachte 16/18, θ = 0: LR = 1/(2·p₁₆·p₁₈) = 1/(2 × 0,25 × 0,15) = 13,3; M_x = (420 + 390)/3640 = 0,22. Met θ = 0,03 onafhankelijk in Python (Balding & Nichols 1994) |
+| pH bijstellen | Tris-Cl uit Tris-base | HCl bij pH 7,4 (mL) | 70 | 67,81 | -3.13% | ✅ | Sambrook & Russell, Molecular Cloning (3e druk), Appendix 1: 1 L 1 M Tris-Cl uit Tris-base vraagt ongeveer 70 / 60 / 42 mL geconcentreerd HCl (12,1 M) voor pH 7,4 / 7,6 / 8,0 |
+| pH bijstellen | Tris-Cl uit Tris-base | HCl bij pH 7,6 (mL) | 60 | 61,37 | +2.28% | ✅ | Sambrook & Russell, Molecular Cloning (3e druk), Appendix 1: 1 L 1 M Tris-Cl uit Tris-base vraagt ongeveer 70 / 60 / 42 mL geconcentreerd HCl (12,1 M) voor pH 7,4 / 7,6 / 8,0 |
+| pH bijstellen | Tris-Cl uit Tris-base | HCl bij pH 8,0 (mL) | 42 | 44,17 | +5.17% | ✅ | Sambrook & Russell, Molecular Cloning (3e druk), Appendix 1: 1 L 1 M Tris-Cl uit Tris-base vraagt ongeveer 70 / 60 / 42 mL geconcentreerd HCl (12,1 M) voor pH 7,4 / 7,6 / 8,0 |
+| pH bijstellen | Acetaatbuffer met NaOH | NaOH (mL) | 5 | 5 | +0.00% | ✅ | Henderson-Hasselbalch: 100 mL 0,1 M azijnzuur naar pH 4,76 (= pKa) vraagt de helft aan NaOH, dus 5,0 mmol; uit 1 M is dat 5,0 mL |
+| pH bijstellen | Acetaatbuffer met NaOH | omgezet deel (%) | 50 | 50 | +0.00% | ✅ | Henderson-Hasselbalch: 100 mL 0,1 M azijnzuur naar pH 4,76 (= pKa) vraagt de helft aan NaOH, dus 5,0 mmol; uit 1 M is dat 5,0 mL |
+| Celkweekmedium klaarmaken | 500 mL met 10% FBS | basismedium (mL) | 440 | 440 | +0.00% | ✅ | Thermo Fisher, Cell Culture Basics: percentages gaan over het eindvolume, dus 500 mL met 10% FBS, 1x pen/strep uit 100x en 2 mM glutamine uit 200 mM geeft 50 + 5 + 5 mL supplement en 440 mL basismedium |
+| Celkweekmedium klaarmaken | 500 mL met 10% FBS | FBS (mL) | 50 | 50 | +0.00% | ✅ | Thermo Fisher, Cell Culture Basics: percentages gaan over het eindvolume, dus 500 mL met 10% FBS, 1x pen/strep uit 100x en 2 mM glutamine uit 200 mM geeft 50 + 5 + 5 mL supplement en 440 mL basismedium |
+| Celkweekmedium klaarmaken | 500 mL met 10% FBS | pen/strep (mL) | 5 | 5 | +0.00% | ✅ | Thermo Fisher, Cell Culture Basics: percentages gaan over het eindvolume, dus 500 mL met 10% FBS, 1x pen/strep uit 100x en 2 mM glutamine uit 200 mM geeft 50 + 5 + 5 mL supplement en 440 mL basismedium |
+| Celkweekmedium klaarmaken | 500 mL met 10% FBS | glutamine (mL) | 5 | 5 | +0.00% | ✅ | Thermo Fisher, Cell Culture Basics: percentages gaan over het eindvolume, dus 500 mL met 10% FBS, 1x pen/strep uit 100x en 2 mM glutamine uit 200 mM geeft 50 + 5 + 5 mL supplement en 440 mL basismedium |
+| Celkweekmedium klaarmaken | 500 mL met 10% FBS | totaal (mL) | 500 | 500 | +0.00% | ✅ | Thermo Fisher, Cell Culture Basics: percentages gaan over het eindvolume, dus 500 mL met 10% FBS, 1x pen/strep uit 100x en 2 mM glutamine uit 200 mM geeft 50 + 5 + 5 mL supplement en 440 mL basismedium |
 
 Toleranties: rekenregels 0,1–0,5%; gepubliceerde receptgrammen (afgerond in de bron) 1–3%; densitometrie op de getekende demo-gel 5%.
