@@ -144,6 +144,7 @@ calc.gplan = function () {
     if (over) out.insertAdjacentHTML('beforeend', note('bad', `${over} laan(en) laden meer dan de ${NL(cap.max, 1)} µL die in een slotje past; het monster loopt dan over in de buurlaan.`)); }
   else out.insertAdjacentHTML('beforeend', note('warn', 'Vul de maten van de kam en de gel in om het slotvolume te berekenen.'));
   gpPredict();
+  gpCast();
   if (rows.length > teeth) out.insertAdjacentHTML('beforeend', note('warn', `Er staan ${rows.length} lanen in de tabel maar de kam heeft ${teeth} tanden; de laatste lanen worden niet getekend.`));
 };
 
@@ -210,7 +211,49 @@ function gpPredict() {
   out.innerHTML = msg.join('') || kv([['Verwachte banden', all.length], ['Lanen met banden', lanes.filter(r => gpSizes(r[2]).length).length]]);
 }
 $('#gp-tray').addEventListener('change', () => calc.gplan());
+
+/* ---------- gel gieten: percentage-advies en een receptkaart voor de gekozen drager ---------- */
+const GPSTAIN = {g10k: ['GelRed / SYBR Safe (1× uit 10 000×)', v => v / 10 * 1], etbr: ['Ethidiumbromide (0,5 µg/mL)', v => v * 0.05], none: [null, null]};
+function gpCast() {
+  const box = $('#gp-cast'), sds = gpMode() === 'sds', [tw, tl] = gpTray();
+  const thick = num($('#gp-gelmm').value), pct = num($('#gp-pct').value);
+  const sizes = etGet('gp-tbl').slice(0, gpTeeth()).flatMap(r => gpSizes(r[2]));
+  if (sds) { box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Gel gieten</h3>' +
+      note('info', 'Een SDS-PAGE-gel giet je met acrylamide, niet met agarose; gebruik het protocol van je practicum voor het scheidings- en stapelgel.'); return; }
+
+  /* advies: welk percentage scheidt alle verwachte fragmenten */
+  let adv = '';
+  if (sizes.length && typeof GELR !== 'undefined') {
+    const lo = Math.min(...sizes), hi = Math.max(...sizes);
+    const fits = GELR.filter(g => lo >= g[1] && hi <= g[2]);
+    let best = null, bd = 1e9;
+    fits.forEach(g => { const mid = (Math.log10(g[1]) + Math.log10(g[2])) / 2, d = Math.abs((Math.log10(lo) + Math.log10(hi)) / 2 - mid); if (d < bd) { bd = d; best = g; } });
+    if (best) adv = note(Math.abs(best[0] - pct) < 1e-9 ? 'ok' : 'info',
+      `Voor ${NL(lo, 0)}–${NL(hi, 0)} bp is ${NL(best[0], 1)}% agarose de beste keus (scheidt ${NL(best[1], 0)}–${NL(best[2], 0)} bp).` +
+      (Math.abs(best[0] - pct) < 1e-9 ? '' : ` <button type="button" class="ghost" data-gp-pct="${best[0]}">Overnemen</button>`));
+    else adv = note('warn', `Geen enkel percentage scheidt ${NL(lo, 0)} tot ${NL(hi, 0)} bp in één gel; overweeg twee gels of een ander bereik.`);
+  }
+
+  /* receptkaart */
+  const V = (thick > 0) ? tw * tl * (thick / 10) : NaN;      /* cm × cm × cm = mL */
+  const g = isFinite(V) ? pct / 100 * V : NaN;
+  const stock = num($('#gp-buf').value), bufName = $('#gp-buf').selectedOptions[0].text;
+  const st = isFinite(V) ? V / stock : NaN;
+  const [stName, stFn] = GPSTAIN[$('#gp-stain').value] || GPSTAIN.none;
+  const rows = [['Gelvolume', isFinite(V) ? `${NL(V, 0)} mL` : '–'],
+    ['Agarose afwegen', isFinite(g) ? mass(g) : '–'],
+    ['Loopbuffer voor de gel', isFinite(st) ? `${ud(bufName)} ${vol(st * 1000)}` : '–'],
+    ['+ water', isFinite(V) ? vol((V - st) * 1000) : '–']];
+  if (stName && isFinite(V)) rows.push([stName, vol(stFn(V))]);
+  box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Gel gieten</h3>' + adv + kv(rows) +
+    (thick > 0
+      ? `<p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Drager ${NL(tw, 0)} × ${NL(tl, 0)} cm bij een geldikte van ${NL(thick, 1)} mm. Smelten in de magnetron, laten afkoelen tot ongeveer 60 °C en pas daarna de kleuring toevoegen en gieten.</p>`
+      : note('warn', 'Vul een geldikte groter dan nul in om het gelvolume te berekenen.'));
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-gp-pct]'); if (!b) return;
+  $('#gp-pct').value = NL(num(b.dataset.gpPct), 1); $('#gp-pct').dispatchEvent(new Event('input', {bubbles: true})); });
 ['gp-pct', 'gp-dyex', 'gp-tooth', 'gp-thick', 'gp-gelmm'].forEach(id => $('#' + id).addEventListener('input', () => calc.gplan()));
+['gp-buf', 'gp-stain'].forEach(id => $('#' + id).addEventListener('change', () => calc.gplan()));
 $('#gp-ladlane').addEventListener('input', () => calc.gplan());
 $('#gp-type').addEventListener('change', () => { gpLadFill(); calc.gplan(); });
 $('#gp-lad').addEventListener('change', () => calc.gplan());

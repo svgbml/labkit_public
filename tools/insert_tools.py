@@ -51,4 +51,9 @@ for m in mods:
     body=re.sub(r",\s*"+m['id']+r":\[[^\]]*\]","",body)
     if m.get('tags'): body=body.rstrip()+","+m['id']+":["+",".join("'"+t.replace("'","\\'")+"'" for t in m['tags'])+"]"
 s=s.replace(tg.group(0),"const TAGS={"+body+"};",1)
-open(HTML,'w',encoding='utf8').write(s); print(len(mods),'modules ingevoegd')
+# 5. controle: elk id mag maar een keer voorkomen (een dubbel ingevoegd blok is anders onzichtbaar)
+ids=re.findall(r'\sid="([^"]+)"',s)
+ids=[i for i in ids if '${' not in i]  # ids die in JS-sjablonen worden opgebouwd tellen niet mee
+dup=sorted({i for i in ids if ids.count(i)>1})
+assert not dup, 'dubbele id in web/index.html: '+', '.join(dup)
+open(HTML,'w',encoding='utf8').write(s); print(len(mods),'modules ingevoegd,',len(ids),'ids, geen dubbele')

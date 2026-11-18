@@ -41,7 +41,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | S14 | 21, 24 | Ladder drawn next to the wells; SDS-PAGE mode with prestained ladder look | ✅ Ladder strip beside the gel (log-linear positions), gel type agarose/SDS-PAGE with prestained ladder colours and the matching unit |
 | S15 | 22 | Predicted gel: bands from expected sizes, log migration per agarose % and ladder | ✅ Second canvas with the expected gel (UV for DNA, Coomassie for SDS); positions from the ladder, the gel percentage gives the out-of-range warning |
 | S16 | 23, 28 | Well capacity check (comb, thickness) and loading dye volume + dye fronts on the prediction | ✅ Well volume from comb/gel dimensions (fill to 80%), per-lane dye volume from the dye strength, warning over capacity, dye fronts on the expected gel |
-| S17 | 25, 26 | Agarose % advisor from the fragment range and a casting recipe card for the tray size | Recipe card printable |
+| S17 | 25, 26 | Agarose % advisor from the fragment range and a casting recipe card for the tray size | ✅ Percentage advice from the expected bands (with "use this"), casting card with gel volume, agarose, buffer and stain; printable via the toolbar print button |
 | S18 | 27 | Run time estimate from voltage, length and fragment sizes | "Stop when" estimate shown |
 | S19 | 228 | Gel loading scheme (`plaad`) opens in / is replaced by the Gelplanner; move its tests | Old links redirect; validation passes |
 | S20 | 203 | SDS-PAGE samples tool sends samples to the Gelplanner (SDS mode) | One click from SDS samples to diagram |
