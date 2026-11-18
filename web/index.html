@@ -5188,7 +5188,9 @@ document.addEventListener('paste',e=>{
   const rows=txt.replace(/\r/g,'').replace(/\n+$/,'').split('\n').map(l=>l.split('\t'));
   const tr0=td.closest('tr'), ri=[...tb.children].indexOf(tr0), ins=tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox])')], ci=ins(tr0).indexOf(el);
   const add=ADDBTN[tb.closest('table').id];
-  rows.forEach((cells,k)=>{ let tr=tb.children[ri+k]; if(!tr&&add){ $(add).click(); tr=tb.children[ri+k]; } if(!tr) return; const I=ins(tr); cells.forEach((v,j)=>{ const t=I[ci+j]; if(t) t.value=v.trim(); }); });
+  rows.forEach((cells,k)=>{ let tr=tb.children[ri+k]; if(!tr&&add){ $(add).click(); tr=tb.children[ri+k]; } if(!tr) return; const I=ins(tr); cells.forEach((v,j)=>{ const t=I[ci+j]; if(!t) return; t.value=v.trim();
+    /* ook per cel een input-event, anders ziet een reactieve tabel de andere cellen niet */
+    t.dispatchEvent(new Event('input',{bubbles:true})); }); });
   el.dispatchEvent(new Event('input',{bubbles:true}));
 });
 
@@ -5432,7 +5434,7 @@ const TBLDEF={
 function tblSnap(){ const out={}; Object.keys(TBLDEF).forEach(id=>{ out[id]=[...document.querySelectorAll('#'+id+' tbody tr')].map(tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select')].map(e=>e.value)); });
   out.reeks=reeksCounts; out.plate=Object.assign(wState(),{title:$('#w-title').value}); out.curve={model:$('#s-model').value,unit:$('#s-unit').value,blank:$('#s-blank').checked,logx:$('#s-logx').checked}; return out; }
 function tblRestore(){ let d=null; try{ d=JSON.parse(localStorage.getItem(TBLKEY)||'null'); }catch(e){} if(!d) return;
-  Object.entries(TBLDEF).forEach(([id,def])=>{ const rows=d[id]; if(!Array.isArray(rows)||!rows.length) return; $('#'+id+' tbody').innerHTML=rows.map(r=>def.row(r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v))).join(''); }); gcRenum();
+  Object.entries(TBLDEF).forEach(([id,def])=>{ const rows=d[id]; if(!Array.isArray(rows)||!rows.length) return; const vals=rows.map(r=>r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v)); /* een tabel die Vue rendert geeft een set() mee: innerHTML zou Vue overschrijven */ if(def.set) def.set(vals); else $('#'+id+' tbody').innerHTML=vals.map(def.row).join(''); }); gcRenum();
   if(d.curve){ $('#s-model').value=d.curve.model; $('#s-unit').value=d.curve.unit; $('#s-blank').checked=d.curve.blank; $('#s-logx').checked=d.curve.logx; }
   if(d.reeks&&typeof d.reeks==='object'){ reeksCounts=d.reeks; buildReeks(); }
   /* oudere sessies bewaarden de tekst per putje apart onder pstore 'wt' en kenden geen
