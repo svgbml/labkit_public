@@ -18,6 +18,12 @@ Elke regel is één zin in het Nederlands en heeft een vertaling nodig in `i18n/
 - Tools met veel instellingen tonen de geavanceerde velden pas na een klik op "Meer instellingen".
 - Bij het eerste bezoek loopt een korte rondleiding langs zoeken, fasen, werkstromen en instellingen.
 - Na een update laat een paneel zien wat er nieuw is.
+- Nieuwe tool Gelplanner: de gel van bovenaf met geldrager, kam, slotjes en de ladder ernaast.
+- De Gelplanner kent zowel agarose als SDS-PAGE, met een prestained eiwitladder.
+- De verwachte gel laat zien waar je banden komen te staan, met de kleurfronten van de laadbuffer.
+- De Gelplanner rekent het slotvolume, de laadbuffer per laan en de looptijd uit.
+- Het Gel-laadschema is opgegaan in de Gelplanner; oude links verwijzen door.
+- SDS-PAGE-monsters gaan met een klik door naar de Gelplanner.
 
 ## 1.18.1 — 2026-11-16
 
