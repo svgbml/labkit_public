@@ -4149,5 +4149,11 @@
 "tijd": "time",
 "Buizenrek": "Tube rack",
 "voor alle buizen": "for all tubes",
-"Alleen de eerste {#} buizen zijn getekend.": "Only the first {#} tubes are drawn."
+"Alleen de eerste {#} buizen zijn getekend.": "Only the first {#} tubes are drawn.",
+"Elke tekening is nu ook als SVG te bewaren, te kopiëren en los af te drukken.": "Every drawing can now also be saved as SVG, copied and printed on its own.",
+"De tekentools hebben dezelfde indeling gekregen: tekening links, instellingen ernaast.": "The drawing tools have been given the same layout: drawing on the left, settings beside it.",
+"Het PCR-programma staat op een echte tijdas: een stap is zo breed als hij lang duurt.": "The PCR programme is on a real time axis: a step is as wide as it is long.",
+"Het kleuringsschema is een tijdlijn met een druppel per reagens geworden.": "The staining scheme has become a timeline with a drop per reagent.",
+"Bij de PCR-mastermix en het pipetteerschema staat een tekening van het buizenrek.": "The PCR master mix and the pipetting scheme now show a drawing of the tube rack.",
+"Je kunt de kleur van een verdunningsreeks zelf kiezen.": "You can choose the colour of a dilution series yourself."
 }

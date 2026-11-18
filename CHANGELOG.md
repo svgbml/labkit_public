@@ -24,6 +24,12 @@ Elke regel is één zin in het Nederlands en heeft een vertaling nodig in `i18n/
 - De Gelplanner rekent het slotvolume, de laadbuffer per laan en de looptijd uit.
 - Het Gel-laadschema is opgegaan in de Gelplanner; oude links verwijzen door.
 - SDS-PAGE-monsters gaan met een klik door naar de Gelplanner.
+- Elke tekening is nu ook als SVG te bewaren, te kopiëren en los af te drukken.
+- De tekentools hebben dezelfde indeling gekregen: tekening links, instellingen ernaast.
+- Het PCR-programma staat op een echte tijdas: een stap is zo breed als hij lang duurt.
+- Het kleuringsschema is een tijdlijn met een druppel per reagens geworden.
+- Bij de PCR-mastermix en het pipetteerschema staat een tekening van het buizenrek.
+- Je kunt de kleur van een verdunningsreeks zelf kiezen.
 
 ## 1.18.1 — 2026-11-16
 

@@ -3,7 +3,9 @@
 The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps of about 30 minutes each**. Each step ends with a working app and runs `python tools/check.py --quick` (the full `tools/check.py` at the end of every phase). Then you can say "do step S12" or "do the next 3 steps".
 
 **Status:** ✅ done · ⏳ planned · ✖ dropped
-**Total:** 146 steps to go (S1–S146) ≈ 73 hours; S0 is done. Every chosen idea number appears in at least one step. Steps within a phase are in a sensible order; steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 146 steps (S1–S146) ≈ 73 hours. Every chosen idea number appears in at least one step. Steps within a phase are in a sensible order; steps marked *(needs Sx)* depend on an earlier step.
+
+**Progress:** S0 done. **Phase 1 (S1–S12) done**, **phase 2 (S13–S20) done**, phase 3 running: S21–S28 done, S29–S36 still to do. After each phase the full `python tools/check.py` passed (validation, layout in Dutch and English, robustness, translations, startup).
 
 ## Decisions
 - **#13 shared layout** applies per *type* of tool. Picture-generating tools (schemes, diagrams, gel figures) share one layout; calculators keep their own.
