@@ -588,10 +588,13 @@ def _(pg):
 
 @case('Plaatindeling', 'Groepen toevoegen', 'Vier keer een kleur toevoegen geeft 8 groepen met 8 verschillende kleuren')
 def _(pg):
-    pg.evaluate("__go('plaat')"); n0 = pg.evaluate("groups.length")
-    pg.evaluate("for(let i=0;i<6;i++) addGroup()")
-    v = pg.evaluate("[groups.length, new Set(groups.map(g=>g.c.toLowerCase())).size]")
-    pg.evaluate(f"groups.splice({n0}); selG=0; renderPlate()")
+    pg.evaluate("__go('plaat')")
+    before = pg.evaluate("wPld.get().groups")
+    n0 = len(before)
+    # de plaatontwerper voegt groepen toe via de knop "+ kleur toevoegen" in de legenda
+    pg.evaluate("for(let i=0;i<6;i++) document.querySelector('#w-pld [data-pl=\"add\"]').click()")
+    v = pg.evaluate("(()=>{const g=wPld.get().groups; return [g.length, new Set(g.map(x=>x.c.toLowerCase())).size];})()")
+    pg.evaluate("g=>wPld.set({fmt:wPld.get().fmt,wells:wPld.get().wells,vals:wPld.get().vals,groups:g})", before)
     return [('groepen erbij', v[0]-n0, 6, 0), ('unieke kleuren', v[1], v[0], 0)]
 
 

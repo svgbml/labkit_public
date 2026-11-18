@@ -860,16 +860,11 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
   <p>Kies een groep en klik of sleep over de putjes. Putjes krijgen automatisch een replicaatnummer in leesvolgorde.</p></header>
   <div class="panel">
     <div class="row" style="justify-content:space-between;margin-bottom:12px">
-      <div class="row">
-        <div class="f"><label for="w-fmt">Formaat</label><select id="w-fmt"><option value="2x3">6 putjes</option><option value="3x4">12 putjes</option><option value="4x6">24 putjes</option><option value="6x8">48 putjes</option><option value="8x12" selected>96 putjes</option></select></div>
-        <div class="f"><label for="w-title">Titel</label><input id="w-title" class="txt" value="ELISA / qPCR — plaat 1" style="width:240px"></div>
-      </div>
-      <div class="row"><button type="button" id="w-addg">+ Groep</button><button type="button" id="w-erase">Gum</button><button type="button" id="w-textmode" title="Klik daarna op een putje en typ de tekst">Tekst per putje</button><button type="button" id="w-clear">Leegmaken</button><button type="button" class="primary" id="w-copy">Kopieer als tabel</button><button type="button" id="w-csv" class="dl-only" style="display:none">Download CSV</button></div>
+      <div class="f"><label for="w-title">Titel</label><input id="w-title" class="txt" value="ELISA / qPCR — plaat 1" style="width:240px"></div>
+      <div class="row"><button type="button" class="primary" id="w-copy">Kopieer als tabel</button><button type="button" id="w-csv" class="dl-only" style="display:none">Download CSV</button></div>
     </div>
-    <div class="legend" id="w-legend"></div>
-    <div class="row" style="margin-top:10px;gap:14px"><div class="f"><label for="w-pal">Kleurenpalet</label><select id="w-pal"><option value="std">Standaard</option><option value="okabe">Kleurenblind-veilig</option><option value="pastel">Pastel</option><option value="fel">Fel</option><option value="grijs">Grijstinten</option></select></div><div class="f"><label for="w-shape">Vorm putjes</label><select id="w-shape"><option value="rond">Rond</option><option value="vierkant">Vierkant</option></select></div><label class="chk" for="w-autolab"><input type="checkbox" id="w-autolab" checked> automatische labels (St1, Mo2 …)</label><label class="chk" for="w-leg"><input type="checkbox" id="w-leg" checked> legenda in afbeelding</label><span style="font-size:13px;color:var(--muted)">Klik op het kleurvakje van een groep voor een eigen kleur.</span></div>
-    <div class="row" id="w-textbar" style="margin-top:10px;display:none"><span class="chip info" id="w-sel">geen putje</span><input id="w-wtext" class="txt" placeholder="Tekst in dit putje, bijv. S1 of 1:10" style="width:240px" maxlength="24"><button type="button" id="w-wclr">Tekst wissen</button><span style="font-size:13px;color:var(--muted)">Enter gaat naar het volgende putje.</span></div>
-    <div class="tbl-wrap" style="margin-top:14px"><div class="plate" id="w-plate"></div></div>
+    <div id="w-pld"></div>
+    <div class="row" style="margin-top:12px;gap:14px"><div class="f"><label for="w-pal">Kleurenpalet</label><select id="w-pal"><option value="std">Standaard</option><option value="okabe">Kleurenblind-veilig</option><option value="pastel">Pastel</option><option value="fel">Fel</option><option value="grijs">Grijstinten</option></select></div><div class="f"><label for="w-shape">Vorm putjes</label><select id="w-shape"><option value="rond">Rond</option><option value="vierkant">Vierkant</option></select></div><label class="chk" for="w-autolab"><input type="checkbox" id="w-autolab" checked> automatische labels (St1, Mo2 …)</label><label class="chk" for="w-leg"><input type="checkbox" id="w-leg" checked> legenda in afbeelding</label><span style="font-size:13px;color:var(--muted)">Klik op het kleurvakje van een groep voor een eigen kleur.</span></div>
     <div class="f" style="margin-top:12px"><label for="w-note">Eigen tekst onder de afbeelding (bijv. verdunningen, incubatietijden)</label><textarea id="w-note" rows="2">Standaarden in duplo in kolom 1–2; monsters in drievoud.</textarea></div>
     <h3 style="margin:16px 0 8px">Afbeelding</h3>
     <canvas id="w-cv"></canvas><div class="pic-bar" data-picbar="w"></div>
@@ -3871,7 +3866,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=bc4ece1f68"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=3752f70764"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -4435,51 +4430,12 @@ setInterval(()=>{
 },250);
 calc.timers=()=>{};
 
-/* ================= PLAAT ================= */
-const GCOL=['#1d5bc4','#c2410c','#15803d','#7c3aed','#b91c1c','#0e7490','#a16207','#be185d','#4b5563','#0f766e'];
-let groups=[{n:'Standaard',c:GCOL[0]},{n:'Blanco',c:GCOL[8]},{n:'Monster',c:GCOL[1]},{n:'Pos. controle',c:GCOL[2]}];
-let selG=0, wells={}, painting=false, eraser=false;
-function dims(){ const [r,c]=$('#w-fmt').value.split('x').map(Number); return {r,c}; }
-const RL='ABCDEFGHIJKLMNOP';
-function exampleWells(){ wells={}; const {r,c}=dims(); if(r!==8) return; for(let i=0;i<7;i++){ wells[RL[i]+1]=0; wells[RL[i]+2]=0; } wells['H1']=1; wells['H2']=1; for(let col=3;col<=8;col++) for(let i=0;i<8;i++) wells[RL[i]+col]=2; wells['H11']=3; wells['H12']=3; }
-function labels(){ const {r,c}=dims(); const cnt={}, nr={}, lab={}, auto=!$('#w-autolab')||$('#w-autolab').checked; for(let i=0;i<r;i++) for(let j=1;j<=c;j++){ const k=RL[i]+j; const g=wells[k]; if(g==null||!groups[g]) continue; cnt[g]=(cnt[g]||0)+1; if(!auto||(typeof wText!=='undefined'&&wText[k])) continue; nr[g]=(nr[g]||0)+1; const short=groups[g].n.replace(/[^A-Za-zÀ-ÿ0-9]/g,'').slice(0,2)||'G'; lab[k]=short+nr[g]; } return {cnt,lab}; }
-function renderPlate(){
-  const {r,c}=dims(); const sz=c>=12?34:c>=8?42:56;
-  const {cnt,lab}=labels();
-  const p=$('#w-plate'); p.style.gridTemplateColumns=`22px repeat(${c},${sz}px)`; p.style.gridAutoRows=sz+'px';
-  let h='<div></div>'; for(let j=1;j<=c;j++) h+=`<div class="hd">${j}</div>`;
-  for(let i=0;i<r;i++){ h+=`<div class="hd">${RL[i]}</div>`; for(let j=1;j<=c;j++){ const k=RL[i]+j, g=wells[k]; const on=g!=null&&groups[g]; h+=`<div class="well${on?' on':''}" data-w="${k}" title="${k}${on?' · '+esc(groups[g].n):''}" style="${on?`background:${groups[g].c};color:${inkOn(groups[g].c)}`:''}">${on?(lab[k]||''):''}</div>`; } }
-  p.innerHTML=h;
-  if(!(document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.gc!=null)) $('#w-legend').innerHTML=groups.map((g,i)=>`<div class="grp${i===selG&&!eraser?' sel':''}" data-g="${i}"><input type="color" data-gc="${i}" value="${/^#[0-9a-f]{6}$/i.test(g.c)?g.c:'#1558b0'}" aria-label="Kleur groep" title="Kleur kiezen"><input class="txt" value="${esc(g.n)}" data-gn="${i}" aria-label="Naam groep"><span class="cnt">${cnt[i]||0}</span></div>`).join('');
-  $('#w-erase').classList.toggle('primary',eraser);
-}
-function paint(k){ if(eraser) delete wells[k]; else wells[k]=selG; }
-$('#w-plate').addEventListener('pointerdown',e=>{ const w=e.target.closest('[data-w]'); if(!w) return; painting=true; paint(w.dataset.w); renderPlate(); });
-$('#w-plate').addEventListener('pointerover',e=>{ if(!painting) return; const w=e.target.closest('[data-w]'); if(w){ paint(w.dataset.w); renderPlate(); }});
-window.addEventListener('pointerup',()=>painting=false);
-$('#w-plate').addEventListener('pointermove',e=>{ if(!painting||e.pointerType==='mouse') return; const el=document.elementFromPoint(e.clientX,e.clientY); const w=el&&el.closest&&el.closest('[data-w]'); if(w&&(wells[w.dataset.w]!==(eraser?undefined:selG))){ paint(w.dataset.w); renderPlate(); }});
-$('#w-legend').addEventListener('click',e=>{ if(e.target.dataset.gc!=null) return; const g=e.target.closest('[data-g]'); if(g){ selG=+g.dataset.g; eraser=false; renderPlate(); const inp=$(`[data-gn="${selG}"]`); if(e.target.tagName==='INPUT'&&inp){ inp.focus(); inp.setSelectionRange(inp.value.length,inp.value.length);} }});
-$('#w-legend').addEventListener('change',e=>{ if(e.target.dataset.gn!=null){ groups[+e.target.dataset.gn].n=e.target.value||'Groep'; renderPlate(); }});
-$('#w-addg').addEventListener('click',()=>{ groups.push({n:'Groep '+(groups.length+1),c:GCOL[groups.length%GCOL.length]}); selG=groups.length-1; eraser=false; renderPlate(); });
-$('#w-erase').addEventListener('click',()=>{ eraser=!eraser; renderPlate(); });
-$('#w-clear').addEventListener('click',()=>{ wells={}; renderPlate(); });
-$('#w-fmt').addEventListener('change',()=>{ wells={}; renderPlate(); });
-$('#w-copy').addEventListener('click',async()=>{
-  const {r,c}=dims(); const {lab}=labels();
-  let t=$('#w-title').value+'\n\t'+Array.from({length:c},(_,j)=>j+1).join('\t')+'\n';
-  for(let i=0;i<r;i++){ t+=RL[i]; for(let j=1;j<=c;j++){ const k=RL[i]+j, g=wells[k]; t+='\t'+((typeof wText!=='undefined'&&wText[k])?wText[k]+(g!=null&&groups[g]?` (${groups[g].n})`:''):(g!=null&&groups[g]?`${groups[g].n} ${(lab[k]||'').replace(/^\D+/,'')}`.trim():'')); } t+='\n'; }
-  t=i18nTSV(t); try{ await navigator.clipboard.writeText(t); $('#w-copied').textContent='Gekopieerd. Plak in Excel, Sheets of je labjournaal.'; $('#w-fallback').style.display='none'; }
-  catch(e){ const f=$('#w-fallback'); f.value=t; f.style.display='block'; f.select(); $('#w-copied').textContent='Kopiëren werd geblokkeerd. Selecteer en kopieer de tekst hieronder.'; }
-});
-calc.plaat=()=>{};
-
 /* ---------- init ---------- */
 loadRecipe('trisnacl');
 buildReeks();
 setCats('diff');
 buildLadder();
 loadQ('taq');
-exampleWells(); renderPlate();
 renderTimers();
 ['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge'].forEach(k=>calc[k]());
 route();
@@ -5210,7 +5166,6 @@ $('#gf-dl').addEventListener('click',()=>{ if(!gf.src) return; const fmtx=$('#gx
 $('#gf-copy').addEventListener('click',async()=>{ if(!gf.src) return; const c=gfRender(true,+$('#gx-scale').value); try{ await navigator.clipboard.write([new ClipboardItem({'image/png':new Promise(r=>c.toBlob(r,'image/png'))})]); $('#gf-exmsg').textContent='Afbeelding gekopieerd; plak in Word, PowerPoint of je verslag.'; }catch(err){ $('#gf-exmsg').textContent='Kopiëren werd geblokkeerd; gebruik rechtsklik → Afbeelding opslaan als.'; } });
 gcv.addEventListener('contextmenu',()=>{ if(!gf.src||gf.mode) return; const c=gfRender(true,1); const ctx=gcv.getContext('2d'); gcv.width=c.width; gcv.height=c.height; ctx.drawImage(c,0,0); setTimeout(()=>gfRender(),4000); });
 $('#s-csv').addEventListener('click',()=>dlMsg($('#s-copied'),()=>saveBlob('standaardcurve.csv',csvBlob(sText))));
-$('#w-csv').addEventListener('click',()=>{ const {r,c}=dims(); const {lab}=labels(); let t='\t'+Array.from({length:c},(_,j)=>j+1).join('\t'); for(let i=0;i<r;i++){ t+='\n'+RL[i]; for(let j=1;j<=c;j++){ const k=RL[i]+j, g=wells[k]; t+='\t'+(g!=null&&groups[g]?`${groups[g].n} ${lab[k].replace(/^\D+/,'')}`:''); } } dlMsg($('#w-copied'),()=>saveBlob(safeName($('#w-title').value)+'.csv',csvBlob(t))); });
 $('#q-csv').addEventListener('click',()=>dlMsg($('#q-copied'),()=>saveBlob('pcr-mastermix.csv',csvBlob(qText))));
 
 /* ================= PLAKKEN UIT EXCEL ================= */
@@ -5464,12 +5419,17 @@ const TBLDEF={
   'ss-tbl':{row:(r)=>ssRow(r),num:[1]}
 };
 function tblSnap(){ const out={}; Object.keys(TBLDEF).forEach(id=>{ out[id]=[...document.querySelectorAll('#'+id+' tbody tr')].map(tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select')].map(e=>e.value)); });
-  out.reeks=reeksCounts; out.plate={fmt:$('#w-fmt').value,wells,groups,title:$('#w-title').value}; out.curve={model:$('#s-model').value,unit:$('#s-unit').value,blank:$('#s-blank').checked,logx:$('#s-logx').checked}; return out; }
+  out.reeks=reeksCounts; out.plate=Object.assign(wState(),{title:$('#w-title').value}); out.curve={model:$('#s-model').value,unit:$('#s-unit').value,blank:$('#s-blank').checked,logx:$('#s-logx').checked}; return out; }
 function tblRestore(){ let d=null; try{ d=JSON.parse(localStorage.getItem(TBLKEY)||'null'); }catch(e){} if(!d) return;
   Object.entries(TBLDEF).forEach(([id,def])=>{ const rows=d[id]; if(!Array.isArray(rows)||!rows.length) return; $('#'+id+' tbody').innerHTML=rows.map(r=>def.row(r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v))).join(''); }); gcRenum();
   if(d.curve){ $('#s-model').value=d.curve.model; $('#s-unit').value=d.curve.unit; $('#s-blank').checked=d.curve.blank; $('#s-logx').checked=d.curve.logx; }
   if(d.reeks&&typeof d.reeks==='object'){ reeksCounts=d.reeks; buildReeks(); }
-  if(d.plate&&d.plate.wells){ $('#w-fmt').value=d.plate.fmt; groups=d.plate.groups&&d.plate.groups.length?d.plate.groups:groups; wells=d.plate.wells; if(d.plate.title!=null) $('#w-title').value=d.plate.title; renderPlate(); } }
+  /* oudere sessies bewaarden de tekst per putje apart onder pstore 'wt' en kenden geen
+     vals of seed; die vorm wordt hier omgezet naar de toestand van de plaatontwerper */
+  if(d.plate&&d.plate.wells&&wPld){ const oldTxt=pstore.get().wt;
+    wPld.set({fmt:d.plate.fmt,wells:d.plate.wells,vals:d.plate.vals||oldTxt||{},seed:d.plate.seed,
+      groups:d.plate.groups&&d.plate.groups.length?d.plate.groups:null});
+    if(d.plate.title!=null) $('#w-title').value=d.plate.title; } }
 let lastTbl='', tblDirty=false; ['input','change','click'].forEach(ev=>document.addEventListener(ev,()=>{ tblDirty=true; },true));
 setInterval(()=>{ try{ const t=JSON.stringify(tblSnap()); if(t!==lastTbl){ if(tblDirty) localStorage.setItem(TBLKEY,t); lastTbl=t; } }catch(e){} },1500);
 $('#reset-store').addEventListener('click',()=>{ try{ localStorage.removeItem(TBLKEY); }catch(e){} },true);
@@ -5967,36 +5927,7 @@ $('#s-pfile').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) r
 /* ================= DESKTOP (TAURI) ================= */
 if(window.__TAURI__&&window.__TAURI__.opener){ document.addEventListener('click',e=>{ const a=e.target.closest('a[href^="http"]'); if(!a) return; e.preventDefault(); window.__TAURI__.opener.openUrl(a.href).catch(()=>{}); }); }
 
-/* ================= PLAATINDELING: TEKST PER PUTJE EN AFBEELDING ================= */
-let wText=pstore.get().wt||{}, wSel=null, wTextMode=false;
-function plateImg(){ const cv=$('#w-cv'); if(!cv) return; const {r,c}=dims(), {lab,cnt}=labels(), title=$('#w-title').value.trim(), sz=c>=12?44:c>=8?54:70, W=Math.max(560,60+c*sz+20);
-  const sq=$('#w-shape').value==='vierkant', used=$('#w-leg').checked?groups.map((g,i)=>[g,i]).filter(([g,i])=>cnt[i]):[]; const NL_=pNotes('w',W), legRows=Math.ceil(used.length/3), H=(title?40:0)+30+r*sz+20+legRows*22+(NL_.length?NL_.length*17+12:0)+10;
-  pShow(cv,W,H,(x)=>{ const t0=pTitle(x,title,W), L=44, T=t0+26; x.font='600 12px '+PFONT(); x.fillStyle=PCOL.muted; x.textAlign='center';
-    for(let j=1;j<=c;j++) x.fillText(String(j),L+(j-0.5)*sz,T-10); for(let i=0;i<r;i++) x.fillText(RL[i],L-14,T+(i+0.5)*sz);
-    x.strokeStyle=PCOL.ink; x.lineWidth=1.2; x.beginPath(); x.roundRect?x.roundRect(L-6,T-4,c*sz+12,r*sz+8,10):x.rect(L-6,T-4,c*sz+12,r*sz+8); x.stroke();
-    for(let i=0;i<r;i++) for(let j=1;j<=c;j++){ const k=RL[i]+j, g=wells[k], on=g!=null&&groups[g], cx=L+(j-0.5)*sz, cy=T+(i+0.5)*sz, rad=sz*0.42;
-      x.beginPath(); if(sq){ x.roundRect?x.roundRect(cx-rad,cy-rad,2*rad,2*rad,5):x.rect(cx-rad,cy-rad,2*rad,2*rad); } else x.arc(cx,cy,rad,0,7); x.fillStyle=on?groups[g].c:'#f4f5f7'; x.fill(); x.strokeStyle=on?'rgba(0,0,0,.25)':PCOL.line; x.lineWidth=1; x.stroke();
-      const t=wText[k]!=null&&wText[k]!==''?wText[k]:on?lab[k]:''; if(t){ x.fillStyle=on?inkOn(groups[g].c):PCOL.ink; wellLines(x,t,cx,cy,sq?rad*1.12:rad); } }
-    let ly=T+r*sz+26; used.forEach(([g,i],q)=>{ const col=q%3, row=Math.floor(q/3), lx=L+col*Math.max(170,(W-L-20)/3), yy=ly+row*22; x.fillStyle=g.c; x.beginPath(); x.arc(lx+6,yy,6,0,7); x.fill(); x.fillStyle=PCOL.ink; x.font='12.5px '+PFONT(); x.textAlign='left'; x.fillText(`${g.n} (${cnt[i]})`,lx+18,yy); });
-    if(NL_.length) pDrawNotes(x,NL_,ly+legRows*22+8); }); }
-function wellLines(x,t,cx,cy,rad){ const W=rad*1.72, set=fs=>{ x.font=`600 ${fs}px `+PFONT(); };
-  const wrap=(fs,split)=>{ set(fs); let words=String(t).split(/\s+/); if(split) words=words.flatMap(w=>{ if(x.measureText(w).width<=W) return [w]; const parts=[]; let cur=''; [...w].forEach(ch=>{ if(x.measureText(cur+ch+'-').width>W&&cur){ parts.push(cur+'-'); cur=ch; } else cur+=ch; }); parts.push(cur); return parts; });
-    const out=[]; let ln=''; words.forEach(w=>{ const c=(ln+' '+w).trim(); if(x.measureText(c).width>W&&ln){ out.push(ln); ln=w; } else ln=c; }); if(ln) out.push(ln); return out; };
-  const fits=(L,fs)=>{ set(fs); const n=L.length, hh=n*fs*1.1; return L.every((l,i)=>{ const yy=(i-(n-1)/2)*fs*1.1, half=Math.sqrt(Math.max(0,rad*rad*0.92-(Math.abs(yy)+fs*0.45)**2)); return x.measureText(l).width<=2*half; })&&hh<=rad*1.7; };
-  let fs=Math.min(12,rad*0.62), L=null; for(;fs>=5.5;fs-=0.5){ const c=wrap(fs,false); if(fits(c,fs)){ L=c; break; } }
-  if(!L){ for(fs=Math.min(9,rad*0.45);fs>=5;fs-=0.5){ const c=wrap(fs,true); if(fits(c,fs)||fs<=5.5){ L=c; break; } } }
-  set(fs); L.forEach((l,i)=>x.fillText(l,cx,cy+(i-(L.length-1)/2)*fs*1.1)); }
-function applyWellText(){ const sz=parseFloat(getComputedStyle($('#w-plate')).gridAutoRows)||34; $$('#w-plate [data-w]').forEach(el=>{ const k=el.dataset.w, t=wText[k]; if(t!=null&&t!==''){ el.innerHTML=`<span>${esc(t)}</span>`; el.classList.add('wtxt'); el.title=k+' · '+t; let fs=Math.min(11,sz*0.3); el.style.fontSize=fs+'px'; if(!el.classList.contains('on')) el.style.color='var(--ink)'; for(let i=0;i<12&&(el.scrollHeight>el.clientHeight+1||el.scrollWidth>el.clientWidth+1)&&fs>5.5;i++){ fs-=0.5; el.style.fontSize=fs+'px'; } } el.classList.toggle('wsel',wTextMode&&k===wSel); }); }
-{ const _rp=renderPlate; renderPlate=function(){ _rp(); $('#w-plate').classList.toggle('sq',$('#w-shape').value==='vierkant'); applyWellText(); try{ plateImg(); }catch(e){} }; }
-$('#w-plate').addEventListener('pointerdown',e=>{ if(!wTextMode) return; const w=e.target.closest('[data-w]'); if(!w) return; e.stopPropagation(); e.preventDefault(); wSel=w.dataset.w; $('#w-sel').textContent=wSel; $('#w-wtext').value=wText[wSel]||''; renderPlate(); setTimeout(()=>$('#w-wtext').focus(),0); },true);
-$('#w-textmode').addEventListener('click',()=>{ wTextMode=!wTextMode; $('#w-textmode').classList.toggle('primary',wTextMode); $('#w-textbar').style.display=wTextMode?'flex':'none'; if(wTextMode&&!wSel){ wSel='A1'; $('#w-sel').textContent=wSel; $('#w-wtext').value=wText[wSel]||''; } renderPlate(); });
-$('#w-wtext').addEventListener('input',e=>{ if(!wSel) return; const v=e.target.value; if(v) wText[wSel]=v; else delete wText[wSel]; pstore.set('wt',wText); renderPlate(); });
-$('#w-wtext').addEventListener('keydown',e=>{ if(e.key!=='Enter'||!wSel) return; e.preventDefault(); const {r,c}=dims(); let i=RL.indexOf(wSel[0]), j=+wSel.slice(1); j++; if(j>c){ j=1; i=(i+1)%r; } wSel=RL[i]+j; $('#w-sel').textContent=wSel; e.target.value=wText[wSel]||''; renderPlate(); });
-$('#w-wclr').addEventListener('click',()=>{ if(wSel){ delete wText[wSel]; pstore.set('wt',wText); $('#w-wtext').value=''; renderPlate(); } });
-['w-title','w-note'].forEach(id=>$('#'+id).addEventListener('input',()=>plateImg()));
-$('#w-fmt').addEventListener('change',()=>{ wText={}; pstore.set('wt',wText); renderPlate(); });
-$('#w-clear').addEventListener('click',()=>{ wText={}; pstore.set('wt',wText); renderPlate(); });
-calc.plaat=()=>{ renderPlate(); };
+/* De plaatindeling staat nu in één blok onderaan, na de gedeelde plaatontwerper. */
 
 /* ================= GELFOTO: EIWITLADDERS EN MASSA PER BAND ================= */
 const LMASS={neb100:'45 35 95 27 24 21 18 97 38 29 25 48',neb1k:'42 42 50 42 33 125 48 36 42 42',k1k13:'28 28 28 28 18 92 34 34 20 92 23 30 45',k1kp:'16 28 28 28 28 18 92 34 34 20 92 23 30 45',h100:'70 50 40 40 30 30 90 40 30 40 40',h100p:'40 70 50 40 40 30 30 90 40 30 40 40'};
@@ -6228,11 +6159,6 @@ async function checkUpdate(manual){ const st=$('#upd-status'); let S={}; try{ S=
 $('#upd-check').addEventListener('click',()=>checkUpdate(true));
 $('#upd-cur').textContent=APPVER; $('#appver').textContent='Versie '+APPVER;
 
-/* ================= PLAATINDELING: KLEUREN EN OPMAAK ================= */
-$('#w-legend').addEventListener('input',e=>{ const i=e.target.dataset.gc; if(i==null) return; groups[+i].c=e.target.value; renderPlate(); });
-$('#w-pal').addEventListener('change',e=>{ const p=PALS[e.target.value]; if(!p) return; groups.forEach((g,i)=>g.c=p[i%p.length]); GCOL.splice(0,GCOL.length,...p); renderPlate(); });
-['w-shape','w-autolab','w-leg'].forEach(id=>$('#'+id).addEventListener('change',()=>renderPlate()));
-
 /* ================= MOLMASSA ================= */
 const ATOM={H:1.008,He:4.0026,Li:6.94,B:10.81,C:12.011,N:14.007,O:15.999,F:18.998,Na:22.990,Mg:24.305,Al:26.982,Si:28.085,P:30.974,S:32.06,Cl:35.45,K:39.098,Ca:40.078,Cr:51.996,Mn:54.938,Fe:55.845,Co:58.933,Ni:58.693,Cu:63.546,Zn:65.38,As:74.922,Se:78.971,Br:79.904,Rb:85.468,Sr:87.62,Mo:95.95,Ag:107.868,Cd:112.414,Sn:118.71,I:126.904,Cs:132.905,Ba:137.327,W:183.84,Pt:195.084,Au:196.967,Hg:200.592,Pb:207.2};
 function parseFormula(txt){ const sub='₀₁₂₃₄₅₆₇₈₉'; let s=String(txt).replace(/[₀-₉]/g,c=>sub.indexOf(c)).replace(/\s+/g,''); if(!s) return {err:'Vul een formule in.'};
@@ -6268,15 +6194,6 @@ calc.rmp=function(){ const th=num($('#rm-th').value)||0, out=$('#rm-out'); let p
     const hom=qr===''||!isFinite(q), g=hom?p*p+p*(1-p)*th:2*p*q; cell.innerHTML=`${sig(g,3)} <span style="color:var(--muted);font-size:12px">${hom?'hom.':'het.'}</span>`; prod*=g; n++; });
   if(!n){ out.innerHTML=note('info','Vul per locus de allelfrequenties in (tussen 0 en 1).'); return; }
   out.innerHTML=`<div class="lbl">Gecombineerde matchkans (${n} loci)</div><div class="big">1 op ${sci(1/prod,3)}</div>`+kv([['Matchkans',sci(prod,3)],['Bewijskracht LR (enkelvoudig profiel)',sci(1/prod,3)],['θ',fmt(th,2)]])+(bad.length?note('bad',`Ongeldige frequenties bij: ${bad.map(esc).join(', ')}. Een frequentie ligt tussen 0 en 1 en twee allelen samen zijn hooguit 1.`):'')+note('info','De productregel veronderstelt onafhankelijke loci en een populatie in Hardy-Weinberg-evenwicht. Geldt niet voor mengprofielen of verwanten.')+`<div class="formula">heterozygoot 2pq · homozygoot p² + p(1 − p)θ · matchkans = product over de loci</div>`; };
-/* ================= PLAATINDELING: MEER GROEPEN ================= */
-function freshColor(){ const usedRgb=groups.map(g=>/^#[0-9a-f]{6}$/i.test(g.c)?hexRgb(g.c):[0,0,0]), far=h=>{ const r=hexRgb(h); return usedRgb.every(u=>Math.hypot(u[0]-r[0],u[1]-r[1],u[2]-r[2])>70); }, used={includes:h=>!far(h)}; const pal=PALS[$('#w-pal').value]||PALS.std; const c=pal.find(far); if(c) return c;
-  for(let k=0;k<40;k++){ const h=(groups.length*137.508+k*29)%360, s=0.62, l=0.45+((k%3)-1)*0.08, a=s*Math.min(l,1-l), f=n=>{ const q=(n+h/30)%12; return 255*(l-a*Math.max(-1,Math.min(q-3,9-q,1))); }, hex=rgbHex([f(0),f(8),f(4)]); if(!used.includes(hex)) return hex; } return '#555555'; }
-function addGroup(){ groups.push({n:'Groep '+(groups.length+1),c:freshColor()}); selG=groups.length-1; eraser=false; renderPlate(); const i=$(`[data-gn="${selG}"]`); if(i){ i.focus(); i.select(); } }
-{ const b=$('#w-addg'), nb=b.cloneNode(true); nb.textContent='+ Kleur / groep'; b.replaceWith(nb); nb.addEventListener('click',addGroup); }
-function legendExtras(){ const L=$('#w-legend'); if(!L||L.querySelector('.addg')) return; L.querySelectorAll('.grp').forEach(g=>{ if(groups.length>1&&!g.querySelector('.gdel')){ const x=document.createElement('button'); x.type='button'; x.className='gdel'; x.textContent='✕'; x.title='Groep verwijderen'; x.dataset.gdel=g.dataset.g; x.setAttribute('aria-label','Groep verwijderen'); g.appendChild(x); } });
-  const a=document.createElement('button'); a.type='button'; a.className='grp addg'; a.textContent='+ kleur toevoegen'; L.appendChild(a); }
-$('#w-legend').addEventListener('click',e=>{ if(e.target.closest('.addg')){ e.stopPropagation(); addGroup(); return; } const d=e.target.closest('[data-gdel]'); if(!d) return; e.stopPropagation(); const i=+d.dataset.gdel; groups.splice(i,1); Object.keys(wells).forEach(k=>{ if(wells[k]===i) delete wells[k]; else if(wells[k]>i) wells[k]--; }); selG=Math.max(0,Math.min(selG,groups.length-1)); renderPlate(); },true);
-{ const _rp2=renderPlate; renderPlate=function(){ _rp2(); legendExtras(); }; }
 
 /* ================= TAGS ================= */
 const TAGS={verdunning:['Oplossingen','Verdunnen'],oplossing:['Oplossingen','Buffers'],units:['Oplossingen'],molm:['Oplossingen'],hh:['Buffers','Oplossingen'],
@@ -6566,6 +6483,15 @@ function pRack(x, X, Y, W, tubes, opts) {
    MIC-titratie, buitenrij als buffer). "Plaatkaart" drukt de plaat op A4 af met de legenda,
    het aantal putjes per groep en een tabel van alle gelabelde putjes.
 
+   Voor de tools die hun eigen plaattekening maken (S33) kan de ontwerper ook:
+     opts.shape 'rond'|'vierkant'  of P.shape(v)   vorm van de putjes
+     opts.autoLabel true|false     of P.autoLabel(v)  automatische labels St1, Mo2, …
+     opts.palette [...hex]         of P.palette(a)  kleurenpool voor nieuwe groepen
+     P.labels()                    {cnt per groep, lab per putje} voor eigen tekeningen
+     P.text()                      de tekst die in een putje hoort (eigen tekst > autolabel)
+   "Tekst per putje" zet de ontwerper in tekstmodus: een klik kiest een putje, Enter gaat naar
+   het volgende. Die tekst is invoer van de gebruiker en wordt nooit vertaald.
+
    Randomiseren (S32): "Randomiseren…" wisselt de gevulde putjes onderling van groep en label,
    met een sleutelnummer erbij zodat dezelfde indeling later opnieuw te maken is. Je kunt de
    hele plaat door elkaar halen of alleen één groep, zodat standaarden en controles op hun
@@ -6641,7 +6567,10 @@ function plateDesigner(host, opts) {
     groups: (opts.groups || [{n: 'Standaard', c: PLCOL[0]}, {n: 'Blanco', c: PLCOL[8]},
       {n: 'Monster', c: PLCOL[1]}, {n: 'Controle', c: PLCOL[2]}]).map(g => ({...g}))
   };
-  let sel = 0, erase = false, painting = false;
+  let sel = 0, erase = false, painting = false, tmode = false, wsel = null;
+  let shape = opts.shape === 'vierkant' ? 'vierkant' : 'rond';
+  let autoLab = opts.autoLabel !== false;
+  let pool = (opts.palette && opts.palette.length ? opts.palette : PLCOL).slice();
   const dims = () => { const [r, c] = S.fmt.split('x').map(Number); return {r: r || 8, c: c || 12}; };
   const key = (i, j) => PLROW[i] + (j + 1);
   const pos = k => ({i: PLROW.indexOf(String(k).charAt(0)), j: +String(k).slice(1) - 1});
@@ -6660,8 +6589,10 @@ function plateDesigner(host, opts) {
       <button type="button" data-pl="erase" aria-pressed="false">Gum</button>
       <button type="button" data-pl="clear">Leegmaken</button>
       <button type="button" data-pl="print" title="De plaatkaart op A4 afdrukken">Plaatkaart</button>
+      <button type="button" data-pl="tmode" aria-pressed="false" title="Klik daarna op een putje en typ de tekst">Tekst per putje</button>
       <label class="chk"><input type="checkbox" data-pl="order"> Vulorde</label>
     </div>
+    <div class="row pld-txt" data-pl="txtbar" hidden><span class="chip info" data-pl="sel" data-notr="">A1</span><input data-pl="wtext" class="txt" placeholder="Tekst in dit putje, bijv. S1 of 1:10" maxlength="24" aria-label="Tekst in dit putje"><button type="button" data-pl="wclr">Tekst wissen</button><span class="pld-hint">Enter gaat naar het volgende putje.</span></div>
     <div class="legend" data-pl="legend"></div>
     <div class="tbl-wrap"><div class="plate" data-pl="grid" role="group" aria-label="Putjes van de plaat"></div></div>
     <div class="pld-mc" data-pl="mc"></div>
@@ -6672,6 +6603,37 @@ function plateDesigner(host, opts) {
   const rep = () => { const v = +(q('rep') || {}).value; return Math.max(1, Math.min(8, v || 1)); };
   const dir = () => ((q('dir') || {}).value === 'v' ? 'v' : 'h');
   const ordOn = () => !!(q('order') || {}).checked;
+
+  /* ---- automatische replicaatnummers (S33) ----
+     Elk putje van een groep krijgt in leesvolgorde een nummer achter de eerste twee letters
+     van de groepsnaam: St1, St2, Mo1, … Een putje met eigen tekst houdt die tekst. */
+  function labels() {
+    const {r, c} = dims(), cnt = {}, nr = {}, lab = {};
+    for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) {
+      const k = key(i, j), g = S.wells[k];
+      if (g == null || !S.groups[g]) continue;
+      cnt[g] = (cnt[g] || 0) + 1;
+      if (!autoLab || S.vals[k]) continue;
+      nr[g] = (nr[g] || 0) + 1;
+      const short = trPlain(S.groups[g].n, true).replace(/[^A-Za-zÀ-ÿ0-9]/g, '').slice(0, 2) || 'G';
+      lab[k] = short + nr[g];
+    }
+    return {cnt, lab};
+  }
+  /* de tekst die in een putje hoort: eigen tekst gaat voor het automatische label */
+  const textOf = (k, lab) => S.vals[k] || (lab ? lab[k] || '' : '');
+
+  /* een kleur voor een nieuwe groep die genoeg verschilt van de kleuren die al in gebruik zijn */
+  function freshCol() {
+    const used = S.groups.map(g => /^#[0-9a-f]{6}$/i.test(g.c) ? hexRgb(g.c) : [0, 0, 0]);
+    const far = h => { const r = hexRgb(h); return used.every(u => Math.hypot(u[0] - r[0], u[1] - r[1], u[2] - r[2]) > 70); };
+    const c = pool.find(far); if (c) return c;
+    for (let k = 0; k < 40; k++) { const h = (S.groups.length * 137.508 + k * 29) % 360, l = 0.45 + ((k % 3) - 1) * 0.08,
+        a = 0.62 * Math.min(l, 1 - l), f = n => { const q2 = (n + h / 30) % 12; return 255 * (l - a * Math.max(-1, Math.min(q2 - 3, 9 - q2, 1))); },
+        hex = rgbHex([f(0), f(8), f(4)]);
+      if (far(hex)) return hex; }
+    return '#555555';
+  }
 
   /* ---- vulorde: per groep, want per groep pak je één keer tips (S31) ---- */
   function orderSeq() {
@@ -6763,30 +6725,50 @@ function plateDesigner(host, opts) {
 
   function render() {
     const {r, c} = dims(), sz = c >= 16 ? 24 : c >= 12 ? 34 : c >= 8 ? 42 : 56;
-    const g = q('grid'), lab = sz >= 34;                 /* bij 384 putjes is er geen ruimte voor een label */
+    const g = q('grid'), room = sz >= 34;                /* bij 384 putjes is er geen ruimte voor een label */
     const on = ordOn(), seq = on ? orderSeq() : null;
+    const {cnt, lab} = labels();
+    g.classList.toggle('sq', shape === 'vierkant');
     g.style.gridTemplateColumns = `22px repeat(${c},${sz}px)`;
     g.style.gridAutoRows = sz + 'px';
     let h = '<div></div>';
     for (let j = 1; j <= c; j++) h += `<button type="button" class="hd" data-plc="${j - 1}" title="Kolom ${j} vullen"><span data-notr="">${j}</span></button>`;
     for (let i = 0; i < r; i++) { h += `<button type="button" class="hd" data-plr="${i}" title="Rij ${uv(PLROW[i])} vullen"><span data-notr="">${PLROW[i]}</span></button>`;
-      for (let j = 0; j < c; j++) { const k = key(i, j), gi = S.wells[k], fill = gi != null && S.groups[gi], v = S.vals[k];
-        const txt = on ? (seq[k] != null ? String(seq[k]) : '') : (v || '');
-        const tip = [k, fill ? trPlain(S.groups[gi].n, true) : '', v || '', on && seq[k] != null ? trPlain('stap ' + seq[k]) : '']
+      for (let j = 0; j < c; j++) { const k = key(i, j), gi = S.wells[k], fill = gi != null && S.groups[gi];
+        const txt = on ? (seq[k] != null ? String(seq[k]) : '') : textOf(k, lab);
+        const tip = [k, fill ? trPlain(S.groups[gi].n, true) : '', S.vals[k] || '', on && seq[k] != null ? trPlain('stap ' + seq[k]) : '']
           .filter(Boolean).join(' · ');
-        h += `<div class="well${fill ? ' on' : ''}${txt && lab ? ' wtxt' : ''}" data-notr="" data-w="${k}" title="${esc(tip)}"${fill ? ` style="--wc:${S.groups[gi].c}"` : ''}>${txt && lab ? `<span>${esc(txt)}</span>` : ''}</div>`; } }
+        h += `<div class="well${fill ? ' on' : ''}${txt && room ? ' wtxt' : ''}${tmode && k === wsel ? ' wsel' : ''}" data-notr="" data-w="${k}" title="${esc(tip)}"${
+          fill ? ` style="--wc:${S.groups[gi].c};color:${inkOn(S.groups[gi].c)}"` : ''}>${txt && room ? `<span>${esc(txt)}</span>` : ''}</div>`; } }
     g.innerHTML = h;
     const act = document.activeElement;
     if (!(act && act.dataset && act.dataset.plgn != null))
       q('legend').innerHTML = S.groups.map((x, i) =>
-        `<div class="grp${i === sel && !erase ? ' sel' : ''}" data-plg="${i}"><i style="background:${x.c}"></i>` +
-        `<input data-plgn="${i}" value="${esc(x.n)}" aria-label="Naam van de groep"><button type="button" class="gdel" data-pldel="${i}" aria-label="Verwijder">✕</button></div>`).join('');
+        `<div class="grp${i === sel && !erase ? ' sel' : ''}" data-plg="${i}"><input type="color" data-plgc="${i}" value="${
+          /^#[0-9a-f]{6}$/i.test(x.c) ? x.c : '#1558b0'}" aria-label="Kleur van de groep" title="Kleur kiezen">` +
+        `<input data-plgn="${i}" value="${esc(x.n)}" aria-label="Naam van de groep"><span class="cnt" data-notr="">${cnt[i] || 0}</span>` +
+        (S.groups.length > 1 ? `<button type="button" class="gdel" data-pldel="${i}" aria-label="Verwijder">✕</button>` : '') + '</div>').join('') +
+        '<button type="button" class="grp addg" data-pl="add">+ kleur toevoegen</button>';
+    q('tmode').setAttribute('aria-pressed', tmode ? 'true' : 'false');
+    q('tmode').classList.toggle('primary', tmode);
+    q('txtbar').hidden = !tmode;
+    if (tmode && wsel) { q('sel').textContent = wsel; const w = q('wtext'); if (w !== document.activeElement) w.value = S.vals[wsel] || ''; }
+    fitText(sz);
     q('mc').innerHTML = mcText();
     q('warn').innerHTML = warnText();
     q('keyv').hidden = S.seed == null;
     q('erase').setAttribute('aria-pressed', erase ? 'true' : 'false');
     q('erase').classList.toggle('primary', erase);
     fire();
+  }
+
+  /* eigen tekst kan langer zijn dan een putje breed is: de letters krimpen tot het past */
+  function fitText(sz) {
+    host.querySelectorAll('.well.wtxt').forEach(el => {
+      let fs = Math.min(11, sz * 0.3); el.style.fontSize = fs + 'px';
+      for (let i = 0; i < 12 && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1) && fs > 5.5; i++) {
+        fs -= 0.5; el.style.fontSize = fs + 'px'; }
+    });
   }
 
   const paint = k => { if (erase) { delete S.wells[k]; delete S.vals[k]; } else S.wells[k] = sel; };
@@ -6798,8 +6780,9 @@ function plateDesigner(host, opts) {
       if (ii >= r || jj >= c) break; paint(key(ii, jj)); }
   }
   q('grid').addEventListener('pointerdown', e => { const w = e.target.closest('[data-w]'); if (!w) return;
+    if (tmode) { e.preventDefault(); wsel = w.dataset.w; render(); setTimeout(() => q('wtext').focus(), 0); return; }
     painting = true; paintRun(w.dataset.w); render(); });
-  q('grid').addEventListener('pointerover', e => { if (!painting) return; const w = e.target.closest('[data-w]'); if (w) { paintRun(w.dataset.w); render(); } });
+  q('grid').addEventListener('pointerover', e => { if (!painting || tmode) return; const w = e.target.closest('[data-w]'); if (w) { paintRun(w.dataset.w); render(); } });
   /* op een aanraakscherm komt pointerover niet, dus daar wordt het putje onder de vinger gezocht */
   q('grid').addEventListener('pointermove', e => { if (!painting || e.pointerType === 'mouse') return;
     const el = document.elementFromPoint(e.clientX, e.clientY), w = el && el.closest && el.closest('[data-w]');
@@ -6820,8 +6803,12 @@ function plateDesigner(host, opts) {
     const g = e.target.closest('[data-plg]');
     if (g && e.target.dataset.plgn == null) { sel = +g.dataset.plg; erase = false; render(); return; }
     const b = e.target.closest('[data-pl]'); if (!b || b.tagName !== 'BUTTON') return;
-    if (b.dataset.pl === 'add') { S.groups.push({n: trPlain('Groep') + ' ' + (S.groups.length + 1), c: PLCOL[S.groups.length % PLCOL.length] }); sel = S.groups.length - 1; erase = false; render(); }
-    else if (b.dataset.pl === 'erase') { erase = !erase; render(); }
+    if (b.dataset.pl === 'add') { S.groups.push({n: trPlain('Groep') + ' ' + (S.groups.length + 1), c: freshCol()}); sel = S.groups.length - 1; erase = false; render();
+      const i2 = host.querySelector(`[data-plgn="${sel}"]`); if (i2) { i2.focus(); i2.select(); } }
+    else if (b.dataset.pl === 'erase') { erase = !erase; tmode = false; render(); }
+    else if (b.dataset.pl === 'tmode') { tmode = !tmode; if (tmode) { erase = false; if (!wsel) wsel = 'A1'; } render();
+      if (tmode) setTimeout(() => q('wtext').focus(), 0); }
+    else if (b.dataset.pl === 'wclr') { if (wsel) { delete S.vals[wsel]; q('wtext').value = ''; render(); } }
     else if (b.dataset.pl === 'series') seriesDialog();
     else if (b.dataset.pl === 'tpl') tplDialog();
     else if (b.dataset.pl === 'rnd') rndDialog();
@@ -6832,6 +6819,17 @@ function plateDesigner(host, opts) {
       render(); }
     else if (b.dataset.pl === 'print') printCard();
     else if (b.dataset.pl === 'clear') { S.wells = {}; S.vals = {}; S.seed = null; render(); }
+  });
+  host.addEventListener('input', e => {
+    if (e.target.dataset.plgc != null) { S.groups[+e.target.dataset.plgc].c = e.target.value; render(); return; }
+    if (e.target.dataset.pl === 'wtext' && wsel) { const v = e.target.value;
+      if (v) S.vals[wsel] = v; else delete S.vals[wsel]; render(); }
+  });
+  host.addEventListener('keydown', e => {
+    if (e.target.dataset.pl !== 'wtext' || e.key !== 'Enter' || !wsel) return;
+    e.preventDefault(); const {r, c} = dims(); let {i, j} = pos(wsel);
+    j++; if (j >= c) { j = 0; i = (i + 1) % r; }
+    wsel = key(i, j); render(); e.target.value = S.vals[wsel] || '';
   });
   host.addEventListener('change', e => {
     if (e.target.dataset.plgn != null) { S.groups[+e.target.dataset.plgn].n = e.target.value || trPlain('Groep'); render(); }
@@ -6936,7 +6934,7 @@ function plateDesigner(host, opts) {
         @page{margin:14mm}body{margin:0;font:13px system-ui,sans-serif;color:#1f2933}
         h1{font-size:18px;margin:0 0 2px}p{margin:0 0 10px;color:#5f6b7a;font-size:12px}
         table{border-collapse:collapse;font-size:12px}th,td{border:1px solid #c9ced6;padding:3px 7px;text-align:left}th{background:#eef0f3}
-        </style><h1>${T(opts.name || 'Plaatkaart')} — ${T('Sleutel van de plaat')}</h1>
+        </style><h1>${typeof opts.name === 'function' ? esc(opts.name() || '') : esc(opts.name || trPlain('Plaatkaart'))} — ${T('Sleutel van de plaat')}</h1>
         <p>${S.seed != null ? T('Sleutelnummer') + ' ' + esc(String(S.seed)) + ' · ' : ''}${T('Datum')}: ________________</p>
         ${m.box.querySelector('.pld-key').outerHTML}`);
     });
@@ -6950,11 +6948,12 @@ function plateDesigner(host, opts) {
     const cnt = {}; Object.keys(S.wells).forEach(k => { const g = S.wells[k]; cnt[g] = (cnt[g] || 0) + 1; });
     const ord = k => PLROW.indexOf(k.charAt(0)) * 100 + (+k.slice(1));
     const lab = Object.keys(S.vals).filter(k => S.wells[k] != null).sort((a, b) => ord(a) - ord(b));
+    const nm = typeof opts.name === 'function' ? (opts.name() || '') : (opts.name || '');
     const T = s => esc(trPlain(s));
     /* een groepsnaam die de gebruiker zelf heeft getypt staat niet in de woordenlijst en
        blijft dan ongewijzigd; `true` houdt hem uit de lijst met ontbrekende vertalingen */
     const G = s => esc(trPlain(String(s), true));
-    const head = `<h1>${T(opts.name || 'Plaatkaart')}</h1>
+    const head = `<h1>${nm ? esc(nm) : T('Plaatkaart')}</h1>
       <p class="meta">${T(r * c + ' putjes')} · ${T('gevuld')}: <b>${Object.keys(S.wells).length}</b>${
         S.seed != null ? ' · ' + T('Sleutelnummer') + ': <b>' + esc(String(S.seed)) + '</b>' : ''
       } · ${T('Datum')}: ________________ · ${T('Uitgevoerd door')}: ________________</p>`;
@@ -6968,7 +6967,7 @@ function plateDesigner(host, opts) {
     const mc = mcHtml ? `<h2>${T('Met een meerkanaalspipet')}</h2><div class="mc">${mcHtml}</div>` : '';
     const tbl = lab.length ? `<h2>${T('Gelabelde putjes')}</h2><table class="wl"><thead><tr><th>${T('Putje')}</th><th>${T('Groep')}</th><th>${T('Label')}</th></tr></thead><tbody>` +
       lab.map(k => `<tr><td>${esc(k)}</td><td>${G((S.groups[S.wells[k]] || {}).n || '')}</td><td>${esc(S.vals[k])}</td></tr>`).join('') + '</tbody></table>' : '';
-    rpPrint(`<!doctype html><meta charset="utf-8"><title>${T(opts.name || 'Plaatkaart')}</title><style>
+    rpPrint(`<!doctype html><meta charset="utf-8"><title>${nm ? esc(nm) : T('Plaatkaart')}</title><style>
       @page{size:A4 landscape;margin:12mm}
       body{margin:0;font:13px system-ui,sans-serif;color:#1f2933}
       h1{font-size:19px;margin:0 0 2px}h2{font-size:14px;margin:14px 0 4px}
@@ -6994,14 +6993,14 @@ function plateDesigner(host, opts) {
     for (let i = 0; i < r; i++) x.fillText(PLROW[i], L - 14, T + (i + 0.5) * sz);
     x.strokeStyle = PCOL.ink; x.lineWidth = 1.2;
     x.beginPath(); x.roundRect(L - 6, T - 4, c * sz + 12, r * sz + 8, 10); x.stroke();
-    const seq = ordOn() ? orderSeq() : null;
+    const seq = ordOn() ? orderSeq() : null, {lab} = labels(), sq = shape === 'vierkant';
     for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) {
       const k = key(i, j), gi = S.wells[k], on = gi != null && S.groups[gi];
       const cx = L + (j + 0.5) * sz, cy = T + (i + 0.5) * sz, rad = sz * 0.42;
-      x.beginPath(); x.arc(cx, cy, rad, 0, 7);
+      x.beginPath(); if (sq) x.roundRect(cx - rad, cy - rad, 2 * rad, 2 * rad, 5); else x.arc(cx, cy, rad, 0, 7);
       x.fillStyle = on ? S.groups[gi].c : '#f4f5f7'; x.fill();
       x.strokeStyle = on ? S.groups[gi].c : PCOL.line; x.lineWidth = 1; x.stroke();
-      const v = seq ? (seq[k] != null ? String(seq[k]) : '') : S.vals[k];
+      const v = seq ? (seq[k] != null ? String(seq[k]) : '') : textOf(k, lab);
       if (v && sz >= 34) {                       /* het label past alleen in een ruim putje */
         x.font = '600 ' + Math.min(10, sz * 0.2) + 'px ' + PFONT();
         x.fillStyle = on ? inkOn(S.groups[gi].c) : PCOL.ink;
@@ -7028,6 +7027,10 @@ function plateDesigner(host, opts) {
       S.seed = v.seed != null ? v.seed : null;
       sel = Math.min(sel, S.groups.length - 1); render(); },
     selected: () => sel, label: (k, v) => { if (v == null || v === '') delete S.vals[k]; else S.vals[k] = String(v); },
+    labels, text: k => textOf(k, labels().lab),
+    shape(v) { if (v != null) { shape = v === 'vierkant' ? 'vierkant' : 'rond'; render(); } return shape; },
+    autoLabel(v) { if (v != null) { autoLab = !!v; render(); } return autoLab; },
+    palette(a) { if (a && a.length) { pool = a.slice(); S.groups.forEach((g, i) => g.c = a[i % a.length]); render(); } return pool.slice(); },
     template(id) { const t = PLTPL.find(x => x.id === id); if (!t) return false;
       if (t.fmt) { S.fmt = t.fmt; const f = q('fmt'); if (f) f.value = S.fmt; }
       const d = dims(), o = t.make(d.r, d.c);
@@ -8738,6 +8741,90 @@ document.addEventListener('click',e=>{ if(e.target.closest('[data-news]')) newsO
 /* /NT:ux */
 buildReeks();
 sLoad('bradford');
+
+/* ================= PLAATINDELING =================
+   De plaat zelf is de gedeelde plaatontwerper uit tools/nt/02_plate.js: die bewaart het
+   formaat, de groepen, welke putjes gevuld zijn en de tekst per putje, en kan vullen met
+   replica's, sjablonen, een verdunningsreeks, een vulorde, randomiseren en een plaatkaart.
+   Deze tool zet daar de titel, het kleurenpalet, de legenda in de afbeelding, een eigen
+   toelichting en de export als tabel of CSV omheen, en tekent de plaat groot op een canvas
+   voor PNG, SVG, kopiëren en afdrukken.
+
+   Dit blok staat helemaal onderaan omdat plateDesigner() uit een ingevoegde module komt die
+   verderop in dit script staat; function- en var-declaraties worden gehesen, dus de rest van
+   het script mag er wel naar verwijzen. Alles leest de toestand via wState(): de plaat heeft
+   maar één bron van waarheid, de ontwerper. */
+const GCOL=['#1d5bc4','#c2410c','#15803d','#7c3aed','#b91c1c','#0e7490','#a16207','#be185d','#4b5563','#0f766e'];
+const WRL='ABCDEFGHIJKLMNOP';
+var wPld=null;
+function wState(){ return wPld?wPld.get():{fmt:'8x12',wells:{},vals:{},groups:[],seed:null}; }
+function wDims(){ const [r,c]=wState().fmt.split('x').map(Number); return {r:r||8,c:c||12}; }
+function wLabels(){ return wPld?wPld.labels():{cnt:{},lab:{}}; }
+
+/* de voorbeeldplaat waarmee de tool opent: standaarden in duplo, een blanco, monsters en een
+   positieve controle; precies de indeling die de tool altijd had */
+function wExample(){ if(!wPld) return; const {r,c}=wDims(); if(r!==8||c<12) return; const w={};
+  for(let i=0;i<7;i++){ w[WRL[i]+1]=0; w[WRL[i]+2]=0; } w.H1=1; w.H2=1;
+  for(let col=3;col<=8;col++) for(let i=0;i<8;i++) w[WRL[i]+col]=2; w.H11=3; w.H12=3;
+  wPld.set({fmt:'8x12',wells:w,vals:{},groups:wState().groups}); }
+
+/* ---------- de afbeelding ---------- */
+function plateImg(){ const cv=$('#w-cv'); if(!cv||!wPld) return;
+  const S=wState(), {r,c}=wDims(), {lab,cnt}=wLabels(), title=$('#w-title').value.trim();
+  const sz=c>=16?30:c>=12?44:c>=8?54:70, W=Math.max(560,60+c*sz+20);
+  const sq=$('#w-shape').value==='vierkant', used=$('#w-leg').checked?S.groups.map((g,i)=>[g,i]).filter(([g,i])=>cnt[i]):[];
+  const NL_=pNotes('w',W), legRows=Math.ceil(used.length/3), H=(title?40:0)+30+r*sz+20+legRows*22+(NL_.length?NL_.length*17+12:0)+10;
+  pShow(cv,W,H,(x)=>{ const t0=pTitle(x,title,W), L=44, T=t0+26; x.font='600 12px '+PFONT(); x.fillStyle=PCOL.muted; x.textAlign='center';
+    for(let j=1;j<=c;j++) x.fillText(String(j),L+(j-0.5)*sz,T-10); for(let i=0;i<r;i++) x.fillText(WRL[i],L-14,T+(i+0.5)*sz);
+    x.strokeStyle=PCOL.ink; x.lineWidth=1.2; x.beginPath(); x.roundRect?x.roundRect(L-6,T-4,c*sz+12,r*sz+8,10):x.rect(L-6,T-4,c*sz+12,r*sz+8); x.stroke();
+    for(let i=0;i<r;i++) for(let j=1;j<=c;j++){ const k=WRL[i]+j, g=S.wells[k], on=g!=null&&S.groups[g], cx=L+(j-0.5)*sz, cy=T+(i+0.5)*sz, rad=sz*0.42;
+      x.beginPath(); if(sq){ x.roundRect?x.roundRect(cx-rad,cy-rad,2*rad,2*rad,5):x.rect(cx-rad,cy-rad,2*rad,2*rad); } else x.arc(cx,cy,rad,0,7);
+      x.fillStyle=on?S.groups[g].c:'#f4f5f7'; x.fill(); x.strokeStyle=on?'rgba(0,0,0,.25)':PCOL.line; x.lineWidth=1; x.stroke();
+      const t=S.vals[k]||(on?(lab[k]||''):''); if(t){ x.fillStyle=on?inkOn(S.groups[g].c):PCOL.ink; wellLines(x,t,cx,cy,sq?rad*1.12:rad); } }
+    let ly=T+r*sz+26; used.forEach(([g,i],q)=>{ const col=q%3, row=Math.floor(q/3), lx=L+col*Math.max(170,(W-L-20)/3), yy=ly+row*22;
+      x.fillStyle=g.c; x.beginPath(); x.arc(lx+6,yy,6,0,7); x.fill(); x.fillStyle=PCOL.ink; x.font='12.5px '+PFONT(); x.textAlign='left';
+      /* de naam gaat door de vertaallaag, het aantal erachter blijft letterlijk */
+      x.fillText(g.n,lx+18,yy); x.fillText(uv(' ('+cnt[i]+')'),lx+18+x.measureText(g.n).width,yy); });
+    if(NL_.length) pDrawNotes(x,NL_,ly+legRows*22+8); }); }
+/* tekst in een putje over meer regels, zodat hij binnen de rand blijft */
+function wellLines(x,t,cx,cy,rad){ const W=rad*1.72, set=fs=>{ x.font=`600 ${fs}px `+PFONT(); };
+  const mw=v=>x.measureText(uv(v)).width;   /* ook meten gaat door trCanvas: markeer de tekst */
+  const wrap=(fs,split)=>{ set(fs); let words=String(t).split(/\s+/); if(split) words=words.flatMap(w=>{ if(mw(w)<=W) return [w]; const parts=[]; let cur=''; [...w].forEach(ch=>{ if(mw(cur+ch+'-')>W&&cur){ parts.push(cur+'-'); cur=ch; } else cur+=ch; }); parts.push(cur); return parts; });
+    const out=[]; let ln=''; words.forEach(w=>{ const c=(ln+' '+w).trim(); if(mw(c)>W&&ln){ out.push(ln); ln=w; } else ln=c; }); if(ln) out.push(ln); return out; };
+  const fits=(L,fs)=>{ set(fs); const n=L.length, hh=n*fs*1.1; return L.every((l,i)=>{ const yy=(i-(n-1)/2)*fs*1.1, half=Math.sqrt(Math.max(0,rad*rad*0.92-(Math.abs(yy)+fs*0.45)**2)); return mw(l)<=2*half; })&&hh<=rad*1.7; };
+  let fs=Math.min(12,rad*0.62), L=null; for(;fs>=5.5;fs-=0.5){ const c=wrap(fs,false); if(fits(c,fs)){ L=c; break; } }
+  if(!L){ for(fs=Math.min(9,rad*0.45);fs>=5;fs-=0.5){ const c=wrap(fs,true); if(fits(c,fs)||fs<=5.5){ L=c; break; } } }
+  set(fs); L.forEach((l,i)=>x.fillText(uv(l),cx,cy+(i-(L.length-1)/2)*fs*1.1)); }
+
+/* ---------- de plaat als tabel ---------- */
+function wCells(){ const S=wState(), {r,c}=wDims(), {lab}=wLabels();
+  const cell=k=>{ const g=S.wells[k], gn=g!=null&&S.groups[g]?S.groups[g].n:'', own=S.vals[k];
+    return own?own+(gn?` (${gn})`:''):(gn?`${gn} ${(lab[k]||'').replace(/^\D+/,'')}`.trim():''); };
+  return {r,c,cell}; }
+$('#w-copy').addEventListener('click',async()=>{ const {r,c,cell}=wCells();
+  let t=$('#w-title').value+'\n\t'+Array.from({length:c},(_,j)=>j+1).join('\t')+'\n';
+  for(let i=0;i<r;i++){ t+=WRL[i]; for(let j=1;j<=c;j++) t+='\t'+cell(WRL[i]+j); t+='\n'; }
+  t=i18nTSV(t); try{ await navigator.clipboard.writeText(t); $('#w-copied').textContent='Gekopieerd. Plak in Excel, Sheets of je labjournaal.'; $('#w-fallback').style.display='none'; }
+  catch(e){ const f=$('#w-fallback'); f.value=t; f.style.display='block'; f.select(); $('#w-copied').textContent='Kopiëren werd geblokkeerd. Selecteer en kopieer de tekst hieronder.'; } });
+$('#w-csv').addEventListener('click',()=>{ const {r,c,cell}=wCells();
+  let t='\t'+Array.from({length:c},(_,j)=>j+1).join('\t');
+  for(let i=0;i<r;i++){ t+='\n'+WRL[i]; for(let j=1;j<=c;j++) t+='\t'+cell(WRL[i]+j); }
+  dlMsg($('#w-copied'),()=>saveBlob(safeName($('#w-title').value)+'.csv',csvBlob(t))); });
+
+/* ---------- opmaakkeuzes gaan naar de ontwerper, de afbeelding volgt ---------- */
+$('#w-pal').addEventListener('change',e=>{ const pal=PALS[e.target.value]; if(!pal||!wPld) return; wPld.palette(pal); plateImg(); });
+$('#w-shape').addEventListener('change',e=>{ if(wPld) wPld.shape(e.target.value); plateImg(); });
+$('#w-autolab').addEventListener('change',e=>{ if(wPld) wPld.autoLabel(e.target.checked); plateImg(); });
+$('#w-leg').addEventListener('change',()=>plateImg());
+['w-title','w-note'].forEach(id=>$('#'+id).addEventListener('input',()=>plateImg()));
+calc.plaat=()=>{ plateImg(); };
+
+wPld=plateDesigner($('#w-pld'),{fmt:'8x12',shape:$('#w-shape').value,autoLabel:$('#w-autolab').checked,
+  palette:PALS[$('#w-pal').value]||GCOL, name:()=>$('#w-title').value,
+  groups:[{n:'Standaard',c:GCOL[0]},{n:'Blanco',c:GCOL[8]},{n:'Monster',c:GCOL[1]},{n:'Pos. controle',c:GCOL[2]}],
+  onChange(){ try{ plateImg(); }catch(e){} }});
+wExample();
+
 tblRestore();
 gfDemo();
 ['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei','transf','stat','pverd','ppip','pprog','mic','gcomp','wb','melt','spec','units','inoc','molm','hh','rmp','seed','oligo','sds','micro'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });

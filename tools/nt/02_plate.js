@@ -12,6 +12,15 @@
    MIC-titratie, buitenrij als buffer). "Plaatkaart" drukt de plaat op A4 af met de legenda,
    het aantal putjes per groep en een tabel van alle gelabelde putjes.
 
+   Voor de tools die hun eigen plaattekening maken (S33) kan de ontwerper ook:
+     opts.shape 'rond'|'vierkant'  of P.shape(v)   vorm van de putjes
+     opts.autoLabel true|false     of P.autoLabel(v)  automatische labels St1, Mo2, …
+     opts.palette [...hex]         of P.palette(a)  kleurenpool voor nieuwe groepen
+     P.labels()                    {cnt per groep, lab per putje} voor eigen tekeningen
+     P.text()                      de tekst die in een putje hoort (eigen tekst > autolabel)
+   "Tekst per putje" zet de ontwerper in tekstmodus: een klik kiest een putje, Enter gaat naar
+   het volgende. Die tekst is invoer van de gebruiker en wordt nooit vertaald.
+
    Randomiseren (S32): "Randomiseren…" wisselt de gevulde putjes onderling van groep en label,
    met een sleutelnummer erbij zodat dezelfde indeling later opnieuw te maken is. Je kunt de
    hele plaat door elkaar halen of alleen één groep, zodat standaarden en controles op hun
@@ -87,7 +96,10 @@ function plateDesigner(host, opts) {
     groups: (opts.groups || [{n: 'Standaard', c: PLCOL[0]}, {n: 'Blanco', c: PLCOL[8]},
       {n: 'Monster', c: PLCOL[1]}, {n: 'Controle', c: PLCOL[2]}]).map(g => ({...g}))
   };
-  let sel = 0, erase = false, painting = false;
+  let sel = 0, erase = false, painting = false, tmode = false, wsel = null;
+  let shape = opts.shape === 'vierkant' ? 'vierkant' : 'rond';
+  let autoLab = opts.autoLabel !== false;
+  let pool = (opts.palette && opts.palette.length ? opts.palette : PLCOL).slice();
   const dims = () => { const [r, c] = S.fmt.split('x').map(Number); return {r: r || 8, c: c || 12}; };
   const key = (i, j) => PLROW[i] + (j + 1);
   const pos = k => ({i: PLROW.indexOf(String(k).charAt(0)), j: +String(k).slice(1) - 1});
@@ -106,8 +118,10 @@ function plateDesigner(host, opts) {
       <button type="button" data-pl="erase" aria-pressed="false">Gum</button>
       <button type="button" data-pl="clear">Leegmaken</button>
       <button type="button" data-pl="print" title="De plaatkaart op A4 afdrukken">Plaatkaart</button>
+      <button type="button" data-pl="tmode" aria-pressed="false" title="Klik daarna op een putje en typ de tekst">Tekst per putje</button>
       <label class="chk"><input type="checkbox" data-pl="order"> Vulorde</label>
     </div>
+    <div class="row pld-txt" data-pl="txtbar" hidden><span class="chip info" data-pl="sel" data-notr="">A1</span><input data-pl="wtext" class="txt" placeholder="Tekst in dit putje, bijv. S1 of 1:10" maxlength="24" aria-label="Tekst in dit putje"><button type="button" data-pl="wclr">Tekst wissen</button><span class="pld-hint">Enter gaat naar het volgende putje.</span></div>
     <div class="legend" data-pl="legend"></div>
     <div class="tbl-wrap"><div class="plate" data-pl="grid" role="group" aria-label="Putjes van de plaat"></div></div>
     <div class="pld-mc" data-pl="mc"></div>
@@ -118,6 +132,37 @@ function plateDesigner(host, opts) {
   const rep = () => { const v = +(q('rep') || {}).value; return Math.max(1, Math.min(8, v || 1)); };
   const dir = () => ((q('dir') || {}).value === 'v' ? 'v' : 'h');
   const ordOn = () => !!(q('order') || {}).checked;
+
+  /* ---- automatische replicaatnummers (S33) ----
+     Elk putje van een groep krijgt in leesvolgorde een nummer achter de eerste twee letters
+     van de groepsnaam: St1, St2, Mo1, … Een putje met eigen tekst houdt die tekst. */
+  function labels() {
+    const {r, c} = dims(), cnt = {}, nr = {}, lab = {};
+    for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) {
+      const k = key(i, j), g = S.wells[k];
+      if (g == null || !S.groups[g]) continue;
+      cnt[g] = (cnt[g] || 0) + 1;
+      if (!autoLab || S.vals[k]) continue;
+      nr[g] = (nr[g] || 0) + 1;
+      const short = trPlain(S.groups[g].n, true).replace(/[^A-Za-zÀ-ÿ0-9]/g, '').slice(0, 2) || 'G';
+      lab[k] = short + nr[g];
+    }
+    return {cnt, lab};
+  }
+  /* de tekst die in een putje hoort: eigen tekst gaat voor het automatische label */
+  const textOf = (k, lab) => S.vals[k] || (lab ? lab[k] || '' : '');
+
+  /* een kleur voor een nieuwe groep die genoeg verschilt van de kleuren die al in gebruik zijn */
+  function freshCol() {
+    const used = S.groups.map(g => /^#[0-9a-f]{6}$/i.test(g.c) ? hexRgb(g.c) : [0, 0, 0]);
+    const far = h => { const r = hexRgb(h); return used.every(u => Math.hypot(u[0] - r[0], u[1] - r[1], u[2] - r[2]) > 70); };
+    const c = pool.find(far); if (c) return c;
+    for (let k = 0; k < 40; k++) { const h = (S.groups.length * 137.508 + k * 29) % 360, l = 0.45 + ((k % 3) - 1) * 0.08,
+        a = 0.62 * Math.min(l, 1 - l), f = n => { const q2 = (n + h / 30) % 12; return 255 * (l - a * Math.max(-1, Math.min(q2 - 3, 9 - q2, 1))); },
+        hex = rgbHex([f(0), f(8), f(4)]);
+      if (far(hex)) return hex; }
+    return '#555555';
+  }
 
   /* ---- vulorde: per groep, want per groep pak je één keer tips (S31) ---- */
   function orderSeq() {
@@ -209,30 +254,50 @@ function plateDesigner(host, opts) {
 
   function render() {
     const {r, c} = dims(), sz = c >= 16 ? 24 : c >= 12 ? 34 : c >= 8 ? 42 : 56;
-    const g = q('grid'), lab = sz >= 34;                 /* bij 384 putjes is er geen ruimte voor een label */
+    const g = q('grid'), room = sz >= 34;                /* bij 384 putjes is er geen ruimte voor een label */
     const on = ordOn(), seq = on ? orderSeq() : null;
+    const {cnt, lab} = labels();
+    g.classList.toggle('sq', shape === 'vierkant');
     g.style.gridTemplateColumns = `22px repeat(${c},${sz}px)`;
     g.style.gridAutoRows = sz + 'px';
     let h = '<div></div>';
     for (let j = 1; j <= c; j++) h += `<button type="button" class="hd" data-plc="${j - 1}" title="Kolom ${j} vullen"><span data-notr="">${j}</span></button>`;
     for (let i = 0; i < r; i++) { h += `<button type="button" class="hd" data-plr="${i}" title="Rij ${uv(PLROW[i])} vullen"><span data-notr="">${PLROW[i]}</span></button>`;
-      for (let j = 0; j < c; j++) { const k = key(i, j), gi = S.wells[k], fill = gi != null && S.groups[gi], v = S.vals[k];
-        const txt = on ? (seq[k] != null ? String(seq[k]) : '') : (v || '');
-        const tip = [k, fill ? trPlain(S.groups[gi].n, true) : '', v || '', on && seq[k] != null ? trPlain('stap ' + seq[k]) : '']
+      for (let j = 0; j < c; j++) { const k = key(i, j), gi = S.wells[k], fill = gi != null && S.groups[gi];
+        const txt = on ? (seq[k] != null ? String(seq[k]) : '') : textOf(k, lab);
+        const tip = [k, fill ? trPlain(S.groups[gi].n, true) : '', S.vals[k] || '', on && seq[k] != null ? trPlain('stap ' + seq[k]) : '']
           .filter(Boolean).join(' · ');
-        h += `<div class="well${fill ? ' on' : ''}${txt && lab ? ' wtxt' : ''}" data-notr="" data-w="${k}" title="${esc(tip)}"${fill ? ` style="--wc:${S.groups[gi].c}"` : ''}>${txt && lab ? `<span>${esc(txt)}</span>` : ''}</div>`; } }
+        h += `<div class="well${fill ? ' on' : ''}${txt && room ? ' wtxt' : ''}${tmode && k === wsel ? ' wsel' : ''}" data-notr="" data-w="${k}" title="${esc(tip)}"${
+          fill ? ` style="--wc:${S.groups[gi].c};color:${inkOn(S.groups[gi].c)}"` : ''}>${txt && room ? `<span>${esc(txt)}</span>` : ''}</div>`; } }
     g.innerHTML = h;
     const act = document.activeElement;
     if (!(act && act.dataset && act.dataset.plgn != null))
       q('legend').innerHTML = S.groups.map((x, i) =>
-        `<div class="grp${i === sel && !erase ? ' sel' : ''}" data-plg="${i}"><i style="background:${x.c}"></i>` +
-        `<input data-plgn="${i}" value="${esc(x.n)}" aria-label="Naam van de groep"><button type="button" class="gdel" data-pldel="${i}" aria-label="Verwijder">✕</button></div>`).join('');
+        `<div class="grp${i === sel && !erase ? ' sel' : ''}" data-plg="${i}"><input type="color" data-plgc="${i}" value="${
+          /^#[0-9a-f]{6}$/i.test(x.c) ? x.c : '#1558b0'}" aria-label="Kleur van de groep" title="Kleur kiezen">` +
+        `<input data-plgn="${i}" value="${esc(x.n)}" aria-label="Naam van de groep"><span class="cnt" data-notr="">${cnt[i] || 0}</span>` +
+        (S.groups.length > 1 ? `<button type="button" class="gdel" data-pldel="${i}" aria-label="Verwijder">✕</button>` : '') + '</div>').join('') +
+        '<button type="button" class="grp addg" data-pl="add">+ kleur toevoegen</button>';
+    q('tmode').setAttribute('aria-pressed', tmode ? 'true' : 'false');
+    q('tmode').classList.toggle('primary', tmode);
+    q('txtbar').hidden = !tmode;
+    if (tmode && wsel) { q('sel').textContent = wsel; const w = q('wtext'); if (w !== document.activeElement) w.value = S.vals[wsel] || ''; }
+    fitText(sz);
     q('mc').innerHTML = mcText();
     q('warn').innerHTML = warnText();
     q('keyv').hidden = S.seed == null;
     q('erase').setAttribute('aria-pressed', erase ? 'true' : 'false');
     q('erase').classList.toggle('primary', erase);
     fire();
+  }
+
+  /* eigen tekst kan langer zijn dan een putje breed is: de letters krimpen tot het past */
+  function fitText(sz) {
+    host.querySelectorAll('.well.wtxt').forEach(el => {
+      let fs = Math.min(11, sz * 0.3); el.style.fontSize = fs + 'px';
+      for (let i = 0; i < 12 && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1) && fs > 5.5; i++) {
+        fs -= 0.5; el.style.fontSize = fs + 'px'; }
+    });
   }
 
   const paint = k => { if (erase) { delete S.wells[k]; delete S.vals[k]; } else S.wells[k] = sel; };
@@ -244,8 +309,9 @@ function plateDesigner(host, opts) {
       if (ii >= r || jj >= c) break; paint(key(ii, jj)); }
   }
   q('grid').addEventListener('pointerdown', e => { const w = e.target.closest('[data-w]'); if (!w) return;
+    if (tmode) { e.preventDefault(); wsel = w.dataset.w; render(); setTimeout(() => q('wtext').focus(), 0); return; }
     painting = true; paintRun(w.dataset.w); render(); });
-  q('grid').addEventListener('pointerover', e => { if (!painting) return; const w = e.target.closest('[data-w]'); if (w) { paintRun(w.dataset.w); render(); } });
+  q('grid').addEventListener('pointerover', e => { if (!painting || tmode) return; const w = e.target.closest('[data-w]'); if (w) { paintRun(w.dataset.w); render(); } });
   /* op een aanraakscherm komt pointerover niet, dus daar wordt het putje onder de vinger gezocht */
   q('grid').addEventListener('pointermove', e => { if (!painting || e.pointerType === 'mouse') return;
     const el = document.elementFromPoint(e.clientX, e.clientY), w = el && el.closest && el.closest('[data-w]');
@@ -266,8 +332,12 @@ function plateDesigner(host, opts) {
     const g = e.target.closest('[data-plg]');
     if (g && e.target.dataset.plgn == null) { sel = +g.dataset.plg; erase = false; render(); return; }
     const b = e.target.closest('[data-pl]'); if (!b || b.tagName !== 'BUTTON') return;
-    if (b.dataset.pl === 'add') { S.groups.push({n: trPlain('Groep') + ' ' + (S.groups.length + 1), c: PLCOL[S.groups.length % PLCOL.length] }); sel = S.groups.length - 1; erase = false; render(); }
-    else if (b.dataset.pl === 'erase') { erase = !erase; render(); }
+    if (b.dataset.pl === 'add') { S.groups.push({n: trPlain('Groep') + ' ' + (S.groups.length + 1), c: freshCol()}); sel = S.groups.length - 1; erase = false; render();
+      const i2 = host.querySelector(`[data-plgn="${sel}"]`); if (i2) { i2.focus(); i2.select(); } }
+    else if (b.dataset.pl === 'erase') { erase = !erase; tmode = false; render(); }
+    else if (b.dataset.pl === 'tmode') { tmode = !tmode; if (tmode) { erase = false; if (!wsel) wsel = 'A1'; } render();
+      if (tmode) setTimeout(() => q('wtext').focus(), 0); }
+    else if (b.dataset.pl === 'wclr') { if (wsel) { delete S.vals[wsel]; q('wtext').value = ''; render(); } }
     else if (b.dataset.pl === 'series') seriesDialog();
     else if (b.dataset.pl === 'tpl') tplDialog();
     else if (b.dataset.pl === 'rnd') rndDialog();
@@ -278,6 +348,17 @@ function plateDesigner(host, opts) {
       render(); }
     else if (b.dataset.pl === 'print') printCard();
     else if (b.dataset.pl === 'clear') { S.wells = {}; S.vals = {}; S.seed = null; render(); }
+  });
+  host.addEventListener('input', e => {
+    if (e.target.dataset.plgc != null) { S.groups[+e.target.dataset.plgc].c = e.target.value; render(); return; }
+    if (e.target.dataset.pl === 'wtext' && wsel) { const v = e.target.value;
+      if (v) S.vals[wsel] = v; else delete S.vals[wsel]; render(); }
+  });
+  host.addEventListener('keydown', e => {
+    if (e.target.dataset.pl !== 'wtext' || e.key !== 'Enter' || !wsel) return;
+    e.preventDefault(); const {r, c} = dims(); let {i, j} = pos(wsel);
+    j++; if (j >= c) { j = 0; i = (i + 1) % r; }
+    wsel = key(i, j); render(); e.target.value = S.vals[wsel] || '';
   });
   host.addEventListener('change', e => {
     if (e.target.dataset.plgn != null) { S.groups[+e.target.dataset.plgn].n = e.target.value || trPlain('Groep'); render(); }
@@ -382,7 +463,7 @@ function plateDesigner(host, opts) {
         @page{margin:14mm}body{margin:0;font:13px system-ui,sans-serif;color:#1f2933}
         h1{font-size:18px;margin:0 0 2px}p{margin:0 0 10px;color:#5f6b7a;font-size:12px}
         table{border-collapse:collapse;font-size:12px}th,td{border:1px solid #c9ced6;padding:3px 7px;text-align:left}th{background:#eef0f3}
-        </style><h1>${T(opts.name || 'Plaatkaart')} — ${T('Sleutel van de plaat')}</h1>
+        </style><h1>${typeof opts.name === 'function' ? esc(opts.name() || '') : esc(opts.name || trPlain('Plaatkaart'))} — ${T('Sleutel van de plaat')}</h1>
         <p>${S.seed != null ? T('Sleutelnummer') + ' ' + esc(String(S.seed)) + ' · ' : ''}${T('Datum')}: ________________</p>
         ${m.box.querySelector('.pld-key').outerHTML}`);
     });
@@ -396,11 +477,12 @@ function plateDesigner(host, opts) {
     const cnt = {}; Object.keys(S.wells).forEach(k => { const g = S.wells[k]; cnt[g] = (cnt[g] || 0) + 1; });
     const ord = k => PLROW.indexOf(k.charAt(0)) * 100 + (+k.slice(1));
     const lab = Object.keys(S.vals).filter(k => S.wells[k] != null).sort((a, b) => ord(a) - ord(b));
+    const nm = typeof opts.name === 'function' ? (opts.name() || '') : (opts.name || '');
     const T = s => esc(trPlain(s));
     /* een groepsnaam die de gebruiker zelf heeft getypt staat niet in de woordenlijst en
        blijft dan ongewijzigd; `true` houdt hem uit de lijst met ontbrekende vertalingen */
     const G = s => esc(trPlain(String(s), true));
-    const head = `<h1>${T(opts.name || 'Plaatkaart')}</h1>
+    const head = `<h1>${nm ? esc(nm) : T('Plaatkaart')}</h1>
       <p class="meta">${T(r * c + ' putjes')} · ${T('gevuld')}: <b>${Object.keys(S.wells).length}</b>${
         S.seed != null ? ' · ' + T('Sleutelnummer') + ': <b>' + esc(String(S.seed)) + '</b>' : ''
       } · ${T('Datum')}: ________________ · ${T('Uitgevoerd door')}: ________________</p>`;
@@ -414,7 +496,7 @@ function plateDesigner(host, opts) {
     const mc = mcHtml ? `<h2>${T('Met een meerkanaalspipet')}</h2><div class="mc">${mcHtml}</div>` : '';
     const tbl = lab.length ? `<h2>${T('Gelabelde putjes')}</h2><table class="wl"><thead><tr><th>${T('Putje')}</th><th>${T('Groep')}</th><th>${T('Label')}</th></tr></thead><tbody>` +
       lab.map(k => `<tr><td>${esc(k)}</td><td>${G((S.groups[S.wells[k]] || {}).n || '')}</td><td>${esc(S.vals[k])}</td></tr>`).join('') + '</tbody></table>' : '';
-    rpPrint(`<!doctype html><meta charset="utf-8"><title>${T(opts.name || 'Plaatkaart')}</title><style>
+    rpPrint(`<!doctype html><meta charset="utf-8"><title>${nm ? esc(nm) : T('Plaatkaart')}</title><style>
       @page{size:A4 landscape;margin:12mm}
       body{margin:0;font:13px system-ui,sans-serif;color:#1f2933}
       h1{font-size:19px;margin:0 0 2px}h2{font-size:14px;margin:14px 0 4px}
@@ -440,14 +522,14 @@ function plateDesigner(host, opts) {
     for (let i = 0; i < r; i++) x.fillText(PLROW[i], L - 14, T + (i + 0.5) * sz);
     x.strokeStyle = PCOL.ink; x.lineWidth = 1.2;
     x.beginPath(); x.roundRect(L - 6, T - 4, c * sz + 12, r * sz + 8, 10); x.stroke();
-    const seq = ordOn() ? orderSeq() : null;
+    const seq = ordOn() ? orderSeq() : null, {lab} = labels(), sq = shape === 'vierkant';
     for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) {
       const k = key(i, j), gi = S.wells[k], on = gi != null && S.groups[gi];
       const cx = L + (j + 0.5) * sz, cy = T + (i + 0.5) * sz, rad = sz * 0.42;
-      x.beginPath(); x.arc(cx, cy, rad, 0, 7);
+      x.beginPath(); if (sq) x.roundRect(cx - rad, cy - rad, 2 * rad, 2 * rad, 5); else x.arc(cx, cy, rad, 0, 7);
       x.fillStyle = on ? S.groups[gi].c : '#f4f5f7'; x.fill();
       x.strokeStyle = on ? S.groups[gi].c : PCOL.line; x.lineWidth = 1; x.stroke();
-      const v = seq ? (seq[k] != null ? String(seq[k]) : '') : S.vals[k];
+      const v = seq ? (seq[k] != null ? String(seq[k]) : '') : textOf(k, lab);
       if (v && sz >= 34) {                       /* het label past alleen in een ruim putje */
         x.font = '600 ' + Math.min(10, sz * 0.2) + 'px ' + PFONT();
         x.fillStyle = on ? inkOn(S.groups[gi].c) : PCOL.ink;
@@ -474,6 +556,10 @@ function plateDesigner(host, opts) {
       S.seed = v.seed != null ? v.seed : null;
       sel = Math.min(sel, S.groups.length - 1); render(); },
     selected: () => sel, label: (k, v) => { if (v == null || v === '') delete S.vals[k]; else S.vals[k] = String(v); },
+    labels, text: k => textOf(k, labels().lab),
+    shape(v) { if (v != null) { shape = v === 'vierkant' ? 'vierkant' : 'rond'; render(); } return shape; },
+    autoLabel(v) { if (v != null) { autoLab = !!v; render(); } return autoLab; },
+    palette(a) { if (a && a.length) { pool = a.slice(); S.groups.forEach((g, i) => g.c = a[i % a.length]); render(); } return pool.slice(); },
     template(id) { const t = PLTPL.find(x => x.id === id); if (!t) return false;
       if (t.fmt) { S.fmt = t.fmt; const f = q('fmt'); if (f) f.value = S.fmt; }
       const d = dims(), o = t.make(d.r, d.c);

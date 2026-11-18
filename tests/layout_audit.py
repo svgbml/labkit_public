@@ -65,7 +65,7 @@ def main():
             for t in tools:
                 pg.evaluate(f"location.hash='{t}'"); pg.wait_for_timeout(450)
                 if t == 'plaat':
-                    pg.evaluate("wText={A4:'ASP25% onverdund',B4:'Monster 12 verdund 1:100',C1:'Supercalifragilistic',H12:'NTC'}; renderPlate();"); pg.wait_for_timeout(200)
+                    pg.evaluate("const s=wPld.get(); s.vals={A4:'ASP25% onverdund',B4:'Monster 12 verdund 1:100',C1:'Supercalifragilistic',H12:'NTC'}; wPld.set(s);"); pg.wait_for_timeout(200)
                 states = extra.get(t, [None])
                 for st in states:
                     if st:

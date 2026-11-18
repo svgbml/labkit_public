@@ -4240,5 +4240,7 @@
 "Deze plaat is niet gerandomiseerd.": "This plate has not been randomised.",
 "Sleutel afdrukken": "Print the key",
 "Geen van de putjes heeft een label, dus de sleutel loopt alleen per putje.": "None of the wells has a label, so the key runs per well only.",
-"Let op": "Take note"
+"Let op": "Take note",
+"Tekst in dit putje": "Text in this well",
+"Kleur van de groep": "Colour of the group"
 }

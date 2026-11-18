@@ -16,7 +16,10 @@ EXPLORE = r"""
   const fire=el=>{ el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); };
   grab();
   if(tool==='gelfoto'){ ['gf-measall','gf-auto'].forEach(id=>{ try{ document.getElementById(id).click(); grab(); }catch(e){} }); }
-  if(tool==='plaat'){ try{ document.getElementById('w-textmode').click(); grab(); document.getElementById('w-textmode').click(); }catch(e){} }
+  if(tool==='plaat'){ try{ const b=sec.querySelector('[data-pl="tmode"]'); b.click(); grab(); b.click(); grab();
+      sec.querySelectorAll('[data-pl="order"]').forEach(o=>{ o.checked=true; o.dispatchEvent(new Event('change',{bubbles:true})); grab(); o.checked=false; o.dispatchEvent(new Event('change',{bubbles:true})); });
+      ['tpl','series','rnd'].forEach(n=>{ sec.querySelector('[data-pl="'+n+'"]').click(); const m=document.querySelector('.lk-modal'); if(m){ for(const k of i18nCollect(m)) keys.add(k); m.remove(); } });
+      grab(); }catch(e){} }
   sec.querySelectorAll('details').forEach(d=>d.open=true); grab();
   for(const sel of [...sec.querySelectorAll('select')]){ if(sel.id==='ui-lang') continue; const old=sel.value; for(const o of [...sel.options]){ sel.value=o.value; fire(sel); grab();
       if(sel.id==='st-test'){ for(const el of [...sec.querySelectorAll('input:not([type=checkbox]):not([type=file]):not([type=color]),textarea')].filter(e=>e.offsetParent!==null&&!e.classList.contains('txt'))){ const ov=el.value; for(const v of EDGE){ el.value=v; fire(el); grab(); } el.value=ov; fire(el); } } }
