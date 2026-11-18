@@ -4245,5 +4245,19 @@
 "Kleur van de groep": "Colour of the group",
 "Of wijs de wells aan op de plaat": "Or mark the wells on the plate",
 "Replicaten opnieuw nummeren": "Number the replicates again",
-"Putjes van dezelfde soort die aan elkaar grenzen zijn één replicaat en krijgen samen één nummer; de richting bepaalt of dat naast of onder elkaar is. Typ een naam in \"Tekst per putje\" om er zelf één te kiezen.": "Wells of the same kind that sit next to each other are one replicate and share one number; the direction decides whether that is side by side or one below the other. Type a name under \"Text in this well\" to choose one yourself."
+"Putjes van dezelfde soort die aan elkaar grenzen zijn één replicaat en krijgen samen één nummer; de richting bepaalt of dat naast of onder elkaar is. Typ een naam in \"Tekst per putje\" om er zelf één te kiezen.": "Wells of the same kind that sit next to each other are one replicate and share one number; the direction decides whether that is side by side or one below the other. Type a name under \"Text in this well\" to choose one yourself.",
+"{*} wells": "{*} wells",
+"Doel": "Target",
+"Exportvorm plaatlijst": "Export format for the plate list",
+"eigen tabel (Well, Monster, Doel, Taak)": "own table (Well, Sample, Target, Task)",
+"Applied Biosystems (Well Position, Sample Name, Target Name, Task)": "Applied Biosystems (Well Position, Sample Name, Target Name, Task)",
+"Bio-Rad CFX (Well, Target, Content, Sample)": "Bio-Rad CFX (Well, Target, Content, Sample)",
+"Plaatlijst downloaden": "Download the plate list",
+"Welke kolommen de qPCR-software bij het importeren verwacht, verschilt per versie: kijk in het importvenster na hoe de kolommen worden toegewezen.": "Which columns the qPCR software expects on import differs per version: check in the import dialog how the columns are mapped.",
+"De plaat is leeg; er is niets om te exporteren.": "The plate is empty; there is nothing to export.",
+"De plaat bijstellen": "Adjusting the plate",
+"Hieronder staat dezelfde plaat in de plaatontwerper. Je kunt er putjes bij verven, leeghalen of een andere naam geven; de tekening, de mastermixen en de plaatlijst volgen meteen. Verander je hierboven een instelling, dan wordt de plaat opnieuw gevuld en gaan je eigen wijzigingen verloren.": "Below is the same plate in the plate designer. You can paint wells in, empty them or give them a different name; the drawing, the master mixes and the plate list follow at once. If you change a setting above, the plate is filled again and your own changes are lost.",
+"Mastermix {*}": "Master mix {*}",
+"Indeling volgens de MIQE-richtlijnen: biologische monsters in technische replicaten, een no-template control (NTC) per assay en een standaardreeks voor efficiëntie (Bustin e.a., Clin Chem {#}:{#}–{#}, {#}). De plaatlijst (well, monster, doel, taak) kun je kopiëren naar Excel of downloaden in de kolomvorm van de Applied Biosystems-software (tab-gescheiden, taak UNKNOWN, STANDARD of NTC) of van Bio-Rad CFX (komma-gescheiden, inhoud Unkn, Std of NTC). De taak volgt uit de naam: St{#}…Stn is een standaard, NTC een no-template control en elke andere naam een monster.": "Layout following the MIQE guidelines: biological samples in technical replicates, a no-template control (NTC) per assay and a standard series for efficiency (Bustin et al., Clin Chem {#}:{#}–{#}, {#}). The plate list (well, sample, target, task) can be copied into Excel or downloaded in the column form of the Applied Biosystems software (tab separated, task UNKNOWN, STANDARD or NTC) or of Bio-Rad CFX (comma separated, content Unkn, Std or NTC). The task follows from the name: St{#}…Stn is a standard, NTC a no-template control and any other name a sample.",
+"Vul minstens één monster en één doelgen in.": "Enter at least one sample and one target gene."
 }

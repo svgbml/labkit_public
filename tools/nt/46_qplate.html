@@ -14,8 +14,18 @@
         <div class="f"><label for="qp2-mar">Marge mastermix</label><div class="inu"><input id="qp2-mar" inputmode="decimal" value="10"><span class="u">%</span></div></div>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Elk doelgen begint op een nieuwe rij (of kolom), zodat je per gen één mastermix met een multichannelpipet kunt verdelen. De mix zelf reken je uit met het Pipetteerschema (sjabloon qPCR).</p>
+      <div class="row" style="margin-top:12px;gap:10px;align-items:flex-end">
+        <div class="f"><label for="qp2-exp">Exportvorm plaatlijst</label><select id="qp2-exp"><option value="eigen">eigen tabel (Well, Monster, Doel, Taak)</option><option value="abi">Applied Biosystems (Well Position, Sample Name, Target Name, Task)</option><option value="cfx">Bio-Rad CFX (Well, Target, Content, Sample)</option></select></div>
+        <button type="button" id="qp2-dl">Plaatlijst downloaden</button>
+      </div>
+      <p id="qp2-msg" style="font-size:13px;color:var(--muted);margin:8px 0 0">Welke kolommen de qPCR-software bij het importeren verwacht, verschilt per versie: kijk in het importvenster na hoe de kolommen worden toegewezen.</p>
     </div>
     <div class="result"><canvas id="qp2-cv"></canvas><div class="pic-bar" data-picbar="qp2"></div><div id="qp2-out"></div></div>
   </div>
-  <p class="src">Indeling volgens de MIQE-richtlijnen: biologische monsters in technische replicaten, een no-template control (NTC) per assay en een standaardreeks voor efficiëntie (Bustin e.a., Clin Chem 55:611–622, 2009). De plaatlijst (well, monster, doel, taak) kun je kopiëren naar Excel of naar de importfunctie van de qPCR-software.</p>
+  <div class="panel" style="margin-top:14px">
+    <h3 style="margin:0 0 8px;font-size:15px">De plaat bijstellen</h3>
+    <p style="font-size:13px;color:var(--muted);margin:0 0 10px;max-width:80ch">Hieronder staat dezelfde plaat in de plaatontwerper. Je kunt er putjes bij verven, leeghalen of een andere naam geven; de tekening, de mastermixen en de plaatlijst volgen meteen. Verander je hierboven een instelling, dan wordt de plaat opnieuw gevuld en gaan je eigen wijzigingen verloren.</p>
+    <div id="qp2-pld"></div>
+  </div>
+  <p class="src">Indeling volgens de MIQE-richtlijnen: biologische monsters in technische replicaten, een no-template control (NTC) per assay en een standaardreeks voor efficiëntie (Bustin e.a., Clin Chem 55:611–622, 2009). De plaatlijst (well, monster, doel, taak) kun je kopiëren naar Excel of downloaden in de kolomvorm van de Applied Biosystems-software (tab-gescheiden, taak UNKNOWN, STANDARD of NTC) of van Bio-Rad CFX (komma-gescheiden, inhoud Unkn, Std of NTC). De taak volgt uit de naam: St1…Stn is een standaard, NTC een no-template control en elke andere naam een monster.</p>
 </section>
