@@ -17,15 +17,18 @@
           <option value="20x25">Maxi, 20 × 25 cm</option>
         </select></div>
         <div class="f"><label for="gp-comb">Tanden op de kam</label><input id="gp-comb" inputmode="numeric" value="10"></div>
+        <div class="f"><label for="gp-ladlane">Ladder in laan</label><input id="gp-ladlane" inputmode="numeric" value="1"></div>
+        <div class="f" data-expert=""><label for="gp-pct">Gelpercentage</label><div class="inu"><input id="gp-pct" inputmode="decimal" value="1"><span class="u">% w/v</span></div></div>
         <div class="f"><label for="gp-dye">Laadbuffer</label><input id="gp-dye" class="txt" value="6× loading dye"></div>
         <div class="f" style="grid-column:1/-1"><label for="gp-note">Eigen tekst onder het schema</label><textarea id="gp-note" rows="2" placeholder="Bijv. verwachte fragmentgrootten, looptijd of een verwijzing naar het protocol"></textarea></div>
         <label class="chk" for="gp-auto" style="grid-column:1/-1"><input type="checkbox" id="gp-auto" checked> Standaardtoelichting tonen</label>
       </div>
       <div class="tbl-wrap" style="margin-top:12px"><table id="gp-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
       <div class="row" style="margin-top:8px"><button type="button" id="gp-tbl-add">+ Laan</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De lanen worden van links naar rechts in de slotjes gezet. Laat de naam leeg om een slotje over te slaan.</p>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De lanen worden van links naar rechts in de slotjes gezet. Laat de naam leeg om een slotje over te slaan. Zet bij <i>Verwachte banden</i> de grootten die je verwacht, gescheiden door een spatie; die worden in de verwachte gel getekend.</p>
     </div>
     <div class="result"><canvas id="gp-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="gp">Download PNG</button></div><div id="gp-out"></div></div>
+    <div class="result"><h3 style="margin:0 0 10px;font-size:14px">Verwachte gel</h3><canvas id="gpp-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="gpp">Download PNG</button></div><div id="gpp-out"></div></div>
   </div>
   <p class="src">Bandposities volgen uit lineaire interpolatie van log(grootte) tegen de loopafstand tussen de grootste en de kleinste band van de gekozen ladder; dat is hetzelfde verband als de standaardcurve in <i>Agarosegel &amp; bandgrootte</i>. Prestained eiwitladders: Bio-Rad Precision Plus Protein Dual Color (alle banden blauw, 75 en 25 kDa rood) en Thermo Scientific PageRuler Plus Prestained (alle banden blauw, 70 kDa groen en 25 kDa rood). Maten van veelgebruikte geldragers en kammen van Bio-Rad (Mini-Sub Cell GT en Wide Mini-Sub Cell GT, instructiehandleiding) en Thermo Scientific (Owl EasyCast B1/B2). Het slotvolume volgt uit de slotbreedte, de kamdikte en de geldikte.</p>
 </section>
