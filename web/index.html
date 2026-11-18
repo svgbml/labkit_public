@@ -239,6 +239,8 @@ nav.side > a.nav-col{display:none!important}
 .pld .pld-mc:empty{display:none}
 .pld .pld-mc b{color:var(--ink);font-weight:600}
 .pld .pld-mc .mcb{margin-top:4px;color:var(--ink)}
+#o-tbl td.o-tick{width:28px;text-align:center}
+#o-tbl tbody tr.oweg td:not(.o-tick){opacity:.5}
 .pld .pld-bar .chk{align-self:center;margin-bottom:5px}
 .pld .pld-warn{margin:10px 0 0;font-size:12.5px;display:grid;gap:3px;max-width:70ch;padding:9px 11px;border:1px solid var(--line);border-left:3px solid var(--warn,#c2410c);border-radius:4px;background:var(--surface)}
 .pld .pld-warn:empty{display:none}
@@ -577,12 +579,14 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
           <div class="f"><label for="o-preset">Recept laden</label>
             <select id="o-preset"><option value="">Kies een recept</option></select></div>
         </div>
-        <button id="o-add" type="button">+ Component</button>
+        <div class="row" style="margin-top:8px;gap:6px;align-items:center"><span style="font-size:12.5px;color:var(--muted)">Snel een volume:</span><button type="button" data-ovol="50" data-ovu="mL">50 mL</button><button type="button" data-ovol="100" data-ovu="mL">100 mL</button><button type="button" data-ovol="250" data-ovu="mL">250 mL</button><button type="button" data-ovol="500" data-ovu="mL">500 mL</button><button type="button" data-ovol="1" data-ovu="L">1 L</button><button type="button" data-ovol="2" data-ovu="L">2 L</button></div>
+        <button id="o-add" type="button" style="margin-top:8px">+ Component</button>
       </div>
       <div class="tbl-wrap" style="margin-top:14px">
-        <table id="o-tbl"><thead><tr><th>Component</th><th class="num">Molmassa (g/mol)</th><th class="num">Concentratie</th><th>Eenheid</th><th>Vorm (hydraat)</th><th class="num">Afwegen</th><th></th></tr></thead><tbody></tbody></table>
+        <table id="o-tbl"><thead><tr><th title="Vink af wat je hebt afgewogen">Af</th><th>Component</th><th class="num">Molmassa (g/mol)</th><th class="num">Concentratie</th><th>Eenheid</th><th>Vorm (hydraat)</th><th class="num">Afwegen</th><th></th></tr></thead><tbody></tbody></table>
       </div>
       <datalist id="chem-list"></datalist>
+      <div class="row" style="margin-top:10px;gap:10px;align-items:center"><span id="o-prog" style="font-size:13px;color:var(--muted)"></span><button type="button" id="o-untick">Vinkjes wissen</button><button type="button" class="primary" id="o-card">Receptkaart afdrukken</button></div>
       <ol class="steps" id="o-steps"></ol>
       <p class="src" id="o-src-rec" style="margin:8px 0 0"></p>
       <div class="formula">massa (g) = c (mol/L) × V (L) × M (g/mol) · % w/v: g = % / 100 × V (mL)</div>
@@ -3880,7 +3884,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=4a76798979"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=71b4e47f1e"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -4061,7 +4065,7 @@ HYD.forEach(g=>g[1].forEach(v=>{ if(!CHEM[v[1]]){ CHEM[v[1]]=v[2]; $('#chem-list
 const hydNorm=t=>String(t).toLowerCase().replace(/\s+/g,'').replace(/[·.*]/g,'·').replace(/[₀-₉]/g,c=>String(c.charCodeAt(0)-8320));
 function hydFind(name){ const k=hydNorm(name); if(!k) return null; for(let gi=0;gi<HYD.length;gi++){ const vi=HYD[gi][1].findIndex(v=>hydNorm(v[1])===k); if(vi>=0) return [gi,vi]; } return null; }
 function hydSel(name){ const f=hydFind(name); return `<select data-k="h" data-g="${f?f[0]:''}" aria-label="Vorm (hydraat)"${f?'':' disabled'}>${f?HYD[f[0]][1].map((v,i)=>`<option value="${i}"${i===f[1]?' selected':''}>${v[0]}</option>`).join(''):'<option value="">–</option>'}</select>`; }
-function oRow(r){ const [n,mw,c,u]=r; return `<tr class="recipe-row"><td><input class="txt" list="chem-list" value="${esc(n)}" data-k="n" placeholder="naam"></td><td><input value="${isFinite(mw)?String(mw).replace('.',','):''}" data-k="mw" inputmode="decimal" style="text-align:right"></td><td><input value="${isFinite(c)?String(c).replace('.',','):''}" data-k="c" inputmode="decimal" style="text-align:right"></td><td><select data-k="u" aria-label="Eenheid"><option ${u==='M'?'selected':''}>M</option><option ${u==='mM'?'selected':''}>mM</option><option ${u==='µM'?'selected':''}>µM</option><option ${u==='% w/v'?'selected':''}>% w/v</option><option ${u==='g/L'?'selected':''}>g/L</option></select></td><td>${hydSel(n)}</td><td class="num" data-k="out">–</td><td><button type="button" class="ghost" data-del aria-label="Verwijder rij">✕</button></td></tr>`; }
+function oRow(r){ const [n,mw,c,u]=r; return `<tr class="recipe-row"><td class="o-tick"><input type="checkbox" data-k="done" aria-label="Afgewogen"></td><td><input class="txt" list="chem-list" value="${esc(n)}" data-k="n" placeholder="naam"></td><td><input value="${isFinite(mw)?String(mw).replace('.',','):''}" data-k="mw" inputmode="decimal" style="text-align:right"></td><td><input value="${isFinite(c)?String(c).replace('.',','):''}" data-k="c" inputmode="decimal" style="text-align:right"></td><td><select data-k="u" aria-label="Eenheid"><option ${u==='M'?'selected':''}>M</option><option ${u==='mM'?'selected':''}>mM</option><option ${u==='µM'?'selected':''}>µM</option><option ${u==='% w/v'?'selected':''}>% w/v</option><option ${u==='g/L'?'selected':''}>g/L</option></select></td><td>${hydSel(n)}</td><td class="num" data-k="out">–</td><td><button type="button" class="ghost" data-del aria-label="Verwijder rij">✕</button></td></tr>`; }
 function loadRecipe(k){ recipeKey=k; $('#o-tbl tbody').innerHTML=RECIPES[k].map(oRow).join(''); calc.oplossing(); }
 $('#o-preset').addEventListener('change',e=>{ if(e.target.value) loadRecipe(e.target.value); });
 $('#o-add').addEventListener('click',()=>{ $('#o-tbl tbody').insertAdjacentHTML('beforeend',oRow(['',NaN,NaN,'mM'])); });
@@ -4095,6 +4099,12 @@ calc.oplossing=function(e){
   /* de namen in het lijstje zijn hierboven al vertaald en de grammen moeten letterlijk
      blijven, dus het lijstje gaat als geheel in een data-notr-span: dan is de zin eromheen
      één sleutel voor alle recepten in plaats van één sleutel per recept */
+  /* voortgang van het afwegen; de vinkjes gaan uit zodra het recept of het volume verandert,
+     want dan verandert ook wat er moet worden afgewogen */
+  const orows=$$('#o-tbl tbody tr'), ocnt=orows.filter(tr=>tr.querySelector('[data-k=out]').textContent!=='–').length,
+    odone=orows.filter(tr=>{ const c=tr.querySelector('[data-k=done]'); return c&&c.checked; }).length;
+  orows.forEach(tr=>{ const c=tr.querySelector('[data-k=done]'); tr.classList.toggle('oweg',!!(c&&c.checked)); });
+  const oprog=$('#o-prog'); if(oprog) oprog.textContent=ocnt?`${odone} van de ${ocnt} componenten afgewogen.`:'';
   $('#o-steps').innerHTML=any?`<li>Los op in ca. 80% van het eindvolume gedemineraliseerd water: <span data-notr="">${steps.join(', ')}</span>.</li>${rph?`<li>${rph}</li>`:''}<li>Vul aan tot ${vtxt} in een maatkolf of maatcilinder en meng.</li>`+(zuur?'<li>EDTA als vrij zuur lost pas op rond pH 8: voeg NaOH toe tot het helder is.</li>':''):'';
 };
 
@@ -9027,6 +9037,49 @@ sLoad('bradford');
 $('#o-preset').insertAdjacentHTML('beforeend',RECKEYS.map(k=>`<option value="${k}">${esc(RECNAME[k]||k)}</option>`).join(''));
 $('#o-preset').value='trisnacl';
 loadRecipe('trisnacl');
+
+/* ---------- receptkaart: snelle volumes, afvinken en afdrukken (S38) ----------
+   Een recept staat in de bibliotheek op concentratie, niet op massa, dus het schaalt
+   lineair met het eindvolume: de knoppen hieronder zetten alleen dat volume. De vinkjes
+   zijn bedoeld voor tijdens het afwegen en gaan uit als het recept of het volume wijzigt,
+   want dan verandert ook wat er in de weegschaal moet. */
+function oUntick(){ $$('#o-tbl [data-k=done]').forEach(c=>{ c.checked=false; }); calc.oplossing(); }
+document.addEventListener('click',e=>{
+  const v=e.target.closest('[data-ovol]');
+  if(v){ $('#o-v').value=v.dataset.ovol; $('#o-vu').value=v.dataset.ovu; oUntick(); return; }
+  if(e.target.closest('#o-untick')) oUntick();
+});
+$('#o-tbl').addEventListener('change',e=>{ if(e.target.dataset.k==='done') calc.oplossing(); });
+$('#o-preset').addEventListener('change',()=>setTimeout(oUntick,0));
+$('#o-card').addEventListener('click',()=>{
+  const T=t=>esc(trPlain(t)), vtxt=$('#o-vu').value==='L'?fmt(num($('#o-v').value),3)+' L':fmt(num($('#o-v').value),1)+' mL';
+  const rows=$$('#o-tbl tbody tr').map(tr=>{ const g=k=>tr.querySelector('[data-k='+k+']');
+      return {n:g('n').value,c:g('c').value,u:g('u').value,out:g('out').textContent}; })
+    .filter(r=>r.out&&r.out!=='–');
+  if(!rows.length){ $('#o-prog').textContent=trPlain('Vul eerst een recept en een volume in.'); return; }
+  /* de stappen staan al vertaald in de pagina, dus die worden overgenomen */
+  const steps=$$('#o-steps li').map(li=>li.innerHTML), src=$('#o-src-rec').textContent.trim();
+  const title=$('#o-btitle').value||trPlain('Receptkaart');
+  rpPrint('<!doctype html><meta charset="utf-8"><title>'+esc(title)+'</title><style>'
+    +'@page{size:A4;margin:16mm}body{margin:0;font:13px system-ui,sans-serif;color:#1f2933}'
+    +'h1{font-size:20px;margin:0 0 2px}h2{font-size:14px;margin:16px 0 6px}'
+    +'.meta{margin:0 0 12px;color:#5f6b7a;font-size:12px}'
+    +'table{border-collapse:collapse;width:100%;font-size:13px}'
+    +'th,td{border:1px solid #c9ced6;padding:5px 8px;text-align:left}'
+    +'th{background:#eef0f3}td.n{text-align:right;white-space:nowrap}'
+    +'td.box,th.box{width:24px;text-align:center}td.box span{display:inline-block;width:12px;height:12px;border:1.4px solid #1f2933}'
+    +'ol{margin:0;padding-left:20px}li{margin:0 0 3px}'
+    +'.src{margin:14px 0 0;font-size:11px;color:#5f6b7a}'
+    +'.sign{margin-top:18px;font-size:12px;color:#5f6b7a}'
+    +'</style><h1>'+esc(title)+'</h1>'
+    +'<p class="meta">'+T('Eindvolume')+': <b>'+esc(vtxt)+'</b></p>'
+    +'<table><thead><tr><th class="box"></th><th>'+T('Component')+'</th><th>'+T('Concentratie')+'</th><th>'+T('Afwegen')+'</th></tr></thead><tbody>'
+    +rows.map(r=>'<tr><td class="box"><span></span></td><td>'+esc(trPlain(r.n,true))+'</td><td>'+esc(r.c)+' '+esc(trPlain(r.u,true))+'</td><td class="n"><b>'+esc(r.out)+'</b></td></tr>').join('')
+    +'</tbody></table>'
+    +(steps.length?'<h2>'+T('Werkwijze')+'</h2><ol>'+steps.map(h=>'<li>'+h+'</li>').join('')+'</ol>':'')
+    +(src?'<p class="src">'+esc(src)+'</p>':'')
+    +'<p class="sign">'+T('Bereid door')+': ________________ &nbsp; '+T('Datum')+': ________________ &nbsp; '+T('Houdbaar tot')+': ________________</p>');
+});
 
 /* ================= PLAATINDELING =================
    De plaat zelf is de gedeelde plaatontwerper uit tools/nt/02_plate.js: die bewaart het

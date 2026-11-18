@@ -4336,5 +4336,17 @@
 "Los op in ca. {#}% van het eindvolume gedemineraliseerd water:": "Dissolve in about {#}% of the final volume of deionised water:",
 "MgSO₄·{#}H₂O": "MgSO₄·{#}H₂O",
 "Na₂CO₃": "Na₂CO₃",
-"SDS": "SDS"
+"SDS": "SDS",
+"Af": "Done",
+"Afgewogen": "Weighed out",
+"Vink af wat je hebt afgewogen": "Tick off what you have weighed out",
+"Snel een volume:": "Quick volume:",
+"Vinkjes wissen": "Clear the ticks",
+"Receptkaart afdrukken": "Print the recipe card",
+"{#} van de {#} componenten afgewogen.": "{#} of the {#} components weighed out.",
+"Vul eerst een recept en een volume in.": "Fill in a recipe and a volume first.",
+"Receptkaart": "Recipe card",
+"Werkwijze": "Method",
+"Bereid door": "Prepared by",
+"Houdbaar tot": "Use before"
 }
