@@ -1,7 +1,8 @@
 <section class="tool" id="t-stain" data-tool="stain">
   <header class="tool-head"><h2>Kleuringsschema</h2>
   <p>Tekent een kleuringsprotocol als stappenafbeelding met reagens, tijd en kleur, met de verwachte uitkomst. Kies een standaardkleuring of maak je eigen.</p></header>
-  <div class="stack">
+  <div class="picwrap">
+    <div class="pic-prev"><div class="result"><canvas id="stn-cv"></canvas><div class="pic-bar" data-picbar="stn"></div><div id="stn-out"></div></div></div>
     <div class="panel">
       <div class="fields">
         <div class="f"><label for="stn-pre">Kleuring</label><div class="row" style="gap:8px;flex-wrap:nowrap"><select id="stn-pre" style="flex:1;min-width:0"><option value="gram">Gramkleuring</option><option value="zn">Ziehl-Neelsen (zuurvast)</option><option value="spore">Sporenkleuring (Schaeffer-Fulton)</option></select><button type="button" id="stn-load">Laden</button></div></div>
@@ -12,7 +13,6 @@
       <div class="row" style="margin-top:8px"><button type="button" id="stn-tbl-add">+ Stap</button></div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Tijd in seconden; laat leeg voor "kort" of "tot helder". Kleur als hexcode of naam. Volg altijd het protocol van je practicum of de fabrikant: tijden en reagentia verschillen.</p>
     </div>
-    <div class="result"><canvas id="stn-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="stn">Download PNG</button></div><div id="stn-out"></div></div>
   </div>
   <p class="src">Gram: kristalviolet 1 min, jodium 1 min, ontkleuren tot het afloopvocht helder is, safranine 30 s – 1 min (ASM, Gram Stain Protocols, 2005; CDC, How to Perform a Gram Stain). Ziehl-Neelsen: verwarmde carbolfuchsine, ontkleuren met zuuralcohol, tegenkleuring methyleenblauw (ASM, Acid-Fast Stain Protocols, 2010). Schaeffer-Fulton: malachietgroen met stoom, spoelen, safranine (ASM, Endospore Stain Protocol, 2007).</p>
 </section>

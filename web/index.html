@@ -562,7 +562,7 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
       <div class="formula">massa (g) = c (mol/L) × V (L) × M (g/mol) · % w/v: g = % / 100 × V (mL)</div>
       <h3 style="margin:16px 0 8px">Stappenschema als afbeelding</h3>
       <div class="fields"><div class="f"><label for="o-btitle">Titel</label><input id="o-btitle" class="txt" value="Bereiding buffer"></div><div class="f" style="grid-column:span 2"><label for="o-note">Eigen tekst onder het schema</label><textarea id="o-note" rows="2" placeholder="Bijv. bewaren bij 4 °C, houdbaarheid, veiligheid"></textarea></div></div>
-      <canvas id="bs-cv" style="margin-top:10px"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="bs">Download PNG</button></div>
+      <canvas id="bs-cv" style="margin-top:10px"></canvas><div class="pic-bar" data-picbar="bs"></div>
     </div>
   </div>
   <p class="src">Recepten: PBS volgens Cold Spring Harbor Protocols (137 mM NaCl, 2,7 mM KCl, 10 mM Na₂HPO₄, 1,8 mM KH₂PO₄); TBE 10X: 0,89 M Tris, 0,89 M boorzuur, 20 mM EDTA (Bio-Rad Bulletin 6205/6230).</p>
@@ -846,7 +846,7 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
     <div class="tbl-wrap" style="margin-top:14px"><div class="plate" id="w-plate"></div></div>
     <div class="f" style="margin-top:12px"><label for="w-note">Eigen tekst onder de afbeelding (bijv. verdunningen, incubatietijden)</label><textarea id="w-note" rows="2">Standaarden in duplo in kolom 1–2; monsters in drievoud.</textarea></div>
     <h3 style="margin:16px 0 8px">Afbeelding</h3>
-    <canvas id="w-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="w">Download PNG</button></div>
+    <canvas id="w-cv"></canvas><div class="pic-bar" data-picbar="w"></div>
     <p id="w-copied" style="font-size:13px;color:var(--muted);margin:10px 0 0">De tabel plak je direct in Excel, Google Sheets of je labjournaal.</p>
     <textarea id="w-fallback" rows="6" style="display:none;margin-top:10px" readonly></textarea>
   </div>
@@ -2627,7 +2627,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       <div class="row" style="margin-top:8px"><button type="button" id="bp-tbl-add">+ Vlek</button></div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Meet breedte en lengte van de ellips zonder staart of satellietdruppels. Positie x, y in cm op het oppervlak; richting γ = looprichting van de druppel in graden (0° = positieve x-as, tegen de klok in). Voor convergentie zijn minstens twee vlekken met positie en richting nodig. Voorbeelddata zijn berekend voor een oorsprong op (60, 40) cm en 45 cm hoogte.</p>
     </div>
-    <div class="result"><canvas id="bp-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="bp">Download PNG</button></div><div id="bp-out"></div></div>
+    <div class="result"><canvas id="bp-cv"></canvas><div class="pic-bar" data-picbar="bp"></div><div id="bp-out"></div></div>
   </div>
   <p class="src">Inslaghoek α = arcsin(breedte / lengte) (formule van Balthazard; AAFS 2005 B28: onzekerheid onder 3° tot een hoek van 60°). Convergentiepunt: punt met de kleinste kwadratische afstand tot de verlengde looprichtingen (rechte-lijnmethode). Hoogte per vlek h = d · tan α, met d de afstand van vlek tot convergentiepunt. De rechte-lijnbenadering negeert zwaartekracht en luchtweerstand en overschat daardoor de hoogte.</p>
 </section>
@@ -2869,7 +2869,8 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-stain" data-tool="stain">
   <header class="tool-head"><h2>Kleuringsschema</h2>
   <p>Tekent een kleuringsprotocol als stappenafbeelding met reagens, tijd en kleur, met de verwachte uitkomst. Kies een standaardkleuring of maak je eigen.</p></header>
-  <div class="stack">
+  <div class="picwrap">
+    <div class="pic-prev"><div class="result"><canvas id="stn-cv"></canvas><div class="pic-bar" data-picbar="stn"></div><div id="stn-out"></div></div></div>
     <div class="panel">
       <div class="fields">
         <div class="f"><label for="stn-pre">Kleuring</label><div class="row" style="gap:8px;flex-wrap:nowrap"><select id="stn-pre" style="flex:1;min-width:0"><option value="gram">Gramkleuring</option><option value="zn">Ziehl-Neelsen (zuurvast)</option><option value="spore">Sporenkleuring (Schaeffer-Fulton)</option></select><button type="button" id="stn-load">Laden</button></div></div>
@@ -2880,7 +2881,6 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       <div class="row" style="margin-top:8px"><button type="button" id="stn-tbl-add">+ Stap</button></div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Tijd in seconden; laat leeg voor "kort" of "tot helder". Kleur als hexcode of naam. Volg altijd het protocol van je practicum of de fabrikant: tijden en reagentia verschillen.</p>
     </div>
-    <div class="result"><canvas id="stn-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="stn">Download PNG</button></div><div id="stn-out"></div></div>
   </div>
   <p class="src">Gram: kristalviolet 1 min, jodium 1 min, ontkleuren tot het afloopvocht helder is, safranine 30 s – 1 min (ASM, Gram Stain Protocols, 2005; CDC, How to Perform a Gram Stain). Ziehl-Neelsen: verwarmde carbolfuchsine, ontkleuren met zuuralcohol, tegenkleuring methyleenblauw (ASM, Acid-Fast Stain Protocols, 2010). Schaeffer-Fulton: malachietgroen met stoom, spoelen, safranine (ASM, Endospore Stain Protocol, 2007).</p>
 </section>
@@ -2927,7 +2927,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Elk doelgen begint op een nieuwe rij (of kolom), zodat je per gen één mastermix met een multichannelpipet kunt verdelen. De mix zelf reken je uit met het Pipetteerschema (sjabloon qPCR).</p>
     </div>
-    <div class="result"><canvas id="qp2-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="qp2">Download PNG</button></div><div id="qp2-out"></div></div>
+    <div class="result"><canvas id="qp2-cv"></canvas><div class="pic-bar" data-picbar="qp2"></div><div id="qp2-out"></div></div>
   </div>
   <p class="src">Indeling volgens de MIQE-richtlijnen: biologische monsters in technische replicaten, een no-template control (NTC) per assay en een standaardreeks voor efficiëntie (Bustin e.a., Clin Chem 55:611–622, 2009). De plaatlijst (well, monster, doel, taak) kun je kopiëren naar Excel of naar de importfunctie van de qPCR-software.</p>
 </section>
@@ -3086,7 +3086,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       <div class="row" style="margin-top:8px"><button type="button" id="xp-tbl-add">+ Stap</button><button type="button" id="xp-tim">Wachtstappen als timers</button><button type="button" id="xp-ics">Naar agenda (.ics)</button></div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Duur in minuten. "Wachten" zijn incubaties of looptijden waarin je iets anders kunt doen; die worden timers. Het .ics-bestand opent in Outlook, Google Agenda en Apple Agenda; elke stap wordt een afspraak in lokale tijd. Voorbeeld: transformatie volgens de Avans DNA-toolbox. Voorbeeldtijden zijn indicatief.</p>
     </div>
-    <div class="result"><canvas id="xp-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="xp">Download PNG</button></div><div id="xp-out"></div></div>
+    <div class="result"><canvas id="xp-cv"></canvas><div class="pic-bar" data-picbar="xp"></div><div id="xp-out"></div></div>
   </div>
 </section>
 <!-- /NT:plan -->
@@ -5556,7 +5556,7 @@ calc.stat=function(){
       `<li><b>Toetsingsgrootheid.</b> F = MS<sub>tussen</sub> / MS<sub>binnen</sub> = ${sig(R.MSB,4)} / ${sig(R.MSW,4)} = <b>${fmt(R.F,3)}</b> (df ${R.dfB}; ${R.dfW})</li><li><b>Kritieke waarde</b> (F-verdeling, eenzijdig): F = ${fmt(R.Fc,3)}</li><li><b>p-waarde</b> = ${pfmt(R.p)}</li>`+decide(rej,'Minstens één groep verschilt significant; zie de Tukey-vergelijkingen.','Er is geen significant verschil tussen de groepen aangetoond.')+`</ol>`+
       `<div class="tbl-wrap"><table class="mini"><thead><tr><th>Bron</th><th class="num">SS</th><th class="num">df</th><th class="num">MS</th><th class="num">F</th><th class="num">p</th></tr></thead><tbody><tr><td>Tussen groepen</td><td class="num">${sig(R.SSB,5)}</td><td class="num">${R.dfB}</td><td class="num">${sig(R.MSB,5)}</td><td class="num">${fmt(R.F,3)}</td><td class="num">${pfmt(R.p)}</td></tr><tr><td>Binnen groepen</td><td class="num">${sig(R.SSW,5)}</td><td class="num">${R.dfW}</td><td class="num">${sig(R.MSW,5)}</td><td></td><td></td></tr><tr><td>Totaal</td><td class="num">${sig(R.SSB+R.SSW,5)}</td><td class="num">${R.N-1}</td><td></td><td></td><td></td></tr></tbody></table></div>`+
       `<div class="lbl" style="margin-top:12px">Tukey-vergelijkingen (q<sub>krit</sub> = ${fmt(R.qc,3)})</div><div class="tbl-wrap"><table class="mini" id="st-tukey"><thead><tr><th>Vergelijking</th><th class="num">Verschil</th><th class="num">${fmt((1-alpha)*100,0)}%-BI</th><th class="num">p (Tukey)</th><th></th></tr></thead><tbody>${R.pairs.map(q=>`<tr><td>${esc(q.a)} − ${esc(q.b)}</td><td class="num">${sig(q.d,4)}</td><td class="num">${sig(q.lo,3)} – ${sig(q.hi,3)}</td><td class="num">${pfmt(q.p)}</td><td>${q.p<alpha?'<span class="chip bad">verschil</span>':'<span class="chip ok">geen</span>'}</td></tr>`).join('')}</tbody></table></div>`+
-      kv([['Effectgrootte η²',fmt(R.eta,3)]])+`<canvas id="stb-cv" style="margin-top:12px"></canvas><div class="row" style="margin-top:6px"><button type="button" data-png="stb">Download PNG</button></div>`;
+      kv([['Effectgrootte η²',fmt(R.eta,3)]])+`<canvas id="stb-cv" style="margin-top:12px"></canvas><div class="pic-bar">${typeof picBar==='function'?picBar('stb'):''}</div>`;
     if(D.some(([,o])=>isFinite(o.lD)&&o.lD>o.lC)) h+=note('warn','Niet alle groepen lijken normaal verdeeld (Lilliefors); ANOVA veronderstelt normaliteit en gelijke varianties.');
     out.innerHTML=h; try{ stBars($('#stb-cv'),AG,R,alpha); }catch(e){} return;
   }
@@ -5683,7 +5683,7 @@ const PCOL={ink:'#1f2933',muted:'#5f6b7a',line:'#c9ced6',soft:'#eef0f3',acc:'#15
 /* teken met vaste logische maat; s = schaalfactor (scherm: devicePixelRatio, export: 3) */
 function pRender(cv,W,H,draw,s){ s=s||window.devicePixelRatio||1; cv.width=Math.round(W*s); cv.height=Math.round(H*s); const x=cv.getContext('2d'); x.setTransform(s,0,0,s,0,0); x.fillStyle='#fff'; x.fillRect(0,0,W,H); x.textBaseline='middle'; x.lineJoin='round'; x.lineCap='round'; draw(x,W,H); return x; }
 function pShow(cv,W,H,draw){ pRender(cv,W,H,draw); cv.style.width='100%'; cv.style.maxWidth=W+'px'; cv._p={W,H,draw}; }
-const PNGNAME={stb:'st-test',pv:'pv-title',pp:'pp-title',pg:'pg-title',w:'w-title',bs:'o-btitle',gp:'gp-title',gpp:'gp-title',stn:'stn-title'};
+const PNGNAME={stb:'st-test',pv:'pv-title',pp:'pp-title',pg:'pg-title',w:'w-title',bs:'o-btitle',gp:'gp-title',gpp:'gp-title',stn:'stn-title',xp:'xp-title'};
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-png]'); if(!b) return; const k=b.dataset.png, cv=$('#'+k+'-cv'); if(!cv||!cv._p) return; const c=document.createElement('canvas'); pRender(c,cv._p.W,cv._p.H,cv._p.draw,3); c.toBlob(bl=>{ if(bl) saveBlob(safeName($('#'+PNGNAME[k]).value||'schema')+'.png',bl).catch(()=>{}); },'image/png'); });
 function pTitle(x,t,W){ if(!t) return 0; if(window.__noTitle) return 40; x.fillStyle=PCOL.ink; x.font='600 16px '+PFONT(); x.textAlign='left'; x.fillText(t,20,22); return 40; }
 function pNotes(pref,W){ const el=$('#'+pref+'-note'); const t=el?el.value:''; const maxc=Math.max(30,Math.floor((W-40)/6.6)); const out=[]; t.split('\n').forEach(par=>{ if(!par.trim()){ if(out.length) out.push(''); return; } let ln=''; par.split(/\s+/).forEach(w=>{ if((ln+' '+w).trim().length>maxc&&ln){ out.push(ln); ln=w; } else ln=(ln+' '+w).trim(); }); if(ln) out.push(ln); }); while(out.length&&out[out.length-1]==='') out.pop(); return out; }
