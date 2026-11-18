@@ -54,7 +54,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | S23 | 13 | Move staining scheme and plate layout onto the shared layout | ✅ `stain` on `.picwrap`; `plaat` keeps its editor layout (its interactive plate is the preview) but gets the shared bar, as do the drawings in `oplossing`, `bpa`, `qplate`, `plan` and `stat` — every drawing in the app now exports the same way |
 | S24 | 34, 225 | Dilution series drawing: tubes, arrows, volumes, colour fading | ✅ Tubes, arrows, volumes, fading and plating dishes were already drawn by earlier work; added a series colour (via a new `col` argument on `pTube`) and a note that the fade is indicative, not proportional |
 | S25 | 35, 227 | PCR programme as a temperature–time graph with bracketed cycles | ✅ The graph with bracketed cycles existed; the x-axis is now a real time axis (step width ∝ duration, with a minimum so short steps stay readable), labels fitted to the step width, PNG/SVG export via the shared bar |
-| S26 | 36, 229 | Staining protocol as an illustrated timeline | Timeline export |
+| S26 | 36, 229 | Staining protocol as an illustrated timeline | ✅ The box grid became a horizontal timeline: bar width ∝ time, a reagent drop per step (outlined for rinse/decolourise), a time axis and the expected result; PNG/SVG via the shared bar |
 | S27 | 33, 192 | Tube rack picture for master mixes (PCR mix, pipetting scheme) | Rack drawn with labels and volumes |
 | S28 | 29 | Shared plate designer, part 1: plate formats 6–384, select and colour wells, legend | Designer component standalone |
 | S29 | 29 | Plate designer part 2: drag to fill replicates, auto-fill a dilution across a row | Drag-fill works with mouse and touch |

@@ -4144,5 +4144,7 @@
 "De kleur in de buizen vervaagt per stap, maar niet op schaal: bij een factor {#} zou de kleur na twee stappen al onzichtbaar zijn. Lees de concentratie dus onder de buis, niet uit de kleur. Zet \"Uitplaten\" op {#} als je geen platen wilt tekenen. Uit de laatste buis houd je het overdrachtsvolume over; dat staat als opmerking onder het schema.": "The colour in the tubes fades per step, but not to scale: at a factor of {#} the colour would already be invisible after two steps. So read the concentration under the tube, not from the colour. Set \"Plating\" to {#} if you do not want plates drawn. From the last tube you keep the transfer volume; that is noted under the scheme.",
 "Breedte van een stap": "Width of a step",
 "Op tijd (tijdas)": "By time (time axis)",
-"Even breed": "Equally wide"
+"Even breed": "Equally wide",
+"kort": "short",
+"tijd": "time"
 }
