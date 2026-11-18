@@ -1316,6 +1316,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       <div class="fields">
         <div class="f" style="grid-column:1/-1"><label for="pg-title">Titel</label><input id="pg-title" class="txt" value="PCR-programma"></div>
         <div class="f"><label for="pg-cyc">Aantal cycli</label><input id="pg-cyc" inputmode="numeric" value="35"></div>
+        <div class="f"><label for="pg-scale">Breedte van een stap</label><select id="pg-scale" style="width:100%"><option value="time" selected>Op tijd (tijdas)</option><option value="eq">Even breed</option></select></div>
         <div class="f"><label for="pg-time">Tijden tonen als</label><select id="pg-time" style="width:100%"><option value="mmss">2:00, 0:30</option><option value="txt">2 min, 30 s</option></select></div>
         <div class="f" style="grid-column:1/-1"><label for="pg-note">Eigen tekst onder het schema</label><textarea id="pg-note" rows="2" placeholder="Bijv. incubatie, opmerkingen of verwijzing naar het protocol"></textarea></div>
         <label class="chk" for="pg-auto" style="grid-column:1/-1"><input type="checkbox" id="pg-auto" checked> Standaardtoelichting tonen</label>
@@ -3843,7 +3844,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=1900e3506b"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=6e457b6a7c"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -5827,16 +5828,46 @@ calc.pprog=function(){
   const cyc=Math.max(1,Math.round(num($('#pg-cyc').value)||1)), mode=$('#pg-time').value, title=$('#pg-title').value.trim(), out=$('#pg-out');
   const ok=steps.filter(s=>isFinite(s.t)); if(ok.length<1){ out.innerHTML=note('info','Vul minstens één stap met temperatuur in.'); return; }
   const ci=steps.map((s,i)=>s.c?i:-1).filter(i=>i>=0); const contig=ci.length===0||ci[ci.length-1]-ci[0]===ci.length-1;
-  const sw=104, W=Math.max(520,90+steps.length*sw), NL_=pNotes('pg',W), NH=NL_.length?NL_.length*17+10:0, H=(title?40:0)+320+NH;
+  /* Op een tijdas is de breedte van een stap evenredig met zijn duur, met een ondergrens
+     zodat een stap van een paar seconden zichtbaar blijft; de as is daardoor niet strikt
+     lineair voor de kortste stappen. Een stap zonder tijd (∞) krijgt de ondergrens. */
+  const L=56, SWMIN=70, budget=steps.length*104;
+  const secs=steps.map(st=>isFinite(st.s)&&st.s>0?st.s:0), totS=secs.reduce((a,b)=>a+b,0);
+  const byTime=$('#pg-scale').value!=='eq'&&totS>0;
+  const wid=byTime?secs.map(v=>Math.max(SWMIN,v>0?budget*v/totS:SWMIN)):steps.map(()=>104);
+  const X=[]; wid.reduce((a,w,i)=>{ X[i]=L+a; return a+w; },0);
+  const totW=wid.reduce((a,b)=>a+b,0);
+  const W=Math.max(520,L+totW+34), NL_=pNotes('pg',W), NH=NL_.length?NL_.length*17+10:0, H=(title?40:0)+320+NH;
   const tmin=Math.min(0,...ok.map(s=>s.t)), tmax=Math.max(100,...ok.map(s=>s.t));
-  pShow($('#pg-cv'),W,H,(x)=>{ const t0=pTitle(x,title,W), top=t0+64, bot=H-62-NH, L=56; if(NL_.length) pDrawNotes(x,NL_,H-NH+4); const Y=t=>bot-(t-tmin)/(tmax-tmin)*(bot-top);
+  pShow($('#pg-cv'),W,H,(x)=>{ const t0=pTitle(x,title,W), top=t0+64, bot=H-62-NH; if(NL_.length) pDrawNotes(x,NL_,H-NH+4); const Y=t=>bot-(t-tmin)/(tmax-tmin)*(bot-top);
     x.font='11px '+PFONT(); x.textAlign='right'; x.fillStyle=PCOL.muted; x.strokeStyle=PCOL.soft; x.lineWidth=1; [0,25,50,75,100].forEach(v=>{ if(v<tmin||v>tmax) return; x.beginPath(); x.moveTo(L,Y(v)); x.lineTo(W-16,Y(v)); x.stroke(); x.fillText(v+' °C',L-6,Y(v)); });
-    if(contig&&ci.length){ const x0=L+ci[0]*sw+4, x1=L+(ci[ci.length-1]+1)*sw-4; x.fillStyle=PCOL.accSoft; x.fillRect(x0,top-44,x1-x0,bot-top+44); x.fillStyle=PCOL.acc; x.font='600 13px '+PFONT(); x.textAlign='center'; x.fillText(`${cyc}×`,(x0+x1)/2,top-50); x.strokeStyle=PCOL.acc; x.lineWidth=1.4; x.beginPath(); x.moveTo(x0+2,top-34); x.lineTo(x0+2,top-40); x.lineTo(x1-2,top-40); x.lineTo(x1-2,top-34); x.stroke(); }
+    if(contig&&ci.length){ const le=ci[ci.length-1], x0=X[ci[0]]+4, x1=X[le]+wid[le]-4; x.fillStyle=PCOL.accSoft; x.fillRect(x0,top-44,x1-x0,bot-top+44); x.fillStyle=PCOL.acc; x.font='600 13px '+PFONT(); x.textAlign='center'; x.fillText(`${cyc}×`,(x0+x1)/2,top-50); x.strokeStyle=PCOL.acc; x.lineWidth=1.4; x.beginPath(); x.moveTo(x0+2,top-34); x.lineTo(x0+2,top-40); x.lineTo(x1-2,top-40); x.lineTo(x1-2,top-34); x.stroke(); }
     x.strokeStyle=PCOL.ink; x.lineWidth=2.4; x.beginPath(); let prev=null;
-    steps.forEach((s,i)=>{ if(!isFinite(s.t)) return; const xa=L+i*sw+(prev==null?0:28), xb=L+(i+1)*sw, y=Y(s.t); if(prev==null) x.moveTo(xa,y); else x.lineTo(xa,y); x.lineTo(xb,y); prev=y; });
+    steps.forEach((s,i)=>{ if(!isFinite(s.t)) return; const ramp=Math.min(28,wid[i]*0.4), xa=X[i]+(prev==null?0:ramp), xb=X[i]+wid[i], y=Y(s.t); if(prev==null) x.moveTo(xa,y); else x.lineTo(xa,y); x.lineTo(xb,y); prev=y; });
     x.stroke();
-    steps.forEach((s,i)=>{ if(!isFinite(s.t)) return; const xm=L+i*sw+sw/2+14, y=Y(s.t); x.textAlign='center'; x.fillStyle=PCOL.ink; x.font='600 12.5px '+PFONT(); x.fillText(`${NL(s.t,1)} °C`,xm,y-11); x.font='12px '+PFONT(); x.fillText(pgFmt(s.s,mode),xm,y+13);
-      x.fillStyle=PCOL.muted; x.font='11.5px '+PFONT(); const words=(s.n||'').split(' '); let line='', ly=bot+20; words.forEach(w=>{ if((line+' '+w).trim().length>14&&line){ x.fillText(line,xm,ly); ly+=14; line=w; } else line=(line+' '+w).trim(); }); if(line) x.fillText(line,xm,ly); });
+    /* op een tijdas zijn korte stappen smal: tekst die niet past wordt kleiner gezet,
+       afgebroken over regels of weggelaten, zodat labels elkaar niet overlappen */
+    const fitTxt=(t,w)=>{ if(x.measureText(uv(t)).width<=w) return t; let r=t;
+      while(r.length>1&&x.measureText(uv(r+'…')).width>w) r=r.slice(0,-1);
+      return r.length>1?r+'…':''; };
+    steps.forEach((s,i)=>{ if(!isFinite(s.t)) return;
+      /* temperatuur en tijd boven het vlakke deel, dus naast de helling; de naam onder de hele stap */
+      const rmp=i===0?0:Math.min(28,wid[i]*0.4), xm=X[i]+rmp+(wid[i]-rmp)/2, xn=X[i]+wid[i]/2,
+        y=Y(s.t), room=wid[i]-rmp-6;
+      x.textAlign='center'; x.fillStyle=PCOL.ink;
+      x.font='600 12.5px '+PFONT(); let tt=`${NL(s.t,1)} °C`;
+      if(x.measureText(tt).width>room){ x.font='600 11px '+PFONT(); }
+      if(x.measureText(tt).width<=room) x.fillText(tt,xm,y-11);
+      x.font='12px '+PFONT(); const dt=pgFmt(s.s,mode);
+      if(x.measureText(dt).width<=room) x.fillText(dt,xm,y+13);
+      x.fillStyle=PCOL.muted; x.font='11.5px '+PFONT();
+      /* eerst vertalen, dan pas afbreken: een afgekapt woord hoort geen eigen vertaalsleutel
+         te worden, dus de stukken gaan als gebruikerstekst (uv) naar het canvas */
+      const room2=wid[i]-6, words=trCanvas(String(s.n||'')).split(' '); let line='', ly=bot+20, lines=0;
+      words.forEach(w=>{ const t2=(line+' '+w).trim();
+        if(x.measureText(uv(t2)).width>room2&&line){ if(lines<1){ x.fillText(uv(line),xn,ly); ly+=14; lines++; line=w; } else line=t2; }
+        else line=t2; });
+      if(line) x.fillText(uv(fitTxt(line,room2)),xn,ly); });
   });
   const tCyc=ci.reduce((a,i)=>a+(isFinite(steps[i].s)?steps[i].s:0),0), tOther=steps.filter((s,i)=>!s.c&&isFinite(s.s)).reduce((a,s)=>a+s.s,0);
   out.innerHTML=(contig?'':note('bad','De aangevinkte stappen zijn niet aaneengesloten; de cyclus wordt niet getekend.'))+kv([['Stappen in cyclus',ci.length],['Looptijd zonder op- en afkoelen',mmss2(tCyc*cyc+tOther)]])+`<div class="formula">Looptijd = som van de staptijden; de echte tijd is langer door de opwarm- en afkoelsnelheid van het apparaat.</div>`;
