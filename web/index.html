@@ -240,6 +240,12 @@ nav.side > a.nav-col{display:none!important}
 .pld .pld-mc b{color:var(--ink);font-weight:600}
 .pld .pld-mc .mcb{margin-top:4px;color:var(--ink)}
 #o-tbl td.o-tick{width:28px;text-align:center}
+#o-tbl small.obal{display:block;font-weight:400;font-size:11px;line-height:1.25;margin-top:2px;white-space:normal;max-width:17ch}
+#o-tbl small.obal.bad{color:var(--warn,#c2410c)}
+#o-tbl small.obal.warn{color:var(--muted)}
+#o-tbl small.obal.ok{color:var(--muted)}
+#o-advice:empty{display:none}
+#o-advice{margin-top:10px;display:grid;gap:6px}
 #o-tbl tbody tr.oweg td:not(.o-tick){opacity:.5}
 .pld .pld-bar .chk{align-self:center;margin-bottom:5px}
 .pld .pld-warn{margin:10px 0 0;font-size:12.5px;display:grid;gap:3px;max-width:70ch;padding:9px 11px;border:1px solid var(--line);border-left:3px solid var(--warn,#c2410c);border-radius:4px;background:var(--surface)}
@@ -588,6 +594,7 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
       <datalist id="chem-list"></datalist>
       <div class="row" style="margin-top:10px;gap:10px;align-items:center"><span id="o-prog" style="font-size:13px;color:var(--muted)"></span><button type="button" id="o-untick">Vinkjes wissen</button><button type="button" class="primary" id="o-card">Receptkaart afdrukken</button></div>
       <ol class="steps" id="o-steps"></ol>
+      <div id="o-advice"></div>
       <p class="src" id="o-src-rec" style="margin:8px 0 0"></p>
       <div class="formula">massa (g) = c (mol/L) × V (L) × M (g/mol) · % w/v: g = % / 100 × V (mL)</div>
       <h3 style="margin:16px 0 8px">Stappenschema als afbeelding</h3>
@@ -3884,7 +3891,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=71b4e47f1e"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=4a61eea7d2"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -4065,6 +4072,18 @@ HYD.forEach(g=>g[1].forEach(v=>{ if(!CHEM[v[1]]){ CHEM[v[1]]=v[2]; $('#chem-list
 const hydNorm=t=>String(t).toLowerCase().replace(/\s+/g,'').replace(/[·.*]/g,'·').replace(/[₀-₉]/g,c=>String(c.charCodeAt(0)-8320));
 function hydFind(name){ const k=hydNorm(name); if(!k) return null; for(let gi=0;gi<HYD.length;gi++){ const vi=HYD[gi][1].findIndex(v=>hydNorm(v[1])===k); if(vi>=0) return [gi,vi]; } return null; }
 function hydSel(name){ const f=hydFind(name); return `<select data-k="h" data-g="${f?f[0]:''}" aria-label="Vorm (hydraat)"${f?'':' disabled'}>${f?HYD[f[0]][1].map((v,i)=>`<option value="${i}"${i===f[1]?' selected':''}>${v[0]}</option>`).join(''):'<option value="">–</option>'}</select>`; }
+/* ---------- welke balans hoort bij deze massa? (S39) ----------
+   De kleinste massa die je met een gevraagde nauwkeurigheid nog kunt afwegen volgt uit de
+   herhaalbaarheid s van de balans: m ≥ 2s / nauwkeurigheid (het 2s-criterium uit USP <41>).
+   Met s gelijk aan de afleesbaarheid betekent dat: op 0,1 mg haal je vanaf ongeveer 20 mg
+   nog 1%, en op 10 mg pas vanaf ongeveer 2 g. Het zijn vuistregels; de werkelijke s staat in
+   het kalibratierapport van de balans. */
+function oBalance(grams){
+  if(!isFinite(grams)||grams<=0) return null;
+  if(grams<0.02) return {k:'bad',t:'te weinig om op 1% af te wegen: maak een stockoplossing en pipetteer die'};
+  if(grams<2) return {k:'warn',t:'analytische balans (0,1 mg)'};
+  return {k:'ok',t:'precisiebalans (10 mg) is genoeg'};
+}
 function oRow(r){ const [n,mw,c,u]=r; return `<tr class="recipe-row"><td class="o-tick"><input type="checkbox" data-k="done" aria-label="Afgewogen"></td><td><input class="txt" list="chem-list" value="${esc(n)}" data-k="n" placeholder="naam"></td><td><input value="${isFinite(mw)?String(mw).replace('.',','):''}" data-k="mw" inputmode="decimal" style="text-align:right"></td><td><input value="${isFinite(c)?String(c).replace('.',','):''}" data-k="c" inputmode="decimal" style="text-align:right"></td><td><select data-k="u" aria-label="Eenheid"><option ${u==='M'?'selected':''}>M</option><option ${u==='mM'?'selected':''}>mM</option><option ${u==='µM'?'selected':''}>µM</option><option ${u==='% w/v'?'selected':''}>% w/v</option><option ${u==='g/L'?'selected':''}>g/L</option></select></td><td>${hydSel(n)}</td><td class="num" data-k="out">–</td><td><button type="button" class="ghost" data-del aria-label="Verwijder rij">✕</button></td></tr>`; }
 function loadRecipe(k){ recipeKey=k; $('#o-tbl tbody').innerHTML=RECIPES[k].map(oRow).join(''); calc.oplossing(); }
 $('#o-preset').addEventListener('change',e=>{ if(e.target.value) loadRecipe(e.target.value); });
@@ -4085,7 +4104,8 @@ calc.oplossing=function(e){
     else if(u==='% w/v') grams=c/100*V*1000;
     else if(u==='g/L') grams=c*V;
     else { const M=u==='M'?c:u==='mM'?c/1e3:c/1e6; grams=M*V*mw; }
-    g('out').innerHTML=isFinite(grams)?`<b>${mass(grams)}</b>`:'–';
+    const bal=oBalance(grams);
+    g('out').innerHTML=isFinite(grams)?`<b>${mass(grams)}</b>${bal?`<br><small class="obal ${bal.k}">${bal.t}</small>`:''}`:'–';
     if(isFinite(grams)){ any=true; steps.push(`${mass(grams)} ${esc(trPlain(name,true))}`); }
   });
   const vtxt=$('#o-vu').value==='L'?fmt(num($('#o-v').value),3)+' L':fmt(num($('#o-v').value),1)+' mL';
@@ -4105,6 +4125,15 @@ calc.oplossing=function(e){
     odone=orows.filter(tr=>{ const c=tr.querySelector('[data-k=done]'); return c&&c.checked; }).length;
   orows.forEach(tr=>{ const c=tr.querySelector('[data-k=done]'); tr.classList.toggle('oweg',!!(c&&c.checked)); });
   const oprog=$('#o-prog'); if(oprog) oprog.textContent=ocnt?`${odone} van de ${ocnt} componenten afgewogen.`:'';
+  /* weegorde: eerst het kleine werk op de analytische balans, dan het grove, in hetzelfde vat */
+  const adv=$('#o-advice');
+  if(adv){ const small=[], stock=[];
+    orows.forEach(tr=>{ const nm=tr.querySelector('[data-k=n]').value||'', b=tr.querySelector('.obal');
+      if(!b||!nm) return; if(b.classList.contains('bad')) stock.push(nm); else if(b.classList.contains('warn')) small.push(nm); });
+    const ster=(typeof RECSTER!=='undefined'&&RECSTER[recipeKey])||'';
+    adv.innerHTML=(ster?note('info','<b>Steriliteit</b> '+ud(ster)):'')
+      +(stock.length?note('warn',`<b>Te klein om af te wegen</b> ${ud(stock.join(', '))}: maak hiervan een stockoplossing en pipetteer die, anders bepaalt de balans je onzekerheid.`):'')
+      +(small.length?note('info',`<b>Weegorde</b> Weeg eerst ${ud(small.join(', '))} op de analytische balans en daarna de grote hoeveelheden op de precisiebalans, in hetzelfde vat.`):''); }
   $('#o-steps').innerHTML=any?`<li>Los op in ca. 80% van het eindvolume gedemineraliseerd water: <span data-notr="">${steps.join(', ')}</span>.</li>${rph?`<li>${rph}</li>`:''}<li>Vul aan tot ${vtxt} in een maatkolf of maatcilinder en meng.</li>`+(zuur?'<li>EDTA als vrij zuur lost pas op rond pH 8: voeg NaOH toe tot het helder is.</li>':''):'';
 };
 
@@ -7104,6 +7133,10 @@ function plateDesigner(host, opts) {
    NaH₂PO₄ 119,98 · boorzuur 61,83 · EDTA-Na₂·2H₂O 372,24 · azijnzuur 60,05 ·
    trinatriumcitraat·2H₂O 294,10 · glycine 75,07 · SDS 288,38 · Na₂CO₃ 105,99 ·
    NaHCO₃ 84,01 · MgCl₂·6H₂O 203,30 · MgSO₄·7H₂O 246,47 · glucose 180,16. */
+/* hydraatvormen die de bibliotheek nodig heeft en die nog niet in HYD stonden (S39);
+   HYD zelf staat in web/index.html, omdat de chemicaliënlijst daar wordt opgebouwd. */
+const RECHYD=[['Na₂CO₃',[['watervrij','Na₂CO₃',105.99],['monohydraat (·H₂O)','Na₂CO₃·H₂O',124.00],['decahydraat (·10H₂O, soda)','Na₂CO₃·10H₂O',286.14]]]
+];
 const RECIPES={
   trisnacl:[['Tris (base)',121.14,50,'mM'],['NaCl',58.44,150,'mM']],
   pbs:[['NaCl',58.44,137,'mM'],['KCl',74.55,2.7,'mM'],['Na₂HPO₄',141.96,10,'mM'],['KH₂PO₄',136.09,1.8,'mM']],
@@ -7170,6 +7203,25 @@ const RECSRC={
   lb:'Miller, Experiments in Molecular Genetics (1972): 10 g trypton, 5 g gistextract en 10 g NaCl per liter. De variant van Lennox (Virology 1:190–206, 1955) heeft 5 g NaCl.',
   lbagar:'LB volgens Miller met 15 g agar per liter (Sambrook & Russell, Molecular Cloning, 3e druk).',
   soc:'Hanahan, J Mol Biol 166:557–580 (1983): 2% trypton, 0,5% gistextract, 10 mM NaCl, 2,5 mM KCl, 10 mM MgCl₂, 10 mM MgSO₄ en 20 mM glucose.'
+};
+/* hoe je het steriel krijgt, of waarom je dat juist niet zo doet (S39) */
+const RECSTER={
+  trisnacl:'Autoclaveerbaar: 15 minuten op 121 °C.',
+  pbs:'Autoclaveerbaar: 15 minuten op 121 °C. Fosfaatzouten kunnen bij het autoclaveren uitzakken; schud de fles na het afkoelen.',
+  tbs:'Autoclaveerbaar: 15 minuten op 121 °C.',
+  tbst:'Niet autoclaveren: Tween 20 breekt af bij hitte. Maak de buffer vers, of autoclaveer de TBS en voeg de Tween daarna toe.',
+  te:'Autoclaveerbaar: 15 minuten op 121 °C.',
+  tbe10:'Autoclaveerbaar, maar niet nodig: bewaar de 10× voorraad bij kamertemperatuur en gooi hem weg als er kristallen of troebeling in zitten.',
+  tae50:'Autoclaveren is niet nodig. Voeg de ijsazijn toe in een zuurkast en autoclaveer die niet mee.',
+  ssc20:'Autoclaveerbaar: 15 minuten op 121 °C.',
+  laemmli10:'Niet autoclaveren: SDS schuimt over en is hier niet nodig. Bewaar bij kamertemperatuur, want SDS slaat in de kou uit.',
+  towbin:'Nooit autoclaveren: methanol is brandbaar. Maak de buffer vers en bewaar hem gekoeld en gesloten.',
+  carbonaat:'Niet autoclaveren: de buffer verliest CO₂ en de pH loopt op. Filtreer steriel over 0,22 µm als het steriel moet, en maak hem anders vers.',
+  citraat:'Autoclaveerbaar: 15 minuten op 121 °C. Voeg Tween 20 pas daarna toe.',
+  fosfaat:'Autoclaveerbaar: 15 minuten op 121 °C; controleer de pH daarna nog een keer.',
+  lb:'Autoclaveer 15 minuten op 121 °C. Antibiotica zijn hittelabiel: die gaan er pas in onder de 50 °C, steriel gefiltreerd over 0,22 µm.',
+  lbagar:'Autoclaveer 15 minuten op 121 °C. Laat afkoelen tot ongeveer 50 °C voordat je antibiotica toevoegt en de platen uitgiet; warmer breekt het antibioticum af, kouder begint de agar al te stijven.',
+  soc:'Autoclaveer het medium zonder de glucose. Voeg de glucose daarna toe als steriel gefiltreerde 1 M oplossing: bij autoclaveren karameliseert hij en reageert hij met de aminozuren.'
 };
 const RECKEYS=['trisnacl','pbs','tbs','tbst','te','tbe10','tae50','ssc20','laemmli10','towbin',
   'carbonaat','citraat','fosfaat','lb','lbagar','soc','leeg'];
@@ -9035,6 +9087,10 @@ sLoad('bradford');
    De bibliotheek is een ingevoegde module, dus dit kan pas hier: hierboven zou RECKEYS nog
    in zijn tijdelijke dode zone staan. */
 $('#o-preset').insertAdjacentHTML('beforeend',RECKEYS.map(k=>`<option value="${k}">${esc(RECNAME[k]||k)}</option>`).join(''));
+/* de bibliotheek brengt eigen hydraatvormen mee; HYD en de chemicaliënlijst worden hierboven
+   opgebouwd, dus die worden hier aangevuld */
+RECHYD.forEach(g=>{ if(!HYD.some(h=>h[0]===g[0])) HYD.push(g);
+  g[1].forEach(v=>{ if(!CHEM[v[1]]){ CHEM[v[1]]=v[2]; $('#chem-list').insertAdjacentHTML('beforeend',`<option value="${v[1]}">`); } }); });
 $('#o-preset').value='trisnacl';
 loadRecipe('trisnacl');
 

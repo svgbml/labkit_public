@@ -11,6 +11,10 @@
    NaH₂PO₄ 119,98 · boorzuur 61,83 · EDTA-Na₂·2H₂O 372,24 · azijnzuur 60,05 ·
    trinatriumcitraat·2H₂O 294,10 · glycine 75,07 · SDS 288,38 · Na₂CO₃ 105,99 ·
    NaHCO₃ 84,01 · MgCl₂·6H₂O 203,30 · MgSO₄·7H₂O 246,47 · glucose 180,16. */
+/* hydraatvormen die de bibliotheek nodig heeft en die nog niet in HYD stonden (S39);
+   HYD zelf staat in web/index.html, omdat de chemicaliënlijst daar wordt opgebouwd. */
+const RECHYD=[['Na₂CO₃',[['watervrij','Na₂CO₃',105.99],['monohydraat (·H₂O)','Na₂CO₃·H₂O',124.00],['decahydraat (·10H₂O, soda)','Na₂CO₃·10H₂O',286.14]]]
+];
 const RECIPES={
   trisnacl:[['Tris (base)',121.14,50,'mM'],['NaCl',58.44,150,'mM']],
   pbs:[['NaCl',58.44,137,'mM'],['KCl',74.55,2.7,'mM'],['Na₂HPO₄',141.96,10,'mM'],['KH₂PO₄',136.09,1.8,'mM']],
@@ -77,6 +81,25 @@ const RECSRC={
   lb:'Miller, Experiments in Molecular Genetics (1972): 10 g trypton, 5 g gistextract en 10 g NaCl per liter. De variant van Lennox (Virology 1:190–206, 1955) heeft 5 g NaCl.',
   lbagar:'LB volgens Miller met 15 g agar per liter (Sambrook & Russell, Molecular Cloning, 3e druk).',
   soc:'Hanahan, J Mol Biol 166:557–580 (1983): 2% trypton, 0,5% gistextract, 10 mM NaCl, 2,5 mM KCl, 10 mM MgCl₂, 10 mM MgSO₄ en 20 mM glucose.'
+};
+/* hoe je het steriel krijgt, of waarom je dat juist niet zo doet (S39) */
+const RECSTER={
+  trisnacl:'Autoclaveerbaar: 15 minuten op 121 °C.',
+  pbs:'Autoclaveerbaar: 15 minuten op 121 °C. Fosfaatzouten kunnen bij het autoclaveren uitzakken; schud de fles na het afkoelen.',
+  tbs:'Autoclaveerbaar: 15 minuten op 121 °C.',
+  tbst:'Niet autoclaveren: Tween 20 breekt af bij hitte. Maak de buffer vers, of autoclaveer de TBS en voeg de Tween daarna toe.',
+  te:'Autoclaveerbaar: 15 minuten op 121 °C.',
+  tbe10:'Autoclaveerbaar, maar niet nodig: bewaar de 10× voorraad bij kamertemperatuur en gooi hem weg als er kristallen of troebeling in zitten.',
+  tae50:'Autoclaveren is niet nodig. Voeg de ijsazijn toe in een zuurkast en autoclaveer die niet mee.',
+  ssc20:'Autoclaveerbaar: 15 minuten op 121 °C.',
+  laemmli10:'Niet autoclaveren: SDS schuimt over en is hier niet nodig. Bewaar bij kamertemperatuur, want SDS slaat in de kou uit.',
+  towbin:'Nooit autoclaveren: methanol is brandbaar. Maak de buffer vers en bewaar hem gekoeld en gesloten.',
+  carbonaat:'Niet autoclaveren: de buffer verliest CO₂ en de pH loopt op. Filtreer steriel over 0,22 µm als het steriel moet, en maak hem anders vers.',
+  citraat:'Autoclaveerbaar: 15 minuten op 121 °C. Voeg Tween 20 pas daarna toe.',
+  fosfaat:'Autoclaveerbaar: 15 minuten op 121 °C; controleer de pH daarna nog een keer.',
+  lb:'Autoclaveer 15 minuten op 121 °C. Antibiotica zijn hittelabiel: die gaan er pas in onder de 50 °C, steriel gefiltreerd over 0,22 µm.',
+  lbagar:'Autoclaveer 15 minuten op 121 °C. Laat afkoelen tot ongeveer 50 °C voordat je antibiotica toevoegt en de platen uitgiet; warmer breekt het antibioticum af, kouder begint de agar al te stijven.',
+  soc:'Autoclaveer het medium zonder de glucose. Voeg de glucose daarna toe als steriel gefiltreerde 1 M oplossing: bij autoclaveren karameliseert hij en reageert hij met de aminozuren.'
 };
 const RECKEYS=['trisnacl','pbs','tbs','tbst','te','tbe10','tae50','ssc20','laemmli10','towbin',
   'carbonaat','citraat','fosfaat','lb','lbagar','soc','leeg'];
