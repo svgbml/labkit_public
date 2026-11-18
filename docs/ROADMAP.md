@@ -52,7 +52,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | S21 | 13 | Shared layout for picture tools: preview left/top, options panel, export bar (PNG/SVG/copy/print) | ✅ `.picwrap` + `data-picbar` in `tools/nt/01_pic.js`; export bar PNG/SVG/copy/print, with a real canvas→SVG recorder (vectors, not a wrapped bitmap). Gelplanner converted |
 | S22 | 13 | Move dilution scheme, pipetting scheme and PCR programme onto the shared layout | ✅ `pverd`, `ppip` and `pprog` on `.picwrap` with the shared export bar; stacking breakpoint raised to 1100 px so the options column stays wide enough |
 | S23 | 13 | Move staining scheme and plate layout onto the shared layout | ✅ `stain` on `.picwrap`; `plaat` keeps its editor layout (its interactive plate is the preview) but gets the shared bar, as do the drawings in `oplossing`, `bpa`, `qplate`, `plan` and `stat` — every drawing in the app now exports the same way |
-| S24 | 34, 225 | Dilution series drawing: tubes, arrows, volumes, colour fading | Drawing in the dilution scheme |
+| S24 | 34, 225 | Dilution series drawing: tubes, arrows, volumes, colour fading | ✅ Tubes, arrows, volumes, fading and plating dishes were already drawn by earlier work; added a series colour (via a new `col` argument on `pTube`) and a note that the fade is indicative, not proportional |
 | S25 | 35, 227 | PCR programme as a temperature–time graph with bracketed cycles | Graph export |
 | S26 | 36, 229 | Staining protocol as an illustrated timeline | Timeline export |
 | S27 | 33, 192 | Tube rack picture for master mixes (PCR mix, pipetting scheme) | Rack drawn with labels and volumes |

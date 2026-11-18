@@ -1274,9 +1274,10 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
         <div class="f"><label for="pv-pv">Uitplaatvolume</label><div class="inu"><input id="pv-pv" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
         <div class="f" style="grid-column:1/-1"><label for="pv-labels">Eigen buislabels (komma-gescheiden, leeg = automatisch)</label><input id="pv-labels" class="txt" placeholder="bijv. stock, A, B, C, D, E, F"></div>
         <div class="f" style="grid-column:1/-1"><label for="pv-note">Eigen tekst onder het schema</label><textarea id="pv-note" rows="2" placeholder="Bijv. incubatie, opmerkingen of verwijzing naar het protocol"></textarea></div>
+        <div class="f"><label for="pv-col">Kleur van de reeks</label><input type="color" id="pv-col" value="#1558b0" style="width:100%;height:32px;padding:2px"></div>
         <label class="chk" for="pv-auto" style="grid-column:1/-1"><input type="checkbox" id="pv-auto" checked> Standaardtoelichting tonen</label>
       </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Zet "Uitplaten" op 0 als je geen platen wilt tekenen. Uit de laatste buis houd je het overdrachtsvolume over; dat staat als opmerking onder het schema.</p>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De kleur in de buizen vervaagt per stap, maar niet op schaal: bij een factor 10 zou de kleur na twee stappen al onzichtbaar zijn. Lees de concentratie dus onder de buis, niet uit de kleur. Zet "Uitplaten" op 0 als je geen platen wilt tekenen. Uit de laatste buis houd je het overdrachtsvolume over; dat staat als opmerking onder het schema.</p>
     </div>
   </div>
 </section>
@@ -3842,7 +3843,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=0628a20397"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=1900e3506b"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -5690,9 +5691,9 @@ function pNotes(pref,W){ const el=$('#'+pref+'-note'); const t=el?el.value:''; c
 const pAuto=pref=>{ const el=$('#'+pref+'-auto'); return !el||el.checked; };
 function pDrawNotes(x,lines,y){ x.textAlign='left'; x.fillStyle=PCOL.ink; x.font='12.5px '+PFONT(); lines.forEach((l,i)=>x.fillText(l,20,y+i*17)); }
 function pArrow(x,x0,y0,x1,y1,col){ x.strokeStyle=col; x.fillStyle=col; x.lineWidth=1.6; x.beginPath(); x.moveTo(x0,y0); x.quadraticCurveTo((x0+x1)/2,y0-28,x1,y1); x.stroke(); const a=Math.atan2(y1-(y0-14),x1-(x0+x1)/2); x.beginPath(); x.moveTo(x1,y1); x.lineTo(x1-8*Math.cos(a-0.4),y1-8*Math.sin(a-0.4)); x.lineTo(x1-8*Math.cos(a+0.4),y1-8*Math.sin(a+0.4)); x.closePath(); x.fill(); }
-function pTube(x,cx,top,h,w,fill,alpha){ const bw=w/2; x.lineWidth=1.6; x.strokeStyle=PCOL.ink;
+function pTube(x,cx,top,h,w,fill,alpha,col){ const bw=w/2; x.lineWidth=1.6; x.strokeStyle=PCOL.ink;
   const body=()=>{ x.beginPath(); x.moveTo(cx-bw,top); x.lineTo(cx-bw,top+h*0.62); x.lineTo(cx,top+h); x.lineTo(cx+bw,top+h*0.62); x.lineTo(cx+bw,top); };
-  if(fill>0){ x.save(); body(); x.closePath(); x.clip(); x.fillStyle=`rgba(${hexRgb(PCOL.liquid).join(',')},${alpha})`; x.fillRect(cx-bw-2,top+h*(1-fill),w+4,h*fill+2); x.restore(); }
+  if(fill>0){ x.save(); body(); x.closePath(); x.clip(); x.fillStyle=`rgba(${hexRgb(col||PCOL.liquid).join(',')},${alpha})`; x.fillRect(cx-bw-2,top+h*(1-fill),w+4,h*fill+2); x.restore(); }
   body(); x.stroke(); x.fillStyle=PCOL.soft; x.strokeStyle=PCOL.ink; x.beginPath(); x.rect(cx-bw-4,top-7,w+8,7); x.fill(); x.stroke(); }
 const supNum=n=>String(n).replace(/-/g,'⁻').replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);
 function pNum(v){ if(!isFinite(v)) return '–'; if(v===0) return '0'; const e=Math.floor(Math.log10(Math.abs(v))); if(e>=-2&&e<4) return sig(v,3); const m=v/10**e; const ms=NL(Number(m.toFixed(2)),2); return (ms==='1'?'':ms+' × ')+'10'+supNum(e); }
@@ -5704,9 +5705,10 @@ calc.pverd=function(){
   if(!(f>1)||!(V>0)){ out.innerHTML=note('bad','Factor moet groter dan 1 zijn en het volume groter dan 0.'); return; }
   const tr=V/f, dv=V-tr, step=118, W=Math.max(520,70+(n+1)*step), NL_=pNotes('pv',W), AU=pAuto('pv'), NH=NL_.length?NL_.length*17+10:0, H=(title?40:0)+(np?405:300)-(AU?0:20)+NH;
   const own=$('#pv-labels').value.split(',').map(t=>t.trim()); const label=i=>own[i]?own[i]:i===0?'stock':lab==='exp'&&f===10?'10'+supNum(-i):lab==='num'?String(i):'1 : '+pNum(f**i).replace(/ /g,'');
+  const colv=$('#pv-col').value, col=/^#[0-9a-f]{6}$/i.test(colv)?colv:PCOL.liquid;
   pShow($('#pv-cv'),W,H,(x)=>{ const t0=pTitle(x,title,W), top=t0+70, th=110, tw=40;
     for(let i=0;i<=n;i++){ const cx=50+i*step+20; const fillA=Math.max(0.06,0.55*Math.pow(1/f,i*0.45));
-      pTube(x,cx,top,th,tw,0.6,i===0?0.6:fillA);
+      pTube(x,cx,top,th,tw,0.6,i===0?0.6:fillA,col);
       x.fillStyle=PCOL.ink; x.textAlign='center'; x.font='600 13px '+PFONT(); x.fillText(label(i),cx,top-22);
       x.font='12px '+PFONT(); x.fillStyle=PCOL.ink; x.fillText(isFinite(c0)?pNum(c0*f**-i):'',cx,top+th+20); x.fillStyle=PCOL.muted; x.fillText(isFinite(c0)?cu:'',cx,top+th+36);
       if(i>0){ x.fillStyle=PCOL.muted; x.font='11.5px '+PFONT(); x.fillText(vol(dv),cx,top+th+58); (()=>{ const ws=dil.split(' '); let ln='', yy=top+th+73, k=0; ws.forEach(w=>{ if((ln+' '+w).trim().length>14&&ln&&k<1){ x.fillText(ln,cx,yy); yy+=14; ln=w; k++; } else ln=(ln+' '+w).trim(); }); x.fillText(ln.length>16?ln.slice(0,15)+'…':ln,cx,yy); })();
