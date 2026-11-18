@@ -44,7 +44,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | S17 | 25, 26 | Agarose % advisor from the fragment range and a casting recipe card for the tray size | ✅ Percentage advice from the expected bands (with "use this"), casting card with gel volume, agarose, buffer and stain; printable via the toolbar print button |
 | S18 | 27 | Run time estimate from voltage, length and fragment sizes | ✅ Field strength + estimated run time as a range, "stop when the front is at … cm", warnings above 10 and below 3 V/cm and when the smallest fragment outruns the dye front |
 | S19 | 228 | Gel loading scheme (`plaad`) opens in / is replaced by the Gelplanner; move its tests | ✅ `plaad` removed; `#plaad` redirects to `#gplan` via a `GONE` map; workflow, next-tool map, stages and icons follow. It had no validation cases of its own; 267/267 still pass |
-| S20 | 203 | SDS-PAGE samples tool sends samples to the Gelplanner (SDS mode) | One click from SDS samples to diagram |
+| S20 | 203 | SDS-PAGE samples tool sends samples to the Gelplanner (SDS mode) | ✅ "Stuur monsters door naar: Gelplanner" under the SDS table; sets SDS mode, ladder lane and comb, and puts the dye strength at 1× because the sample buffer is already in the loading volume |
 
 ## Phase 3: preparation, picture tools and plates (16 steps)
 | Step | Ideas | What | Done when |
