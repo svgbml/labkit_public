@@ -228,7 +228,7 @@ nav.side > a.nav-col{display:none!important}
 .picwrap .pic-prev{position:sticky;top:16px}
 .pic-bar{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .pic-bar button{font-size:13px}
-@media (max-width:1000px){ .picwrap{grid-template-columns:1fr} .picwrap .pic-prev{position:static} }
+@media (max-width:1100px){ .picwrap{grid-template-columns:1fr} .picwrap .pic-prev{position:static} }
 /* paneel "wat is er nieuw" */
 .lk-news section{margin:0 0 14px}
 .lk-news h4{margin:0 0 4px;font-size:13.5px;font-weight:700}
@@ -1258,7 +1258,8 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-pverd" data-tool="pverd">
   <header class="tool-head"><h2>Verdunningsschema</h2>
   <p>Tekent een seriële verdunningsreeks met buizen, overdrachtsvolumes en concentraties, eventueel met uitplaten. Download als afbeelding voor je protocol of labjournaal.</p></header>
-  <div class="grid2">
+  <div class="picwrap">
+    <div class="pic-prev"><div class="result"><canvas id="pv-cv"></canvas><div class="pic-bar" data-picbar="pv"></div><div id="pv-out"></div></div></div>
     <div class="panel">
       <div class="fields">
         <div class="f" style="grid-column:1/-1"><label for="pv-title">Titel</label><input id="pv-title" class="txt" value="Decimale verdunningsreeks"></div>
@@ -1277,7 +1278,6 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Zet "Uitplaten" op 0 als je geen platen wilt tekenen. Uit de laatste buis houd je het overdrachtsvolume over; dat staat als opmerking onder het schema.</p>
     </div>
-    <div class="result"><canvas id="pv-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="pv">Download PNG</button></div><div id="pv-out"></div></div>
   </div>
 </section>
 
@@ -1285,7 +1285,8 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-ppip" data-tool="ppip">
   <header class="tool-head"><h2>Pipetteerschema</h2>
   <p>Algemeen pipetteerschema voor elke reactie of mengsel: componenten in rijen, buizen in kolommen. Geef per component een volume, of een stock- en eindconcentratie zodat Labkit het volume uitrekent. Eén component vult aan tot het eindvolume; optioneel met mastermix.</p></header>
-  <div class="stack">
+  <div class="picwrap">
+    <div class="pic-prev"><div class="result"><canvas id="pp-cv"></canvas><div class="pic-bar" data-picbar="pp"></div><div id="pp-out"></div></div></div>
     <div class="panel">
       <div class="fields">
         <div class="f" style="grid-column:span 2"><label for="pp-preset">Sjabloon</label><div class="row" style="gap:8px;flex-wrap:nowrap"><select id="pp-preset" style="flex:1;min-width:0"><option value="leeg">Leeg</option><option value="pcr" selected>PCR (Taq, 25 µL)</option><option value="qpcr">qPCR (SYBR Green, 20 µL)</option><option value="digest">Restrictiedigest (50 µL)</option><option value="ligatie">Ligatie (T4, 20 µL)</option><option value="bca">BSA-standaardreeks (BCA)</option><option value="medium">Kweekmedium met supplementen</option></select><button type="button" id="pp-load">Laden</button></div></div>
@@ -1301,7 +1302,6 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       <div class="row" style="margin-top:10px"><button type="button" id="pp-addr">+ Component</button><button type="button" id="pp-addc">+ Buis</button><button type="button" id="pp-delc">− Laatste buis</button></div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0"><b>Soort</b>: bij <i>volume</i> typ je per buis het volume; bij <i>eindconc.</i> vul je de stockconcentratie in en per buis de gewenste eindconcentratie (zelfde eenheid), dan volgt het volume uit C₁V₁ = C₂V₂; <i>aanvullen</i> vult de buis aan tot het eindvolume (laat de cellen leeg). Componenten met "nee" bij <i>In mix</i> pipetteer je per buis apart. Je kunt een blok uit Excel plakken.</p>
     </div>
-    <div class="result"><canvas id="pp-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="pp">Download PNG</button></div><div id="pp-out"></div></div>
   </div>
 </section>
 
@@ -1309,7 +1309,8 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-pprog" data-tool="pprog">
   <header class="tool-head"><h2>PCR-programma</h2>
   <p>Tekent het temperatuurprofiel van een PCR- of incubatieprogramma met de cyclus aangegeven, zoals in protocollen en kitbijsluiters.</p></header>
-  <div class="grid2">
+  <div class="picwrap">
+    <div class="pic-prev"><div class="result"><canvas id="pg-cv"></canvas><div class="pic-bar" data-picbar="pg"></div><div id="pg-out"></div></div></div>
     <div class="panel">
       <div class="fields">
         <div class="f" style="grid-column:1/-1"><label for="pg-title">Titel</label><input id="pg-title" class="txt" value="PCR-programma"></div>
@@ -1322,7 +1323,6 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
       <div class="row" style="margin-top:10px"><button type="button" id="pg-add">+ Stap</button><button type="button" id="pg-from">Neem over uit PCR-cyclus</button></div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De aangevinkte stappen vormen samen de cyclus en moeten aaneengesloten zijn.</p>
     </div>
-    <div class="result"><canvas id="pg-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="pg">Download PNG</button></div><div id="pg-out"></div></div>
   </div>
 </section>
 

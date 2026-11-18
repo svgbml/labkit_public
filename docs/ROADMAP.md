@@ -50,7 +50,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Step | Ideas | What | Done when |
 |---|---|---|---|
 | S21 | 13 | Shared layout for picture tools: preview left/top, options panel, export bar (PNG/SVG/copy/print) | ✅ `.picwrap` + `data-picbar` in `tools/nt/01_pic.js`; export bar PNG/SVG/copy/print, with a real canvas→SVG recorder (vectors, not a wrapped bitmap). Gelplanner converted |
-| S22 | 13 | Move dilution scheme, pipetting scheme and PCR programme onto the shared layout | 3 tools converted, tests pass |
+| S22 | 13 | Move dilution scheme, pipetting scheme and PCR programme onto the shared layout | ✅ `pverd`, `ppip` and `pprog` on `.picwrap` with the shared export bar; stacking breakpoint raised to 1100 px so the options column stays wide enough |
 | S23 | 13 | Move staining scheme and plate layout onto the shared layout | All picture tools consistent |
 | S24 | 34, 225 | Dilution series drawing: tubes, arrows, volumes, colour fading | Drawing in the dilution scheme |
 | S25 | 35, 227 | PCR programme as a temperature–time graph with bracketed cycles | Graph export |
