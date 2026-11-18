@@ -56,7 +56,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | S25 | 35, 227 | PCR programme as a temperature–time graph with bracketed cycles | ✅ The graph with bracketed cycles existed; the x-axis is now a real time axis (step width ∝ duration, with a minimum so short steps stay readable), labels fitted to the step width, PNG/SVG export via the shared bar |
 | S26 | 36, 229 | Staining protocol as an illustrated timeline | ✅ The box grid became a horizontal timeline: bar width ∝ time, a reagent drop per step (outlined for rinse/decolourise), a time axis and the expected result; PNG/SVG via the shared bar |
 | S27 | 33, 192 | Tube rack picture for master mixes (PCR mix, pipetting scheme) | ✅ Shared `pRack` in `01_pic.js`; rack with master-mix tube + one tube per reaction in the PCR mix, and one tube per column in the pipetting scheme. Both capped at a maximum number of tubes |
-| S28 | 29 | Shared plate designer, part 1: plate formats 6–384, select and colour wells, legend | Designer component standalone |
+| S28 | 29 | Shared plate designer, part 1: plate formats 6–384, select and colour wells, legend | ✅ `plateDesigner()` in `tools/nt/02_plate.js`: own state per instance, formats 6–384, groups with legend, click and drag (mouse and touch), `get`/`set`/`draw`/`size`. Verified standalone; it gets its first mount at S33 |
 | S29 | 29 | Plate designer part 2: drag to fill replicates, auto-fill a dilution across a row | Drag-fill works with mouse and touch |
 | S30 | 30, 37 | Plate templates (standards in duplicate + blanks + samples) and A4 plate map print | Template + print |
 | S31 | 31, 32 | Pipetting order view and multichannel planning | Numbered fill order; row/column hints |
