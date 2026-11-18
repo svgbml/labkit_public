@@ -22,7 +22,7 @@ const STAGES={
   /* Kwaliteit */
   pipcal:'ua',westgard:'a',munc:'a',mval:'a',
   /* Protocollen */
-  pverd:'v',ppip:'v',pprog:'v',plaad:'v',stain:'vu',
+  pverd:'v',ppip:'v',pprog:'v',plaad:'v',stain:'vu',gplan:'v',
   /* Bench */
   centrifuge:'u',timers:'u',plaat:'v',plan:'v',report:'a',pipkeus:'vu'
 };
