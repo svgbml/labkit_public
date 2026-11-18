@@ -38,7 +38,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Step | Ideas | What | Done when |
 |---|---|---|---|
 | S13 | 21 | New *Gelplanner* tool: gel tray, comb and wells drawn top-down; sample name, colour and volume per well | ✅ `tools/nt/48_gplan.*`: tray on scale (length capped), comb, wells with name/colour/volume, PNG export; `ET` gained a `col` colour column |
-| S14 | 21, 24 | Ladder drawn next to the wells; SDS-PAGE mode with prestained ladder look | Agarose and SDS-PAGE diagrams |
+| S14 | 21, 24 | Ladder drawn next to the wells; SDS-PAGE mode with prestained ladder look | ✅ Ladder strip beside the gel (log-linear positions), gel type agarose/SDS-PAGE with prestained ladder colours and the matching unit |
 | S15 | 22 | Predicted gel: bands from expected sizes, log migration per agarose % and ladder | Predicted gel image beside the plan |
 | S16 | 23, 28 | Well capacity check (comb, thickness) and loading dye volume + dye fronts on the prediction | Warning over capacity; dye fronts drawn |
 | S17 | 25, 26 | Agarose % advisor from the fragment range and a casting recipe card for the tray size | Recipe card printable |

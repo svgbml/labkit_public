@@ -4053,5 +4053,18 @@
 "Totaal te laden": "Total to load",
 "Volume per slotje is inclusief {*}.": "The volume per well includes {*}.",
 "Volume per slotje is inclusief de laadbuffer.": "The volume per well includes the loading dye.",
-"Maten van veelgebruikte geldragers en kammen van Bio-Rad (Mini-Sub Cell GT en Wide Mini-Sub Cell GT, instructiehandleiding) en Thermo Scientific (Owl EasyCast B{#}/B{#}). Het slotvolume volgt uit de slotbreedte, de kamdikte en de geldikte.": "Sizes of common gel trays and combs from Bio-Rad (Mini-Sub Cell GT and Wide Mini-Sub Cell GT, instruction manual) and Thermo Scientific (Owl EasyCast B{#}/B{#}). The well volume follows from the well width, the comb thickness and the gel thickness."
+"Maten van veelgebruikte geldragers en kammen van Bio-Rad (Mini-Sub Cell GT en Wide Mini-Sub Cell GT, instructiehandleiding) en Thermo Scientific (Owl EasyCast B{#}/B{#}). Het slotvolume volgt uit de slotbreedte, de kamdikte en de geldikte.": "Sizes of common gel trays and combs from Bio-Rad (Mini-Sub Cell GT and Wide Mini-Sub Cell GT, instruction manual) and Thermo Scientific (Owl EasyCast B{#}/B{#}). The well volume follows from the well width, the comb thickness and the gel thickness.",
+"Geltype": "Gel type",
+"Agarose (DNA)": "Agarose (DNA)",
+"SDS-PAGE (eiwit)": "SDS-PAGE (protein)",
+"looprichting eiwit": "protein running direction",
+"{#} bp-ladder ({#}–{#} bp)": "{#} bp ladder ({#}–{#} bp)",
+"NEB {#} bp ({#}–{#} bp)": "NEB {#} bp ({#}–{#} bp)",
+"{#} bp plus ({#}–{#} bp)": "{#} bp plus ({#}–{#} bp)",
+"{#} kb-ladder ({#} {#}–{#} bp)": "{#} kb ladder ({#} {#}–{#} bp)",
+"Precision Plus Dual Color ({#}–{#} kDa)": "Precision Plus Dual Color ({#}–{#} kDa)",
+"PageRuler Plus Prestained ({#}–{#} kDa)": "PageRuler Plus Prestained ({#}–{#} kDa)",
+"{#} banden, {#}–{#} bp": "{#} bands, {#}–{#} bp",
+"{#} banden, {#}–{#} kDa": "{#} bands, {#}–{#} kDa",
+"Bandposities volgen uit lineaire interpolatie van log(grootte) tegen de loopafstand tussen de grootste en de kleinste band van de gekozen ladder; dat is hetzelfde verband als de standaardcurve in <i>Agarosegel &amp; bandgrootte</i>. Prestained eiwitladders: Bio-Rad Precision Plus Protein Dual Color (alle banden blauw, {#} en {#} kDa rood) en Thermo Scientific PageRuler Plus Prestained (alle banden blauw, {#} kDa groen en {#} kDa rood). Maten van veelgebruikte geldragers en kammen van Bio-Rad (Mini-Sub Cell GT en Wide Mini-Sub Cell GT, instructiehandleiding) en Thermo Scientific (Owl EasyCast B{#}/B{#}). Het slotvolume volgt uit de slotbreedte, de kamdikte en de geldikte.": "Band positions follow from linear interpolation of log(size) against the migration distance between the largest and the smallest band of the chosen ladder; that is the same relation as the standard curve in <i>Agarose gel &amp; band size</i>. Prestained protein ladders: Bio-Rad Precision Plus Protein Dual Color (all bands blue, {#} and {#} kDa red) and Thermo Scientific PageRuler Plus Prestained (all bands blue, {#} kDa green and {#} kDa red). Sizes of common gel trays and combs from Bio-Rad (Mini-Sub Cell GT and Wide Mini-Sub Cell GT, instruction manual) and Thermo Scientific (Owl EasyCast B{#}/B{#}). The well volume follows from the well width, the comb thickness and the gel thickness."
 }

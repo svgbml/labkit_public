@@ -5,6 +5,10 @@
     <div class="panel">
       <div class="fields">
         <div class="f" style="grid-column:1/-1"><label for="gp-title">Titel</label><input id="gp-title" class="txt" value="1% agarosegel, 1× TAE, 100 V"></div>
+        <div class="f"><label for="gp-type">Geltype</label><select id="gp-type" style="width:100%"><option value="dna" selected>Agarose (DNA)</option><option value="sds">SDS-PAGE (eiwit)</option></select></div>
+        <div class="f"><label for="gp-lad">Ladder</label><select id="gp-lad" style="width:100%"></select></div>
+        <div class="f"><label for="gp-type">Geltype</label><select id="gp-type" style="width:100%"><option value="dna" selected>Agarose (DNA)</option><option value="sds">SDS-PAGE (eiwit)</option></select></div>
+        <div class="f"><label for="gp-lad">Ladder</label><select id="gp-lad" style="width:100%"></select></div>
         <div class="f"><label for="gp-tray">Geldrager</label><select id="gp-tray" style="width:100%">
           <option value="7x7">Mini, 7 × 7 cm</option>
           <option value="7x10" selected>Mini, 7 × 10 cm</option>
@@ -23,5 +27,5 @@
     </div>
     <div class="result"><canvas id="gp-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="gp">Download PNG</button></div><div id="gp-out"></div></div>
   </div>
-  <p class="src">Maten van veelgebruikte geldragers en kammen van Bio-Rad (Mini-Sub Cell GT en Wide Mini-Sub Cell GT, instructiehandleiding) en Thermo Scientific (Owl EasyCast B1/B2). Het slotvolume volgt uit de slotbreedte, de kamdikte en de geldikte.</p>
+  <p class="src">Bandposities volgen uit lineaire interpolatie van log(grootte) tegen de loopafstand tussen de grootste en de kleinste band van de gekozen ladder; dat is hetzelfde verband als de standaardcurve in <i>Agarosegel &amp; bandgrootte</i>. Prestained eiwitladders: Bio-Rad Precision Plus Protein Dual Color (alle banden blauw, 75 en 25 kDa rood) en Thermo Scientific PageRuler Plus Prestained (alle banden blauw, 70 kDa groen en 25 kDa rood). Maten van veelgebruikte geldragers en kammen van Bio-Rad (Mini-Sub Cell GT en Wide Mini-Sub Cell GT, instructiehandleiding) en Thermo Scientific (Owl EasyCast B1/B2). Het slotvolume volgt uit de slotbreedte, de kamdikte en de geldikte.</p>
 </section>
