@@ -3,9 +3,9 @@
 The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps of about 30 minutes each**. Each step ends with a working app and runs `python tools/check.py --quick` (the full `tools/check.py` at the end of every phase). Then you can say "do step S12" or "do the next 3 steps".
 
 **Status:** ✅ done · ⏳ planned · ✖ dropped
-**Total:** 201 steps (S1–S201) ≈ 100 hours. Every chosen idea number appears in at least one step. Steps within a phase are in a sensible order; steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 263 steps (S1–S263) ≈ 130 hours. Every chosen idea number appears in at least one step. Steps within a phase are in a sensible order; steps marked *(needs Sx)* depend on an earlier step.
 
-**Progress:** S0 done. **Phase 1 (S1–S12) done**, **phase 2 (S13–S20) done**, **phase 3 (S21–S36) done**, phase 4 (S37–S47) next. After each phase the full `python tools/check.py` passed (validation, layout in Dutch and English, robustness, translations, startup). Phases 12–14 (S147–S201) were added later and have not been started.
+**Progress:** S0 done. **Phase 1 (S1–S12) done**, **phase 2 (S13–S20) done**, **phase 3 (S21–S36) done**, phase 4 (S37–S47) next. After each phase the full `python tools/check.py` passed (validation, layout in Dutch and English, robustness, translations, startup). Phases 12–14 (S147–S201) were added later and have not been started. Phase 15 (S202–S263) is the Vue migration of the tools that are not on Vue yet; four tools and the layer underneath are done (see `CLAUDE.md`).
 
 ## Decisions
 - **Vue 3 (besloten tijdens de run van fase 4).** De app gaat op Vue, met Vue als los bestand in `web/vendor/` zodat er geen CDN en geen bouwstap bij komt en de app vanaf `file://` blijft werken. De omzetting gaat per tool; de rest van de app blijft intussen werken. De vertaallaag van de DOM kan niet in een Vue-boom komen, dus een component vertaalt zelf met `t()` / `tHtml()` tegen dezelfde `i18n/en.json`, en `tests/i18n_vue.py` controleert dat statisch. Een omgezette tool houdt zijn element-id's en zijn validatiegeval, zodat delen, ongedaan maken, de invoeropslag en de validatie blijven werken. Zie `CLAUDE.md`.
@@ -335,6 +335,100 @@ Ideas #369–#390. **S191 is cheap and independent**, so it is a good one to pul
 | S201 | 389, 390 | The confirmation note on every looked-up genotype, and exporting the cache as an offline pack | Offline pack reopens with the switch off |
 
 ---
+
+## Phase 15: the remaining tools onto Vue (62 steps)
+
+Vier tools staan al op Vue (*Significante cijfers & afronden*, *Welke pipet?*,
+*Assaykwaliteit (Z′-factor)*, *Restrictiedigestie*) en de laag eronder staat er: Vite bouwt
+`src/` tot één bundel, `src/lib/ui.js` heeft de gedeelde componenten en `t()` / `tHtml()`
+gebruiken dezelfde woordenlijst als de rest van de app. Zie `CLAUDE.md`. Hieronder de 81 tools
+die nog over zijn, plus de app-schil.
+
+**Hoe een stap eruitziet.** Dit is een verhuizing, geen herontwerp:
+- Het **rekenwerk gaat ongewijzigd mee.** Die functies zitten achter de validatiegevallen met
+  gepubliceerde referentiewaarden; opnieuw uitschrijven levert niets op en zet die waarden op
+  het spel. Alleen de weergave wordt opnieuw opgebouwd, met de gedeelde componenten in plaats
+  van een string HTML.
+- De **element-id's blijven** zoals ze zijn. Delen via een link, ongedaan maken, de
+  invoeropslag en `tests/validate.py` zetten `.value` en sturen een `input`-event; verander je
+  een id, dan breekt dat alles.
+- De **kop en de bronregel blijven gewone HTML** in `tools/nt/<tool>.html`; Vue krijgt alleen
+  de host ertussen. Zo blijven die vertaalsleutels gelden.
+- Een **tekening op een canvas blijft met de tekencontext gemaakt.** Vue beheert de velden
+  eromheen en tekent na elke render opnieuw (zie *Assaykwaliteit* als voorbeeld).
+- Tekst die eerst deel was van een groter element heeft daarna vaak een **eigen vertaalsleutel**
+  nodig; `tests/i18n_vue.py` wijst die aan.
+- **Klaar is:** dezelfde uitkomsten, het validatiegeval van de tool nog groen, en
+  `python tools/check.py` groen in het Nederlands en het Engels.
+
+De stappen staan per navgroep bij elkaar, zodat je een hele groep in één keer kunt afmaken.
+De drie zwaarste tools (*Statistiek*, *Gelplanner*, *Gelfoto-editor*) zijn in twee stappen
+gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half af te maken.
+
+| Step | Ideas | What | Done when |
+|---|---|---|---|
+| S202 | — | *Oplossing & buffer* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S203 | — | *Buffercapaciteit*, *Oplosbaarheid (Ksp)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S204 | — | *Verdunning*, *Osmolariteit & ionsterkte* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S205 | — | *Titratiecurve*, *pH-buffer* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S206 | — | *Waterhardheid (EDTA-titratie)*, *Molmassa* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S207 | — | *Kjeldahl (eiwit uit stikstof)*, *Eenheden omrekenen* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S208 | — | *Enzymkinetiek* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S209 | — | *Standaardcurve* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S210 | — | *ELISA-plaatanalyse* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S211 | — | *Interne standaard & standaardadditie* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S212 | — | *Eiwitzuiveringstabel* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S213 | — | *Chromatografie (HPLC/GC)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S214 | — | *Spectrofotometrie*, *Dosis-respons (IC50/EC50)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S215 | — | *Verdunningsreeks & KVE* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S216 | — | *Flowcytometrie (panel & controles)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S217 | — | *Antibiotica-gevoeligheid* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S218 | — | *Groeicurve* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S219 | — | *Transfectie (Lipofectamine 3000)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S220 | — | *Telkamer*, *Celpassageplanner* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S221 | — | *Desinfectietest (log-reductie)*, *Sterilisatie (D, z, F₀)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S222 | — | *Groeicurves vergelijken*, *Viabiliteit (trypaanblauw)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S223 | — | *Cellen uitzaaien*, *MPN (meest waarschijnlijk aantal)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S224 | — | *Microscoop-kalibratie*, *Inoculum (OD verdunnen)*, *Teller* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S225 | — | *Gelfoto-editor* naar Vue, deel 1: de velden en de uitkomsten; het beeldwerk op het canvas blijft | Zelfde uitkomsten; validatie blijft staan |
+| S226 | — | *Gelfoto-editor* naar Vue, deel 2: de laanbewerking en de ladderlabels | Zelfde uitkomsten; validatie blijft staan |
+| S227 | — | *PCR-cyclus* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S228 | — | *DNA-kwantificatie* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S229 | — | *Agarosegel & bandgrootte* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S230 | — | *qPCR-plaatindeling* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S231 | — | *Transformatie & blauw-wit* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S232 | — | *qPCR-analyse (ΔΔCt)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S233 | — | *PCR-mastermix* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S234 | — | *cDNA-synthese (RT-mix)*, *Gradiënt-PCR* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S235 | — | *RNA-kwaliteit*, *qPCR-smeltcurve* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S236 | — | *SDS-PAGE monsters*, *Ligatie* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S237 | — | *Western blot-normalisatie*, *Primers oplossen* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S238 | — | *Bloedalcohol (Widmark)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S239 | — | *Mengprofiel & LR* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S240 | — | *Entomologie (graaddagen)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S241 | — | *Lichaamslengte uit botten* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S242 | — | *Glasvergelijking (brekingsindex)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S243 | — | *STR-profielcontrole* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S244 | — | *Bloedvlekpatronen* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S245 | — | *Tijd sinds overlijden* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S246 | — | *Verwantschapsindex*, *Hardy-Weinberg & forensische kengetallen* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S247 | — | *Forensische matchkans*, *Y-STR / mtDNA-frequentie* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S248 | — | *Statistiek* naar Vue, deel 1: de toetsen t, ANOVA en Kruskal-Wallis | Zelfde uitkomsten; validatie blijft staan |
+| S249 | — | *Statistiek* naar Vue, deel 2: de rest: chi-kwadraat, regressie, power en de post-hoc | Zelfde uitkomsten; validatie blijft staan |
+| S250 | — | *Overlevingscurve (Kaplan-Meier)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S251 | — | *ROC-curve & diagnostische test*, *Bland-Altman (methodevergelijking)* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S252 | — | *Westgard / Levey-Jennings* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S253 | — | *Methodevalidatie* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S254 | — | *Meetonzekerheid*, *Pipetkalibratie* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S255 | — | *Gelplanner* naar Vue, deel 1: de gel van bovenaf en de laantabel | Zelfde uitkomsten; validatie blijft staan |
+| S256 | — | *Gelplanner* naar Vue, deel 2: de verwachte gel, het slotvolume en de looptijd | Zelfde uitkomsten; validatie blijft staan |
+| S257 | — | *Pipetteerschema* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S258 | — | *PCR-programma* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S259 | — | *Verdunningsschema* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S260 | — | *Kleuringsschema* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S261 | — | *Experimentplanner*, *Rapport / labjournaal* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S262 | — | *Plaatindeling*, *Centrifuge*, *Timers* naar Vue | Zelfde uitkomsten; validatie blijft staan |
+| S263 | — | Startpagina en Instellingen naar Vue (de app-schil, geen rekentool) | Zoeken, fasen, tegels en instellingen werken |
 
 ## Suggested start
 1. **S1–S3** stages and colours (the new structure everything else hangs on).
