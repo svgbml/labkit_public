@@ -24,11 +24,31 @@ function gpLadFill() { const sel = $('#gp-lad'), cur = sel.value, L = GPLAD[gpMo
   sel.value = L.some(([k]) => k === cur) ? cur : L[0][0]; }
 const gpTray = () => GPTRAY[$('#gp-tray').value] || GPTRAY['7x10'];
 const gpTeeth = () => Math.max(1, Math.min(30, Math.round(num($('#gp-comb').value) || 10)));
-const gpT = ET('gp-tbl', [{h: 'Monster', t: 'txt', w: 150}, {h: 'Volume (µL)', t: 'num', w: 72},
+const gpT = ET('gp-tbl', [{h: 'Monster', t: 'txt', w: 150}, {h: 'Monster (µL)', t: 'num', w: 72},
   {h: 'Verwachte banden', t: 'txt', w: 120}, {h: 'Kleur', t: 'col', d: '#1558b0'}],
   [['Ladder', '5', '', '#c2410c'], ['Monster 1', '10', '500', '#1558b0'],
     ['Monster 2', '10', '1500 700', '#1558b0'], ['Negatieve controle', '10', '', '#5f6b7a']], 'gplan');
 const gpLadLane = () => Math.max(0, Math.min(30, Math.round(num($('#gp-ladlane').value) || 0)));
+/* slotvolume uit de maten van kam en gel; 1 mm3 = 1 uL en een slotje wordt tot 80% gevuld */
+const GPFILL = 0.8, GPFLOOR = 1;
+function gpWell() { const w = num($('#gp-tooth').value), t = num($('#gp-thick').value), g = num($('#gp-gelmm').value), d = g - GPFLOOR;
+  if (!(w > 0) || !(t > 0) || !(d > 0)) return null;
+  const geom = w * t * d; return {geom, max: geom * GPFILL}; }
+/* laadbuffer: bij 6x hoort 1 deel buffer op 5 delen monster */
+const gpDyeX = () => { const x = num($('#gp-dyex').value); return x > 1 ? x : 0; };
+const gpDye = v => { const x = gpDyeX(); return x && isFinite(v) && v > 0 ? v / (x - 1) : 0; };
+/* kleurfronten in TAE/TBE: met welke fragmentgrootte loopt de kleurstof mee (bp) */
+const GPFRONT = [[0.5, 1000, 10000], [0.7, 700, 6000], [1.0, 300, 4000], [1.2, 200, 3000],
+  [1.5, 150, 1800], [2.0, 100, 750], [3.0, 50, 250]];
+function gpFronts(pct) { if (!(pct > 0)) return null;
+  const T = GPFRONT;
+  if (pct <= T[0][0]) return [T[0][1], T[0][2]];
+  if (pct >= T[T.length - 1][0]) return [T[T.length - 1][1], T[T.length - 1][2]];
+  for (let i = 1; i < T.length; i++) { if (pct > T[i][0]) continue;
+    const a = T[i - 1], b = T[i], f = (pct - a[0]) / (b[0] - a[0]);
+    const ip = (p, q) => 10 ** (Math.log10(p) + f * (Math.log10(q) - Math.log10(p)));
+    return [ip(a[1], b[1]), ip(a[2], b[2])]; }
+  return null; }
 
 calc.gplan = function () {
   const rows = etGet('gp-tbl'), teeth = gpTeeth(), [tw, tl] = gpTray();
@@ -67,8 +87,10 @@ calc.gplan = function () {
       if (!nm) continue;
       x.save(); x.translate(cx, gy - 14); x.rotate(-Math.PI / 4); x.textAlign = 'left';
       x.font = '12px ' + PFONT(); x.fillStyle = PCOL.ink; x.fillText(uv(nm), 0, 0); x.restore();
-      const v = num(r[1]);
-      if (isFinite(v) && v > 0) { x.fillStyle = PCOL.muted; x.font = '11px ' + PFONT(); x.textAlign = 'center'; x.fillText(`${NL(v, 1)} µL`, cx, gy + 52); }
+      const v = num(r[1]), dv = gpDye(v);
+      if (isFinite(v) && v > 0) { x.fillStyle = PCOL.muted; x.font = '11px ' + PFONT(); x.textAlign = 'center';
+        x.fillText(dv ? `${NL(v, 1)} + ${NL(dv, 1)} µL` : `${NL(v, 1)} µL`, cx, gy + 52);
+        const cap = gpWell(); if (cap && v + dv > cap.max) { x.fillStyle = PCOL.warn; x.font = '600 12px ' + PFONT(); x.fillText('!', cx, gy + 68); } }
     }
 
     /* ladder naast de gel: de banden zoals ze na het lopen zullen staan */
@@ -110,11 +132,17 @@ calc.gplan = function () {
 
   const used = lanes.filter(r => String(r[0] || '').trim());
   const vols = used.map(r => num(r[1])).filter(v => isFinite(v) && v > 0);
-  const bb = gpBands();
+  const bb = gpBands(), cap = gpWell();
+  const tot = vols.map(v => v + gpDye(v)), dyeTot = vols.reduce((a, v) => a + gpDye(v), 0);
   out.innerHTML = kv([['Gebruikte slotjes', `${used.length} van ${teeth}`],
-    ['Grootste laadvolume', vols.length ? NL(Math.max(...vols), 1) + ' µL' : '–'],
-    ['Totaal te laden', vols.length ? NL(vols.reduce((a, b) => a + b, 0), 1) + ' µL' : '–'],
+    ['Grootste laadvolume per slotje', tot.length ? NL(Math.max(...tot), 1) + ' µL' : '–'],
+    ['Totaal te laden', tot.length ? NL(tot.reduce((a, b) => a + b, 0), 1) + ' µL' : '–'],
+    ['Laadbuffer in totaal', dyeTot ? NL(dyeTot, 1) + ' µL' : '–'],
+    ['Slotvolume (tot 80% vullen)', cap ? `${NL(cap.max, 1)} µL van ${NL(cap.geom, 1)} µL` : '–'],
     ['Ladder', bb.length ? `${bb.length} banden, ${NL(bb[bb.length - 1], 0)}\u2013${NL(bb[0], 0)} ${gpUnit()}` : '\u2013']]);
+  if (cap) { const over = tot.filter(v => v > cap.max).length;
+    if (over) out.insertAdjacentHTML('beforeend', note('bad', `${over} laan(en) laden meer dan de ${NL(cap.max, 1)} µL die in een slotje past; het monster loopt dan over in de buurlaan.`)); }
+  else out.insertAdjacentHTML('beforeend', note('warn', 'Vul de maten van de kam en de gel in om het slotvolume te berekenen.'));
   gpPredict();
   if (rows.length > teeth) out.insertAdjacentHTML('beforeend', note('warn', `Er staan ${rows.length} lanen in de tabel maar de kam heeft ${teeth} tanden; de laatste lanen worden niet getekend.`));
 };
@@ -154,6 +182,18 @@ function gpPredict() {
       const nm = String(r[0] || '').trim();
       if (nm) { x.save(); x.translate(cx, gy - 10); x.rotate(-Math.PI / 4); x.textAlign = 'left'; x.font = '11px ' + PFONT(); x.fillStyle = PCOL.ink; x.fillText(uv(nm), 0, 0); x.restore(); }
     }
+    /* kleurfronten van de laadbuffer */
+    const fr = sds ? null : gpFronts(num($('#gp-pct').value));
+    if (fr) { [[fr[0], 'bromofenolblauw', '#2f4bbf'], [fr[1], 'xyleencyanol', '#0f7f8f']].forEach(([bp, nm, col]) => {
+        const m = gpMig(bp, lo, hi); if (!isFinite(m)) return; const y = gy + GH * m;
+        x.save(); x.strokeStyle = col; x.lineWidth = 1.4; x.setLineDash([5, 4]);
+        x.beginPath(); x.moveTo(gx + 4, y); x.lineTo(gx + GW - 4, y); x.stroke(); x.restore();
+        x.fillStyle = col; x.font = '600 9.5px ' + PFONT(); x.textAlign = 'right';
+        x.fillText(nm, gx + GW - 6, y - 7); }); }
+    else if (sds) { const y = gy + GH * 0.93;
+      x.save(); x.strokeStyle = '#2f4bbf'; x.lineWidth = 1.4; x.setLineDash([5, 4]);
+      x.beginPath(); x.moveTo(gx + 4, y); x.lineTo(gx + GW - 4, y); x.stroke(); x.restore();
+      x.fillStyle = '#2f4bbf'; x.font = '600 9.5px ' + PFONT(); x.textAlign = 'right'; x.fillText('loopfront', gx + GW - 6, y - 7); }
     x.fillStyle = PCOL.muted; x.font = '11px ' + PFONT(); x.textAlign = 'left';
     x.fillText(sds ? 'Verwacht beeld na Coomassie-kleuring; posities uit de ladder.' : 'Verwacht beeld onder UV; posities uit de ladder.', gx, gy + GH + 36);
   });
@@ -170,7 +210,7 @@ function gpPredict() {
   out.innerHTML = msg.join('') || kv([['Verwachte banden', all.length], ['Lanen met banden', lanes.filter(r => gpSizes(r[2]).length).length]]);
 }
 $('#gp-tray').addEventListener('change', () => calc.gplan());
-$('#gp-pct').addEventListener('input', () => calc.gplan());
+['gp-pct', 'gp-dyex', 'gp-tooth', 'gp-thick', 'gp-gelmm'].forEach(id => $('#' + id).addEventListener('input', () => calc.gplan()));
 $('#gp-ladlane').addEventListener('input', () => calc.gplan());
 $('#gp-type').addEventListener('change', () => { gpLadFill(); calc.gplan(); });
 $('#gp-lad').addEventListener('change', () => calc.gplan());
