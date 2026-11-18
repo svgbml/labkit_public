@@ -145,6 +145,7 @@ calc.gplan = function () {
   else out.insertAdjacentHTML('beforeend', note('warn', 'Vul de maten van de kam en de gel in om het slotvolume te berekenen.'));
   gpPredict();
   gpCast();
+  gpRun();
   if (rows.length > teeth) out.insertAdjacentHTML('beforeend', note('warn', `Er staan ${rows.length} lanen in de tabel maar de kam heeft ${teeth} tanden; de laatste lanen worden niet getekend.`));
 };
 
@@ -253,7 +254,39 @@ function gpCast() {
 document.addEventListener('click', e => { const b = e.target.closest('[data-gp-pct]'); if (!b) return;
   $('#gp-pct').value = NL(num(b.dataset.gpPct), 1); $('#gp-pct').dispatchEvent(new Event('input', {bubbles: true})); });
 ['gp-pct', 'gp-dyex', 'gp-tooth', 'gp-thick', 'gp-gelmm'].forEach(id => $('#' + id).addEventListener('input', () => calc.gplan()));
+
+/* ---------- looptijd: hoe lang tot het blauwe front op de gewenste plek staat ----------
+   De snelheid van bromofenolblauw is evenredig met de veldsterkte en loopt terug bij een
+   hoger percentage agarose. De ijking (10 V/cm, 1%: 6 cm in 35 min) komt uit een gangbare
+   minigel; de uitkomst is dus een schatting met een ruime marge, geen meetwaarde. */
+const GPV0 = 6 / 35 / 10;   /* cm per minuut per V/cm bij 1% agarose */
+const gpSpeed = (E, pct) => (E > 0 && pct > 0) ? GPV0 * E / Math.sqrt(pct) : NaN;
+const gpMin = m => !isFinite(m) ? '–' : m >= 60 ? `${Math.floor(m / 60)} u ${Math.round(m % 60)} min` : `${Math.round(m)} min`;
+function gpRun() {
+  const box = $('#gp-run'), sds = gpMode() === 'sds';
+  const V = num($('#gp-volt').value), d = num($('#gp-elec').value), pct = num($('#gp-pct').value);
+  const [, tl] = gpTray(), target = tl * 0.6;                /* tot ongeveer 60% van de gel */
+  if (sds) { box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' +
+      note('info', 'Voor SDS-PAGE hangt de looptijd af van het geltype en het buffersysteem; volg het protocol van je practicum.'); return; }
+  if (!(V > 0) || !(d > 0)) { box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' +
+      note('warn', 'Vul de spanning en de afstand tussen de elektroden in voor een schatting van de looptijd.'); return; }
+  const E = V / d, v = gpSpeed(E, pct), t = v > 0 ? target / v : NaN;
+  const rows = [['Veldsterkte', `${NL(Number(E.toFixed(2)), 2)} V/cm`],
+    ['Snelheid van het blauwe front', isFinite(v) ? `${NL(Number(v.toFixed(2)), 2)} cm/min` : '–'],
+    ['Looptijd tot ' + NL(Number(target.toFixed(1)), 1) + ' cm', isFinite(t) ? `${gpMin(t * 0.75)} – ${gpMin(t * 1.3)}` : '–']];
+  let msg = '';
+  if (E > 10) msg += note('warn', `${NL(Number(E.toFixed(1)), 1)} V/cm is hoog; boven 10 V/cm warmt de gel op en lopen de banden scheef.`);
+  else if (E < 3) msg += note('warn', `${NL(Number(E.toFixed(1)), 1)} V/cm is laag; onder 3 V/cm diffunderen kleine fragmenten uit en wordt de band vaag.`);
+  /* loopt het kleinste fragment van de gel af voordat het front er is? */
+  const sizes = etGet('gp-tbl').slice(0, gpTeeth()).flatMap(r => gpSizes(r[2])), fr = gpFronts(pct);
+  if (sizes.length && fr) { const sm = Math.min(...sizes);
+    if (sm < fr[0]) msg += note('warn', `Het kleinste fragment van ${NL(sm, 0)} bp loopt vóór het blauwe front uit; stop eerder of kies een hoger percentage agarose.`);
+  }
+  box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' + kv(rows) + msg +
+    `<p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Stop wanneer het blauwe front ongeveer ${NL(Number(target.toFixed(1)), 1)} cm van de slotjes staat, dus ruim vóór de rand van de gel. De tijd is een schatting; kijk naar het front, niet naar de klok.</p>`;
+}
 ['gp-buf', 'gp-stain'].forEach(id => $('#' + id).addEventListener('change', () => calc.gplan()));
+['gp-volt', 'gp-elec'].forEach(id => $('#' + id).addEventListener('input', () => calc.gplan()));
 $('#gp-ladlane').addEventListener('input', () => calc.gplan());
 $('#gp-type').addEventListener('change', () => { gpLadFill(); calc.gplan(); });
 $('#gp-lad').addEventListener('change', () => calc.gplan());

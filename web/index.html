@@ -2991,6 +2991,8 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
         <div class="f"><label for="gp-comb">Tanden op de kam</label><input id="gp-comb" inputmode="numeric" value="10"></div>
         <div class="f"><label for="gp-ladlane">Ladder in laan</label><input id="gp-ladlane" inputmode="numeric" value="1"></div>
         <div class="f" data-expert=""><label for="gp-pct">Gelpercentage</label><div class="inu"><input id="gp-pct" inputmode="decimal" value="1"><span class="u">% w/v</span></div></div>
+        <div class="f"><label for="gp-volt">Spanning</label><div class="inu"><input id="gp-volt" inputmode="decimal" value="100"><span class="u">V</span></div></div>
+        <div class="f"><label for="gp-elec">Afstand tussen de elektroden</label><div class="inu"><input id="gp-elec" inputmode="decimal" value="15"><span class="u">cm</span></div></div>
         <div class="f"><label for="gp-buf">Loopbuffer (stock)</label><select id="gp-buf" style="width:100%"><option value="50">50× TAE</option><option value="10">10× TBE</option><option value="5">5× TBE</option></select></div>
         <div class="f"><label for="gp-stain">Kleuring in de gel</label><select id="gp-stain" style="width:100%"><option value="g10k">GelRed of SYBR Safe, 10 000× stock</option><option value="etbr">Ethidiumbromide, 10 mg/mL</option><option value="none">Geen (achteraf kleuren)</option></select></div>
         <div class="f"><label for="gp-dyex">Laadbuffer sterkte</label><div class="inu"><input id="gp-dyex" inputmode="decimal" value="6"><span class="u">×</span></div></div>
@@ -3007,9 +3009,10 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
     </div>
     <div class="result"><canvas id="gp-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="gp">Download PNG</button></div><div id="gp-out"></div></div>
     <div class="result" id="gp-cast"></div>
+    <div class="result" id="gp-run"></div>
     <div class="result"><h3 style="margin:0 0 10px;font-size:14px">Verwachte gel</h3><canvas id="gpp-cv"></canvas><div class="row" style="margin-top:8px"><button type="button" data-png="gpp">Download PNG</button></div><div id="gpp-out"></div></div>
   </div>
-  <p class="src">Bandposities volgen uit lineaire interpolatie van log(grootte) tegen de loopafstand tussen de grootste en de kleinste band van de gekozen ladder; dat is hetzelfde verband als de standaardcurve in <i>Agarosegel &amp; bandgrootte</i>. Prestained eiwitladders: Bio-Rad Precision Plus Protein Dual Color (alle banden blauw, 75 en 25 kDa rood) en Thermo Scientific PageRuler Plus Prestained (alle banden blauw, 70 kDa groen en 25 kDa rood). Maten van veelgebruikte geldragers en kammen van Bio-Rad (Mini-Sub Cell GT en Wide Mini-Sub Cell GT, instructiehandleiding) en Thermo Scientific (Owl EasyCast B1/B2). Het slotvolume volgt uit de slotmaten: breedte × kamdikte × (geldikte − 1 mm bodem), waarbij 1 mm³ = 1 µL; er wordt tot 80% gevuld, want een vol slotje loopt over in de buurlaan. De loopbuffer in een 6× laadbuffer betekent 1 deel buffer op 5 delen monster. Scheidingsbereik per agarosepercentage naar dezelfde tabel als de tool <i>Agarosegel &amp; bandgrootte</i>. Kleuring: GelRed en SYBR Safe worden als 1× uit een 10 000×-stock in de gel gebruikt; ethidiumbromide op 0,5 µg/mL uit een stock van 10 mg/mL. Posities van de kleurfronten in TAE/TBE naar NEB (Gel Loading Dye, Purple 6X) en Sambrook &amp; Russell, Molecular Cloning, tabel bij agarosegelelektroforese.</p>
+  <p class="src">Bandposities volgen uit lineaire interpolatie van log(grootte) tegen de loopafstand tussen de grootste en de kleinste band van de gekozen ladder; dat is hetzelfde verband als de standaardcurve in <i>Agarosegel &amp; bandgrootte</i>. Prestained eiwitladders: Bio-Rad Precision Plus Protein Dual Color (alle banden blauw, 75 en 25 kDa rood) en Thermo Scientific PageRuler Plus Prestained (alle banden blauw, 70 kDa groen en 25 kDa rood). Maten van veelgebruikte geldragers en kammen van Bio-Rad (Mini-Sub Cell GT en Wide Mini-Sub Cell GT, instructiehandleiding) en Thermo Scientific (Owl EasyCast B1/B2). Het slotvolume volgt uit de slotmaten: breedte × kamdikte × (geldikte − 1 mm bodem), waarbij 1 mm³ = 1 µL; er wordt tot 80% gevuld, want een vol slotje loopt over in de buurlaan. De loopbuffer in een 6× laadbuffer betekent 1 deel buffer op 5 delen monster. Scheidingsbereik per agarosepercentage naar dezelfde tabel als de tool <i>Agarosegel &amp; bandgrootte</i>. Kleuring: GelRed en SYBR Safe worden als 1× uit een 10 000×-stock in de gel gebruikt; ethidiumbromide op 0,5 µg/mL uit een stock van 10 mg/mL. De looptijd is een schatting: de snelheid van het blauwe front is evenredig met de veldsterkte en neemt af bij een hoger agarosepercentage, geijkt op een minigel die bij 10 V/cm in ongeveer 35 minuten 6 cm loopt; reken op een marge van ongeveer een derde. Richtlijn 5–10 V/cm uit de gangbare protocollen (Sambrook &amp; Russell; Bio-Rad, Mini-Sub Cell GT). Posities van de kleurfronten in TAE/TBE naar NEB (Gel Loading Dye, Purple 6X) en Sambrook &amp; Russell, Molecular Cloning, tabel bij agarosegelelektroforese.</p>
 </section>
 <!-- /NT:gplan -->
 
@@ -3849,7 +3852,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=21d703f7c2"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=2dd65355e3"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -6731,6 +6734,7 @@ calc.gplan = function () {
   else out.insertAdjacentHTML('beforeend', note('warn', 'Vul de maten van de kam en de gel in om het slotvolume te berekenen.'));
   gpPredict();
   gpCast();
+  gpRun();
   if (rows.length > teeth) out.insertAdjacentHTML('beforeend', note('warn', `Er staan ${rows.length} lanen in de tabel maar de kam heeft ${teeth} tanden; de laatste lanen worden niet getekend.`));
 };
 
@@ -6839,7 +6843,39 @@ function gpCast() {
 document.addEventListener('click', e => { const b = e.target.closest('[data-gp-pct]'); if (!b) return;
   $('#gp-pct').value = NL(num(b.dataset.gpPct), 1); $('#gp-pct').dispatchEvent(new Event('input', {bubbles: true})); });
 ['gp-pct', 'gp-dyex', 'gp-tooth', 'gp-thick', 'gp-gelmm'].forEach(id => $('#' + id).addEventListener('input', () => calc.gplan()));
+
+/* ---------- looptijd: hoe lang tot het blauwe front op de gewenste plek staat ----------
+   De snelheid van bromofenolblauw is evenredig met de veldsterkte en loopt terug bij een
+   hoger percentage agarose. De ijking (10 V/cm, 1%: 6 cm in 35 min) komt uit een gangbare
+   minigel; de uitkomst is dus een schatting met een ruime marge, geen meetwaarde. */
+const GPV0 = 6 / 35 / 10;   /* cm per minuut per V/cm bij 1% agarose */
+const gpSpeed = (E, pct) => (E > 0 && pct > 0) ? GPV0 * E / Math.sqrt(pct) : NaN;
+const gpMin = m => !isFinite(m) ? '–' : m >= 60 ? `${Math.floor(m / 60)} u ${Math.round(m % 60)} min` : `${Math.round(m)} min`;
+function gpRun() {
+  const box = $('#gp-run'), sds = gpMode() === 'sds';
+  const V = num($('#gp-volt').value), d = num($('#gp-elec').value), pct = num($('#gp-pct').value);
+  const [, tl] = gpTray(), target = tl * 0.6;                /* tot ongeveer 60% van de gel */
+  if (sds) { box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' +
+      note('info', 'Voor SDS-PAGE hangt de looptijd af van het geltype en het buffersysteem; volg het protocol van je practicum.'); return; }
+  if (!(V > 0) || !(d > 0)) { box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' +
+      note('warn', 'Vul de spanning en de afstand tussen de elektroden in voor een schatting van de looptijd.'); return; }
+  const E = V / d, v = gpSpeed(E, pct), t = v > 0 ? target / v : NaN;
+  const rows = [['Veldsterkte', `${NL(Number(E.toFixed(2)), 2)} V/cm`],
+    ['Snelheid van het blauwe front', isFinite(v) ? `${NL(Number(v.toFixed(2)), 2)} cm/min` : '–'],
+    ['Looptijd tot ' + NL(Number(target.toFixed(1)), 1) + ' cm', isFinite(t) ? `${gpMin(t * 0.75)} – ${gpMin(t * 1.3)}` : '–']];
+  let msg = '';
+  if (E > 10) msg += note('warn', `${NL(Number(E.toFixed(1)), 1)} V/cm is hoog; boven 10 V/cm warmt de gel op en lopen de banden scheef.`);
+  else if (E < 3) msg += note('warn', `${NL(Number(E.toFixed(1)), 1)} V/cm is laag; onder 3 V/cm diffunderen kleine fragmenten uit en wordt de band vaag.`);
+  /* loopt het kleinste fragment van de gel af voordat het front er is? */
+  const sizes = etGet('gp-tbl').slice(0, gpTeeth()).flatMap(r => gpSizes(r[2])), fr = gpFronts(pct);
+  if (sizes.length && fr) { const sm = Math.min(...sizes);
+    if (sm < fr[0]) msg += note('warn', `Het kleinste fragment van ${NL(sm, 0)} bp loopt vóór het blauwe front uit; stop eerder of kies een hoger percentage agarose.`);
+  }
+  box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' + kv(rows) + msg +
+    `<p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Stop wanneer het blauwe front ongeveer ${NL(Number(target.toFixed(1)), 1)} cm van de slotjes staat, dus ruim vóór de rand van de gel. De tijd is een schatting; kijk naar het front, niet naar de klok.</p>`;
+}
 ['gp-buf', 'gp-stain'].forEach(id => $('#' + id).addEventListener('change', () => calc.gplan()));
+['gp-volt', 'gp-elec'].forEach(id => $('#' + id).addEventListener('input', () => calc.gplan()));
 $('#gp-ladlane').addEventListener('input', () => calc.gplan());
 $('#gp-type').addEventListener('change', () => { gpLadFill(); calc.gplan(); });
 $('#gp-lad').addEventListener('change', () => calc.gplan());
