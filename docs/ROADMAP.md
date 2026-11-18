@@ -2,13 +2,41 @@
 
 The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps of about 30 minutes each**. Each step ends with a working app and runs `python tools/check.py --quick` (the full `tools/check.py` at the end of every phase). Then you can say "do step S12" or "do the next 3 steps".
 
-**Status:** ✅ done · ⏳ planned · ✖ dropped
-**Total:** 263 steps (S1–S263) ≈ 130 hours. Every chosen idea number appears in at least one step. Steps within a phase are in a sensible order; steps marked *(needs Sx)* depend on an earlier step.
+**Status:** ✅ done · 🔨 started, something left (the row says what) · ⏳ planned · ✖ dropped
+**Total:** 264 steps (S1–S263, plus S204a) ≈ 130 hours. Every chosen idea number appears in at least one step. Steps within a phase are in a sensible order; steps marked *(needs Sx)* depend on an earlier step.
 
-**Progress:** S0 done. **Phase 1 (S1–S12) done**, **phase 2 (S13–S20) done**, **phase 3 (S21–S36) done**, phase 4 (S37–S47) next. After each phase the full `python tools/check.py` passed (validation, layout in Dutch and English, robustness, translations, startup). Phases 12–14 (S147–S201) were added later and have not been started. Phase 15 (S202–S263) is the Vue migration of the tools that are not on Vue yet; the layer underneath plus *Significante cijfers*, *Pipetkeuze*, *Z-factor*, *Restrictiedigest*, *pH bijstellen*, *Celkweekmedium* and *Oplossing & buffer* are done (see `CLAUDE.md`).
+## Where it stands
+
+| Phase | Steps | Status |
+|---|---|---|
+| Phase 0 clean-up | S0 | ✅ done |
+| Phase 1 navigation and app shell | S1–S12 | ✅ done |
+| Phase 2 preparation, gels | S13–S20 | ✅ done |
+| Phase 3 picture tools and plates | S21–S36 | ✅ done |
+| Phase 4 recipes and sequences | S37–S47 | **part done:** S37–S40 ✅, **S41–S47 still to do** |
+| Phases 5–11 | S48–S146 | ⏳ not started |
+| Phases 12–14 Sanger, alignment, sequence toolbox | S147–S201 | ⏳ not started (added later) |
+| Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | **running:** S202, S203, S204, S204a ✅, **S205 next** |
+
+After each finished phase the full `python tools/check.py` passed: validation against published
+reference data, layout in Dutch and English, robustness, translations and startup. At the last
+full run: **286 of 286 validation checks**, 0 layout problems in both languages, 0 robustness
+problems.
+
+**Phase 4 was left part-way** when the Vue migration was decided mid-run: S41–S47 (the overage
+switch on master mixes, the antibody dilution planner, the transformation prep card, the primer
+card and checker, in-silico PCR and digest, the plasmid map and the protocol export) are still
+open. They are not blocked by anything; they were overtaken by phase 15.
+
+**On Vue so far** (see `CLAUDE.md` for the rules): the layer underneath (Vite bundle, the shared
+components in `src/lib/ui.js`, `t()` / `tHtml()`), two tools that were *built* in Vue at S40
+(*pH bijstellen*, *Celkweekmedium klaarmaken*), and nine *converted* tools: *Significante
+cijfers*, *Welke pipet?*, *Z′-factor*, *Restrictiedigestie*, *Oplossing & buffer*,
+*Buffercapaciteit*, *Oplosbaarheid (Ksp)*, *Verdunning* and *Osmolariteit & ionsterkte*.
+**76 tools and the app shell are left.**
 
 ## Decisions
-- **Vue 3 (besloten tijdens de run van fase 4).** De app gaat op Vue, met Vue als los bestand in `web/vendor/` zodat er geen CDN en geen bouwstap bij komt en de app vanaf `file://` blijft werken. De omzetting gaat per tool; de rest van de app blijft intussen werken. De vertaallaag van de DOM kan niet in een Vue-boom komen, dus een component vertaalt zelf met `t()` / `tHtml()` tegen dezelfde `i18n/en.json`, en `tests/i18n_vue.py` controleert dat statisch. Een omgezette tool houdt zijn element-id's en zijn validatiegeval, zodat delen, ongedaan maken, de invoeropslag en de validatie blijven werken. Zie `CLAUDE.md`.
+- **Vue 3 (besloten tijdens de run van fase 4).** De app gaat op Vue. Eerst stond Vue als los bestand in `web/vendor/` om een bouwstap te vermijden; dat is **herzien**: Vue komt nu uit npm en Vite bundelt `src/` tot één IIFE in `build/app.bundle.js`, die `tools/insert_tools.py` in `web/index.html` zet. Dus wél een bouwstap (`npm run build:vue`), nog steeds geen CDN, en de app werkt nog steeds vanaf `file://` — daarom één bundel zonder `dist/`, zonder code-splitting en zonder hashnamen, want vanaf `file://` zijn ES-modules geblokkeerd. De omzetting gaat per tool; de rest van de app blijft intussen werken. De vertaallaag van de DOM kan niet in een Vue-boom komen, dus een component vertaalt zelf met `t()` / `tHtml()` tegen dezelfde `i18n/en.json`, en `tests/i18n_vue.py` controleert dat statisch. Een omgezette tool houdt zijn element-id's en zijn validatiegeval, zodat delen, ongedaan maken, de invoeropslag en de validatie blijven werken. Zie `CLAUDE.md`.
 - **#13 shared layout** applies per *type* of tool. Picture-generating tools (schemes, diagrams, gel figures) share one layout; calculators keep their own.
 - **Gel editor:** keep automatic ladder band detection, and keep editing the numbers/text next to each ladder band.
 - **Removed:** chain of custody, reagent stock, freezer boxes, label sheets and the GHS label. Organisation is merged into Bench. The experiment planner stays (#240 was not chosen).
@@ -336,13 +364,21 @@ Ideas #369–#390. **S191 is cheap and independent**, so it is a good one to pul
 
 ---
 
-## Phase 15: the remaining tools onto Vue (62 steps)
+## Phase 15: the remaining tools onto Vue (63 steps)
 
-Vier tools staan al op Vue (*Significante cijfers & afronden*, *Welke pipet?*,
-*Assaykwaliteit (Z′-factor)*, *Restrictiedigestie*) en de laag eronder staat er: Vite bouwt
-`src/` tot één bundel, `src/lib/ui.js` heeft de gedeelde componenten en `t()` / `tHtml()`
-gebruiken dezelfde woordenlijst als de rest van de app. Zie `CLAUDE.md`. Hieronder de 81 tools
-die nog over zijn, plus de app-schil.
+**Af:** S202, S203, S204 en S204a. Negen tools zijn om (*Significante cijfers & afronden*,
+*Welke pipet?*, *Assaykwaliteit (Z′-factor)*, *Restrictiedigestie*, *Oplossing & buffer*,
+*Buffercapaciteit*, *Oplosbaarheid (Ksp)*, *Verdunning*, *Osmolariteit & ionsterkte*) en de
+laag eronder staat er: Vite bouwt `src/` tot één bundel, `src/lib/ui.js` heeft de gedeelde
+componenten (inclusief `lk-etable`, de bewerkbare tabel) en `t()` / `tHtml()` gebruiken
+dezelfde woordenlijst als de rest van de app. Zie `CLAUDE.md`. **Over: 76 tools en de
+app-schil**, vanaf S205.
+
+**Wat S204a opleverde voor de rest van de fase.** Negentien tabellen in zeventien tools komen
+nog uit `ET()`. Die ruilen nu alleen `ET(...)` voor `<lk-etable>`; de twee fouten die daar
+onderweg uit kwamen (een geplakt blok dat groter is dan de tabel liet rijen vallen, en een
+kolom verschuiving bij een tabel die met een keuzelijst begint) zijn in de gedeelde laag
+opgelost en hoeven niet per tool opnieuw gevonden te worden.
 
 **Hoe een stap eruitziet.** Dit is een verhuizing, geen herontwerp:
 - Het **rekenwerk gaat ongewijzigd mee.** Die functies zitten achter de validatiegevallen met
@@ -367,10 +403,10 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 
 | Step | Ideas | What | Done when |
 |---|---|---|---|
-| S202 | ✅ | *Oplossing & buffer* naar Vue | `src/tools/Oplossing.vue`; de tabel, de stappen, het advies en de receptkaart zitten in de component, `oBalance()` en de hydraatvormen blijven in `tools/nt/05_oplos.js`. `addRow()` in `tools/nt/99_app.js` en `tblRestore()` gaan via de `push`/`set`-haken op `TBLDEF`. Het stappenschema op het canvas blijft gewone HTML |
-| S203 | ✅ | *Buffercapaciteit*, *Oplosbaarheid (Ksp)* naar Vue | `src/tools/Bufcap.vue` en `src/tools/Ksp.vue`; het rekenwerk (`bcNbar`/`bcCb`/`bcBeta`, `KSP`/`kspSolve`) blijft onveranderd in de modules staan. `lk-field` kreeg `label-html` en `lk-big` een `html`-waarde, want `sci()` levert een exponent in een `<sup>` |
-| S204 | ✅ | *Verdunning*, *Osmolariteit & ionsterkte* naar Vue | `src/tools/Verdunning.vue` en `src/tools/Osmo.vue`. `pipAdvies()` is gesplitst in `pipAdviesDeel()` zodat een Vue-tool het advies met `tHtml()` kan vertalen. *Osmolariteit* wachtte op S204a en is daarmee de eerste tool op `lk-etable` |
-| S204a | ✅ | Gedeelde Vue-tabel in plaats van `ET()` | `lk-etable` in `src/lib/ui.js`: dezelfde kolomopgave (`{h, t:'txt'\|'num'\|'sel', w, o}`), en hij zet zelf `TBLDEF[id]` met `set`/`push`/`get`/`blank`. De plak-handler in `web/index.html` klikt nu de toevoegknop en leest de DOM meteen daarna uit; Vue rendert pas op de volgende tick, dus voor een Vue-tabel moet die handler de rijen via de haken zetten. *Osmolariteit & ionsterkte* is de eerste gebruiker. De 19 andere `ET()`-tabellen kunnen nu een voor een om |
+| S202 | — | *Oplossing & buffer* naar Vue | ✅ `src/tools/Oplossing.vue`; de tabel, de stappen, het advies en de receptkaart zitten in de component, `oBalance()` en de hydraatvormen blijven in `tools/nt/05_oplos.js`. `addRow()` in `tools/nt/99_app.js` en `tblRestore()` gaan via de `push`/`set`-haken op `TBLDEF`. Het stappenschema op het canvas blijft gewone HTML |
+| S203 | — | *Buffercapaciteit*, *Oplosbaarheid (Ksp)* naar Vue | ✅ `src/tools/Bufcap.vue` en `src/tools/Ksp.vue`; het rekenwerk (`bcNbar`/`bcCb`/`bcBeta`, `KSP`/`kspSolve`) blijft onveranderd in de modules staan. `lk-field` kreeg `label-html` en `lk-big` een `html`-waarde, want `sci()` levert een exponent in een `<sup>` |
+| S204 | — | *Verdunning*, *Osmolariteit & ionsterkte* naar Vue | ✅ `src/tools/Verdunning.vue` en `src/tools/Osmo.vue`. `pipAdvies()` is gesplitst in `pipAdviesDeel()` zodat een Vue-tool het advies met `tHtml()` kan vertalen. *Osmolariteit* wachtte op S204a en is daarmee de eerste tool op `lk-etable` |
+| S204a | — | Gedeelde Vue-tabel in plaats van `ET()` | ✅ `lk-etable` in `src/lib/ui.js`: dezelfde kolomopgave (`{h, t:'txt'\|'num'\|'sel'\|'col', w, o, d}`), en hij zet zelf `TBLDEF[id]` met `set`/`push`/`get`/`blank`. De plak-handler in `web/index.html` klikt nu de toevoegknop en leest de DOM meteen daarna uit; Vue rendert pas op de volgende tick, dus voor een Vue-tabel moet die handler de rijen via de haken zetten. *Osmolariteit & ionsterkte* is de eerste gebruiker. De 19 andere `ET()`-tabellen kunnen nu een voor een om |
 | S205 | — | *Titratiecurve*, *pH-buffer* naar Vue | Zelfde uitkomsten; validatie blijft staan |
 | S206 | — | *Waterhardheid (EDTA-titratie)*, *Molmassa* naar Vue | Zelfde uitkomsten; validatie blijft staan |
 | S207 | — | *Kjeldahl (eiwit uit stikstof)*, *Eenheden omrekenen* naar Vue | Zelfde uitkomsten; validatie blijft staan |
@@ -431,11 +467,20 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S262 | — | *Plaatindeling*, *Centrifuge*, *Timers* naar Vue | Zelfde uitkomsten; validatie blijft staan |
 | S263 | — | Startpagina en Instellingen naar Vue (de app-schil, geen rekentool) | Zoeken, fasen, tegels en instellingen werken |
 
-## Suggested start
-1. **S1–S3** stages and colours (the new structure everything else hangs on).
-2. **S13–S18** Gelplanner (the most-wanted visual for preparation).
-3. **S62–S69** gel editor quick wins before the big rebuild.
-4. **S134, S137** safety nets (size budget, error reports) early, because they're cheap.
-5. **S191** the reverse complement tool. One step, no dependencies, useful immediately.
-6. **S170–S173** the alignment viewer, if you mostly need to read `.aln` files: four steps give a coloured alignment with conservation.
-7. **S147–S151** the chromatogram reader, if SNP work is the nearest practical: these five steps already give a working trace viewer with automatic, editable base labels.
+## What to pick up next
+
+The first two suggestions below are **done** (S1–S3 in phase 1, S13–S18 in phase 2); the rest
+still stand. Nothing here is blocked, so this is a question of what is most useful first.
+
+1. ~~**S1–S3** stages and colours~~ — ✅ done in phase 1.
+2. ~~**S13–S18** Gelplanner~~ — ✅ done in phase 2.
+3. **S205 and on** carry on with the Vue migration in order. The nineteen `ET()` tables now
+   only need `ET(...)` swapped for `<lk-etable>`, so those steps should go quickly.
+4. **S41–S47** finish phase 4, which was overtaken mid-run: the master-mix overage switch, the
+   antibody dilution planner, the transformation prep card, the primer card and checker,
+   in-silico PCR and digest, the plasmid map and the protocol export.
+5. **S62–S69** gel editor quick wins before the big rebuild.
+6. **S134, S137** safety nets (size budget, error reports) early, because they're cheap.
+7. **S191** the reverse complement tool. One step, no dependencies, useful immediately.
+8. **S170–S173** the alignment viewer, if you mostly need to read `.aln` files: four steps give a coloured alignment with conservation.
+9. **S147–S151** the chromatogram reader, if SNP work is the nearest practical: these five steps already give a working trace viewer with automatic, editable base labels.
