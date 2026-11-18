@@ -8,6 +8,10 @@
      P.draw(x, X, Y, sz)-> de plaat op een canvas tekenen (voor PNG/SVG)
      P.rows()/P.cols()  -> afmetingen van het huidige formaat
 
+   Sjablonen (S30): "Sjabloon…" zet een kant-en-klare indeling neer (ELISA, qPCR in triplo,
+   MIC-titratie, buitenrij als buffer). "Plaatkaart" drukt de plaat op A4 af met de legenda,
+   het aantal putjes per groep en een tabel van alle gelabelde putjes.
+
    Vullen (S29): slepen vult putjes. Staat "Herhalingen" op 2–8, dan vult één klik of sleep
    meteen zoveel putjes naast of onder elkaar: replica's in één beweging. Een klik op een
    rij- of kolomkop vult die hele rij of kolom. "Reeks…" zet een verdunningsreeks neer en
@@ -22,6 +26,42 @@ const PLFMT = [['2x3', '6 putjes'], ['3x4', '12 putjes'], ['4x6', '24 putjes'],
 const PLROW = 'ABCDEFGHIJKLMNOP';
 const PLCOL = ['#1d5bc4', '#c2410c', '#15803d', '#7c3aed', '#b91c1c', '#0e7490', '#a16207', '#be185d', '#4b5563', '#0f766e'];
 let plateSeq = 0;
+
+/* ---------- plaatsjablonen (S30) ----------
+   Elk sjabloon geeft de groepen, de gevulde putjes en eventuele labels terug. `fmt` is het
+   formaat dat erbij hoort (de sjablonen voor 96 putjes zetten de plaat zelf op 8x12);
+   `fmt:null` betekent: werkt op het formaat dat nu is gekozen. De indelingen volgen de
+   gangbare labpraktijk: standaarden in duplo in de eerste kolommen, controles bij elkaar,
+   en bij een titratie een groei- en een steriliteitscontrole in de laatste twee kolommen. */
+const PLTPL = [
+  {id: 'elisa', n: 'ELISA-standaardcurve', fmt: '8x12',
+   d: '7 standaarden (S1–S7) en een blanco in duplo in kolom 1 en 2, monsters in kolom 3–12.',
+   make() { const wells = {}, vals = {};
+     for (let i = 0; i < 7; i++) for (const c of [1, 2]) { const k = PLROW[i] + c; wells[k] = 0; vals[k] = 'S' + (i + 1); }
+     for (const k of ['H1', 'H2']) { wells[k] = 1; vals[k] = '0'; }
+     for (let j = 3; j <= 12; j++) for (let i = 0; i < 8; i++) wells[PLROW[i] + j] = 2;
+     return {groups: [{n: 'Standaard', c: PLCOL[0]}, {n: 'Blanco', c: PLCOL[8]}, {n: 'Monster', c: PLCOL[1]}], wells, vals}; }},
+  {id: 'qpcr', n: 'qPCR in triplo', fmt: '8x12',
+   d: '28 monsters in triplo (M1–M28) in rij A–G, met een positieve controle en een NTC in triplo in rij H.',
+   make() { const wells = {}, vals = {}; let m = 0;
+     for (let i = 0; i < 7; i++) for (let b = 0; b < 4; b++) { m++;
+       for (let t = 0; t < 3; t++) { const k = PLROW[i] + (b * 3 + t + 1); wells[k] = 0; vals[k] = 'M' + m; } }
+     for (let t = 0; t < 3; t++) { wells['H' + (t + 1)] = 1; vals['H' + (t + 1)] = '+'; }
+     for (let t = 0; t < 3; t++) { wells['H' + (t + 4)] = 2; vals['H' + (t + 4)] = 'NTC'; }
+     return {groups: [{n: 'Monster (triplo)', c: PLCOL[0]}, {n: 'Positieve controle', c: PLCOL[2]}, {n: 'NTC', c: PLCOL[4]}], wells, vals}; }},
+  {id: 'mic', n: 'Titratie (MIC)', fmt: '8x12',
+   d: 'Een tweevoudige reeks 1:1 tot 1:512 over kolom 1–10 per rij, kolom 11 groeicontrole en kolom 12 steriliteitscontrole.',
+   make() { const wells = {}, vals = {};
+     for (let i = 0; i < 8; i++) { for (let j = 1; j <= 10; j++) { const k = PLROW[i] + j; wells[k] = 0; vals[k] = '1:' + Math.pow(2, j - 1); }
+       wells[PLROW[i] + 11] = 1; wells[PLROW[i] + 12] = 2; }
+     return {groups: [{n: 'Verdunningsreeks', c: PLCOL[0]}, {n: 'Groeicontrole', c: PLCOL[2]}, {n: 'Steriliteitscontrole', c: PLCOL[8]}], wells, vals}; }},
+  {id: 'edge', n: 'Buitenrij als buffer', fmt: null,
+   d: 'De hele buitenrand wordt buffer en alleen de putjes binnenin zijn monster: dat houdt het randeffect uit je metingen.',
+   make(r, c) { const wells = {};
+     for (let i = 0; i < r; i++) for (let j = 0; j < c; j++)
+       wells[PLROW[i] + (j + 1)] = (i === 0 || j === 0 || i === r - 1 || j === c - 1) ? 1 : 0;
+     return {groups: [{n: 'Monster', c: PLCOL[1]}, {n: 'Buffer (rand)', c: PLCOL[8]}], wells, vals: {}}; }}
+];
 
 function plateDesigner(host, opts) {
   opts = opts || {};
@@ -45,9 +85,11 @@ function plateDesigner(host, opts) {
       <label class="f"><span>Herhalingen</span><select data-pl="rep">${[1, 2, 3, 4, 5, 6, 7, 8].map(n => `<option value="${n}">${n === 1 ? '1 (los putje)' : n + '×'}</option>`).join('')}</select></label>
       <label class="f"><span>Richting</span><select data-pl="dir"><option value="h">naast elkaar (rij)</option><option value="v">onder elkaar (kolom)</option></select></label>
       <button type="button" data-pl="add">+ Groep</button>
+      <button type="button" data-pl="tpl">Sjabloon…</button>
       <button type="button" data-pl="series">Reeks…</button>
       <button type="button" data-pl="erase" aria-pressed="false">Gum</button>
       <button type="button" data-pl="clear">Leegmaken</button>
+      <button type="button" data-pl="print" title="De plaatkaart op A4 afdrukken">Plaatkaart</button>
     </div>
     <div class="legend" data-pl="legend"></div>
     <div class="tbl-wrap"><div class="plate" data-pl="grid" role="group" aria-label="Putjes van de plaat"></div></div>
@@ -112,6 +154,8 @@ function plateDesigner(host, opts) {
     if (b.dataset.pl === 'add') { S.groups.push({n: trPlain('Groep') + ' ' + (S.groups.length + 1), c: PLCOL[S.groups.length % PLCOL.length] }); sel = S.groups.length - 1; erase = false; render(); }
     else if (b.dataset.pl === 'erase') { erase = !erase; render(); }
     else if (b.dataset.pl === 'series') seriesDialog();
+    else if (b.dataset.pl === 'tpl') tplDialog();
+    else if (b.dataset.pl === 'print') printCard();
     else if (b.dataset.pl === 'clear') { S.wells = {}; S.vals = {}; render(); }
   });
   host.addEventListener('change', e => {
@@ -155,6 +199,56 @@ function plateDesigner(host, opts) {
     setTimeout(() => f('c0').focus(), 0);
   }
 
+  /* ---- een sjabloon kiezen ---- */
+  function tplDialog() {
+    const {r, c} = dims();
+    const m = appModal(`<h3 style="margin:0 0 4px;font-size:16px">Plaatsjabloon</h3>
+      <p style="margin:0 0 12px;color:var(--muted);font-size:13px">Een sjabloon vervangt de huidige indeling. De eerste drie zetten de plaat op 96 putjes; het laatste gebruikt het formaat dat nu is gekozen.</p>
+      <div class="pld-tpl">${PLTPL.map(t => `<button type="button" data-t="${t.id}"><b>${t.n}</b><span>${t.d}</span><em data-notr="">${t.fmt ? trPlain(t.fmt.split('x').reduce((a, b) => a * b) + ' putjes') : trPlain('huidig formaat')}</em></button>`).join('')}</div>
+      <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" data-t="no">Annuleren</button></div>`);
+    m.box.addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (!b) return;
+      if (b.dataset.t === 'no') { m.close(); return; }
+      const t = PLTPL.find(x => x.id === b.dataset.t); if (!t) return;
+      if (t.fmt) { S.fmt = t.fmt; const f = q('fmt'); if (f) f.value = S.fmt; }
+      const d = dims(), out = t.make(d.r, d.c);
+      S.groups = out.groups.map(g => ({...g})); S.wells = {...out.wells}; S.vals = {...out.vals};
+      sel = 0; erase = false; m.close(); render(); });
+  }
+
+  /* ---- plaatkaart op A4: de tekening, de legenda en de gelabelde putjes ---- */
+  function printCard() {
+    const {r, c} = dims(), sz = c >= 16 ? 30 : c >= 12 ? 56 : 72, dim = size(sz);
+    const cv = document.createElement('canvas');
+    pRender(cv, dim.W, dim.H, x => draw(x, 0, 0, sz), 3);
+    const cnt = {}; Object.keys(S.wells).forEach(k => { const g = S.wells[k]; cnt[g] = (cnt[g] || 0) + 1; });
+    const ord = k => PLROW.indexOf(k.charAt(0)) * 100 + (+k.slice(1));
+    const lab = Object.keys(S.vals).filter(k => S.wells[k] != null).sort((a, b) => ord(a) - ord(b));
+    const T = s => esc(trPlain(s));
+    /* een groepsnaam die de gebruiker zelf heeft getypt staat niet in de woordenlijst en
+       blijft dan ongewijzigd; `true` houdt hem uit de lijst met ontbrekende vertalingen */
+    const G = s => esc(trPlain(String(s), true));
+    const head = `<h1>${T(opts.name || 'Plaatkaart')}</h1>
+      <p class="meta">${T(r * c + ' putjes')} · ${T('gevuld')}: <b>${Object.keys(S.wells).length}</b> · ${T('Datum')}: ________________ · ${T('Uitgevoerd door')}: ________________</p>`;
+    const leg = `<table><thead><tr><th>${T('Groep')}</th><th>${T('Putjes')}</th></tr></thead><tbody>` +
+      S.groups.map((g, i) => `<tr><td><i style="background:${esc(g.c)}"></i>${G(g.n)}</td><td>${cnt[i] || 0}</td></tr>`).join('') + '</tbody></table>';
+    const tbl = lab.length ? `<h2>${T('Gelabelde putjes')}</h2><table class="wl"><thead><tr><th>${T('Putje')}</th><th>${T('Groep')}</th><th>${T('Label')}</th></tr></thead><tbody>` +
+      lab.map(k => `<tr><td>${esc(k)}</td><td>${G((S.groups[S.wells[k]] || {}).n || '')}</td><td>${esc(S.vals[k])}</td></tr>`).join('') + '</tbody></table>' : '';
+    rpPrint(`<!doctype html><meta charset="utf-8"><title>${T(opts.name || 'Plaatkaart')}</title><style>
+      @page{size:A4 landscape;margin:12mm}
+      body{margin:0;font:13px system-ui,sans-serif;color:#1f2933}
+      h1{font-size:19px;margin:0 0 2px}h2{font-size:14px;margin:14px 0 4px}
+      .meta{margin:0 0 10px;color:#5f6b7a;font-size:12px}
+      img{max-width:100%;height:auto;display:block}
+      table{border-collapse:collapse;font-size:12px;margin:0}
+      th,td{border:1px solid #c9ced6;padding:3px 7px;text-align:left}
+      th{background:#eef0f3}
+      td i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+      .cols{display:flex;gap:16px;align-items:flex-start}
+      .wl{column-count:4;column-gap:10px;display:block}
+      .wl tbody,.wl thead{display:block}.wl tr{display:flex}.wl th,.wl td{flex:1}
+      </style>${head}<div class="cols"><img src="${cv.toDataURL('image/png')}"><div>${leg}</div></div>${tbl}`);
+  }
+
   /* de plaat op een canvas tekenen; geeft de gebruikte hoogte terug */
   function draw(x, X, Y, sz) {
     const {r, c} = dims(); sz = sz || (c >= 16 ? 26 : c >= 12 ? 44 : c >= 8 ? 54 : 70);
@@ -196,6 +290,10 @@ function plateDesigner(host, opts) {
       S.vals = v.vals ? {...v.vals} : {};
       sel = Math.min(sel, S.groups.length - 1); render(); },
     selected: () => sel, label: (k, v) => { if (v == null || v === '') delete S.vals[k]; else S.vals[k] = String(v); },
-    draw, size, render
+    template(id) { const t = PLTPL.find(x => x.id === id); if (!t) return false;
+      if (t.fmt) { S.fmt = t.fmt; const f = q('fmt'); if (f) f.value = S.fmt; }
+      const d = dims(), o = t.make(d.r, d.c);
+      S.groups = o.groups.map(g => ({...g})); S.wells = {...o.wells}; S.vals = {...o.vals}; sel = 0; render(); return true; },
+    print: printCard, draw, size, render
   };
 }
