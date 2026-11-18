@@ -44,7 +44,14 @@ for m in mods:
 #     helpers en de lib-modules hierboven al kan gebruiken. Hij wordt ingevoegd en niet als
 #     <script src> gekoppeld, zodat web/index.html een bestand blijft dat vanaf file:// werkt.
 BUNDLE = os.path.join(R, 'build', 'app.bundle.js')
+SRC = os.path.join(R, 'src')
 if os.path.exists(BUNDLE):
+    # Een verouderde bundel invoegen geeft een index.html die niet bij src/ past, en dat valt
+    # pas op als je je afvraagt waarom je wijziging niets doet. Dus: liever hier stoppen.
+    newer = [p for p in glob.glob(os.path.join(SRC, '**', '*'), recursive=True)
+             if os.path.isfile(p) and os.path.getmtime(p) > os.path.getmtime(BUNDLE)]
+    assert not newer, ('build/app.bundle.js is ouder dan ' + str(len(newer)) + ' bestand(en) in src/ ('
+                       + os.path.relpath(newer[0], R) + ' …): draai eerst "npm run build:vue".')
     js = open(BUNDLE, encoding='utf8').read().strip()
     mk = 'buildReeks();\nsLoad('
     assert mk in s
