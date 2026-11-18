@@ -1,4 +1,4 @@
-import {h} from 'vue';
+import {h, onMounted, onUnmounted, watch} from 'vue';
 
 /* ================= GEDEELDE VUE-COMPONENTEN =================
    De eerste omgezette tools bouwden hun uitkomst nog als een string HTML en zetten die met
@@ -12,6 +12,7 @@ import {h} from 'vue';
      <lk-kv :rows="[[label, waarde], …]">        de definitielijst met uitkomsten
      <lk-field label="…" for="x-id" unit="µL">   een veld met label en eenheid
      <lk-table :cols="…" :rows="…">              een tabel met koppen en getalkolommen
+     <lk-etable table-id="os-tbl" v-model:rows>   een bewerkbare tabel (in plaats van ET())
      <lk-big :value="…" sub="per reactie">       het grote getal bovenaan een uitkomst
 
    Afspraken die hier gelden:
@@ -129,6 +130,125 @@ LKUI.steps = {
   }
 };
 
+/* ---------- de bewerkbare tabel ----------
+   ET() in tools/nt/00_lib.js bouwt zo'n tabel met strings HTML en leest hem met etGet() weer
+   uit de DOM. In Vue kan dat niet: de volgende render gooit het terug. Deze component neemt
+   dezelfde kolomopgave aan, zodat een tool die om gaat alleen ET(...) hoeft te ruilen voor
+   <lk-etable>, en de tool houdt de rijen zelf bij.
+
+     cols  [{h:'Stof', t:'txt'|'num'|'sel'|'col', w:110, o:[opties], d:'#1558b0'}, …]
+     rows  v-model: een lijst rijen, elke rij een lijst strings
+
+   Drie dingen buiten de tool schrijven in zo'n tabel: tblRestore() zet een bewaarde tabel
+   terug, addRow() laat een andere tool er een rij in duwen, en het plakken van een blok uit
+   Excel vult cellen. Daarom zet deze component zijn haken op TBLDEF[id]:
+
+     set(rows)  de hele tabel vervangen        get()    de rijen zoals ze nu zijn
+     push(row)  een rij erbij                  blank()  een lege rij van de juiste breedte
+     row()      bestaat alleen nog omdat oude code hem aanroept; hij geeft niets terug
+
+   get() en blank() zijn er voor de plak-handler: die moet weten wat er staat en hoe breed een
+   nieuwe rij is, want hij kan niet op de DOM wachten. */
+LKUI.etable = {
+  props: {
+    tableId: {type: String, required: true},
+    cols: {type: Array, default: () => []},
+    rows: {type: Array, default: () => []},
+    /* de id van de knop die een rij toevoegt; daarmee blijft het plakken van een blok werken */
+    addId: String,
+    cls: {type: String, default: 'mini'},
+    wrap: {type: Boolean, default: true}
+  },
+  emits: ['update:rows'],
+  setup(props, {emit}) {
+    const blank = () => props.cols.map(c =>
+      c.t === 'sel' ? (c.o && c.o[0]) || '' : c.t === 'col' ? (c.d || '#1558b0') : '');
+    /* een waarde die van buiten komt is een getal of een string met een punt erin; in de
+       tabel staat hij met een komma, net als bij inp() in de oude versie */
+    const dec = v => (v == null || v === '' || (typeof v === 'number' && !isFinite(v))
+      ? '' : String(v).replace('.', ','));
+    const norm = r => props.cols.map((c, i) => (c.t === 'num' ? dec(r[i]) : (r[i] == null ? '' : String(r[i]))));
+    const put = rows => emit('update:rows', rows);
+    const optText = o => (typeof trPlain === 'function' ? trPlain(o, true) : o);
+
+    const setRows = rows => put((rows || []).map(norm));
+    const pushRow = r => {
+      const next = props.rows.map(x => x.slice());
+      const empty = next.findIndex(x => x.every((v, i) => props.cols[i].t === 'sel' || props.cols[i].t === 'col' || !String(v).trim()));
+      if (empty >= 0) next.splice(empty, 1);
+      next.push(norm(r));
+      put(next);
+    };
+
+    const hooks = () => {
+      if (typeof TBLDEF === 'undefined') return;
+      TBLDEF[props.tableId] = {
+        row: () => '',
+        num: props.cols.map((c, i) => (c.t === 'num' ? i : -1)).filter(i => i >= 0),
+        set: setRows, push: pushRow, blank,
+        get: () => props.rows.map(r => r.slice()),
+        /* welke kolom bij het hoeveelste invoerveld van een rij hoort. De plak-handler telt in
+           invoervelden en een keuzelijst is er geen, dus zonder deze lijst zou hij een kolom
+           opschuiven bij een tabel die met een keuzelijst begint. */
+        inputCols: props.cols.map((c, i) => (c.t === 'sel' ? -1 : i)).filter(i => i >= 0)
+      };
+      if (props.addId && typeof ADDBTN !== 'undefined') ADDBTN[props.tableId] = '#' + props.addId;
+    };
+    onMounted(hooks);
+    /* de kolommen kunnen van vorm veranderen (een tool met een keuzelijst erboven), dus de
+       haken worden opnieuw gezet als dat gebeurt */
+    watch(() => props.cols, hooks);
+    onUnmounted(() => {
+      if (typeof TBLDEF !== 'undefined' && TBLDEF[props.tableId]
+        && TBLDEF[props.tableId].get) delete TBLDEF[props.tableId];
+    });
+
+    const cell = (c, r, ri, ci) => {
+      const set = val => {
+        const next = props.rows.map(x => x.slice());
+        next[ri][ci] = val;
+        put(next);
+      };
+      const v = r[ci] == null ? '' : String(r[ci]);
+      if (c.t === 'sel') {
+        /* de waarde blijft de Nederlandse naam, want de tool zoekt daarmee op (OSMI, CHEM);
+           alleen het label gaat door de vertaling, net als de DOM-laag eerder deed */
+        return h('select', {value: v, 'aria-label': c.h,
+          onChange: e => set(e.target.value)},
+          (c.o || []).map(o => h('option', {value: o}, optText(o))));
+      }
+      if (c.t === 'col') {
+        return h('input', {type: 'color', value: /^#[0-9a-f]{6}$/i.test(v) ? v : (c.d || '#1558b0'),
+          'aria-label': 'Kleur', style: 'width:' + (c.w || 44) + 'px;height:28px;padding:1px',
+          onInput: e => set(e.target.value)});
+      }
+      if (c.t === 'txt') {
+        return h('input', {class: 'txt', value: v, style: 'width:' + (c.w || 110) + 'px',
+          onInput: e => set(e.target.value)});
+      }
+      return h('input', {inputmode: 'decimal', value: v,
+        style: 'text-align:right;width:' + (c.w || 80) + 'px',
+        onInput: e => set(e.target.value)});
+    };
+
+    return () => {
+      const table = h('table', {id: props.tableId, class: props.cls}, [
+        h('thead', null, h('tr', null, [
+          ...props.cols.map(c => h('th', {class: c.t === 'num' ? 'num' : null, innerHTML: String(c.h == null ? '' : c.h)})),
+          h('th')
+        ])),
+        h('tbody', null, props.rows.map((r, ri) => h('tr', {key: ri}, [
+          ...props.cols.map((c, ci) => h('td', null, cell(c, r, ri, ci))),
+          h('td', null, h('button', {type: 'button', class: 'ghost', 'data-del': '',
+            'aria-label': 'Verwijder',
+            onClick: () => put(props.rows.filter((_, i) => i !== ri))}, '\u2715'))
+        ])))
+      ]);
+      return props.wrap ? h('div', {class: 'tbl-wrap'}, table) : table;
+    };
+  }
+};
+
 /* Zet de gedeelde componenten op een app. lkVueMount() doet dit zelf, dus een tool hoeft er
    niets voor te doen. */
 export function lkUiInstall(app) {
@@ -139,4 +259,5 @@ export function lkUiInstall(app) {
   app.component('lk-table', LKUI.table);
   app.component('lk-formula', LKUI.formula);
   app.component('lk-steps', LKUI.steps);
+  app.component('lk-etable', LKUI.etable);
 }

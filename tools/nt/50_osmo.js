@@ -1,12 +1,5 @@
-/* ================= OSMOLARITEIT & IONSTERKTE ================= */
+/* ================= OSMOLARITEIT & IONSTERKTE =================
+   De tabel, de velden en de uitkomst staan in src/tools/Osmo.vue; hier blijft de lijst met
+   ionen per stof, waar het validatiegeval aan hangt. Een niet-elektrolyt staat als '0' en
+   telt als één deeltje; '' betekent "vul de ladingen zelf in". */
 const OSMI={'NaCl':'+1 -1','KCl':'+1 -1','CaCl₂':'+2 -1 -1','MgCl₂':'+2 -1 -1','MgSO₄':'+2 -2','Na₂SO₄':'+1 +1 -2','Na₂HPO₄':'+1 +1 -2','NaH₂PO₄':'+1 -1','KH₂PO₄':'+1 -1','K₂HPO₄':'+1 +1 -2','NaHCO₃':'+1 -1','Glucose':'0','Sucrose':'0','Ureum':'0','Glycerol':'0','Mannitol':'0','HEPES (zwitterion)':'0','eigen stof':''};
-ET('os-tbl',[{h:'Stof',t:'sel',o:Object.keys(OSMI)},{h:'Concentratie (mM)',t:'num',w:90},{h:'Ionen (ladingen)',t:'txt',w:110}],[['NaCl',137,''],['KCl',2.7,''],['Na₂HPO₄',10,''],['KH₂PO₄',1.8,'']],'osmo');
-calc.osmo=function(){ const phi=num($('#os-phi').value)||1, out=$('#os-out'); let osm=0, I=0, ions=0; const rows=[], warn=[];
-  etGet('os-tbl').forEach(r=>{ const c=num(r[1]); if(!isFinite(c)) return; const spec=(r[2].trim()||OSMI[r[0]]||'').replace(/−/g,'-'); if(!spec){ warn.push(`${ud(r[0])}: vul de ladingen van de ionen in.`); return; }
-    const z=spec.split(/[\s,;]+/).filter(Boolean).map(Number); if(z.some(v=>!isFinite(v))){ warn.push(`${ud(r[0])}: ladingen niet herkend.`); return; }
-    const nu=z.length===1&&z[0]===0?1:z.length, i=0.5*z.reduce((s,q)=>s+q*q,0)*c; osm+=nu*c; I+=i; if(z.some(q=>q!==0)) ions+=nu*c; rows.push([r[0],c,nu,i]); });
-  if(!rows.length&&!warn.length){ out.innerHTML=note('info','Vul minstens één stof met concentratie in.'); return; }
-  const real=(osm-ions)+ions*phi, nb=num($('#os-nb').value), nm=num($('#os-nm').value);
-  out.innerHTML=warn.map(w=>note('warn',w)).join('')+`<div class="lbl">Osmolariteit</div><div class="big">${fmt(phi===1?osm:real,0)} <small>mOsm/L</small></div>`+kv([['Ideaal (volledige dissociatie)',fmt(osm,1)+' mOsm/L'],...(phi!==1?[['Met φ = '+fmt(phi,2)+' voor ionen',fmt(real,1)+' mOsm/L']]:[]),['Ionsterkte I',fmt(I,1)+' mM ('+sig(I/1000,3)+' M)'],...(isFinite(nm)?[['Normaliteit',sig(nm*nb,3)+' N ('+sig(nm,3)+' M × '+nb+' eq/mol)']]:[])])+
-   `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Stof</th><th class="num">mM</th><th class="num">Deeltjes</th><th class="num">Bijdrage I (mM)</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r[0])}</td><td class="num">${fmt(r[1],2)}</td><td class="num">${r[2]}</td><td class="num">${fmt(r[3],2)}</td></tr>`).join('')}</tbody></table></div>`+
-   (osm>270&&osm<310?note('ok','Ongeveer isotoon met bloedplasma (circa 275–300 mOsm/kg).'):'')+`<div class="formula">osmolariteit = Σ c·ν · I = ½ Σ c·z²</div>`; };
