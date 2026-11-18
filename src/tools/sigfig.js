@@ -1,5 +1,5 @@
 /* ================= SIGNIFICANTE CIJFERS =================
-   Op Vue 3 en declaratief opgebouwd met de gedeelde componenten uit 00b_ui.js.
+   Op Vue 3 en declaratief opgebouwd met de gedeelde componenten uit lib/ui.js.
 
    Het rekenwerk hieronder is onveranderd: het telt met BigInt op de getypte cijfers, niet met
    een afgeronde computerwaarde, dus 0,004565 rondt af op wat er staat en niet op wat een
@@ -7,6 +7,8 @@
 
    De id's sf-x, sf-n, sf-m, sf-u, sf-ud en sf-out blijven zoals ze waren, zodat delen via een
    link, ongedaan maken, de invoeropslag en tests/validate.py blijven werken. */
+import {lkVueMount, lkNumIn} from '../lib/bridge.js';
+
 function sfParse(s){ s=String(s).trim().replace(/\s/g,'').replace(/×10\^?/,'e').replace(',','.'); const m=s.match(/^([+-]?)(\d*)(?:\.(\d*))?(?:[eE]([+-]?\d+))?$/); if(!m||(!m[2]&&!m[3])) return null;
   const ip=m[2]||'', fp=m[3]||'', all=(ip+fp).replace(/^0+/,''); let e=-(fp.length)+(m[4]?+m[4]:0); if(!all) return {neg:false,D:0n,e,sf:fp?Math.max(1,fp.length):1,amb:false,zero:true};
   const D=BigInt(all), lead=all.length, trailInt=!m[3]&&!m[4]?(ip.match(/0+$/)||[''])[0].length:0; return {neg:m[1]==='-',D,e,sf:lead,amb:trailInt>0,min:lead-trailInt,zero:false}; }
@@ -45,7 +47,7 @@ const sfVue = lkVueMount('#sf-app', {
   template: SF_TPL,
   data() { return {x: lkNumIn('0,0045650'), n: '3', mode: 'up', u: lkNumIn('0,0000234'), ud: '2'}; },
   computed: {
-    /* één sleutel voor de hele alinea, met de opmaak erin: zie tHtml() in 00a_vue.js */
+    /* één sleutel voor de hele alinea, met de opmaak erin: zie tHtml() in lib/bridge.js */
     hint() {
       return this.tHtml('Komma of punt als decimaalteken; wetenschappelijke notatie mag (bijv. <span class="mono">4,565e-3</span>). Er wordt met de getypte cijfers gerekend, niet met een afgeronde computerwaarde.');
     },

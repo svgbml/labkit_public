@@ -1,7 +1,11 @@
+import {createApp} from 'vue';
+import {lkUiInstall} from './ui.js';
+
 /* ================= VUE-LAAG =================
-   Labkit wordt stap voor stap op Vue 3 gezet. Vue staat als los bestand in web/vendor/, dus
-   er is geen CDN en geen bouwstap nodig: de volledige build bevat de template-compiler, zodat
-   een component zijn template als gewone string mag meegeven. Werkt daarmee ook vanaf file://.
+   Labkit wordt stap voor stap op Vue 3 gezet. Vue komt uit npm en wordt door Vite in deze
+   bundel meegenomen (zie vite.config.js): één IIFE-bestand zonder hash, dat
+   tools/insert_tools.py in web/index.html zet. Zo blijft index.html één bestand dat vanaf
+   file:// werkt, want ES-modules zijn daar geblokkeerd.
 
    ---- De vertaling ----
    De bestaande vertaallaag loopt met een MutationObserver door de DOM en herschrijft daar de
@@ -27,12 +31,13 @@
    Mount alleen het bewerkbare deel van een tool, niet de hele sectie: de kop en de bronregel
    blijven gewone HTML, zodat hun bestaande vertaalsleutels blijven gelden. */
 
-const LKVUE = typeof Vue !== 'undefined' && Vue && Vue.createApp ? Vue : null;
+/* Vue komt nu uit npm en zit in deze bundel; vroeger stond hij als los bestand in
+   web/vendor/ en kwam hij via een globale `Vue` binnen. */
+const LKVUE = {createApp};
 
 /* Zet een component op een host binnen een tool. Geeft {app, vm} terug, of null als Vue er
    niet is; in dat laatste geval blijft de rest van de app gewoon werken. */
-function lkVueMount(sel, options) {
-  if (!LKVUE) { console.error('Vue is niet geladen; ' + sel + ' blijft leeg.'); return null; }
+export function lkVueMount(sel, options) {
   const host = document.querySelector(sel);
   if (!host) { console.error('geen host voor ' + sel); return null; }
   host.setAttribute('data-notr', '');   /* Vue bezit deze DOM: de vertaallaag blijft eraf */
@@ -52,7 +57,7 @@ function lkVueMount(sel, options) {
     app.config.globalProperties.uv = uv;
     app.config.globalProperties.esc = esc;
     app.config.errorHandler = (err, inst, info) => { console.error('Vue-fout in ' + sel, info, err); };
-    if (typeof lkUiInstall === 'function') lkUiInstall(app);   /* de gedeelde componenten, zie 00b_ui.js */
+    lkUiInstall(app);   /* de gedeelde componenten, zie lib/ui.js */
     return {app, vm: app.mount(host)};
   } catch (e) { console.error('Vue kon ' + sel + ' niet opzetten', e); return null; }
 }
@@ -60,5 +65,5 @@ function lkVueMount(sel, options) {
 /* Een getal in de taal van de gebruiker zetten. De vertaallaag deed dat zelf voor gewone
    invoervelden (i18nValue) en voor tekst (trPlain), maar binnen een Vue-boom komt hij niet.
    In het Nederlands staat het al goed, dus dan blijft de tekst zoals hij is. */
-const lkNumIn = v => (LANG === 'en' && typeof i18nNum === 'function'
+export const lkNumIn = v => (LANG === 'en' && typeof i18nNum === 'function'
   ? String(v).replace(/\d+(?:[.,]\d+)*/g, m => i18nNum(m)) : String(v));

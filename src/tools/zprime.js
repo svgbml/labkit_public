@@ -1,11 +1,13 @@
 /* ================= Z′-FACTOR =================
-   Op Vue 3 met de gedeelde componenten uit 00b_ui.js, en de eerste tool met een tekening
+   Op Vue 3 met de gedeelde componenten uit lib/ui.js, en de eerste tool met een tekening
    erbij. Het canvas blijft met de gewone tekencontext gemaakt: Vue beheert de velden en de
    uitkomst en tekent na elke render opnieuw. Een virtuele DOM heeft op een <canvas> geen nut,
    en tekst die op een canvas komt loopt al door trCanvas(), dus die wordt nog gewoon vertaald
    en door tests/i18n_collect.py gezien.
 
    De id's zp-pos, zp-neg, zp-s, zp-cv en zp-out blijven zoals ze waren. */
+import {lkVueMount, lkNumIn} from '../lib/bridge.js';
+
 const ZP_TPL = `<div class="grid2">
   <div class="panel">
     <div class="fields">

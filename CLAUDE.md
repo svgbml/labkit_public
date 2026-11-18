@@ -19,15 +19,22 @@ Lab calculator and gel-editor web app (Dutch first, English via a runtime transl
 - At most about three subagents at a time; parallel work multiplies usage instead of saving it.
 
 ## Vue (de overstap die loopt)
-- De app gaat stap voor stap over op **Vue 3**. Vue staat als los bestand in `web/vendor/vue.global.prod.js` (MIT, 158 KB, volledige build met template-compiler): geen CDN, geen bouwstap, werkt vanaf `file://`. Staat ook in de cachelijst van `web/sw.js`.
-- De laag eronder is `tools/nt/00a_vue.js`. `lkVueMount('#host', options)` zet een component op een host *binnen* een tool en geeft die host `data-notr`.
+- De app gaat stap voor stap over op **Vue 3**. Vue komt uit npm en wordt door Vite in `build/app.bundle.js` meegenomen (zie *De Vite-bundel* hieronder): geen CDN, en de app blijft vanaf `file://` werken.
+- De laag eronder is `src/lib/bridge.js`. `lkVueMount('#host', options)` zet een component op een host *binnen* een tool en geeft die host `data-notr`.
 - **Mount alleen het bewerkbare deel van een tool**, niet de hele `<section>`: de kop (`.tool-head`) en de bronregel (`p.src`) blijven gewone HTML, zodat hun bestaande vertaalsleutels blijven gelden.
 - **Houd de element-id's van de oude tool aan.** Delen via een link, ongedaan maken, de invoeropslag en `tests/validate.py` zetten `.value` en sturen een `input`- en `change`-event; daar reageert `v-model` op. Verander je een id, dan breekt dat alles.
 - `calc.<tool>` blijft bestaan (als lege functie mag), want de rest van de app roept dat aan na delen, ongedaan maken en bij het openen.
 - Een omgezette tool houdt zijn validatiegeval in `tests/validate.py`: de uitkomsten mogen niet veranderen.
 - **Het rekenwerk gaat ongewijzigd mee.** Die functies staan achter de 276 validatiegevallen met gepubliceerde referentiewaarden (ISO 8655, GUM, NEB, Laemmli, Hanahan); opnieuw uitschrijven levert niets op en zet die waarden op het spel. Alleen de weergave wordt opnieuw opgebouwd.
 
-## De gedeelde Vue-componenten (`tools/nt/00b_ui.js`)
+## De Vite-bundel
+- De Vue-code staat in `src/` en wordt door Vite gebundeld: `npm run build:vue` → `build/app.bundle.js` (één IIFE, geen hash, alles erin). `tools/insert_tools.py` zet die inhoud in `web/index.html`.
+- **Geen `dist/`, geen code-splitting, geen dynamische `import()`.** `web/index.html` moet vanaf `file://` werken en alle vijf de testsuites openen de app zo; vanaf `file://` zijn ES-modules geblokkeerd (nagemeten). Daarom ook geen hashnamen en hoeft `web/sw.js` niets te weten van de bundel.
+- `build/app.bundle.js` gaat mee in de repo, net als `web/index.html` zelf: wie alleen de niet-Vue tools aanpast heeft dan nog steeds alleen Python nodig. Verander je iets in `src/`, draai dan `npm run build:vue` vóór `tools/insert_tools.py` (`npm run check` doet beide).
+- Vue zit in de bundel en de bundel gaat in `index.html`, dus de MIT-melding staat als banner in de code; de volledige tekst staat in `licenses/vue-LICENSE.txt`.
+- In lib-modus vervangt Vite `process.env.NODE_ENV` niet zelf; die `define` staat in `vite.config.js` en zonder hem valt de app om met "process is not defined".
+
+## De gedeelde Vue-componenten (`src/lib/ui.js`)
 - **Bouw een uitkomst niet als string HTML met `v-html`.** Dat was de snelle weg bij de eerste tools en is teruggedraaid: je raakt het declaratieve renderen kwijt en elke tool herhaalt dezelfde stukjes. Gebruik de componenten, die `lkVueMount()` zelf registreert:
   - `<lk-note kind="info|warn|bad|ok">` een melding · `<lk-kv :rows="[[label, waarde], …]">` de uitkomstenlijst
   - `<lk-big :label :value :sub :chip :chip-kind :cls :top>` het grote getal bovenaan

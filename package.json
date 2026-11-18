@@ -9,10 +9,17 @@
     "start": "tauri dev",
     "dist": "tauri build",
     "web": "npx --yes serve web",
-    "check": "python tools/check.py",
-    "check:quick": "python tools/check.py --quick"
+    "check": "npm run build:vue && python tools/check.py",
+    "check:quick": "npm run build:vue && python tools/check.py --quick",
+    "build:vue": "vite build",
+    "dev:vue": "vite build --watch"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2"
+    "@tauri-apps/cli": "^2",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vite": "^6.0.7"
+  },
+  "dependencies": {
+    "vue": "^3.5.13"
   }
 }

@@ -1,5 +1,5 @@
 /* ================= RESTRICTIEDIGESTIE =================
-   Vierde tool op Vue 3 (zie 00a_vue.js), declaratief opgebouwd met de gedeelde componenten uit 00b_ui.js, met keuzelijsten uit data en
+   Vierde tool op Vue 3 (zie lib/bridge.js), declaratief opgebouwd met de gedeelde componenten uit lib/ui.js, met keuzelijsten uit data en
    een veld dat alleen bij een dubbele digestie te zien is. Het rekenwerk is onveranderd.
 
    De enzymnaam is zelf de waarde van de optie, dus hij mag niet vertaald worden: in de
@@ -8,6 +8,8 @@
 
    De id's dg-c, dg-ng, dg-v, dg-e1, dg-u1, dg-e2, dg-u2, dg-upg, dg-n, dg-x, dg-bsa en
    dg-out blijven zoals ze waren. */
+import {lkVueMount, lkNumIn} from '../lib/bridge.js';
+
 const DGE={BamHI:['5′-overhang',37],EcoRI:['5′-overhang',37],HindIII:['5′-overhang',37],PstI:['3′-overhang',37],NdeI:['5′-overhang',37],XhoI:['5′-overhang',37],NotI:['5′-overhang',37],SmaI:['stomp (blunt)',25],'ander enzym':['zie productinformatie',37]};
 
 const DG_TPL = `<div class="grid2">

@@ -1,5 +1,5 @@
 /* ================= WELKE PIPET? =================
-   Op Vue 3, en declaratief opgebouwd met de gedeelde componenten uit 00b_ui.js: geen HTML
+   Op Vue 3, en declaratief opgebouwd met de gedeelde componenten uit lib/ui.js: geen HTML
    meer die als string in elkaar wordt geplakt. De uitkomst is een tabel, dus deze tool is
    het voorbeeld voor <lk-table>, <lk-kv>, <lk-big>, <lk-note> en <lk-field>.
 
@@ -10,6 +10,8 @@
 
    De id's pk-v, pk-set en pk-out blijven zoals ze waren, zodat delen via een link, ongedaan
    maken, de invoeropslag en tests/validate.py blijven werken. */
+import {lkVueMount, lkNumIn} from '../lib/bridge.js';
+
 function pkLim(nom){ let r=ISOLIM[0]; for(const x of ISOLIM) if(x[0]<=nom) r=x; return r; }
 
 /* per pipet: hoe vaak je moet pipetteren en welke fout dat geeft */

@@ -5,7 +5,6 @@ const CORE = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './vendor/vue.global.prod.js',
   './i18n-en.js?h=623b8cbd79',
   './icons/icon.svg',
   './icons/icon-192.png',

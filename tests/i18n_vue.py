@@ -2,9 +2,9 @@
 Labkit BML - vertaalcontrole voor de Vue-componenten.
 
 tests/i18n_collect.py loopt door de DOM, maar een Vue-boom krijgt `data-notr` omdat Vue die
-DOM zelf bezit (zie tools/nt/00a_vue.js). Daar kan die test dus niets vinden. Deze test kijkt
-daarom in de bron: elke `t('...')` met een letterlijke tekst moet een sleutel in i18n/en.json
-hebben, met getallen als {#} net als in de rest van de app.
+DOM zelf bezit (zie src/lib/bridge.js). Daar kan die test dus niets vinden. Deze test kijkt
+daarom in de bron onder src/ (zowel .js als .vue): elke `t('...')` met een letterlijke tekst
+moet een sleutel in i18n/en.json hebben, met getallen als {#} net als in de rest van de app.
 
 Een `t()` met een samengestelde tekst (`t('Kies ' + n + ' cijfers')`) kan hier niet worden
 nagekeken; die wordt alleen gemeld zodat je hem zelf kunt controleren. Exitcode 1 als er een
@@ -16,7 +16,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-NT = ROOT / 'tools' / 'nt'
+SRC = ROOT / 'src'
 NUM = re.compile(r'\d+(?:[.,]\d+)*')
 # t('...') of t("...") zonder aanhalingsteken of backslash erin, en zonder + erachter
 LIT = re.compile(r"""(?<![\w$.])t\(\s*(['"])((?:(?!\1)[^\\])*)\1\s*\)""")
@@ -57,7 +57,8 @@ def strip_comments(src):
 
 def main():
     en = json.loads((ROOT / 'i18n' / 'en.json').read_text(encoding='utf8'))
-    files = sorted(f for f in NT.glob('*.js') if 'lkVueMount' in f.read_text(encoding='utf8'))
+    files = sorted(f for f in [*SRC.rglob('*.js'), *SRC.rglob('*.vue')]
+                   if f.name != 'main.js')
     missing, dynamic, total = [], [], 0
     for f in files:
         src = strip_comments(f.read_text(encoding='utf8'))
@@ -84,9 +85,10 @@ def main():
             dynamic.append((f.name, line, m.group(2)))
 
     if not files:
-        print('geen Vue-componenten gevonden')
-        return 0
-    print(f'{len(files)} Vue-module(s), {total} letterlijke teksten gecontroleerd')
+        # Een controle die niets vindt, is geen groene controle: dan is er iets verplaatst.
+        print('GEEN Vue-bronbestanden gevonden in ' + str(SRC) + '; is er iets verhuisd?')
+        return 1
+    print(f'{len(files)} Vue-bestand(en), {total} letterlijke teksten gecontroleerd')
     for name, line, text in dynamic:
         print(f'  samengesteld (zelf nakijken) {name}:{line}  {text}...')
     for name, line, k in missing:

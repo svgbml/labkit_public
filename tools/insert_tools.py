@@ -40,6 +40,18 @@ for m in mods:
         mk='<!-- ============ START ============ -->'; s=s.replace(mk,f'<!-- NT:{m["id"]} -->\n{m["_html"]}\n<!-- /NT:{m["id"]} -->\n\n'+mk,1)
     if m['_js']:
         mk='buildReeks();\nsLoad('; assert mk in s; s=s.replace(mk,f'/* NT:{m["id"]} */\n{m["_js"]}\n/* /NT:{m["id"]} */\n'+mk,1)
+# 3b. de Vue-bundel (Vite -> build/app.bundle.js) komt na alle modules, zodat hij de
+#     helpers en de lib-modules hierboven al kan gebruiken. Hij wordt ingevoegd en niet als
+#     <script src> gekoppeld, zodat web/index.html een bestand blijft dat vanaf file:// werkt.
+BUNDLE = os.path.join(R, 'build', 'app.bundle.js')
+if os.path.exists(BUNDLE):
+    js = open(BUNDLE, encoding='utf8').read().strip()
+    mk = 'buildReeks();\nsLoad('
+    assert mk in s
+    s = s.replace(mk, f'/* NT:vuebundle */\n{js}\n/* /NT:vuebundle */\n' + mk, 1)
+else:
+    print('let op: build/app.bundle.js ontbreekt; draai eerst "npm run build:vue"')
+
 # 4. TOOLS en TAGS
 tm=re.search(r"const TOOLS=\[(.*?)\];",s); ids=[x.strip().strip("'") for x in tm.group(1).split(',')]
 for m in mods:
