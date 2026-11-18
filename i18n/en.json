@@ -4368,5 +4368,15 @@
 "Niet autoclaveren: de buffer verliest CO₂ en de pH loopt op. Filtreer steriel over {#} µm als het steriel moet, en maak hem anders vers.": "Do not autoclave: the buffer loses CO₂ and the pH rises. Sterile-filter through {#} µm if it has to be sterile, and otherwise make it fresh.",
 "Autoclaveer {#} minuten op {#} °C. Antibiotica zijn hittelabiel: die gaan er pas in onder de {#} °C, steriel gefiltreerd over {#} µm.": "Autoclave for {#} minutes at {#} °C. Antibiotics are heat-labile: they go in only below {#} °C, sterile-filtered through {#} µm.",
 "Autoclaveer {#} minuten op {#} °C. Laat afkoelen tot ongeveer {#} °C voordat je antibiotica toevoegt en de platen uitgiet; warmer breekt het antibioticum af, kouder begint de agar al te stijven.": "Autoclave for {#} minutes at {#} °C. Allow to cool to about {#} °C before adding antibiotics and pouring the plates; warmer breaks the antibiotic down, cooler and the agar already starts to set.",
-"Autoclaveer het medium zonder de glucose. Voeg de glucose daarna toe als steriel gefiltreerde {#} M oplossing: bij autoclaveren karameliseert hij en reageert hij met de aminozuren.": "Autoclave the medium without the glucose. Add the glucose afterwards as a sterile-filtered {#} M solution: on autoclaving it caramelises and reacts with the amino acids."
+"Autoclaveer het medium zonder de glucose. Voeg de glucose daarna toe als steriel gefiltreerde {#} M oplossing: bij autoclaveren karameliseert hij en reageert hij met de aminozuren.": "Autoclave the medium without the glucose. Add the glucose afterwards as a sterile-filtered {#} M solution: on autoclaving it caramelises and reacts with the amino acids.",
+"Vul een getal in, bijvoorbeeld {#} of {#}e-{#}.": "Enter a number, for example {#} or {#}e-{#}.",
+"(zelfde)": "(same)",
+"(anders)": "(different)",
+"ideaal": "ideal",
+"uitstekend": "excellent",
+"matig": "moderate",
+"onbruikbaar": "unusable",
+"Monsters: gemiddelde ± SD": "Samples: mean ± SD",
+"Z-factor monsters": "Z-factor of the samples",
+"Met minder dan {#} controles per groep is de Z′ onnauwkeurig.": "With fewer than {#} controls per group the Z′ is imprecise."
 }

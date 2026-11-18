@@ -21,6 +21,9 @@ window.__go=t=>{ location.hash=t; };
 window.__n=t=>{ t=String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' '); const m=t.match(/(-?\d{1,3}(?:\.\d{3})+(?:,\d+)?|-?\d+(?:,\d+)?)(?:\s*×\s*10\^(-?\d+))?/); if(!m) return NaN; let n=Number(m[1].replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.')); if(m[2]) n*=10**Number(m[2]); return n; };
 window.__el=el=>{ if(!el) return ''; const c=el.cloneNode(true); c.querySelectorAll('small,span[style*=muted]').forEach(s=>s.remove()); c.querySelectorAll('sup').forEach(s=>s.replaceWith('^'+s.textContent.replace('−','-'))); return c.textContent; };
 window.__big=sel=>__n(__el(document.querySelector(sel+' .big')));
+/* De afweegcel bevat behalve de massa ook het balansadvies, waarin "mg" kan staan. De massa
+   zelf staat in de <b>; kleine hoeveelheden laat de tool in mg zien, dus die worden omgerekend. */
+window.__mass=sel=>[...document.querySelectorAll(sel)].map(td=>{ const b=td.querySelector('b'); const t=__el(b||td); const n=__n(t); return /\bmg\b/.test(t)?n/1000:n; });
 window.__cells=sel=>[...document.querySelectorAll(sel)].map(e=>__n(__el(e)));
 window.__tbl=(id,rows,tool)=>{ document.querySelector("#"+id+" tbody").innerHTML=rows.map(TBLDEF[id].row).join(""); calc[tool](); };
 window.__kv=(sel,label)=>{ const dt=[...document.querySelectorAll(sel+' dt')].find(d=>d.textContent.trim().startsWith(label)); return dt?__n(__el(dt.nextElementSibling)):NaN; };
@@ -41,7 +44,7 @@ def _(pg):
 @case('Oplossing & buffer', 'PBS 1X, 1 L', 'Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄)')
 def _(pg):
     pg.evaluate("__go('oplossing');__set('o-v','1');__set('o-vu','L');__set('o-preset','pbs')")
-    vals = pg.evaluate("[...document.querySelectorAll('#o-tbl tbody tr [data-k=out]')].map(td=>{ const t=td.textContent; const n=__n(t); return t.includes('mg')?n/1000:n; })")
+    vals = pg.evaluate("__mass('#o-tbl tbody tr [data-k=out]')")
     return [('NaCl (g)', vals[0], 8.0, 0.01), ('KCl (g)', vals[1], 0.2, 0.02), ('Na₂HPO₄ (g)', vals[2], 1.44, 0.02), ('KH₂PO₄ (g)', vals[3], 0.24, 0.03)]
 
 @case('Oplossing & buffer', 'TBE 10X, 1 L', 'Bio-Rad Bulletin 6205 (108 g Tris, 55 g boorzuur per liter)')
@@ -65,8 +68,7 @@ def _(pg):
 @case('Oplossing & buffer', 'SOC-medium, 1 L', 'Hanahan, J Mol Biol 166:557-580 (1983): 20 g trypton, 5 g gistextract, 0,58 g NaCl (10 mM), 3,6 g glucose (20 mM) per liter')
 def _(pg):
     pg.evaluate("__go('oplossing');__set('o-v','1');__set('o-vu','L');__set('o-preset','soc')")
-    # kleine hoeveelheden laat de tool in mg zien, dus de eenheid moet mee
-    vals = pg.evaluate("[...document.querySelectorAll('#o-tbl tbody tr [data-k=out]')].map(td=>{ const t=td.textContent; const n=__n(t); return t.includes('mg')?n/1000:n; })")
+    vals = pg.evaluate("__mass('#o-tbl tbody tr [data-k=out]')")
     return [('trypton (g)', vals[0], 20, 0.001), ('gistextract (g)', vals[1], 5, 0.001),
             ('NaCl (g)', vals[2], 0.5844, 0.01), ('glucose (g)', vals[6], 3.603, 0.01)]
 

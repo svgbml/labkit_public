@@ -18,6 +18,22 @@ Lab calculator and gel-editor web app (Dutch first, English via a runtime transl
 - Check a subagent's work before committing it, and run `python tools/check.py --quick` yourself rather than trusting a report of it.
 - At most about three subagents at a time; parallel work multiplies usage instead of saving it.
 
+## Vue (de overstap die loopt)
+- De app gaat stap voor stap over op **Vue 3**. Vue staat als los bestand in `web/vendor/vue.global.prod.js` (MIT, 158 KB, volledige build met template-compiler): geen CDN, geen bouwstap, werkt vanaf `file://`. Staat ook in de cachelijst van `web/sw.js`.
+- De laag eronder is `tools/nt/00a_vue.js`. `lkVueMount('#host', options)` zet een component op een host *binnen* een tool en geeft die host `data-notr`.
+- **Mount alleen het bewerkbare deel van een tool**, niet de hele `<section>`: de kop (`.tool-head`) en de bronregel (`p.src`) blijven gewone HTML, zodat hun bestaande vertaalsleutels blijven gelden.
+- **Houd de element-id's van de oude tool aan.** Delen via een link, ongedaan maken, de invoeropslag en `tests/validate.py` zetten `.value` en sturen een `input`- en `change`-event; daar reageert `v-model` op. Verander je een id, dan breekt dat alles.
+- `calc.<tool>` blijft bestaan (als lege functie mag), want de rest van de app roept dat aan na delen, ongedaan maken en bij het openen.
+- Een omgezette tool houdt zijn validatiegeval in `tests/validate.py`: de uitkomsten mogen niet veranderen.
+
+## Translation in Vue
+- De DOM-vertaallaag komt niet in een Vue-boom (die heeft `data-notr`), dus de component vertaalt zelf:
+  - `t('tekst')` voor platte tekst. Zelfde sleutels als de rest van de app, dus `i18n/en.json` blijft gewoon gelden. Een getal in de tekst wordt `{#}`, dus `t('Kies ' + n + ' cijfers')` zoekt `Kies {#} cijfers` op.
+  - `tHtml('tekst met <b>opmaak</b>')` als er inline tags in zitten: dan is de sleutel de innerHTML, net zoals de DOM-laag een heel element opzoekt. `t()` zou `<` en `>` als entiteit in de sleutel zetten.
+  - `uv(waarde)` om tekst van de gebruiker letterlijk te laten staan, `lkNumIn(waarde)` voor een getal in een voorbeeldwaarde (dat deed `i18nValue` eerst zelf).
+- **Eén sleutel per zin.** Een zin in stukjes vertalen levert sleutels op die in geen enkele taal te maken zijn.
+- `tests/i18n_vue.py` controleert statisch dat elke letterlijke `t('…')` en `tHtml('…')` een sleutel in `i18n/en.json` heeft, en meldt samengestelde teksten zodat je die zelf nakijkt.
+
 ## How the app is built
 - `web/index.html` is both source and build output (~830 KB). Older tools are edited in place.
 - Newer tools are modules in `tools/nt/` (`NN_id.json` + `.html` + `.js`), injected by `python tools/insert_tools.py` between `<!-- NT:id -->` / `/* NT:id */` markers. **Never edit inside those markers in `index.html`**: change the module file and re-run the insert. A module with `"lib":true` is JS only.
@@ -32,7 +48,8 @@ Lab calculator and gel-editor web app (Dutch first, English via a runtime transl
 - `tests/i18n_collect.py` fails on any untranslated string.
 
 ## Tests
-- `tests/validate.py` (results against published reference data; writes `tests/VALIDATIE.md`), `tests/layout_audit.py`, `tests/robust_audit.py`, `tests/i18n_collect.py`, `tests/perf_budget.py`.
+- `tests/validate.py` (results against published reference data; writes `tests/VALIDATIE.md`), `tests/layout_audit.py`, `tests/robust_audit.py`, `tests/i18n_collect.py`, `tests/i18n_vue.py`, `tests/perf_budget.py`.
+- `tests/validate.py` doet het zware werk op een echte gel en is daar soms wisselvallig: een enkel geval dat één keer afbreekt, draai je opnieuw voordat je het als fout rapporteert.
 - Setup: `pip install playwright==1.48.0 scipy statsmodels scikit-posthocs opencv-python-headless numpy && python -m playwright install --with-deps chromium`.
 - New calculations need a validation case in `tests/validate.py` with a cited source.
 

@@ -3426,17 +3426,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-zprime" data-tool="zprime">
   <header class="tool-head"><h2>Assaykwaliteit (Z′-factor)</h2>
   <p>Beoordeel of een plaat-assay positieve en negatieve controles goed scheidt: Z′-factor, signaal/achtergrond, signaal/ruis en CV, en de Z-factor van de monsters.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="zp-pos">Positieve controle <span class="example">voorbeeld</span></label><textarea id="zp-pos" rows="3">1,842 1,905 1,778 1,861 1,920 1,812 1,889 1,850 1,795 1,874 1,903 1,836</textarea></div>
-        <div class="f" style="grid-column:1/-1"><label for="zp-neg">Negatieve controle</label><textarea id="zp-neg" rows="3">0,212 0,198 0,225 0,204 0,231 0,190 0,218 0,207 0,215 0,199 0,226 0,210</textarea></div>
-        <div class="f" style="grid-column:1/-1"><label for="zp-s">Monsters (optioneel)</label><textarea id="zp-s" rows="2"></textarea></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Getallen scheiden met spaties of regels; plakken uit Excel mag. Gebruik minstens 8 en liefst 16 of meer controleputjes, verspreid over de plaat. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="zp-cv"></canvas><div id="zp-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie 80_zprime.js). De tekening op het canvas
+       blijft gewoon met de tekencontext gemaakt: Vue beheert alleen de velden eromheen. -->
+  <div id="zp-app"></div>
   <p class="src">Z′ = 1 − 3(σ<sub>p</sub> + σ<sub>n</sub>) / |μ<sub>p</sub> − μ<sub>n</sub>|; Z = 1 − 3(σ<sub>s</sub> + σ<sub>c</sub>) / |μ<sub>s</sub> − μ<sub>c</sub>| met de negatieve controle als c. Indeling: Z′ = 1 ideaal, 0,5 – 1 uitstekend, 0 – 0,5 matig, &lt; 0 onbruikbaar (Zhang, Chung &amp; Oldenburg, J Biomol Screen 4:67–73, 1999; NIH/NCATS Assay Guidance Manual, "HTS Assay Validation").</p>
 </section>
 <!-- /NT:zprime -->
@@ -3604,19 +3596,9 @@ behandeld 25 0</textarea></div>
 <section class="tool" id="t-sigfig" data-tool="sigfig">
   <header class="tool-head"><h2>Significante cijfers &amp; afronden</h2>
   <p>Tel de significante cijfers van een getal, rond af op een gekozen aantal (half naar boven of half naar even) en rapporteer een meetwaarde met zijn onzekerheid op het juiste aantal decimalen.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="sf-x">Getal of meetwaarde</label><input id="sf-x" class="txt mono" value="0,0045650"></div>
-        <div class="f"><label for="sf-n">Afronden op</label><div class="inu"><input id="sf-n" inputmode="numeric" value="3"><span class="u">sign. cijfers</span></div></div>
-        <div class="f"><label for="sf-m">Regel bij precies de helft</label><select id="sf-m"><option value="up">half naar boven (weg van nul)</option><option value="even">half naar even (bankiers)</option></select></div>
-        <div class="f"><label for="sf-u">Onzekerheid (optioneel)</label><input id="sf-u" class="txt mono" value="0,0000234"></div>
-        <div class="f"><label for="sf-ud">Cijfers in de onzekerheid</label><select id="sf-ud"><option value="2">2 (aanbevolen)</option><option value="1">1</option></select></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Komma of punt als decimaalteken; wetenschappelijke notatie mag (bijv. <span class="mono">4,565e-3</span>). Er wordt met de getypte cijfers gerekend, niet met een afgeronde computerwaarde.</p>
-    </div>
-    <div class="result"><div id="sf-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie 87_sigfig.js). De kop hierboven en de
+       bronregel hieronder blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="sf-app"></div>
   <p class="src">Onzekerheid met hooguit twee significante cijfers en de meetwaarde op dezelfde decimaal (JCGM 100:2008, GUM §7.2.6). Afronden half naar even voorkomt systematische afwijking bij veel afrondingen (ISO 80000-1:2022, bijlage B). Nullen vóór het eerste cijfer tellen niet; nullen aan het eind na een decimaalteken wel; nullen aan het eind van een geheel getal zijn dubbelzinnig.</p>
 </section>
 <!-- /NT:sigfig -->
@@ -3625,16 +3607,8 @@ behandeld 25 0</textarea></div>
 <section class="tool" id="t-pipkeus" data-tool="pipkeus">
   <header class="tool-head"><h2>Welke pipet?</h2>
   <p>Kies de pipet die een volume het nauwkeurigst afmeet: per pipet in je set de maximaal toegestane systematische en toevallige fout bij dat volume, ook als je meerdere keren moet pipetteren.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="pk-v">Te pipetteren volume</label><div class="inu"><input id="pk-v" inputmode="decimal" value="15"><span class="u">µL</span></div></div>
-        <div class="f" style="grid-column:span 2"><label for="pk-set">Pipetten in je set (nominaal, µL)</label><input id="pk-set" class="txt" value="2 10 20 100 200 1000 5000"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Een pipet met variabel volume werkt tussen 10% en 100% van het nominale volume. Kalibreer je eigen pipetten met de Pipetkalibratie; de echte fouten zijn meestal kleiner dan de ISO-grenzen.</p>
-    </div>
-    <div class="result"><div id="pk-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie 90_pipkeus.js). -->
+  <div id="pk-app"></div>
   <p class="src">Maximaal toelaatbare fouten van pipetten met variabel volume volgens ISO 8655-2, bij het nominale volume (zie Pipetkalibratie; Mettler Toledo, SOP Pipette Quick Check). Aangenomen is dat de absolute fout van het nominale volume over het hele bereik geldt, zodat de relatieve fout bij een klein volume groter wordt. Bij k keer pipetteren tellen systematische fouten op (k × e<sub>s</sub>) en toevallige fouten kwadratisch (√k × s).</p>
 </section>
 <!-- /NT:pipkeus -->
@@ -3883,6 +3857,10 @@ behandeld 25 0</textarea></div>
 </main>
 </div>
 
+<!-- Vue 3 staat als los bestand in web/vendor/ (MIT, zie vue-LICENSE.txt): geen CDN,
+     geen bouwstap, en de app blijft vanaf file:// werken. De volledige build bevat de
+     template-compiler, zodat een component zijn template als string mag meegeven. -->
+<script src="vendor/vue.global.prod.js"></script>
 <script>
 /* ================= TAAL / LANGUAGE (vertaallaag) ================= */
 const LKEY='labkit:v1:lang';
@@ -3891,7 +3869,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=4a61eea7d2"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=623738b61a"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -6325,6 +6303,71 @@ const etGet=id=>[...document.querySelectorAll('#'+id+' tbody tr')].map(tr=>[...t
 const numsC=t=>String(t).split(/[\s;\t]+/).map(num).filter(x=>isFinite(x));
 const fmtv=(v,d=3)=>isFinite(v)?NL(Number(v.toPrecision(d)),9):'–';
 /* /NT:ntlib */
+/* NT:vuelayer */
+/* ================= VUE-LAAG =================
+   Labkit wordt stap voor stap op Vue 3 gezet. Vue staat als los bestand in web/vendor/, dus
+   er is geen CDN en geen bouwstap nodig: de volledige build bevat de template-compiler, zodat
+   een component zijn template als gewone string mag meegeven. Werkt daarmee ook vanaf file://.
+
+   ---- De vertaling ----
+   De bestaande vertaallaag loopt met een MutationObserver door de DOM en herschrijft daar de
+   tekst. Vue bezit zijn eigen DOM en zou die herschrijving bij elke render terugdraaien. Het
+   deel dat Vue rendert krijgt daarom `data-notr`, waarmee de observer er vanaf blijft, en de
+   component vertaalt zelf met `t()`.
+
+   `t()` is `trPlain()`: precies dezelfde sleutels als de rest van de app, dus de hele
+   woordenlijst in i18n/en.json blijft geldig. Een getal in de tekst wordt automatisch `{#}`,
+   dus `t('Kies ' + n + ' cijfers')` zoekt de sleutel `Kies {#} cijfers` op en vult het getal
+   in de taal van de gebruiker weer in. Tekst van de gebruiker zelf wordt met `uv()` gemarkeerd
+   en blijft dan letterlijk staan.
+
+   Omdat de observer niet in een Vue-boom kijkt, kan tests/i18n_collect.py daar niets vinden.
+   tests/i18n_vue.py controleert daarom statisch dat elke `t('…')` in deze modules een sleutel
+   in i18n/en.json heeft.
+
+   ---- Wat hetzelfde blijft ----
+   Een Vue-component houdt de element-id's van de tool aan. Daarmee blijven het delen van een
+   link, ongedaan maken, de invoeropslag en tests/validate.py werken: die zetten `.value` en
+   sturen een input- en change-event, en daar reageert v-model op.
+
+   Mount alleen het bewerkbare deel van een tool, niet de hele sectie: de kop en de bronregel
+   blijven gewone HTML, zodat hun bestaande vertaalsleutels blijven gelden. */
+
+const LKVUE = typeof Vue !== 'undefined' && Vue && Vue.createApp ? Vue : null;
+
+/* Zet een component op een host binnen een tool. Geeft {app, vm} terug, of null als Vue er
+   niet is; in dat laatste geval blijft de rest van de app gewoon werken. */
+function lkVueMount(sel, options) {
+  if (!LKVUE) { console.error('Vue is niet geladen; ' + sel + ' blijft leeg.'); return null; }
+  const host = document.querySelector(sel);
+  if (!host) { console.error('geen host voor ' + sel); return null; }
+  host.setAttribute('data-notr', '');   /* Vue bezit deze DOM: de vertaallaag blijft eraf */
+  try {
+    const app = LKVUE.createApp(options);
+    /* t(): platte tekst. De sleutel is de tekst met < en > als entiteit, net als bij een
+       tekstknoop in de DOM-laag. */
+    app.config.globalProperties.t = s => trPlain(s);
+    /* tHtml(): tekst met inline opmaak erin (<b>, <span class="mono">, <sub>). De sleutel is
+       dan de innerHTML zelf, precies zoals de DOM-laag een heel element opzoekt, dus de
+       bestaande sleutels met tags erin blijven gelden. Houd één sleutel per zin: een zin in
+       stukjes vertalen levert sleutels op die in geen enkele taal te maken zijn. */
+    app.config.globalProperties.tHtml = h => {
+      if (LANG !== 'en' || typeof i18nLook !== 'function') return h;
+      const r = i18nLook(h); return r ? r.out : h;
+    };
+    app.config.globalProperties.uv = uv;
+    app.config.globalProperties.esc = esc;
+    app.config.errorHandler = (err, inst, info) => { console.error('Vue-fout in ' + sel, info, err); };
+    return {app, vm: app.mount(host)};
+  } catch (e) { console.error('Vue kon ' + sel + ' niet opzetten', e); return null; }
+}
+
+/* Een getal in de taal van de gebruiker zetten. De vertaallaag deed dat zelf voor gewone
+   invoervelden (i18nValue) en voor tekst (trPlain), maar binnen een Vue-boom komt hij niet.
+   In het Nederlands staat het al goed, dus dan blijft de tekst zoals hij is. */
+const lkNumIn = v => (LANG === 'en' && typeof i18nNum === 'function'
+  ? String(v).replace(/\d+(?:[.,]\d+)*/g, m => i18nNum(m)) : String(v));
+/* /NT:vuelayer */
 /* NT:pic */
 /* ================= GEDEELDE OPMAAK VOOR TEKENTOOLS =================
    Elke tool die een afbeelding maakt gebruikt dezelfde indeling (tekening boven of links,
@@ -8314,17 +8357,82 @@ calc.ksp=function(){ const K=num($('#ks-k').value), x=Math.round(num($('#ks-x').
   out.innerHTML=h+`<div class="formula">s = (K<sub>sp</sub> / x<sup>x</sup>y<sup>y</sup>)<sup>1/(x+y)</sup> · Q = [M]<sup>x</sup>[A]<sup>y</sup></div>`; };
 /* /NT:ksp */
 /* NT:zprime */
-/* ================= Z′-FACTOR ================= */
-calc.zprime=function(){ const P=numsC($('#zp-pos').value), N=numsC($('#zp-neg').value), S=numsC($('#zp-s').value), out=$('#zp-out'), cv=$('#zp-cv');
-  if(P.length<2||N.length<2){ out.innerHTML=note('info','Vul minstens twee waarden voor beide controles in.'); cv.style.display='none'; return; }
-  const mp=mean(P), sp=sd(P), mn=mean(N), sn=sd(N), d=Math.abs(mp-mn), z=d>0?1-3*(sp+sn)/d:-Infinity, cls=z>=1?['ok','ideaal']:z>=0.5?['ok','uitstekend']:z>=0?['warn','matig']:['bad','onbruikbaar'];
-  let h=`<div class="lbl">Z′-factor</div><div class="big">${isFinite(z)?fmt(z,3):'–'}<span class="chip ${cls[0]}" style="vertical-align:middle;margin-left:6px">${cls[1]}</span></div>`+kv([['Positief: gemiddelde ± SD',`${sig(mp,4)} ± ${sig(sp,3)} (CV ${fmt(sp/Math.abs(mp)*100,1)}%, n = ${P.length})`],['Negatief: gemiddelde ± SD',`${sig(mn,4)} ± ${sig(sn,3)} (CV ${fmt(sn/Math.abs(mn)*100,1)}%, n = ${N.length})`],['Signaal / achtergrond',mn!==0?fmt(mp/mn,2):'–'],['Signaal / ruis',sn>0?fmt(d/sn,1):'–'],['Scheidingsband',`${sig(d-3*(sp+sn),3)}`]]);
-  if(S.length>1){ const ms=mean(S), ss=sd(S), zs=Math.abs(ms-mn)>0?1-3*(ss+sn)/Math.abs(ms-mn):NaN; h+=kv([['Monsters: gemiddelde ± SD',`${sig(ms,4)} ± ${sig(ss,3)} (n = ${S.length})`],['Z-factor monsters',fmt(zs,3)]]); }
-  if(P.length<8||N.length<8) h+=note('info','Met minder dan 8 controles per groep is de Z′ onnauwkeurig.');
-  out.innerHTML=h+`<div class="formula">Z′ = 1 − 3(σ<sub>p</sub> + σ<sub>n</sub>) / |μ<sub>p</sub> − μ<sub>n</sub>| · banden: μ ± 3σ</div>`;
-  const all=[...P,...N,...S], y0=Math.min(...all,mn-3*sn,mp-3*sp), y1=Math.max(...all,mp+3*sp,mn+3*sn), pad=(y1-y0)*0.08, n=Math.max(P.length,N.length,S.length);
-  cv.style.display=''; const g=chart(cv,{xmin:0,xmax:n+1,ymin:y0-pad,ymax:y1+pad,xlabel:'putje',ylabel:'signaal',series:[{fn:()=>mp,name:'μ positief'},{fn:()=>mn,color:'--muted',name:'μ negatief'},{pts:P.map((v,i)=>[i+1,v]),name:'positief'},{pts:N.map((v,i)=>[i+1,v]),color:'--muted',name:'negatief'},{pts:S.map((v,i)=>[i+1,v]),color:'--warn',name:'monsters',hollow:true}]});
-  const c=cv.getContext('2d'); c.fillStyle='rgba(120,140,170,.15)'; [[mp,sp],[mn,sn]].forEach(([m,s])=>{ const a=g.Y(m+3*s), b=g.Y(m-3*s); c.fillRect(g.X(0),a,g.X(n+1)-g.X(0),b-a); }); };
+/* ================= Z′-FACTOR =================
+   Derde tool op Vue 3 (zie 00a_vue.js), en de eerste met een tekening erbij. De tekening
+   blijft met de gewone tekencontext gemaakt: Vue beheert de velden en de uitkomst, en na elke
+   render wordt het canvas opnieuw getekend. Een virtuele DOM heeft op een <canvas> geen nut,
+   en de tekst die op een canvas komt loopt al door trCanvas(), dus die wordt nog gewoon
+   vertaald en door tests/i18n_collect.py gezien.
+
+   De id's zp-pos, zp-neg, zp-s, zp-cv en zp-out blijven zoals ze waren. */
+const ZP_TPL = `<div class="grid2">
+  <div class="panel">
+    <div class="fields">
+      <div class="f" style="grid-column:1/-1"><label for="zp-pos">{{ t('Positieve controle') }} <span class="example">{{ t('voorbeeld') }}</span></label><textarea id="zp-pos" rows="3" v-model="pos"></textarea></div>
+      <div class="f" style="grid-column:1/-1"><label for="zp-neg">{{ t('Negatieve controle') }}</label><textarea id="zp-neg" rows="3" v-model="neg"></textarea></div>
+      <div class="f" style="grid-column:1/-1"><label for="zp-s">{{ t('Monsters (optioneel)') }}</label><textarea id="zp-s" rows="2" v-model="smp"></textarea></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Getallen scheiden met spaties of regels; plakken uit Excel mag. Gebruik minstens 8 en liefst 16 of meer controleputjes, verspreid over de plaat. Voorbeelddata zijn verzonnen.') }}</p>
+  </div>
+  <div class="result"><canvas id="zp-cv" v-show="ok"></canvas><div id="zp-out" v-html="out"></div></div>
+</div>`;
+
+const zpVue = lkVueMount('#zp-app', {
+  template: ZP_TPL,
+  data() { return {
+    pos: lkNumIn('1,842 1,905 1,778 1,861 1,920 1,812 1,889 1,850 1,795 1,874 1,903 1,836'),
+    neg: lkNumIn('0,212 0,198 0,225 0,204 0,231 0,190 0,218 0,207 0,215 0,199 0,226 0,210'),
+    smp: ''
+  }; },
+  computed: {
+    sets() { return {P: numsC(this.pos), N: numsC(this.neg), S: numsC(this.smp)}; },
+    ok() { const {P, N} = this.sets; return P.length >= 2 && N.length >= 2; },
+    out() {
+      const t = this.t, tH = this.tHtml, {P, N, S} = this.sets;
+      const F = (x, d) => lkNumIn(fmt(x, d)), G = (x, d) => lkNumIn(sig(x, d));
+      if (!this.ok) return note('info', t('Vul minstens twee waarden voor beide controles in.'));
+      const mp = mean(P), sp = sd(P), mn = mean(N), sn = sd(N), d = Math.abs(mp - mn);
+      const z = d > 0 ? 1 - 3 * (sp + sn) / d : -Infinity;
+      const cls = z >= 1 ? ['ok', t('ideaal')] : z >= 0.5 ? ['ok', t('uitstekend')]
+        : z >= 0 ? ['warn', t('matig')] : ['bad', t('onbruikbaar')];
+      let h = `<div class="lbl">${t('Z′-factor')}</div><div class="big">${isFinite(z) ? F(z, 3) : '–'}`
+        + `<span class="chip ${cls[0]}" style="vertical-align:middle;margin-left:6px">${cls[1]}</span></div>`
+        + kv([[t('Positief: gemiddelde ± SD'), `${G(mp, 4)} ± ${G(sp, 3)} (${t('CV')} ${F(sp / Math.abs(mp) * 100, 1)}%, n = ${P.length})`],
+          [t('Negatief: gemiddelde ± SD'), `${G(mn, 4)} ± ${G(sn, 3)} (${t('CV')} ${F(sn / Math.abs(mn) * 100, 1)}%, n = ${N.length})`],
+          [t('Signaal / achtergrond'), mn !== 0 ? F(mp / mn, 2) : '–'],
+          [t('Signaal / ruis'), sn > 0 ? F(d / sn, 1) : '–'],
+          [t('Scheidingsband'), G(d - 3 * (sp + sn), 3)]]);
+      if (S.length > 1) { const ms = mean(S), ss = sd(S),
+        zs = Math.abs(ms - mn) > 0 ? 1 - 3 * (ss + sn) / Math.abs(ms - mn) : NaN;
+        h += kv([[t('Monsters: gemiddelde ± SD'), `${G(ms, 4)} ± ${G(ss, 3)} (n = ${S.length})`],
+          [t('Z-factor monsters'), F(zs, 3)]]); }
+      if (P.length < 8 || N.length < 8) h += note('info', t('Met minder dan 8 controles per groep is de Z′ onnauwkeurig.'));
+      return h + `<div class="formula">${tH('Z′ = 1 − 3(σ<sub>p</sub> + σ<sub>n</sub>) / |μ<sub>p</sub> − μ<sub>n</sub>| · banden: μ ± 3σ')}</div>`;
+    }
+  },
+  /* de tekening wordt na elke render bijgewerkt; dat is goedkoop en houdt canvas en uitkomst
+     bij elkaar zonder dat Vue iets van het canvas hoeft te weten */
+  mounted() { this.draw(); },
+  updated() { this.draw(); },
+  methods: {
+    draw() {
+      const cv = document.getElementById('zp-cv'); if (!cv || !this.ok) return;
+      const {P, N, S} = this.sets, mp = mean(P), sp = sd(P), mn = mean(N), sn = sd(N);
+      const all = [...P, ...N, ...S];
+      const y0 = Math.min(...all, mn - 3 * sn, mp - 3 * sp), y1 = Math.max(...all, mp + 3 * sp, mn + 3 * sn);
+      const pad = (y1 - y0) * 0.08, n = Math.max(P.length, N.length, S.length);
+      const g = chart(cv, {xmin: 0, xmax: n + 1, ymin: y0 - pad, ymax: y1 + pad, xlabel: 'putje', ylabel: 'signaal',
+        series: [{fn: () => mp, name: 'μ positief'}, {fn: () => mn, color: '--muted', name: 'μ negatief'},
+          {pts: P.map((v, i) => [i + 1, v]), name: 'positief'},
+          {pts: N.map((v, i) => [i + 1, v]), color: '--muted', name: 'negatief'},
+          {pts: S.map((v, i) => [i + 1, v]), color: '--warn', name: 'monsters', hollow: true}]});
+      const c = cv.getContext('2d'); c.fillStyle = 'rgba(120,140,170,.15)';
+      [[mp, sp], [mn, sn]].forEach(([m, s]) => { const a = g.Y(m + 3 * s), b = g.Y(m - 3 * s);
+        c.fillRect(g.X(0), a, g.X(n + 1) - g.X(0), b - a); });
+    }
+  }
+});
+calc.zprime = () => { if (zpVue && zpVue.vm) zpVue.vm.draw(); };
 /* /NT:zprime */
 /* NT:transfect */
 /* ================= TRANSFECTIE (LIPOFECTAMINE 3000) ================= */
@@ -8412,7 +8520,15 @@ calc.km=function(){ const un=$('#km-u').value, out=$('#km-out'), cv=$('#km-cv');
   cv._data={head:['groep','tijd','S(t)'],rows:F.flatMap(f=>f.steps.map(s=>[f.g,s.t,s.S]))}; };
 /* /NT:km */
 /* NT:sigfig */
-/* ================= SIGNIFICANTE CIJFERS ================= */
+/* ================= SIGNIFICANTE CIJFERS =================
+   Eerste tool op Vue 3 (zie 00a_vue.js voor de laag eronder). Het rekenwerk hieronder is
+   onveranderd: het telt met BigInt op de getypte cijfers, niet met een afgeronde
+   computerwaarde, dus 0,004565 rondt af op wat er staat en niet op wat een double ervan maakt.
+
+   De component houdt de element-id's van de oude tool aan (sf-x, sf-n, sf-m, sf-u, sf-ud,
+   sf-out). Daarmee blijven het delen van een link, ongedaan maken, de invoeropslag en
+   tests/validate.py werken: die zetten .value en sturen een input-event, en v-model luistert
+   daarnaar. Alle tekst loopt door t(), want binnen een Vue-boom komt de vertaallaag niet. */
 function sfParse(s){ s=String(s).trim().replace(/\s/g,'').replace(/×10\^?/,'e').replace(',','.'); const m=s.match(/^([+-]?)(\d*)(?:\.(\d*))?(?:[eE]([+-]?\d+))?$/); if(!m||(!m[2]&&!m[3])) return null;
   const ip=m[2]||'', fp=m[3]||'', all=(ip+fp).replace(/^0+/,''); let e=-(fp.length)+(m[4]?+m[4]:0); if(!all) return {neg:false,D:0n,e,sf:fp?Math.max(1,fp.length):1,amb:false,zero:true};
   const D=BigInt(all), lead=all.length, trailInt=!m[3]&&!m[4]?(ip.match(/0+$/)||[''])[0].length:0; return {neg:m[1]==='-',D,e,sf:lead,amb:trailInt>0,min:lead-trailInt,zero:false}; }
@@ -8421,23 +8537,126 @@ function sfRoundAt(D,e,p,mode){ if(p<=e) return {D:D*10n**BigInt(e-p),e:p}; cons
 function sfRoundSig(x,n,mode){ if(x.zero) return {D:0n,e:0}; const msd=x.e+sfLen(x.D)-1; let r=sfRoundAt(x.D,x.e,msd-n+1,mode); if(sfLen(r.D)>n) r=sfRoundAt(r.D,r.e,r.e+1,mode); return r; }
 function sfStr(D,e,neg){ let s=D.toString(); if(e>=0) s=s+'0'.repeat(e); else { s=s.padStart(-e+1,'0'); s=s.slice(0,s.length+e)+','+s.slice(s.length+e); } return (neg&&D!==0n?'−':'')+s; }
 function sfSci(D,e,neg){ const s=D.toString(), ex=e+s.length-1; return `${neg?'−':''}${s[0]}${s.length>1?','+s.slice(1):''} × 10<sup>${ex}</sup>`; }
-calc.sigfig=function(){ const x=sfParse($('#sf-x').value), n=Math.round(num($('#sf-n').value)), mode=$('#sf-m').value, nd=+$('#sf-ud').value, out=$('#sf-out');
-  if(!x){ out.innerHTML=note('info','Vul een getal in, bijvoorbeeld 0,004565 of 4,565e-3.'); return; } if(!(n>=1&&n<=20)){ out.innerHTML=note('info','Kies 1 tot 20 significante cijfers.'); return; }
-  const r=sfRoundSig(x,n,mode), alt=sfRoundSig(x,n,mode==='up'?'even':'up');
-  let h=`<div class="lbl">Afgerond op ${n} significante cijfers</div><div class="big mono">${sfStr(r.D,r.e,x.neg)}</div>`+kv([['Wetenschappelijk',x.zero?'0':sfSci(r.D,r.e,x.neg)],['Significante cijfers in de invoer',x.zero?'–':x.amb?`${x.min} tot ${x.sf} (nullen aan het eind van een geheel getal zijn dubbelzinnig)`:String(x.sf)],['Met de andere halveringsregel',sfStr(alt.D,alt.e,x.neg)+(sfStr(alt.D,alt.e,x.neg)===sfStr(r.D,r.e,x.neg)?' (zelfde)':' (anders)')]]);
-  const u=sfParse($('#sf-u').value); if(u&&!u.zero&&!u.neg){ const ru=sfRoundSig(u,nd,'up'), up=ru.e+sfLen(ru.D)-nd, ux=sfRoundAt(ru.D,ru.e,up,'up'), xv=x.zero?{D:0n,e:up}:sfRoundAt(x.D,x.e,up,mode);
-    const conc=`${sfStr(xv.D,xv.e,x.neg)}(${ux.D.toString()})`; h+=`<div class="lbl" style="margin-top:14px">Meetwaarde met onzekerheid</div><div class="big mono">${sfStr(xv.D,xv.e,x.neg)} ± ${sfStr(ux.D,ux.e,false)}</div>`+kv([['Beknopte notatie',conc],['Decimalen',String(Math.max(0,-up))]]); }
-  out.innerHTML=h+`<div class="formula">onzekerheid op ${nd} cijfer${nd>1?'s':''} · waarde op dezelfde decimaal</div>`; };
+/* een uitkomst is een getal van de gebruiker: in de Engelse modus met een punt, en nooit als
+   vertaalbare tekst opgevat */
+const sfOut=s=>lkNumIn(s);
+
+const SF_TPL = `<div class="grid2">
+  <div class="panel">
+    <div class="fields">
+      <div class="f"><label for="sf-x">{{ t('Getal of meetwaarde') }}</label><input id="sf-x" class="txt mono" v-model="x"></div>
+      <div class="f"><label for="sf-n">{{ t('Afronden op') }}</label><div class="inu"><input id="sf-n" inputmode="numeric" v-model="n"><span class="u">{{ t('sign. cijfers') }}</span></div></div>
+      <div class="f"><label for="sf-m">{{ t('Regel bij precies de helft') }}</label><select id="sf-m" v-model="mode"><option value="up">{{ t('half naar boven (weg van nul)') }}</option><option value="even">{{ t('half naar even (bankiers)') }}</option></select></div>
+      <div class="f"><label for="sf-u">{{ t('Onzekerheid (optioneel)') }}</label><input id="sf-u" class="txt mono" v-model="u"></div>
+      <div class="f"><label for="sf-ud">{{ t('Cijfers in de onzekerheid') }}</label><select id="sf-ud" v-model="ud"><option value="2">{{ t('2 (aanbevolen)') }}</option><option value="1">1</option></select></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:10px 0 0" v-html="hint"></p>
+  </div>
+  <div class="result"><div id="sf-out" v-html="out"></div></div>
+</div>`;
+
+const sfVue = lkVueMount('#sf-app', {
+  template: SF_TPL,
+  data() { return {x: lkNumIn('0,0045650'), n: '3', mode: 'up', u: lkNumIn('0,0000234'), ud: '2'}; },
+  computed: {
+    /* één sleutel voor de hele alinea, met de opmaak erin: zie tHtml() in 00a_vue.js */
+    hint() {
+      return this.tHtml('Komma of punt als decimaalteken; wetenschappelijke notatie mag (bijv. <span class="mono">4,565e-3</span>). Er wordt met de getypte cijfers gerekend, niet met een afgeronde computerwaarde.');
+    },
+    out() {
+      const t = this.t, x = sfParse(this.x), n = Math.round(num(this.n)), mode = this.mode, nd = +this.ud;
+      if (!x) return note('info', t('Vul een getal in, bijvoorbeeld 0,004565 of 4,565e-3.'));
+      if (!(n >= 1 && n <= 20)) return note('info', t('Kies 1 tot 20 significante cijfers.'));
+      const r = sfRoundSig(x, n, mode), alt = sfRoundSig(x, n, mode === 'up' ? 'even' : 'up');
+      const rs = sfStr(r.D, r.e, x.neg), as = sfStr(alt.D, alt.e, x.neg);
+      let h = `<div class="lbl">${t('Afgerond op ' + n + ' significante cijfers')}</div><div class="big mono">${sfOut(rs)}</div>`
+        + kv([[t('Wetenschappelijk'), x.zero ? '0' : sfOut(sfSci(r.D, r.e, x.neg))],
+          [t('Significante cijfers in de invoer'), x.zero ? '–'
+            : x.amb ? t(x.min + ' tot ' + x.sf + ' (nullen aan het eind van een geheel getal zijn dubbelzinnig)')
+              : sfOut(String(x.sf))],
+          [t('Met de andere halveringsregel'), sfOut(as) + (as === rs ? ' ' + t('(zelfde)') : ' ' + t('(anders)'))]]);
+      const u = sfParse(this.u);
+      if (u && !u.zero && !u.neg) {
+        const ru = sfRoundSig(u, nd, 'up'), up = ru.e + sfLen(ru.D) - nd,
+          ux = sfRoundAt(ru.D, ru.e, up, 'up'), xv = x.zero ? {D: 0n, e: up} : sfRoundAt(x.D, x.e, up, mode);
+        const conc = `${sfStr(xv.D, xv.e, x.neg)}(${ux.D.toString()})`;
+        h += `<div class="lbl" style="margin-top:14px">${t('Meetwaarde met onzekerheid')}</div>`
+          + `<div class="big mono">${sfOut(sfStr(xv.D, xv.e, x.neg))} ± ${sfOut(sfStr(ux.D, ux.e, false))}</div>`
+          + kv([[t('Beknopte notatie'), sfOut(conc)], [t('Decimalen'), sfOut(String(Math.max(0, -up)))]]);
+      }
+      return h + `<div class="formula">${t(nd > 1 ? 'onzekerheid op ' + nd + ' cijfers · waarde op dezelfde decimaal'
+        : 'onzekerheid op ' + nd + ' cijfer · waarde op dezelfde decimaal')}</div>`;
+    }
+  }
+});
+/* de rest van de app roept calc[tool]() aan na het delen van een link, ongedaan maken en bij
+   het openen; een Vue-component rekent zelf opnieuw, dus hier hoeft niets te gebeuren */
+calc.sigfig = () => {};
 /* /NT:sigfig */
 /* NT:pipkeus */
-/* ================= WELKE PIPET? ================= */
+/* ================= WELKE PIPET? =================
+   Tweede tool op Vue 3 (zie 00a_vue.js): een tool waarvan de uitkomst een tabel is.
+   Het rekenwerk is onveranderd. De grenzen komen uit ISO 8655-2 bij het nominale volume
+   (ISOLIM); de absolute fout van het nominale volume wordt over het hele bereik aangenomen,
+   dus bij een klein volume wordt de relatieve fout groter. Bij k keer pipetteren tellen
+   systematische fouten op en toevallige fouten kwadratisch.
+
+   De id's pk-v, pk-set en pk-out blijven zoals ze waren, zodat delen via een link, ongedaan
+   maken, de invoeropslag en tests/validate.py blijven werken. */
 function pkLim(nom){ let r=ISOLIM[0]; for(const x of ISOLIM) if(x[0]<=nom) r=x; return r; }
-calc.pipkeus=function(){ const V=num($('#pk-v').value), set=[...new Set($('#pk-set').value.split(/[\s;,]+/).map(num).filter(v=>v>0&&v<=1e5))].sort((a,b)=>a-b), out=$('#pk-out');
-  if(!(V>0)||!set.length){ out.innerHTML=note('info','Vul een volume en minstens één pipet in.'); return; }
-  const R=set.map(nom=>{ const [,sp,rp]=pkLim(nom), es=sp/100*nom, s=rp/100*nom, k=V>nom?Math.ceil(V/nom-1e-9):1, sub=V/k, ok=sub>=nom*0.1-1e-9, ES=k*es, S=Math.sqrt(k)*s; return {nom,k,sub,ok,es:ES,s:S,rel:(ES+2*S)/V*100}; });
-  const can=R.filter(r=>r.ok&&r.k<=20), best=can.length?can.reduce((a,b)=>b.rel<a.rel-1e-12||(Math.abs(b.rel-a.rel)<1e-12&&b.k<a.k)?b:a):null;
-  out.innerHTML=(best?`<div class="lbl">Beste keuze</div><div class="big">P${fmt(best.nom,0)}${best.k>1?` <small>${best.k} × ${vol(best.sub)}</small>`:''}</div>`+kv([['Systematische fout (max.)',`± ${vol(best.es)} (${fmt(best.es/V*100,2)}%)`],['Toevallige fout (max., SD)',`${vol(best.s)} (${fmt(best.s/V*100,2)}%)`]]):note('warn','Geen pipet in je set kan dit volume binnen 10–100% van zijn bereik afmeten.'))+
-   `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Pipet</th><th class="num">Keer</th><th class="num">Per keer</th><th class="num">e<sub>s</sub> max.</th><th class="num">s max.</th><th class="num">Totaal (e<sub>s</sub> + 2s)</th><th>Bruikbaar</th></tr></thead><tbody>${R.map(r=>`<tr><td>P${fmt(r.nom,0)}</td><td class="num">${r.k}</td><td class="num">${vol(r.sub)}</td><td class="num">${vol(r.es)}</td><td class="num">${vol(r.s)}</td><td class="num">${fmt(r.rel,2)}%</td><td>${r.ok?(r.k>20?'te vaak':'ja'):'onder 10% van bereik'}</td></tr>`).join('')}</tbody></table></div><div class="formula">totaal = (k·e<sub>s</sub> + 2·√k·s) / V</div>`; };
+
+/* de pipetten uit de set, met per pipet hoe vaak je moet pipetteren en welke fout dat geeft */
+function pkRows(V, set){
+  return set.map(nom => { const [, sp, rp] = pkLim(nom), es = sp / 100 * nom, s = rp / 100 * nom;
+    const k = V > nom ? Math.ceil(V / nom - 1e-9) : 1, sub = V / k, ok = sub >= nom * 0.1 - 1e-9;
+    const ES = k * es, S = Math.sqrt(k) * s;
+    return {nom, k, sub, ok, es: ES, s: S, rel: (ES + 2 * S) / V * 100}; });
+}
+
+const PK_TPL = `<div class="grid2">
+  <div class="panel">
+    <div class="fields">
+      <div class="f"><label for="pk-v">{{ t('Te pipetteren volume') }}</label><div class="inu"><input id="pk-v" inputmode="decimal" v-model="v"><span class="u">µL</span></div></div>
+      <div class="f" style="grid-column:span 2"><label for="pk-set">{{ t('Pipetten in je set (nominaal, µL)') }}</label><input id="pk-set" class="txt" v-model="set"></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Een pipet met variabel volume werkt tussen 10% en 100% van het nominale volume. Kalibreer je eigen pipetten met de Pipetkalibratie; de echte fouten zijn meestal kleiner dan de ISO-grenzen.') }}</p>
+  </div>
+  <div class="result"><div id="pk-out" v-html="out"></div></div>
+</div>`;
+
+const pkVue = lkVueMount('#pk-app', {
+  template: PK_TPL,
+  data() { return {v: lkNumIn('15'), set: '2 10 20 100 200 1000 5000'}; },
+  computed: {
+    out() {
+      const t = this.t, tH = this.tHtml, V = num(this.v);
+      /* fmt() en vol() geven altijd Nederlandse getallen; binnen een Vue-boom komt de
+         vertaallaag niet, dus ze gaan hier zelf door lkNumIn() */
+      const F = (x, d) => lkNumIn(fmt(x, d)), VL = x => lkNumIn(vol(x));
+      const set = [...new Set(String(this.set).split(/[\s;,]+/).map(num).filter(x => x > 0 && x <= 1e5))].sort((a, b) => a - b);
+      if (!(V > 0) || !set.length) return note('info', t('Vul een volume en minstens één pipet in.'));
+      const R = pkRows(V, set), can = R.filter(r => r.ok && r.k <= 20);
+      const best = can.length ? can.reduce((a, b) =>
+        b.rel < a.rel - 1e-12 || (Math.abs(b.rel - a.rel) < 1e-12 && b.k < a.k) ? b : a) : null;
+      const head = best
+        ? `<div class="lbl">${t('Beste keuze')}</div><div class="big">P${F(best.nom, 0)}${
+            best.k > 1 ? ` <small>${best.k} × ${VL(best.sub)}</small>` : ''}</div>`
+          + kv([[t('Systematische fout (max.)'), `± ${VL(best.es)} (${F(best.es / V * 100, 2)}%)`],
+            [t('Toevallige fout (max., SD)'), `${VL(best.s)} (${F(best.s / V * 100, 2)}%)`]])
+        : note('warn', t('Geen pipet in je set kan dit volume binnen 10–100% van zijn bereik afmeten.'));
+      const why = r => r.ok ? (r.k > 20 ? t('te vaak') : t('ja')) : t('onder 10% van bereik');
+      return head + `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr>`
+        + `<th>${t('Pipet')}</th><th class="num">${t('Keer')}</th><th class="num">${t('Per keer')}</th>`
+        + `<th class="num">${tH('e<sub>s</sub> max.')}</th><th class="num">${t('s max.')}</th>`
+        + `<th class="num">${tH('Totaal (e<sub>s</sub> + 2s)')}</th><th>${t('Bruikbaar')}</th></tr></thead><tbody>`
+        + R.map(r => `<tr><td>P${F(r.nom, 0)}</td><td class="num">${r.k}</td><td class="num">${VL(r.sub)}</td>`
+          + `<td class="num">${VL(r.es)}</td><td class="num">${VL(r.s)}</td>`
+          + `<td class="num">${F(r.rel, 2)}%</td><td>${why(r)}</td></tr>`).join('')
+        + `</tbody></table></div><div class="formula">${tH('totaal = (k·e<sub>s</sub> + 2·√k·s) / V')}</div>`;
+    }
+  }
+});
+calc.pipkeus = () => {};
 /* /NT:pipkeus */
 /* NT:digest */
 /* ================= RESTRICTIEDIGESTIE ================= */

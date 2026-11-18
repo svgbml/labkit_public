@@ -1,15 +1,7 @@
 <section class="tool" id="t-pipkeus" data-tool="pipkeus">
   <header class="tool-head"><h2>Welke pipet?</h2>
   <p>Kies de pipet die een volume het nauwkeurigst afmeet: per pipet in je set de maximaal toegestane systematische en toevallige fout bij dat volume, ook als je meerdere keren moet pipetteren.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="pk-v">Te pipetteren volume</label><div class="inu"><input id="pk-v" inputmode="decimal" value="15"><span class="u">µL</span></div></div>
-        <div class="f" style="grid-column:span 2"><label for="pk-set">Pipetten in je set (nominaal, µL)</label><input id="pk-set" class="txt" value="2 10 20 100 200 1000 5000"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Een pipet met variabel volume werkt tussen 10% en 100% van het nominale volume. Kalibreer je eigen pipetten met de Pipetkalibratie; de echte fouten zijn meestal kleiner dan de ISO-grenzen.</p>
-    </div>
-    <div class="result"><div id="pk-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie 90_pipkeus.js). -->
+  <div id="pk-app"></div>
   <p class="src">Maximaal toelaatbare fouten van pipetten met variabel volume volgens ISO 8655-2, bij het nominale volume (zie Pipetkalibratie; Mettler Toledo, SOP Pipette Quick Check). Aangenomen is dat de absolute fout van het nominale volume over het hele bereik geldt, zodat de relatieve fout bij een klein volume groter wordt. Bij k keer pipetteren tellen systematische fouten op (k × e<sub>s</sub>) en toevallige fouten kwadratisch (√k × s).</p>
 </section>

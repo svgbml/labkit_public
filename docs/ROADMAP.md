@@ -8,6 +8,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Progress:** S0 done. **Phase 1 (S1–S12) done**, **phase 2 (S13–S20) done**, **phase 3 (S21–S36) done**, phase 4 (S37–S47) next. After each phase the full `python tools/check.py` passed (validation, layout in Dutch and English, robustness, translations, startup). Phases 12–14 (S147–S201) were added later and have not been started.
 
 ## Decisions
+- **Vue 3 (besloten tijdens de run van fase 4).** De app gaat op Vue, met Vue als los bestand in `web/vendor/` zodat er geen CDN en geen bouwstap bij komt en de app vanaf `file://` blijft werken. De omzetting gaat per tool; de rest van de app blijft intussen werken. De vertaallaag van de DOM kan niet in een Vue-boom komen, dus een component vertaalt zelf met `t()` / `tHtml()` tegen dezelfde `i18n/en.json`, en `tests/i18n_vue.py` controleert dat statisch. Een omgezette tool houdt zijn element-id's en zijn validatiegeval, zodat delen, ongedaan maken, de invoeropslag en de validatie blijven werken. Zie `CLAUDE.md`.
 - **#13 shared layout** applies per *type* of tool. Picture-generating tools (schemes, diagrams, gel figures) share one layout; calculators keep their own.
 - **Gel editor:** keep automatic ladder band detection, and keep editing the numbers/text next to each ladder band.
 - **Removed:** chain of custody, reagent stock, freezer boxes, label sheets and the GHS label. Organisation is merged into Bench. The experiment planner stays (#240 was not chosen).

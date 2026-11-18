@@ -1,18 +1,8 @@
 <section class="tool" id="t-sigfig" data-tool="sigfig">
   <header class="tool-head"><h2>Significante cijfers &amp; afronden</h2>
   <p>Tel de significante cijfers van een getal, rond af op een gekozen aantal (half naar boven of half naar even) en rapporteer een meetwaarde met zijn onzekerheid op het juiste aantal decimalen.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="sf-x">Getal of meetwaarde</label><input id="sf-x" class="txt mono" value="0,0045650"></div>
-        <div class="f"><label for="sf-n">Afronden op</label><div class="inu"><input id="sf-n" inputmode="numeric" value="3"><span class="u">sign. cijfers</span></div></div>
-        <div class="f"><label for="sf-m">Regel bij precies de helft</label><select id="sf-m"><option value="up">half naar boven (weg van nul)</option><option value="even">half naar even (bankiers)</option></select></div>
-        <div class="f"><label for="sf-u">Onzekerheid (optioneel)</label><input id="sf-u" class="txt mono" value="0,0000234"></div>
-        <div class="f"><label for="sf-ud">Cijfers in de onzekerheid</label><select id="sf-ud"><option value="2">2 (aanbevolen)</option><option value="1">1</option></select></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Komma of punt als decimaalteken; wetenschappelijke notatie mag (bijv. <span class="mono">4,565e-3</span>). Er wordt met de getypte cijfers gerekend, niet met een afgeronde computerwaarde.</p>
-    </div>
-    <div class="result"><div id="sf-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie 87_sigfig.js). De kop hierboven en de
+       bronregel hieronder blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="sf-app"></div>
   <p class="src">Onzekerheid met hooguit twee significante cijfers en de meetwaarde op dezelfde decimaal (JCGM 100:2008, GUM §7.2.6). Afronden half naar even voorkomt systematische afwijking bij veel afrondingen (ISO 80000-1:2022, bijlage B). Nullen vóór het eerste cijfer tellen niet; nullen aan het eind na een decimaalteken wel; nullen aan het eind van een geheel getal zijn dubbelzinnig.</p>
 </section>

@@ -1,16 +1,8 @@
 <section class="tool" id="t-zprime" data-tool="zprime">
   <header class="tool-head"><h2>Assaykwaliteit (Z′-factor)</h2>
   <p>Beoordeel of een plaat-assay positieve en negatieve controles goed scheidt: Z′-factor, signaal/achtergrond, signaal/ruis en CV, en de Z-factor van de monsters.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="zp-pos">Positieve controle <span class="example">voorbeeld</span></label><textarea id="zp-pos" rows="3">1,842 1,905 1,778 1,861 1,920 1,812 1,889 1,850 1,795 1,874 1,903 1,836</textarea></div>
-        <div class="f" style="grid-column:1/-1"><label for="zp-neg">Negatieve controle</label><textarea id="zp-neg" rows="3">0,212 0,198 0,225 0,204 0,231 0,190 0,218 0,207 0,215 0,199 0,226 0,210</textarea></div>
-        <div class="f" style="grid-column:1/-1"><label for="zp-s">Monsters (optioneel)</label><textarea id="zp-s" rows="2"></textarea></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Getallen scheiden met spaties of regels; plakken uit Excel mag. Gebruik minstens 8 en liefst 16 of meer controleputjes, verspreid over de plaat. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="zp-cv"></canvas><div id="zp-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie 80_zprime.js). De tekening op het canvas
+       blijft gewoon met de tekencontext gemaakt: Vue beheert alleen de velden eromheen. -->
+  <div id="zp-app"></div>
   <p class="src">Z′ = 1 − 3(σ<sub>p</sub> + σ<sub>n</sub>) / |μ<sub>p</sub> − μ<sub>n</sub>|; Z = 1 − 3(σ<sub>s</sub> + σ<sub>c</sub>) / |μ<sub>s</sub> − μ<sub>c</sub>| met de negatieve controle als c. Indeling: Z′ = 1 ideaal, 0,5 – 1 uitstekend, 0 – 0,5 matig, &lt; 0 onbruikbaar (Zhang, Chung &amp; Oldenburg, J Biomol Screen 4:67–73, 1999; NIH/NCATS Assay Guidance Manual, "HTS Assay Validation").</p>
 </section>
