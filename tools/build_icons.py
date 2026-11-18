@@ -21,8 +21,8 @@ DEEL1 = ['start', 'verdunning', 'oplossing', 'units', 'molm', 'hh', 'osmo', 'tit
          'curve', 'enzym', 'spec', 'reeks', 'groei', 'inoc', 'telkamer', 'teller', 'seed',
          'micro', 'gcomp', 'mic', 'dna', 'oligo', 'pcr', 'pcrcyclus', 'qpcr', 'melt', 'gel',
          'gelfoto', 'sds', 'wb', 'ligatie', 'transf', 'rmp', 'stat', 'pverd', 'ppip', 'pprog',
-         'plaad', 'centrifuge', 'timers', 'plaat', 'plan', 'report', 'inst']
-assert len(DEEL1) == 45, len(DEEL1)
+         'centrifuge', 'timers', 'plaat', 'plan', 'report', 'inst']
+assert len(DEEL1) == 44, len(DEEL1)
 
 glyphs = {}
 for f in ('basis.json', 'deel1.json', 'deel2.json'):
