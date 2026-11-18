@@ -21,6 +21,7 @@ import Medium from './tools/Medium.vue';
 import Oplossing from './tools/Oplossing.vue';
 import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
+import Verdunning from './tools/Verdunning.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -53,3 +54,6 @@ calc.bufcap = () => { if (bc && bc.vm) bc.vm.draw(); };
 
 mountTool('#ks-app', Ksp);
 calc.ksp = () => {};
+
+mountTool('#d-app', Verdunning);
+calc.verdunning = () => {};
