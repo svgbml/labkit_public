@@ -32,7 +32,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | S9 | 12 | Simple/expert toggle infrastructure (`data-expert` fields hidden in simple mode) + apply to 5 tools | ✅ `data-expert` + "Meer instellingen" per tool in `labkit:v1:expert`; applied to spec, dna, oligo, pcr, reeks. A field with a non-default value stays visible |
 | S10 | 12 | Apply simple/expert to 15 more tools with many fields | ✅ 15 more tools (31 fields), 20 in total; one toggle per block of settings |
 | S11 | 14 | Onboarding tour (4 steps: search, stages, workflows, settings) on first visit | ✅ Spotlight tour with 4 steps, keyboard-operable, replay button in Instellingen; a step without a visible target (phone) falls back to a centred card |
-| S12 | 15, 286 | What's new panel after an update + changelog page generated from a `CHANGELOG.md` | Panel shows once per version |
+| S12 | 15, 286 | What's new panel after an update + changelog page generated from a `CHANGELOG.md` | ✅ `CHANGELOG.md` -> `tools/build_changelog.py` -> `tools/nt/97_news.js`; panel after a version change, full list from Instellingen. Nothing on a first visit |
 
 ## Phase 2: preparation, gels (8 steps)
 | Step | Ideas | What | Done when |

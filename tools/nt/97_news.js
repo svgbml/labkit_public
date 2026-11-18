@@ -1,0 +1,12 @@
+/* ================= WAT IS ER NIEUW =================
+   Gegenereerd door tools/build_changelog.py uit CHANGELOG.md; niet met de hand bewerken.
+   Een blok zonder versienummer (v:'') is nog niet uitgebracht en verschijnt alleen in
+   de volledige lijst. */
+const NEWS=[
+  {v:'',d:'',t:'Nog niet uitgebracht',items:['Elke tool hoort nu bij een fase van het experiment: voorbereiden, uitvoeren of analyseren.','Tabs boven de zijbalk filteren de tools en de startpagina op die fase, met een eigen kleur per fase.','In de kop van elke tool staat een kruimelpad van fase naar groep naar tool.','Onder aan een tool staan de vervolgstappen die er meestal op volgen.','Zoekresultaten en het opdrachtpalet laten nu ook de beschrijving en de tags van een tool zien.','Je kunt maximaal zes tools vastzetten in een balk boven het werkvlak.','Elke tool heeft een eigen pictogram in de zijbalk en op de startpagina.','Tools met veel instellingen tonen de geavanceerde velden pas na een klik op "Meer instellingen".','Bij het eerste bezoek loopt een korte rondleiding langs zoeken, fasen, werkstromen en instellingen.','Na een update laat een paneel zien wat er nieuw is.']},
+  {v:'1.18.1',d:'2026-11-16',items:['Labels bij de ladder in de geleditor wijken alleen nog uit voor hun directe buren.','Labels worden niet meer afgesneden aan de rand van de afbeelding.']},
+  {v:'1.18.0',d:'2026-11-16',items:['De geleditor herkent de ladder in een foto automatisch.','Je kunt een virtuele ladder naast de gel zetten als die op de foto ontbreekt.','De foto wordt automatisch bijgesneden tot de gel zelf.']},
+  {v:'1.17.0',d:'2026-11-15',items:['De geleditor heeft zoom en een verstelbare bijsnijdkader gekregen.','Putjes in de gel worden herkend, ook bij meerdere ladders naast elkaar.']},
+  {v:'1.16.0',d:'2026-11-15',items:['Je kunt een uitkomst doorsturen naar een andere tool.','Elke berekening heeft een link gekregen waarmee je hem terugvindt.','Zes nieuwe modules en een reeks verbeteringen in bestaande tools.']},
+  {v:'1.15.0',d:'2026-11-14',items:['Eenentwintig nieuwe tools.','Het opdrachtpalet opent overal met Ctrl+K.','Je kunt de invoer van een tool delen als link of QR-code.','Ongedaan maken werkt per tool met Ctrl+Z.','Rapporten zijn te bewaren als Word-bestand.']}
+];

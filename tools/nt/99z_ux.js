@@ -260,3 +260,22 @@ function tourStart(){ if(current!=='start'){ location.hash='#start'; }
 document.addEventListener('click',e=>{ if(e.target.closest('[data-tour-start]')) tourStart(); });
 addEventListener('resize',()=>{ if(tourAt>=0) tourGo(tourAt); });
 if(!jget(TOURKEY,{}).v) setTimeout(()=>{ if(!jget(TOURKEY,{}).v&&current==='start'&&!document.querySelector('.lk-modal')) tourStart(); },900);
+
+/* ---------- "wat is er nieuw": na een update de punten uit CHANGELOG.md laten zien ---------- */
+const NKEY='labkit:v1:seenver';
+const nvCmp=(a,b)=>{ const A=String(a).split('.').map(Number), B=String(b).split('.').map(Number);
+  for(let i=0;i<Math.max(A.length,B.length);i++){ const d=(A[i]||0)-(B[i]||0); if(d) return d<0?-1:1; } return 0; };
+function newsOpen(all){ if(typeof NEWS==='undefined') return; const seen=jget(NKEY,'');
+  const L=NEWS.filter(n=>all?true:(n.v&&nvCmp(n.v,seen)>0&&nvCmp(n.v,APPVER)<=0));
+  if(!L.length) return;
+  const head=all?'Alle wijzigingen':'Wat is er nieuw';
+  const m=appModal(`<h3 style="margin:0 0 4px;font-size:16px">${head}</h3><p style="margin:0 0 12px;color:var(--muted);font-size:13px">Labkit werkt zonder internet; deze lijst hoort bij de versie die je nu gebruikt.</p>`+
+    `<div class="lk-news">${L.map(n=>`<section><h4>${n.v?`<span data-notr="">${esc(n.v)}</span>`:esc(n.t||'')}${n.d?` <small data-notr="">${esc(n.d)}</small>`:''}</h4><ul>${n.items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul></section>`).join('')}</div>`+
+    `<div class="row" style="justify-content:space-between;margin-top:14px">${all?'<span></span>':'<button type="button" class="ghost" data-news-all="">Alle wijzigingen</button>'}<button type="button" class="primary lk-close">Sluiten</button></div>`);
+  m.box.querySelector('.lk-close').addEventListener('click',m.close);
+  const a=m.box.querySelector('[data-news-all]'); if(a) a.addEventListener('click',()=>{ m.close(); newsOpen(true); });
+  if(!all) jset(NKEY,APPVER); }
+document.addEventListener('click',e=>{ if(e.target.closest('[data-news]')) newsOpen(true); });
+{ const seen=jget(NKEY,'');
+  if(!seen) jset(NKEY,APPVER); /* eerste bezoek: niets melden, alleen onthouden */
+  else if(nvCmp(seen,APPVER)<0) setTimeout(()=>{ if(!document.querySelector('.lk-modal')&&!document.querySelector('#lk-tour:not([hidden])')) newsOpen(false); },1200); }

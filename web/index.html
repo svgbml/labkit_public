@@ -222,6 +222,12 @@ nav.side > a.nav-col{display:none!important}
   html.nav-open nav.side > .navgroup{display:flex;margin:0;padding:16px 16px 6px 20px;font-size:12.5px}
   html.nav-open .lk-menu{background:var(--accent-soft)}
 }
+/* paneel "wat is er nieuw" */
+.lk-news section{margin:0 0 14px}
+.lk-news h4{margin:0 0 4px;font-size:13.5px;font-weight:700}
+.lk-news h4 small{font-weight:400;color:var(--muted);font-size:12px}
+.lk-news ul{margin:0;padding-left:18px}
+.lk-news li{margin:2px 0;font-size:13.5px}
 /* rondleiding bij het eerste bezoek */
 .lk-tour{position:fixed;inset:0;z-index:90}
 .lk-tour[hidden]{display:none}
@@ -1600,6 +1606,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
         <div id="upd-status" style="margin-top:10px"></div>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De controle vraagt alleen het versienummer van de laatste release op bij GitHub; er worden geen gegevens van jou verstuurd. De web-app haalt een nieuwe versie zelf op zodra je vernieuwt; het Windows-programma downloadt de nieuwe installer, die je daarna uitvoert.</p>
       </div>
+      <div class="panel"><h3>Wat is er nieuw</h3><p style="margin:0 0 10px;color:var(--muted);font-size:13px">De wijzigingen per versie, zoals ze ook na een update worden getoond.</p><div class="row"><button type="button" data-news="">Alle wijzigingen bekijken</button></div></div>
       <div class="panel"><h3>Rondleiding</h3><p style="margin:0 0 10px;color:var(--muted);font-size:13px">Vier korte stappen door het zoeken, de fasen, de werkstromen en deze instellingen.</p><div class="row"><button type="button" data-tour-start="">Rondleiding opnieuw starten</button></div></div>
       <div class="panel"><h3>Herstellen</h3><div class="row"><button type="button" id="ui-reset">Uiterlijk terug naar standaard</button></div></div>
     </div>
@@ -3799,7 +3806,7 @@ document.documentElement.lang=LANG;
 /* Het Engelse woordenboek staat apart in i18n-en.js (een derde van de app) en wordt alleen voor Engels geladen.
    document.write houdt de parser vast tot het bestand er is, zodat de vertaallaag hieronder het meteen heeft.
    De ?h=-hash zet tools/build_i18n.py, zodat een nieuwe vertaling nooit uit een oude cache komt. */
-if(LANG==='en') document.write('<script src="i18n-en.js?h=d1fa8f8dab"><\/script>');
+if(LANG==='en') document.write('<script src="i18n-en.js?h=c55df2be8a"><\/script>');
 </script>
 <script>
 const I18N_EN=window.__I18N_EN||{};
@@ -7030,6 +7037,20 @@ calc.mix=function(){ const th=Math.min(Math.max(num($('#mx-th').value)||0,0),0.2
   h+=`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Locus</th><th class="num">Allelen</th><th class="num">M<sub>x</sub></th><th class="num">H<sub>b</sub> major</th><th class="num">H<sub>b</sub> minor</th><th class="num">LR</th><th>Opmerking</th></tr></thead><tbody>${R.map(r=>`<tr><td>${ud(r.loc)}</td><td class="num">${r.n}</td><td class="num">${isFinite(r.mx)?fmt(r.mx,2):'–'}</td><td class="num">${isFinite(r.hbMaj)?fmt(r.hbMaj,2):isFinite(r.hb2)?fmt(r.hb2,2):'–'}</td><td class="num">${isFinite(r.hbMin)?fmt(r.hbMin,2):'–'}</td><td class="num">${r.lr==null?'–':r.lr===0?'0':sig(r.lr,3)}</td><td>${r.note||(isFinite(r.hbMaj)&&Math.min(r.hbMaj,r.hbMin)<0.6?'H<sub>b</sub> onder 0,60':'')}</td></tr>`).join('')}</tbody></table></div>`+warn.map(w=>note('warn',w)).join('')+note('info','Rekenvoorbeeld voor onderwijs: dit model gebruikt geen piekhoogtes, stutter of drop-out bij de LR en gaat uit van precies twee bijdragers.');
   out.innerHTML=h+`<div class="formula">LR = Π 1 / Σ P(genotype onbekende | slachtoffer, verdachte, θ) · M<sub>x</sub> = (φ<sub>minor 1</sub> + φ<sub>minor 2</sub>) / Σφ</div>`; };
 /* /NT:mix */
+/* NT:news */
+/* ================= WAT IS ER NIEUW =================
+   Gegenereerd door tools/build_changelog.py uit CHANGELOG.md; niet met de hand bewerken.
+   Een blok zonder versienummer (v:'') is nog niet uitgebracht en verschijnt alleen in
+   de volledige lijst. */
+const NEWS=[
+  {v:'',d:'',t:'Nog niet uitgebracht',items:['Elke tool hoort nu bij een fase van het experiment: voorbereiden, uitvoeren of analyseren.','Tabs boven de zijbalk filteren de tools en de startpagina op die fase, met een eigen kleur per fase.','In de kop van elke tool staat een kruimelpad van fase naar groep naar tool.','Onder aan een tool staan de vervolgstappen die er meestal op volgen.','Zoekresultaten en het opdrachtpalet laten nu ook de beschrijving en de tags van een tool zien.','Je kunt maximaal zes tools vastzetten in een balk boven het werkvlak.','Elke tool heeft een eigen pictogram in de zijbalk en op de startpagina.','Tools met veel instellingen tonen de geavanceerde velden pas na een klik op "Meer instellingen".','Bij het eerste bezoek loopt een korte rondleiding langs zoeken, fasen, werkstromen en instellingen.','Na een update laat een paneel zien wat er nieuw is.']},
+  {v:'1.18.1',d:'2026-11-16',items:['Labels bij de ladder in de geleditor wijken alleen nog uit voor hun directe buren.','Labels worden niet meer afgesneden aan de rand van de afbeelding.']},
+  {v:'1.18.0',d:'2026-11-16',items:['De geleditor herkent de ladder in een foto automatisch.','Je kunt een virtuele ladder naast de gel zetten als die op de foto ontbreekt.','De foto wordt automatisch bijgesneden tot de gel zelf.']},
+  {v:'1.17.0',d:'2026-11-15',items:['De geleditor heeft zoom en een verstelbare bijsnijdkader gekregen.','Putjes in de gel worden herkend, ook bij meerdere ladders naast elkaar.']},
+  {v:'1.16.0',d:'2026-11-15',items:['Je kunt een uitkomst doorsturen naar een andere tool.','Elke berekening heeft een link gekregen waarmee je hem terugvindt.','Zes nieuwe modules en een reeks verbeteringen in bestaande tools.']},
+  {v:'1.15.0',d:'2026-11-14',items:['Eenentwintig nieuwe tools.','Het opdrachtpalet opent overal met Ctrl+K.','Je kunt de invoer van een tool delen als link of QR-code.','Ongedaan maken werkt per tool met Ctrl+Z.','Rapporten zijn te bewaren als Word-bestand.']}
+];
+/* /NT:news */
 /* NT:valid */
 /* gegenereerd door tools/build_validated.py uit tests/VALIDATIE.md; niet met de hand bewerken */
 const VALIDATED={"bland":[3,3],"bpa":[2,2],"bufcap":[1,1],"cdna":[2,2],"centrifuge":[2,2],"chrom":[3,3],"curve":[8,8],"desinf":[1,1],"digest":[2,2],"dna":[4,4],"edta":[2,2],"elisa":[1,1],"ento":[1,1],"enzym":[5,5],"facs":[3,3],"gcomp":[3,3],"gel":[1,1],"gelfoto":[19,19],"glass":[2,2],"gradient":[1,1],"groei":[3,3],"hh":[2,2],"hwe":[4,4],"ic50":[1,1],"inoc":[1,1],"istd":[2,2],"kin":[3,3],"kjel":[1,1],"km":[3,3],"ksp":[2,2],"ligatie":[1,1],"melt":[2,2],"mic":[3,3],"micro":[2,2],"mix":[3,3],"molm":[4,4],"mpn":[2,2],"munc":[1,1],"oligo":[2,2],"oplossing":[7,7],"osmo":[2,2],"passage":[1,1],"pcr":[5,5],"pcrcyclus":[5,5],"pipcal":[2,2],"pipkeus":[2,2],"plaat":[2,2],"pmi":[1,1],"ppip":[7,7],"pprog":[1,1],"purif":[2,2],"pverd":[2,2],"qpcr":[3,3],"qplate":[1,1],"reeks":[3,3],"rmp":[1,1],"rnaq":[1,1],"roc":[1,1],"sds":[3,3],"seed":[1,1],"sigfig":[4,4],"spec":[2,2],"stat":[57,57],"stature":[2,2],"steril":[2,2],"strchk":[2,2],"telkamer":[4,4],"titr":[3,3],"transf":[3,3],"transfect":[4,4],"units":[1,1],"verdunning":[3,3],"viab":[2,2],"wb":[1,1],"widmark":[4,4],"ystr":[1,1],"zprime":[1,1]};
@@ -7592,6 +7613,25 @@ function tourStart(){ if(current!=='start'){ location.hash='#start'; }
 document.addEventListener('click',e=>{ if(e.target.closest('[data-tour-start]')) tourStart(); });
 addEventListener('resize',()=>{ if(tourAt>=0) tourGo(tourAt); });
 if(!jget(TOURKEY,{}).v) setTimeout(()=>{ if(!jget(TOURKEY,{}).v&&current==='start'&&!document.querySelector('.lk-modal')) tourStart(); },900);
+
+/* ---------- "wat is er nieuw": na een update de punten uit CHANGELOG.md laten zien ---------- */
+const NKEY='labkit:v1:seenver';
+const nvCmp=(a,b)=>{ const A=String(a).split('.').map(Number), B=String(b).split('.').map(Number);
+  for(let i=0;i<Math.max(A.length,B.length);i++){ const d=(A[i]||0)-(B[i]||0); if(d) return d<0?-1:1; } return 0; };
+function newsOpen(all){ if(typeof NEWS==='undefined') return; const seen=jget(NKEY,'');
+  const L=NEWS.filter(n=>all?true:(n.v&&nvCmp(n.v,seen)>0&&nvCmp(n.v,APPVER)<=0));
+  if(!L.length) return;
+  const head=all?'Alle wijzigingen':'Wat is er nieuw';
+  const m=appModal(`<h3 style="margin:0 0 4px;font-size:16px">${head}</h3><p style="margin:0 0 12px;color:var(--muted);font-size:13px">Labkit werkt zonder internet; deze lijst hoort bij de versie die je nu gebruikt.</p>`+
+    `<div class="lk-news">${L.map(n=>`<section><h4>${n.v?`<span data-notr="">${esc(n.v)}</span>`:esc(n.t||'')}${n.d?` <small data-notr="">${esc(n.d)}</small>`:''}</h4><ul>${n.items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul></section>`).join('')}</div>`+
+    `<div class="row" style="justify-content:space-between;margin-top:14px">${all?'<span></span>':'<button type="button" class="ghost" data-news-all="">Alle wijzigingen</button>'}<button type="button" class="primary lk-close">Sluiten</button></div>`);
+  m.box.querySelector('.lk-close').addEventListener('click',m.close);
+  const a=m.box.querySelector('[data-news-all]'); if(a) a.addEventListener('click',()=>{ m.close(); newsOpen(true); });
+  if(!all) jset(NKEY,APPVER); }
+document.addEventListener('click',e=>{ if(e.target.closest('[data-news]')) newsOpen(true); });
+{ const seen=jget(NKEY,'');
+  if(!seen) jset(NKEY,APPVER); /* eerste bezoek: niets melden, alleen onthouden */
+  else if(nvCmp(seen,APPVER)<0) setTimeout(()=>{ if(!document.querySelector('.lk-modal')&&!document.querySelector('#lk-tour:not([hidden])')) newsOpen(false); },1200); }
 /* /NT:ux */
 buildReeks();
 sLoad('bradford');

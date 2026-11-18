@@ -13,7 +13,9 @@ Lab calculator and gel-editor web app (Dutch first, English via a runtime transl
 ## How the app is built
 - `web/index.html` is both source and build output (~830 KB). Older tools are edited in place.
 - Newer tools are modules in `tools/nt/` (`NN_id.json` + `.html` + `.js`), injected by `python tools/insert_tools.py` between `<!-- NT:id -->` / `/* NT:id */` markers. **Never edit inside those markers in `index.html`**: change the module file and re-run the insert. A module with `"lib":true` is JS only.
-- New features of the UX layer go in `tools/nt/99z_ux.js`; generated data in `tools/nt/98_valid.js` comes from `python tools/build_validated.py`.
+- New features of the UX layer go in `tools/nt/99z_ux.js`; generated data comes from a build script: `tools/nt/98_valid.js` from `python tools/build_validated.py`, `tools/nt/99ya_icon.js` from `python tools/build_icons.py` (sources in `tools/icons/`), `tools/nt/97_news.js` from `python tools/build_changelog.py` (source `CHANGELOG.md`).
+- Stages (prepare/perform/analyse) live in `tools/nt/99y_stage.js`; `tests/stages_check.py` fails when a tool has no stage.
+- An icon is a CSS mask on `::before`, never an `<svg>` inside a nav link or tile: the translation layer uses the link's whole innerHTML as its key, so an extra element there breaks existing keys.
 - Removing a tool: delete its module files, then also remove its id from `const TOOLS=[…]`, `const TAGS={…}` and `SYN` in `tools/nt/99_app.js` (insert_tools does not remove those).
 
 ## Translation (Dutch → English)
