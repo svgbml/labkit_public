@@ -5,7 +5,8 @@ import sys
 
 from playwright.sync_api import sync_playwright
 
-URL = (pathlib.Path('/home/user/labkit_public') / 'web' / 'index.html').as_uri()
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+URL = (ROOT / 'web' / 'index.html').as_uri()
 PASTE = """(block)=>{
   const el = document.querySelector('#o-tbl tbody tr [data-k=n]');
   const seen = [];

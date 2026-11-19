@@ -3,7 +3,9 @@
 Lab calculator and gel-editor web app (Dutch first, English via a runtime translation layer), published to GitHub Pages from `web/` and packaged for Windows with Tauri.
 
 ## Roadmap work
-- The plan lives in `docs/ROADMAP.md`: steps `S1`–`S146` of ~30 minutes each; idea numbers (`#n`) refer to `docs/ideas.md`.
+- The plan lives in `docs/ROADMAP.md`: steps `S0`–`S263` (plus `S204a`) of ~30 minutes each; idea numbers (`#n`) refer to `docs/ideas.md`.
+- Work comes in **batches** (the *Cloud sessions* table in the roadmap): one cloud session does one batch, in order, on the batch's lead model. Steps in the batch whose *Model* column is cheaper go to a subagent of that model; a step never runs on a cheaper model than its column says.
+- Don't add features to a tool that isn't on Vue yet; that waits for its phase-15 conversion. New tools are built in Vue straight away.
 - Do exactly the steps you are asked to do, in order. If a step depends on one that isn't done (*needs Sx*), stop and report that instead of doing both.
 - After each step: run `python tools/check.py --quick`; it must pass. At the end of a phase (or when asked), run the full `python tools/check.py`.
 - Mark the step ✅ in `docs/ROADMAP.md` (add a one-line note if something was left out), then **commit once per step** with the message `S<n>: <short summary>`.
