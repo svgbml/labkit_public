@@ -4451,5 +4451,6 @@
 "{*}: ladingen niet herkend.": "{*}: charges not recognised.",
 "Vul minstens één stof met concentratie in.": "Enter at least one substance with a concentration.",
 "Vul minstens één stap met temperatuur in.": "Enter at least one step with a temperature.",
-"Voeg minstens één stap toe.": "Add at least one step."
+"Voeg minstens één stap toe.": "Add at least one step.",
+"Vul een starttijd (uu:mm) en minstens één stap in.": "Enter a start time (hh:mm) and at least one step."
 }

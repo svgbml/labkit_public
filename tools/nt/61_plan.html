@@ -1,18 +1,7 @@
 <section class="tool" id="t-plan" data-tool="plan">
   <header class="tool-head"><h2>Experimentplanner</h2>
   <p>Zet de stappen van een experiment op een tijdlijn: wanneer begint en eindigt elke stap, hoeveel handwerk zit erin en past het binnen je labdag. Wachtstappen zet je met één klik als timers klaar, en de hele planning als agendabestand.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="xp-title">Titel</label><input id="xp-title" class="txt" value="Transformatie en uitplaten"></div>
-        <div class="f"><label for="xp-date">Datum</label><input id="xp-date" class="txt" placeholder="dd-mm-jjjj (leeg = vandaag)"></div>
-        <div class="f"><label for="xp-start">Starttijd</label><input id="xp-start" class="txt" value="09:00"></div>
-        <div class="f"><label for="xp-end">Labdag tot</label><input id="xp-end" class="txt" value="17:00"></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="xp-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="xp-tbl-add">+ Stap</button><button type="button" id="xp-tim">Wachtstappen als timers</button><button type="button" id="xp-ics">Naar agenda (.ics)</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Duur in minuten. "Wachten" zijn incubaties of looptijden waarin je iets anders kunt doen; die worden timers. Het .ics-bestand opent in Outlook, Google Agenda en Apple Agenda; elke stap wordt een afspraak in lokale tijd. Voorbeeld: transformatie volgens de Avans DNA-toolbox. Voorbeeldtijden zijn indicatief.</p>
-    </div>
-    <div class="result"><canvas id="xp-cv"></canvas><div class="pic-bar" data-picbar="xp"></div><div id="xp-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Planner.vue); de kop blijft
+       gewone HTML, zodat zijn vertaalsleutels blijven gelden. -->
+  <div id="xp-app"></div>
 </section>

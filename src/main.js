@@ -27,6 +27,8 @@ import Pipetteer from './tools/Pipetteer.vue';
 import PcrProgramma from './tools/PcrProgramma.vue';
 import Verdunningsschema from './tools/Verdunningsschema.vue';
 import Kleuringsschema from './tools/Kleuringsschema.vue';
+import Planner from './tools/Planner.vue';
+import Rapport from './tools/Rapport.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -86,3 +88,15 @@ calc.pverd = () => { if (pv && pv.vm) pv.vm.draw(); };
    component opnieuw tekenen (de invoer-events van de pagina en het exporteren roepen dat aan). */
 const stn = mountTool('#stn-app', Kleuringsschema);
 calc.stain = () => { if (stn && stn.vm) stn.vm.draw(); };
+
+/* Experimentplanner tekent op #xp-cv met de bestaande tekenfuncties; calc.plan() laat de
+   component opnieuw tekenen. "Wachtstappen als timers" (#xp-tim) en het agendabestand (#xp-ics)
+   zitten in de component. */
+const xp = mountTool('#xp-app', Planner);
+calc.plan = () => { if (xp && xp.vm) xp.vm.draw(); };
+
+/* Rapport / labjournaal: de bediening en de melding staan in de component; rpSection, rpDoc en
+   rpPrint blijven globaal in tools/nt/62_report.js omdat ook "Afdrukken" bij elke tool ze
+   aanroept. De component rekent zelf opnieuw. */
+mountTool('#rp-app', Rapport);
+calc.report = () => {};
