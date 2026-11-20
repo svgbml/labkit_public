@@ -597,3 +597,13 @@ Follow the batch order in *Cloud sessions* above. In short:
 3. **V6, V7** (Opus 5): Statistiek, Gelplanner, the gel editor and finally the app shell.
 4. Then wave by wave: **P** (phase 4), **E/G** (bench mode and gel editor), **C/R/W**, **F**.
 5. The *any time* batches (**SQ1**, **AL1**, **SA1a**) when sequence or SNP work is the nearest practical need; SQ1 is one Sonnet session and immediately useful.
+
+## Known bugs (not fixed yet)
+
+Bugs found along the way that fall outside the batch that found them. Fix one in its own commit
+(`fix: …`) and remove its row here; a bug in a tool that is not on Vue yet can also be fixed during
+that tool's conversion.
+
+| Found | Where | Bug | Notes |
+|---|---|---|---|
+| 2026-11-21, batch V1a | *PCR-mastermix* (`pcr`), English | `tests/layout_audit.py` with `LABKIT_LANG=en` reports two labels overflowing their field at 390 px wide: *Reaction volume* and *Template per reaction* (`overloop … 11>3`). The full `tools/check.py` fails on this. | Not caused by V1a: the commit before it (`5de083d`) shows the same two on the same machine. Seen on Windows; the earlier cloud run (Linux) had 0, so font metrics are the likely cause. Probably fixed by shorter English labels or letting those labels wrap. *PCR-mastermix* goes to Vue at S233. |
