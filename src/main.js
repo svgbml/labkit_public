@@ -25,6 +25,7 @@ import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Reeks from './tools/Reeks.vue';
 import Facs from './tools/Facs.vue';
+import Transfect from './tools/Transfect.vue';
 import Mic from './tools/Mic.vue';
 import Groei from './tools/Groei.vue';
 
@@ -75,6 +76,10 @@ calc.reeks = () => {};
 /* Flowcytometrie: de antilichamentabel (fc-tbl) en de uitkomst zitten in de component. */
 mountTool('#fc-app', Facs);
 calc.facs = () => {};
+
+/* Transfectie (Lipofectamine 3000): de velden en de uitkomst zitten in de component. */
+mountTool('#trf-app', Transfect);
+calc.transfect = () => {};
 
 /* Antibiotica-gevoeligheid: beide tabellen (mi-tbl, mz-tbl) en de uitkomsten zitten in de component. */
 mountTool('#mi-app', Mic);
