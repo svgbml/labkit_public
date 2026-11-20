@@ -539,7 +539,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S213 | — | *Chromatografie (HPLC/GC)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S214 | — | *Spectrofotometrie*, *Dosis-respons (IC50/EC50)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S215 | — | *Verdunningsreeks & KVE* naar Vue | ✅ `src/tools/Reeks.vue`; het rekenwerk is dat van de oude `calc.reeks()`. De tellingen blijven in de globale `reeksCounts` (bewaard door `tblSnap()`, gezet door `tests/validate.py`) en `buildReeks()` laadt ze in de component. Getallen in de uitkomst gaan door `lkNumIn()`. Open: de knop *Kopieer naar Excel* die de UX-laag bij elke tabel zet blijft in een Vue-boom Nederlands (geldt ook voor eerdere tools) | Sonnet |
-| S216 | — | *Flowcytometrie (panel & controles)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S216 | — | *Flowcytometrie (panel & controles)* naar Vue | ✅ `src/tools/Facs.vue`; de antilichamentabel staat op `lk-etable` (`fc-tbl`), het rekenwerk is dat van de oude `calc.facs()` en `tools/nt/95_facs.js` is leeg op een opmerking na | Sonnet |
 | S217 | — | *Antibiotica-gevoeligheid* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S218 | — | *Groeicurve* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S219 | — | *Transfectie (Lipofectamine 3000)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |

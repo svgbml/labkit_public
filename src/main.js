@@ -24,6 +24,7 @@ import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Reeks from './tools/Reeks.vue';
+import Facs from './tools/Facs.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -68,3 +69,7 @@ calc.osmo = () => {};
 const rk = mountTool('#r-app', Reeks);
 if (rk) window.__reeksVm = rk.vm;
 calc.reeks = () => {};
+
+/* Flowcytometrie: de antilichamentabel (fc-tbl) en de uitkomst zitten in de component. */
+mountTool('#fc-app', Facs);
+calc.facs = () => {};
