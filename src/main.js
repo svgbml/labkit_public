@@ -29,6 +29,9 @@ import Verdunningsschema from './tools/Verdunningsschema.vue';
 import Kleuringsschema from './tools/Kleuringsschema.vue';
 import Planner from './tools/Planner.vue';
 import Rapport from './tools/Rapport.vue';
+import Centrifuge from './tools/Centrifuge.vue';
+import Timers from './tools/Timers.vue';
+import Plaatindeling from './tools/Plaatindeling.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -100,3 +103,19 @@ calc.plan = () => { if (xp && xp.vm) xp.vm.draw(); };
    aanroept. De component rekent zelf opnieuw. */
 mountTool('#rp-app', Rapport);
 calc.report = () => {};
+
+/* Centrifuge: de twee velden zijn elkaars uitkomst (rpm of × g, het laatst bewerkte veld telt);
+   de component houdt dat zelf bij, dus calc.centrifuge() hoeft niets meer. */
+mountTool('#z-app', Centrifuge);
+calc.centrifuge = () => {};
+
+/* Timers: de timers zelf (lijst, tikken, piepen, bewaren, addTimer, tmAct) blijven in
+   web/index.html, want ze lopen door in andere tools en de Experimentplanner voegt er toe. De
+   component tekent formulier en rooster en wordt via window.__tmVm.tick bijgewerkt. */
+mountTool('#tm-app', Timers);
+calc.timers = () => {};
+
+/* Plaatindeling: de bediening zit in de component; de gedeelde plaatontwerper (#w-pld) en de
+   tekening (#w-cv) komen uit tools/nt/02_plate.js en 04_plaat.js en worden in mounted() gebouwd.
+   calc.plaat() (= plateImg()) staat in 04_plaat.js. */
+mountTool('#w-app', Plaatindeling);

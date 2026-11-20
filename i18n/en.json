@@ -4452,5 +4452,20 @@
 "Vul minstens één stof met concentratie in.": "Enter at least one substance with a concentration.",
 "Vul minstens één stap met temperatuur in.": "Enter at least one step with a temperature.",
 "Voeg minstens één stap toe.": "Add at least one step.",
-"Vul een starttijd (uu:mm) en minstens één stap in.": "Enter a start time (hh:mm) and at least one step."
+"Vul een starttijd (uu:mm) en minstens één stap in.": "Enter a start time (hh:mm) and at least one step.",
+"Naam timer": "Timer name",
+"Verwijder timer": "Remove timer",
+"Stop alarm": "Stop alarm",
+"Pauze": "Pause",
+"Hervat": "Resume",
+"Reset": "Reset",
+"+{#} min": "+{#} min",
+"Opgeslagen.": "Saved.",
+"Download geannuleerd.": "Download cancelled.",
+"Downloaden lukte niet hier.": "Downloading did not work here.",
+"automatische labels (St1, Mo2 …)": "automatic labels (St1, Mo2 …)",
+"Gekopieerd. Plak in Excel, Sheets of je labjournaal.": "Copied. Paste into Excel, Sheets or your lab journal.",
+"Kopiëren werd geblokkeerd. Selecteer en kopieer de tekst hieronder.": "Copying was blocked. Select and copy the text below.",
+"ELISA / qPCR — plaat 1": "ELISA / qPCR — plate 1",
+"Standaarden in duplo in kolom 1–2; monsters in drievoud.": "Standards in duplicate in columns 1–2; samples in triplicate."
 }

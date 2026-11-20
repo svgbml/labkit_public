@@ -54,26 +54,30 @@ function wCells(){ const S=wState(), {r,c}=wDims(), {lab}=wLabels();
   const cell=k=>{ const g=S.wells[k], gn=g!=null&&S.groups[g]?S.groups[g].n:'', own=S.vals[k];
     return own?own+(gn?` (${gn})`:''):(gn?`${gn} ${(lab[k]||'').replace(/^\D+/,'')}`.trim():''); };
   return {r,c,cell}; }
-$('#w-copy').addEventListener('click',async()=>{ const {r,c,cell}=wCells();
+/* de tekst voor het klembord (tabel) en voor het CSV-bestand; de knoppen zelf staan in de Vue-component
+   Plaatindeling (src/tools/Plaatindeling.vue), die deze twee functies aanroept */
+function plaatTSV(){ const {r,c,cell}=wCells();
   let t=$('#w-title').value+'\n\t'+Array.from({length:c},(_,j)=>j+1).join('\t')+'\n';
   for(let i=0;i<r;i++){ t+=WRL[i]; for(let j=1;j<=c;j++) t+='\t'+cell(WRL[i]+j); t+='\n'; }
-  t=i18nTSV(t); try{ await navigator.clipboard.writeText(t); $('#w-copied').textContent='Gekopieerd. Plak in Excel, Sheets of je labjournaal.'; $('#w-fallback').style.display='none'; }
-  catch(e){ const f=$('#w-fallback'); f.value=t; f.style.display='block'; f.select(); $('#w-copied').textContent='Kopiëren werd geblokkeerd. Selecteer en kopieer de tekst hieronder.'; } });
-$('#w-csv').addEventListener('click',()=>{ const {r,c,cell}=wCells();
+  return i18nTSV(t); }
+function plaatCSV(){ const {r,c,cell}=wCells();
   let t='\t'+Array.from({length:c},(_,j)=>j+1).join('\t');
   for(let i=0;i<r;i++){ t+='\n'+WRL[i]; for(let j=1;j<=c;j++) t+='\t'+cell(WRL[i]+j); }
-  dlMsg($('#w-copied'),()=>saveBlob(safeName($('#w-title').value)+'.csv',csvBlob(t))); });
+  return t; }
 
-/* ---------- opmaakkeuzes gaan naar de ontwerper, de afbeelding volgt ---------- */
-$('#w-pal').addEventListener('change',e=>{ const pal=PALS[e.target.value]; if(!pal||!wPld) return; wPld.palette(pal); plateImg(); });
-$('#w-shape').addEventListener('change',e=>{ if(wPld) wPld.shape(e.target.value); plateImg(); });
-$('#w-autolab').addEventListener('change',e=>{ if(wPld) wPld.autoLabel(e.target.checked); plateImg(); });
-$('#w-leg').addEventListener('change',()=>plateImg());
-['w-title','w-note'].forEach(id=>$('#'+id).addEventListener('input',()=>plateImg()));
+/* de keuzes (palet, vorm, labels, legenda, titel, tekst) en de knoppen regelt de component; die roept
+   plateImg() aan en geeft palet, vorm en labels door aan de ontwerper (wPld) */
 calc.plaat=()=>{ plateImg(); };
 
-wPld=plateDesigner($('#w-pld'),{fmt:'8x12',shape:$('#w-shape').value,autoLabel:$('#w-autolab').checked,
-  palette:PALS[$('#w-pal').value]||GCOL, name:()=>$('#w-title').value,
-  groups:[{n:'Standaard',c:GCOL[0]},{n:'Blanco',c:GCOL[8]},{n:'Monster',c:GCOL[1]},{n:'Pos. controle',c:GCOL[2]}],
-  onChange(){ try{ plateImg(); }catch(e){} }});
-wExample();
+/* De gedeelde plaatontwerper bouwt de plaat in #w-pld, dat in de component staat. Daarom wordt hij pas
+   gemaakt als de component er is: Plaatindeling.vue roept dit aan in mounted(). Een Vue-mount wist de
+   inhoud van zijn host, dus vroeger bouwen heeft geen zin. De andere tools (qPCR, ELISA) maken hun
+   eigen ontwerper en veranderen niet. */
+function plaatInit(){
+  if(wPld) return;
+  wPld=plateDesigner($('#w-pld'),{fmt:'8x12',shape:$('#w-shape').value,autoLabel:$('#w-autolab').checked,
+    palette:PALS[$('#w-pal').value]||GCOL, name:()=>$('#w-title').value,
+    groups:[{n:'Standaard',c:GCOL[0]},{n:'Blanco',c:GCOL[8]},{n:'Monster',c:GCOL[1]},{n:'Pos. controle',c:GCOL[2]}],
+    onChange(){ try{ plateImg(); }catch(e){} }});
+  wExample();
+}

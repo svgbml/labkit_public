@@ -585,7 +585,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S259 | — | *Verdunningsschema* naar Vue | ✅ `src/tools/Verdunningsschema.vue`; de tekenhulpjes (`pTube`, `pArrow`, `pNum`, …) blijven in `web/index.html` | Sonnet |
 | S260 | — | *Kleuringsschema* naar Vue | ✅ `src/tools/Kleuringsschema.vue`, de tabel op `lk-etable`; alleen de sjablonen (`STN`) blijven in `tools/nt/44_stain.js`. Geen validatiegeval (het is een tekening) | Sonnet |
 | S261 | — | *Experimentplanner*, *Rapport / labjournaal* naar Vue | ✅ `src/tools/Planner.vue` (tabel op `lk-etable`) en `src/tools/Rapport.vue`. `rpTools`, `rpSection`, `rpDoc` en `rpPrint` blijven globaal in `tools/nt/62_report.js`, want de afdrukknoppen van andere tools gebruiken ze; het rapportdocument zelf blijft een string | Sonnet |
-| S262 | — | *Plaatindeling*, *Centrifuge*, *Timers* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S262 | — | *Plaatindeling*, *Centrifuge*, *Timers* naar Vue | ✅ `src/tools/Centrifuge.vue`, `Timers.vue`, `Plaatindeling.vue`. De timer-motor (`timers`, `addTimer`, tik, piep, opslag) blijft globaal in `web/index.html`, want hij loopt door in andere tools; de plaatontwerper in `#w-pld` en `plateImg()` blijven de gedeelde motor (`plaatInit()` in `tools/nt/04_plaat.js`). Open punt, ouder dan deze stap: in het Engels vertaalt de MutationObserver getallen in een Vue-boom opnieuw (`i18nWalk` kijkt alleen naar `data-notr` op de knoop zelf) | Sonnet |
 | S263 | — | Startpagina en Instellingen naar Vue (de app-schil, geen rekentool) | Zoeken, fasen, tegels en instellingen werken | Opus 5 |
 
 ## What to pick up next
