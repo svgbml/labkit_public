@@ -28,6 +28,7 @@ import Pcrcyclus from './tools/Pcrcyclus.vue';
 import Dna from './tools/Dna.vue';
 import Gel from './tools/Gel.vue';
 import Qplate from './tools/Qplate.vue';
+import Qpcr from './tools/Qpcr.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -90,3 +91,9 @@ calc.gel = () => { if (gl && gl.vm) gl.vm.draw(); };
 const qp = mountTool('#qp-app', Qplate);
 if (qp) window.__qpVm = qp.vm;
 calc.qplate = () => { if (qp && qp.vm) qp.vm.reflow(); };
+
+/* qPCR-analyse (ΔΔCt) tekent de staafgrafiek op een canvas, dus calc.qpcr() laat de component
+   opnieuw tekenen. De Ct-tabel (qp-tbl) is een lk-etable die zelf op TBLDEF/ADDBTN staat. */
+const qc = mountTool('#qpc-app', Qpcr);
+if (qc) window.__qpcrVm = qc.vm;
+calc.qpcr = () => { if (qc && qc.vm) qc.vm.draw(); };

@@ -4457,5 +4457,10 @@
 "Kopiëren geblokkeerd.": "Copying blocked.",
 "binnen {#}–{#}%": "within {#}–{#}%",
 "buiten {#}–{#}%": "outside {#}–{#}%",
-"Vul de tellingen per plaat in.": "Enter the plate counts."
+"Vul de tellingen per plaat in.": "Enter the plate counts.",
+"Plak de export met kopregel.": "Paste the export with a header row.",
+"Vul Ct-waarden in voor minstens twee monsters (kalibrator en een testmonster).": "Enter Ct values for at least two samples (calibrator and a test sample).",
+"Kolommen voor monster, target en Ct/Cq niet gevonden in de kopregel.": "Columns for sample, target and Ct/Cq not found in the header row.",
+"Referentiegen niet gevonden. Gevonden targets: {*}.": "Reference gene not found. Targets found: {*}.",
+"{#} rijen ingelezen: doelgen \"{*}\", referentiegen \"{*}\".": "{#} rows imported: target gene \"{*}\", reference gene \"{*}\"."
 }

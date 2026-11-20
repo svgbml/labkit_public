@@ -180,7 +180,7 @@ def _(pg):
 @case('qPCR-analyse', 'ΔΔCt (Livak)', 'CASRAI rekenvoorbeeld: controle 24,0/20,0, behandeld 21,5/20,2 → 6,5×')
 def _(pg):
     pg.evaluate("""__go('qpcr');__set('qp-et','100');__set('qp-er','100');__set('qp-m','livak');
-      document.querySelector('#qp-tbl tbody').innerHTML=[['Controle',24.0,20.0],['Behandeld',21.5,20.2]].map(qpRow).join(''); calc.qpcr(); __set('qp-cal','Controle');""")
+      __tbl('qp-tbl',[['Controle',24.0,20.0],['Behandeld',21.5,20.2]],'qpcr'); __set('qp-cal','Controle');""")
     return [('fold change', pg.evaluate("__big('#qp-res')"), 6.498, 0.002)]
 
 @case('qPCR-analyse', 'Pfaffl (efficiëntie-gecorrigeerd)', 'CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9×')
