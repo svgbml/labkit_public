@@ -1,7 +1,7 @@
-/* ================= ELISA-PLAATANALYSE ================= */
-{ const f=x=>0.06+2.4/(1+(x/180)**-1.15), S=[1000,500,250,125,62.5,31.25,15.625], smp=[52,30,18,9,41,22,6.5,95], rnd=hwRng(7), A=[], L=[];
-  for(let r=0;r<8;r++){ const a=[], l=[]; for(let c=0;c<12;c++){ let v=NaN, n='-'; if(c<2){ if(r<7){ n='S'+(r+1); v=f(S[r]); } else { n='B'; v=0.06; } } else if(c<4){ n='M'+(r+1); v=f(smp[r]); } if(isFinite(v)){ v*=1+(rnd()-0.5)*0.05; if(n==='M7'&&c===3) v*=1.3; } a.push(isFinite(v)?v.toFixed(3).replace('.',','):''); l.push(n); } A.push(a.join('\t')); L.push(l.join('\t')); }
-  if(!$('#el-a').value) $('#el-a').value=A.join('\n'); if(!$('#el-l').value) $('#el-l').value=L.join('\n'); }
+/* ================= ELISA-PLAATANALYSE =================
+   De weergave en de berekening staan in src/tools/Elisa.vue (Vue 3). Hier blijft alleen over wat
+   globaal moet zijn: elGrid() (het plakken van een 8 × 12-blok), de soorten en groepen van de
+   plaatontwerper en elBlocks(), dat de replicaatblokken nummert. */
 function elGrid(txt,numeric){ return String(txt).split(/\n/).filter(l=>l.trim()!=='').slice(0,8).map(l=>{ let c=l.split('\t'); if(c.length<2) c=l.trim().split(numeric?/[\s;]+/:/[\s;]+/); return c.slice(0,12).map(t=>numeric?num(t.trim()):t.trim().toUpperCase()); }); }
 /* ---------- de plaat als tekening (S34) ----------
    De plaatindeling in het tekstvak blijft de bron voor de berekening: er verandert niets aan
@@ -10,7 +10,6 @@ function elGrid(txt,numeric){ return String(txt).split(/\n/).filter(l=>l.trim()!
    komt van de replicaatblokken: putjes van dezelfde soort die aan elkaar grenzen horen bij
    elkaar en krijgen samen één nummer. Een naam die je zelf typt gaat daar altijd voor. */
 const ELKIND=['B','S','M'], ELGRP=[{n:'Blanco',c:'#4b5563'},{n:'Standaard',c:'#1d5bc4'},{n:'Monster',c:'#c2410c'}];
-let elPld=null, elSync=false;
 /* nummert de replicaatblokken in de gekozen richting; blanco's houden allemaal de naam B */
 function elBlocks(st){
   const out={}, cnt={S:0,M:0}, down=st.dir==='v';
@@ -25,39 +24,3 @@ function elBlocks(st){
   return out;
 }
 const elName=(st,lab,k)=>st.vals[k]||lab[k]||'';
-/* plaat -> tekstvak */
-function elToText(){ if(!elPld||elSync) return; const st=elPld.get(), lab=elPld.labels().lab, rows=[];
-  for(let i=0;i<8;i++){ const row=[]; for(let j=1;j<=12;j++){ const k='ABCDEFGH'[i]+j; row.push(elName({vals:st.vals},lab,k)||'-'); } rows.push(row.join('\t')); }
-  elSync=true; try{ $('#el-l').value=rows.join('\n'); calc.elisa(); } finally { elSync=false; } }
-/* tekstvak -> plaat */
-function elToPlate(){ if(!elPld||elSync) return; const L=elGrid($('#el-l').value,false), wells={}, vals={};
-  for(let i=0;i<8;i++) for(let j=0;j<12;j++){ const n=((L[i]||[])[j]||'').trim(); if(!n||n==='-') continue;
-    const g=ELKIND.indexOf(n.charAt(0)); if(g<0) continue; wells['ABCDEFGH'[i]+(j+1)]=g; vals['ABCDEFGH'[i]+(j+1)]=n; }
-  elSync=true; try{ elPld.set({fmt:'8x12',wells,vals,groups:ELGRP}); } finally { elSync=false; } }
-
-calc.elisa=function(){ const out=$('#el-out'), cv=$('#el-cv2'), A=elGrid($('#el-a').value,true), R=elGrid($('#el-r').value,true), L=elGrid($('#el-l').value,false), un=$('#el-u').value, fit=$('#el-fit').value, cvmax=num($('#el-cv').value)||10;
-  const SC=numsC($('#el-s').value), DF={}; $('#el-d').value.toUpperCase().split(/[\s;,]+(?=M)/).forEach(t=>{ const m=t.match(/^(M\d+)\s*[=:]\s*([\d.,eE+-]+)/); if(m) DF[m[1]]=num(m[2]); });
-  const W={}; let nw=0; for(let r=0;r<8;r++) for(let c=0;c<12;c++){ const n=(L[r]||[])[c], a=(A[r]||[])[c]; if(!n||n==='-'||!isFinite(a)) continue; const rf=(R[r]||[])[c]; (W[n]=W[n]||[]).push({w:'ABCDEFGH'[r]+(c+1),a:a-(isFinite(rf)?rf:0)}); nw++; }
-  const fail=m=>{ out.innerHTML=note('info',m); cv.style.display='none'; };
-  if(!nw) return fail('Plak de absorpties en de plaatindeling (8 rijen × 12 kolommen).');
-  const blank=W.B?mean(W.B.map(x=>x.a)):0, grp=n=>{ const v=W[n].map(x=>x.a-blank), m=mean(v), s=v.length>1?sd(v):NaN; return {n,v,m,cv:v.length>1&&m!==0?Math.abs(s/m)*100:NaN,wells:W[n].map(x=>x.w).join(' ')}; };
-  const ST=Object.keys(W).filter(n=>/^S\d+$/.test(n)).map(n=>({...grp(n),x:SC[+n.slice(1)-1]})).filter(s=>s.x>0).sort((a,b)=>a.x-b.x);
-  if(ST.length<(fit==='4pl'?5:3)) return fail(fit==='4pl'?'Een 4PL-curve heeft minstens vijf standaarden met een concentratie nodig; kies lineair of vul de concentraties aan.':'Vul minstens drie standaarden met een concentratie in.');
-  let inv, fn, eq, r2; const xs=ST.map(s=>s.x), ys=ST.map(s=>s.m), my=mean(ys), sst=ys.reduce((a,y)=>a+(y-my)**2,0);
-  if(fit==='lin'){ const F=linreg(xs,ys); fn=x=>F.a+F.b*x; inv=y=>(y-F.a)/F.b; r2=F.r2; eq=`A = ${sig(F.b,4)}·c ${F.a<0?'−':'+'} ${sig(Math.abs(F.a),3)}`; }
-  else { const lo=Math.min(...ys), hi=Math.max(...ys), mid=xs[Math.floor(xs.length/2)], f4=(x,p)=>p[1]+(p[0]-p[1])/(1+(x/Math.exp(p[2]))**p[3]); const F=lmfit(f4,[lo,hi*1.1,Math.log(mid),1],xs,ys,500), p=F.p, c=Math.exp(p[2]); if(!p.every(Number.isFinite)) return fail('De 4PL-fit convergeert niet; controleer de standaarden of kies lineair.');
-    fn=x=>f4(x,p); inv=y=>{ const q=(p[0]-p[1])/(y-p[1])-1; return q>0?c*q**(1/p[3]):NaN; }; r2=1-ys.reduce((a,y,i)=>a+(y-fn(xs[i]))**2,0)/sst; eq=`a = ${sig(p[0],3)} · d = ${sig(p[1],3)} · c = ${sig(c,4)} ${ud(un)} · b = ${sig(p[3],3)}`; }
-  const yLo=Math.min(fn(xs[0]),fn(xs[xs.length-1])), yHi=Math.max(fn(xs[0]),fn(xs[xs.length-1]));
-  const M=Object.keys(W).filter(n=>/^M\d+$/.test(n)).sort((a,b)=>+a.slice(1)- +b.slice(1)).map(n=>{ const g=grp(n), df=DF[n]>0?DF[n]:1, below=g.m<yLo, above=g.m>yHi, x=below||above?NaN:inv(g.m); return {...g,df,x,c:x*df,below,above,bad:g.cv>cvmax}; });
-  const chip=(k,t)=>`<span class="chip ${k}" style="vertical-align:middle;margin-left:4px">${t}</span>`, nflag=M.filter(m=>m.bad||m.below||m.above).length;
-  out.innerHTML=`<div class="lbl">Kalibratiecurve (${fit==='4pl'?'4PL':'lineair'})</div><div class="big">R² = ${fmt(r2,4)}</div>`+kv([['Parameters',eq],['Blanco (gemiddeld)',W.B?`${fmt(blank,3)} (n = ${W.B.length})`:'geen blanco op de plaat'],['Meetbereik',`${sig(xs[0],4)} – ${sig(xs[xs.length-1],4)} ${ud(un)}`],['Monsters met een opmerking',`${nflag} van ${M.length}`]])+
-   `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Monster</th><th>Wells</th><th class="num">Gem. A (gecorr.)</th><th class="num">CV (%)</th><th class="num">Uit curve</th><th class="num">Verdunning</th><th class="num">Concentratie (${ud(un)})</th><th>Opmerking</th></tr></thead><tbody>${M.map(m=>`<tr><td>${m.n}</td><td>${m.wells}</td><td class="num">${fmt(m.m,3)}</td><td class="num">${isFinite(m.cv)?fmt(m.cv,1):'–'}</td><td class="num">${isFinite(m.x)?sig(m.x,4):'–'}</td><td class="num">${fmt(m.df,1)}</td><td class="num">${isFinite(m.c)?sig(m.c,4):m.above?'&gt; '+sig(xs[xs.length-1]*m.df,4):m.below?'&lt; '+sig(xs[0]*m.df,4):'–'}</td><td>${(m.bad?chip('warn','CV te hoog'):'')+(m.above?chip('bad','boven de curve'):'')+(m.below?chip('warn','onder de curve'):'')||chip('ok','in orde')}</td></tr>`).join('')}</tbody></table></div>`+
-   `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Standaard</th><th class="num">Concentratie</th><th class="num">Gem. A (gecorr.)</th><th class="num">CV (%)</th><th class="num">Teruggerekend</th><th class="num">Terugvinding (%)</th></tr></thead><tbody>${ST.map(s=>{ const b=inv(s.m); return `<tr><td>${s.n}</td><td class="num">${sig(s.x,4)}</td><td class="num">${fmt(s.m,3)}</td><td class="num">${isFinite(s.cv)?fmt(s.cv,1):'–'}</td><td class="num">${isFinite(b)?sig(b,4):'–'}</td><td class="num">${isFinite(b)?fmt(b/s.x*100,0):'–'}</td></tr>`; }).join('')}</tbody></table></div>`+(ST.some(s=>s.cv>cvmax)?note('warn','Een standaard heeft een CV boven de grens; de curve is daardoor minder betrouwbaar.'):'')+`<div class="formula">A = (A<sub>meet</sub> − A<sub>ref</sub>) − blanco · c = c<sub>curve</sub> × verdunning</div>`;
-  cv.style.display=''; const ok=M.filter(m=>isFinite(m.x)); chart(cv,{logx:fit==='4pl',xmin:fit==='4pl'?xs[0]/2:0,xmax:xs[xs.length-1]*(fit==='4pl'?1.5:1.08),ymin:Math.min(0,...ys),ymax:Math.max(...ys,...M.map(m=>m.m))*1.1,xlabel:`concentratie (${uv(un)})`,ylabel:'absorptie (gecorrigeerd)',series:[{fn,name:'fit'},{pts:ST.flatMap(s=>s.v.map(v=>[s.x,v])),color:'--ink',name:'standaarden'},{pts:ok.map(m=>[m.x,m.m]),color:'--warn',hollow:true,name:'monsters'}]}); };
-
-elPld=plateDesigner($('#el-pld'),{fmt:'8x12',groups:ELGRP,autoLabel:elBlocks,name:()=>trPlain('ELISA-plaatanalyse'),
-  onChange(){ elToText(); }});
-$('#el-l').addEventListener('input',()=>elToPlate());
-$('#el-renum').addEventListener('click',()=>{ if(!elPld) return; const st=elPld.get();
-  elSync=true; try{ elPld.set({fmt:st.fmt,wells:st.wells,vals:{},groups:st.groups}); } finally { elSync=false; } elToText(); });
-elToPlate();

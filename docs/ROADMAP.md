@@ -533,7 +533,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S207 | — | *Kjeldahl (eiwit uit stikstof)*, *Eenheden omrekenen* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S208 | — | *Enzymkinetiek* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S209 | — | *Standaardcurve* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S210 | — | *ELISA-plaatanalyse* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S210 | — | *ELISA-plaatanalyse* naar Vue | ✅ `src/tools/Elisa.vue`; het rekenwerk staat ongewijzigd in één computed, `elGrid`/`elBlocks` blijven in `tools/nt/94_elisa.js`. De plaatontwerper blijft gewone DOM op `#el-pld`, met dezelfde tweerichtingskoppeling naar het tekstvak | Sonnet |
 | S211 | — | *Interne standaard & standaardadditie* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S212 | — | *Eiwitzuiveringstabel* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S213 | — | *Chromatografie (HPLC/GC)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |

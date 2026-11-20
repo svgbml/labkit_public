@@ -1,24 +1,8 @@
 <section class="tool" id="t-elisa" data-tool="elisa">
   <header class="tool-head"><h2>ELISA-plaatanalyse</h2>
   <p>Plak de absorpties van een hele 96-wells plaat, wijs wells toe als blanco, standaard of monster, en reken alle monsters terug via een lineaire of 4PL-kalibratiecurve, met controle op duplo's en op het bereik van de curve.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="el-a">Absorptie meetgolflengte (bijv. 450 nm), 8 rijen × 12 kolommen <span class="example">voorbeeld</span></label><textarea id="el-a" rows="8" class="mono" style="font-size:12px;white-space:pre;overflow-x:auto"></textarea></div>
-        <div class="f" style="grid-column:1/-1"><label for="el-r">Referentiegolflengte (bijv. 570 of 620 nm), optioneel</label><textarea id="el-r" rows="3" class="mono" style="font-size:12px;white-space:pre;overflow-x:auto"></textarea></div>
-        <div class="f" style="grid-column:1/-1"><label for="el-l">Plaatindeling: B = blanco, S1…Sn = standaard, M1…Mn = monster, leeg of - = niet gebruikt</label><textarea id="el-l" rows="8" class="mono" style="font-size:12px;white-space:pre;overflow-x:auto"></textarea></div>
-        <div class="f" style="grid-column:1/-1"><label>Of wijs de wells aan op de plaat</label>
-          <div id="el-pld"></div>
-          <div class="row" style="margin-top:8px"><button type="button" id="el-renum">Replicaten opnieuw nummeren</button><span style="font-size:12.5px;color:var(--muted);max-width:60ch">Putjes van dezelfde soort die aan elkaar grenzen zijn één replicaat en krijgen samen één nummer; de richting bepaalt of dat naast of onder elkaar is. Typ een naam in "Tekst per putje" om er zelf één te kiezen.</span></div></div>
-        <div class="f" style="grid-column:span 2"><label for="el-s">Concentraties standaarden S1, S2, …</label><input id="el-s" class="txt" value="1000 500 250 125 62,5 31,25 15,625"></div>
-        <div class="f"><label for="el-u">Eenheid</label><input id="el-u" class="txt" value="pg/mL"></div>
-        <div class="f"><label for="el-fit">Curve</label><select id="el-fit"><option value="4pl">4PL (vierparameter-logistisch)</option><option value="lin">lineair</option></select></div>
-        <div class="f" style="grid-column:span 2"><label for="el-d">Verdunningsfactoren monsters (bijv. M1=10 M3=50; standaard 1)</label><input id="el-d" class="txt" value="M1=10 M2=10 M3=10 M4=10 M5=50 M6=50 M7=50 M8=50"></div>
-        <div class="f"><label for="el-cv">Maximale CV van replicaten</label><div class="inu"><input id="el-cv" inputmode="decimal" value="10"><span class="u">%</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Plak het 8 × 12-blok rechtstreeks uit Excel of de export van de plaatlezer (tabs, spaties of puntkomma's; komma of punt als decimaalteken). Wells met dezelfde naam zijn replicaten. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="el-cv2"></canvas><div id="el-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Elisa.vue). De plaatontwerper en
+       de tekening op het canvas blijven gewone DOM, door de component op zijn plek gezet. -->
+  <div id="el-app"></div>
   <p class="src">Correctie: A = (A<sub>meet</sub> − A<sub>ref</sub>) − gemiddelde blanco. 4PL: y = d + (a − d)/(1 + (x/c)<sup>b</sup>), gefit met Levenberg-Marquardt; terugrekenen x = c·((a − d)/(y − d) − 1)<sup>1/b</sup> (Findlay &amp; Dillard, AAPS J 9:E260–E267, 2007). Replicaten met CV boven 10–20% opnieuw meten (NIH/NCATS Assay Guidance Manual, "Immunoassay Methods"). Monsters boven de hoogste of onder de laagste standaard worden niet geëxtrapoleerd: verdun opnieuw of rapporteer als buiten bereik.</p>
 </section>

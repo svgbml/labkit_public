@@ -23,6 +23,7 @@ import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
+import Elisa from './tools/Elisa.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -61,3 +62,7 @@ calc.verdunning = () => {};
 
 mountTool('#os-app', Osmo);
 calc.osmo = () => {};
+
+/* ELISA tekent een curve op een canvas, dus calc.elisa() laat de component opnieuw tekenen. */
+const el = mountTool('#el-app', Elisa);
+calc.elisa = () => { if (el && el.vm) el.vm.draw(); };
