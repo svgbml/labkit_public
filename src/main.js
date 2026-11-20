@@ -25,6 +25,7 @@ import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Pcrcyclus from './tools/Pcrcyclus.vue';
 import Dna from './tools/Dna.vue';
+import Gel from './tools/Gel.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -73,3 +74,8 @@ calc.pcrcyclus = () => { if (yc && yc.vm) yc.vm.draw(); };
 /* DNA-kwantificatie, met de forensische qPCR-kwantificatie (fq-*) als vierde paneel. */
 mountTool('#dna-app', Dna);
 calc.dna = () => {};
+
+/* Agarosegel & bandgrootte tekent de standaardcurve, dus calc.gel() laat de component opnieuw
+   tekenen. LADDERS, LEX en GELR blijven globals in web/index.html (Gelplanner en Gelfoto). */
+const gl = mountTool('#g-app', Gel);
+calc.gel = () => { if (gl && gl.vm) gl.vm.draw(); };
