@@ -1,13 +1,8 @@
 <section class="tool" id="t-bpa" data-tool="bpa">
   <header class="tool-head"><h2>Bloedvlekpatronen</h2>
   <p>Inslaghoek per bloedvlek uit breedte en lengte, het convergentiegebied uit de looprichting van meerdere vlekken, en een schatting van de hoogte van het punt van oorsprong.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="tbl-wrap"><table id="bp-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="bp-tbl-add">+ Vlek</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Meet breedte en lengte van de ellips zonder staart of satellietdruppels. Positie x, y in cm op het oppervlak; richting γ = looprichting van de druppel in graden (0° = positieve x-as, tegen de klok in). Voor convergentie zijn minstens twee vlekken met positie en richting nodig. Voorbeelddata zijn berekend voor een oorsprong op (60, 40) cm en 45 cm hoogte.</p>
-    </div>
-    <div class="result"><canvas id="bp-cv"></canvas><div class="pic-bar" data-picbar="bp"></div><div id="bp-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Bpa.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="bp-app"></div>
   <p class="src">Inslaghoek α = arcsin(breedte / lengte) (formule van Balthazard; AAFS 2005 B28: onzekerheid onder 3° tot een hoek van 60°). Convergentiepunt: punt met de kleinste kwadratische afstand tot de verlengde looprichtingen (rechte-lijnmethode). Hoogte per vlek h = d · tan α, met d de afstand van vlek tot convergentiepunt. De rechte-lijnbenadering negeert zwaartekracht en luchtweerstand en overschat daardoor de hoogte.</p>
 </section>
