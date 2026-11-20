@@ -29,6 +29,7 @@ import Edta from './tools/Edta.vue';
 import Molm from './tools/Molm.vue';
 import Kjel from './tools/Kjel.vue';
 import Units from './tools/Units.vue';
+import Enzym from './tools/Enzym.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -87,3 +88,8 @@ calc.kjel = () => {};
 
 mountTool('#un-app', Units);
 calc.units = () => {};
+
+/* Enzymkinetiek tekent een grafiek, dus calc.enzym() laat de component opnieuw tekenen. mmFit()
+   blijft in web/index.html. De tabel #k-tbl is een <lk-etable> en zet zelf TBLDEF['k-tbl']. */
+const en = mountTool('#en-app', Enzym);
+calc.enzym = () => { if (en && en.vm) en.vm.draw(); };

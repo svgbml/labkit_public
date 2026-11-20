@@ -99,7 +99,7 @@ def _(pg):
 def _(pg):
     pg.evaluate("""__go('enzym');__set('k-su','mM');__set('k-vu','µmol/min');
       const S=[0.02,0.02,0.06,0.06,0.11,0.11,0.22,0.22,0.56,0.56,1.1,1.1], v=[76,47,97,107,123,139,159,152,191,201,207,200];
-      document.querySelector('#k-tbl tbody').innerHTML=S.map((s,i)=>kRow([s,v[i],''])).join(''); calc.enzym();""")
+      __tbl('k-tbl',S.map((s,i)=>[s,v[i],'']),'enzym');""")
     vm = pg.evaluate("__cells('#k-res tr.hl td:nth-child(2)')[0]")
     km = pg.evaluate("__cells('#k-res tr.hl td:nth-child(3)')[0]")
     return [('Vmax', vm, 212.684, 0.005), ('Km (mM)', km, 0.064121, 0.01)]

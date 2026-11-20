@@ -62,8 +62,8 @@ function toolSnap(id){ const sec=$('#t-'+id); if(!sec) return null; const v={}, 
   sec.querySelectorAll('input,select,textarea').forEach(el=>{ if(!persistable(el)) return; v[el.id]=el.type==='checkbox'?el.checked:el.value; });
   sec.querySelectorAll('table[id]').forEach(t=>{ if(TBLDEF[t.id]) tb[t.id]=[...t.querySelectorAll('tbody tr')].map(tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select')].map(e=>e.value)); });
   return {t:id,v,tb}; }
-function toolApply(s){ const sec=$('#t-'+s.t); if(!sec) return; Object.entries(s.tb||{}).forEach(([id,rows])=>{ const def=TBLDEF[id], t=$('#'+id); if(!def||!t||!Array.isArray(rows)) return; t.querySelector('tbody').innerHTML=rows.slice(0,2000).map(r=>def.row(r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v))).join(''); });
-  Object.entries(s.v||{}).forEach(([id,val])=>{ const el=document.getElementById(id); if(!el||!sec.contains(el)||!persistable(el)) return; if(el.type==='checkbox') el.checked=!!val; else el.value=String(val); el.dispatchEvent(new Event('change',{bubbles:true})); });
+function toolApply(s){ const sec=$('#t-'+s.t); if(!sec) return; Object.entries(s.tb||{}).forEach(([id,rows])=>{ const def=TBLDEF[id], t=$('#'+id); if(!def||!t||!Array.isArray(rows)) return; const vals=rows.slice(0,2000).map(r=>r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v)); /* een tabel die Vue rendert geeft set() mee: innerHTML zou Vue overschrijven */ if(def.set) def.set(vals); else t.querySelector('tbody').innerHTML=vals.map(def.row).join(''); });
+  Object.entries(s.v||{}).forEach(([id,val])=>{ const el=document.getElementById(id); if(!el||!sec.contains(el)||!persistable(el)) return; if(el.type==='checkbox') el.checked=!!val; else el.value=String(val); /* v-model van een Vue-veld luistert naar input, een keuzelijst naar change */ el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); });
   if(calc[s.t]) try{ calc[s.t](); }catch(e){} }
 
 /* --- delen via link of QR-code --- */

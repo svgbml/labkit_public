@@ -4456,5 +4456,9 @@
 "Element \"{*}\" is onbekend.": "Element \"{*}\" is unknown.",
 "<b>{*}</b> voor {#} {*} in {#} {*}": "<b>{*}</b> for {#} {*} in {#} {*}",
 "Oplossing & buffer": "Solution & buffer",
-"Vul de molmassa in om naar massa om te rekenen.": "Enter the molar mass to convert to mass."
+"Vul de molmassa in om naar massa om te rekenen.": "Enter the molar mass to convert to mass.",
+"Oncompetitief": "Uncompetitive",
+"Geen duidelijke remming": "No clear inhibition",
+"U/mg eiwit": "U/mg protein",
+"Vul minstens drie substraatconcentraties met snelheid in.": "Enter at least three substrate concentrations with a rate."
 }
