@@ -1,27 +1,8 @@
 <section class="tool" id="t-ento" data-tool="ento">
   <header class="tool-head"><h2>Entomologie (graaddagen)</h2>
   <p>Minimaal postmortaal interval uit het ontwikkelingsstadium van vliegenlarven: tel vanaf de vinddag terug de opgebouwde graaddagen (ADD) tot de hoeveelheid die het stadium nodig heeft.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="en-base">Ontwikkelingsdrempel</label><div class="inu"><input id="en-base" inputmode="decimal" value="10"><span class="u">°C</span></div></div>
-        <div class="f"><label for="en-add">Benodigde ADD tot dit stadium</label><div class="inu"><input id="en-add" inputmode="decimal" value="60"><span class="u">°C·d</span></div></div>
-        <div class="f"><label for="en-off">Correctie plaats t.o.v. weerstation</label><div class="inu"><input id="en-off" inputmode="decimal" value="0"><span class="u">°C</span></div></div>
-        <div class="f"><label for="en-meth">Dagtemperatuur</label><select id="en-meth"><option value="avg">gemiddelde van min en max</option><option value="trunc">min en max afgekapt op de drempel</option></select></div>
-        <div class="f" style="grid-column:1/-1"><label for="en-t">Temperaturen per dag, oudste eerst, laatste regel = vinddag <span class="example">voorbeeld</span></label><textarea id="en-t" rows="9">01-07-2026 12,1 21,4
-02-07-2026 13,0 23,2
-03-07-2026 14,2 25,8
-04-07-2026 15,0 26,1
-05-07-2026 13,8 22,0
-06-07-2026 12,5 20,3
-07-07-2026 11,9 19,8
-08-07-2026 13,1 22,7
-09-07-2026 14,6 24,9
-10-07-2026 15,2 26,4</textarea></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per regel een datum (optioneel) en de minimum- en maximumtemperatuur, of één daggemiddelde. Weerdata haal je bij het KNMI (daggegevens van het dichtstbijzijnde station). Drempel en benodigde ADD hangen af van soort en stadium; neem ze over uit de ontwikkelingsdata in je cursusmateriaal. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="en-cv"></canvas><div id="en-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Ento.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="en-app"></div>
   <p class="src">Graaddagenmethode: ADD = Σ max(0, T<sub>dag</sub> − T<sub>drempel</sub>), teruggeteld vanaf de vinddag tot de benodigde ADD voor het gevonden stadium is bereikt; dat geeft het minimale PMI (tijd sinds eileg). Bij de afkapmethode worden min en max eerst begrensd op de drempel (Higley &amp; Haskell, in Byrd &amp; Castner, Forensic Entomology, 2e ed., 2010; Amendt e.a., Int J Legal Med 121:90–104, 2007). De laatste dag telt volledig mee. Temperaturen van een weerstation wijken af van de vindplaats; een lokale correctie op basis van metingen ter plaatse verbetert de schatting.</p>
 </section>

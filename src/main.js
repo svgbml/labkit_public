@@ -25,6 +25,7 @@ import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Widmark from './tools/Widmark.vue';
 import Mix from './tools/Mix.vue';
+import Ento from './tools/Ento.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -70,3 +71,7 @@ calc.widmark = () => { if (wd && wd.vm) wd.vm.draw(); };
 
 mountTool('#mx-app', Mix);
 calc.mix = () => {};
+
+/* Entomologie tekent de opgebouwde graaddagen; de component tekent zelf opnieuw na elke render. */
+const en = mountTool('#en-app', Ento);
+calc.ento = () => { if (en && en.vm) en.vm.draw(); };
