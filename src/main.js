@@ -24,6 +24,7 @@ import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Widmark from './tools/Widmark.vue';
+import Mix from './tools/Mix.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -66,3 +67,6 @@ calc.osmo = () => {};
 /* Bloedalcohol tekent een curve; de component tekent zelf opnieuw na elke render. */
 const wd = mountTool('#wd-app', Widmark);
 calc.widmark = () => { if (wd && wd.vm) wd.vm.draw(); };
+
+mountTool('#mx-app', Mix);
+calc.mix = () => {};
