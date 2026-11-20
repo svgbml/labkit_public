@@ -4453,5 +4453,12 @@
 "niet bereikt": "not reached",
 "{*}: waargenomen / verwacht": "{*}: observed / expected",
 "Groep, tijd, status per regel": "Group, time, status per line",
-"χ² = {#}, df = {#}, p &lt; {#}": "χ² = {#}, df = {#}, p &lt; {#}"
+"χ² = {#}, df = {#}, p &lt; {#}": "χ² = {#}, df = {#}, p &lt; {#}",
+"Positief (ziek, aanwezig)": "Positive (diseased, present)",
+"Methode A en methode B, één monster per regel": "Method A and method B, one sample per line",
+"Met het {#}%-interval van de grenzen meegenomen liggen de verschillen niet zeker binnen ±{#}.": "Including the {#}% interval of the limits, the differences do not certainly lie within ±{#}.",
+"Met het {#}%-interval van de grenzen meegenomen liggen de verschillen binnen ±{#}%.": "Including the {#}% interval of the limits, the differences lie within ±{#}%.",
+"Met het {#}%-interval van de grenzen meegenomen liggen de verschillen niet zeker binnen ±{#}%.": "Including the {#}% interval of the limits, the differences do not certainly lie within ±{#}%.",
+"helling {#}, p &lt; {#}": "slope {#}, p &lt; {#}",
+"Het verschil hangt samen met de grootte van de meting; overweeg verschillen in procenten of een log-transformatie.": "The difference depends on the size of the measurement; consider differences in percent or a log transformation."
 }

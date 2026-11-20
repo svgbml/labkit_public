@@ -22,6 +22,8 @@ import Oplossing from './tools/Oplossing.vue';
 import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
 import Km from './tools/Km.vue';
+import Roc from './tools/Roc.vue';
+import Bland from './tools/Bland.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 
@@ -66,3 +68,11 @@ calc.osmo = () => {};
 /* Overlevingscurve tekent een curve, dus calc.km() laat de component opnieuw tekenen. */
 const km = mountTool('#km-app', Km);
 calc.km = () => { if (km && km.vm) km.vm.draw(); };
+
+/* ROC-curve en Bland-Altman tekenen ook een grafiek, dus calc.roc() en calc.bland() laten de
+   component opnieuw tekenen. */
+const roc = mountTool('#ro-app', Roc);
+calc.roc = () => { if (roc && roc.vm) roc.vm.draw(); };
+
+const bland = mountTool('#ba-app', Bland);
+calc.bland = () => { if (bland && bland.vm) bland.vm.draw(); };

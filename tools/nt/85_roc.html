@@ -1,18 +1,8 @@
 <section class="tool" id="t-roc" data-tool="roc">
   <header class="tool-head"><h2>ROC-curve &amp; diagnostische test</h2>
   <p>ROC-curve en oppervlak onder de curve (AUC) uit meetwaarden van positieve en negatieve monsters, de afkapwaarde met de hoogste Youden-index, en sensitiviteit, specificiteit, voorspellende waarden en likelihoodratio's bij een gekozen afkapwaarde.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="ro-p">Positief (ziek, aanwezig) <span class="example">voorbeeld</span></label><textarea id="ro-p" rows="3">2,8 3,5 1,9 4,2 3,1 2,4 5,0 3,8 2,2 4,6 3,3 1,6 2,9 3,7 4,9</textarea></div>
-        <div class="f" style="grid-column:1/-1"><label for="ro-n">Negatief (gezond, afwezig)</label><textarea id="ro-n" rows="3">1,1 0,8 1,5 2,0 0,6 1,3 1,9 0,9 1,2 2,6 1,4 0,7 1,0 1,7 2,3 1,1 0,5 1,6</textarea></div>
-        <div class="f"><label for="ro-dir">Richting</label><select id="ro-dir"><option value="hi">hoger = positief</option><option value="lo">lager = positief</option></select></div>
-        <div class="f"><label for="ro-c">Afkapwaarde (leeg = optimaal)</label><input id="ro-c" inputmode="decimal" value=""></div>
-        <div class="f"><label for="ro-prev">Prevalentie</label><div class="inu"><input id="ro-prev" inputmode="decimal" value="10"><span class="u">%</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Waarden van monsters waarvan je de echte status kent (referentietest). Een waarde gelijk aan de afkapwaarde telt als positief. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="ro-cv"></canvas><div id="ro-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Roc.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ro-app"></div>
   <p class="src">AUC = kans dat een willekeurig positief monster hoger scoort dan een negatief (Mann-Whitney, gelijke waarden tellen half); 95%-interval met de standaardfout van Hanley &amp; McNeil, Radiology 143:29–36 (1982). Youden-index J = sensitiviteit + specificiteit − 1 (Youden, Cancer 3:32–35, 1950). PPV en NPV met de regel van Bayes bij de opgegeven prevalentie; LR+ = sens/(1 − spec), LR− = (1 − sens)/spec.</p>
 </section>
