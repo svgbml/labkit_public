@@ -30,6 +30,8 @@ import Rnaq from './tools/Rnaq.vue';
 import Melt from './tools/Melt.vue';
 import Sds from './tools/Sds.vue';
 import Ligatie from './tools/Ligatie.vue';
+import Wb from './tools/Wb.vue';
+import Oligo from './tools/Oligo.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -97,3 +99,15 @@ calc.sds = () => {};
 
 mountTool('#l-app', Ligatie, {pip: 'ligatie'});
 calc.ligatie = () => {};
+
+/* Western blot-normalisatie en Primers oplossen: beide tabellen hebben een eigen <table> met
+   haken op TBLDEF in web/index.html (via window.__wbVm en window.__olVm). calc.wb() laat de
+   grafiek opnieuw tekenen (taal, thema, verslag-PNG). Primers oplossen houdt de pipetteergrens
+   (pipScan) via {pip: 'oligo'}. */
+const wbm = mountTool('#wb-app', Wb);
+if (wbm) window.__wbVm = wbm.vm;
+calc.wb = () => { if (wbm && wbm.vm) wbm.vm.draw(); };
+
+const olm = mountTool('#ol-app', Oligo, {pip: 'oligo'});
+if (olm) window.__olVm = olm.vm;
+calc.oligo = () => {};

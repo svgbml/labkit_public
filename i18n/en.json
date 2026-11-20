@@ -4467,5 +4467,7 @@
 "Te weinig meetpunten.": "Too few data points.",
 "Vul concentraties in.": "Enter concentrations.",
 "{*}: te verdund voor {#} µg in {#} µL. Maximaal {#} µg per laan, of vergroot het laadvolume.": "{*}: too dilute for {#} µg in {#} µL. Maximum {#} µg per lane, or increase the loading volume.",
-"{*}: minder dan {#} µL monster; verdun het monster eerst.": "{*}: less than {#} µL sample; dilute the sample first."
+"{*}: minder dan {#} µL monster; verdun het monster eerst.": "{*}: less than {#} µL sample; dilute the sample first.",
+"Vul intensiteiten in.": "Enter intensities.",
+"Zet minstens één laan op Controle = ja.": "Set at least one lane to Control = yes."
 }
