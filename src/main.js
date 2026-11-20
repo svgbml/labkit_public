@@ -27,6 +27,8 @@ import Titr from './tools/Titr.vue';
 import Hh from './tools/Hh.vue';
 import Edta from './tools/Edta.vue';
 import Molm from './tools/Molm.vue';
+import Kjel from './tools/Kjel.vue';
+import Units from './tools/Units.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -79,3 +81,9 @@ calc.edta = () => {};
 /* Molmassa: parseFormula() en ATOM blijven in web/index.html; de component roept ze aan. */
 mountTool('#mm-app', Molm);
 calc.molm = () => {};
+
+mountTool('#kj-app', Kjel);
+calc.kjel = () => {};
+
+mountTool('#un-app', Units);
+calc.units = () => {};
