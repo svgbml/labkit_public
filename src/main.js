@@ -23,6 +23,7 @@ import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
+import Strchk from './tools/Strchk.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -61,3 +62,6 @@ calc.verdunning = () => {};
 
 mountTool('#os-app', Osmo);
 calc.osmo = () => {};
+
+mountTool('#sc-app', Strchk);
+calc.strchk = () => {};

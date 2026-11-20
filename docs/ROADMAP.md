@@ -566,7 +566,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S240 | — | *Entomologie (graaddagen)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S241 | — | *Lichaamslengte uit botten* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S242 | — | *Glasvergelijking (brekingsindex)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S243 | — | *STR-profielcontrole* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S243 | — | *STR-profielcontrole* naar Vue | ✅ `src/tools/Strchk.vue` op `lk-etable`; de beoordeling per locus komt ongewijzigd uit `calc.strchk`. De knop *Kopieer naar Excel* die `99z_ux` bij elke tabel zet blijft in een Vue-boom Nederlands (geldt voor alle Vue-tools; hoort bij de app-shell) | Sonnet |
 | S244 | — | *Bloedvlekpatronen* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S245 | — | *Tijd sinds overlijden* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S246 | — | *Verwantschapsindex*, *Hardy-Weinberg & forensische kengetallen* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
