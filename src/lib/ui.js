@@ -157,7 +157,9 @@ LKUI.etable = {
     /* de id van de knop die een rij toevoegt; daarmee blijft het plakken van een blok werken */
     addId: String,
     cls: {type: String, default: 'mini'},
-    wrap: {type: Boolean, default: true}
+    wrap: {type: Boolean, default: true},
+    /* een kolom # vooraan met het rijnummer (geen invoerveld, dus tblSnap() en plakken merken er niets van) */
+    numbered: {type: Boolean, default: false}
   },
   emits: ['update:rows'],
   setup(props, {emit}) {
@@ -166,7 +168,7 @@ LKUI.etable = {
     /* een waarde die van buiten komt is een getal of een string met een punt erin; in de
        tabel staat hij met een komma, net als bij inp() in de oude versie */
     const dec = v => (v == null || v === '' || (typeof v === 'number' && !isFinite(v))
-      ? '' : String(v).replace('.', ','));
+      ? '' : (typeof LANG !== 'undefined' && LANG === 'en' ? String(v) : String(v).replace('.', ',')));
     const norm = r => props.cols.map((c, i) => (c.t === 'num' ? dec(r[i]) : (r[i] == null ? '' : String(r[i]))));
     const put = rows => emit('update:rows', rows);
     const optText = o => (typeof trPlain === 'function' ? trPlain(o, true) : o);
@@ -234,10 +236,12 @@ LKUI.etable = {
     return () => {
       const table = h('table', {id: props.tableId, class: props.cls}, [
         h('thead', null, h('tr', null, [
+          props.numbered ? h('th', {class: 'num'}, '#') : null,
           ...props.cols.map(c => h('th', {class: c.t === 'num' ? 'num' : null, innerHTML: String(c.h == null ? '' : c.h)})),
           h('th')
         ])),
         h('tbody', null, props.rows.map((r, ri) => h('tr', {key: ri}, [
+          props.numbered ? h('td', {class: 'num'}, String(ri + 1)) : null,
           ...props.cols.map((c, ci) => h('td', null, cell(c, r, ri, ci))),
           h('td', null, h('button', {type: 'button', class: 'ghost', 'data-del': '',
             'aria-label': 'Verwijder',

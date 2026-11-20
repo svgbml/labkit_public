@@ -26,6 +26,7 @@ import Osmo from './tools/Osmo.vue';
 import Reeks from './tools/Reeks.vue';
 import Facs from './tools/Facs.vue';
 import Mic from './tools/Mic.vue';
+import Groei from './tools/Groei.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -78,3 +79,8 @@ calc.facs = () => {};
 /* Antibiotica-gevoeligheid: beide tabellen (mi-tbl, mz-tbl) en de uitkomsten zitten in de component. */
 mountTool('#mi-app', Mic);
 calc.mic = () => {};
+
+/* Groeicurve: de metingen (gc-tbl), de velden en de uitkomst zitten in de component. De tekening
+   blijft met chart() gemaakt, dus calc.groei() laat de component opnieuw tekenen. */
+const gr = mountTool('#g2-app', Groei);
+calc.groei = () => { if (gr && gr.vm) gr.vm.draw(); };

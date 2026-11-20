@@ -4460,5 +4460,10 @@
 "R < (mm)": "R < (mm)",
 "overgeslagen putje (groei na een put zonder groei): herhaal": "skipped well (growth after a well without growth): repeat",
 "groei in alle putjes": "growth in all wells",
-"MIC ({*})": "MIC ({*})"
+"MIC ({*})": "MIC ({*})",
+"Kies minstens twee punten voor de exponentiële fase.": "Choose at least two points for the exponential phase.",
+"Geen exponentiële fase gevonden (geen reeks van {#}–{#} punten met R² ≥ {#}). Kies het venster zelf.": "No exponential phase found (no series of {#}–{#} points with R² ≥ {#}). Choose the window yourself.",
+"Het venster bevat maar {#} punten; meet vaker in de exponentiële fase.": "The window contains only {#} points; measure more often in the exponential phase.",
+"{#} u": "{#} h",
+"exponentiële fit": "exponential fit"
 }
