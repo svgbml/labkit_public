@@ -564,7 +564,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S238 | — | *Bloedalcohol (Widmark)* naar Vue | ✅ `src/tools/Widmark.vue`; de drankentabel is een `lk-etable`, de curve tekent na elke render met `chart()`. `wdT()`/`wdHM()` blijven in `tools/nt/70_widmark.js` | Sonnet |
 | S239 | — | *Mengprofiel & LR* naar Vue | ✅ `src/tools/Mix.vue`; de locustabel is een `lk-etable`. `mxTok()` en `mxLR()` blijven in `tools/nt/96_mix.js` | Sonnet |
 | S240 | — | *Entomologie (graaddagen)* naar Vue | ✅ `src/tools/Ento.vue`; de curve tekent na elke render met `chart()`. `enDay()` blijft in `tools/nt/72_ento.js` | Sonnet |
-| S241 | — | *Lichaamslengte uit botten* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S241 | — | *Lichaamslengte uit botten* naar Vue | ✅ `src/tools/Stature.vue`; het intervaldiagram tekent na elke render met `pShow()`. `SLF`, `SLN` en `SLR` blijven in `tools/nt/71_stature.js` | Sonnet |
 | S242 | — | *Glasvergelijking (brekingsindex)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S243 | — | *STR-profielcontrole* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S244 | — | *Bloedvlekpatronen* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |

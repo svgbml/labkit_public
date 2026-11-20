@@ -4451,5 +4451,6 @@
 "{*}: ladingen niet herkend.": "{*}: charges not recognised.",
 "Vul minstens één stof met concentratie in.": "Enter at least one substance with a concentration.",
 "Vul minstens één drankje met volume, alcoholpercentage en tijdstip in.": "Enter at least one drink with volume, alcohol percentage and time.",
-"mogelijk, afhankelijk van de afbraak": "possibly, depending on the elimination rate"
+"mogelijk, afhankelijk van de afbraak": "possibly, depending on the elimination rate",
+"Vul de lengte van minstens één bot in.": "Enter the length of at least one bone."
 }

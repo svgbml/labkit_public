@@ -26,6 +26,7 @@ import Osmo from './tools/Osmo.vue';
 import Widmark from './tools/Widmark.vue';
 import Mix from './tools/Mix.vue';
 import Ento from './tools/Ento.vue';
+import Stature from './tools/Stature.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -75,3 +76,7 @@ calc.mix = () => {};
 /* Entomologie tekent de opgebouwde graaddagen; de component tekent zelf opnieuw na elke render. */
 const en = mountTool('#en-app', Ento);
 calc.ento = () => { if (en && en.vm) en.vm.draw(); };
+
+/* Lichaamslengte tekent de intervallen per bot; de component tekent zelf opnieuw na elke render. */
+const sl = mountTool('#sl-app', Stature);
+calc.stature = () => { if (sl && sl.vm) sl.vm.draw(); };

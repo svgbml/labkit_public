@@ -1,22 +1,8 @@
 <section class="tool" id="t-stature" data-tool="stature">
   <header class="tool-head"><h2>Lichaamslengte uit botten</h2>
   <p>Schat de lichaamslengte uit de maximale lengte van een of meer lange beenderen met de regressieformules van Trotter en Gleser, met de standaardfout per formule.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="sl-sex">Geslacht</label><select id="sl-sex"><option value="m">man</option><option value="v">vrouw</option></select></div>
-        <div class="f"><label for="sl-pop">Referentiegroep</label><select id="sl-pop"><option value="w">Europese afkomst (White)</option><option value="b">Afrikaanse afkomst (Black)</option></select></div>
-        <div class="f"><label for="sl-age">Leeftijd (optioneel)</label><div class="inu"><input id="sl-age" inputmode="decimal" value=""><span class="u">jaar</span></div></div>
-        <div class="f"><label for="sl-fem">Femur</label><div class="inu"><input id="sl-fem" inputmode="decimal" value="47,2"><span class="u">cm</span></div></div>
-        <div class="f"><label for="sl-tib">Tibia</label><div class="inu"><input id="sl-tib" inputmode="decimal" value="38,6"><span class="u">cm</span></div></div>
-        <div class="f"><label for="sl-fib">Fibula</label><div class="inu"><input id="sl-fib" inputmode="decimal" value=""><span class="u">cm</span></div></div>
-        <div class="f"><label for="sl-hum">Humerus</label><div class="inu"><input id="sl-hum" inputmode="decimal" value="33,4"><span class="u">cm</span></div></div>
-        <div class="f"><label for="sl-rad">Radius</label><div class="inu"><input id="sl-rad" inputmode="decimal" value=""><span class="u">cm</span></div></div>
-        <div class="f"><label for="sl-uln">Ulna</label><div class="inu"><input id="sl-uln" inputmode="decimal" value=""><span class="u">cm</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Maximale lengte op een osteometrische plank. Vul alleen de botten in die je hebt. De formules komen uit een Amerikaanse referentiegroep van rond 1950; voor de huidige Nederlandse bevolking zijn ze minder nauwkeurig. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="sl-cv"></canvas><div id="sl-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Stature.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="sl-app"></div>
   <p class="src">Mannen: Trotter (1970), vrouwen: Trotter &amp; Gleser, Am J Phys Anthropol 10:463–514 (1952), zoals samengevat in Bass, Human Osteology (1995) en Grand Valley State University, Introduction to Human Osteology, "Stature Estimation". De ± is de standaardfout van de schatting; het 95%-interval is ongeveer ± 1,96 × SE. Leeftijdscorrectie boven 30 jaar: −0,06 × (leeftijd − 30) cm (Trotter &amp; Gleser 1951). Trotter en Gleser maten de tibia zonder malleolus (Jantz e.a., J Forensic Sci 1994); meet de tibia op dezelfde manier.</p>
 </section>
