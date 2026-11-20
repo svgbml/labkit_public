@@ -606,7 +606,7 @@ def _(pg):
 
 @case('SDS-PAGE monsters', 'Laadschema', 'Rekentest: 20 µg van 2,4 µg/µL = 8,33 µL; 4× buffer in 20 µL = 5 µL; water 6,67 µL')
 def _(pg):
-    pg.evaluate("__go('sds');document.querySelector('#ss-tbl tbody').innerHTML=ssRow(['A',2.4]);__set('ss-ug','20');__set('ss-x','4');__set('ss-v','20')")
+    pg.evaluate("__go('sds');__tbl('ss-tbl',[['A',2.4]],'sds');__set('ss-ug','20');__set('ss-x','4');__set('ss-v','20')")
     v = pg.evaluate("[...document.querySelector('#ss-res tbody tr').cells].slice(1,4).map(c=>__n(c.textContent))")
     return [('monster', v[0], 8.33, 0.002), ('buffer', v[1], 5, 0.001), ('water', v[2], 6.67, 0.002)]
 

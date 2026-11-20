@@ -4464,5 +4464,8 @@
 "deels afgebroken": "partly degraded",
 "afgebroken": "degraded",
 "geen piek": "no peak",
-"Te weinig meetpunten.": "Too few data points."
+"Te weinig meetpunten.": "Too few data points.",
+"Vul concentraties in.": "Enter concentrations.",
+"{*}: te verdund voor {#} µg in {#} µL. Maximaal {#} µg per laan, of vergroot het laadvolume.": "{*}: too dilute for {#} µg in {#} µL. Maximum {#} µg per lane, or increase the loading volume.",
+"{*}: minder dan {#} µL monster; verdun het monster eerst.": "{*}: less than {#} µL sample; dilute the sample first."
 }

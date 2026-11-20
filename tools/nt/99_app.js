@@ -177,7 +177,7 @@ document.addEventListener('click',e=>{ const b=e.target.closest('[data-send]'); 
   const c=e.target.closest('[data-send-curve]'); if(!c) return; const unit=$('#s-unit').value, f=unit==='µg/mL'||unit==='ng/µL'?1e-3:unit==='mg/mL'||unit==='µg/µL'||unit==='g/L'?1:NaN;
   const R=$$('#s-unk tbody tr').map(tr=>{ const cells=[...tr.cells], nm=(tr.querySelector('input.txt')||tr.querySelector('input')||{}).value||'', last=cells.filter(td=>!td.querySelector('input,button,select')&&/\d/.test(td.textContent)).pop(); return [nm,last?bigNum(last):NaN]; }).filter(r=>r[0]&&r[1]>0);
   if(!R.length){ alertBox('Geen berekende monsterconcentraties om door te sturen.'); return; }
-  if(c.dataset.sendCurve==='sds'){ if(!isFinite(f)){ alertBox(`SDS-PAGE rekent in µg/µL; de eenheid ${unit} is niet om te rekenen.`); return; } $('#ss-tbl tbody').innerHTML=R.map(r=>TBLDEF['ss-tbl'].row([r[0],Number((r[1]*f).toPrecision(4))])).join(''); calc.sds(); location.hash='#sds'; alertBox(`${R.length} monsters doorgestuurd (in µg/µL).`); }
+  if(c.dataset.sendCurve==='sds'){ if(!isFinite(f)){ alertBox(`SDS-PAGE rekent in µg/µL; de eenheid ${unit} is niet om te rekenen.`); return; } TBLDEF['ss-tbl'].set(R.map(r=>[r[0],Number((r[1]*f).toPrecision(4))])); /* Vue-tabel: set() zet de rijen */ location.hash='#sds'; alertBox(`${R.length} monsters doorgestuurd (in µg/µL).`); }
   else { $('#wb-tbl tbody').innerHTML=R.map(r=>TBLDEF['wb-tbl'].row([r[0],NaN,NaN,'0'])).join(''); calc.wb(); location.hash='#wb'; alertBox(`${R.length} monsternamen doorgestuurd; vul de bandintensiteiten in.`); } });
 
 /* ================= FASE 2.3: BEREKENINGSLINK IN DE URL-HASH ================= */

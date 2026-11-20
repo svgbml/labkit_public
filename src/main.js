@@ -28,6 +28,8 @@ import Gradient from './tools/Gradient.vue';
 import Pcr from './tools/Pcr.vue';
 import Rnaq from './tools/Rnaq.vue';
 import Melt from './tools/Melt.vue';
+import Sds from './tools/Sds.vue';
+import Ligatie from './tools/Ligatie.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -87,3 +89,11 @@ calc.rnaq = () => {};
    (taal, thema). */
 const ml = mountTool('#ml-app', Melt);
 calc.melt = () => { if (ml && ml.vm) ml.vm.draw(); };
+
+/* SDS-PAGE monsters en Ligatie: pip houdt de pipetteergrens (pipScan) werkend na elke render.
+   De monstertabel van SDS is een lk-etable (TBLDEF['ss-tbl'] met set/push/get/blank). */
+mountTool('#ss-app', Sds, {pip: 'sds'});
+calc.sds = () => {};
+
+mountTool('#l-app', Ligatie, {pip: 'ligatie'});
+calc.ligatie = () => {};
