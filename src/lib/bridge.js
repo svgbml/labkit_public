@@ -42,7 +42,7 @@ const LKVUE = {createApp};
    #dg-app) staan in web/index.html bij de kop en de bronregel van de tool, de host moet
    `data-notr` krijgen zodat de vertaallaag van de DOM eraf blijft, en elke app heeft t(),
    tHtml() en de gedeelde componenten nodig. */
-export function mountTool(sel, options) {
+export function mountTool(sel, options, opts = {}) {
   const host = document.querySelector(sel);
   if (!host) { console.error('geen host voor ' + sel); return null; }
   host.setAttribute('data-notr', '');   /* Vue bezit deze DOM: de vertaallaag blijft eraf */
@@ -63,6 +63,16 @@ export function mountTool(sel, options) {
     app.config.globalProperties.esc = esc;
     app.config.errorHandler = (err, inst, info) => { console.error('Vue-fout in ' + sel, info, err); };
     lkUiInstall(app);   /* de gedeelde componenten, zie lib/ui.js */
+    /* opts.pip: de pipetteergrens (pipScan in tools/nt/99_app.js) na elke render opnieuw
+       zoeken. Die haakte zich eerst aan calc[tool], maar de bundel zet calc[tool] pas daarna,
+       dus voor een Vue-tool moet de component hem zelf aanroepen. Alleen de wortel telt. */
+    if (opts.pip) {
+      const scan = () => { try { if (typeof pipScan === 'function') pipScan(opts.pip); } catch (e) {} };
+      app.mixin({
+        mounted() { if (this.$root === this) this.$nextTick(scan); },
+        updated() { if (this.$root === this) this.$nextTick(scan); },
+      });
+    }
     return {app, vm: app.mount(host)};
   } catch (e) { console.error('Vue kon ' + sel + ' niet opzetten', e); return null; }
 }

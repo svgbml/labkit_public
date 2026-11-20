@@ -1,18 +1,8 @@
 <section class="tool" id="t-gradient" data-tool="gradient">
   <header class="tool-head"><h2>Gradiënt-PCR</h2>
   <p>Temperatuur per kolom van een gradiëntblok uit de laagste en hoogste temperatuur, en in welke kolom je een primerpaar met een bepaalde annealingtemperatuur het best kunt zetten.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="gr-lo">Laagste temperatuur (kolom 1)</label><div class="inu"><input id="gr-lo" inputmode="decimal" value="52"><span class="u">°C</span></div></div>
-        <div class="f"><label for="gr-hi">Hoogste temperatuur (laatste kolom)</label><div class="inu"><input id="gr-hi" inputmode="decimal" value="66"><span class="u">°C</span></div></div>
-        <div class="f"><label for="gr-n">Aantal kolommen</label><select id="gr-n"><option>12</option><option>8</option><option>6</option><option>24</option></select></div>
-        <div class="f"><label for="gr-m">Verloop</label><select id="gr-m"><option value="lin">lineair</option><option value="sig">S-vormig (randen vlakker)</option></select></div>
-        <div class="f"><label for="gr-ta">Gewenste annealingtemperaturen (optioneel)</label><input id="gr-ta" class="txt" value="55 58 61 64"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De echte temperatuur per kolom hangt af van het apparaat: veel blokken verlopen niet precies lineair en zijn aan de randen vlakker. Neem de waarden over uit het display of de software van je thermocycler als die ze toont. T<sub>m</sub> van je primers: zie Primers oplossen en PCR-cyclus.</p>
-    </div>
-    <div class="result"><canvas id="gr-cv"></canvas><div id="gr-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Gradient.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="gr-app"></div>
   <p class="src">Lineair: T<sub>k</sub> = T<sub>laag</sub> + (k − 1)·(T<sub>hoog</sub> − T<sub>laag</sub>)/(n − 1). Gradiëntblokken hebben een maximale spreiding van ongeveer 20–25 °C en een niet-lineair verloop over het blok (Bio-Rad, C1000 Touch Thermal Cycler Instruction Manual; Eppendorf, Mastercycler nexus gradient Operating Manual). Begin een annealingoptimalisatie rond 5 °C onder de laagste T<sub>m</sub> van het primerpaar.</p>
 </section>
