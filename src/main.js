@@ -23,6 +23,8 @@ import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
+import Titr from './tools/Titr.vue';
+import Hh from './tools/Hh.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -61,3 +63,10 @@ calc.verdunning = () => {};
 
 mountTool('#os-app', Osmo);
 calc.osmo = () => {};
+
+/* Titratiecurve tekent een curve, dus calc.titr() laat de component opnieuw tekenen. */
+const ti = mountTool('#ti-app', Titr);
+calc.titr = () => { if (ti && ti.vm) ti.vm.draw(); };
+
+mountTool('#hh-app', Hh);
+calc.hh = () => {};
