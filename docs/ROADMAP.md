@@ -556,7 +556,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S230 | — | *qPCR-plaatindeling* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S231 | — | *Transformatie & blauw-wit* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S232 | — | *qPCR-analyse (ΔΔCt)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S233 | — | *PCR-mastermix* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S233 | — | *PCR-mastermix* naar Vue | ✅ `src/tools/Pcr.vue` op host `#q-app`; de rekenregels van `calc.pcr()` zijn ongewijzigd overgenomen. De tabel is een eigen `<table>` en geen `lk-etable`, want elke rij heeft berekende kolommen (per reactie, mix) en een voet met water/totaal/template; `TBLDEF['q-tbl']` in `index.html` heeft `set`/`push`/`get`/`blank`/`inputCols` die naar `window.__pcrVm` wijzen. `QPRE`, `qRow`, `loadQ`, kopiëren en CSV zijn naar de component verhuisd; `qRack()` (buizenrek op `#qr-cv`) blijft in `index.html` en wordt door `draw()` aangeroepen. `toolApply()` (`tools/nt/99_app.js`) gebruikt nu `def.set` als die er is, zodat delen en ongedaan maken ook een Vue-tabel terugzetten | Sonnet |
 | S234 | — | *cDNA-synthese (RT-mix)*, *Gradiënt-PCR* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S235 | — | *RNA-kwaliteit*, *qPCR-smeltcurve* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S236 | — | *SDS-PAGE monsters*, *Ligatie* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |

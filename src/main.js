@@ -23,6 +23,7 @@ import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
+import Pcr from './tools/Pcr.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -61,3 +62,10 @@ calc.verdunning = () => {};
 
 mountTool('#os-app', Osmo);
 calc.osmo = () => {};
+
+/* PCR-mastermix: de tabel heeft berekende kolommen en is dus geen lk-etable. TBLDEF['q-tbl'] in
+   web/index.html zet, duwt en leest rijen via window.__pcrVm. calc.pcr() laat de buizenrek
+   opnieuw tekenen (taal, thema). */
+const pc = mountTool('#q-app', Pcr);
+if (pc) window.__pcrVm = pc.vm;
+calc.pcr = () => { if (pc && pc.vm) pc.vm.draw(); };
