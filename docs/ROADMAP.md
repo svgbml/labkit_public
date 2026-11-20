@@ -23,7 +23,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 4 recipes and sequences | S37–S47 | **part done:** S37–S40 ✅, S41–S47 open |
 | Phases 5–11 | S48–S146 | ⏳ not started (S45, S54, S82, S91, S93 partly there) |
 | Phases 12–14 Sanger, alignment, sequence toolbox | S147–S201 | ⏳ not started |
-| Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | **running:** S202–S204a ✅ (4 of 63), S205 next |
+| Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | **running:** S202–S209 ✅ (9 of 63; batch V1a done), S210 next |
 
 **Checkmark audit.** Every ✅ in this file has its own `S<n>:` commit, and every `S<n>:` commit
 in the history has its ✅. Nothing is ticked that wasn't done, and nothing done is unticked.
@@ -36,18 +36,19 @@ over:
 - **S91:** *Standaardcurve* reads a pasted plate grid, but not per instrument.
 - **S93:** *qPCR-analyse* reads a pasted Ct table by its header, but not per instrument.
 
-At the last full `python tools/check.py` (after S204a): **286 of 286 validation checks**, 0
-layout problems in both languages, 0 robustness problems. The quick check passed again on
-2026-11-19 on a Windows machine.
+At the last full `python tools/check.py` (after S209, batch V1a, on Windows): **286 of 286 validation checks**, 0
+layout problems in Dutch, 0 robustness problems. The English layout audit reports 2 overflowing labels in
+*PCR-mastermix* at 390 px; the commit before V1a shows the same 2 on this machine, so they are not from V1a
+(probably Windows font metrics; the earlier cloud run had 0).
 
 ### Vue migration: how far it is
 
 | Part | Done | Left |
 |---|---|---|
 | Foundation: Vite bundle, `src/lib/bridge.js`, shared components in `src/lib/ui.js` (incl. `lk-etable`), `t()`/`tHtml()`, `tests/i18n_vue.py` | ✅ | — |
-| Calculation tools on Vue | **11 of 87 (13%)**: *Significante cijfers*, *Welke pipet?*, *Z′-factor*, *Restrictiedigestie*, *Oplossing & buffer*, *Buffercapaciteit*, *Oplosbaarheid (Ksp)*, *Verdunning*, *Osmolariteit & ionsterkte*, plus *pH bijstellen* and *Celkweekmedium klaarmaken* (built in Vue at S40) | **76 tools**, all listed in phase 15 (checked one by one against `TOOLS`) |
+| Calculation tools on Vue | **19 of 87 (22%)**: *Significante cijfers*, *Welke pipet?*, *Z′-factor*, *Restrictiedigestie*, *Oplossing & buffer*, *Buffercapaciteit*, *Oplosbaarheid (Ksp)*, *Verdunning*, *Osmolariteit & ionsterkte*, *Titratiecurve*, *pH-buffer*, *Waterhardheid*, *Molmassa*, *Kjeldahl*, *Eenheden omrekenen*, *Enzymkinetiek*, *Standaardcurve*, plus *pH bijstellen* and *Celkweekmedium klaarmaken* (built in Vue at S40) | **68 tools**, all listed in phase 15 from S210 on |
 | App shell (start page, Instellingen, navigation) | — | S263 |
-| Phase 15 steps | 4 of 63 (S202, S203, S204, S204a) | 59 (S205–S263) |
+| Phase 15 steps | 9 of 63 (S202–S209, S204a) | 54 (S210–S263) |
 
 Four of the converted tools (*Significante cijfers*, *Welke pipet?*, *Z′-factor*,
 *Restrictiedigestie*) were done as groundwork before phase 15 had step numbers, so they have no
@@ -528,11 +529,11 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S203 | — | *Buffercapaciteit*, *Oplosbaarheid (Ksp)* naar Vue | ✅ `src/tools/Bufcap.vue` en `src/tools/Ksp.vue`; het rekenwerk (`bcNbar`/`bcCb`/`bcBeta`, `KSP`/`kspSolve`) blijft onveranderd in de modules staan. `lk-field` kreeg `label-html` en `lk-big` een `html`-waarde, want `sci()` levert een exponent in een `<sup>` | — |
 | S204 | — | *Verdunning*, *Osmolariteit & ionsterkte* naar Vue | ✅ `src/tools/Verdunning.vue` en `src/tools/Osmo.vue`. `pipAdvies()` is gesplitst in `pipAdviesDeel()` zodat een Vue-tool het advies met `tHtml()` kan vertalen. *Osmolariteit* wachtte op S204a en is daarmee de eerste tool op `lk-etable` | — |
 | S204a | — | Gedeelde Vue-tabel in plaats van `ET()` | ✅ `lk-etable` in `src/lib/ui.js`: dezelfde kolomopgave (`{h, t:'txt'\|'num'\|'sel'\|'col', w, o, d}`), en hij zet zelf `TBLDEF[id]` met `set`/`push`/`get`/`blank`. De plak-handler in `web/index.html` klikt nu de toevoegknop en leest de DOM meteen daarna uit; Vue rendert pas op de volgende tick, dus voor een Vue-tabel moet die handler de rijen via de haken zetten. *Osmolariteit & ionsterkte* is de eerste gebruiker. De 19 andere `ET()`-tabellen kunnen nu een voor een om | — |
-| S205 | — | *Titratiecurve*, *pH-buffer* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S206 | — | *Waterhardheid (EDTA-titratie)*, *Molmassa* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S207 | — | *Kjeldahl (eiwit uit stikstof)*, *Eenheden omrekenen* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S208 | — | *Enzymkinetiek* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S209 | — | *Standaardcurve* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S205 | — | *Titratiecurve*, *pH-buffer* naar Vue | ✅ `src/tools/Titr.vue` en `src/tools/Hh.vue`; `titrPH` blijft in `tools/nt/51_titr.js`. De vertaal-observer in `web/index.html` sloeg alleen een `data-notr`-element zelf over, niet wat erin zit, en zette in het Engels `2.175 g` terug naar `2,175 g`; hij slaat nu alles binnen `[data-notr]` over (geldt voor elke Vue-tool) | Sonnet |
+| S206 | — | *Waterhardheid (EDTA-titratie)*, *Molmassa* naar Vue | ✅ `src/tools/Edta.vue` en `src/tools/Molm.vue`; `ATOM` en `parseFormula` blijven in `web/index.html`. Het rekenwerk van *Waterhardheid* stond los in `calc.edta` en staat nu ongewijzigd in de component. **Let op voor latere stappen:** `tools/nt/99_app.js` hangt de *Stuur door naar*-balk achter `calc[tool]` voor elke tool in `SEND`; een Vue-tool vervangt `calc[tool]`, dus die balk rendert de component nu zelf (`data-send="molm:0"`) | Sonnet |
+| S207 | — | *Kjeldahl (eiwit uit stikstof)*, *Eenheden omrekenen* naar Vue | ✅ `src/tools/Kjel.vue` en `src/tools/Units.vue`; het rekenwerk stond bij beide los in `calc.<id>` en staat nu ongewijzigd in de component. Het `list="un-chem"` op het molmassaveld wees naar een datalist die nergens bestond en is weggelaten | Sonnet |
+| S208 | — | *Enzymkinetiek* naar Vue | ✅ `src/tools/Enzym.vue` met `lk-etable` voor `#k-tbl`; `mmFit()` blijft in `web/index.html`. Drie fouten in de gedeelde laag die elke Vue-tool raakten: `toolApply()` (delen, ongedaan maken) zette een `lk-etable` leeg en stuurde een veld alleen `change`, waar `v-model` niet op reageert (nu `set()` en ook `input`); en de invoeropslag zette bewaarde waarden terug vóór de bundel de velden maakte, dus `mountTool()` doet dat nu na het mounten. Het validatiegeval *Puromycin* vult de tabel via `__tbl()` in plaats van `innerHTML` | Sonnet |
+| S209 | — | *Standaardcurve* naar Vue | ✅ `src/tools/Curve.vue`; `fitCurve()`, `coef()`, `parsePlate()` en `colList()` blijven in `web/index.html`, de plaatlezer-import is een methode van de component. `lk-etable` kreeg een berekende kolom (`{h, t:'out', k, num}`, inhoud via de slot `#out`), die niet meetelt in `inputCols`. De *Stuur monsters door naar*-balk rendert de component zelf. Kleine afwijking: bij een mislukte fit tonen de terugberekende cellen nu `–` in plaats van een oude waarde | Sonnet |
 | S210 | — | *ELISA-plaatanalyse* naar Vue | ✅ `src/tools/Elisa.vue`; het rekenwerk staat ongewijzigd in één computed, `elGrid`/`elBlocks` blijven in `tools/nt/94_elisa.js`. De plaatontwerper blijft gewone DOM op `#el-pld`, met dezelfde tweerichtingskoppeling naar het tekstvak | Sonnet |
 | S211 | — | *Interne standaard & standaardadditie* naar Vue | ✅ `src/tools/Istd.vue`; de drie tabellen zijn `lk-etable` en blijven alle drie in de DOM (`v-show`), `isdFit()` blijft in `tools/nt/76_istd.js` | Sonnet |
 | S212 | — | *Eiwitzuiveringstabel* naar Vue | ✅ `src/tools/Purif.vue`; de tabel is `lk-etable`, `ASAT` en het rekenwerk staan ongewijzigd in de component (niemand anders gebruikte ze) | Sonnet |
@@ -596,3 +597,13 @@ Follow the batch order in *Cloud sessions* above. In short:
 3. **V6, V7** (Opus 5): Statistiek, Gelplanner, the gel editor and finally the app shell.
 4. Then wave by wave: **P** (phase 4), **E/G** (bench mode and gel editor), **C/R/W**, **F**.
 5. The *any time* batches (**SQ1**, **AL1**, **SA1a**) when sequence or SNP work is the nearest practical need; SQ1 is one Sonnet session and immediately useful.
+
+## Known bugs (not fixed yet)
+
+Bugs found along the way that fall outside the batch that found them. Fix one in its own commit
+(`fix: …`) and remove its row here; a bug in a tool that is not on Vue yet can also be fixed during
+that tool's conversion.
+
+| Found | Where | Bug | Notes |
+|---|---|---|---|
+| 2026-11-21, batch V1a | *PCR-mastermix* (`pcr`), English | `tests/layout_audit.py` with `LABKIT_LANG=en` reports two labels overflowing their field at 390 px wide: *Reaction volume* and *Template per reaction* (`overloop … 11>3`). The full `tools/check.py` fails on this. | Not caused by V1a: the commit before it (`5de083d`) shows the same two on the same machine. Seen on Windows; the earlier cloud run (Linux) had 0, so font metrics are the likely cause. Probably fixed by shorter English labels or letting those labels wrap. *PCR-mastermix* goes to Vue at S233. |
