@@ -26,6 +26,8 @@ import Roc from './tools/Roc.vue';
 import Bland from './tools/Bland.vue';
 import Westgard from './tools/Westgard.vue';
 import Mval from './tools/Mval.vue';
+import Munc from './tools/Munc.vue';
+import Pipcal from './tools/Pipcal.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 
@@ -86,3 +88,11 @@ calc.westgard = () => { if (westgard && westgard.vm) westgard.vm.draw(); };
 /* Methodevalidatie tekent de kalibratielijn, dus calc.mval() laat de component opnieuw tekenen. */
 const mval = mountTool('#mv-app', Mval);
 calc.mval = () => { if (mval && mval.vm) mval.vm.draw(); };
+
+/* Meetonzekerheid tekent balken, dus calc.munc() laat de component opnieuw tekenen;
+   Pipetkalibratie heeft geen tekening en rekent zelf al opnieuw. */
+const munc = mountTool('#mu-app', Munc);
+calc.munc = () => { if (munc && munc.vm) munc.vm.draw(); };
+
+mountTool('#pc-app', Pipcal);
+calc.pipcal = () => {};

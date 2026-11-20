@@ -4465,5 +4465,7 @@
 "Vul ten minste één onderdeel in.": "Fill in at least one part.",
 "Lineariteit": "Linearity",
 "vul evenveel concentraties als signalen in (minstens {#})": "enter as many concentrations as signals (at least {#})",
-"{#}% (x̄ = {#}, s = {#}, n = {#})": "{#}% (x̄ = {#}, s = {#}, n = {#})"
+"{#}% (x̄ = {#}, s = {#}, n = {#})": "{#}% (x̄ = {#}, s = {#}, n = {#})",
+"Vul per bron een waarde en onzekerheid in.": "Enter a value and uncertainty for each source.",
+"Gebruik minstens {#} wegingen voor een betrouwbare schatting.": "Use at least {#} weighings for a reliable estimate."
 }
