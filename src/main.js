@@ -27,6 +27,7 @@ import Widmark from './tools/Widmark.vue';
 import Mix from './tools/Mix.vue';
 import Ento from './tools/Ento.vue';
 import Stature from './tools/Stature.vue';
+import Glass from './tools/Glass.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -80,3 +81,7 @@ calc.ento = () => { if (en && en.vm) en.vm.draw(); };
 /* Lichaamslengte tekent de intervallen per bot; de component tekent zelf opnieuw na elke render. */
 const sl = mountTool('#sl-app', Stature);
 calc.stature = () => { if (sl && sl.vm) sl.vm.draw(); };
+
+/* Glasvergelijking tekent de metingen tegen het interval; de component tekent zelf opnieuw na elke render. */
+const gl = mountTool('#gl-app', Glass);
+calc.glass = () => { if (gl && gl.vm) gl.vm.draw(); };
