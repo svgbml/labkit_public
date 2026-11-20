@@ -24,6 +24,7 @@ import Ksp from './tools/Ksp.vue';
 import Km from './tools/Km.vue';
 import Roc from './tools/Roc.vue';
 import Bland from './tools/Bland.vue';
+import Westgard from './tools/Westgard.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 
@@ -76,3 +77,7 @@ calc.roc = () => { if (roc && roc.vm) roc.vm.draw(); };
 
 const bland = mountTool('#ba-app', Bland);
 calc.bland = () => { if (bland && bland.vm) bland.vm.draw(); };
+
+/* Westgard / Levey-Jennings tekent een kaart, dus calc.westgard() laat de component opnieuw tekenen. */
+const westgard = mountTool('#wg-app', Westgard);
+calc.westgard = () => { if (westgard && westgard.vm) westgard.vm.draw(); };
