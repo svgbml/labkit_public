@@ -24,6 +24,7 @@ import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Pcrcyclus from './tools/Pcrcyclus.vue';
+import Dna from './tools/Dna.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -68,3 +69,7 @@ calc.osmo = () => {};
    PCR-programma (#pg-from). */
 const yc = mountTool('#y-app', Pcrcyclus);
 calc.pcrcyclus = () => { if (yc && yc.vm) yc.vm.draw(); };
+
+/* DNA-kwantificatie, met de forensische qPCR-kwantificatie (fq-*) als vierde paneel. */
+mountTool('#dna-app', Dna);
+calc.dna = () => {};
