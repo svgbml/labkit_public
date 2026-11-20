@@ -25,6 +25,7 @@ import Km from './tools/Km.vue';
 import Roc from './tools/Roc.vue';
 import Bland from './tools/Bland.vue';
 import Westgard from './tools/Westgard.vue';
+import Mval from './tools/Mval.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 
@@ -81,3 +82,7 @@ calc.bland = () => { if (bland && bland.vm) bland.vm.draw(); };
 /* Westgard / Levey-Jennings tekent een kaart, dus calc.westgard() laat de component opnieuw tekenen. */
 const westgard = mountTool('#wg-app', Westgard);
 calc.westgard = () => { if (westgard && westgard.vm) westgard.vm.draw(); };
+
+/* Methodevalidatie tekent de kalibratielijn, dus calc.mval() laat de component opnieuw tekenen. */
+const mval = mountTool('#mv-app', Mval);
+calc.mval = () => { if (mval && mval.vm) mval.vm.draw(); };

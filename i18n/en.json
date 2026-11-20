@@ -4461,5 +4461,9 @@
 "Met het {#}%-interval van de grenzen meegenomen liggen de verschillen niet zeker binnen ±{#}%.": "Including the {#}% interval of the limits, the differences do not certainly lie within ±{#}%.",
 "helling {#}, p &lt; {#}": "slope {#}, p &lt; {#}",
 "Het verschil hangt samen met de grootte van de meting; overweeg verschillen in procenten of een log-transformatie.": "The difference depends on the size of the measurement; consider differences in percent or a log transformation.",
-"van {#}": "of {#}"
+"van {#}": "of {#}",
+"Vul ten minste één onderdeel in.": "Fill in at least one part.",
+"Lineariteit": "Linearity",
+"vul evenveel concentraties als signalen in (minstens {#})": "enter as many concentrations as signals (at least {#})",
+"{#}% (x̄ = {#}, s = {#}, n = {#})": "{#}% (x̄ = {#}, s = {#}, n = {#})"
 }
