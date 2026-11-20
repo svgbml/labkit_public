@@ -4454,5 +4454,11 @@
 "Vul minstens drie standaarden met concentratie en beide oppervlakken in.": "Enter at least three standards with a concentration and both peak areas.",
 "Vul minstens drie punten (waarvan één zonder toevoeging) in.": "Enter at least three points (one of them without addition).",
 "Het snijpunt ligt niet links van de oorsprong; controleer de data (het monster moet signaal geven).": "The intercept does not lie to the left of the origin; check the data (the sample must give a signal).",
-"Voor ammoniumsulfaat: {#} ≤ S₁ < S₂ ≤ {#}%.": "For ammonium sulfate: {#} ≤ S₁ &lt; S₂ ≤ {#}%."
+"Voor ammoniumsulfaat: {#} ≤ S₁ < S₂ ≤ {#}%.": "For ammonium sulfate: {#} ≤ S₁ &lt; S₂ ≤ {#}%.",
+"Plaatgetal": "Plate number",
+"Vul per piek een retentietijd en breedte in.": "Enter a retention time and width for each peak.",
+"basislijn, krap": "baseline, marginal",
+"overlap": "overlap",
+"N = {#}(t<sub>R</sub>/W<sub>b</sub>)² · R<sub>s</sub> = {#}Δt<sub>R</sub>/(W<sub>b{#}</sub>+W<sub>b{#}</sub>) · k = (t<sub>R</sub>−t<sub>{#}</sub>)/t<sub>{#}</sub>": "N = {#}(t<sub>R</sub>/W<sub>b</sub>)² · R<sub>s</sub> = {#}Δt<sub>R</sub>/(W<sub>b{#}</sub>+W<sub>b{#}</sub>) · k = (t<sub>R</sub>−t<sub>{#}</sub>)/t<sub>{#}</sub>",
+"N = {#}(t<sub>R</sub>/W<sub>h</sub>)² · R<sub>s</sub> = {#}Δt<sub>R</sub>/(W<sub>h{#}</sub>+W<sub>h{#}</sub>) · k = (t<sub>R</sub>−t<sub>{#}</sub>)/t<sub>{#}</sub>": "N = {#}(t<sub>R</sub>/W<sub>h</sub>)² · R<sub>s</sub> = {#}Δt<sub>R</sub>/(W<sub>h{#}</sub>+W<sub>h{#}</sub>) · k = (t<sub>R</sub>−t<sub>{#}</sub>)/t<sub>{#}</sub>"
 }

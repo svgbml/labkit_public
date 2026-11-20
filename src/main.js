@@ -26,6 +26,7 @@ import Osmo from './tools/Osmo.vue';
 import Elisa from './tools/Elisa.vue';
 import Istd from './tools/Istd.vue';
 import Purif from './tools/Purif.vue';
+import Chrom from './tools/Chrom.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -76,3 +77,7 @@ calc.istd = () => { if (is_ && is_.vm) is_.vm.draw(); };
 /* Eiwitzuivering tekent een grafiek op een canvas, dus calc.purif() laat de component opnieuw tekenen. */
 const pf = mountTool('#pf-app', Purif);
 calc.purif = () => { if (pf && pf.vm) pf.vm.draw(); };
+
+/* Chromatografie tekent een chromatogram op een canvas, dus calc.chrom() laat de component opnieuw tekenen. */
+const chr = mountTool('#chr-app', Chrom);
+calc.chrom = () => { if (chr && chr.vm) chr.vm.draw(); };

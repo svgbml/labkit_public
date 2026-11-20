@@ -1,15 +1,2 @@
-/* ================= CHROMATOGRAFIE ================= */
-ET('chr-tbl',[{h:'Piek',t:'txt',w:110},{h:'t<sub>R</sub> (min)',t:'num',w:80},{h:'Breedte (min)',t:'num',w:80},{h:'W<sub>0,05</sub> (min)',t:'num',w:80},{h:'f (min)',t:'num',w:70}],[['Theobromine',2.85,0.075,0.14,0.065],['Theofylline',3.42,0.082,0.16,0.072],['Cafeïne',4.95,0.110,0.23,0.098]],'chrom');
-calc.chrom=function(){ const t0=num($('#chr-t0').value), L=num($('#chr-L').value), wb=$('#chr-wt').value==='b', out=$('#chr-out'), cv=$('#chr-cv');
-  const P=etGet('chr-tbl').map(r=>({n:r[0]||'?',t:num(r[1]),w:num(r[2]),w5:num(r[3]),f:num(r[4])})).filter(p=>p.t>0&&p.w>0).sort((a,b)=>a.t-b.t);
-  if(!P.length){ out.innerHTML=note('info','Vul per piek een retentietijd en breedte in.'); cv.style.display='none'; return; }
-  P.forEach(p=>{ p.k=t0>0?(p.t-t0)/t0:NaN; p.N=(wb?16:5.54)*(p.t/p.w)**2; p.H=L>0?L*1000/p.N:NaN; p.T=p.w5>0&&p.f>0?p.w5/(2*p.f):NaN; p.sg=wb?p.w/4:p.w/2.3548; });
-  for(let i=1;i<P.length;i++){ const a=P[i-1], b=P[i]; b.a=a.k>0?b.k/a.k:NaN; b.Rs=(wb?2:1.18)*(b.t-a.t)/(a.w+b.w); }
-  const minRs=Math.min(...P.slice(1).map(p=>p.Rs)), chip=(ok,txt)=>`<span class="chip ${ok?'ok':'warn'}" style="vertical-align:middle;margin-left:6px">${txt}</span>`;
-  out.innerHTML=(P.length>1?`<div class="lbl">Kleinste resolutie</div><div class="big">${fmt(minRs,2)}${chip(minRs>2,minRs>2?'voldoet':minRs>=1.5?'basislijn, krap':'overlap')}</div>`:`<div class="lbl">Plaatgetal</div><div class="big">${fmt(P[0].N,0)}</div>`)+
-   `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Piek</th><th class="num">t<sub>R</sub></th><th class="num">k</th><th class="num">N</th><th class="num">H (µm)</th><th class="num">T</th><th class="num">α</th><th class="num">R<sub>s</sub></th></tr></thead><tbody>${P.map(p=>`<tr><td>${ud(p.n)}</td><td class="num">${fmt(p.t,2)}</td><td class="num">${fmt(p.k,2)}</td><td class="num">${fmt(p.N,0)}</td><td class="num">${fmt(p.H,1)}</td><td class="num">${fmt(p.T,2)}</td><td class="num">${p.a?fmt(p.a,3):'–'}</td><td class="num">${p.Rs?fmt(p.Rs,2):'–'}</td></tr>`).join('')}</tbody></table></div>`+
-   (P.some(p=>p.T>2)?note('warn','Tailingfactor boven 2: controleer kolom, pH van de mobiele fase of overbelasting.'):'')+(P.some(p=>p.k<2&&p.k>=0)?note('info','k onder 2: de eerste piek ligt dicht bij de dode tijd en kan storen met de solventpiek.'):'')+(P.some(p=>p.N<2000)?note('info','Plaatgetal onder 2000 bij een of meer pieken.'):'')+
-   `<div class="formula">${wb?'N = 16(t<sub>R</sub>/W<sub>b</sub>)² · R<sub>s</sub> = 2Δt<sub>R</sub>/(W<sub>b1</sub>+W<sub>b2</sub>)':'N = 5,54(t<sub>R</sub>/W<sub>h</sub>)² · R<sub>s</sub> = 1,18Δt<sub>R</sub>/(W<sub>h1</sub>+W<sub>h2</sub>)'} · k = (t<sub>R</sub>−t<sub>0</sub>)/t<sub>0</sub></div>`;
-  const x0=Math.max(0,Math.min(...P.map(p=>p.t-4*p.sg))-0.3), x1=Math.max(...P.map(p=>p.t+4*p.sg))+0.3, f=x=>P.reduce((s,p)=>s+Math.exp(-0.5*((x-p.t)/p.sg)**2),0);
-  cv.style.display=''; const g=chart(cv,{xmin:x0,xmax:x1,ymin:0,ymax:1.25,xlabel:'tijd (min)',ylabel:'signaal (relatief)',series:[{fn:f,name:'chromatogram'}]});
-  const c=cv.getContext('2d'); c.font='11px '+PFONT(); c.fillStyle=PCOL.ink; c.textAlign='center'; P.forEach(p=>c.fillText(uv(p.n.length>14?p.n.slice(0,13)+'…':p.n),g.X(p.t),g.Y(f(p.t))-10)); };
+/* ================= CHROMATOGRAFIE =================
+   De tabel, de velden, de uitkomst en de tekening staan in src/tools/Chrom.vue. */
