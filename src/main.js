@@ -27,6 +27,8 @@ import Telkamer from './tools/Telkamer.vue';
 import Passage from './tools/Passage.vue';
 import Desinf from './tools/Desinf.vue';
 import Steril from './tools/Steril.vue';
+import Gcomp from './tools/Gcomp.vue';
+import Viab from './tools/Viab.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -80,3 +82,10 @@ calc.desinf = () => {};
 /* Sterilisatie tekent een overlevingscurve, dus calc.steril() laat de component opnieuw tekenen. */
 const st = mountTool('#ste-app', Steril);
 calc.steril = () => { if (st && st.vm) st.vm.draw(); };
+
+/* Groeicurves vergelijken tekent een grafiek, dus calc.gcomp() laat de component opnieuw tekenen. */
+const gc = mountTool('#gm-app', Gcomp);
+calc.gcomp = () => { if (gc && gc.vm) gc.vm.draw(); };
+
+mountTool('#vb-app', Viab);
+calc.viab = () => {};

@@ -1,20 +1,8 @@
 <section class="tool" id="t-viab" data-tool="viab">
   <header class="tool-head"><h2>Viabiliteit (trypaanblauw)</h2>
   <p>Levende celdichtheid en viabiliteit uit een telling met trypaanblauw in een Neubauer-telkamer, met betrouwbaarheidsintervallen voor de telling en het volume dat je nodig hebt om cellen in te zaaien.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="vb-l">Levende cellen (ongekleurd)</label><input id="vb-l" inputmode="numeric" value="182"></div>
-        <div class="f"><label for="vb-d">Dode cellen (blauw)</label><input id="vb-d" inputmode="numeric" value="14"></div>
-        <div class="f"><label for="vb-sq">Getelde grote vierkanten</label><input id="vb-sq" inputmode="numeric" value="4"></div>
-        <div class="f"><label for="vb-df">Verdunningsfactor</label><input id="vb-df" inputmode="decimal" value="2"></div>
-        <div class="f"><label for="vb-v">Volume celsuspensie</label><div class="inu"><input id="vb-v" inputmode="decimal" value="10"><span class="u">mL</span></div></div>
-        <div class="f"><label for="vb-t">Gewenst aantal levende cellen</label><input id="vb-t" inputmode="decimal" value="2e5"></div>
-        <div class="f"><label for="vb-n">Aantal putjes of flessen</label><input id="vb-n" inputmode="numeric" value="6"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Eén groot vierkant van een Neubauer-kamer is 1 mm² × 0,1 mm = 0,1 µL. Trypaanblauw 1:1 met de suspensie gemengd geeft verdunningsfactor 2. Tel binnen 3–5 minuten na mengen; daarna kleuren ook levende cellen. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><div id="vb-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Viab.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="vb-app"></div>
   <p class="src">Cellen/mL = telling / aantal vierkanten × verdunningsfactor × 10⁴; viabiliteit = levend / (levend + dood) (Strober, Curr Protoc Immunol 111:A3.B.1–A3.B.3, 2015). Interval van een telling: exact Poisson-interval (Garwood, Biometrika 28:437–442, 1936); viabiliteit: Wilson-scoreinterval (Wilson, J Am Stat Assoc 22:209–212, 1927). Tel minstens 100–200 cellen voor een onzekerheid rond 10%.</p>
 </section>

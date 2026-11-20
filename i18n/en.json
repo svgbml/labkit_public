@@ -4452,5 +4452,7 @@
 "Vul minstens één stof met concentratie in.": "Enter at least one substance with a concentration.",
 "Grote spreiding tussen vakken (CV {#}%). Controleer of de suspensie goed gemengd en de kamer egaal gevuld is.": "Large spread between squares (CV {#}%). Check that the suspension is well mixed and the chamber evenly filled.",
 "Vul per organisme N en N<sub>a</sub> in.": "Enter N and N<sub>a</sub> for each organism.",
-"Vul een overlevingscurve, D-waarden of een temperatuurlog in.": "Enter a survival curve, D values or a temperature log."
+"Vul een overlevingscurve, D-waarden of een temperatuurlog in.": "Enter a survival curve, D values or a temperature log.",
+"per mL": "per mL",
+"Meer dan {#} cellen per vierkant: verdun de suspensie voor een betrouwbare telling.": "More than {#} cells per square: dilute the suspension for a reliable count."
 }
