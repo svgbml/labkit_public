@@ -23,6 +23,8 @@ import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
+import Telkamer from './tools/Telkamer.vue';
+import Passage from './tools/Passage.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -61,3 +63,11 @@ calc.verdunning = () => {};
 
 mountTool('#os-app', Osmo);
 calc.osmo = () => {};
+
+/* Telkamer: de vakken van k-sq hangen van de kamer af; de component zet window.__telkamerVm
+   zodat kSq() in web/index.html hem direct kan laten tekenen. */
+mountTool('#k-app', Telkamer);
+calc.telkamer = () => {};
+
+mountTool('#ps-app', Passage);
+calc.passage = () => {};

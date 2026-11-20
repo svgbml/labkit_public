@@ -543,7 +543,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S217 | — | *Antibiotica-gevoeligheid* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S218 | — | *Groeicurve* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S219 | — | *Transfectie (Lipofectamine 3000)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S220 | — | *Telkamer*, *Celpassageplanner* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S220 | ✅ | *Telkamer*, *Celpassageplanner* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S221 | — | *Desinfectietest (log-reductie)*, *Sterilisatie (D, z, F₀)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S222 | — | *Groeicurves vergelijken*, *Viabiliteit (trypaanblauw)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S223 | — | *Cellen uitzaaien*, *MPN (meest waarschijnlijk aantal)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
