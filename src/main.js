@@ -23,6 +23,7 @@ import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
+import Reeks from './tools/Reeks.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -61,3 +62,9 @@ calc.verdunning = () => {};
 
 mountTool('#os-app', Osmo);
 calc.osmo = () => {};
+
+/* Verdunningsreeks & KVE: de tellingen staan in de globale reeksCounts (bewaard door tblSnap(),
+   gezet door tests/validate.py), en buildReeks() in web/index.html laadt ze via deze instantie. */
+const rk = mountTool('#r-app', Reeks);
+if (rk) window.__reeksVm = rk.vm;
+calc.reeks = () => {};
