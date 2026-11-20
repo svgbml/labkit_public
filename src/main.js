@@ -23,6 +23,7 @@ import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
+import Pipetteer from './tools/Pipetteer.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -61,3 +62,9 @@ calc.verdunning = () => {};
 
 mountTool('#os-app', Osmo);
 calc.osmo = () => {};
+
+/* Pipetteerschema tekent op #pp-cv (en het buizenrek op #ppr-cv) met de bestaande tekenfuncties;
+   calc.ppip() laat de component rekenen en tekenen, want de invoer-events van de pagina, het
+   terugzetten van een sessie en het exporteren van de tekening roepen dat aan. */
+const pp = mountTool('#pp-app', Pipetteer);
+calc.ppip = () => { if (pp && pp.vm) pp.vm.draw(); };
