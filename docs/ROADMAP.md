@@ -547,7 +547,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S221 | ✅ | *Desinfectietest (log-reductie)*, *Sterilisatie (D, z, F₀)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S222 | ✅ | *Groeicurves vergelijken*, *Viabiliteit (trypaanblauw)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S223 | ✅ | *Cellen uitzaaien*, *MPN (meest waarschijnlijk aantal)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S224 | — | *Microscoop-kalibratie*, *Inoculum (OD verdunnen)*, *Teller* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S224 | ✅ | *Microscoop-kalibratie*, *Inoculum (OD verdunnen)*, *Teller* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S225 | — | *Gelfoto-editor* naar Vue, deel 1: de velden en de uitkomsten; het beeldwerk op het canvas blijft | Zelfde uitkomsten; validatie blijft staan | Opus 5 |
 | S226 | — | *Gelfoto-editor* naar Vue, deel 2: de laanbewerking en de ladderlabels | Zelfde uitkomsten; validatie blijft staan | Opus 5 |
 | S227 | — | *PCR-cyclus* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |

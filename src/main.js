@@ -31,6 +31,9 @@ import Gcomp from './tools/Gcomp.vue';
 import Viab from './tools/Viab.vue';
 import Seed from './tools/Seed.vue';
 import Mpn from './tools/Mpn.vue';
+import Inoc from './tools/Inoc.vue';
+import Micro from './tools/Micro.vue';
+import Teller from './tools/Teller.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -97,3 +100,14 @@ calc.seed = () => {};
 
 mountTool('#mp-app', Mpn);
 calc.mpn = () => {};
+
+mountTool('#io-app', Inoc);
+calc.inoc = () => {};
+
+mountTool('#mc-app', Micro);
+calc.micro = () => {};
+
+/* Teller: de stand zit in de component. calc.teller() deed vroeger een nieuwe render, en die
+   haalde de markering van het laatst getelde vak weg; dat doet hij nog steeds. */
+const tl = mountTool('#c-app', Teller);
+calc.teller = () => { if (tl && tl.vm) tl.vm.flash = -1; };

@@ -4458,5 +4458,8 @@
 "Vul per verdunning de hoeveelheid monster per buis, het aantal buizen en het aantal positieve buizen in.": "Enter, for each dilution, the amount of sample per tube, the number of tubes and the number of positive tubes.",
 "Geen positieve buizen: dit is de bovengrens ({#}%) bij nul positieven.": "No positive tubes: this is the upper limit ({#}%) at zero positives.",
 "te hoog": "too high",
-"Alle buizen positief: het aantal is groter dan de reeks kan meten. Verdun verder.": "All tubes positive: the count is higher than the series can measure. Dilute further."
+"Alle buizen positief: het aantal is groter dan de reeks kan meten. Verdun verder.": "All tubes positive: the count is higher than the series can measure. Dilute further.",
+"cultuur": "culture",
+"µm per schaaldeel": "µm per division",
+"Doel bereikt": "Target reached"
 }
