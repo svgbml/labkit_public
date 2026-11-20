@@ -26,6 +26,8 @@ import Osmo from './tools/Osmo.vue';
 import Strchk from './tools/Strchk.vue';
 import Bpa from './tools/Bpa.vue';
 import Pmi from './tools/Pmi.vue';
+import Kin from './tools/Kin.vue';
+import Hwe from './tools/Hwe.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -74,3 +76,9 @@ calc.bpa = () => { if (bp && bp.vm) bp.vm.draw(); };
 
 const pm = mountTool('#pm-app', Pmi);
 calc.pmi = () => { if (pm && pm.vm) pm.vm.draw(); };
+
+mountTool('#kn-app', Kin);
+calc.kin = () => {};
+
+mountTool('#hw-app', Hwe);
+calc.hwe = () => {};

@@ -4457,5 +4457,11 @@
 "Buiten het bereik van het model (meer dan {#} uur).": "Outside the range of the model (more than {#} hours).",
 "Geschat tijdstip van overlijden": "Estimated time of death",
 "Tussen": "Between",
-"Na ongeveer anderhalve dag is het verschil met de omgevingstemperatuur klein en wordt de schatting onbetrouwbaar.": "After about a day and a half the difference from the ambient temperature is small and the estimate becomes unreliable."
+"Na ongeveer anderhalve dag is het verschil met de omgevingstemperatuur klein en wordt de schatting onbetrouwbaar.": "After about a day and a half the difference from the ambient temperature is small and the estimate becomes unreliable.",
+"Vul per locus de allelen van kind en vermeende vader en de frequenties van de allelen van het kind in.": "Enter the alleles of the child and the alleged father and the frequencies of the child's alleles for each locus.",
+"Uitsluiting op meerdere loci: de vermeende vader is uitgesloten.": "Exclusion at several loci: the alleged father is excluded.",
+"van {#} loci": "of {#} loci",
+"0 (uitsluiting)": "0 (exclusion)",
+"Afwijking van Hardy-Weinberg (p &lt; {#}). Controleer typefouten, null-allelen, substructuur of een kleine steekproef. Bij meerdere loci: corrigeer voor meervoudig toetsen.": "Deviation from Hardy-Weinberg (p &lt; {#}). Check for typing errors, null alleles, substructure or a small sample. With several loci: correct for multiple testing.",
+"Maximaal {#} {#} personen.": "At most {#} {#} people."
 }

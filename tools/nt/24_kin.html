@@ -1,17 +1,8 @@
 <section class="tool" id="t-kin" data-tool="kin">
   <header class="tool-head"><h2>Verwantschapsindex</h2>
   <p>Vaderschapsindex (PI) per locus en gecombineerd, met of zonder moeder, en de kans op vaderschap bij een gekozen a-priorikans.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="kn-mo">Moeder getypeerd</label><select id="kn-mo" style="width:100%"><option value="1">ja (trio)</option><option value="0">nee (duo)</option></select></div>
-        <div class="f"><label for="kn-pr">A-priorikans</label><div class="inu"><input id="kn-pr" inputmode="decimal" value="50"><span class="u">%</span></div></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="kn-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="kn-tbl-add">+ Locus</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per locus de allelen van kind, moeder en vermeende vader, plus de allelfrequenties van de twee allelen van het kind uit de populatiedatabase van je opdracht. Homozygoot: vul twee keer hetzelfde allel in. Voorbeelddata en frequenties zijn verzonnen.</p>
-    </div>
-    <div class="result" id="kn-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Kin.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="kn-app"></div>
   <p class="src">PI = P(genotype kind | moeder, vermeende vader) / P(genotype kind | moeder, willekeurige man); een ouder geeft elk van zijn allelen met kans ½ door, een willekeurige man allel x met kans p<sub>x</sub> (Butler, Advanced Topics in Forensic DNA Typing: Interpretation, 2015, hfst. 15; AABB Standards for Relationship Testing). CPI = product over onafhankelijke loci. Kans op vaderschap W = CPI·π / (CPI·π + 1 − π). Mutaties worden niet meegenomen: een uitsluiting op één locus kan een mutatie zijn.</p>
 </section>
