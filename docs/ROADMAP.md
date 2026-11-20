@@ -535,7 +535,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S209 | — | *Standaardcurve* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S210 | — | *ELISA-plaatanalyse* naar Vue | ✅ `src/tools/Elisa.vue`; het rekenwerk staat ongewijzigd in één computed, `elGrid`/`elBlocks` blijven in `tools/nt/94_elisa.js`. De plaatontwerper blijft gewone DOM op `#el-pld`, met dezelfde tweerichtingskoppeling naar het tekstvak | Sonnet |
 | S211 | — | *Interne standaard & standaardadditie* naar Vue | ✅ `src/tools/Istd.vue`; de drie tabellen zijn `lk-etable` en blijven alle drie in de DOM (`v-show`), `isdFit()` blijft in `tools/nt/76_istd.js` | Sonnet |
-| S212 | — | *Eiwitzuiveringstabel* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S212 | — | *Eiwitzuiveringstabel* naar Vue | ✅ `src/tools/Purif.vue`; de tabel is `lk-etable`, `ASAT` en het rekenwerk staan ongewijzigd in de component (niemand anders gebruikte ze) | Sonnet |
 | S213 | — | *Chromatografie (HPLC/GC)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S214 | — | *Spectrofotometrie*, *Dosis-respons (IC50/EC50)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S215 | — | *Verdunningsreeks & KVE* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |

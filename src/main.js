@@ -25,6 +25,7 @@ import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Elisa from './tools/Elisa.vue';
 import Istd from './tools/Istd.vue';
+import Purif from './tools/Purif.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -71,3 +72,7 @@ calc.elisa = () => { if (el && el.vm) el.vm.draw(); };
 /* Interne standaard tekent een kalibratielijn, dus calc.istd() laat de component opnieuw tekenen. */
 const is_ = mountTool('#isd-app', Istd);
 calc.istd = () => { if (is_ && is_.vm) is_.vm.draw(); };
+
+/* Eiwitzuivering tekent een grafiek op een canvas, dus calc.purif() laat de component opnieuw tekenen. */
+const pf = mountTool('#pf-app', Purif);
+calc.purif = () => { if (pf && pf.vm) pf.vm.draw(); };

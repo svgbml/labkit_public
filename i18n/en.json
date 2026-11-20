@@ -4453,5 +4453,6 @@
 "Absorptie meetgolflengte (bijv. {#} nm), {#} rijen × {#} kolommen": "Absorbance at measurement wavelength (e.g. {#} nm), {#} rows × {#} columns",
 "Vul minstens drie standaarden met concentratie en beide oppervlakken in.": "Enter at least three standards with a concentration and both peak areas.",
 "Vul minstens drie punten (waarvan één zonder toevoeging) in.": "Enter at least three points (one of them without addition).",
-"Het snijpunt ligt niet links van de oorsprong; controleer de data (het monster moet signaal geven).": "The intercept does not lie to the left of the origin; check the data (the sample must give a signal)."
+"Het snijpunt ligt niet links van de oorsprong; controleer de data (het monster moet signaal geven).": "The intercept does not lie to the left of the origin; check the data (the sample must give a signal).",
+"Voor ammoniumsulfaat: {#} ≤ S₁ < S₂ ≤ {#}%.": "For ammonium sulfate: {#} ≤ S₁ &lt; S₂ ≤ {#}%."
 }

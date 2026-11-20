@@ -1,20 +1,8 @@
 <section class="tool" id="t-purif" data-tool="purif">
   <header class="tool-head"><h2>Eiwitzuiveringstabel</h2>
   <p>Zuiveringstabel voor een meerstaps eiwitzuivering: totaal eiwit, totale en specifieke activiteit, opbrengst en zuiveringsfactor per stap, plus de hoeveelheid vast ammoniumsulfaat voor een precipitatiestap.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="tbl-wrap"><table id="pf-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="pf-tbl-add">+ Stap</button></div>
-      <h3 style="margin:16px 0 6px;font-size:14px">Ammoniumsulfaat-precipitatie</h3>
-      <div class="fields">
-        <div class="f"><label for="pf-s1">Startverzadiging S₁</label><div class="inu"><input id="pf-s1" inputmode="decimal" value="0"><span class="u">%</span></div></div>
-        <div class="f"><label for="pf-s2">Eindverzadiging S₂</label><div class="inu"><input id="pf-s2" inputmode="decimal" value="40"><span class="u">%</span></div></div>
-        <div class="f"><label for="pf-t">Temperatuur</label><select id="pf-t"><option value="0">0 °C (op ijs)</option><option value="20">20 °C</option><option value="25">25 °C</option></select></div>
-        <div class="f"><label for="pf-v">Volume oplossing</label><div class="inu"><input id="pf-v" inputmode="decimal" value="50"><span class="u">mL</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per stap het volume van de fractie, de eiwitconcentratie (bijvoorbeeld uit de Standaardcurve) en de enzymactiviteit (uit Enzymkinetiek). Voeg ammoniumsulfaat langzaam en fijngemalen toe onder roeren op ijs. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="pf-cv"></canvas><div id="pf-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Purif.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="pf-app"></div>
   <p class="src">Totaal eiwit = V × c; totale activiteit = V × U/mL; specifieke activiteit = U/mg; opbrengst = totale activiteit / totale activiteit van stap 1; zuiveringsfactor = specifieke activiteit / specifieke activiteit van stap 1 (Berg, Tymoczko &amp; Stryer, Biochemistry, hfst. 3; Scopes, Protein Purification, 3e ed.). Ammoniumsulfaat: g per liter = G<sub>sat</sub>·(S₂ − S₁) / (1 − P·S₂) met S als fractie; G<sub>sat</sub> = 515,35 (0 °C), 536,49 (20 °C) en 541,80 g/L (25 °C), P = 0,2722, 0,290 en 0,2945 (Wingfield, Curr Protoc Protein Sci 84:A.3F.1–A.3F.9, 2016; Cold Spring Harb Protoc 2006, pdb.tab1).</p>
 </section>
