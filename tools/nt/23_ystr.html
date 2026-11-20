@@ -1,17 +1,8 @@
 <section class="tool" id="t-ystr" data-tool="ystr">
   <header class="tool-head"><h2>Y-STR / mtDNA-frequentie</h2>
   <p>Haplotypefrequentie met de telmethode en een bovengrens van het betrouwbaarheidsinterval, voor Y-STR- of mtDNA-profielen die als één geheel worden overgeërfd.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="ys-x">Keer gezien in database</label><input id="ys-x" inputmode="numeric" value="0"></div>
-        <div class="f"><label for="ys-n">Grootte database (N)</label><input id="ys-n" inputmode="numeric" value="4500"></div>
-        <div class="f"><label for="ys-cl">Betrouwbaarheid</label><select id="ys-cl" style="width:100%"><option value="0.95" selected>95%</option><option value="0.99">99%</option></select></div>
-        <div class="f"><label for="ys-th">θ (subpopulatiecorrectie, optioneel)</label><input id="ys-th" inputmode="decimal" value="0"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Neem het aantal en de databasegrootte uit YHRD of EMPOP voor de juiste referentiepopulatie. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result" id="ys-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Ystr.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ys-app"></div>
   <p class="src">Telmethode: p = x / N. Bovengrens: Clopper-Pearson (exact binomiaal); bij x = 0 is dat 1 − α<sup>1/N</sup> (SWGDAM Interpretation Guidelines for Y-Chromosome STR Typing, 2022; Holland &amp; Parsons 1999 voor mtDNA). Met θ: p<sub>θ</sub> = θ + (1 − θ)·p (Buckleton e.a., Forensic Sci Int Genet 2011). LR = 1 / gerapporteerde frequentie.</p>
 </section>

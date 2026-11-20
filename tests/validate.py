@@ -563,7 +563,7 @@ def _(pg):
 
 @case('Forensische matchkans', 'Productregel met θ', 'NRC II (1996) 4.1: het. 2pq = 2·0,1·0,2 = 0,04; hom. p² + p(1−p)θ = 0,01 + 0,1·0,9·0,01 = 0,0109; product 4,36 × 10⁻⁴ → 1 op 2294')
 def _(pg):
-    pg.evaluate("__go('rmp');__set('rm-th','0.01');document.querySelector('#rm-tbl tbody').innerHTML=[['A',0.1,0.2],['B',0.1,'']].map(rmRow).join('');calc.rmp();")
+    pg.evaluate("__go('rmp');__set('rm-th','0.01');__tbl('rm-tbl',[['A',0.1,0.2],['B',0.1,'']],'rmp')")
     v = pg.evaluate("__kv('#rm-out','Matchkans')")
     return [('matchkans', v, 0.04*0.0109, 0.002)]
 

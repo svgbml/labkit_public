@@ -4463,5 +4463,7 @@
 "van {#} loci": "of {#} loci",
 "0 (uitsluiting)": "0 (exclusion)",
 "Afwijking van Hardy-Weinberg (p &lt; {#}). Controleer typefouten, null-allelen, substructuur of een kleine steekproef. Bij meerdere loci: corrigeer voor meervoudig toetsen.": "Deviation from Hardy-Weinberg (p &lt; {#}). Check for typing errors, null alleles, substructure or a small sample. With several loci: correct for multiple testing.",
-"Maximaal {#} {#} personen.": "At most {#} {#} people."
+"Maximaal {#} {#} personen.": "At most {#} {#} people.",
+"Vul per locus de allelfrequenties in (tussen {#} en {#}).": "Enter the allele frequencies for each locus (between {#} and {#}).",
+"Ongeldige frequenties bij: {*}. Een frequentie ligt tussen {#} en {#} en twee allelen samen zijn hooguit {#}.": "Invalid frequencies at: {*}. A frequency is between {#} and {#} and two alleles together are at most {#}."
 }

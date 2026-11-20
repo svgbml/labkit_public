@@ -28,6 +28,8 @@ import Bpa from './tools/Bpa.vue';
 import Pmi from './tools/Pmi.vue';
 import Kin from './tools/Kin.vue';
 import Hwe from './tools/Hwe.vue';
+import Rmp from './tools/Rmp.vue';
+import Ystr from './tools/Ystr.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -82,3 +84,11 @@ calc.kin = () => {};
 
 mountTool('#hw-app', Hwe);
 calc.hwe = () => {};
+
+/* Forensische matchkans zet zelf TBLDEF['rm-tbl']: die tabel heeft een uitkomstkolom en is
+   daarom geen lk-etable */
+mountTool('#rm-app', Rmp);
+calc.rmp = () => {};
+
+mountTool('#ys-app', Ystr);
+calc.ystr = () => {};
