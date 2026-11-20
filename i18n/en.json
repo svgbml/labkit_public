@@ -4454,5 +4454,11 @@
 "Geen plaat binnen {#}–{#}. Schatting op basis van de plaat die het dichtst bij {#} ligt; markeer als geschat.": "No plate within {#}–{#}. Estimate based on the plate closest to {#}; mark as estimated.",
 "Meer dan twee telbare verdunningen; volgens ISO {#} zijn alleen stap {#} gebruikt.": "More than two countable dilutions; according to ISO {#} only step {#} was used.",
 "totaal": "total",
-"cellen/µL": "cells/µL"
+"cellen/µL": "cells/µL",
+"Vul per rij de groei per putje in.": "Fill in the growth per well for each row.",
+"Vul zonediameters in.": "Enter zone diameters.",
+"R < (mm)": "R < (mm)",
+"overgeslagen putje (groei na een put zonder groei): herhaal": "skipped well (growth after a well without growth): repeat",
+"groei in alle putjes": "growth in all wells",
+"MIC ({*})": "MIC ({*})"
 }
