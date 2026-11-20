@@ -25,6 +25,7 @@ import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Pipetteer from './tools/Pipetteer.vue';
 import PcrProgramma from './tools/PcrProgramma.vue';
+import Verdunningsschema from './tools/Verdunningsschema.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -74,3 +75,8 @@ calc.ppip = () => { if (pp && pp.vm) pp.vm.draw(); };
    opnieuw tekenen. "Neem over uit PCR-cyclus" (#pg-from) leest de globale yTa van die tool. */
 const pg = mountTool('#pg-app', PcrProgramma);
 calc.pprog = () => { if (pg && pg.vm) pg.vm.draw(); };
+
+/* Verdunningsschema tekent op #pv-cv met de bestaande tekenfuncties; calc.pverd() laat de
+   component opnieuw tekenen (de invoer-events van de pagina en het exporteren roepen dat aan). */
+const pv = mountTool('#pv-app', Verdunningsschema);
+calc.pverd = () => { if (pv && pv.vm) pv.vm.draw(); };
