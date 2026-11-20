@@ -561,7 +561,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S235 | — | *RNA-kwaliteit*, *qPCR-smeltcurve* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S236 | — | *SDS-PAGE monsters*, *Ligatie* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S237 | — | *Western blot-normalisatie*, *Primers oplossen* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S238 | — | *Bloedalcohol (Widmark)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S238 | — | *Bloedalcohol (Widmark)* naar Vue | ✅ `src/tools/Widmark.vue`; de drankentabel is een `lk-etable`, de curve tekent na elke render met `chart()`. `wdT()`/`wdHM()` blijven in `tools/nt/70_widmark.js` | Sonnet |
 | S239 | — | *Mengprofiel & LR* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S240 | — | *Entomologie (graaddagen)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S241 | — | *Lichaamslengte uit botten* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
