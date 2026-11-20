@@ -26,6 +26,7 @@ import Osmo from './tools/Osmo.vue';
 import Pcrcyclus from './tools/Pcrcyclus.vue';
 import Dna from './tools/Dna.vue';
 import Gel from './tools/Gel.vue';
+import Qplate from './tools/Qplate.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -79,3 +80,9 @@ calc.dna = () => {};
    tekenen. LADDERS, LEX en GELR blijven globals in web/index.html (Gelplanner en Gelfoto). */
 const gl = mountTool('#g-app', Gel);
 calc.gel = () => { if (gl && gl.vm) gl.vm.draw(); };
+
+/* qPCR-plaatindeling: de plaatontwerper (#qp2-pld) is een DOM-widget buiten de Vue-boom en meldt
+   wijzigingen via window.__qpVm.onPlate(); calc.qplate() laat de tekening opnieuw maken. */
+const qp = mountTool('#qp-app', Qplate);
+if (qp) window.__qpVm = qp.vm;
+calc.qplate = () => { if (qp && qp.vm) qp.vm.reflow(); };
