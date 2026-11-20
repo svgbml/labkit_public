@@ -25,6 +25,8 @@ import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Telkamer from './tools/Telkamer.vue';
 import Passage from './tools/Passage.vue';
+import Desinf from './tools/Desinf.vue';
+import Steril from './tools/Steril.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -71,3 +73,10 @@ calc.telkamer = () => {};
 
 mountTool('#ps-app', Passage);
 calc.passage = () => {};
+
+mountTool('#ds-app', Desinf);
+calc.desinf = () => {};
+
+/* Sterilisatie tekent een overlevingscurve, dus calc.steril() laat de component opnieuw tekenen. */
+const st = mountTool('#ste-app', Steril);
+calc.steril = () => { if (st && st.vm) st.vm.draw(); };
