@@ -1,29 +1,8 @@
 <section class="tool" id="t-istd" data-tool="istd">
   <header class="tool-head"><h2>Interne standaard &amp; standaardadditie</h2>
   <p>Kalibratie met een interne standaard (oppervlakteverhouding tegen concentratie) of met standaardadditie (extrapolatie naar het snijpunt met de x-as), met de standaardonzekerheid van het resultaat.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="isd-mode">Methode</label><select id="isd-mode"><option value="is">interne standaard</option><option value="sa">standaardadditie</option></select></div>
-        <div class="f"><label for="isd-unit">Concentratie-eenheid</label><input id="isd-unit" class="txt" value="mg/L"></div>
-        <div class="f" data-isd="sa"><label for="isd-df">Verdunningsfactor monster</label><input id="isd-df" inputmode="decimal" value="5"></div>
-      </div>
-      <div data-isd="is">
-        <h3 style="margin:14px 0 6px;font-size:14px">Kalibratiestandaarden</h3>
-        <div class="tbl-wrap"><table id="isd-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-        <div class="row" style="margin-top:8px"><button type="button" id="isd-tbl-add">+ Standaard</button></div>
-        <h3 style="margin:14px 0 6px;font-size:14px">Monsters</h3>
-        <div class="tbl-wrap"><table id="isd-unk" class="mini"><thead></thead><tbody></tbody></table></div>
-        <div class="row" style="margin-top:8px"><button type="button" id="isd-unk-add">+ Monster</button></div>
-      </div>
-      <div data-isd="sa">
-        <h3 style="margin:14px 0 6px;font-size:14px">Toevoegingen</h3>
-        <div class="tbl-wrap"><table id="isd-sa" class="mini"><thead></thead><tbody></tbody></table></div>
-        <div class="row" style="margin-top:8px"><button type="button" id="isd-sa-add">+ Toevoeging</button></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Interne standaard: dezelfde hoeveelheid IS in elke standaard en elk monster. Standaardadditie: de toegevoegde concentratie in de meetoplossing, met 0 voor het monster zonder toevoeging; de verdunningsfactor rekent terug naar het oorspronkelijke monster. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="isd-cv"></canvas><div id="isd-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Istd.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="isd-app"></div>
   <p class="src">Lineaire regressie met standaardfout s<sub>y/x</sub>. Interne standaard: s<sub>x0</sub> = (s<sub>y/x</sub>/b)·√(1 + 1/n + (y<sub>0</sub> − ȳ)²/(b²·Σ(x − x̄)²)). Standaardadditie: x<sub>E</sub> = a/b en s<sub>xE</sub> = (s<sub>y/x</sub>/b)·√(1/n + ȳ²/(b²·Σ(x − x̄)²)) (Miller &amp; Miller, Statistics and Chemometrics for Analytical Chemistry, 6e ed., 2010, §5.9 en §5.10; Harris, Quantitative Chemical Analysis, hfst. 5).</p>
 </section>

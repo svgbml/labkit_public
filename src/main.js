@@ -24,6 +24,7 @@ import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Elisa from './tools/Elisa.vue';
+import Istd from './tools/Istd.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -66,3 +67,7 @@ calc.osmo = () => {};
 /* ELISA tekent een curve op een canvas, dus calc.elisa() laat de component opnieuw tekenen. */
 const el = mountTool('#el-app', Elisa);
 calc.elisa = () => { if (el && el.vm) el.vm.draw(); };
+
+/* Interne standaard tekent een kalibratielijn, dus calc.istd() laat de component opnieuw tekenen. */
+const is_ = mountTool('#isd-app', Istd);
+calc.istd = () => { if (is_ && is_.vm) is_.vm.draw(); };
