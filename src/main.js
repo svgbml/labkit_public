@@ -28,6 +28,14 @@ import Facs from './tools/Facs.vue';
 import Transfect from './tools/Transfect.vue';
 import Mic from './tools/Mic.vue';
 import Groei from './tools/Groei.vue';
+import Titr from './tools/Titr.vue';
+import Hh from './tools/Hh.vue';
+import Edta from './tools/Edta.vue';
+import Molm from './tools/Molm.vue';
+import Kjel from './tools/Kjel.vue';
+import Units from './tools/Units.vue';
+import Enzym from './tools/Enzym.vue';
+import Curve from './tools/Curve.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -89,3 +97,33 @@ calc.mic = () => {};
    blijft met chart() gemaakt, dus calc.groei() laat de component opnieuw tekenen. */
 const gr = mountTool('#g2-app', Groei);
 calc.groei = () => { if (gr && gr.vm) gr.vm.draw(); };
+
+/* Titratiecurve tekent een curve, dus calc.titr() laat de component opnieuw tekenen. */
+const ti = mountTool('#ti-app', Titr);
+calc.titr = () => { if (ti && ti.vm) ti.vm.draw(); };
+
+mountTool('#hh-app', Hh);
+calc.hh = () => {};
+
+mountTool('#ed-app', Edta);
+calc.edta = () => {};
+
+/* Molmassa: parseFormula() en ATOM blijven in web/index.html; de component roept ze aan. */
+mountTool('#mm-app', Molm);
+calc.molm = () => {};
+
+mountTool('#kj-app', Kjel);
+calc.kjel = () => {};
+
+mountTool('#un-app', Units);
+calc.units = () => {};
+
+/* Enzymkinetiek tekent een grafiek, dus calc.enzym() laat de component opnieuw tekenen. mmFit()
+   blijft in web/index.html. De tabel #k-tbl is een <lk-etable> en zet zelf TBLDEF['k-tbl']. */
+const en = mountTool('#en-app', Enzym);
+calc.enzym = () => { if (en && en.vm) en.vm.draw(); };
+
+/* Standaardcurve tekent een grafiek, dus calc.curve() laat de component opnieuw tekenen. fitCurve()
+   blijft in web/index.html. De tabellen #s-std en #s-unk zijn <lk-etable> met berekende kolommen. */
+const cu = mountTool('#cu-app', Curve);
+calc.curve = () => { if (cu && cu.vm) cu.vm.draw(); };
