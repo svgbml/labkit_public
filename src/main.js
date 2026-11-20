@@ -26,6 +26,7 @@ import Osmo from './tools/Osmo.vue';
 import Pipetteer from './tools/Pipetteer.vue';
 import PcrProgramma from './tools/PcrProgramma.vue';
 import Verdunningsschema from './tools/Verdunningsschema.vue';
+import Kleuringsschema from './tools/Kleuringsschema.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -80,3 +81,8 @@ calc.pprog = () => { if (pg && pg.vm) pg.vm.draw(); };
    component opnieuw tekenen (de invoer-events van de pagina en het exporteren roepen dat aan). */
 const pv = mountTool('#pv-app', Verdunningsschema);
 calc.pverd = () => { if (pv && pv.vm) pv.vm.draw(); };
+
+/* Kleuringsschema tekent op #stn-cv met de bestaande tekenfuncties; calc.stain() laat de
+   component opnieuw tekenen (de invoer-events van de pagina en het exporteren roepen dat aan). */
+const stn = mountTool('#stn-app', Kleuringsschema);
+calc.stain = () => { if (stn && stn.vm) stn.vm.draw(); };

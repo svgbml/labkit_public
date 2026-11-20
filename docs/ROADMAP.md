@@ -583,7 +583,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S257 | — | *Pipetteerschema* naar Vue | ✅ `src/tools/Pipetteer.vue`; eigen tabel (een kolom per buis past niet in `lk-etable`) met eigen plak-handler. `PPRE`, `ppMigrate` en het buizenrek (`ppRack`, gewone HTML) blijven in `web/index.html`; `#pp-cv._data` blijft gezet | Sonnet |
 | S258 | — | *PCR-programma* naar Vue | ✅ `src/tools/PcrProgramma.vue`; `PGDEF`, `pgSecs`, `pgFmt` en (voor *PCR-cyclus*) `mmss2`/`yTa` blijven in `web/index.html`; de stappen blijven in `pstore` | Sonnet |
 | S259 | — | *Verdunningsschema* naar Vue | ✅ `src/tools/Verdunningsschema.vue`; de tekenhulpjes (`pTube`, `pArrow`, `pNum`, …) blijven in `web/index.html` | Sonnet |
-| S260 | — | *Kleuringsschema* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S260 | — | *Kleuringsschema* naar Vue | ✅ `src/tools/Kleuringsschema.vue`, de tabel op `lk-etable`; alleen de sjablonen (`STN`) blijven in `tools/nt/44_stain.js`. Geen validatiegeval (het is een tekening) | Sonnet |
 | S261 | — | *Experimentplanner*, *Rapport / labjournaal* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S262 | — | *Plaatindeling*, *Centrifuge*, *Timers* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S263 | — | Startpagina en Instellingen naar Vue (de app-schil, geen rekentool) | Zoeken, fasen, tegels en instellingen werken | Opus 5 |
