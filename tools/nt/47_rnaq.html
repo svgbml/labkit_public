@@ -1,21 +1,8 @@
 <section class="tool" id="t-rnaq" data-tool="rnaq">
   <header class="tool-head"><h2>RNA-kwaliteit</h2>
   <p>RNA-concentratie en zuiverheid uit absorptie bij 230, 260 en 280 nm, en de verhouding van de 28S- en 18S-rRNA-banden op gel als maat voor intactheid.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="rq-a260">A<sub>260</sub></label><input id="rq-a260" inputmode="decimal" value="0,532"></div>
-        <div class="f"><label for="rq-a280">A<sub>280</sub></label><input id="rq-a280" inputmode="decimal" value="0,262"></div>
-        <div class="f"><label for="rq-a230">A<sub>230</sub></label><input id="rq-a230" inputmode="decimal" value="0,251"></div>
-        <div class="f"><label for="rq-df">Verdunningsfactor</label><input id="rq-df" inputmode="decimal" value="20"></div>
-        <div class="f"><label for="rq-l">Weglengte</label><div class="inu"><input id="rq-l" inputmode="decimal" value="1"><span class="u">cm</span></div></div>
-        <div class="f"><label for="rq-v">Volume eluaat</label><div class="inu"><input id="rq-v" inputmode="decimal" value="30"><span class="u">µL</span></div></div>
-        <div class="f"><label for="rq-28">Intensiteit 28S-band</label><input id="rq-28" inputmode="decimal" value="18400"></div>
-        <div class="f"><label for="rq-18">Intensiteit 18S-band</label><input id="rq-18" inputmode="decimal" value="9800"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Bandintensiteiten haal je uit de gelfoto-editor of ImageJ (geïntegreerde intensiteit, achtergrond afgetrokken). Laat leeg als je geen gel hebt. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result" id="rq-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Rnaq.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="rq-app"></div>
   <p class="src">c (µg/mL) = A<sub>260</sub> × 40 × verdunning / weglengte; zuiver RNA heeft A<sub>260</sub>/A<sub>280</sub> ≈ 2,0 en A<sub>260</sub>/A<sub>230</sub> ≈ 2,0–2,2 (Thermo Fisher, T042 Technical Bulletin, Assessment of Nucleic Acid Purity; T009, 260/280 and 260/230 Ratios). Intact eukaryotisch totaal-RNA geeft een 28S:18S-verhouding van ongeveer 2 (Sambrook &amp; Russell, Molecular Cloning, 3e ed.; Schroeder e.a., BMC Mol Biol 7:3, 2006, die ook laat zien dat de verhouding alleen een grove maat is; de RIN is betrouwbaarder).</p>
 </section>

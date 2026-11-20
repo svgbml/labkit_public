@@ -26,6 +26,8 @@ import Osmo from './tools/Osmo.vue';
 import Cdna from './tools/Cdna.vue';
 import Gradient from './tools/Gradient.vue';
 import Pcr from './tools/Pcr.vue';
+import Rnaq from './tools/Rnaq.vue';
+import Melt from './tools/Melt.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -77,3 +79,11 @@ calc.gradient = () => { if (gr && gr.vm) gr.vm.draw(); };
 const pc = mountTool('#q-app', Pcr, {pip: 'pcr'});
 if (pc) window.__pcrVm = pc.vm;
 calc.pcr = () => { if (pc && pc.vm) pc.vm.draw(); };
+
+mountTool('#rq-app', Rnaq);
+calc.rnaq = () => {};
+
+/* qPCR-smeltcurve tekent −dF/dT met chart(); calc.melt() laat de tekening opnieuw maken
+   (taal, thema). */
+const ml = mountTool('#ml-app', Melt);
+calc.melt = () => { if (ml && ml.vm) ml.vm.draw(); };

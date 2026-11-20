@@ -4456,5 +4456,13 @@
 "Opgeslagen.": "Saved.",
 "Download geannuleerd.": "Download cancelled.",
 "Downloaden lukte niet hier.": "Downloading did not work here.",
-"gemiddeld": "average"
+"gemiddeld": "average",
+"zuiver": "pure",
+"afwijkend": "deviating",
+"laag": "low",
+"intact": "intact",
+"deels afgebroken": "partly degraded",
+"afgebroken": "degraded",
+"geen piek": "no peak",
+"Te weinig meetpunten.": "Too few data points."
 }
