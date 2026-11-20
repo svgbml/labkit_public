@@ -25,6 +25,8 @@ import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Titr from './tools/Titr.vue';
 import Hh from './tools/Hh.vue';
+import Edta from './tools/Edta.vue';
+import Molm from './tools/Molm.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -70,3 +72,10 @@ calc.titr = () => { if (ti && ti.vm) ti.vm.draw(); };
 
 mountTool('#hh-app', Hh);
 calc.hh = () => {};
+
+mountTool('#ed-app', Edta);
+calc.edta = () => {};
+
+/* Molmassa: parseFormula() en ATOM blijven in web/index.html; de component roept ze aan. */
+mountTool('#mm-app', Molm);
+calc.molm = () => {};

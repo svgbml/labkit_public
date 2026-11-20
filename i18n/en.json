@@ -4449,5 +4449,11 @@
 "mM per pH-eenheid": "mM per pH unit",
 "Benodigde stock": "Stock needed",
 "{*}: ladingen niet herkend.": "{*}: charges not recognised.",
-"Vul minstens één stof met concentratie in.": "Enter at least one substance with a concentration."
+"Vul minstens één stof met concentratie in.": "Enter at least one substance with a concentration.",
+"Haakje niet gesloten.": "Bracket not closed.",
+"Haakje te veel.": "Too many closing brackets.",
+"Onbekend teken \"{*}\".": "Unknown character \"{*}\".",
+"Element \"{*}\" is onbekend.": "Element \"{*}\" is unknown.",
+"<b>{*}</b> voor {#} {*} in {#} {*}": "<b>{*}</b> for {#} {*} in {#} {*}",
+"Oplossing & buffer": "Solution & buffer"
 }
