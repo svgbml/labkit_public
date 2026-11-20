@@ -27,6 +27,8 @@ import Elisa from './tools/Elisa.vue';
 import Istd from './tools/Istd.vue';
 import Purif from './tools/Purif.vue';
 import Chrom from './tools/Chrom.vue';
+import Spec from './tools/Spec.vue';
+import Ic50 from './tools/Ic50.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -81,3 +83,11 @@ calc.purif = () => { if (pf && pf.vm) pf.vm.draw(); };
 /* Chromatografie tekent een chromatogram op een canvas, dus calc.chrom() laat de component opnieuw tekenen. */
 const chr = mountTool('#chr-app', Chrom);
 calc.chrom = () => { if (chr && chr.vm) chr.vm.draw(); };
+
+/* Spectrofotometrie rekent in de component zelf; calc.spec() hoeft niets te doen. */
+mountTool('#sp-app', Spec);
+calc.spec = () => {};
+
+/* Dosis-respons tekent een fit op een canvas, dus calc.ic50() laat de component opnieuw tekenen. */
+const ic = mountTool('#ic-app', Ic50);
+calc.ic50 = () => { if (ic && ic.vm) ic.vm.draw(); };

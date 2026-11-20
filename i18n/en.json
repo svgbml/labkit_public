@@ -4460,5 +4460,9 @@
 "basislijn, krap": "baseline, marginal",
 "overlap": "overlap",
 "N = {#}(t<sub>R</sub>/W<sub>b</sub>)² · R<sub>s</sub> = {#}Δt<sub>R</sub>/(W<sub>b{#}</sub>+W<sub>b{#}</sub>) · k = (t<sub>R</sub>−t<sub>{#}</sub>)/t<sub>{#}</sub>": "N = {#}(t<sub>R</sub>/W<sub>b</sub>)² · R<sub>s</sub> = {#}Δt<sub>R</sub>/(W<sub>b{#}</sub>+W<sub>b{#}</sub>) · k = (t<sub>R</sub>−t<sub>{#}</sub>)/t<sub>{#}</sub>",
-"N = {#}(t<sub>R</sub>/W<sub>h</sub>)² · R<sub>s</sub> = {#}Δt<sub>R</sub>/(W<sub>h{#}</sub>+W<sub>h{#}</sub>) · k = (t<sub>R</sub>−t<sub>{#}</sub>)/t<sub>{#}</sub>": "N = {#}(t<sub>R</sub>/W<sub>h</sub>)² · R<sub>s</sub> = {#}Δt<sub>R</sub>/(W<sub>h{#}</sub>+W<sub>h{#}</sub>) · k = (t<sub>R</sub>−t<sub>{#}</sub>)/t<sub>{#}</sub>"
+"N = {#}(t<sub>R</sub>/W<sub>h</sub>)² · R<sub>s</sub> = {#}Δt<sub>R</sub>/(W<sub>h{#}</sub>+W<sub>h{#}</sub>) · k = (t<sub>R</sub>−t<sub>{#}</sub>)/t<sub>{#}</sub>": "N = {#}(t<sub>R</sub>/W<sub>h</sub>)² · R<sub>s</sub> = {#}Δt<sub>R</sub>/(W<sub>h{#}</sub>+W<sub>h{#}</sub>) · k = (t<sub>R</sub>−t<sub>{#}</sub>)/t<sub>{#}</sub>",
+"Voor % van de controle is een rij met concentratie {#} nodig.": "A row with concentration {#} is needed for % of control.",
+"Vul minstens vier concentraties groter dan {#} in.": "Enter at least four concentrations greater than {#}.",
+"Verwachte absorbantie": "Expected absorbance",
+"A = ε · c · l / verdunning": "A = ε · c · l / dilution"
 }

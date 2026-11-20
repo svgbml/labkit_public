@@ -1,17 +1,8 @@
 <section class="tool" id="t-ic50" data-tool="ic50">
   <header class="tool-head"><h2>Dosis-respons (IC50/EC50)</h2>
   <p>Fit een vierparameter-logistische curve aan een concentratiereeks en bepaal de IC50 of EC50 met betrouwbaarheidsinterval, de Hill-helling en de onder- en bovengrens.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="ic-norm">Respons</label><select id="ic-norm" style="width:100%"><option value="raw">zoals ingevuld</option><option value="pct">als % van de controle (concentratie 0)</option></select></div>
-        <div class="f"><label for="ic-cu">Concentratie-eenheid</label><input id="ic-cu" class="txt" value="µM"></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="ic-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="ic-tbl-add">+ Concentratie</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Tot drie replicaten per concentratie. Concentratie 0 telt als controle (100%) en wordt niet gefit op de log-as. Voorbeelddata (groeiremming, OD<sub>600</sub>) zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="ic-cv"></canvas><div id="ic-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Ic50.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ic-app"></div>
   <p class="src">4PL: y = onder + (boven − onder) / (1 + (x / IC<sub>50</sub>)<sup>h</sup>), gefit met Levenberg-Marquardt op log₁₀(IC<sub>50</sub>); 95%-interval uit de standaardfout en de t-verdeling (Sebaugh, Pharm Stat 10:128–134, 2011; GraphPad Prism, "Equation: log(inhibitor) vs. response – Variable slope").</p>
 </section>

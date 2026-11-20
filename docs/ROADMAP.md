@@ -537,7 +537,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S211 | — | *Interne standaard & standaardadditie* naar Vue | ✅ `src/tools/Istd.vue`; de drie tabellen zijn `lk-etable` en blijven alle drie in de DOM (`v-show`), `isdFit()` blijft in `tools/nt/76_istd.js` | Sonnet |
 | S212 | — | *Eiwitzuiveringstabel* naar Vue | ✅ `src/tools/Purif.vue`; de tabel is `lk-etable`, `ASAT` en het rekenwerk staan ongewijzigd in de component (niemand anders gebruikte ze) | Sonnet |
 | S213 | — | *Chromatografie (HPLC/GC)* naar Vue | ✅ `src/tools/Chrom.vue`; de tabel is `lk-etable` en het rekenwerk staat ongewijzigd in één computed. Beginwaarden met drie decimalen (0,075) gaan met een komma door `lkNumIn`, anders leest het Engels ze als duizendtallen | Sonnet |
-| S214 | — | *Spectrofotometrie*, *Dosis-respons (IC50/EC50)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S214 | — | *Spectrofotometrie*, *Dosis-respons (IC50/EC50)* naar Vue | ✅ `src/tools/Spec.vue` en `src/tools/Ic50.vue`. *Spectrofotometrie* stond nog in `web/index.html`: `calc.spec` en de listener op `#sp-seq` zijn daar weg (een watcher in de component), `AAM` blijft globaal. Het rekenwerk staat ongewijzigd in één computed per tool | Sonnet |
 | S215 | — | *Verdunningsreeks & KVE* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S216 | — | *Flowcytometrie (panel & controles)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S217 | — | *Antibiotica-gevoeligheid* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
