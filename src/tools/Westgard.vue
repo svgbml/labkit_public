@@ -40,7 +40,7 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 
-const F = (x, d) => fmt(x, d), G = (x, d) => sig(x, d);
+const F = (x, d) => lkNumIn(fmt(x, d)), G = (x, d) => lkNumIn(sig(x, d));
 
 export default {
   name: 'Westgard',

@@ -36,7 +36,10 @@
 </template>
 
 <script>
-const F = (x, d) => fmt(x, d);
+import {lkNumIn} from '../lib/bridge.js';
+/* getallen in de uitkomst in de notatie van de gebruiker; binnen t() blijft het fmt(), want t() zet
+   het getal zelf om */
+const F = (x, d) => lkNumIn(fmt(x, d));
 
 export default {
   name: 'Km',
@@ -78,8 +81,8 @@ export default {
       if (this.G.length < 2) return null;
       const t = this.t, G = this.G, {O, E, m, chi, p} = kmLogrank(this.R, G);
       const head = !isFinite(chi) ? '–'
-        : p < 0.001 ? this.tHtml(`χ² = ${F(chi, 2)}, df = ${m}, p &lt; 0,001`)
-          : t(`χ² = ${F(chi, 2)}, df = ${m}, p = ${F(p, 3)}`);
+        : p < 0.001 ? this.tHtml(`χ² = ${fmt(chi, 2)}, df = ${m}, p &lt; 0,001`)
+          : t(`χ² = ${fmt(chi, 2)}, df = ${m}, p = ${fmt(p, 3)}`);
       return [[t('Log-ranktoets'), head],
         ...G.map((g, i) => [t(this.uv(this.esc(g)) + ': waargenomen / verwacht'), `${O[i]} / ${F(E[i], 1)}`])];
     },

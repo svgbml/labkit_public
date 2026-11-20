@@ -43,7 +43,7 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 
-const F = (x, d) => fmt(x, d), G = (x, d) => sig(x, d);
+const F = (x, d) => lkNumIn(fmt(x, d)), G = (x, d) => lkNumIn(sig(x, d));
 
 export default {
   name: 'Bland',
@@ -67,8 +67,8 @@ export default {
         [t('95%-interval ondergrens'), `${G(lo - tq * seL, 3)} – ${G(lo + tq * seL, 3)}`],
         [t('95%-interval bovengrens'), `${G(hi - tq * seL, 3)} – ${G(hi + tq * seL, 3)}`],
         [t('SD van de verschillen'), G(s, 3) + u],
-        [t('Bias ≠ 0?'), p0 < 0.001 ? this.tHtml('p &lt; 0,001 (gepaarde t-toets)') : t(`p = ${F(p0, 3)} (gepaarde t-toets)`)],
-        [t('Proportionele afwijking'), pb < 0.001 ? this.tHtml(`helling ${G(r.b, 3)}, p &lt; 0,001`) : t(`helling ${G(r.b, 3)}, p = ${F(pb, 3)}`)],
+        [t('Bias ≠ 0?'), p0 < 0.001 ? this.tHtml('p &lt; 0,001 (gepaarde t-toets)') : t(`p = ${fmt(p0, 3)} (gepaarde t-toets)`)],
+        [t('Proportionele afwijking'), pb < 0.001 ? this.tHtml(`helling ${sig(r.b, 3)}, p &lt; 0,001`) : t(`helling ${sig(r.b, 3)}, p = ${fmt(pb, 3)}`)],
         [t('Paren'), n]
       ];
     },
@@ -77,8 +77,8 @@ export default {
       const t = this.t, {lo, hi, t: tq, seL} = this.M, u = this.u;
       const inside = Math.max(Math.abs(lo - tq * seL), Math.abs(hi + tq * seL)) <= lim;
       return {kind: inside ? 'ok' : 'warn',
-        text: inside ? t(`Met het 95%-interval van de grenzen meegenomen liggen de verschillen binnen ±${G(lim, 3)}${u}.`)
-          : t(`Met het 95%-interval van de grenzen meegenomen liggen de verschillen niet zeker binnen ±${G(lim, 3)}${u}.`)};
+        text: inside ? t(`Met het 95%-interval van de grenzen meegenomen liggen de verschillen binnen ±${sig(lim, 3)}${u}.`)
+          : t(`Met het 95%-interval van de grenzen meegenomen liggen de verschillen niet zeker binnen ±${sig(lim, 3)}${u}.`)};
     }
   },
   mounted() { this.draw(); },

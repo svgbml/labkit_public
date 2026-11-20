@@ -47,7 +47,7 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 
-const F = (x, d) => fmt(x, d);
+const F = (x, d) => lkNumIn(fmt(x, d)), G = (x, d) => lkNumIn(sig(x, d));
 
 export default {
   name: 'Roc',
@@ -69,10 +69,10 @@ export default {
     rows() {
       const t = this.t, M = this.M, cu = num(this.c), prev = num(this.prev) / 100, {best, ch, rc, ppv, npv, lrp, lrn} = M;
       return [
-        [t('Optimale afkapwaarde (Youden)'), `${sig(rc(best.c), 4)} (J = ${F(best.J, 3)})`],
+        [t('Optimale afkapwaarde (Youden)'), `${G(rc(best.c), 4)} (J = ${F(best.J, 3)})`],
         [isFinite(cu) ? t(`Bij afkapwaarde ${sig(cu, 4)}`) : t('Bij de optimale afkapwaarde'),
-          t(`sensitiviteit ${F(ch.se * 100, 1)}%, specificiteit ${F(ch.sp * 100, 1)}%`)],
-        [t(`PPV / NPV bij ${F(prev * 100, 1)}% prevalentie`), `${F(ppv * 100, 1)}% / ${F(npv * 100, 1)}%`],
+          t(`sensitiviteit ${fmt(ch.se * 100, 1)}%, specificiteit ${fmt(ch.sp * 100, 1)}%`)],
+        [t(`PPV / NPV bij ${fmt(prev * 100, 1)}% prevalentie`), `${F(ppv * 100, 1)}% / ${F(npv * 100, 1)}%`],
         [t('LR+ / LR−'), `${isFinite(lrp) ? F(lrp, 2) : '∞'} / ${F(lrn, 3)}`],
         [t('Positief / negatief'), `${M.np} / ${M.nn}`]
       ];

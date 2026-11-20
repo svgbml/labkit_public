@@ -48,7 +48,7 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 
-const F = (x, d) => fmt(x, d), G = (x, d) => sig(x, d);
+const F = (x, d) => lkNumIn(fmt(x, d)), G = (x, d) => lkNumIn(sig(x, d));
 
 export default {
   name: 'Mval',
@@ -72,7 +72,7 @@ export default {
     rows() {
       const t = this.t, {rep, rec, fit, badLin} = this.R, rows = [];
       const chip = (ok, on) => on ? `<span class="chip ${ok ? 'ok' : 'bad'}" style="vertical-align:middle;margin-left:6px">${ok ? t('voldoet') : t('voldoet niet')}</span>` : '';
-      if (rep) rows.push([t('Herhaalbaarheid (CV)'), t(`${F(rep.c, 2)}% (x̄ = ${G(rep.m, 4)}, s = ${G(rep.s, 3)}, n = ${rep.n})`) + chip(rep.ok, rep.chip)]);
+      if (rep) rows.push([t('Herhaalbaarheid (CV)'), t(`${fmt(rep.c, 2)}% (x̄ = ${sig(rep.m, 4)}, s = ${sig(rep.s, 3)}, n = ${rep.n})`) + chip(rep.ok, rep.chip)]);
       if (rec) rows.push([t('Terugvinding'), F(rec.r, 1) + '%' + chip(rec.ok, rec.chip)]);
       if (fit) rows.push([t('Lineariteit R²'), F(fit.r2, 5) + chip(fit.ok, fit.chip)], [t('Helling / intercept'), `${G(fit.b, 4)} / ${G(fit.a, 3)}`],
         [t('LOD (3,3·σ/S)'), G(fit.lod, 3)], [t('LOQ (10·σ/S)'), G(fit.loq, 3)]);
