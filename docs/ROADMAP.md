@@ -573,7 +573,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S247 | — | *Forensische matchkans*, *Y-STR / mtDNA-frequentie* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S248 | — | *Statistiek* naar Vue, deel 1: de toetsen t, ANOVA en Kruskal-Wallis | Zelfde uitkomsten; validatie blijft staan | Opus 5 |
 | S249 | — | *Statistiek* naar Vue, deel 2: de rest: chi-kwadraat, regressie, power en de post-hoc | Zelfde uitkomsten; validatie blijft staan | Opus 5 |
-| S250 | — | *Overlevingscurve (Kaplan-Meier)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S250 | — | *Overlevingscurve (Kaplan-Meier)* naar Vue | ✅ `src/tools/Km.vue`. `kmFit()` blijft en de log-ranktoets staat nu in `kmLogrank()` in `tools/nt/86_km.js`; de curve wordt na elke render met `chart()` getekend, net als bij de Z'-factor | — |
 | S251 | — | *ROC-curve & diagnostische test*, *Bland-Altman (methodevergelijking)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S252 | — | *Westgard / Levey-Jennings* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S253 | — | *Methodevalidatie* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |

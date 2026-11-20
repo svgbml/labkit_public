@@ -21,6 +21,7 @@ import Medium from './tools/Medium.vue';
 import Oplossing from './tools/Oplossing.vue';
 import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
+import Km from './tools/Km.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 
@@ -61,3 +62,7 @@ calc.verdunning = () => {};
 
 mountTool('#os-app', Osmo);
 calc.osmo = () => {};
+
+/* Overlevingscurve tekent een curve, dus calc.km() laat de component opnieuw tekenen. */
+const km = mountTool('#km-app', Km);
+calc.km = () => { if (km && km.vm) km.vm.draw(); };
