@@ -4453,5 +4453,9 @@
 "Vul per piek locus, allel en hoogte in.": "Enter locus, allele and height for each peak.",
 "Vul per vlek breedte en lengte in.": "Enter width and length for each stain.",
 "Inslaghoeken": "Impact angles",
-"De looprichtingen zijn (bijna) evenwijdig; er is geen convergentiepunt.": "The directions of travel are (almost) parallel; there is no point of convergence."
+"De looprichtingen zijn (bijna) evenwijdig; er is geen convergentiepunt.": "The directions of travel are (almost) parallel; there is no point of convergence.",
+"Buiten het bereik van het model (meer dan {#} uur).": "Outside the range of the model (more than {#} hours).",
+"Geschat tijdstip van overlijden": "Estimated time of death",
+"Tussen": "Between",
+"Na ongeveer anderhalve dag is het verschil met de omgevingstemperatuur klein en wordt de schatting onbetrouwbaar.": "After about a day and a half the difference from the ambient temperature is small and the estimate becomes unreliable."
 }

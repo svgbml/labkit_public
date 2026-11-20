@@ -1,18 +1,8 @@
 <section class="tool" id="t-pmi" data-tool="pmi">
   <header class="tool-head"><h2>Tijd sinds overlijden</h2>
   <p>Schatting van het postmortaal interval uit rectale temperatuur, omgevingstemperatuur en lichaamsgewicht met de afkoelformule van Henssge (de basis van het nomogram).</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="pm-tr">Rectale temperatuur</label><div class="inu"><input id="pm-tr" inputmode="decimal" value="30,5"><span class="u">°C</span></div></div>
-        <div class="f"><label for="pm-ta">Omgevingstemperatuur</label><div class="inu"><input id="pm-ta" inputmode="decimal" value="18"><span class="u">°C</span></div></div>
-        <div class="f"><label for="pm-w">Lichaamsgewicht</label><div class="inu"><input id="pm-w" inputmode="decimal" value="75"><span class="u">kg</span></div></div>
-        <div class="f"><label for="pm-cf">Correctiefactor</label><input id="pm-cf" inputmode="decimal" value="1"></div>
-        <div class="f" style="grid-column:span 2"><label for="pm-at">Tijdstip van meting (optioneel)</label><input id="pm-at" type="datetime-local" class="txt"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Correctiefactor 1 = naakt lichaam in stilstaande lucht (referentie); naakt in bewegende lucht ongeveer 0,75; kleding of dekens verhogen de factor (bijv. ongeveer 1,1 voor lichte kleding). Gebruik de tabel van Henssge uit je cursusmateriaal voor andere situaties. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="pm-cv"></canvas><div id="pm-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Pmi.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="pm-app"></div>
   <p class="src">Henssge (formule van Marshall &amp; Hoare): (T<sub>r</sub> − T<sub>a</sub>) / (37,2 − T<sub>a</sub>) = 1,25·e<sup>Bt</sup> − 0,25·e<sup>5Bt</sup> bij T<sub>a</sub> ≤ 23,2 °C en 1,11·e<sup>Bt</sup> − 0,11·e<sup>10Bt</sup> daarboven, met B = −1,2815·(CF·W)<sup>−0,625</sup> + 0,0284 (Henssge &amp; Madea, Forensic Sci Int 144:167–175, 2004; forens-med.ru). t wordt numeriek opgelost. Het kleinste 95%-interval van de methode is ±2,8 h (Hubig e.a., BMC Med Inform Decis Mak 2019); onafhankelijke validatie vond vaker afwijkingen (Hubig e.a., Forensic Sci Int 2015). Niet gebruiken bij hypothermie, koorts, sterke straling, wisselend klimaat of als het lichaam verplaatst is.</p>
 </section>

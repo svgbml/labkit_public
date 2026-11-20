@@ -25,6 +25,7 @@ import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Strchk from './tools/Strchk.vue';
 import Bpa from './tools/Bpa.vue';
+import Pmi from './tools/Pmi.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -70,3 +71,6 @@ calc.strchk = () => {};
 /* Bloedvlekpatronen tekent op een canvas; calc.bpa() laat de component opnieuw tekenen */
 const bp = mountTool('#bp-app', Bpa);
 calc.bpa = () => { if (bp && bp.vm) bp.vm.draw(); };
+
+const pm = mountTool('#pm-app', Pmi);
+calc.pmi = () => { if (pm && pm.vm) pm.vm.draw(); };
