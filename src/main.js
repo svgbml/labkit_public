@@ -30,6 +30,7 @@ import Molm from './tools/Molm.vue';
 import Kjel from './tools/Kjel.vue';
 import Units from './tools/Units.vue';
 import Enzym from './tools/Enzym.vue';
+import Curve from './tools/Curve.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -93,3 +94,8 @@ calc.units = () => {};
    blijft in web/index.html. De tabel #k-tbl is een <lk-etable> en zet zelf TBLDEF['k-tbl']. */
 const en = mountTool('#en-app', Enzym);
 calc.enzym = () => { if (en && en.vm) en.vm.draw(); };
+
+/* Standaardcurve tekent een grafiek, dus calc.curve() laat de component opnieuw tekenen. fitCurve()
+   blijft in web/index.html. De tabellen #s-std en #s-unk zijn <lk-etable> met berekende kolommen. */
+const cu = mountTool('#cu-app', Curve);
+calc.curve = () => { if (cu && cu.vm) cu.vm.draw(); };

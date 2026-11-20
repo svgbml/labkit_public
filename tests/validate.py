@@ -90,8 +90,8 @@ def _(pg):
 def _(pg):
     pg.evaluate("""__go('curve');__set('s-preset','leeg');__set('s-model','4pl');__set('s-blank',false);
       const xs=[0,10,50,150,500,1000], f=x=>4.17+(-0.00767-4.17)/(1+Math.pow(x/710,0.942));
-      document.querySelector('#s-std tbody').innerHTML=xs.map(x=>sStdRow([x,Number(f(x).toFixed(5))])).join('');
-      document.querySelector('#s-unk tbody').innerHTML=sUnkRow(['test',Number(f(300).toFixed(5)),'','',1]); calc.curve();""")
+      __tbl('s-std',xs.map(x=>[x,Number(f(x).toFixed(5))]),'curve');
+      __tbl('s-unk',[['test',Number(f(300).toFixed(5)),'','',1]],'curve');""")
     v = pg.evaluate("__cells('#s-unk tbody tr [data-x]')[0]")
     return [('terugberekend (IU/L)', v, 300, 0.01)]
 
@@ -359,7 +359,7 @@ def _(pg):
     X = [0, 0, 5, 5, 10, 10, 20, 20, 40, 40]; Y = [0.002, 0.006, 0.101, 0.094, 0.197, 0.205, 0.389, 0.402, 0.811, 0.796]
     b, a = np.polyfit(X, Y, 1); res = np.array(Y) - (a + b*np.array(X)); s = np.sqrt((res**2).sum()/(len(X)-2))
     pg.evaluate("""__go('curve');__set('s-preset','leeg');__set('s-model','lin');__set('s-blank',false);__set('s-logx',false);
-      document.querySelector('#s-std tbody').innerHTML=[[0,0.002,0.006],[5,0.101,0.094],[10,0.197,0.205],[20,0.389,0.402],[40,0.811,0.796]].map(r=>sStdRow(r)).join(''); calc.curve();""")
+      __tbl('s-std',[[0,0.002,0.006],[5,0.101,0.094],[10,0.197,0.205],[20,0.389,0.402],[40,0.811,0.796]],'curve');""")
     lod = pg.evaluate("__kv('#s-res','LOD')"); loq = pg.evaluate("__kv('#s-res','LOQ')")
     return [('LOD', lod, 3.3*s/b, 0.005), ('LOQ', loq, 10*s/b, 0.005)]
 
@@ -408,8 +408,8 @@ def _(pg):
 def _(pg):
     pg.evaluate("""__go('curve');__set('s-preset','leeg');__set('s-model','5pl');__set('s-blank',false);
       const xs=[0,7.8,15.6,31.3,62.5,125,250,500,1000,2000], f=x=>3.2+(0.05-3.2)/Math.pow(1+Math.pow(x/400,1.3),0.6);
-      document.querySelector('#s-std tbody').innerHTML=xs.map(x=>sStdRow([x,Number(f(x).toFixed(6))])).join('');
-      document.querySelector('#s-unk tbody').innerHTML=sUnkRow(['test',Number(f(300).toFixed(6)),'','',1]); calc.curve();""")
+      __tbl('s-std',xs.map(x=>[x,Number(f(x).toFixed(6))]),'curve');
+      __tbl('s-unk',[['test',Number(f(300).toFixed(6)),'','',1]],'curve');""")
     return [('terugberekend', pg.evaluate("__cells('#s-unk tbody tr [data-x]')[0]"), 300, 0.01)]
 
 @case('Standaardcurve', 'Plaatlezer-import', 'Rekentest: plaatblok met standaarden in kolom 1–2 (A–H = 0…1500) en monsters in duplo; resultaat gelijk aan dezelfde waarden handmatig invoeren')

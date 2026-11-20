@@ -172,7 +172,6 @@ const SEND={
 };
 function sendBar(tool){ const S=SEND[tool], out=$(S.out); if(!out||out.querySelector('.lk-send')) return; const v=S.get(); if(!(v>0)) return; out.insertAdjacentHTML('beforeend',`<div class="lk-send"><span>Stuur door naar</span>${S.to.map((t,i)=>`<button type="button" data-send="${tool}:${i}">${t[0]}</button>`).join('')}</div>`); }
 Object.keys(SEND).forEach(tool=>{ const f=calc[tool]; calc[tool]=function(e){ const r=f.call(this,e); try{ sendBar(tool); }catch(err){} return r; }; });
-{ const w=$('#s-unk')&&$('#s-unk').closest('.tbl-wrap'); if(w) w.insertAdjacentHTML('afterend','<div class="lk-send"><span>Stuur monsters door naar</span><button type="button" data-send-curve="sds">SDS-PAGE</button><button type="button" data-send-curve="wb">Western blot</button></div>'); }
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-send]'); if(b){ const [tool,i]=b.dataset.send.split(':'), S=SEND[tool], t=S.to[+i], v=S.get(); if(!(v>0)) return; const msg=t[2](v); location.hash='#'+t[1]; alertBox(msg); return; }
   const c=e.target.closest('[data-send-curve]'); if(!c) return; const unit=$('#s-unit').value, f=unit==='µg/mL'||unit==='ng/µL'?1e-3:unit==='mg/mL'||unit==='µg/µL'||unit==='g/L'?1:NaN;
   const R=$$('#s-unk tbody tr').map(tr=>{ const cells=[...tr.cells], nm=(tr.querySelector('input.txt')||tr.querySelector('input')||{}).value||'', last=cells.filter(td=>!td.querySelector('input,button,select')&&/\d/.test(td.textContent)).pop(); return [nm,last?bigNum(last):NaN]; }).filter(r=>r[0]&&r[1]>0);
