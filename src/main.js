@@ -23,6 +23,7 @@ import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
+import Transf from './tools/Transf.vue';
 import Pcrcyclus from './tools/Pcrcyclus.vue';
 import Dna from './tools/Dna.vue';
 import Gel from './tools/Gel.vue';
@@ -65,6 +66,9 @@ calc.verdunning = () => {};
 
 mountTool('#os-app', Osmo);
 calc.osmo = () => {};
+
+mountTool('#tf-app', Transf);
+calc.transf = () => {};
 
 /* PCR-cyclus tekent het programma op een canvas, dus calc.pcrcyclus() laat de component opnieuw
    tekenen. De annealingtemperatuur staat op window.__pcrVm.taAuto voor de knop in het

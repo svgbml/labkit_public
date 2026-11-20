@@ -242,7 +242,7 @@ def _(pg):
 # ---------------- Transformatie ----------------
 def _tf(pg, lv, vng, used, tot, rows):
     pg.evaluate(f"""__go('transf');__set('tf-range','1-100000');__set('tf-lv','{lv}');__set('tf-vng','{vng}');__set('tf-used','{used}');__set('tf-tot','{tot}');
-      document.querySelector('#tf-tbl tbody').innerHTML={rows!r}.map(r=>tfRow(r)).join(''); calc.transf();""")
+      __tbl('tf-tbl',{rows!r},'transf');""")
     return pg.evaluate("__big('#tf-out')")
 
 @case('Transformatie', 'Rekenvoorbeeld iGEM', 'iGEM Troubleshooting Transformations: 1 µL van 0,05 ng/µL, 100 van 1000 µL uitgeplaat, 250 kolonies → 5 × 10⁷ kve/µg')
