@@ -25,8 +25,11 @@ import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import {gfRefresh} from './tools/gelfoto/tick.js';
 import GfImage from './tools/gelfoto/GfImage.vue';
+import GfLanes from './tools/gelfoto/GfLanes.vue';
 import GfLadder from './tools/gelfoto/GfLadder.vue';
 import GfDens from './tools/gelfoto/GfDens.vue';
+import GfBands from './tools/gelfoto/GfBands.vue';
+import GfVirtual from './tools/gelfoto/GfVirtual.vue';
 import GfMarks from './tools/gelfoto/GfMarks.vue';
 import GfFormat from './tools/gelfoto/GfFormat.vue';
 
@@ -73,14 +76,16 @@ calc.osmo = () => {};
    detectie en het slepen) blijft in web/index.html, want dat rekent met canvassen en staat
    daar achter de validatiegevallen van de editor.
 
-   Elke component zit op zijn eigen host binnen de panelen; wat nog gewone HTML is (de
-   lanentabel, de bandentabel en "ladder uit een foto") houdt daardoor zijn vertaling uit de
-   DOM-laag. window.__gfRefresh laat de motor ze alle vijf bijwerken: gf is geen reactief
-   object, dus Vue ziet een verandering erin niet zelf. */
+   Elke component zit op zijn eigen host binnen de panelen die de tool al had; de koppen van
+   de panelen en de bronregel blijven gewone HTML. window.__gfRefresh laat de motor ze alle
+   bijwerken: gf is geen reactief object, dus Vue ziet een verandering erin niet zelf. */
 window.__gfRefresh = gfRefresh;
 mountTool('#gf-app-img', GfImage);
+mountTool('#gf-app-lanes', GfLanes);
 mountTool('#gf-app-lad', GfLadder);
+mountTool('#gf-app-virt', GfVirtual);
 mountTool('#gf-app-dens', GfDens);
+mountTool('#gf-app-bands', GfBands);
 mountTool('#gf-app-marks', GfMarks);
 mountTool('#gf-app-fmt', GfFormat);
 /* calc.gelfoto blijft gfUpdate() in index.html: dat leest de velden en tekent opnieuw. */

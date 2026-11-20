@@ -43,26 +43,7 @@
 
 <script>
 import {gfMix} from './tick.js';
-
-/* Dezelfde keuzelijst als eerst, in dezelfde volgorde. De namen gaan door t(): de getallen
-   erin worden {#} in de sleutel, dus "100 bp (1000–100)" en "50 bp (500–50)" delen één
-   sleutel, precies zoals de vertaallaag het in de HTML deed. */
-const LADS = [
-  {v: '100', n: '100 bp (1000–100)'},
-  {v: 'neb100', n: 'NEB 100 bp (1517–100)'},
-  {v: '100p', n: '100 bp plus (3000–100)'},
-  {v: 'neb1k', n: 'NEB 1 kb (10 000–500)'},
-  {v: '1k', n: '1 kb (10 000–250)'},
-  {v: 'k1k13', n: '1 kb (10 000–250, 13 banden)'},
-  {v: 'k1kp', n: '1 kb plus (25 000–250)'},
-  {v: 'h100', n: '100 bp (1500–100)'},
-  {v: 'h100p', n: '100 bp plus (3000, 1500–100)'},
-  {v: 'b50', n: '50 bp (500–50)'},
-  {v: 'fast1', n: 'Fast DNA Ladder 1 (1200–100)'},
-  {v: 'ppp', n: 'Eiwit: Precision Plus (250–10 kDa)'},
-  {v: 'prplus', n: 'Eiwit: PageRuler Plus (250–10 kDa)'},
-  {v: 'custom', n: 'Eigen ladder…'}
-];
+import {LADS} from './ladders.js';
 
 export default {
   name: 'GfLadder',
@@ -85,7 +66,17 @@ export default {
       this.$nextTick(() => { calc.gelfoto(); });
     }
   },
+  /* "ladder uit een foto" in web/index.html kiest een ladder voor ons; zoals bij __oplosVm
+     staat de instantie daarom op window. Zelf het veld in de DOM zetten kan niet: het
+     eigen-ladderveld bestaat pas nadat Vue het heeft neergezet. */
+  mounted() { window.__gfLadVm = this; },
   methods: {
+    /* een ladder van buiten zetten; `done` draait zodra het veld er staat */
+    setLadder(key, sizes, done) {
+      this.f.lad = key;
+      if (key === 'custom' && sizes) this.f.ladc = sizes;
+      this.$nextTick(() => { calc.gelfoto(); if (done) done(); });
+    },
     /* delen via een link en ongedaan maken sturen alleen een change-event; v-model ziet dat
        bij een tekstveld niet */
     syncLadc(e) { this.f.ladc = e.target.value; },
