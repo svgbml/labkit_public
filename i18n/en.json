@@ -4454,5 +4454,9 @@
 "Vul per organisme N en N<sub>a</sub> in.": "Enter N and N<sub>a</sub> for each organism.",
 "Vul een overlevingscurve, D-waarden of een temperatuurlog in.": "Enter a survival curve, D values or a temperature log.",
 "per mL": "per mL",
-"Meer dan {#} cellen per vierkant: verdun de suspensie voor een betrouwbare telling.": "More than {#} cells per square: dilute the suspension for a reliable count."
+"Meer dan {#} cellen per vierkant: verdun de suspensie voor een betrouwbare telling.": "More than {#} cells per square: dilute the suspension for a reliable count.",
+"Vul per verdunning de hoeveelheid monster per buis, het aantal buizen en het aantal positieve buizen in.": "Enter, for each dilution, the amount of sample per tube, the number of tubes and the number of positive tubes.",
+"Geen positieve buizen: dit is de bovengrens ({#}%) bij nul positieven.": "No positive tubes: this is the upper limit ({#}%) at zero positives.",
+"te hoog": "too high",
+"Alle buizen positief: het aantal is groter dan de reeks kan meten. Verdun verder.": "All tubes positive: the count is higher than the series can measure. Dilute further."
 }

@@ -29,6 +29,8 @@ import Desinf from './tools/Desinf.vue';
 import Steril from './tools/Steril.vue';
 import Gcomp from './tools/Gcomp.vue';
 import Viab from './tools/Viab.vue';
+import Seed from './tools/Seed.vue';
+import Mpn from './tools/Mpn.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -89,3 +91,9 @@ calc.gcomp = () => { if (gc && gc.vm) gc.vm.draw(); };
 
 mountTool('#vb-app', Viab);
 calc.viab = () => {};
+
+mountTool('#sd-app', Seed);
+calc.seed = () => {};
+
+mountTool('#mp-app', Mpn);
+calc.mpn = () => {};
