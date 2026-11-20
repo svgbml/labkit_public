@@ -137,12 +137,13 @@ function gpDrawTop() {
    bepaalt niet de positie maar levert wel de waarschuwing of het fragment binnen het
    scheidingsbereik van dat percentage valt. */
 const gpSizes = t => String(t || '').split(/[\s,;]+/).map(num).filter(v => isFinite(v) && v > 0);
-function gpPredict() {
+function gpDrawPredict() {
   const rows = etGet('gp-tbl'), teeth = gpTeeth(), lanes = rows.slice(0, teeth);
-  const bands = gpBands(), sds = gpMode() === 'sds', out = $('#gpp-out'), ladLane = gpLadLane();
+  const bands = gpBands(), sds = gpMode() === 'sds', ladLane = gpLadLane();
   const any = lanes.some(r => gpSizes(r[2]).length);
-  if (!bands.length || (!any && !ladLane)) { $('#gpp-cv').style.display = 'none'; out.innerHTML = note('info', 'Vul bij een laan de verwachte banden in om de verwachte gel te tekenen.'); return; }
-  $('#gpp-cv').style.display = '';
+  /* de component beslist met v-show of de tekening in beeld staat; hier alleen de vraag of er
+     iets te tekenen valt */
+  if (!bands.length || (!any && !ladLane)) return;
   const lo = bands[bands.length - 1], hi = bands[0];
   const GW = Math.max(360, Math.min(680, teeth * 46 + 120)), GH = 300, W = GW + 120;
   const maxLab = Math.max(6, ...lanes.map(r => String(r[0] || '').length));
@@ -181,91 +182,23 @@ function gpPredict() {
     x.fillStyle = PCOL.muted; x.font = '11px ' + PFONT(); x.textAlign = 'left';
     x.fillText(sds ? 'Verwacht beeld na Coomassie-kleuring; posities uit de ladder.' : 'Verwacht beeld onder UV; posities uit de ladder.', gx, gy + GH + 36);
   });
-  /* waarschuwingen: buiten de ladder of buiten het scheidingsbereik van het percentage */
-  const all = lanes.flatMap(r => gpSizes(r[2]));
-  const high = all.filter(v => v > hi), low = all.filter(v => v < lo), msg = [];
-  if (high.length) msg.push(note('warn', `${high.length} verwachte band(en) zijn groter dan de grootste ladderband; die positie is een schatting.`));
-  if (low.length) msg.push(note('warn', `${low.length} verwachte band(en) zijn kleiner dan de kleinste ladderband; die positie is een schatting.`));
-  if (!sds && typeof GELR !== 'undefined' && all.length) {
-    const pct = num($('#gp-pct').value), cur = GELR.find(g => Math.abs(g[0] - pct) < 1e-9);
-    if (cur) { const bad = all.filter(v => v < cur[1] || v > cur[2]);
-      if (bad.length) msg.push(note('warn', `Bij ${NL(pct, 1)}% agarose scheidt de gel ${NL(cur[1], 0)}–${NL(cur[2], 0)} bp; ${bad.length} verwachte band(en) vallen daarbuiten.`)); }
-  }
-  out.innerHTML = msg.join('') || kv([['Verwachte banden', all.length], ['Lanen met banden', lanes.filter(r => gpSizes(r[2]).length).length]]);
 }
 
-/* ---------- gel gieten: percentage-advies en een receptkaart voor de gekozen drager ---------- */
+/* ---------- gel gieten ----------
+   Het percentage-advies en de receptkaart staan in src/tools/Gelplan.vue; hier blijft de
+   kleuring staan: de naam en hoeveel er per mL gel in gaat. */
 const GPSTAIN = {g10k: ['GelRed / SYBR Safe (1× uit 10 000×)', v => v / 10 * 1], etbr: ['Ethidiumbromide (0,5 µg/mL)', v => v * 0.05], none: [null, null]};
-function gpCast() {
-  const box = $('#gp-cast'), sds = gpMode() === 'sds', [tw, tl] = gpTray();
-  const thick = num($('#gp-gelmm').value), pct = num($('#gp-pct').value);
-  const sizes = etGet('gp-tbl').slice(0, gpTeeth()).flatMap(r => gpSizes(r[2]));
-  if (sds) { box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Gel gieten</h3>' +
-      note('info', 'Een SDS-PAGE-gel giet je met acrylamide, niet met agarose; gebruik het protocol van je practicum voor het scheidings- en stapelgel.'); return; }
-
-  /* advies: welk percentage scheidt alle verwachte fragmenten */
-  let adv = '';
-  if (sizes.length && typeof GELR !== 'undefined') {
-    const lo = Math.min(...sizes), hi = Math.max(...sizes);
-    const fits = GELR.filter(g => lo >= g[1] && hi <= g[2]);
-    let best = null, bd = 1e9;
-    fits.forEach(g => { const mid = (Math.log10(g[1]) + Math.log10(g[2])) / 2, d = Math.abs((Math.log10(lo) + Math.log10(hi)) / 2 - mid); if (d < bd) { bd = d; best = g; } });
-    if (best) adv = note(Math.abs(best[0] - pct) < 1e-9 ? 'ok' : 'info',
-      `Voor ${NL(lo, 0)}–${NL(hi, 0)} bp is ${NL(best[0], 1)}% agarose de beste keus (scheidt ${NL(best[1], 0)}–${NL(best[2], 0)} bp).` +
-      (Math.abs(best[0] - pct) < 1e-9 ? '' : ` <button type="button" class="ghost" data-gp-pct="${best[0]}">Overnemen</button>`));
-    else adv = note('warn', `Geen enkel percentage scheidt ${NL(lo, 0)} tot ${NL(hi, 0)} bp in één gel; overweeg twee gels of een ander bereik.`);
-  }
-
-  /* receptkaart */
-  const V = (thick > 0) ? tw * tl * (thick / 10) : NaN;      /* cm × cm × cm = mL */
-  const g = isFinite(V) ? pct / 100 * V : NaN;
-  const stock = num($('#gp-buf').value), bufName = $('#gp-buf').selectedOptions[0].text;
-  const st = isFinite(V) ? V / stock : NaN;
-  const [stName, stFn] = GPSTAIN[$('#gp-stain').value] || GPSTAIN.none;
-  const rows = [['Gelvolume', isFinite(V) ? `${NL(V, 0)} mL` : '–'],
-    ['Agarose afwegen', isFinite(g) ? mass(g) : '–'],
-    ['Loopbuffer voor de gel', isFinite(st) ? `${ud(bufName)} ${vol(st * 1000)}` : '–'],
-    ['+ water', isFinite(V) ? vol((V - st) * 1000) : '–']];
-  if (stName && isFinite(V)) rows.push([stName, vol(stFn(V))]);
-  box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Gel gieten</h3>' + adv + kv(rows) +
-    (thick > 0
-      ? `<p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Drager ${NL(tw, 0)} × ${NL(tl, 0)} cm bij een geldikte van ${NL(thick, 1)} mm. Smelten in de magnetron, laten afkoelen tot ongeveer 60 °C en pas daarna de kleuring toevoegen en gieten.</p>`
-      : note('warn', 'Vul een geldikte groter dan nul in om het gelvolume te berekenen.'));
-}
 document.addEventListener('click', e => { const b = e.target.closest('[data-gp-pct]'); if (!b) return;
   $('#gp-pct').value = NL(num(b.dataset.gpPct), 1); $('#gp-pct').dispatchEvent(new Event('input', {bubbles: true})); });
 
-/* ---------- looptijd: hoe lang tot het blauwe front op de gewenste plek staat ----------
+/* ---------- looptijd ----------
    De snelheid van bromofenolblauw is evenredig met de veldsterkte en loopt terug bij een
    hoger percentage agarose. De ijking (10 V/cm, 1%: 6 cm in 35 min) komt uit een gangbare
-   minigel; de uitkomst is dus een schatting met een ruime marge, geen meetwaarde. */
+   minigel; de uitkomst is dus een schatting met een ruime marge, geen meetwaarde. De tekst
+   eromheen staat in src/tools/Gelplan.vue. */
 const GPV0 = 6 / 35 / 10;   /* cm per minuut per V/cm bij 1% agarose */
 const gpSpeed = (E, pct) => (E > 0 && pct > 0) ? GPV0 * E / Math.sqrt(pct) : NaN;
 const gpMin = m => !isFinite(m) ? '–' : m >= 60 ? `${Math.floor(m / 60)} u ${Math.round(m % 60)} min` : `${Math.round(m)} min`;
-function gpRun() {
-  const box = $('#gp-run'), sds = gpMode() === 'sds';
-  const V = num($('#gp-volt').value), d = num($('#gp-elec').value), pct = num($('#gp-pct').value);
-  const [, tl] = gpTray(), target = tl * 0.6;                /* tot ongeveer 60% van de gel */
-  if (sds) { box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' +
-      note('info', 'Voor SDS-PAGE hangt de looptijd af van het geltype en het buffersysteem; volg het protocol van je practicum.'); return; }
-  if (!(V > 0) || !(d > 0)) { box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' +
-      note('warn', 'Vul de spanning en de afstand tussen de elektroden in voor een schatting van de looptijd.'); return; }
-  const E = V / d, v = gpSpeed(E, pct), t = v > 0 ? target / v : NaN;
-  const rows = [['Veldsterkte', `${NL(Number(E.toFixed(2)), 2)} V/cm`],
-    ['Snelheid van het blauwe front', isFinite(v) ? `${NL(Number(v.toFixed(2)), 2)} cm/min` : '–'],
-    ['Looptijd tot ' + NL(Number(target.toFixed(1)), 1) + ' cm', isFinite(t) ? `${gpMin(t * 0.75)} – ${gpMin(t * 1.3)}` : '–']];
-  let msg = '';
-  if (E > 10) msg += note('warn', `${NL(Number(E.toFixed(1)), 1)} V/cm is hoog; boven 10 V/cm warmt de gel op en lopen de banden scheef.`);
-  else if (E < 3) msg += note('warn', `${NL(Number(E.toFixed(1)), 1)} V/cm is laag; onder 3 V/cm diffunderen kleine fragmenten uit en wordt de band vaag.`);
-  /* loopt het kleinste fragment van de gel af voordat het front er is? */
-  const sizes = etGet('gp-tbl').slice(0, gpTeeth()).flatMap(r => gpSizes(r[2])), fr = gpFronts(pct);
-  if (sizes.length && fr) { const sm = Math.min(...sizes);
-    if (sm < fr[0]) msg += note('warn', `Het kleinste fragment van ${NL(sm, 0)} bp loopt vóór het blauwe front uit; stop eerder of kies een hoger percentage agarose.`);
-  }
-  box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' + kv(rows) + msg +
-    `<p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Stop wanneer het blauwe front ongeveer ${NL(Number(target.toFixed(1)), 1)} cm van de slotjes staat, dus ruim vóór de rand van de gel. De tijd is een schatting; kijk naar het front, niet naar de klok.</p>`;
-}
-
 /* De velden en de uitkomstenlijst staan in src/tools/Gelplan.vue; calc.gplan() daar laat de
    component opnieuw tekenen. Een verandering in een veld komt via v-model binnen, dus de
    koppelingen die hier stonden zijn niet meer nodig. */
