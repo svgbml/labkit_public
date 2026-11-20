@@ -137,6 +137,10 @@ LKUI.steps = {
    <lk-etable>, en de tool houdt de rijen zelf bij.
 
      cols  [{h:'Stof', t:'txt'|'num'|'sel'|'col', w:110, o:[opties], d:'#1558b0'}, …]
+           of een berekende kolom {h, t:'out', k:'m', num:true}: een alleen-lezen cel met
+           data-m, waarvan de tool de inhoud in de slot #out zet ({ri, k, row}). Zo'n kolom heeft
+           geen invoerveld en telt dus niet mee in inputCols; de rijen krijgen er wel een lege
+           plaats voor, zodat de index van de kolommen gelijk blijft.
      rows  v-model: een lijst rijen, elke rij een lijst strings
 
    Drie dingen buiten de tool schrijven in zo'n tabel: tblRestore() zet een bewaarde tabel
@@ -160,7 +164,7 @@ LKUI.etable = {
     wrap: {type: Boolean, default: true}
   },
   emits: ['update:rows'],
-  setup(props, {emit}) {
+  setup(props, {emit, slots}) {
     const blank = () => props.cols.map(c =>
       c.t === 'sel' ? (c.o && c.o[0]) || '' : c.t === 'col' ? (c.d || '#1558b0') : '');
     /* een waarde die van buiten komt is een getal of een string met een punt erin; in de
@@ -190,7 +194,7 @@ LKUI.etable = {
         /* welke kolom bij het hoeveelste invoerveld van een rij hoort. De plak-handler telt in
            invoervelden en een keuzelijst is er geen, dus zonder deze lijst zou hij een kolom
            opschuiven bij een tabel die met een keuzelijst begint. */
-        inputCols: props.cols.map((c, i) => (c.t === 'sel' ? -1 : i)).filter(i => i >= 0)
+        inputCols: props.cols.map((c, i) => (c.t === 'sel' || c.t === 'out' ? -1 : i)).filter(i => i >= 0)
       };
       if (props.addId && typeof ADDBTN !== 'undefined') ADDBTN[props.tableId] = '#' + props.addId;
     };
@@ -234,11 +238,16 @@ LKUI.etable = {
     return () => {
       const table = h('table', {id: props.tableId, class: props.cls}, [
         h('thead', null, h('tr', null, [
-          ...props.cols.map(c => h('th', {class: c.t === 'num' ? 'num' : null, innerHTML: String(c.h == null ? '' : c.h)})),
+          ...props.cols.map(c => h('th', {class: c.t === 'num' || c.num ? 'num' : null, innerHTML: String(c.h == null ? '' : c.h)})),
           h('th')
         ])),
         h('tbody', null, props.rows.map((r, ri) => h('tr', {key: ri}, [
-          ...props.cols.map((c, ci) => h('td', null, cell(c, r, ri, ci))),
+          ...props.cols.map((c, ci) => (c.t === 'out'
+            /* een berekende cel: alleen-lezen, met data-<k> zodat tests en andere code hem vinden;
+               de inhoud komt uit de slot #out van de tool */
+            ? h('td', {class: c.num ? 'num' : null, ['data-' + c.k]: ''},
+              slots.out ? slots.out({ri, ci, k: c.k, row: r}) : null)
+            : h('td', null, cell(c, r, ri, ci)))),
           h('td', null, h('button', {type: 'button', class: 'ghost', 'data-del': '',
             'aria-label': 'Verwijder',
             onClick: () => put(props.rows.filter((_, i) => i !== ri))}, '\u2715'))
