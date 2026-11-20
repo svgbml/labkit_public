@@ -63,8 +63,29 @@ export function mountTool(sel, options) {
     app.config.globalProperties.esc = esc;
     app.config.errorHandler = (err, inst, info) => { console.error('Vue-fout in ' + sel, info, err); };
     lkUiInstall(app);   /* de gedeelde componenten, zie lib/ui.js */
-    return {app, vm: app.mount(host)};
+    const vm = app.mount(host);
+    restoreInputs(host);
+    return {app, vm};
   } catch (e) { console.error('Vue kon ' + sel + ' niet opzetten', e); return null; }
+}
+
+/* De invoeropslag (restore() in web/index.html) zet bij het laden de bewaarde waarden terug,
+   maar dat gebeurt voordat de bundel de velden van een Vue-tool aanmaakt. Daarom zet de host
+   ze hier na het mounten zelf terug, met de events waar v-model op reageert. Keuzelijsten
+   eerst: een keuze kan een ander veld vullen (een buffer vult het pKₐ-veld), en wat de
+   gebruiker daarna zelf intypte moet blijven staan. */
+function restoreInputs(host) {
+  if (typeof storeGet !== 'function' || typeof persistable !== 'function') return;
+  const s = storeGet();
+  const els = [...host.querySelectorAll('input,select,textarea')]
+    .filter(el => persistable(el) && Object.prototype.hasOwnProperty.call(s, el.id));
+  els.sort((a, b) => (b.tagName === 'SELECT') - (a.tagName === 'SELECT'));
+  for (const el of els) {
+    const v = s[el.id];
+    if (el.type === 'checkbox') el.checked = !!v; else el.value = v;
+    el.dispatchEvent(new Event('input', {bubbles: true}));
+    el.dispatchEvent(new Event('change', {bubbles: true}));
+  }
 }
 
 /* Een getal in de taal van de gebruiker zetten. De vertaallaag deed dat zelf voor gewone
