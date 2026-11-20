@@ -62,8 +62,8 @@ function toolSnap(id){ const sec=$('#t-'+id); if(!sec) return null; const v={}, 
   sec.querySelectorAll('input,select,textarea').forEach(el=>{ if(!persistable(el)) return; v[el.id]=el.type==='checkbox'?el.checked:el.value; });
   sec.querySelectorAll('table[id]').forEach(t=>{ if(TBLDEF[t.id]) tb[t.id]=[...t.querySelectorAll('tbody tr')].map(tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select')].map(e=>e.value)); });
   return {t:id,v,tb}; }
-function toolApply(s){ const sec=$('#t-'+s.t); if(!sec) return; Object.entries(s.tb||{}).forEach(([id,rows])=>{ const def=TBLDEF[id], t=$('#'+id); if(!def||!t||!Array.isArray(rows)) return; t.querySelector('tbody').innerHTML=rows.slice(0,2000).map(r=>def.row(r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v))).join(''); });
-  Object.entries(s.v||{}).forEach(([id,val])=>{ const el=document.getElementById(id); if(!el||!sec.contains(el)||!persistable(el)) return; if(el.type==='checkbox') el.checked=!!val; else el.value=String(val); el.dispatchEvent(new Event('change',{bubbles:true})); });
+function toolApply(s){ const sec=$('#t-'+s.t); if(!sec) return; Object.entries(s.tb||{}).forEach(([id,rows])=>{ const def=TBLDEF[id], t=$('#'+id); if(!def||!t||!Array.isArray(rows)) return; const vals=rows.slice(0,2000).map(r=>r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v)); /* een tabel die Vue rendert geeft set() mee: innerHTML zou Vue overschrijven */ if(def.set) def.set(vals); else t.querySelector('tbody').innerHTML=vals.map(def.row).join(''); });
+  Object.entries(s.v||{}).forEach(([id,val])=>{ const el=document.getElementById(id); if(!el||!sec.contains(el)||!persistable(el)) return; if(el.type==='checkbox') el.checked=!!val; else el.value=String(val); /* v-model van een Vue-veld luistert naar input, een keuzelijst naar change */ el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); });
   if(calc[s.t]) try{ calc[s.t](); }catch(e){} }
 
 /* --- delen via link of QR-code --- */
@@ -172,7 +172,6 @@ const SEND={
 };
 function sendBar(tool){ const S=SEND[tool], out=$(S.out); if(!out||out.querySelector('.lk-send')) return; const v=S.get(); if(!(v>0)) return; out.insertAdjacentHTML('beforeend',`<div class="lk-send"><span>Stuur door naar</span>${S.to.map((t,i)=>`<button type="button" data-send="${tool}:${i}">${t[0]}</button>`).join('')}</div>`); }
 Object.keys(SEND).forEach(tool=>{ const f=calc[tool]; calc[tool]=function(e){ const r=f.call(this,e); try{ sendBar(tool); }catch(err){} return r; }; });
-{ const w=$('#s-unk')&&$('#s-unk').closest('.tbl-wrap'); if(w) w.insertAdjacentHTML('afterend','<div class="lk-send"><span>Stuur monsters door naar</span><button type="button" data-send-curve="sds">SDS-PAGE</button><button type="button" data-send-curve="wb">Western blot</button></div>'); }
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-send]'); if(b){ const [tool,i]=b.dataset.send.split(':'), S=SEND[tool], t=S.to[+i], v=S.get(); if(!(v>0)) return; const msg=t[2](v); location.hash='#'+t[1]; alertBox(msg); return; }
   const c=e.target.closest('[data-send-curve]'); if(!c) return; const unit=$('#s-unit').value, f=unit==='µg/mL'||unit==='ng/µL'?1e-3:unit==='mg/mL'||unit==='µg/µL'||unit==='g/L'?1:NaN;
   const R=$$('#s-unk tbody tr').map(tr=>{ const cells=[...tr.cells], nm=(tr.querySelector('input.txt')||tr.querySelector('input')||{}).value||'', last=cells.filter(td=>!td.querySelector('input,button,select')&&/\d/.test(td.textContent)).pop(); return [nm,last?bigNum(last):NaN]; }).filter(r=>r[0]&&r[1]>0);
