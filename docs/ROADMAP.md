@@ -581,7 +581,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S255 | — | *Gelplanner* naar Vue, deel 1: de gel van bovenaf en de laantabel | Zelfde uitkomsten; validatie blijft staan | Opus 5 |
 | S256 | — | *Gelplanner* naar Vue, deel 2: de verwachte gel, het slotvolume en de looptijd | Zelfde uitkomsten; validatie blijft staan | Opus 5 |
 | S257 | — | *Pipetteerschema* naar Vue | ✅ `src/tools/Pipetteer.vue`; eigen tabel (een kolom per buis past niet in `lk-etable`) met eigen plak-handler. `PPRE`, `ppMigrate` en het buizenrek (`ppRack`, gewone HTML) blijven in `web/index.html`; `#pp-cv._data` blijft gezet | Sonnet |
-| S258 | — | *PCR-programma* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S258 | — | *PCR-programma* naar Vue | ✅ `src/tools/PcrProgramma.vue`; `PGDEF`, `pgSecs`, `pgFmt` en (voor *PCR-cyclus*) `mmss2`/`yTa` blijven in `web/index.html`; de stappen blijven in `pstore` | Sonnet |
 | S259 | — | *Verdunningsschema* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S260 | — | *Kleuringsschema* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S261 | — | *Experimentplanner*, *Rapport / labjournaal* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |

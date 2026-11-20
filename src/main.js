@@ -24,6 +24,7 @@ import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Pipetteer from './tools/Pipetteer.vue';
+import PcrProgramma from './tools/PcrProgramma.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -68,3 +69,8 @@ calc.osmo = () => {};
    terugzetten van een sessie en het exporteren van de tekening roepen dat aan. */
 const pp = mountTool('#pp-app', Pipetteer);
 calc.ppip = () => { if (pp && pp.vm) pp.vm.draw(); };
+
+/* PCR-programma tekent op #pg-cv met de bestaande tekenfuncties; calc.pprog() laat de component
+   opnieuw tekenen. "Neem over uit PCR-cyclus" (#pg-from) leest de globale yTa van die tool. */
+const pg = mountTool('#pg-app', PcrProgramma);
+calc.pprog = () => { if (pg && pg.vm) pg.vm.draw(); };
