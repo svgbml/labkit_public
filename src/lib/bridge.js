@@ -55,9 +55,13 @@ export function mountTool(sel, options) {
        dan de innerHTML zelf, precies zoals de DOM-laag een heel element opzoekt, dus de
        bestaande sleutels met tags erin blijven gelden. Houd één sleutel per zin: een zin in
        stukjes vertalen levert sleutels op die in geen enkele taal te maken zijn. */
+    /* Staat er geen vertaling tegenover de tekst (en in het Nederlands is dat altijd), dan
+       haalt i18nStrip() de markeringen van uv() weg; in het Engels gaan de getallen daar nog
+       wel door, want anders blijft een samengestelde regel zonder sleutel met komma's staan.
+       Dat deed de DOM-laag ook: trPlain() zet de getallen om als hij de sleutel niet vindt. */
     app.config.globalProperties.tHtml = h => {
-      if (LANG !== 'en' || typeof i18nLook !== 'function') return h;
-      const r = i18nLook(h); return r ? r.out : h;
+      if (LANG !== 'en' || typeof i18nLook !== 'function') return i18nStrip(h);
+      const r = i18nLook(h); return r ? r.out : lkNumHtml(i18nStrip(h));
     };
     app.config.globalProperties.uv = uv;
     app.config.globalProperties.esc = esc;
@@ -72,3 +76,8 @@ export function mountTool(sel, options) {
    In het Nederlands staat het al goed, dus dan blijft de tekst zoals hij is. */
 export const lkNumIn = v => (LANG === 'en' && typeof i18nNum === 'function'
   ? String(v).replace(/\d+(?:[.,]\d+)*/g, m => i18nNum(m)) : String(v));
+
+/* Hetzelfde voor een stukje HTML: alleen de tekst tussen de tags gaat erdoor, want in een
+   attribuut (style="font-weight:400") staan ook getallen en die horen te blijven. */
+export const lkNumHtml = h => (LANG !== 'en' ? String(h)
+  : String(h).split(/(<[^>]*>)/).map(p => (p.charAt(0) === '<' ? p : lkNumIn(p))).join(''));

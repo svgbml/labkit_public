@@ -4449,5 +4449,11 @@
 "mM per pH-eenheid": "mM per pH unit",
 "Benodigde stock": "Stock needed",
 "{*}: ladingen niet herkend.": "{*}: charges not recognised.",
-"Vul minstens één stof met concentratie in.": "Enter at least one substance with a concentration."
+"Vul minstens één stof met concentratie in.": "Enter at least one substance with a concentration.",
+"Te weinig verschillen ongelijk aan nul (minstens {#} nodig; tabel {#} begint bij n = {#}).": "Too few differences other than zero (at least {#} needed; table {#} starts at n = {#}).",
+"Verwijder een waarde alleen met een aanwijsbare oorzaak en noteer dat in je labjournaal; test maar één waarde per keer.": "Only remove a value when there is an identifiable cause and note it in your lab notebook; test only one value at a time.",
+"Niet alle groepen lijken normaal verdeeld (Lilliefors); ANOVA veronderstelt normaliteit en gelijke varianties.": "Not all groups appear normally distributed (Lilliefors); ANOVA assumes normality and equal variances.",
+"Bij groepen kleiner dan {#} is de χ²-benadering voor H minder nauwkeurig.": "For groups smaller than {#} the χ² approximation for H is less accurate.",
+"Welch-toets, ongelijke varianties": "Welch test, unequal variances",
+"Ter vergelijking: gepoold": "For comparison: pooled"
 }

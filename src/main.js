@@ -23,6 +23,7 @@ import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
+import Stat from './tools/Stat.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -61,3 +62,8 @@ calc.verdunning = () => {};
 
 mountTool('#os-app', Osmo);
 calc.osmo = () => {};
+
+/* Statistiek tekent bij de ANOVA staafjes, dus calc.stat() laat de component opnieuw tekenen;
+   de rest van de uitkomst volgt uit de velden en rekent zichzelf opnieuw. */
+const st = mountTool('#st-app', Stat);
+calc.stat = () => { if (st && st.vm) st.vm.draw(); };
