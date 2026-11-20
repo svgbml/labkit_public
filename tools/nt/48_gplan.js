@@ -19,15 +19,11 @@ const gpBands = () => (typeof LADDERS !== 'undefined' && LADDERS[$('#gp-lad').va
 function gpMig(size, lo, hi) { if (!(size > 0) || !(hi > lo)) return NaN;
   const f = (Math.log10(hi) - Math.log10(size)) / (Math.log10(hi) - Math.log10(lo));
   return 0.1 + 0.78 * Math.max(0, Math.min(1, f)); }
-function gpLadFill() { const sel = $('#gp-lad'), cur = sel.value, L = GPLAD[gpMode()];
-  sel.innerHTML = L.map(([k, n]) => `<option value="${k}">${n}</option>`).join('');
-  sel.value = L.some(([k]) => k === cur) ? cur : L[0][0]; }
 const gpTray = () => GPTRAY[$('#gp-tray').value] || GPTRAY['7x10'];
 const gpTeeth = () => Math.max(1, Math.min(30, Math.round(num($('#gp-comb').value) || 10)));
-const gpT = ET('gp-tbl', [{h: 'Monster', t: 'txt', w: 150}, {h: 'Monster (µL)', t: 'num', w: 72},
-  {h: 'Verwachte banden', t: 'txt', w: 120}, {h: 'Kleur', t: 'col', d: '#1558b0'}],
-  [['Ladder', '5', '', '#c2410c'], ['Monster 1', '10', '500', '#1558b0'],
-    ['Monster 2', '10', '1500 700', '#1558b0'], ['Negatieve controle', '10', '', '#5f6b7a']], 'gplan');
+/* De laantabel is sinds S255 een <lk-etable> in src/tools/Gelplan.vue; de kolommen en de
+   beginrijen staan daar. etGet('gp-tbl') leest hem gewoon uit, want de component rendert
+   dezelfde invoervelden in dezelfde volgorde. */
 const gpLadLane = () => Math.max(0, Math.min(30, Math.round(num($('#gp-ladlane').value) || 0)));
 /* slotvolume uit de maten van kam en gel; 1 mm3 = 1 uL en een slotje wordt tot 80% gevuld */
 const GPFILL = 0.8, GPFLOOR = 1;
@@ -50,9 +46,12 @@ function gpFronts(pct) { if (!(pct > 0)) return null;
     return [ip(a[1], b[1]), ip(a[2], b[2])]; }
   return null; }
 
-calc.gplan = function () {
+/* De gel van bovenaf. De component roept dit na elke render aan; een virtuele DOM heeft op
+   een <canvas> geen nut, en tekst op een canvas loopt al door trCanvas(). De invoer wordt uit
+   de velden gelezen, net als eerst: de component houdt met v-model dezelfde id's bij. */
+function gpDrawTop() {
   const rows = etGet('gp-tbl'), teeth = gpTeeth(), [tw, tl] = gpTray();
-  const title = $('#gp-title').value.trim(), dye = $('#gp-dye').value.trim(), out = $('#gp-out');
+  const title = $('#gp-title').value.trim(), dye = $('#gp-dye').value.trim();
   const lanes = rows.slice(0, teeth);
 
   /* De breedte volgt het aantal slotjes; de lengte volgt de verhouding van de drager, maar
@@ -130,24 +129,7 @@ calc.gplan = function () {
       x.fillText(dye ? `Volume per slotje is inclusief ${uv(dye)}.` : 'Volume per slotje is inclusief de laadbuffer.', 20, H - 14); }
   });
 
-  const used = lanes.filter(r => String(r[0] || '').trim());
-  const vols = used.map(r => num(r[1])).filter(v => isFinite(v) && v > 0);
-  const bb = gpBands(), cap = gpWell();
-  const tot = vols.map(v => v + gpDye(v)), dyeTot = vols.reduce((a, v) => a + gpDye(v), 0);
-  out.innerHTML = kv([['Gebruikte slotjes', `${used.length} van ${teeth}`],
-    ['Grootste laadvolume per slotje', tot.length ? NL(Math.max(...tot), 1) + ' µL' : '–'],
-    ['Totaal te laden', tot.length ? NL(tot.reduce((a, b) => a + b, 0), 1) + ' µL' : '–'],
-    ['Laadbuffer in totaal', dyeTot ? NL(dyeTot, 1) + ' µL' : '–'],
-    ['Slotvolume (tot 80% vullen)', cap ? `${NL(cap.max, 1)} µL van ${NL(cap.geom, 1)} µL` : '–'],
-    ['Ladder', bb.length ? `${bb.length} banden, ${NL(bb[bb.length - 1], 0)}\u2013${NL(bb[0], 0)} ${gpUnit()}` : '\u2013']]);
-  if (cap) { const over = tot.filter(v => v > cap.max).length;
-    if (over) out.insertAdjacentHTML('beforeend', note('bad', `${over} laan(en) laden meer dan de ${NL(cap.max, 1)} µL die in een slotje past; het monster loopt dan over in de buurlaan.`)); }
-  else out.insertAdjacentHTML('beforeend', note('warn', 'Vul de maten van de kam en de gel in om het slotvolume te berekenen.'));
-  gpPredict();
-  gpCast();
-  gpRun();
-  if (rows.length > teeth) out.insertAdjacentHTML('beforeend', note('warn', `Er staan ${rows.length} lanen in de tabel maar de kam heeft ${teeth} tanden; de laatste lanen worden niet getekend.`));
-};
+}
 
 /* ---------- verwachte gel: de banden zoals ze na het lopen zouden moeten staan ----------
    De posities komen uit de ladder (log(grootte) lineair tegen de loopafstand), hetzelfde
@@ -211,7 +193,6 @@ function gpPredict() {
   }
   out.innerHTML = msg.join('') || kv([['Verwachte banden', all.length], ['Lanen met banden', lanes.filter(r => gpSizes(r[2]).length).length]]);
 }
-$('#gp-tray').addEventListener('change', () => calc.gplan());
 
 /* ---------- gel gieten: percentage-advies en een receptkaart voor de gekozen drager ---------- */
 const GPSTAIN = {g10k: ['GelRed / SYBR Safe (1× uit 10 000×)', v => v / 10 * 1], etbr: ['Ethidiumbromide (0,5 µg/mL)', v => v * 0.05], none: [null, null]};
@@ -253,7 +234,6 @@ function gpCast() {
 }
 document.addEventListener('click', e => { const b = e.target.closest('[data-gp-pct]'); if (!b) return;
   $('#gp-pct').value = NL(num(b.dataset.gpPct), 1); $('#gp-pct').dispatchEvent(new Event('input', {bubbles: true})); });
-['gp-pct', 'gp-dyex', 'gp-tooth', 'gp-thick', 'gp-gelmm'].forEach(id => $('#' + id).addEventListener('input', () => calc.gplan()));
 
 /* ---------- looptijd: hoe lang tot het blauwe front op de gewenste plek staat ----------
    De snelheid van bromofenolblauw is evenredig met de veldsterkte en loopt terug bij een
@@ -285,9 +265,7 @@ function gpRun() {
   box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' + kv(rows) + msg +
     `<p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Stop wanneer het blauwe front ongeveer ${NL(Number(target.toFixed(1)), 1)} cm van de slotjes staat, dus ruim vóór de rand van de gel. De tijd is een schatting; kijk naar het front, niet naar de klok.</p>`;
 }
-['gp-buf', 'gp-stain'].forEach(id => $('#' + id).addEventListener('change', () => calc.gplan()));
-['gp-volt', 'gp-elec'].forEach(id => $('#' + id).addEventListener('input', () => calc.gplan()));
-$('#gp-ladlane').addEventListener('input', () => calc.gplan());
-$('#gp-type').addEventListener('change', () => { gpLadFill(); calc.gplan(); });
-$('#gp-lad').addEventListener('change', () => calc.gplan());
-gpLadFill();
+
+/* De velden en de uitkomstenlijst staan in src/tools/Gelplan.vue; calc.gplan() daar laat de
+   component opnieuw tekenen. Een verandering in een veld komt via v-model binnen, dus de
+   koppelingen die hier stonden zijn niet meer nodig. */

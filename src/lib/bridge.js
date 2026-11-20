@@ -67,8 +67,29 @@ export function mountTool(sel, options) {
     app.config.globalProperties.esc = esc;
     app.config.errorHandler = (err, inst, info) => { console.error('Vue-fout in ' + sel, info, err); };
     lkUiInstall(app);   /* de gedeelde componenten, zie lib/ui.js */
-    return {app, vm: app.mount(host)};
+    const vm = app.mount(host);
+    lkMarkDefaults(host);
+    return {app, vm};
   } catch (e) { console.error('Vue kon ' + sel + ' niet opzetten', e); return null; }
+}
+
+/* De laag "Meer instellingen" (xpChanged in web/index.html) en de invoeropslag vergelijken een
+   veld met zijn standaardwaarde: defaultValue, defaultChecked of de optie met defaultSelected.
+   Die komen uit de HTML, en Vue zet alleen de eigenschap, dus zonder dit zou elk veld van een
+   Vue-tool als "veranderd" gelden en zou een geavanceerd veld nooit verborgen worden. Wat de
+   component bij het opzetten neerzet is hier de standaard; een waarde die daarna binnenkomt
+   (een deellink, de geschiedenis) geldt dus wel als veranderd, en dat hoort ook. */
+function lkMarkDefaults(host) {
+  host.querySelectorAll('input,textarea,select').forEach(el => {
+    if (el.tagName === 'SELECT') {
+      const o = el.options[el.selectedIndex];
+      if (o) o.defaultSelected = true;
+    } else if (el.type === 'checkbox' || el.type === 'radio') {
+      el.defaultChecked = el.checked;
+    } else {
+      el.defaultValue = el.value;
+    }
+  });
 }
 
 /* Een getal in de taal van de gebruiker zetten. De vertaallaag deed dat zelf voor gewone
@@ -76,6 +97,18 @@ export function mountTool(sel, options) {
    In het Nederlands staat het al goed, dus dan blijft de tekst zoals hij is. */
 export const lkNumIn = v => (LANG === 'en' && typeof i18nNum === 'function'
   ? String(v).replace(/\d+(?:[.,]\d+)*/g, m => i18nNum(m)) : String(v));
+
+/* De knoppenbalk onder een tekening, zoals picBar() in tools/nt/01_pic.js hem maakt. Die
+   balken worden bij het opstarten één keer in de pagina gezet, dus een Vue-tool die zijn
+   tekening zelf rendert maakt hem hier en vertaalt de teksten zelf: de vertaallaag van de DOM
+   komt niet in een Vue-boom. */
+export const lkPicBar = key => {
+  const t = s => (typeof trPlain === 'function' ? trPlain(s) : s);
+  return `<button type="button" data-png="${key}">PNG</button>`
+    + `<button type="button" data-svg="${key}">SVG</button>`
+    + `<button type="button" data-copy="${key}">${t('Kopieer afbeelding')}</button>`
+    + `<button type="button" data-picprint="${key}">${t('Afdrukken')}</button>`;
+};
 
 /* Hetzelfde voor een stukje HTML: alleen de tekst tussen de tags gaat erdoor, want in een
    attribuut (style="font-weight:400") staan ook getallen en die horen te blijven. */

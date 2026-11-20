@@ -199,16 +199,24 @@ const xpOn=id=>!!jget(XKEY,{})[id];
 const xpDefault=el=>el.type==='checkbox'?el.defaultChecked:el.tagName==='SELECT'?(([...el.options].find(o=>o.defaultSelected)||el.options[0]||{}).value):el.defaultValue;
 const xpChanged=box=>[...box.querySelectorAll('input,select,textarea')].some(el=>el.type==='checkbox'?el.checked!==el.defaultChecked:String(el.value)!==String(xpDefault(el)));
 function xpApply(id){ const sec=$('#t-'+id); if(!sec) return; const on=xpOn(id);
-  sec.querySelectorAll('[data-expert]').forEach(box=>{ box.hidden=!on&&!xpChanged(box); });
-  const t=on?'Minder instellingen':'Meer instellingen';
+  /* xpApply() loopt sinds S255 ook na een render (zie xpInit), dus een veld dat van zijn
+     standaard afwijkt komt nu meteen tevoorschijn in plaats van pas bij het opstarten. Een
+     veld waarin iemand staat te typen blijft staan, ook als het weer op de standaard komt. */
+  sec.querySelectorAll('[data-expert]').forEach(box=>{ box.hidden=!on&&!xpChanged(box)&&!box.contains(document.activeElement); });
+  /* de knop staat soms in een Vue-boom en wordt dan niet door de DOM-laag vertaald */
+  const t=trPlain(on?'Minder instellingen':'Meer instellingen');
   sec.querySelectorAll('[data-xp]').forEach(b=>{ b.setAttribute('aria-pressed',on?'true':'false');
     if(b.dataset.lkx!==t){ b.dataset.lkx=t; b.textContent=t; } }); }
 function xpToggle(id){ const all=jget(XKEY,{}); if(all[id]) delete all[id]; else all[id]=1; jset(XKEY,all); xpApply(id); }
-$$('section.tool[data-tool]').forEach(sec=>{ const ex=[...sec.querySelectorAll('[data-expert]')]; if(!ex.length) return;
+/* Een Vue-tool rendert zijn velden pas na de eerste render, dus dit loopt daarna nog een keer:
+   een host die zijn knop al heeft wordt overgeslagen. */
+function xpInit(){ $$('section.tool[data-tool]').forEach(sec=>{ const ex=[...sec.querySelectorAll('[data-expert]')]; if(!ex.length) return;
   const id=sec.dataset.tool, hosts=[];
   ex.forEach(e=>{ const h=e.closest('.fields')||e; if(!hosts.includes(h)) hosts.push(h); });
-  hosts.forEach(h=>h.insertAdjacentHTML('afterend',`<div class="lk-xp-row"><button type="button" class="lk-xp" data-xp="${id}" aria-pressed="false" title="Toon of verberg de geavanceerde instellingen van deze tool">Meer instellingen</button></div>`));
-  xpApply(id); });
+  hosts.forEach(h=>{ const n=h.nextElementSibling; if(n&&n.classList.contains('lk-xp-row')) return;
+    h.insertAdjacentHTML('afterend',`<div class="lk-xp-row"><button type="button" class="lk-xp" data-xp="${id}" aria-pressed="false" title="${esc(trPlain('Toon of verberg de geavanceerde instellingen van deze tool'))}">${trPlain('Meer instellingen')}</button></div>`); });
+  xpApply(id); }); }
+xpInit(); lkMainWatch(xpInit,120);
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-xp]'); if(b) xpToggle(b.dataset.xp); });
 window.addEventListener('hashchange',()=>setTimeout(()=>xpApply(current),0));
 
@@ -315,9 +323,9 @@ smpUse('plaat',names=>{ if(typeof wPld==='undefined'||!wPld||!names.length) retu
   Object.keys(bl).forEach(k=>{ const n=names[bl[k]]; if(n) st.vals[k]=n; else delete st.vals[k]; });
   wPld.set(st); });
 /* Gelplanner: één laan per naam, met de volumes en kleur van de eerste laan */
-smpUse('gplan',names=>{ if(typeof gpT==='undefined'||!gpT||!names.length) return;
+smpUse('gplan',names=>{ const T=TBLDEF['gp-tbl']; if(!T||!T.set||!names.length) return;
   const old=etGet('gp-tbl'), base=old[0]||['','10','','#1558b0'];
-  gpT.set(names.map((n,i)=>{ const r=(old[i]||base).slice(); r[0]=n; return r; })); });
+  T.set(names.map((n,i)=>{ const r=(old[i]||base).slice(); r[0]=n; return r; })); });
 /* qPCR-plaatindeling: het komma-gescheiden veld met monsters */
 smpUse('qplate',names=>{ const el=$('#qp2-s'); if(!el||!names.length) return;
   el.value=names.join(', '); el.__typed=true;

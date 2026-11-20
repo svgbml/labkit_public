@@ -24,6 +24,7 @@ import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
 import Stat from './tools/Stat.vue';
+import Gelplan from './tools/Gelplan.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -67,3 +68,8 @@ calc.osmo = () => {};
    de rest van de uitkomst volgt uit de velden en rekent zichzelf opnieuw. */
 const st = mountTool('#st-app', Stat);
 calc.stat = () => { if (st && st.vm) st.vm.draw(); };
+
+/* De Gelplanner tekent twee gels; calc.gplan() laat de component opnieuw tekenen en daarmee
+   ook de verwachte gel, de receptkaart en de looptijd uit tools/nt/48_gplan.js. */
+const gp = mountTool('#gp-app', Gelplan);
+calc.gplan = () => { if (gp && gp.vm) gp.vm.draw(); };

@@ -140,7 +140,7 @@
 </template>
 
 <script>
-import {lkNumIn} from '../lib/bridge.js';
+import {lkNumIn, lkPicBar} from '../lib/bridge.js';
 
 /* getallen: F en G voor de weergave (dus door lkNumIn), f en g voor tekst die nog door
    tHtml() of t() gaat — die zet de getallen zelf in de taal van de gebruiker */
@@ -205,15 +205,9 @@ export default {
         ? 'Waarden B <span id="st-bopt" style="font-weight:400">(optioneel)</span>'
         : 'Waarden B';
     },
-    picBarHtml() {
-      /* dezelfde knoppen als picBar('stb'), maar zelf vertaald: de vertaallaag van de DOM
-         komt niet in een Vue-boom */
-      const t = this.t;
-      return `<button type="button" data-png="stb">PNG</button>`
-        + `<button type="button" data-svg="stb">SVG</button>`
-        + `<button type="button" data-copy="stb">${t('Kopieer afbeelding')}</button>`
-        + `<button type="button" data-picprint="stb">${t('Afdrukken')}</button>`;
-    },
+    /* dezelfde knoppen als picBar('stb'), maar zelf vertaald: de vertaallaag van de DOM komt
+       niet in een Vue-boom */
+    picBarHtml() { return lkPicBar('stb'); },
 
     /* ---------- de tabel per groep ---------- */
     /* [naam, stDesc()] per groep, net als in de oude versie */
