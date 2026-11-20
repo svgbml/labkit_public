@@ -4455,5 +4455,8 @@
 "Niet alle groepen lijken normaal verdeeld (Lilliefors); ANOVA veronderstelt normaliteit en gelijke varianties.": "Not all groups appear normally distributed (Lilliefors); ANOVA assumes normality and equal variances.",
 "Bij groepen kleiner dan {#} is de χ²-benadering voor H minder nauwkeurig.": "For groups smaller than {#} the χ² approximation for H is less accurate.",
 "Welch-toets, ongelijke varianties": "Welch test, unequal variances",
-"Ter vergelijking: gepoold": "For comparison: pooled"
+"Ter vergelijking: gepoold": "For comparison: pooled",
+"Alle rijen van de kruistabel moeten evenveel kolommen hebben.": "All rows of the contingency table must have the same number of columns.",
+"De helling is niet significant van {#} verschillend.": "The slope does not differ significantly from {#}.",
+"F = MS<sub>effect</sub> / MS<sub>rest</sub>; kritieke F (α = {#}): {#} voor {*}, {#} voor {*}, {#} voor de interactie": "F = MS<sub>effect</sub> / MS<sub>residual</sub>; critical F (α = {#}): {#} for {*}, {#} for {*}, {#} for the interaction"
 }
