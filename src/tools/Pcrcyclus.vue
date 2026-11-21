@@ -36,6 +36,29 @@
         <lk-note v-else kind="info">{{ t('Vul beide primersequenties in.') }}</lk-note>
       </div>
     </div>
+    <!-- in-silico PCR (S44): waar binden de primers op een geplakt template, en welk product -->
+    <div class="grid2">
+      <div class="panel">
+        <h3>{{ t('In-silico PCR') }}</h3>
+        <div class="f"><label for="y-tpl">{{ t('Template (sequentie of FASTA)') }}</label>
+          <textarea id="y-tpl" class="mono" rows="5" v-model="tpl" spellcheck="false"></textarea></div>
+        <label class="chk" for="y-circ" style="margin-top:8px">
+          <input type="checkbox" id="y-circ" v-model="circ"> {{ t('Circulair template (plasmide)') }}</label>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Een primer bindt waar zijn laatste 15 basen aan het 3′-eind precies passen; afwijkingen aan de 5′-kant (zoals een staart met een knipplaats) worden geteld en zitten in het product. Producten tot 10 kb.') }}</p>
+      </div>
+      <div class="result" id="y-pcr">
+        <lk-note v-if="!pcr" kind="info">{{ t('Plak een template om te zien waar de primers binden.') }}</lk-note>
+        <template v-else>
+          <lk-big v-if="pcr.main" :label="t('Verwacht product (forward + reverse)')" :value="F(pcr.main.size, 0)" sub="bp"/>
+          <lk-note v-else kind="bad">{{ t('Forward en reverse geven samen geen product op dit template.') }}</lk-note>
+          <lk-table v-if="pcr.sites.length" :cols="siteCols" :rows="siteRows"/>
+          <lk-table v-if="pcr.prods.length > 1" :cols="prodCols" :rows="prodRows"/>
+          <lk-note v-for="(x, i) in pcrNotes" :key="i" :kind="x[0]">{{ x[1] }}</lk-note>
+          <div class="row" v-if="pcr.main" style="margin-top:8px">
+            <button type="button" id="y-usebp" @click="bp = String(pcr.main.size)">{{ t('Gebruik als ampliconlengte') }}</button></div>
+        </template>
+      </div>
+    </div>
     <div class="grid2">
       <div class="panel">
         <h3>{{ t('Programma') }}</h3>
@@ -112,6 +135,7 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {clean, cleanTemplate, pcrSites, pcrProducts} from '../lib/primer.js';
 
 const F = (x, d) => lkNumIn(fmt(x, d)), S = (x, d) => lkNumIn(sci(x, d));
 /* een looptijd: met "min" erin is het een vertaalsleutel ("{#}:{#} min"), anders alleen een getal */
@@ -125,7 +149,7 @@ export default {
       na: lkNumIn('50'), mg: lkNumIn('1,5'), dntp: lkNumIn('0,8'), pc: lkNumIn('0,2'),
       type: 'std', bp: '650', n: '30', dt: '95', ds: '30', ta: '', an: '30', et: '68', es: '',
       ramp: '3', n0: '300', eff: '95', cyc: '30', goal: '1e10', q0: '1e6', qf: '10',
-      cq: lkNumIn('15,12 18,41 21,80 25,08 28,51'), copied: ''};
+      cq: lkNumIn('15,12 18,41 21,80 25,08 28,51'), copied: '', tpl: '', circ: false};
   },
   computed: {
     /* de primers met hun Tm, en de annealingtemperatuur die daaruit volgt */
@@ -165,6 +189,38 @@ export default {
         if (p.other) out.push(['info', t(nm + ': ' + p.other + ' niet-ACGT-teken(s) genegeerd.')]);
       });
       if (ta >= 65) out.push(['info', t('Annealing ≥ 65 °C: een 2-staps PCR (annealing en extensie samen) is mogelijk.')]);
+      return out;
+    },
+    /* in-silico PCR: bindingsplaatsen en producten; primer 0 = forward, 1 = reverse */
+    pcr() {
+      const tpl = cleanTemplate(this.tpl);
+      if (tpl.length < 20) return null;
+      const P = [{seq: clean(this.fw)}, {seq: clean(this.rv)}], circ = this.circ;
+      const sites = pcrSites(tpl, P, circ), prods = pcrProducts(tpl, P, sites, circ);
+      return {L: tpl.length, P, sites, prods, main: prods.find(x => x.a.pi !== x.b.pi)};
+    },
+    siteCols() {
+      return [{h: this.t('Primer')}, {h: this.t('Streng')}, {h: this.t('Positie 3′-eind'), num: true},
+        {h: this.t('Afwijkingen 5′-kant'), num: true}];
+    },
+    siteRows() {
+      const nm = ['Forward', 'Reverse'];
+      return this.pcr.sites.map(x => [this.t(nm[x.pi]), x.strand, F(x.end3 + 1, 0), String(x.mis)]);
+    },
+    prodCols() { return [{h: this.t('Primers')}, {h: this.t('Grootte'), num: true}, {h: this.t('Van–tot'), num: true}]; },
+    prodRows() {
+      const nm = ['Forward', 'Reverse'];
+      return this.pcr.prods.map(x => ({cells: [this.t(nm[x.a.pi]) + ' + ' + this.t(nm[x.b.pi]), F(x.size, 0) + ' bp',
+        F(x.from, 0) + '–' + F(x.to, 0)], cls: x === this.pcr.main ? 'hl' : null}));
+    },
+    pcrNotes() {
+      const p = this.pcr, t = this.t, out = [];
+      ['Forward', 'Reverse'].forEach((nm, i) => {
+        if (p.P[i].seq.length < 10) out.push(['info', t(nm + ': te kort om te zoeken (minder dan 10 basen).')]);
+        else if (!p.sites.some(x => x.pi === i)) out.push(['warn', t(nm + ' bindt niet op het template.')]);
+      });
+      if (p.prods.length > 1) out.push(['warn', t('Meer dan één product: de primers binden op meer plaatsen of ook met zichzelf.')]);
+      if (p.main && p.main.size > 5000) out.push(['info', t('Een product boven 5 kb vraagt een polymerase voor lange fragmenten en een langere extensietijd.')]);
       return out;
     },
     /* het programma: stappen, looptijd en waarschuwingen */

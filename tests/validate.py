@@ -177,6 +177,26 @@ def _(pg):
     pg.evaluate("__set('ol-pf','0');__set('ol-pr','1')")
     return [('kruisdimeer ΔG (kcal/mol)', pg.evaluate("__kv('#ol-pair','Kruisdimeer')"), -5.35, 0.02)]
 
+def _tpl():
+    """Vast pseudowillekeurig template van 1500 bp met de forward op 100 en de reverse-site op 700."""
+    import random
+    rnd = random.Random(44); t = ''.join(rnd.choice('ACGT') for _ in range(1500))
+    f, r = 'AGCTGACCTGAAGGCTCTGAAG', 'TCGTCGTACTTGACCAGGCTAT'
+    rc = r[::-1].translate(str.maketrans('ACGT', 'TGCA'))
+    t = t[:100] + f + t[122:700] + rc + t[722:]
+    return t, f, r, rc
+
+@case('PCR-cyclus', 'In-silico PCR: productgrootte, lineair en circulair', 'Onafhankelijk berekend: productgrootte = einde reverse-site − begin forward-site (Python str.find op hetzelfde template); circulair met het nulpunt midden in het product')
+def _(pg):
+    t, f, r, rc = _tpl()
+    exp = t.find(rc) + len(rc) - t.find(f)
+    rot = t[400:] + t[:400]  # het nulpunt ligt nu tussen de twee primers
+    pg.evaluate("([f,r,t])=>{__go('pcrcyclus');__set('y-f',f);__set('y-r',r);__set('y-circ',false);__set('y-tpl',t)}", [f, r, t])
+    lin = pg.evaluate("__big('#y-pcr')")
+    pg.evaluate("t=>{__set('y-circ',true);__set('y-tpl',t)}", rot)
+    circ = pg.evaluate("__big('#y-pcr')")
+    return [('product lineair (bp)', lin, exp, 0), ('product circulair over het nulpunt (bp)', circ, exp, 0)]
+
 @case('PCR-cyclus', 'qPCR-efficiëntie uit helling', 'Pearson qPCR-efficiëntie: helling −3,80 → 83,3%; helling −3,3 → 100,9%')
 def _(pg):
     pg.evaluate("__go('pcrcyclus');__set('y-q0','1e6');__set('y-qf','10');__set('y-cq','15 18,8 22,6')")

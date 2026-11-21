@@ -100,3 +100,44 @@ export function analyse(p, ion) {
   const info = primerInfo(p.seq, ion);
   return {...p, info, self: dimer(p.seq, p.seq), hair: hairpin(p.seq)};
 }
+
+/* ---------- in-silico PCR (S44) ----------
+   Een primer bindt waar zijn 3′-eind (de laatste min(15, lengte) basen) precies past; de
+   5′-kant mag afwijken (een staart met een knipplaats is gewoon) en het aantal afwijkingen
+   daar wordt gemeld. Op de + streng wijst de primer naar rechts, op de − streng naar links.
+   Een product ligt tussen een site naar rechts en een site naar links verderop; in een
+   circulair template ook over het nulpunt heen. Lengte = afstand tussen de 3′-einden + beide
+   primerlengtes − 1, dus 5′-staarten tellen mee zoals in het echte product. */
+export const ANCHOR = 15, PCR_MAX = 10000;
+export function cleanTemplate(text) {
+  return clean(String(text || '').split(/\r?\n/).filter(l => !/^\s*[>;]/.test(l)).join(''));
+}
+export function pcrSites(tpl, primers, circular) {
+  const L = tpl.length, out = [];
+  primers.forEach((p, pi) => {
+    const n = p.seq.length, k = Math.min(ANCHOR, n);
+    if (n < 10 || L < k) return;
+    const ext = circular ? tpl + tpl.slice(0, Math.min(n, L)) : tpl, at = i => (circular ? tpl[((i % L) + L) % L] : tpl[i]);
+    const mis = (start, s) => { let m = 0; for (let q = 0; q < s.length; q++) { const b = at(start + q); if (b && b !== s[q]) m++; } return m; };
+    const fw = p.seq.slice(-k), rc = revcomp(p.seq), rv = rc.slice(0, k);
+    for (let i = ext.indexOf(fw); i >= 0 && i < L; i = ext.indexOf(fw, i + 1)) {
+      const end = i + k - 1; /* 3′-base */
+      out.push({pi, strand: '+', end3: end % L, mis: mis(end - n + 1, p.seq.slice(0, n - k))});
+    }
+    for (let i = ext.indexOf(rv); i >= 0 && i < L; i = ext.indexOf(rv, i + 1))
+      out.push({pi, strand: '−', end3: i, mis: mis(i + k, rc.slice(k))});
+  });
+  return out;
+}
+export function pcrProducts(tpl, primers, sites, circular) {
+  const L = tpl.length, out = [];
+  sites.filter(a => a.strand === '+').forEach(a => sites.filter(b => b.strand === '−').forEach(b => {
+    const d = circular ? (b.end3 - a.end3 + L) % L : b.end3 - a.end3;
+    if (d <= 0) return;
+    const na = primers[a.pi].seq.length, nb = primers[b.pi].seq.length, size = d + na + nb - 1;
+    /* van/tot: de 5′-einden op het template (1-based), staarten vallen erbuiten */
+    const f = a.end3 - na + 1, t = b.end3 + nb - 1, w = i => ((i % L) + L) % L + 1;
+    if (size <= PCR_MAX) out.push({a, b, size, from: circular ? w(f) : Math.max(1, f + 1), to: circular ? w(t) : Math.min(L, t + 1)});
+  }));
+  return out.sort((x, y) => x.size - y.size);
+}
