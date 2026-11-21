@@ -7,3 +7,4 @@ i18n/missing.json
 .lighthouseci/
 .lighthouseci-mobile/
 tests/perf_result.json
+__pycache__/
