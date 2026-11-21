@@ -2,6 +2,14 @@
 
 Lab calculator and gel-editor web app (Dutch first, English via a dictionary looked up at runtime), published to GitHub Pages from `web/` and packaged for Windows with Tauri. Every tool is a Vue 3 component; all code lives in `src/` and is built into one generated `web/index.html`.
 
+## Skills
+These skills are on the account, so cloud sessions have them too.
+- Before starting a task, check the available skills and use every one that fits the task, instead of doing it from scratch.
+- Always use the ponytail skill (full level) for coding tasks.
+- Whenever you write or edit prose meant for readers (documents, reports, emails, articles, README/docs text, Markdown or HTML prose), finish it with the humanizer skill and then the clean-user-facing-text skill. Not for code, commands, short chat replies, or translation keys in `i18n/en.json`.
+- Whenever you write, outline, revise or review fiction or other narrative creative writing, use the storyscope-fiction skill first (plan and draft with it), then humanizer and clean-user-facing-text as above.
+- If a `graphify-out/` knowledge graph exists, read `graphify-out/GRAPH_REPORT.md` first and use the graph to find files before searching by hand. Don't build one unless asked.
+
 ## Roadmap work
 - The plan lives in `docs/ROADMAP.md`: steps `S0`–`S272` (plus `S204a`) of ~30 minutes each; idea numbers (`#n`) refer to `docs/ideas.md`.
 - Work comes in **batches** (the *Cloud sessions* table in the roadmap): one cloud session does one batch, in order, on the batch's lead model. Steps in the batch whose *Model* column is cheaper go to a subagent of that model; a step never runs on a cheaper model than its column says.
