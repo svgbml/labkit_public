@@ -1,0 +1,8 @@
+<section class="tool" id="t-stat" data-tool="stat">
+  <header class="tool-head"><h2>Statistiek</h2>
+  <p>Beschrijvende statistiek, uitbijtertoetsen en de toetsen uit het Tabellenboek Statistiek, met de volledige toetsingsprocedure. Plak een kolom uit Excel of typ getallen gescheiden door spaties of enters.</p></header>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Stat.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="st-app"></div>
+  <p class="src">Kritieke waarden zoals in het Tabellenboek Statistiek (J.P.M. Andries, Avans): t tweezijdig (Bijlage 4), F (5 en 6), χ² (7), Kolmogorov-Smirnov met geschatte µ en σ (Lilliefors, 8), Dixon Q (9), Grubbs tweezijdig (10), Wilcoxon (11). Grubbs: G = max|xᵢ − x̄| / s, voor n &gt; 10 G<sub>krit</sub> = (n−1)/√n · √(t²/(n−2+t²)) met t bij α/(2n) en n−2 vrijheidsgraden (NIST/SEMATECH e-Handbook 1.3.5.17.1). Dixon: Q = sprong / spreidingsbreedte (Rorabacher, Anal. Chem. 1991). Welch-toets: t = (x̄₁−x̄₂)/√(s₁²/n₁+s₂²/n₂) met Welch–Satterthwaite-vrijheidsgraden. p-waarden exact uit de t-, F- en χ²-verdeling; Wilcoxon exact zonder gelijke waarden, anders normale benadering met correctie. One-way ANOVA met Tukey-Kramer: q = |x̄ᵢ − x̄ⱼ| / √(MS<sub>binnen</sub>/2 · (1/nᵢ + 1/nⱼ)), p uit de studentized range-verdeling (zoals TukeyHSD in R, Tukey-post-hoc in JASP en GraphPad Prism). Kruskal-Wallis: H met correctie voor gelijke waarden, χ²-benadering; Dunn (1964) z-toets op gemiddelde rangen met Bonferroni-correctie (zoals kruskal.test en dunn.test in R). Voorbeelddata: Student (1908), slaapwinst van twee middelen bij 10 proefpersonen (Cushny &amp; Peebles); χ²: Mendel, erwten 315/108/101/32 tegen 9:3:3:1.</p>
+</section>

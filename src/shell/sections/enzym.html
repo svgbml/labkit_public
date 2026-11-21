@@ -1,0 +1,8 @@
+<section class="tool" id="t-enzym" data-tool="enzym">
+  <header class="tool-head"><h2>Enzymkinetiek</h2>
+  <p>Enzymactiviteit uit een absorptiehelling, en V<sub>max</sub>, K<sub>m</sub>, k<sub>cat</sub> en het remmingstype uit een substraatreeks.</p></header>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Enzym.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="en-app"></div>
+  <p class="src">Activiteit: U/mL = (ΔA/min<sub>test</sub> − ΔA/min<sub>blanco</sub>) × V<sub>totaal</sub> × df / (ε<sub>mM</sub> × l × V<sub>enzym</sub>), ε NADH bij 340 nm = 6,22 mM⁻¹cm⁻¹ (Sigma-Aldrich, Enzymatic Assay of L-Lactic Dehydrogenase). 1 U = 1 µmol/min = 16,67 nkat. Remming: competitief K<sub>m,app</sub> = K<sub>m</sub>(1 + [I]/K<sub>i</sub>); niet-competitief V<sub>max,app</sub> = V<sub>max</sub>/(1 + [I]/K<sub>i</sub>); oncompetitief beide gedeeld door (1 + [I]/K<sub>i</sub>′) (UC Davis BIS105). Lineweaver-Burk vervormt de meetfout; de niet-lineaire fit is de betrouwbaarste schatting. Voorbeelddata zijn verzonnen.</p>
+</section>

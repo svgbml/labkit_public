@@ -1,0 +1,7 @@
+<section class="tool" id="t-pcrcyclus" data-tool="pcrcyclus">
+  <header class="tool-head"><h2>PCR-cyclus</h2>
+  <p>Primer-T<sub>m</sub> en annealingtemperatuur, een compleet cyclerprogramma met looptijd, en de rekenkunde van amplificatie en qPCR-efficiëntie.</p></header>
+  <!-- Het bewerkbare deel staat in src/tools/Pcrcyclus.vue (Vue); kop en bronregel blijven gewone HTML. -->
+  <div id="y-app"></div>
+  <p class="src">Programma volgens NEB Taq-richtlijnen: initiële denaturatie 30 s bij 95 °C (kolonie-PCR 5 min), 25–35 cycli, annealing 15–60 s rond T<sub>m</sub> − 5 °C, extensie bij 68 °C met 1 min/kb (45–60 s onder 1 kb), eindextensie 5 min; T<sub>m</sub> van beide primers boven 45 °C en binnen 5 °C van elkaar. Primer-T<sub>m</sub>: nearest-neighbor-parameters van SantaLucia (PNAS 1998), zoutcorrectie ΔS + 0,368·(N−1)·ln[Na⁺] met [Na⁺]<sub>eq</sub> = [Na⁺] + 120·√([Mg²⁺] − [dNTP]) (von Ahsen e.a., Clin Chem 2001), zoals in Primer3. qPCR: E = 10<sup>−1/helling</sup> − 1, acceptabel 90–110% (helling −3,58 tot −3,10) en R² ≥ 0,98 (JoVE 54067).</p>
+</section>

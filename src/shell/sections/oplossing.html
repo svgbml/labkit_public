@@ -1,0 +1,16 @@
+<section class="tool" id="t-oplossing" data-tool="oplossing">
+  <header class="tool-head"><h2>Oplossing &amp; buffer</h2>
+  <p>Zet een recept om in af te wegen hoeveelheden. Controleer de molmassa altijd op de pot: hydraten wegen meer.</p></header>
+  <div class="stack">
+    <div class="panel">
+      <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Oplossing.vue). Het
+           stappenschema hieronder blijft gewone HTML: dat tekent bufImg() op het canvas. -->
+      <div id="o-app"></div>
+      <datalist id="chem-list"></datalist>
+      <h3 style="margin:16px 0 8px">Stappenschema als afbeelding</h3>
+      <div class="fields"><div class="f"><label for="o-btitle">Titel</label><input id="o-btitle" class="txt" value="Bereiding buffer"></div><div class="f" style="grid-column:span 2"><label for="o-note">Eigen tekst onder het schema</label><textarea id="o-note" rows="2" placeholder="Bijv. bewaren bij 4 °C, houdbaarheid, veiligheid"></textarea></div></div>
+      <canvas id="bs-cv" style="margin-top:10px"></canvas><div class="pic-bar" data-picbar="bs"></div>
+    </div>
+  </div>
+  <p class="src">Recepten: PBS volgens Cold Spring Harbor Protocols (137 mM NaCl, 2,7 mM KCl, 10 mM Na₂HPO₄, 1,8 mM KH₂PO₄); TBE 10X: 0,89 M Tris, 0,89 M boorzuur, 20 mM EDTA (Bio-Rad Bulletin 6205/6230).</p>
+</section>

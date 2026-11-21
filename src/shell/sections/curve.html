@@ -1,0 +1,8 @@
+<section class="tool" id="t-curve" data-tool="curve">
+  <header class="tool-head"><h2>Standaardcurve</h2>
+  <p>Concentraties van onbekende monsters uit een standaardreeks: Bradford of BCA (lineair of kwadratisch) en ELISA (4-parameter logistisch). Tot drie replicaten per punt.</p></header>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Curve.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="cu-app"></div>
+  <p class="src">Bradford-voorbeeldwaarden: Thermo Fisher NanoDrop One Bradford-protocol (Coomassie Plus, BSA 0–2000 µg/mL); de BSA-respons is niet lineair over het hele bereik (Thermo Fisher Coomassie Plus gebruikershandleiding), daarom staat het voorbeeld op kwadratisch. 4PL: y = D + (A − D) / (1 + (x/C)<sup>B</sup>), A = onderste asymptoot, D = bovenste, C = buigpunt, B = helling. 5PL: y = D + (A − D) / (1 + (x/C)<sup>B</sup>)<sup>E</sup>, met E voor asymmetrie (Gottschalk &amp; Dunn, Anal. Biochem. 2005); E = 1 geeft de 4PL. ELISA-voorbeelddata zijn verzonnen. LOD en LOQ (alleen lineair model): 3,3·σ/S en 10·σ/S, met σ de reststandaardafwijking van de regressie en S de helling (ICH Q2(R2)).</p>
+</section>

@@ -1,0 +1,7 @@
+<section class="tool" id="t-qpcr" data-tool="qpcr">
+  <header class="tool-head"><h2>qPCR-analyse (ΔΔCt)</h2>
+  <p>Relatieve genexpressie van een doelgen ten opzichte van een referentiegen en een kalibrator, met de 2<sup>−ΔΔCt</sup>-methode en de efficiëntie-gecorrigeerde Pfaffl-methode. Herhalingen: geef ze dezelfde monsternaam.</p></header>
+  <!-- Het bewerkbare deel (velden, Ct-tabel, Ct-export inlezen en uitkomst) staat sinds S232 in src/tools/Qpcr.vue (host #qpc-app); de ids (qp-*) zijn gebleven. -->
+  <div id="qpc-app"></div>
+  <p class="src">ΔCt = Ct<sub>doel</sub> − Ct<sub>ref</sub>; ΔΔCt = ΔCt<sub>monster</sub> − ΔCt<sub>kalibrator</sub>; fold change = 2<sup>−ΔΔCt</sup> (Livak &amp; Schmittgen, Methods 2001). Pfaffl: ratio = E<sub>doel</sub><sup>ΔCt doel (kalibrator − monster)</sup> / E<sub>ref</sub><sup>ΔCt ref (kalibrator − monster)</sup> (Pfaffl, Nucleic Acids Res 2001). Voorbeeld: het rekenvoorbeeld van CASRAI (controle 24,0/20,0; behandeld 21,5/20,2 → 6,5×).</p>
+</section>

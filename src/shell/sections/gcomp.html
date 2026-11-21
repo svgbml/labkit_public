@@ -1,0 +1,8 @@
+<section class="tool" id="t-gcomp" data-tool="gcomp">
+  <header class="tool-head"><h2>Groeicurves vergelijken</h2>
+  <p>Meerdere stammen of condities tegelijk: fit van het gemodificeerde Gompertz-model met maximale groeisnelheid, lag-fase en verdubbelingstijd per curve.</p></header>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Gcomp.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="gm-app"></div>
+  <p class="src">Gemodificeerd Gompertz-model: y = A·exp(−exp(µ<sub>m</sub>·e/A·(λ − t) + 1)) met y = ln(N/N₀), µ<sub>m</sub> = maximale specifieke groeisnelheid, λ = lag-tijd en A = ln(N<sub>max</sub>/N₀) (Zwietering e.a., Appl. Environ. Microbiol. 56:1875–1881, 1990). Verdubbelingstijd t<sub>d</sub> = ln 2 / µ<sub>m</sub>.</p>
+</section>

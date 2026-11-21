@@ -1,0 +1,8 @@
+<section class="tool" id="t-melt" data-tool="melt">
+  <header class="tool-head"><h2>qPCR-smeltcurve</h2>
+  <p>Berekent −dF/dT uit de ruwe smeltcurve, bepaalt de smelttemperatuur (Tm) per monster en signaleert een tweede piek (primerdimeren of aspecifiek product).</p></header>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Melt.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ml-app"></div>
+  <p class="src">−dF/dT met een centrale differentie na glijdend gemiddelde; Tm = maximum van −dF/dT, verfijnd met parabolische interpolatie. Eén scherpe piek wijst op één specifiek product; een extra piek bij lagere temperatuur past bij primerdimeren (Ririe e.a., Anal. Biochem. 245:154–160, 1997).</p>
+</section>

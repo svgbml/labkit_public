@@ -1,0 +1,8 @@
+<section class="tool" id="t-wb" data-tool="wb">
+  <header class="tool-head"><h2>Western blot-normalisatie</h2>
+  <p>Bandintensiteit van je doeleiwit gedeeld door een laadcontrole (huishoudeiwit of totaaleiwit), relatief ten opzichte van de controle. Intensiteiten haal je uit de gelfoto-editor of ImageJ.</p></header>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Wb.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="wb-app"></div>
+  <p class="src">Genormaliseerde expressie = (doel / laadcontrole) / gemiddelde (doel / laadcontrole) van de controle; werk binnen het lineaire bereik van de detectie (Bio-Rad, Western Blot Normalization; Pillai-Kastoori e.a., Anal. Biochem. 2020).</p>
+</section>

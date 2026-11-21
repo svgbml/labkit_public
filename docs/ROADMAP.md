@@ -24,7 +24,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phases 5–11 | S48–S146 | ⏳ not started (S45, S54, S82, S91, S93 partly there) |
 | Phases 12–14 Sanger, alignment, sequence toolbox | S147–S201 | ⏳ not started |
 | Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | ✅ done (batches V1a–V7 merged on 2026-11-21, S263 the same day) |
-| Phase 16 one source, one translation path | S264–S272 | ⏳ **next**, before every feature phase (replaces S143–S146) |
+| Phase 16 one source, one translation path | S264–S272 | **in progress:** K1 (S264–S266) ✅, K2 next (replaces S143–S146) |
 
 **Checkmark audit.** Every ✅ in this file has its own `S<n>:` commit, and every `S<n>:` commit
 in the history has its ✅. Nothing is ticked that wasn't done, and nothing done is unticked.
@@ -107,7 +107,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | V6 ✅ | Opus 5 | S248–S249 *Statistiek*, S255–S256 *Gelplanner*, then S263 the app shell (last) | all other V batches before S263 | one V batch |
 | V7 ✅ | Opus 5 | S225–S226 *Gelfoto-editor* on Vue | — | one V batch |
 | **Wave 2: one source, one translation path (phase 16)** | | | | |
-| K1 | Opus 5.5 | S264 inventory and target layout, S265 generated `index.html`, S266 (Sonnet) sections and CSS into source files | Wave 1 | — |
+| K1 ✅ | Opus 5.5 | S264 inventory and target layout, S265 generated `index.html`, S266 (Sonnet) sections and CSS into source files | Wave 1 | — |
 | K2 | Opus 5.5 | S267 (Opus 5) shared helpers, S268 engines, S269 (Sonnet) `tools/nt/` into `src/` and `insert_tools.py` retired | K1 | — |
 | K3 | Opus 5.5 | S270 (Opus 5) static text through `t()`, S271 DOM translation layer removed, S272 (Sonnet) rules and docs | K2 | — |
 | **Wave 3: finish phase 4** | | | | |
@@ -637,7 +637,7 @@ end of each batch with the full check (286/286).
 |---|---|---|---|---|
 | S264 | 276 | Inventory and target layout: list everything that still lives in `web/index.html` outside the NT markers (39 sections, ~173 KB JS, ~34 KB CSS) and in `tools/nt/`, with for each piece where it goes in `src/`, which globals other code still reads (`gf`, `timers`, `TBLDEF`, `calc`, `chart()`, …) and which text the DOM walker still translates. Write the target layout under *Decisions* | ✅ The list and the target layout are under *Decisions* (*Phase 16 target layout*); S265–S272 still fit, except that the nav stays in the shell template until S269 | Opus 5.5 |
 | S265 | 276 | `web/index.html` becomes a build output: a shell template in `src/` plus the CSS and the bundle, written by one build script (`npm run build`); `insert_tools.py` is called from it for now. CI fails when the committed `index.html` is out of date | ✅ Source is `src/shell/index.html`; `npm run build` = Vite + `python tools/build.py` (build_validated → build_i18n → insert_tools, which now reads the template, expands `@include` lines and fills in the i18n hash). The generated file is byte-for-byte the old one. CI runs `vite build` + `git diff --exit-code build/app.bundle.js` and `python tools/build.py --check`. `bump_version.py` sets `APPVER` in the template too. Full check runs at the end of K1 | Opus 5.5 |
-| S266 | 276 | Move the 39 hand-written `<section>`s and the inline CSS out of `index.html` into source files in `src/` | No tool markup or CSS is left only in `index.html` | Sonnet |
+| S266 | 276 | Move the 39 hand-written `<section>`s and the inline CSS out of `index.html` into source files in `src/` | ✅ CSS in `src/shell/styles/app.css`, the 39 sections in `src/shell/sections/<id>.html`, pulled in by `@include` lines in the same order; the generated `web/index.html` is unchanged byte for byte. Done by the lead instead of a Sonnet subagent: a 20-line split script was cheaper than a brief | Sonnet |
 | S267 | 277 | Shared helpers out of the inline JS into `src/lib/` modules (`$`, `num`, `esc`, `note`, `chart()`, `barChart()`, storage, `toolSnap`/`toolApply`, …), still exposed on `window` where other code reads them | Inline JS in `index.html` only calls into the bundle | Opus 5 |
 | S268 | 277 | The engines into `src/`: the gel-editor engine (`gf`, `gfProc`, detection, dragging), the timer engine and the plate designer, each as one module with the same `window` hooks the components use now | The gel editor, timers and plate tools work as before; their validation cases are green | Opus 5.5 |
 | S269 | 277 | The 57 JS modules of `tools/nt/` into `src/` (calculation libraries as plain modules the components import; the generated files from `build_validated.py`, `build_icons.py` and `build_changelog.py` written into `src/generated/`). Retire the NT markers and `tools/insert_tools.py` | `tools/nt/` is gone; `tools/check.py` no longer calls `insert_tools.py` | Sonnet |

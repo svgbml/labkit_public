@@ -1,0 +1,8 @@
+<section class="tool" id="t-rmp" data-tool="rmp">
+  <header class="tool-head"><h2>Forensische matchkans</h2>
+  <p>Genotypefrequentie per STR-locus volgens Hardy-Weinberg en de gecombineerde kans op een toevallige match (random match probability) voor een enkelvoudig profiel.</p></header>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Rmp.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="rm-app"></div>
+  <p class="src">Heterozygoot: 2pq; homozygoot: p² + p(1 − p)θ (National Research Council, The Evaluation of Forensic DNA Evidence, 1996, aanbeveling 4.1). Gecombineerde matchkans = product over onafhankelijke loci (productregel); de bewijskracht voor een enkelvoudig profiel is LR = 1 / matchkans (Butler, Advanced Topics in Forensic DNA Typing: Interpretation, 2015).</p>
+</section>

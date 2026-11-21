@@ -1,0 +1,8 @@
+<section class="tool" id="t-groei" data-tool="groei">
+  <header class="tool-head"><h2>Groeicurve</h2>
+  <p>Specifieke groeisnelheid, verdubbelingstijd en lag-fase uit OD₆₀₀-metingen of kiemgetallen. De exponentiële fase wordt automatisch gezocht.</p></header>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Groei.vue); de kop en de
+       bronregel blijven gewone HTML. -->
+  <div id="g2-app"></div>
+  <p class="src">N(t) = N₀·e<sup>µt</sup>, µ = helling van ln(waarde) tegen tijd in de exponentiële fase, t<sub>d</sub> = ln 2 / µ (ConductScience, Doubling Time Calculator). OD₆₀₀ en kiemgetal hangen alleen tot ongeveer OD 1,0 lineair samen (JoVE Science Education, Growth Curves); ± 8 × 10⁸ E. coli-cellen per mL bij OD₆₀₀ = 1 is een vuistregel, kalibreer voor je eigen stam. Voorbeelddata zijn verzonnen.</p>
+</section>
