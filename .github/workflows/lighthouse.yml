@@ -6,6 +6,7 @@ on:
     paths:
       - 'web/**'
       - 'lighthouserc.json'
+      - 'lighthouserc.mobile.json'
       - '.github/workflows/lighthouse.yml'
   pull_request:
   workflow_dispatch:
@@ -21,10 +22,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Lighthouse CI (3 runs per pagina)
+      - name: Lighthouse CI desktop (3 runs per pagina)
         run: npx --yes @lhci/cli@0.14.0 autorun
+      # S135: ook een mobiel profiel (412 px breed, gesimuleerde 4G en 4× tragere CPU, de standaard van Lighthouse)
+      - name: Lighthouse CI mobiel (3 runs per pagina)
+        if: always()
+        run: npx --yes @lhci/cli@0.14.0 autorun --config=lighthouserc.mobile.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: lighthouse-rapport
-          path: .lighthouseci
+          path: |
+            .lighthouseci
+            .lighthouseci-mobile

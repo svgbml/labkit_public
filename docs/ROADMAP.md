@@ -10,7 +10,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 - **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (54 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (24 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **114 done, 156 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **115 done, 155 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-21)
 
@@ -386,7 +386,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | Step | Ideas | What | Model |
 |---|---|---|---|
 | S134 | 269, 273 | Bundle size budget and memory check in `perf_budget.py` · ✅ `tests/perf_baseline.json` holds the sizes of `web/index.html`, `web/i18n-en.js` and the bundle; more than 5% growth fails (`--update-baseline` after a deliberate one). JS heap after all tools plus the test gel ~14 MB, limit 40 MB (`LABKIT_HEAP_MB`) | Sonnet |
-| S135 | 270, 271, 274 | Gel editor benchmark, mobile Lighthouse, typing-latency (INP) test | Sonnet |
+| S135 | 270, 271, 274 | Gel editor benchmark, mobile Lighthouse, typing-latency (INP) test · ✅ `perf_budget.py`: load + straighten + measure of the test gel, best of 3, ~260 ms (budget 2000 ms); typing in 12 heavy tools and the gel editor, worst keystroke ~70 ms in *Oplossing* (budget 100 ms, Event Timing API). `lighthouserc.mobile.json` as a second Lighthouse run: on the mobile preset the score is ~0.4 and Total Blocking Time ~5.6 s (warnings only; input for F1a) | Sonnet |
 | S136 | 275 | Performance summary in the CI run | Haiku |
 | S137 | 284, 285, 289 | Copy error report, feedback link per tool, export/import everything | Sonnet |
 | S138 | 278 | Unit tests for pure calculation functions | Sonnet |
