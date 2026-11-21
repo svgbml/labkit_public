@@ -6,13 +6,13 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 
 **Model** (last column) is the cheapest model that can do the step well, so the shared usage limit lasts longer. Done steps show "—".
 - **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (3 open steps).
-- **Sonnet**: the default. The design is settled and the step extends something that already exists, which includes almost every Vue conversion in phase 15 (128 open steps).
-- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps, and the heaviest Vue conversions (gel editor, Statistiek, Gelplanner, app shell) (61 open steps).
+- **Sonnet**: the default. The design is settled and the step extends something that already exists, which includes almost every Vue conversion in phase 15 (76 open steps).
+- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps, and the heaviest Vue conversions (gel editor, Statistiek, Gelplanner, app shell) (55 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading and the alignment engine (28 open steps; S143–S146 is one row).
 
-**Total:** 265 steps (S0–S263, plus S204a) ≈ 130 hours; **45 done, 220 open**. Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 265 steps (S0–S263, plus S204a) ≈ 130 hours; **103 done, 162 open**. Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
-## Where it stands (checked 2026-11-19)
+## Where it stands (checked 2026-11-21)
 
 | Phase | Steps | Status |
 |---|---|---|
@@ -23,7 +23,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 4 recipes and sequences | S37–S47 | **part done:** S37–S40 ✅, S41–S47 open |
 | Phases 5–11 | S48–S146 | ⏳ not started (S45, S54, S82, S91, S93 partly there) |
 | Phases 12–14 Sanger, alignment, sequence toolbox | S147–S201 | ⏳ not started |
-| Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | **running:** S202–S209 ✅ (9 of 63; batch V1a done), S210 next |
+| Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | **almost done:** S202–S262 ✅ (62 of 63; batches V1a–V7 merged on 2026-11-21), only S263 (app shell) left |
 
 **Checkmark audit.** Every ✅ in this file has its own `S<n>:` commit, and every `S<n>:` commit
 in the history has its ✅. Nothing is ticked that wasn't done, and nothing done is unticked.
@@ -36,19 +36,20 @@ over:
 - **S91:** *Standaardcurve* reads a pasted plate grid, but not per instrument.
 - **S93:** *qPCR-analyse* reads a pasted Ct table by its header, but not per instrument.
 
-At the last full `python tools/check.py` (after S209, batch V1a, on Windows): **286 of 286 validation checks**, 0
-layout problems in Dutch, 0 robustness problems. The English layout audit reports 2 overflowing labels in
-*PCR-mastermix* at 390 px; the commit before V1a shows the same 2 on this machine, so they are not from V1a
-(probably Windows font metrics; the earlier cloud run had 0).
+At the last full `python tools/check.py` (2026-11-21, after merging batches V1a–V7, on Windows): **285 of 286
+validation checks**. The one failure is *Gelfoto-editor › Rf-waarde* ("Cannot read properties of null (reading
+'width')" in `gfRotated()`): it passed on the V6 and V7 branches and when run on its own, so it comes from the order
+of the cases after the merge (the page is reloaded earlier and `gf.src` is empty); still to fix. Layout: 0 problems in
+Dutch, 2 in English (the known label overflow in *PCR-mastermix*). Robustness: 0 problems.
 
 ### Vue migration: how far it is
 
 | Part | Done | Left |
 |---|---|---|
 | Foundation: Vite bundle, `src/lib/bridge.js`, shared components in `src/lib/ui.js` (incl. `lk-etable`), `t()`/`tHtml()`, `tests/i18n_vue.py` | ✅ | — |
-| Calculation tools on Vue | **19 of 87 (22%)**: *Significante cijfers*, *Welke pipet?*, *Z′-factor*, *Restrictiedigestie*, *Oplossing & buffer*, *Buffercapaciteit*, *Oplosbaarheid (Ksp)*, *Verdunning*, *Osmolariteit & ionsterkte*, *Titratiecurve*, *pH-buffer*, *Waterhardheid*, *Molmassa*, *Kjeldahl*, *Eenheden omrekenen*, *Enzymkinetiek*, *Standaardcurve*, plus *pH bijstellen* and *Celkweekmedium klaarmaken* (built in Vue at S40) | **68 tools**, all listed in phase 15 from S210 on |
+| Calculation tools on Vue | **all 87**: every tool of phase 15 is converted (S202–S262, batches V1a–V7), plus *pH bijstellen* and *Celkweekmedium klaarmaken* (built in Vue at S40) | — |
 | App shell (start page, Instellingen, navigation) | — | S263 |
-| Phase 15 steps | 9 of 63 (S202–S209, S204a) | 54 (S210–S263) |
+| Phase 15 steps | 62 of 63 (S202–S262, S204a) | 1 (S263) |
 
 Four of the converted tools (*Significante cijfers*, *Welke pipet?*, *Z′-factor*,
 *Restrictiedigestie*) were done as groundwork before phase 15 had step numbers, so they have no
@@ -94,18 +95,18 @@ when that is more useful. Within a pair (a/b/c) do *a* first unless the row says
 | Batch | Lead model | Steps (in this order) | Needs | Parallel with |
 |---|---|---|---|---|
 | **Wave 1: finish Vue** | | | | |
-| V1a | Sonnet | S205–S209 chemistry tools | — | one other V batch |
-| V1b | Sonnet | S210–S214 analysis tools | — | one other V batch |
-| V2a | Sonnet | S215–S219 microbiology | — | one other V batch |
-| V2b | Sonnet | S220–S224 cell culture | — | one other V batch |
-| V3a | Sonnet | S227–S232 molecular biology, part 1 | — | one other V batch |
-| V3b | Sonnet | S233–S237 molecular biology, part 2 | — | one other V batch |
-| V4a | Sonnet | S238–S242 forensics, part 1 | — | one other V batch |
-| V4b | Sonnet | S243–S247 forensics, part 2 | — | one other V batch |
-| V5a | Sonnet | S250–S254 statistics tools and quality | — | one other V batch |
-| V5b | Sonnet | S257–S262 schemes, planner, report, plate, centrifuge, timers | — | one other V batch |
-| V6 | Opus 5 | S248–S249 *Statistiek*, S255–S256 *Gelplanner*, then S263 the app shell (last) | all other V batches before S263 | one V batch |
-| V7 | Opus 5 | S225–S226 *Gelfoto-editor* on Vue | — | one V batch |
+| V1a ✅ | Sonnet | S205–S209 chemistry tools | — | one other V batch |
+| V1b ✅ | Sonnet | S210–S214 analysis tools | — | one other V batch |
+| V2a ✅ | Sonnet | S215–S219 microbiology | — | one other V batch |
+| V2b ✅ | Sonnet | S220–S224 cell culture | — | one other V batch |
+| V3a ✅ | Sonnet | S227–S232 molecular biology, part 1 | — | one other V batch |
+| V3b ✅ | Sonnet | S233–S237 molecular biology, part 2 | — | one other V batch |
+| V4a ✅ | Sonnet | S238–S242 forensics, part 1 | — | one other V batch |
+| V4b ✅ | Sonnet | S243–S247 forensics, part 2 | — | one other V batch |
+| V5a ✅ | Sonnet | S250–S254 statistics tools and quality | — | one other V batch |
+| V5b ✅ | Sonnet | S257–S262 schemes, planner, report, plate, centrifuge, timers | — | one other V batch |
+| V6 🔨 (S263 left) | Opus 5 | S248–S249 *Statistiek*, S255–S256 *Gelplanner*, then S263 the app shell (last) | all other V batches before S263 | one V batch |
+| V7 ✅ | Opus 5 | S225–S226 *Gelfoto-editor* on Vue | — | one V batch |
 | **Wave 2: finish phase 4** | | | | |
 | P1 | Opus 5 | S42, S43 (Sonnet), S44, S45: primers, in-silico PCR and digest | V3a, V3b | E2, *any time* batches |
 | P2 | Sonnet | S41, S47: overage switch, material list and protocol export | V3a, V3b, V5b | P1 |
@@ -544,11 +545,11 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S217 | — | *Antibiotica-gevoeligheid* naar Vue | ✅ `src/tools/Mic.vue`; `mi-tbl` en `mz-tbl` staan op `lk-etable`, hun vaste `TBLDEF`/`ADDBTN`-ingangen zijn weg. `micOf()` en de S/I/R-regels gaan ongewijzigd mee. Open (gedeeld, ook *Osmolariteit* en *Verdunningsreeks*): de UX-laag verbergt `data-expert`-velden voordat de Vue-bundel draait, dus in een Vue-tool staan die velden altijd open | Sonnet |
 | S218 | — | *Groeicurve* naar Vue | ✅ `src/tools/Groei.vue`; `gc-tbl` op `lk-etable` (nieuwe optie `numbered` voor de kolom #), de grafiek blijft `chart()` en `calc.groei()` tekent opnieuw. De twee validatiegevallen vullen de tabel nu met `__tbl()` in plaats van `gcRow()`; verwachte waarden ongewijzigd. `lk-etable` zet in het Engels voortaan een punt in een getal dat van buiten komt (een teruggezette tabel las 0,077 als 77) | Sonnet |
 | S219 | — | *Transfectie (Lipofectamine 3000)* naar Vue | ✅ `src/tools/Transfect.vue`; het rekenwerk, `TRF_SEED`/`TRF_MED` en de stappen gaan ongewijzigd mee, `tools/nt/81_transfect.js` is leeg op een opmerking na. Geen nieuwe vertaalsleutels nodig | Sonnet |
-| S220 | ✅ | *Telkamer*, *Celpassageplanner* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S221 | ✅ | *Desinfectietest (log-reductie)*, *Sterilisatie (D, z, F₀)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S222 | ✅ | *Groeicurves vergelijken*, *Viabiliteit (trypaanblauw)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S223 | ✅ | *Cellen uitzaaien*, *MPN (meest waarschijnlijk aantal)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S224 | ✅ | *Microscoop-kalibratie*, *Inoculum (OD verdunnen)*, *Teller* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S220 | — | *Telkamer*, *Celpassageplanner* naar Vue | ✅ Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S221 | — | *Desinfectietest (log-reductie)*, *Sterilisatie (D, z, F₀)* naar Vue | ✅ Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S222 | — | *Groeicurves vergelijken*, *Viabiliteit (trypaanblauw)* naar Vue | ✅ Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S223 | — | *Cellen uitzaaien*, *MPN (meest waarschijnlijk aantal)* naar Vue | ✅ Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S224 | — | *Microscoop-kalibratie*, *Inoculum (OD verdunnen)*, *Teller* naar Vue | ✅ Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S225 | — | *Gelfoto-editor* naar Vue, deel 1: de velden en de uitkomsten; het beeldwerk op het canvas blijft | ✅ `src/tools/gelfoto/`: `GfImage.vue` (foto kiezen en bijstellen), `GfLadder.vue` (ladder, eenheid, meten), `GfDens.vue` (achtergrond, front, massa per band), `GfMarks.vue` (de gemeten banden, met de kolommen rel. int., R<sub>f</sub> en ng die eerst met `insertCell()` werden aangeplakt) en `GfFormat.vue` (opmaak en export). Het beeldwerk (`gfProc`, `gfRender`, de detectie, het slepen) blijft in `web/index.html`; `window.__gfRefresh` tikt de componenten op, want `gf` is geen reactief object. De lanentabel, de bandentabel en "ladder uit een foto" zijn nog gewone HTML (S226). Twee dingen die de hele Vue-overstap raken: de MutationObserver van de vertaallaag slaat nu alles binnen een `data-notr` over (een wijziging binnen een Vue-boom komt daar aan als de host zelf niet de target is, en 0.179 werd dan weer 0,179), en `gfSetIn()` zet een veld van buiten Vue met een input-event erachter | — |
 | S226 | — | *Gelfoto-editor* naar Vue, deel 2: de laanbewerking en de ladderlabels | ✅ `GfLanes.vue` (aantal, lanebreedte en de lanentabel met naam, ladderlane en weghalen), `GfBands.vue` (de ladderlane kiezen, de banden met hun grootte en hun label, samenvoegen/splitsen en de symbolen) en `GfVirtual.vue` ("ladder uit een foto": herkennen, het voorbeeld, de groottes en de virtuele ladder naast de gel). De detectie en het slepen blijven in `web/index.html`; de losse listeners zijn motorfuncties geworden (`gfLaneLad`, `gfLaneDel`, `gfBandBp`, `gfBandMerge`, `gfBandSplit`, `gfBandDel`, `gfVlFile`, `gfVlSizes`, `gfVlUse`). Twee dingen om te weten bij een tool waarvan de toestand buiten Vue blijft: elke computed moet zelf de tik lezen (een computed die hetzelfde object teruggeeft waarschuwt zijn afhankelijkheden niet, dus een lijst gaat als kopie) en een veld achter een `v-if` bestaat nog niet als de motor het wil zetten, vandaar `window.__gfLadVm.setLadder()`. Staat ook in `CLAUDE.md` | — |
 | S227 | — | *PCR-cyclus* naar Vue | ✅ `src/tools/Pcrcyclus.vue`, host `#y-app`; alle `y-*`-id's blijven. `primerInfo()` kreeg een tweede parameter met de zoutinstellingen (leest anders de DOM), `yTa` werd `window.__pcrVm.taAuto` voor de knop in het PCR-programma, en de i18n-observer slaat mutaties binnen `data-notr` over (anders werd het Engelse `1.833` weer `1,833`). Niet gehaald: het *Meer instellingen*-knopje (de expert-velden blijven zichtbaar, net als bij *Osmolariteit*) en de vertaling van de door de UX-laag toegevoegde knoppen *Kopieer naar Excel* en de grafiekknoppen | Sonnet |

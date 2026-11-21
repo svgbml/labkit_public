@@ -35,6 +35,15 @@ import Facs from './tools/Facs.vue';
 import Transfect from './tools/Transfect.vue';
 import Mic from './tools/Mic.vue';
 import Groei from './tools/Groei.vue';
+import Cdna from './tools/Cdna.vue';
+import Gradient from './tools/Gradient.vue';
+import Pcr from './tools/Pcr.vue';
+import Rnaq from './tools/Rnaq.vue';
+import Melt from './tools/Melt.vue';
+import Sds from './tools/Sds.vue';
+import Ligatie from './tools/Ligatie.vue';
+import Wb from './tools/Wb.vue';
+import Oligo from './tools/Oligo.vue';
 import Titr from './tools/Titr.vue';
 import Hh from './tools/Hh.vue';
 import Edta from './tools/Edta.vue';
@@ -49,6 +58,55 @@ import Purif from './tools/Purif.vue';
 import Chrom from './tools/Chrom.vue';
 import Spec from './tools/Spec.vue';
 import Ic50 from './tools/Ic50.vue';
+import Telkamer from './tools/Telkamer.vue';
+import Passage from './tools/Passage.vue';
+import Desinf from './tools/Desinf.vue';
+import Steril from './tools/Steril.vue';
+import Gcomp from './tools/Gcomp.vue';
+import Viab from './tools/Viab.vue';
+import Seed from './tools/Seed.vue';
+import Mpn from './tools/Mpn.vue';
+import Inoc from './tools/Inoc.vue';
+import Micro from './tools/Micro.vue';
+import Teller from './tools/Teller.vue';
+import Transf from './tools/Transf.vue';
+import Pcrcyclus from './tools/Pcrcyclus.vue';
+import Dna from './tools/Dna.vue';
+import Gel from './tools/Gel.vue';
+import Qplate from './tools/Qplate.vue';
+import Qpcr from './tools/Qpcr.vue';
+import Widmark from './tools/Widmark.vue';
+import Mix from './tools/Mix.vue';
+import Ento from './tools/Ento.vue';
+import Stature from './tools/Stature.vue';
+import Glass from './tools/Glass.vue';
+import Strchk from './tools/Strchk.vue';
+import Bpa from './tools/Bpa.vue';
+import Pmi from './tools/Pmi.vue';
+import Kin from './tools/Kin.vue';
+import Hwe from './tools/Hwe.vue';
+import Rmp from './tools/Rmp.vue';
+import Ystr from './tools/Ystr.vue';
+import Pipetteer from './tools/Pipetteer.vue';
+import PcrProgramma from './tools/PcrProgramma.vue';
+import Verdunningsschema from './tools/Verdunningsschema.vue';
+import Kleuringsschema from './tools/Kleuringsschema.vue';
+import Planner from './tools/Planner.vue';
+import Rapport from './tools/Rapport.vue';
+import Centrifuge from './tools/Centrifuge.vue';
+import Timers from './tools/Timers.vue';
+import Plaatindeling from './tools/Plaatindeling.vue';
+import Stat from './tools/Stat.vue';
+import Gelplan from './tools/Gelplan.vue';
+import {gfRefresh} from './tools/gelfoto/tick.js';
+import GfImage from './tools/gelfoto/GfImage.vue';
+import GfLanes from './tools/gelfoto/GfLanes.vue';
+import GfLadder from './tools/gelfoto/GfLadder.vue';
+import GfDens from './tools/gelfoto/GfDens.vue';
+import GfBands from './tools/gelfoto/GfBands.vue';
+import GfVirtual from './tools/gelfoto/GfVirtual.vue';
+import GfMarks from './tools/gelfoto/GfMarks.vue';
+import GfFormat from './tools/gelfoto/GfFormat.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -111,6 +169,46 @@ calc.mic = () => {};
 const gr = mountTool('#g2-app', Groei);
 calc.groei = () => { if (gr && gr.vm) gr.vm.draw(); };
 
+mountTool('#cd-app', Cdna, {pip: 'cdna'});
+calc.cdna = () => {};
+
+const grd = mountTool('#gr-app', Gradient);
+calc.gradient = () => { if (grd && grd.vm) grd.vm.draw(); };
+
+/* PCR-mastermix: de tabel heeft berekende kolommen en is dus geen lk-etable. TBLDEF['q-tbl'] in
+   web/index.html zet, duwt en leest rijen via window.__pcrVm. calc.pcr() laat de buizenrek
+   opnieuw tekenen (taal, thema). */
+const pc = mountTool('#q-app', Pcr, {pip: 'pcr'});
+if (pc) window.__pcrVm = pc.vm;
+calc.pcr = () => { if (pc && pc.vm) pc.vm.draw(); };
+
+mountTool('#rq-app', Rnaq);
+calc.rnaq = () => {};
+
+/* qPCR-smeltcurve tekent −dF/dT met chart(); calc.melt() laat de tekening opnieuw maken
+   (taal, thema). */
+const ml = mountTool('#ml-app', Melt);
+calc.melt = () => { if (ml && ml.vm) ml.vm.draw(); };
+
+/* SDS-PAGE monsters en Ligatie: pip houdt de pipetteergrens (pipScan) werkend na elke render.
+   De monstertabel van SDS is een lk-etable (TBLDEF['ss-tbl'] met set/push/get/blank). */
+mountTool('#ss-app', Sds, {pip: 'sds'});
+calc.sds = () => {};
+
+mountTool('#l-app', Ligatie, {pip: 'ligatie'});
+calc.ligatie = () => {};
+
+/* Western blot-normalisatie en Primers oplossen: beide tabellen hebben een eigen <table> met
+   haken op TBLDEF in web/index.html (via window.__wbVm en window.__olVm). calc.wb() laat de
+   grafiek opnieuw tekenen (taal, thema, verslag-PNG). Primers oplossen houdt de pipetteergrens
+   (pipScan) via {pip: 'oligo'}. */
+const wbm = mountTool('#wb-app', Wb);
+if (wbm) window.__wbVm = wbm.vm;
+calc.wb = () => { if (wbm && wbm.vm) wbm.vm.draw(); };
+
+const olm = mountTool('#ol-app', Oligo, {pip: 'oligo'});
+if (olm) window.__olVm = olm.vm;
+calc.oligo = () => {};
 /* Titratiecurve tekent een curve, dus calc.titr() laat de component opnieuw tekenen. */
 const ti = mountTool('#ti-app', Titr);
 calc.titr = () => { if (ti && ti.vm) ti.vm.draw(); };
@@ -164,3 +262,214 @@ calc.spec = () => {};
 /* Dosis-respons tekent een fit op een canvas, dus calc.ic50() laat de component opnieuw tekenen. */
 const ic = mountTool('#ic-app', Ic50);
 calc.ic50 = () => { if (ic && ic.vm) ic.vm.draw(); };
+/* Telkamer: de vakken van k-sq hangen van de kamer af; de component zet window.__telkamerVm
+   zodat kSq() in web/index.html hem direct kan laten tekenen. */
+mountTool('#k-app', Telkamer);
+calc.telkamer = () => {};
+
+mountTool('#ps-app', Passage);
+calc.passage = () => {};
+
+mountTool('#ds-app', Desinf);
+calc.desinf = () => {};
+
+/* Sterilisatie tekent een overlevingscurve, dus calc.steril() laat de component opnieuw tekenen. */
+const st = mountTool('#ste-app', Steril);
+calc.steril = () => { if (st && st.vm) st.vm.draw(); };
+
+/* Groeicurves vergelijken tekent een grafiek, dus calc.gcomp() laat de component opnieuw tekenen. */
+const gc = mountTool('#gm-app', Gcomp);
+calc.gcomp = () => { if (gc && gc.vm) gc.vm.draw(); };
+
+mountTool('#vb-app', Viab);
+calc.viab = () => {};
+
+mountTool('#sd-app', Seed);
+calc.seed = () => {};
+
+mountTool('#mp-app', Mpn);
+calc.mpn = () => {};
+
+mountTool('#io-app', Inoc);
+calc.inoc = () => {};
+
+mountTool('#mc-app', Micro);
+calc.micro = () => {};
+
+/* Teller: de stand zit in de component. calc.teller() deed vroeger een nieuwe render, en die
+   haalde de markering van het laatst getelde vak weg; dat doet hij nog steeds. */
+const tl = mountTool('#c-app', Teller);
+calc.teller = () => { if (tl && tl.vm) tl.vm.flash = -1; };
+mountTool('#tf-app', Transf);
+calc.transf = () => {};
+
+/* PCR-cyclus tekent het programma op een canvas, dus calc.pcrcyclus() laat de component opnieuw
+   tekenen. De annealingtemperatuur staat op window.__pcrVm.taAuto voor de knop in het
+   PCR-programma (#pg-from). */
+const yc = mountTool('#y-app', Pcrcyclus);
+calc.pcrcyclus = () => { if (yc && yc.vm) yc.vm.draw(); };
+
+/* DNA-kwantificatie, met de forensische qPCR-kwantificatie (fq-*) als vierde paneel. */
+mountTool('#dna-app', Dna);
+calc.dna = () => {};
+
+/* Agarosegel & bandgrootte tekent de standaardcurve, dus calc.gel() laat de component opnieuw
+   tekenen. LADDERS, LEX en GELR blijven globals in web/index.html (Gelplanner en Gelfoto). */
+const gl = mountTool('#g-app', Gel);
+calc.gel = () => { if (gl && gl.vm) gl.vm.draw(); };
+
+/* qPCR-plaatindeling: de plaatontwerper (#qp2-pld) is een DOM-widget buiten de Vue-boom en meldt
+   wijzigingen via window.__qpVm.onPlate(); calc.qplate() laat de tekening opnieuw maken. */
+const qp = mountTool('#qp-app', Qplate);
+if (qp) window.__qpVm = qp.vm;
+calc.qplate = () => { if (qp && qp.vm) qp.vm.reflow(); };
+
+/* qPCR-analyse (ΔΔCt) tekent de staafgrafiek op een canvas, dus calc.qpcr() laat de component
+   opnieuw tekenen. De Ct-tabel (qp-tbl) is een lk-etable die zelf op TBLDEF/ADDBTN staat. */
+const qc = mountTool('#qpc-app', Qpcr);
+if (qc) window.__qpcrVm = qc.vm;
+calc.qpcr = () => { if (qc && qc.vm) qc.vm.draw(); };
+/* Bloedalcohol tekent een curve; de component tekent zelf opnieuw na elke render. */
+const wd = mountTool('#wd-app', Widmark);
+calc.widmark = () => { if (wd && wd.vm) wd.vm.draw(); };
+
+mountTool('#mx-app', Mix);
+calc.mix = () => {};
+
+/* Entomologie tekent de opgebouwde graaddagen; de component tekent zelf opnieuw na elke render. */
+const ent = mountTool('#ent-app', Ento);
+calc.ento = () => { if (ent && ent.vm) ent.vm.draw(); };
+
+/* Lichaamslengte tekent de intervallen per bot; de component tekent zelf opnieuw na elke render. */
+const sl = mountTool('#sl-app', Stature);
+calc.stature = () => { if (sl && sl.vm) sl.vm.draw(); };
+
+/* Glasvergelijking tekent de metingen tegen het interval; de component tekent zelf opnieuw na elke render. */
+const gls = mountTool('#gl-app', Glass);
+calc.glass = () => { if (gls && gls.vm) gls.vm.draw(); };
+mountTool('#sc-app', Strchk);
+calc.strchk = () => {};
+
+/* Bloedvlekpatronen tekent op een canvas; calc.bpa() laat de component opnieuw tekenen */
+const bp = mountTool('#bp-app', Bpa);
+calc.bpa = () => { if (bp && bp.vm) bp.vm.draw(); };
+
+const pm = mountTool('#pm-app', Pmi);
+calc.pmi = () => { if (pm && pm.vm) pm.vm.draw(); };
+
+mountTool('#kn-app', Kin);
+calc.kin = () => {};
+
+mountTool('#hw-app', Hwe);
+calc.hwe = () => {};
+
+/* Forensische matchkans zet zelf TBLDEF['rm-tbl']: die tabel heeft een uitkomstkolom en is
+   daarom geen lk-etable */
+mountTool('#rm-app', Rmp);
+calc.rmp = () => {};
+
+mountTool('#ys-app', Ystr);
+calc.ystr = () => {};
+/* Overlevingscurve tekent een curve, dus calc.km() laat de component opnieuw tekenen. */
+const km = mountTool('#km-app', Km);
+calc.km = () => { if (km && km.vm) km.vm.draw(); };
+
+/* ROC-curve en Bland-Altman tekenen ook een grafiek, dus calc.roc() en calc.bland() laten de
+   component opnieuw tekenen. */
+const roc = mountTool('#ro-app', Roc);
+calc.roc = () => { if (roc && roc.vm) roc.vm.draw(); };
+
+const bland = mountTool('#ba-app', Bland);
+calc.bland = () => { if (bland && bland.vm) bland.vm.draw(); };
+
+/* Westgard / Levey-Jennings tekent een kaart, dus calc.westgard() laat de component opnieuw tekenen. */
+const westgard = mountTool('#wg-app', Westgard);
+calc.westgard = () => { if (westgard && westgard.vm) westgard.vm.draw(); };
+
+/* Methodevalidatie tekent de kalibratielijn, dus calc.mval() laat de component opnieuw tekenen. */
+const mval = mountTool('#mv-app', Mval);
+calc.mval = () => { if (mval && mval.vm) mval.vm.draw(); };
+
+/* Meetonzekerheid tekent balken, dus calc.munc() laat de component opnieuw tekenen;
+   Pipetkalibratie heeft geen tekening en rekent zelf al opnieuw. */
+const munc = mountTool('#mu-app', Munc);
+calc.munc = () => { if (munc && munc.vm) munc.vm.draw(); };
+
+mountTool('#pc-app', Pipcal);
+calc.pipcal = () => {};
+/* Pipetteerschema tekent op #pp-cv (en het buizenrek op #ppr-cv) met de bestaande tekenfuncties;
+   calc.ppip() laat de component rekenen en tekenen, want de invoer-events van de pagina, het
+   terugzetten van een sessie en het exporteren van de tekening roepen dat aan. */
+const pp = mountTool('#pp-app', Pipetteer);
+calc.ppip = () => { if (pp && pp.vm) pp.vm.draw(); };
+
+/* PCR-programma tekent op #pg-cv met de bestaande tekenfuncties; calc.pprog() laat de component
+   opnieuw tekenen. "Neem over uit PCR-cyclus" (#pg-from) leest de globale yTa van die tool. */
+const pg = mountTool('#pg-app', PcrProgramma);
+calc.pprog = () => { if (pg && pg.vm) pg.vm.draw(); };
+
+/* Verdunningsschema tekent op #pv-cv met de bestaande tekenfuncties; calc.pverd() laat de
+   component opnieuw tekenen (de invoer-events van de pagina en het exporteren roepen dat aan). */
+const pv = mountTool('#pv-app', Verdunningsschema);
+calc.pverd = () => { if (pv && pv.vm) pv.vm.draw(); };
+
+/* Kleuringsschema tekent op #stn-cv met de bestaande tekenfuncties; calc.stain() laat de
+   component opnieuw tekenen (de invoer-events van de pagina en het exporteren roepen dat aan). */
+const stn = mountTool('#stn-app', Kleuringsschema);
+calc.stain = () => { if (stn && stn.vm) stn.vm.draw(); };
+
+/* Experimentplanner tekent op #xp-cv met de bestaande tekenfuncties; calc.plan() laat de
+   component opnieuw tekenen. "Wachtstappen als timers" (#xp-tim) en het agendabestand (#xp-ics)
+   zitten in de component. */
+const xp = mountTool('#xp-app', Planner);
+calc.plan = () => { if (xp && xp.vm) xp.vm.draw(); };
+
+/* Rapport / labjournaal: de bediening en de melding staan in de component; rpSection, rpDoc en
+   rpPrint blijven globaal in tools/nt/62_report.js omdat ook "Afdrukken" bij elke tool ze
+   aanroept. De component rekent zelf opnieuw. */
+mountTool('#rp-app', Rapport);
+calc.report = () => {};
+
+/* Centrifuge: de twee velden zijn elkaars uitkomst (rpm of × g, het laatst bewerkte veld telt);
+   de component houdt dat zelf bij, dus calc.centrifuge() hoeft niets meer. */
+mountTool('#z-app', Centrifuge);
+calc.centrifuge = () => {};
+
+/* Timers: de timers zelf (lijst, tikken, piepen, bewaren, addTimer, tmAct) blijven in
+   web/index.html, want ze lopen door in andere tools en de Experimentplanner voegt er toe. De
+   component tekent formulier en rooster en wordt via window.__tmVm.tick bijgewerkt. */
+mountTool('#tm-app', Timers);
+calc.timers = () => {};
+
+/* Plaatindeling: de bediening zit in de component; de gedeelde plaatontwerper (#w-pld) en de
+   tekening (#w-cv) komen uit tools/nt/02_plate.js en 04_plaat.js en worden in mounted() gebouwd.
+   calc.plaat() (= plateImg()) staat in 04_plaat.js. */
+mountTool('#w-app', Plaatindeling);
+/* Statistiek tekent bij de ANOVA staafjes, dus calc.stat() laat de component opnieuw tekenen;
+   de rest van de uitkomst volgt uit de velden en rekent zichzelf opnieuw. */
+const sta = mountTool('#st-app', Stat);
+calc.stat = () => { if (sta && sta.vm) sta.vm.draw(); };
+
+/* De Gelplanner tekent twee gels; calc.gplan() laat de component opnieuw tekenen en daarmee
+   ook de verwachte gel, de receptkaart en de looptijd uit tools/nt/48_gplan.js. */
+const gp = mountTool('#gp-app', Gelplan);
+calc.gplan = () => { if (gp && gp.vm) gp.vm.draw(); };
+/* De gelfoto-editor gaat in stukken om: de velden en de uitkomsten eerst (S225), de
+   laanbewerking en de ladderlabels daarna (S226). Het beeldwerk (gfProc, gfRender, de
+   detectie en het slepen) blijft in web/index.html, want dat rekent met canvassen en staat
+   daar achter de validatiegevallen van de editor.
+
+   Elke component zit op zijn eigen host binnen de panelen die de tool al had; de koppen van
+   de panelen en de bronregel blijven gewone HTML. window.__gfRefresh laat de motor ze alle
+   bijwerken: gf is geen reactief object, dus Vue ziet een verandering erin niet zelf. */
+window.__gfRefresh = gfRefresh;
+mountTool('#gf-app-img', GfImage);
+mountTool('#gf-app-lanes', GfLanes);
+mountTool('#gf-app-lad', GfLadder);
+mountTool('#gf-app-virt', GfVirtual);
+mountTool('#gf-app-dens', GfDens);
+mountTool('#gf-app-bands', GfBands);
+mountTool('#gf-app-marks', GfMarks);
+mountTool('#gf-app-fmt', GfFormat);
+/* calc.gelfoto blijft gfUpdate() in index.html: dat leest de velden en tekent opnieuw. */
+
