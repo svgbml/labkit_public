@@ -150,6 +150,31 @@ document.addEventListener('click',e=>{
   const h=e.target.closest('[data-hist]'); if(h){ histOpen(h.dataset.hist); return; }
   const p=e.target.closest('[data-tprint]'); if(p&&typeof rpDoc==='function'){ const id=p.dataset.tprint; rpPrint(rpDoc([id],true,true,$('#t-'+id+' .tool-head h2').textContent,$('#sess-name')?$('#sess-name').value:'')); } });
 
+/* ---------- S137: fout of idee melden per tool (#284, #285) ----------
+   "Melden" in de werkbalk opent een venster met een foutrapport (versie, tool, browser, de
+   invoer van deze tool en de laatste opgevangen scriptfouten uit src/lib/errors.js) om te
+   kopiëren, en een link die een vooraf ingevulde melding op GitHub opent. Er gaat niets
+   vanzelf de deur uit: de gebruiker ziet het rapport en plakt het zelf. */
+const LK_REPO='https://github.com/svgbml/labkit_public';
+function lkToolName(id){ const h=$('#t-'+id+' .tool-head h2'); return h?h.textContent.trim():id; }
+function lkReport(id){ const s=toolSnap(id)||{}, errs=lkErrors();
+  return [`Labkit BML ${APPVER} · ${lkToolName(id)} (#${id})`, `${navigator.userAgent}`, `${LANG} · ${innerWidth}×${innerHeight} · ${location.protocol}`, '',
+    trPlain('Invoer van deze tool:'), '```json', JSON.stringify({v:s.v||{},tb:s.tb||{}},null,1), '```', '',
+    errs.length?trPlain('Laatste scriptfouten:')+'\n'+errs.map(e=>`- ${e.at} ${e.msg}${e.where?' ('+e.where+')':''}`).join('\n'):trPlain('Geen scriptfouten opgevangen.')].join('\n'); }
+function lkIssueUrl(id){ const body=[`Labkit BML ${APPVER} · ${lkToolName(id)} (#${id})`, '', trPlain('Wat deed je, wat verwachtte je en wat gebeurde er?'), '', '', trPlain('Plak hieronder eventueel het foutrapport (knop "Foutrapport kopiëren" in de app).'), ''].join('\n');
+  return `${LK_REPO}/issues/new?title=${encodeURIComponent('['+lkToolName(id)+'] ')}&body=${encodeURIComponent(body)}`; }
+function lkReportOpen(id){ const m=appModal(`<h3 style="margin-top:0">Fout of idee melden</h3>
+    <p style="margin:0 0 8px;font-size:13px;color:var(--muted)">Het foutrapport bevat de versie, deze tool, je browser, de invoer van deze tool en de laatste scriptfouten. Er wordt niets automatisch verstuurd.</p>
+    <textarea class="lk-rep" readonly rows="9" data-notr="" aria-label="Foutrapport" style="width:100%;font-family:ui-monospace,monospace;font-size:12px"></textarea>
+    <div class="note warn">Controleer of er geen vertrouwelijke gegevens in staan, zoals namen van personen of zaaknummers.</div>
+    <div class="row" style="justify-content:space-between;margin-top:12px;gap:8px;flex-wrap:wrap"><div class="row" style="gap:8px"><button type="button" class="primary lk-rep-copy">Foutrapport kopiëren</button><a class="lk-rep-gh" target="_blank" rel="noopener">Melding op GitHub openen</a></div><button type="button" class="lk-close">Sluiten</button></div>`);
+  const ta=m.box.querySelector('.lk-rep'); ta.value=lkReport(id); m.box.querySelector('.lk-rep-gh').href=lkIssueUrl(id);
+  m.box.querySelector('.lk-close').addEventListener('click',m.close);
+  m.box.querySelector('.lk-rep-copy').addEventListener('click',async e=>{ const b=e.currentTarget; try{ await navigator.clipboard.writeText(ta.value); flashBtn(b,trPlain('Gekopieerd')); }catch(err){ ta.select(); try{ document.execCommand('copy'); flashBtn(b,trPlain('Gekopieerd')); }catch(e2){ flashBtn(b,trPlain('Geblokkeerd')); } } }); }
+$$('.lk-tbar').forEach(bar=>{ const id=bar.querySelector('[data-share]').dataset.share;
+  bar.insertAdjacentHTML('beforeend',`<button type="button" class="ghost" data-report="${id}" title="Een fout melden of een idee voor deze tool doorgeven">Melden</button>`); });
+document.addEventListener('click',e=>{ const r=e.target.closest('[data-report]'); if(r) lkReportOpen(r.dataset.report); });
+
 /* ---------- "volgende tool": handgekozen vervolgstappen onder aan elke tool ---------- */
 const NEXT={
   verdunning:['oplossing','pverd','pipkeus'],oplossing:['hh','osmo','pverd'],units:['verdunning','molm'],molm:['oplossing','verdunning'],hh:['bufcap','titr','phadj'],phadj:['hh','oplossing','titr'],
@@ -338,6 +363,11 @@ smpUse('qplate',names=>{ const el=$('#qp2-s'); if(!el||!names.length) return;
 
 /* alles hierboven ook als globale naam, live (zie src/lib/global.js) */
 live({
+  LK_REPO: () => LK_REPO,
+  lkToolName: [() => lkToolName, v => { lkToolName = v; }],
+  lkReport: [() => lkReport, v => { lkReport = v; }],
+  lkIssueUrl: [() => lkIssueUrl, v => { lkIssueUrl = v; }],
+  lkReportOpen: [() => lkReportOpen, v => { lkReportOpen = v; }],
   NCKEY: () => NCKEY,
   navColApply: [() => navColApply, v => { navColApply = v; }],
   navColToggle: [() => navColToggle, v => { navColToggle = v; }],

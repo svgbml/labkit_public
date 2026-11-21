@@ -70,6 +70,13 @@
       <div class="panel"><h3>{{ t('Rondleiding') }}</h3>
         <p style="margin:0 0 10px;color:var(--muted);font-size:13px">{{ t('Vier korte stappen door het zoeken, de fasen, de werkstromen en deze instellingen.') }}</p>
         <div class="row"><button type="button" data-tour-start="">{{ t('Rondleiding opnieuw starten') }}</button></div></div>
+      <div class="panel"><h3>{{ t('Gegevens') }}</h3>
+        <p style="margin:0 0 10px;color:var(--muted);font-size:13px">{{ t('Alle instellingen, invoer, geschiedenis, tabellen en protocollen van dit apparaat als één bestand, bijvoorbeeld om over te zetten naar een nieuwe computer. Importeren vervangt wat hier staat.') }}</p>
+        <div class="row">
+          <button type="button" id="ui-export" @click="exportAll">{{ t('Alles exporteren') }}</button>
+          <button type="button" id="ui-import" @click="$refs.imp.click()">{{ t('Alles importeren') }}</button>
+          <input ref="imp" type="file" id="ui-import-file" accept=".json,application/json" hidden @change="importAll">
+        </div></div>
       <div class="panel"><h3>{{ t('Herstellen') }}</h3>
         <div class="row"><button type="button" id="ui-reset" @click="reset">{{ t('Uiterlijk terug naar standaard') }}</button></div></div>
     </div>
@@ -98,6 +105,14 @@ export default {
        reset pas na de volgende render */
     apply() { this.$nextTick(() => { if (typeof applyUI === 'function') applyUI(); }); },
     setLang() { try { localStorage.setItem(LKEY, this.lang); } catch (e) {} location.reload(); },
+    /* S137 (#289): dezelfde bestandsvorm als "Sessie opslaan", maar importeren vervangt alles */
+    exportAll() { if (typeof lkExportAll === 'function') lkExportAll('', 'labkit-alles'); },
+    importAll(e) {
+      const f = e.target.files[0]; e.target.value = '';
+      if (!f || typeof lkImportAll !== 'function') return;
+      if (!confirm(trPlain('Alle gegevens op dit apparaat vervangen door die uit het bestand?'))) return;
+      lkImportAll(f, true);
+    },
     check() { if (typeof checkUpdate === 'function') checkUpdate(true); },
     reset() {
       Object.assign(this, DEF);

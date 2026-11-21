@@ -200,12 +200,20 @@ calc.groei=function(){};
 /* FORENSISCHE KWANTIFICATIE (fq-*) zit sinds S228 in src/tools/Dna.vue */
 
 /* ================= SESSIE OPSLAAN / OPENEN ================= */
-$('#sess-save').addEventListener('click',()=>{ try{ localStorage.setItem(TBLKEY,JSON.stringify(tblSnap())); }catch(e){}
+/* S137: lkExportAll/lkImportAll bewaren en lezen alle labkit:-sleutels (instellingen, invoer,
+   geschiedenis, tabellen, protocollen, favorieten) als één bestand. "Sessie openen" voegt de
+   sleutels uit het bestand toe; "Alles importeren" (Instellingen) vervangt ze, voor het
+   overzetten naar een ander apparaat. */
+function lkExportAll(pn,base){ try{ localStorage.setItem(TBLKEY,JSON.stringify(tblSnap())); }catch(e){}
   const data={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('labkit:')) data[k]=localStorage.getItem(k); } }catch(e){}
   const d=new Date(), stamp=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  const pn=($('#sess-name').value||'').trim(); saveBlob(`${pn?safeName(pn):'labkit-sessie'}-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',project:pn,versie:APPVER,opgeslagen:d.toISOString(),data},null,1)],{type:'application/json'})).catch(()=>{}); });
+  pn=(pn||'').trim(); return saveBlob(`${pn?safeName(pn):base||'labkit-sessie'}-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',project:pn,versie:APPVER,opgeslagen:d.toISOString(),data},null,1)],{type:'application/json'})).catch(()=>{}); }
+function lkImportAll(f,replace){ if(!f) return Promise.resolve(); return f.text().then(t=>{ const j=JSON.parse(t); if(!j||j.app!=='Labkit BML'||typeof j.data!=='object') throw 0;
+    if(replace){ const old=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('labkit:')) old.push(k); } old.forEach(k=>localStorage.removeItem(k)); }
+    Object.entries(j.data).forEach(([k,v])=>{ if(k.startsWith('labkit:')&&typeof v==='string') localStorage.setItem(k,v); }); location.reload(); }).catch(()=>alertBox('Dit bestand is geen Labkit-sessie.')); }
+$('#sess-save').addEventListener('click',()=>lkExportAll($('#sess-name').value));
 $('#sess-open').addEventListener('click',()=>$('#sess-file').click());
-$('#sess-file').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const j=JSON.parse(t); if(!j||j.app!=='Labkit BML'||typeof j.data!=='object') throw 0; Object.entries(j.data).forEach(([k,v])=>{ if(k.startsWith('labkit:')) localStorage.setItem(k,v); }); location.reload(); }).catch(()=>alertBox('Dit bestand is geen Labkit-sessie.')); });
+$('#sess-file').addEventListener('change',e=>lkImportAll(e.target.files[0],false));
 function alertBox(t){ const n=document.createElement('div'); n.className='note bad'; n.style.cssText='position:fixed;left:16px;bottom:16px;z-index:50;max-width:320px'; n.textContent=t; document.body.appendChild(n); setTimeout(()=>n.remove(),4000); }
 
 /* ================= TABELLEN, PLAAT EN REEKS BEWAREN ================= */
@@ -599,6 +607,8 @@ live({
   MAINW: () => MAINW,
   lkMainWatch: [() => lkMainWatch, v => { lkMainWatch = v; }],
   alertBox: [() => alertBox, v => { alertBox = v; }],
+  lkExportAll: [() => lkExportAll, v => { lkExportAll = v; }],
+  lkImportAll: [() => lkImportAll, v => { lkImportAll = v; }],
   TBLKEY: () => TBLKEY,
   TBLDEF: () => TBLDEF,
   tblSnap: [() => tblSnap, v => { tblSnap = v; }],

@@ -10,7 +10,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 - **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (54 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (24 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **116 done, 154 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **117 done, 153 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-21)
 
@@ -135,7 +135,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | R3 | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | — |
 | W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — |
 | **Wave 6: performance and quality** | | | | |
-| Q1a | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything |
+| Q1a ✅ | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything |
 | Q1b | Sonnet | S138, S139, S141 | K3 (then *any time*) | anything |
 | Q2 | Opus 5 | S140, S142 | K3 | — |
 | F1a | Opus 5.5 | **Re-plan phase 10 first** (lazy init and DOM templates may be largely solved by mounting a component only when its tool opens, which phase 16 makes possible), then S125–S127 | K3 | — |
@@ -388,7 +388,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S134 | 269, 273 | Bundle size budget and memory check in `perf_budget.py` · ✅ `tests/perf_baseline.json` holds the sizes of `web/index.html`, `web/i18n-en.js` and the bundle; more than 5% growth fails (`--update-baseline` after a deliberate one). JS heap after all tools plus the test gel ~14 MB, limit 40 MB (`LABKIT_HEAP_MB`) | Sonnet |
 | S135 | 270, 271, 274 | Gel editor benchmark, mobile Lighthouse, typing-latency (INP) test · ✅ `perf_budget.py`: load + straighten + measure of the test gel, best of 3, ~260 ms (budget 2000 ms); typing in 12 heavy tools and the gel editor, worst keystroke ~70 ms in *Oplossing* (budget 100 ms, Event Timing API). `lighthouserc.mobile.json` as a second Lighthouse run: on the mobile preset the score is ~0.4 and Total Blocking Time ~5.6 s (warnings only; input for F1a) | Sonnet |
 | S136 | 275 | Performance summary in the CI run · ✅ `perf_budget.py` writes `tests/perf_result.json` (uploaded with the validation report, so runs can be compared over time) and a table with start-up, sizes vs baseline, heap, gel benchmark and slowest keystroke to the GitHub job summary | Haiku |
-| S137 | 284, 285, 289 | Copy error report, feedback link per tool, export/import everything | Sonnet |
+| S137 | 284, 285, 289 | Copy error report, feedback link per tool, export/import everything · ✅ *Melden* in every tool bar: a dialog with the error report (version, tool, browser, the tool's inputs, the last 10 script errors from `src/lib/errors.js`) to copy, a privacy warning, and a link that opens a pre-filled GitHub issue. *Instellingen → Gegevens*: export everything / import everything (replaces all `labkit:` keys after a confirm; `lkExportAll`/`lkImportAll` in `src/legacy/app.js`, also used by *Sessie opslaan/openen*, which still merges). `alertBox()` now translates its text | Sonnet |
 | S138 | 278 | Unit tests for pure calculation functions | Sonnet |
 | S139 | 279 | Visual regression screenshots for key tools and the gel editor | Sonnet |
 | S140 | 280, 281, 282, 283 | Screen-reader results, keyboard gel editor/plate designer, theme contrast check, reduced motion | Opus 5 |
