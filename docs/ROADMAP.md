@@ -111,7 +111,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | K2 ✅ | Opus 5.5 | S267 (Opus 5) shared helpers, S268 engines, S269 (Sonnet) `tools/nt/` into `src/` and `insert_tools.py` retired | K1 | — |
 | K3 ✅ | Opus 5.5 | S270 (Opus 5) static text through `t()`, S271 DOM translation layer removed, S272 (Sonnet) rules and docs | K2 | — |
 | **Wave 3: finish phase 4** | | | | |
-| P1 | Opus 5 | S42, S43 (Sonnet), S44, S45: primers, in-silico PCR and digest | K3 | E2, *any time* batches |
+| P1 ✅ | Opus 5 | S42, S43 (Sonnet), S44, S45: primers, in-silico PCR and digest | K3 | E2, *any time* batches |
 | P2 | Sonnet | S41, S47: overage switch, material list and protocol export | K3 | P1 |
 | P3 | Opus 5.5 | S46 plasmid map (new tool, Vue) | S45 | — |
 | **Wave 4: execution and gel editor** | | | | |
