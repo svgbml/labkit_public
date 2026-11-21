@@ -37,7 +37,7 @@ over:
 - **S91:** *Standaardcurve* reads a pasted plate grid, but not per instrument.
 - **S93:** *qPCR-analyse* reads a pasted Ct table by its header, but not per instrument.
 
-At the last full `python tools/check.py` (2026-11-21, after S272, end of phase 16): **286 of 286 validation checks**, 0 layout problems in Dutch and 2 in English (the known label overflow in *PCR-mastermix*), 0 untranslated texts (including the new leftover-Dutch check), start-up 413/459 ms. `tests/robust_audit.py` could not finish on this machine: the browser runs out of memory while loading a page (see *Known bugs*). By the owner's decision (2026-11-21) that failure is **not blocking** on this machine and the test is not rerun here; it still runs in CI on GitHub.
+At the last full `python tools/check.py` (2026-11-21, after batch Q1a, in a cloud session): **286 of 286 validation checks**, 0 layout problems in Dutch and English, 0 untranslated texts, `tests/robust_audit.py` passed; `tests/perf_budget.py`: start-up 846/961 ms, JS heap 14 MB after all tools, gel benchmark 286 ms, slowest keystroke 72 ms (*Oplossing*). Earlier (after S272, on the owner's Windows machine) `tests/robust_audit.py` could not finish because the browser ran out of memory (see *Known bugs*); by the owner's decision (2026-11-21) that failure is **not blocking** on that machine and it still runs in CI on GitHub.
 
 ### Vue migration: how far it is
 
