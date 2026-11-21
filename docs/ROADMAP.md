@@ -567,11 +567,11 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S240 | — | *Entomologie (graaddagen)* naar Vue | ✅ `src/tools/Ento.vue`; de curve tekent na elke render met `chart()`. `enDay()` blijft in `tools/nt/72_ento.js` | Sonnet |
 | S241 | — | *Lichaamslengte uit botten* naar Vue | ✅ `src/tools/Stature.vue`; het intervaldiagram tekent na elke render met `pShow()`. `SLF`, `SLN` en `SLR` blijven in `tools/nt/71_stature.js` | Sonnet |
 | S242 | — | *Glasvergelijking (brekingsindex)* naar Vue | ✅ `src/tools/Glass.vue`; de tekening gaat na elke render met `pShow()`. `glF()` blijft in `tools/nt/73_glass.js` | Sonnet |
-| S243 | — | *STR-profielcontrole* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S244 | — | *Bloedvlekpatronen* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S245 | — | *Tijd sinds overlijden* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S246 | — | *Verwantschapsindex*, *Hardy-Weinberg & forensische kengetallen* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S247 | — | *Forensische matchkans*, *Y-STR / mtDNA-frequentie* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S243 | — | *STR-profielcontrole* naar Vue | ✅ `src/tools/Strchk.vue` op `lk-etable`; de beoordeling per locus komt ongewijzigd uit `calc.strchk`. De knop *Kopieer naar Excel* die `99z_ux` bij elke tabel zet blijft in een Vue-boom Nederlands (geldt voor alle Vue-tools; hoort bij de app-shell) | Sonnet |
+| S244 | — | *Bloedvlekpatronen* naar Vue | ✅ `src/tools/Bpa.vue` op `lk-etable`; rekenwerk en tekening ongewijzigd uit `calc.bpa`. De knoppenbalk onder de tekening staat in de template (zonder `data-picbar`, dat zou bij het opstarten met Nederlandse `innerHTML` gevuld worden) | Sonnet |
+| S245 | — | *Tijd sinds overlijden* naar Vue | ✅ `src/tools/Pmi.vue`; Henssge en de curve ongewijzigd uit `calc.pmi`. Daarbij in `web/index.html` een fout in de DOM-vertaallaag hersteld: de MutationObserver keek alleen of het gewijzigde element zelf `data-notr` had, niet een voorouder, en zette na een herrender in het Engels `0.365` terug naar `0,365` (gold voor alle Vue-tools) | Sonnet |
+| S246 | — | *Verwantschapsindex*, *Hardy-Weinberg & forensische kengetallen* naar Vue | ✅ `src/tools/Kin.vue` (op `lk-etable`, rekenwerk uit `calc.kin`) en `src/tools/Hwe.vue`; `hwStats()`, `hwExact()` en `hwRng()` blijven onveranderd in `tools/nt/74_hwe.js` | Sonnet |
+| S247 | — | *Forensische matchkans*, *Y-STR / mtDNA-frequentie* naar Vue | ✅ `src/tools/Rmp.vue` en `src/tools/Ystr.vue`; `betaInvUp()` blijft in `tools/nt/23_ystr.js`. De matchkanstabel heeft een uitkomstkolom tussen de invoer, dus hij staat in de component zelf (geen `lk-etable`) en zet dezelfde `TBLDEF`-haken; `rmRow` en `RMDATA` zijn uit `web/index.html`. Het validatiegeval vult de tabel nu via `__tbl()` in plaats van met `rmRow`; referentiewaarde ongewijzigd | Sonnet |
 | S248 | — | *Statistiek* naar Vue, deel 1: de toetsen t, ANOVA en Kruskal-Wallis | Zelfde uitkomsten; validatie blijft staan | Opus 5 |
 | S249 | — | *Statistiek* naar Vue, deel 2: de rest: chi-kwadraat, regressie, power en de post-hoc | Zelfde uitkomsten; validatie blijft staan | Opus 5 |
 | S250 | — | *Overlevingscurve (Kaplan-Meier)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |

@@ -1091,17 +1091,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-rmp" data-tool="rmp">
   <header class="tool-head"><h2>Forensische matchkans</h2>
   <p>Genotypefrequentie per STR-locus volgens Hardy-Weinberg en de gecombineerde kans op een toevallige match (random match probability) voor een enkelvoudig profiel.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="rm-th">θ (subpopulatiecorrectie)</label><select id="rm-th" style="width:100%"><option value="0">0 (geen)</option><option value="0.01" selected>0,01</option><option value="0.03">0,03</option></select></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="rm-tbl" class="mini"><thead><tr><th>Locus</th><th class="num">Frequentie allel 1</th><th class="num">Frequentie allel 2</th><th class="num">Genotypefrequentie</th><th></th></tr></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:10px"><button type="button" id="rm-add">+ Locus</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Homozygoot: laat allel 2 leeg. Gebruik allelfrequenties uit de populatiedatabase van je opdracht; de voorbeeldfrequenties zijn verzonnen.</p>
-    </div>
-    <div class="result" id="rm-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Rmp.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="rm-app"></div>
   <p class="src">Heterozygoot: 2pq; homozygoot: p² + p(1 − p)θ (National Research Council, The Evaluation of Forensic DNA Evidence, 1996, aanbeveling 4.1). Gecombineerde matchkans = product over onafhankelijke loci (productregel); de bewijskracht voor een enkelvoudig profiel is LR = 1 / matchkans (Butler, Advanced Topics in Forensic DNA Typing: Interpretation, 2015).</p>
 </section>
 
@@ -2165,20 +2157,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-strchk" data-tool="strchk">
   <header class="tool-head"><h2>STR-profielcontrole</h2>
   <p>Controleer een STR-profiel per locus: piekhoogteverhouding van heterozygoten, mogelijke stutterpieken, pieken onder de analytische drempel, mogelijke drop-out onder de stochastische drempel en het minimale aantal bijdragers.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="sc-at">Analytische drempel</label><div class="inu"><input id="sc-at" inputmode="decimal" value="50"><span class="u">RFU</span></div></div>
-        <div class="f"><label for="sc-st">Stochastische drempel</label><div class="inu"><input id="sc-st" inputmode="decimal" value="200"><span class="u">RFU</span></div></div>
-        <div class="f"><label for="sc-phr">Minimale piekhoogteverhouding</label><div class="inu"><input id="sc-phr" inputmode="decimal" value="60"><span class="u">%</span></div></div>
-        <div class="f"><label for="sc-stut">Stutterfilter (n−1)</label><div class="inu"><input id="sc-stut" inputmode="decimal" value="15"><span class="u">%</span></div></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px;max-height:440px;overflow-y:auto"><table id="sc-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="sc-tbl-add">+ Piek</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Eén regel per piek. Plak drie kolommen uit de export van je analysesoftware (locus, allel, hoogte). Drempels zijn per lab en kit gevalideerd; de standaardwaarden zijn voorbeelden. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result" id="sc-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Strchk.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="sc-app"></div>
   <p class="src">Begrippen volgens de SWGDAM Interpretation Guidelines for Autosomal STR Typing (2017, rev. 2021): het lab stelt een analytische en stochastische drempel en verwachtingen voor de piekhoogteverhouding (PHR) vast. PHR = laagste / hoogste piek van een heterozygoot; vaak boven 60% (FBI Laboratory, BIO-574; San Diego PD Forensic Biology). Stutter: piek één repeat kleiner dan een allel, gefilterd onder een kit-specifiek percentage (NIST STRBase, bijv. 15%). Minimaal aantal bijdragers = afgerond omhoog (maximaal aantal allelen per locus / 2).</p>
 </section>
 <!-- /NT:strchk -->
@@ -2187,14 +2168,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-bpa" data-tool="bpa">
   <header class="tool-head"><h2>Bloedvlekpatronen</h2>
   <p>Inslaghoek per bloedvlek uit breedte en lengte, het convergentiegebied uit de looprichting van meerdere vlekken, en een schatting van de hoogte van het punt van oorsprong.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="tbl-wrap"><table id="bp-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="bp-tbl-add">+ Vlek</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Meet breedte en lengte van de ellips zonder staart of satellietdruppels. Positie x, y in cm op het oppervlak; richting γ = looprichting van de druppel in graden (0° = positieve x-as, tegen de klok in). Voor convergentie zijn minstens twee vlekken met positie en richting nodig. Voorbeelddata zijn berekend voor een oorsprong op (60, 40) cm en 45 cm hoogte.</p>
-    </div>
-    <div class="result"><canvas id="bp-cv"></canvas><div class="pic-bar" data-picbar="bp"></div><div id="bp-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Bpa.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="bp-app"></div>
   <p class="src">Inslaghoek α = arcsin(breedte / lengte) (formule van Balthazard; AAFS 2005 B28: onzekerheid onder 3° tot een hoek van 60°). Convergentiepunt: punt met de kleinste kwadratische afstand tot de verlengde looprichtingen (rechte-lijnmethode). Hoogte per vlek h = d · tan α, met d de afstand van vlek tot convergentiepunt. De rechte-lijnbenadering negeert zwaartekracht en luchtweerstand en overschat daardoor de hoogte.</p>
 </section>
 <!-- /NT:bpa -->
@@ -2203,19 +2179,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-pmi" data-tool="pmi">
   <header class="tool-head"><h2>Tijd sinds overlijden</h2>
   <p>Schatting van het postmortaal interval uit rectale temperatuur, omgevingstemperatuur en lichaamsgewicht met de afkoelformule van Henssge (de basis van het nomogram).</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="pm-tr">Rectale temperatuur</label><div class="inu"><input id="pm-tr" inputmode="decimal" value="30,5"><span class="u">°C</span></div></div>
-        <div class="f"><label for="pm-ta">Omgevingstemperatuur</label><div class="inu"><input id="pm-ta" inputmode="decimal" value="18"><span class="u">°C</span></div></div>
-        <div class="f"><label for="pm-w">Lichaamsgewicht</label><div class="inu"><input id="pm-w" inputmode="decimal" value="75"><span class="u">kg</span></div></div>
-        <div class="f"><label for="pm-cf">Correctiefactor</label><input id="pm-cf" inputmode="decimal" value="1"></div>
-        <div class="f" style="grid-column:span 2"><label for="pm-at">Tijdstip van meting (optioneel)</label><input id="pm-at" type="datetime-local" class="txt"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Correctiefactor 1 = naakt lichaam in stilstaande lucht (referentie); naakt in bewegende lucht ongeveer 0,75; kleding of dekens verhogen de factor (bijv. ongeveer 1,1 voor lichte kleding). Gebruik de tabel van Henssge uit je cursusmateriaal voor andere situaties. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="pm-cv"></canvas><div id="pm-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Pmi.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="pm-app"></div>
   <p class="src">Henssge (formule van Marshall &amp; Hoare): (T<sub>r</sub> − T<sub>a</sub>) / (37,2 − T<sub>a</sub>) = 1,25·e<sup>Bt</sup> − 0,25·e<sup>5Bt</sup> bij T<sub>a</sub> ≤ 23,2 °C en 1,11·e<sup>Bt</sup> − 0,11·e<sup>10Bt</sup> daarboven, met B = −1,2815·(CF·W)<sup>−0,625</sup> + 0,0284 (Henssge &amp; Madea, Forensic Sci Int 144:167–175, 2004; forens-med.ru). t wordt numeriek opgelost. Het kleinste 95%-interval van de methode is ±2,8 h (Hubig e.a., BMC Med Inform Decis Mak 2019); onafhankelijke validatie vond vaker afwijkingen (Hubig e.a., Forensic Sci Int 2015). Niet gebruiken bij hypothermie, koorts, sterke straling, wisselend klimaat of als het lichaam verplaatst is.</p>
 </section>
 <!-- /NT:pmi -->
@@ -2224,18 +2190,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-ystr" data-tool="ystr">
   <header class="tool-head"><h2>Y-STR / mtDNA-frequentie</h2>
   <p>Haplotypefrequentie met de telmethode en een bovengrens van het betrouwbaarheidsinterval, voor Y-STR- of mtDNA-profielen die als één geheel worden overgeërfd.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="ys-x">Keer gezien in database</label><input id="ys-x" inputmode="numeric" value="0"></div>
-        <div class="f"><label for="ys-n">Grootte database (N)</label><input id="ys-n" inputmode="numeric" value="4500"></div>
-        <div class="f"><label for="ys-cl">Betrouwbaarheid</label><select id="ys-cl" style="width:100%"><option value="0.95" selected>95%</option><option value="0.99">99%</option></select></div>
-        <div class="f"><label for="ys-th">θ (subpopulatiecorrectie, optioneel)</label><input id="ys-th" inputmode="decimal" value="0"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Neem het aantal en de databasegrootte uit YHRD of EMPOP voor de juiste referentiepopulatie. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result" id="ys-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Ystr.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ys-app"></div>
   <p class="src">Telmethode: p = x / N. Bovengrens: Clopper-Pearson (exact binomiaal); bij x = 0 is dat 1 − α<sup>1/N</sup> (SWGDAM Interpretation Guidelines for Y-Chromosome STR Typing, 2022; Holland &amp; Parsons 1999 voor mtDNA). Met θ: p<sub>θ</sub> = θ + (1 − θ)·p (Buckleton e.a., Forensic Sci Int Genet 2011). LR = 1 / gerapporteerde frequentie.</p>
 </section>
 <!-- /NT:ystr -->
@@ -2244,18 +2201,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-kin" data-tool="kin">
   <header class="tool-head"><h2>Verwantschapsindex</h2>
   <p>Vaderschapsindex (PI) per locus en gecombineerd, met of zonder moeder, en de kans op vaderschap bij een gekozen a-priorikans.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="kn-mo">Moeder getypeerd</label><select id="kn-mo" style="width:100%"><option value="1">ja (trio)</option><option value="0">nee (duo)</option></select></div>
-        <div class="f"><label for="kn-pr">A-priorikans</label><div class="inu"><input id="kn-pr" inputmode="decimal" value="50"><span class="u">%</span></div></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="kn-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="kn-tbl-add">+ Locus</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per locus de allelen van kind, moeder en vermeende vader, plus de allelfrequenties van de twee allelen van het kind uit de populatiedatabase van je opdracht. Homozygoot: vul twee keer hetzelfde allel in. Voorbeelddata en frequenties zijn verzonnen.</p>
-    </div>
-    <div class="result" id="kn-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Kin.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="kn-app"></div>
   <p class="src">PI = P(genotype kind | moeder, vermeende vader) / P(genotype kind | moeder, willekeurige man); een ouder geeft elk van zijn allelen met kans ½ door, een willekeurige man allel x met kans p<sub>x</sub> (Butler, Advanced Topics in Forensic DNA Typing: Interpretation, 2015, hfst. 15; AABB Standards for Relationship Testing). CPI = product over onafhankelijke loci. Kans op vaderschap W = CPI·π / (CPI·π + 1 − π). Mutaties worden niet meegenomen: een uitsluiting op één locus kan een mutatie zijn.</p>
 </section>
 <!-- /NT:kin -->
@@ -2624,29 +2572,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-hwe" data-tool="hwe">
   <header class="tool-head"><h2>Hardy-Weinberg &amp; forensische kengetallen</h2>
   <p>Allelfrequenties, geobserveerde en verwachte heterozygotie, een exacte Hardy-Weinbergtoets en de forensische kengetallen (PM, PD, PIC, PE, TPI) voor één STR-locus uit je eigen populatiedata.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="hw-loc">Locus</label><input id="hw-loc" class="txt" value="D8S1179"></div>
-        <div class="f" style="grid-column:1/-1"><label for="hw-g">Genotypen, één per regel <span class="example">voorbeeld</span></label><textarea id="hw-g" rows="9">13 14 9
-12 13 6
-13 13 5
-14 15 5
-10 13 4
-11 14 4
-12 14 3
-13 15 3
-14 14 3
-10 14 2
-11 13 2
-12 12 1
-15 16 2
-13 16 1</textarea></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per regel twee allelen, gescheiden door een spatie of /, bijvoorbeeld <span class="mono">13 14</span> of <span class="mono">9.3/10</span>. Een derde getal is het aantal personen met dat genotype. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><div id="hw-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Hwe.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="hw-app"></div>
   <p class="src">Exacte toets: Monte-Carlopermutatie van de allelen (Guo &amp; Thompson, Biometrics 48:361–372, 1992), 10 000 permutaties met een vaste startwaarde; p = aandeel permutaties met een kans ≤ de waargenomen configuratie. H<sub>e</sub> = 2n/(2n−1) · (1 − Σp<sub>i</sub>²) (Nei 1978). PM = Σ (genotypefrequentie)², PD = 1 − PM (Fisher 1951), PIC = 1 − Σp<sub>i</sub>² − ΣΣ 2p<sub>i</sub>²p<sub>j</sub>², PE = h²(1 − 2hH²) en TPI = 1/(2H) met h en H de geobserveerde fractie hetero- en homozygoten (Brenner &amp; Morris 1990; Gouy &amp; Zieger, STRAF, Forensic Sci Int Genet 30:148–151, 2017).</p>
 </section>
 <!-- /NT:hwe -->
@@ -4634,18 +4562,9 @@ calc.molm=function(){};
    De velden en de uitkomst staan in src/tools/Hh.vue; de component rekent zelf opnieuw. */
 calc.hh=function(){};
 
-/* ================= FORENSISCHE MATCHKANS ================= */
-const RMDATA=[['D3S1358',0.25,0.15],['vWA',0.10,0.20],['FGA',0.18,''],['TH01',0.22,0.31]];
-const rmRow=r=>`<tr><td><input class="txt" data-n value="${esc(r[0]??'')}" style="width:110px"></td><td>${inp(r[1],80,'data-p')}</td><td>${inp(r[2],80,'data-q')}</td><td class="num" data-g>–</td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
-$('#rm-tbl tbody').innerHTML=RMDATA.map(rmRow).join('');
-$('#rm-add').addEventListener('click',()=>{ $('#rm-tbl tbody').insertAdjacentHTML('beforeend',rmRow(['','',''])); });
-$('#rm-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); calc.rmp(); }});
-calc.rmp=function(){ const th=num($('#rm-th').value)||0, out=$('#rm-out'); let prod=1, n=0, bad=[];
-  $$('#rm-tbl tbody tr').forEach(tr=>{ const p=num(tr.querySelector('[data-p]').value), qr=tr.querySelector('[data-q]').value.trim(), q=num(qr), cell=tr.querySelector('[data-g]'), nm=tr.querySelector('[data-n]').value||'locus';
-    if(!isFinite(p)){ cell.textContent='–'; return; } if(!(p>0&&p<=1)||(qr!==''&&!(q>0&&q<=1))||(qr!==''&&p+q>1+1e-9)){ cell.innerHTML='<span class="chip bad">ongeldig</span>'; bad.push(nm); return; }
-    const hom=qr===''||!isFinite(q), g=hom?p*p+p*(1-p)*th:2*p*q; cell.innerHTML=`${sig(g,3)} <span style="color:var(--muted);font-size:12px">${hom?'hom.':'het.'}</span>`; prod*=g; n++; });
-  if(!n){ out.innerHTML=note('info','Vul per locus de allelfrequenties in (tussen 0 en 1).'); return; }
-  out.innerHTML=`<div class="lbl">Gecombineerde matchkans (${n} loci)</div><div class="big">1 op ${sci(1/prod,3)}</div>`+kv([['Matchkans',sci(prod,3)],['Bewijskracht LR (enkelvoudig profiel)',sci(1/prod,3)],['θ',fmt(th,2)]])+(bad.length?note('bad',`Ongeldige frequenties bij: ${bad.map(esc).join(', ')}. Een frequentie ligt tussen 0 en 1 en twee allelen samen zijn hooguit 1.`):'')+note('info','De productregel veronderstelt onafhankelijke loci en een populatie in Hardy-Weinberg-evenwicht. Geldt niet voor mengprofielen of verwanten.')+`<div class="formula">heterozygoot 2pq · homozygoot p² + p(1 − p)θ · matchkans = product over de loci</div>`; };
+/* ================= FORENSISCHE MATCHKANS =================
+   De tabel, de genotypefrequentie per locus en de productregel staan in src/tools/Rmp.vue;
+   die zet ook TBLDEF['rm-tbl'] en calc.rmp. */
 
 /* ================= TAGS ================= */
 const TAGS={verdunning:['Oplossingen','Verdunnen'],oplossing:['Oplossingen','Buffers'],units:['Oplossingen'],molm:['Oplossingen'],hh:['Buffers','Oplossingen'],
@@ -5697,94 +5616,30 @@ RECHYD.forEach(g=>{ if(!HYD.some(h=>h[0]===g[0])) HYD.push(g);
   g[1].forEach(v=>{ if(!CHEM[v[1]]){ CHEM[v[1]]=v[2]; $('#chem-list').insertAdjacentHTML('beforeend',`<option value="${v[1]}">`); } }); });
 /* /NT:oplosui */
 /* NT:strchk */
-/* ================= STR-PROFIELCONTROLE ================= */
-ET('sc-tbl',[{h:'Locus',t:'txt',w:90},{h:'Allel',t:'num',w:70},{h:'Hoogte (RFU)',t:'num',w:90}],[['D3S1358',15,1520],['D3S1358',16,1310],['D3S1358',14,140],['vWA',17,2210],['FGA',21,610],['FGA',24,290],['TH01',9.3,180],['D8S1179',12,880],['D8S1179',13,930],['D8S1179',14,410],['D8S1179',15,380],['D21S11',30,40]],'strchk');
-calc.strchk=function(){ const AT=num($('#sc-at').value)||0, ST=num($('#sc-st').value)||0, PHR=(num($('#sc-phr').value)||0)/100, SF=(num($('#sc-stut').value)||0)/100, out=$('#sc-out');
-  const rows=etGet('sc-tbl').map(r=>({l:r[0].trim(),a:num(r[1]),h:num(r[2])})).filter(r=>r.l&&isFinite(r.a)&&isFinite(r.h));
-  if(!rows.length){ out.innerHTML=note('info','Vul per piek locus, allel en hoogte in.'); return; }
-  const loci=[...new Set(rows.map(r=>r.l))], res=[]; let maxA=0;
-  loci.forEach(l=>{ const P=rows.filter(r=>r.l===l).sort((a,b)=>a.a-b.a), below=P.filter(p=>p.h<AT), ab=P.filter(p=>p.h>=AT);
-    const stut=ab.filter(p=>ab.some(q=>q!==p&&Math.abs(q.a-1-p.a)<0.01&&p.h<=q.h*SF)), al=ab.filter(p=>!stut.includes(p));
-    const flags=[]; let phr=NaN;
-    if(al.length===2){ phr=Math.min(al[0].h,al[1].h)/Math.max(al[0].h,al[1].h); if(phr<PHR) flags.push(['warn','PHR onder drempel']); }
-    if(al.length===1&&al[0].h<ST) flags.push(['warn','mogelijke drop-out (homozygoot onder ST)']);
-    if(al.length===2&&al.some(p=>p.h<ST)) flags.push(['warn','allel onder ST']);
-    if(al.length>2) flags.push(['bad','meer dan 2 allelen: mengprofiel']);
-    if(stut.length) flags.push(['info',`stutter gefilterd: ${stut.map(p=>fmt(p.a,1)).join(', ')}`]);
-    if(below.length) flags.push(['info',`onder AT: ${below.map(p=>fmt(p.a,1)).join(', ')}`]);
-    if(!al.length) flags.push(['bad','geen allel boven AT']);
-    maxA=Math.max(maxA,al.length); res.push({l,al,phr,flags}); });
-  const nc=Math.max(1,Math.ceil(maxA/2)), mix=maxA>2, low=res.filter(r=>r.flags.some(f=>f[0]!=='info')).length;
-  let h=`<div class="lbl">Minimaal aantal bijdragers</div><div class="big">${nc}</div>`+kv([['Loci',loci.length],['Maximaal aantal allelen per locus',maxA],['Loci met opmerkingen',low],['Profieltype',mix?'mengprofiel':'enkelvoudig (op basis van alleltelling)']]);
-  const chip=(c,t)=>`<span class="chip ${c==='bad'?'bad':c==='warn'?'warn':'ok'}" style="margin:1px 3px 1px 0">${t}</span>`;
-  h+=`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Locus</th><th>Allelen</th><th class="num">PHR</th><th>Beoordeling</th></tr></thead><tbody>${res.map(r=>`<tr><td><b>${esc(r.l)}</b></td><td>${r.al.map(p=>`${fmt(p.a,1)} <small style="color:var(--muted)">(${fmt(p.h,0)})</small>`).join(', ')||'–'}</td><td class="num">${isFinite(r.phr)?fmt(r.phr*100,0)+'%':'–'}</td><td>${r.flags.length?r.flags.map(f=>chip(f[0],f[1])).join(''):chip('ok','in orde')}</td></tr>`).join('')}</tbody></table></div>`;
-  if(mix) h+=note('info','Bij een mengprofiel zijn PHR- en drop-outregels per bijdrager niet direct toepasbaar; gebruik de mengprofielrichtlijnen van je lab of probabilistische software.');
-  out.innerHTML=h; };
+/* ================= STR-PROFIELCONTROLE =================
+   De tabel, de drempels en de beoordeling per locus staan in src/tools/Strchk.vue. calc.strchk
+   wordt daar gezet (een lege functie), want de rest van de app roept hem aan. */
 /* /NT:strchk */
 /* NT:bpa */
-/* ================= BLOEDVLEKPATRONEN ================= */
-ET('bp-tbl',[{h:'Vlek',t:'txt',w:60},{h:'Breedte (mm)',t:'num',w:80},{h:'Lengte (mm)',t:'num',w:80},{h:'x (cm)',t:'num',w:64},{h:'y (cm)',t:'num',w:64},{h:'γ (°)',t:'num',w:60}],[['1',6.7,10,20,10,217],['2',6.5,10,110,25,343],['3',6.2,10,95,85,52],['4',6.1,10,30,90,121],['5',5.9,10,70,100,81]],'bpa');
-calc.bpa=function(){ const out=$('#bp-out'), D=etGet('bp-tbl').map(r=>({n:r[0],w:num(r[1]),l:num(r[2]),x:num(r[3]),y:num(r[4]),g:num(r[5])})).filter(s=>s.w>0&&s.l>0);
-  if(!D.length){ out.innerHTML=note('info','Vul per vlek breedte en lengte in.'); $('#bp-cv').style.display='none'; return; }
-  const warn=[]; D.forEach(s=>{ if(s.w>s.l) warn.push(`Vlek ${ud(s.n)}: breedte groter dan lengte; verwissel ze.`); s.a=Math.asin(Math.min(1,s.w/s.l)); });
-  const P=D.filter(s=>isFinite(s.x)&&isFinite(s.y)&&isFinite(s.g)); let C=null;
-  if(P.length>=2){ let a11=0,a12=0,a22=0,b1=0,b2=0; P.forEach(s=>{ const t=s.g*Math.PI/180, ux=Math.cos(t), uy=Math.sin(t), m11=1-ux*ux, m12=-ux*uy, m22=1-uy*uy; a11+=m11; a12+=m12; a22+=m22; b1+=m11*s.x+m12*s.y; b2+=m12*s.x+m22*s.y; }); const det=a11*a22-a12*a12; if(Math.abs(det)>1e-9) C={x:(a22*b1-a12*b2)/det,y:(a11*b2-a12*b1)/det}; else warn.push('De looprichtingen zijn (bijna) evenwijdig; er is geen convergentiepunt.'); }
-  if(C) P.forEach(s=>{ s.d=Math.hypot(s.x-C.x,s.y-C.y); s.h=s.d*Math.tan(s.a); const t=s.g*Math.PI/180; if((s.x-C.x)*Math.cos(t)+(s.y-C.y)*Math.sin(t)<0) warn.push(`Vlek ${ud(s.n)}: de looprichting wijst naar het convergentiepunt toe; controleer γ.`); });
-  const hs=P.filter(s=>isFinite(s.h)).map(s=>s.h);
-  let h=C?`<div class="lbl">Geschatte hoogte van de oorsprong</div><div class="big">${fmt(mean(hs),0)} <small>cm${hs.length>1?' ± '+fmt(sd(hs),0):''}</small></div>`+kv([['Convergentiepunt (x, y)',`${fmt(C.x,1)}, ${fmt(C.y,1)} cm`],['Vlekken gebruikt',P.length]]):`<div class="lbl">Inslaghoeken</div>`;
-  h+=`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Vlek</th><th class="num">B/L</th><th class="num">α (°)</th><th class="num">d (cm)</th><th class="num">h (cm)</th></tr></thead><tbody>${D.map(s=>`<tr><td>${esc(s.n)}</td><td class="num">${fmt(s.w/s.l,3)}</td><td class="num">${fmt(s.a*180/Math.PI,1)}</td><td class="num">${fmt(s.d,1)}</td><td class="num">${fmt(s.h,1)}</td></tr>`).join('')}</tbody></table></div>`;
-  out.innerHTML=warn.map(w=>note('warn',w)).join('')+h;
-  if(!P.length){ $('#bp-cv').style.display='none'; return; } $('#bp-cv').style.display='';
-  const xs=[...P.map(s=>s.x),...(C?[C.x]:[])], ys=[...P.map(s=>s.y),...(C?[C.y]:[])], x0=Math.min(...xs)-15, x1=Math.max(...xs)+15, y0=Math.min(...ys)-15, y1=Math.max(...ys)+15, W=460, sc=(W-60)/Math.max(x1-x0,y1-y0,1), H=Math.round((y1-y0)*sc+60);
-  pShow($('#bp-cv'),W,H,(x)=>{ const X=v=>30+(v-x0)*sc, Y=v=>H-30-(v-y0)*sc; x.strokeStyle=PCOL.line; x.strokeRect(30,30,W-60,H-60);
-    P.forEach(s=>{ const t=s.g*Math.PI/180; x.strokeStyle='rgba(194,65,12,.45)'; x.lineWidth=1; x.setLineDash([4,4]); x.beginPath(); x.moveTo(X(s.x),Y(s.y)); const back=C?s.d+10:40; x.lineTo(X(s.x-Math.cos(t)*back),Y(s.y-Math.sin(t)*back)); x.stroke(); x.setLineDash([]);
-      x.save(); x.translate(X(s.x),Y(s.y)); x.rotate(-t); x.fillStyle='#9b1c1c'; x.beginPath(); x.ellipse(0,0,7,7*s.w/s.l,0,0,7); x.fill(); x.restore(); x.fillStyle=PCOL.ink; x.font='11px '+PFONT(); x.textAlign='left'; x.fillText(s.n,X(s.x)+9,Y(s.y)-8); });
-    if(C){ x.strokeStyle=PCOL.acc; x.lineWidth=2; x.beginPath(); x.arc(X(C.x),Y(C.y),6,0,7); x.stroke(); x.fillStyle=PCOL.acc; x.font='600 11px '+PFONT(); x.fillText('convergentie',X(C.x)+9,Y(C.y)+14); }
-    x.fillStyle=PCOL.muted; x.font='11px '+PFONT(); x.textAlign='left'; x.fillText('bovenaanzicht (cm)',30,20); }); };
+/* ================= BLOEDVLEKPATRONEN =================
+   De tabel, het rekenwerk (Balthazard, convergentiepunt, hoogte) en de tekening staan in
+   src/tools/Bpa.vue. calc.bpa wordt daar gezet, want de rest van de app roept hem aan. */
 /* /NT:bpa */
 /* NT:pmi */
-/* ================= TIJD SINDS OVERLIJDEN (HENSSGE) ================= */
-calc.pmi=function(){ const Tr=num($('#pm-tr').value), Ta=num($('#pm-ta').value), W=num($('#pm-w').value), CF=num($('#pm-cf').value), out=$('#pm-out'), cv=$('#pm-cv');
-  if(![Tr,Ta,W,CF].every(isFinite)||W<=0||CF<=0){ out.innerHTML=note('info','Vul rectale temperatuur, omgevingstemperatuur, gewicht en correctiefactor in.'); cv.style.display='none'; return; }
-  if(Tr>=37.2||Tr<=Ta){ out.innerHTML=note('bad','De rectale temperatuur moet tussen de omgevingstemperatuur en 37,2 °C liggen; anders is de methode niet toepasbaar.'); cv.style.display='none'; return; }
-  const hi=Ta>23.2, B=-1.2815*Math.pow(CF*W,-0.625)+0.0284, Q=t=>hi?1.11*Math.exp(B*t)-0.11*Math.exp(10*B*t):1.25*Math.exp(B*t)-0.25*Math.exp(5*B*t), q=(Tr-Ta)/(37.2-Ta);
-  let lo=0, up=200; if(Q(up)>q){ out.innerHTML=note('bad','Buiten het bereik van het model (meer dan 200 uur).'); cv.style.display='none'; return; }
-  for(let i=0;i<80;i++){ const m=(lo+up)/2; if(Q(m)>q) lo=m; else up=m; } const t=(lo+up)/2, ci=2.8;
-  const hm=v=>{ const h=Math.floor(v), m=Math.round((v-h)*60); return m===60?`${h+1} u 0 min`:`${h} u ${m} min`; };
-  let h=`<div class="lbl">Geschat postmortaal interval</div><div class="big">${hm(t)}</div>`+kv([['95%-interval (minimaal)',`${hm(Math.max(0,t-ci))} – ${hm(t+ci)}`],['Formule',hi?'T<sub>a</sub> &gt; 23,2 °C':'T<sub>a</sub> ≤ 23,2 °C'],['B',fmt(B,4)],['Temperatuurquotiënt Q',fmt(q,3)]]);
-  const at=$('#pm-at').value; if(at){ const d=new Date(at); if(!isNaN(d)){ const f=v=>new Date(d.getTime()-v*3600e3).toLocaleString(LANG==='en'?'en-GB':'nl-NL',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); h+=kv([['Geschat tijdstip van overlijden',`<span data-notr="">${f(t)}</span>`],['Tussen',`<span data-notr="">${f(t+ci)} en ${f(Math.max(0,t-ci))}</span>`]]); } }
-  if(t>36) h+=note('warn','Na ongeveer anderhalve dag is het verschil met de omgevingstemperatuur klein en wordt de schatting onbetrouwbaar.');
-  if(CF!==1) h+=note('info','Met een correctiefactor ongelijk aan 1 is de onzekerheid groter dan het minimale interval.');
-  out.innerHTML=h+note('info','Rekenvoorbeeld voor onderwijs; een officiële schatting hoort bij een forensisch arts en combineert meerdere methoden.');
-  cv.style.display=''; const tm=Math.max(t*1.6,12);
-  chart(cv,{xmin:0,xmax:tm,ymin:Math.min(Ta,Tr)-1,ymax:38,xlabel:'tijd na overlijden (h)',ylabel:'rectale temperatuur (°C)',series:[{fn:x=>Ta+(37.2-Ta)*Q(x),name:'afkoelcurve'},{pts:[[t,Tr]],color:'--warn',r:5},{fn:()=>Ta,dash:[4,4],color:'--muted'}]}); };
+/* ================= TIJD SINDS OVERLIJDEN (HENSSGE) =================
+   De velden, de afkoelformule van Henssge en de curve staan in src/tools/Pmi.vue. calc.pmi
+   wordt daar gezet, want de rest van de app roept hem aan. */
 /* /NT:pmi */
 /* NT:ystr */
-/* ================= Y-STR / MTDNA ================= */
+/* ================= Y-STR / MTDNA =================
+   De velden en de uitkomst staan in src/tools/Ystr.vue; hier blijft de Clopper-Pearson-
+   bovengrens betaInvUp(), waar het validatiegeval aan hangt. */
 function betaInvUp(x,n,cl){ /* Clopper-Pearson bovengrens via bisectie op de binomiale cdf */ const a=1-cl; if(x>=n) return 1; const cdf=p=>{ let s=0, t=Math.pow(1-p,n); for(let k=0;k<=x;k++){ s+=t; t=t*(n-k)/(k+1)*p/(1-p); } return s; }; let lo=x/n, hi=1; for(let i=0;i<100;i++){ const m=(lo+hi)/2; if(cdf(m)>a) lo=m; else hi=m; } return (lo+hi)/2; }
-calc.ystr=function(){ const x=Math.round(num($('#ys-x').value)), n=Math.round(num($('#ys-n').value)), cl=num($('#ys-cl').value), th=num($('#ys-th').value)||0, out=$('#ys-out');
-  if(!(n>0)||!(x>=0)||x>n||n>1e7){ out.innerHTML=note('info','Vul het aantal waarnemingen (0 of meer) en de databasegrootte in.'); return; }
-  const p=x/n, up=x===0?1-Math.pow(1-cl,1/n):betaInvUp(x,n,cl), rep=th>0?th+(1-th)*up:up;
-  out.innerHTML=`<div class="lbl">Gerapporteerde frequentie (bovengrens ${fmt(cl*100,0)}%)</div><div class="big">${sci(rep,3)}</div>`+kv([['1 op',sci(1/rep,3)],['Telfrequentie x / N',x?sci(p,3):'0 (niet waargenomen)'],['Bovengrens zonder θ',sci(up,3)],['Bewijskracht LR',sci(1/rep,3)]])+note('info','Y-STR- en mtDNA-profielen worden als haplotype geërfd: alle mannen (Y) of moederlijn-verwanten (mtDNA) delen het profiel. Een match sluit familieleden dus niet uit.')+`<div class="formula">p = x / N · bovengrens bij x = 0: 1 − (1 − ${fmt(cl,2)})<sup>1/${n}</sup></div>`; };
 /* /NT:ystr */
 /* NT:kin */
-/* ================= VERWANTSCHAPSINDEX ================= */
-ET('kn-tbl',[{h:'Locus',t:'txt',w:84},{h:'Kind a₁',t:'num',w:56},{h:'Kind a₂',t:'num',w:56},{h:'p(a₁)',t:'num',w:64},{h:'p(a₂)',t:'num',w:64},{h:'Moeder a₁',t:'num',w:60},{h:'Moeder a₂',t:'num',w:60},{h:'Vader a₁',t:'num',w:56},{h:'Vader a₂',t:'num',w:56}],
- [['D3S1358',15,17,0.26,0.20,15,16,17,18],['vWA',16,16,0.21,0.21,16,18,16,17],['FGA',21,24,0.17,0.14,22,24,21,21],['TH01',6,9.3,0.23,0.30,9.3,9.3,6,7],['D8S1179',13,14,0.30,0.20,12,13,14,15]],'kin');
-calc.kin=function(){ const trio=$('#kn-mo').value==='1', pr=Math.min(0.9999,Math.max(0.0001,(num($('#kn-pr').value)||50)/100)), out=$('#kn-out');
-  const eq=(a,b)=>isFinite(a)&&isFinite(b)&&Math.abs(a-b)<0.01, T=(g,x)=>((eq(g[0],x)?1:0)+(eq(g[1],x)?1:0))/2;
-  const rows=etGet('kn-tbl').map(r=>({l:r[0],c:[num(r[1]),num(r[2])],p:[num(r[3]),num(r[4])],m:[num(r[5]),num(r[6])],f:[num(r[7]),num(r[8])]})).filter(r=>r.l&&r.c.every(isFinite)&&r.p.every(v=>v>0&&v<1)&&r.f.every(isFinite));
-  if(!rows.length){ out.innerHTML=note('info','Vul per locus de allelen van kind en vermeende vader en de frequenties van de allelen van het kind in.'); return; }
-  const warn=[]; const res=rows.map(r=>{ const mo=trio&&r.m.every(isFinite), pm=x=>mo?T(r.m,x):(eq(x,r.c[0])?r.p[0]:r.p[1]), pr_=x=>eq(x,r.c[0])?r.p[0]:r.p[1];
-    const ord=eq(r.c[0],r.c[1])?[[r.c[0],r.c[1]]]:[[r.c[0],r.c[1]],[r.c[1],r.c[0]]]; /* [moederlijk, vaderlijk] */
-    const num_=ord.reduce((s,[m,f])=>s+pm(m)*T(r.f,f),0), den=ord.reduce((s,[m,f])=>s+pm(m)*pr_(f),0);
-    if(mo&&den===0) warn.push(`${ud(r.l)}: het kind heeft geen allel van de moeder; controleer de typering of een mutatie.`);
-    return {l:r.l,pi:den>0?num_/den:NaN}; });
-  const valid=res.filter(r=>isFinite(r.pi)), excl=valid.filter(r=>r.pi===0), cpi=valid.reduce((s,r)=>s*r.pi,1), W=cpi*pr/(cpi*pr+1-pr);
-  let h=excl.length?`<div class="lbl">Uitsluiting</div><div class="big">${excl.length} <small>van ${valid.length} loci</small></div>`+note(excl.length>=2?'bad':'warn',excl.length>=2?'Uitsluiting op meerdere loci: de vermeende vader is uitgesloten.':'Uitsluiting op één locus: dit kan een mutatie zijn; neem een mutatiemodel mee of typeer extra loci.'):
-    `<div class="lbl">Gecombineerde vaderschapsindex</div><div class="big">${sci(cpi,3)}</div>`+kv([['Kans op vaderschap W',W>0.99999?'&gt; 99,999%':fmt(W*100,3)+'%'],['A-priorikans',fmt(pr*100,1)+'%'],['Loci',valid.length],['Type',trio?'trio (met moeder)':'duo (zonder moeder)']]);
-  h+=`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Locus</th><th class="num">PI</th></tr></thead><tbody>${res.map(r=>`<tr><td>${esc(r.l)}</td><td class="num">${isFinite(r.pi)?(r.pi===0?'<span class="chip bad">0 (uitsluiting)</span>':fmt(r.pi,3)):'–'}</td></tr>`).join('')}</tbody></table></div>`;
-  out.innerHTML=warn.map(w=>note('warn',w)).join('')+h; };
+/* ================= VERWANTSCHAPSINDEX =================
+   De tabel, de vaderschapsindex per locus en de kans op vaderschap staan in src/tools/Kin.vue.
+   calc.kin wordt daar gezet, want de rest van de app roept hem aan. */
 /* /NT:kin */
 /* NT:pipcal */
 /* ================= PIPETKALIBRATIE ================= */
@@ -6385,7 +6240,9 @@ function enDay(lo,hi,base,meth){ if(hi==null) return Math.max(0,lo-base); if(met
 const glF=(v,d=5)=>isFinite(v)?v.toFixed(d).replace('.',','):'–';
 /* /NT:glass */
 /* NT:hwe */
-/* ================= HARDY-WEINBERG & FORENSISCHE KENGETALLEN ================= */
+/* ================= HARDY-WEINBERG & FORENSISCHE KENGETALLEN =================
+   De velden en de uitkomst staan in src/tools/Hwe.vue; hier blijven hwStats(), de exacte
+   toets hwExact() en de vaste toevalsgenerator hwRng(), waar het validatiegeval aan hangt. */
 function hwRng(seed){ let a=seed>>>0; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
 function hwStats(G){ const al={}; let n=0; G.forEach(([a,b,c])=>{ n+=c; al[a]=(al[a]||0)+c; al[b]=(al[b]||0)+c; }); const A=Object.keys(al).sort((x,y)=>num(x)-num(y)||x.localeCompare(y)), p=A.map(a=>al[a]/(2*n));
   const gc={}; G.forEach(([a,b,c])=>{ const k=[a,b].sort((x,y)=>num(x)-num(y)||x.localeCompare(y)).join('/'); gc[k]=(gc[k]||0)+c; });
@@ -6398,14 +6255,6 @@ function hwExact(S,iters=10000){ const pool=[]; S.A.forEach(a=>{ for(let k=0;k<S
   const obs=score(S.gc), rnd=hwRng(1); let le=0; const idx=Object.fromEntries(S.A.map((a,i)=>[a,i])), P=pool.map(a=>idx[a]);
   for(let it=0;it<iters;it++){ for(let i=P.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); const t=P[i]; P[i]=P[j]; P[j]=t; } const gc={}; for(let i=0;i<P.length;i+=2){ const a=Math.min(P[i],P[i+1]), b=Math.max(P[i],P[i+1]), k=a+'/'+b; gc[k]=(gc[k]||0)+1; } if(score(gc)<=obs+1e-9) le++; }
   return le/iters; }
-calc.hwe=function(){ const out=$('#hw-out'), loc=$('#hw-loc').value;
-  const G=$('#hw-g').value.split(/\n/).map(l=>{ const t=l.trim().split(/[\s\/;\t]+/).filter(Boolean).map(x=>x.replace(',','.')); if(t.length<2) return null; const c=t.length>2?Math.round(num(t[2])):1; if(!(c>0)) return null; return [t[0],t[1],Math.min(c,1e5)]; }).filter(Boolean);
-  const n=G.reduce((s,g)=>s+g[2],0); if(n<2){ out.innerHTML=note('info','Vul genotypen van minstens twee personen in.'); return; } if(n>20000){ out.innerHTML=note('warn','Maximaal 20 000 personen.'); return; }
-  const S=hwStats(G), k=S.A.length, p=hwExact(S);
-  let chi=0, df=k*(k-1)/2, small=0; for(let i=0;i<k;i++) for(let j=i;j<k;j++){ const key=S.A[i]+'/'+S.A[j], e=(i===j?S.p[i]*S.p[i]:2*S.p[i]*S.p[j])*n, o=S.gc[key]||0; if(e<5) small++; if(e>0) chi+=(o-e)**2/e; } const pchi=df>0?1-chicdf(chi,df):NaN;
-  out.innerHTML=`<div class="lbl">${ud(loc)} · exacte HWE-toets</div><div class="big">p ${isFinite(p)?(p<0.001?'&lt; 0,001':'= '+fmt(p,3)):'–'}</div>`+kv([['Personen / allelen',`${n} / ${k}`],['H<sub>o</sub> (geobserveerd)',fmt(S.Ho,3)],['H<sub>e</sub> (verwacht)',fmt(S.He,3)],['χ² (ter vergelijking)',isFinite(pchi)?`${fmt(chi,2)}, df = ${df}, p ${pchi<0.001?'&lt; 0,001':'= '+fmt(pchi,3)}`:'–'],['Matchkans PM',fmt(S.PM,4)],['Discriminatiekracht PD',fmt(S.PD,4)],['PIC',fmt(S.pic,4)],['Uitsluitingskans PE',fmt(S.PE,4)],['Typische vaderschapsindex TPI',isFinite(S.TPI)?fmt(S.TPI,2):'–']])+
-   (p<0.05?note('warn','Afwijking van Hardy-Weinberg (p &lt; 0,05). Controleer typefouten, null-allelen, substructuur of een kleine steekproef. Bij meerdere loci: corrigeer voor meervoudig toetsen.'):'')+(small?note('info',`${small} genotypeklassen hebben een verwachte frequentie onder 5; de χ²-toets is dan onbetrouwbaar, gebruik de exacte toets.`):'')+
-   `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Allel</th><th class="num">Aantal</th><th class="num">Frequentie</th></tr></thead><tbody>${S.A.map((a,i)=>`<tr><td>${ud(a)}</td><td class="num">${S.al[a]}</td><td class="num">${fmt(S.p[i],4)}</td></tr>`).join('')}</tbody></table></div><div class="formula">PD = 1 − Σ G<sub>i</sub>² · PE = h²(1 − 2hH²) · TPI = 1/(2H)</div>`; };
 /* /NT:hwe */
 /* NT:chrom */
 /* ================= CHROMATOGRAFIE =================
