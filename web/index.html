@@ -2580,29 +2580,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-widmark" data-tool="widmark">
   <header class="tool-head"><h2>Bloedalcohol (Widmark)</h2>
   <p>Schat het bloedalcoholgehalte in de tijd uit de gedronken hoeveelheid, en reken een gemeten waarde terug naar een eerder tijdstip met een bandbreedte voor de afbraaksnelheid.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="wd-sex">Geslacht</label><select id="wd-sex"><option value="m">man</option><option value="v">vrouw</option></select></div>
-        <div class="f"><label for="wd-w">Lichaamsgewicht</label><div class="inu"><input id="wd-w" inputmode="decimal" value="80"><span class="u">kg</span></div></div>
-        <div class="f"><label for="wd-h">Lengte</label><div class="inu"><input id="wd-h" inputmode="decimal" value="180"><span class="u">cm</span></div></div>
-        <div class="f"><label for="wd-rm">Verdelingsfactor r</label><select id="wd-rm"><option value="w">Widmark (man 0,68 / vrouw 0,55)</option><option value="s">Seidl (uit lengte en gewicht)</option><option value="e">eigen waarde</option></select></div>
-        <div class="f"><label for="wd-r">Eigen r</label><input id="wd-r" inputmode="decimal" value="0,68"></div>
-        <div class="f"><label for="wd-b">Afbraak β</label><div class="inu"><input id="wd-b" inputmode="decimal" value="0,15"><span class="u">g/L/h</span></div></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="wd-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="wd-tbl-add">+ Drankje</button></div>
-      <h3 style="margin:16px 0 6px;font-size:14px">Terugrekenen</h3>
-      <div class="fields">
-        <div class="f"><label for="wd-m">Gemeten in bloed</label><div class="inu"><input id="wd-m" inputmode="decimal" value="0,62"><span class="u">g/L</span></div></div>
-        <div class="f"><label for="wd-mt">Tijdstip bloedafname</label><input id="wd-mt" class="txt" value="01:30"></div>
-        <div class="f"><label for="wd-it">Tijdstip incident</label><input id="wd-it" class="txt" value="23:45"></div>
-        <div class="f"><label for="wd-b1">β laag – hoog</label><div class="row" style="gap:6px"><input id="wd-b1" inputmode="decimal" value="0,10" style="width:70px"><input id="wd-b2" inputmode="decimal" value="0,25" style="width:70px"></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Tijden als uu:mm; na middernacht telt de klok door. De berekening gaat uit van directe, volledige opname; in werkelijkheid duurt de opname 30–90 minuten en ligt de piek lager en later. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="wd-cv"></canvas><div id="wd-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Widmark.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="wd-app"></div>
   <p class="src">Widmark: c = A / (r · W) − β · t, met A de gram alcohol (volume × % vol × 0,789 g/mL), W het lichaamsgewicht en r de verdelingsfactor (Widmark, Die theoretischen Grundlagen und die praktische Verwendbarkeit der gerichtlich-medizinischen Alkoholbestimmung, 1932). c in g/kg bloed is omgerekend naar g/L met de bloeddichtheid 1,055 kg/L. r volgens Seidl: man 0,31608 − 0,004821·W + 0,004632·L, vrouw 0,31223 − 0,006446·W + 0,004466·L (Seidl, Jensen &amp; Alt, Int J Legal Med 114:71–77, 2000). Afbraaksnelheid bij drinkende bestuurders 0,10–0,25 g/L/h (Jones, Forensic Sci Rev 22:91–132, 2010). Terugrekenen geldt alleen in de afbraakfase, als de opname voorbij is. Een standaardglas in Nederland bevat 10 g alcohol (Trimbos-instituut). Wettelijke grens in Nederland: 0,5 g/L bloed, 0,2 g/L voor beginnende bestuurders.</p>
 </section>
 <!-- /NT:widmark -->
@@ -2611,23 +2591,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-stature" data-tool="stature">
   <header class="tool-head"><h2>Lichaamslengte uit botten</h2>
   <p>Schat de lichaamslengte uit de maximale lengte van een of meer lange beenderen met de regressieformules van Trotter en Gleser, met de standaardfout per formule.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="sl-sex">Geslacht</label><select id="sl-sex"><option value="m">man</option><option value="v">vrouw</option></select></div>
-        <div class="f"><label for="sl-pop">Referentiegroep</label><select id="sl-pop"><option value="w">Europese afkomst (White)</option><option value="b">Afrikaanse afkomst (Black)</option></select></div>
-        <div class="f"><label for="sl-age">Leeftijd (optioneel)</label><div class="inu"><input id="sl-age" inputmode="decimal" value=""><span class="u">jaar</span></div></div>
-        <div class="f"><label for="sl-fem">Femur</label><div class="inu"><input id="sl-fem" inputmode="decimal" value="47,2"><span class="u">cm</span></div></div>
-        <div class="f"><label for="sl-tib">Tibia</label><div class="inu"><input id="sl-tib" inputmode="decimal" value="38,6"><span class="u">cm</span></div></div>
-        <div class="f"><label for="sl-fib">Fibula</label><div class="inu"><input id="sl-fib" inputmode="decimal" value=""><span class="u">cm</span></div></div>
-        <div class="f"><label for="sl-hum">Humerus</label><div class="inu"><input id="sl-hum" inputmode="decimal" value="33,4"><span class="u">cm</span></div></div>
-        <div class="f"><label for="sl-rad">Radius</label><div class="inu"><input id="sl-rad" inputmode="decimal" value=""><span class="u">cm</span></div></div>
-        <div class="f"><label for="sl-uln">Ulna</label><div class="inu"><input id="sl-uln" inputmode="decimal" value=""><span class="u">cm</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Maximale lengte op een osteometrische plank. Vul alleen de botten in die je hebt. De formules komen uit een Amerikaanse referentiegroep van rond 1950; voor de huidige Nederlandse bevolking zijn ze minder nauwkeurig. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="sl-cv"></canvas><div id="sl-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Stature.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="sl-app"></div>
   <p class="src">Mannen: Trotter (1970), vrouwen: Trotter &amp; Gleser, Am J Phys Anthropol 10:463–514 (1952), zoals samengevat in Bass, Human Osteology (1995) en Grand Valley State University, Introduction to Human Osteology, "Stature Estimation". De ± is de standaardfout van de schatting; het 95%-interval is ongeveer ± 1,96 × SE. Leeftijdscorrectie boven 30 jaar: −0,06 × (leeftijd − 30) cm (Trotter &amp; Gleser 1951). Trotter en Gleser maten de tibia zonder malleolus (Jantz e.a., J Forensic Sci 1994); meet de tibia op dezelfde manier.</p>
 </section>
 <!-- /NT:stature -->
@@ -2636,28 +2602,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-ento" data-tool="ento">
   <header class="tool-head"><h2>Entomologie (graaddagen)</h2>
   <p>Minimaal postmortaal interval uit het ontwikkelingsstadium van vliegenlarven: tel vanaf de vinddag terug de opgebouwde graaddagen (ADD) tot de hoeveelheid die het stadium nodig heeft.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="en-base">Ontwikkelingsdrempel</label><div class="inu"><input id="en-base" inputmode="decimal" value="10"><span class="u">°C</span></div></div>
-        <div class="f"><label for="en-add">Benodigde ADD tot dit stadium</label><div class="inu"><input id="en-add" inputmode="decimal" value="60"><span class="u">°C·d</span></div></div>
-        <div class="f"><label for="en-off">Correctie plaats t.o.v. weerstation</label><div class="inu"><input id="en-off" inputmode="decimal" value="0"><span class="u">°C</span></div></div>
-        <div class="f"><label for="en-meth">Dagtemperatuur</label><select id="en-meth"><option value="avg">gemiddelde van min en max</option><option value="trunc">min en max afgekapt op de drempel</option></select></div>
-        <div class="f" style="grid-column:1/-1"><label for="en-t">Temperaturen per dag, oudste eerst, laatste regel = vinddag <span class="example">voorbeeld</span></label><textarea id="en-t" rows="9">01-07-2026 12,1 21,4
-02-07-2026 13,0 23,2
-03-07-2026 14,2 25,8
-04-07-2026 15,0 26,1
-05-07-2026 13,8 22,0
-06-07-2026 12,5 20,3
-07-07-2026 11,9 19,8
-08-07-2026 13,1 22,7
-09-07-2026 14,6 24,9
-10-07-2026 15,2 26,4</textarea></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per regel een datum (optioneel) en de minimum- en maximumtemperatuur, of één daggemiddelde. Weerdata haal je bij het KNMI (daggegevens van het dichtstbijzijnde station). Drempel en benodigde ADD hangen af van soort en stadium; neem ze over uit de ontwikkelingsdata in je cursusmateriaal. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="en-cv"></canvas><div id="en-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Ento.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="en-app"></div>
   <p class="src">Graaddagenmethode: ADD = Σ max(0, T<sub>dag</sub> − T<sub>drempel</sub>), teruggeteld vanaf de vinddag tot de benodigde ADD voor het gevonden stadium is bereikt; dat geeft het minimale PMI (tijd sinds eileg). Bij de afkapmethode worden min en max eerst begrensd op de drempel (Higley &amp; Haskell, in Byrd &amp; Castner, Forensic Entomology, 2e ed., 2010; Amendt e.a., Int J Legal Med 121:90–104, 2007). De laatste dag telt volledig mee. Temperaturen van een weerstation wijken af van de vindplaats; een lokale correctie op basis van metingen ter plaatse verbetert de schatting.</p>
 </section>
 <!-- /NT:ento -->
@@ -2666,19 +2613,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-glass" data-tool="glass">
   <header class="tool-head"><h2>Glasvergelijking (brekingsindex)</h2>
   <p>Vergelijk de brekingsindex van glasfragmenten van een verdachte met referentieglas van de plaats delict: per fragment tegen een vergelijkingsinterval, en de groep met een t-toets van Welch.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="gl-k">Bekend glas (referentie), n<sub>D</sub> <span class="example">voorbeeld</span></label><textarea id="gl-k" rows="3">1,51824 1,51828 1,51821 1,51830 1,51826 1,51823 1,51827 1,51825 1,51829 1,51822</textarea></div>
-        <div class="f" style="grid-column:1/-1"><label for="gl-r">Gevonden fragmenten, n<sub>D</sub></label><textarea id="gl-r" rows="2">1,51826 1,51829 1,51823 1,51852</textarea></div>
-        <div class="f"><label for="gl-crit">Vergelijkingsinterval</label><select id="gl-crit"><option value="4">gemiddelde ± 4 s</option><option value="3">gemiddelde ± 3 s</option><option value="2">gemiddelde ± 2 s</option><option value="r">bereik van het bekende glas</option></select></div>
-        <div class="f"><label for="gl-smin">Minimale s (meetprecisie)</label><input id="gl-smin" inputmode="decimal" value="0,00004"></div>
-        <div class="f"><label for="gl-a">Significantieniveau α</label><select id="gl-a"><option value="0.01">0,01</option><option value="0.05">0,05</option></select></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Gebruik genoeg referentiefragmenten (bij voorkeur 10 of meer) om de spreiding binnen de bron te dekken. Als de s van het bekende glas kleiner is dan de meetprecisie, wordt de minimale s gebruikt. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="gl-cv"></canvas><div id="gl-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Glass.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="gl-app"></div>
   <p class="src">ASTM E1967-19: gevonden fragmenten worden vergeleken met een interval uit de metingen van het bekende glas. Intervallen van 2–4 s en de minimale-s-benadering zijn geëvalueerd door Garvin &amp; Koons, J Forensic Sci 56:491–500 (2011). Groepsvergelijking met de t-toets van Welch (Curran, Hicks &amp; Buckleton, Forensic Interpretation of Glass Evidence, 2000). "Niet te onderscheiden" betekent niet dat het glas van dezelfde bron komt; de bewijswaarde hangt ook af van hoe vaak deze brekingsindex voorkomt.</p>
 </section>
 <!-- /NT:glass -->
@@ -2983,17 +2920,9 @@ behandeld 25 0</textarea></div>
 <section class="tool" id="t-mix" data-tool="mix">
   <header class="tool-head"><h2>Mengprofiel &amp; LR</h2>
   <p>Analyse van een STR-mengprofiel van twee personen: mengverhouding (M<sub>x</sub>) en heterozygote balans (H<sub>b</sub>) uit de piekhoogtes, en de likelihood ratio voor "slachtoffer + verdachte" tegenover "slachtoffer + onbekende", met optionele θ-correctie en de verbale schaal van het NFI.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="mx-th">θ (F<sub>ST</sub>, subpopulatiecorrectie)</label><input id="mx-th" inputmode="decimal" value="0,01"></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="mx-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="mx-tbl-add">+ Locus</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per locus de allelen van het mengprofiel met in dezelfde volgorde de piekhoogtes en de allelfrequenties, en de genotypen van slachtoffer (bekende bijdrager) en verdachte. Scheid waarden met spaties. Neem frequenties uit de populatiedatabase van je opdracht. Voorbeelddata en frequenties zijn verzonnen.</p>
-    </div>
-    <div class="result"><div id="mx-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Mix.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="mx-app"></div>
   <p class="src">M<sub>x</sub> = som van de pieken van de kleinste bijdrager / totaal, bepaald op loci met vier allelen (twee laagste pieken); H<sub>b</sub> = laagste / hoogste piek binnen een bijdrager (Clayton e.a., Forensic Sci Int 91:55–70, 1998; Gill e.a., DNA commission of the ISFG: Recommendations on the interpretation of mixtures, Forensic Sci Int 160:90–101, 2006). LR per locus = 1 / Σ P(genotype onbekende), gesommeerd over alle genotypen die samen met het slachtoffer precies de waargenomen allelen verklaren, zonder piekhoogtes of drop-out (onbeperkt combinatorisch model). Met θ: P(allel a) = (m<sub>a</sub>θ + (1 − θ)p<sub>a</sub>) / (1 + (n − 1)θ), met m<sub>a</sub> het aantal keer dat a al gezien is bij slachtoffer en verdachte (Balding &amp; Nichols, Forensic Sci Int 64:125–140, 1994). Verbale schaal: NFI, Vakbijlage "De reeks waarschijnlijkheidstermen van het NFI". Voor echte zaken gebruikt het NFI probabilistische software die piekhoogtes en drop-out meeweegt.</p>
 </section>
 <!-- /NT:mix -->
@@ -6426,79 +6355,34 @@ $('#rp-docx').addEventListener('click',()=>{ const html=rpHTML(), d=new DOMParse
   const imgs=[...host.querySelectorAll('img')]; Promise.all(imgs.map(im=>im.complete?1:new Promise(r=>{ im.onload=im.onerror=r; }))).then(()=>{ try{ saveBlob((t.replace(/[^\w\- ]+/g,'').trim()||'labjournaal')+'.docx',htmlToDocx(host,t)).catch(()=>{}); } finally { host.remove(); } }); });
 /* /NT:report */
 /* NT:widmark */
-/* ================= BLOEDALCOHOL (WIDMARK) ================= */
-ET('wd-tbl',[{h:'Drank',t:'txt',w:120},{h:'Volume (mL)',t:'num',w:80},{h:'Alcohol (% vol)',t:'num',w:80},{h:'Tijdstip',t:'txt',w:70}],[['Bier',330,5,'20:00'],['Bier',330,5,'20:45'],['Wijn',150,12,'21:30'],['Bier',330,5,'22:15']],'widmark');
+/* ================= BLOEDALCOHOL (WIDMARK) =================
+   De velden, de drankentabel, de curve en de uitkomst staan in src/tools/Widmark.vue; hier
+   blijven de tijdhulpjes: wdT() leest uu:mm als minuten, wdHM() zet minuten terug als uu:mm. */
 const wdT=t=>{ const m=String(t).trim().match(/^(\d{1,2})[:.](\d{2})$/); return m&&+m[1]<24&&+m[2]<60?+m[1]*60+ +m[2]:NaN; };
 const wdHM=m=>{ const r=((Math.round(m)%1440)+1440)%1440; return String(Math.floor(r/60)).padStart(2,'0')+':'+String(r%60).padStart(2,'0'); };
-function wdR(){ const sex=$('#wd-sex').value, W=num($('#wd-w').value), L=num($('#wd-h').value), m=$('#wd-rm').value; if(m==='e') return num($('#wd-r').value); if(m==='s') return sex==='m'?0.31608-0.004821*W+0.004632*L:0.31223-0.006446*W+0.004466*L; return sex==='m'?0.68:0.55; }
-calc.widmark=function(){ const W=num($('#wd-w').value), r=wdR(), beta=num($('#wd-b').value), out=$('#wd-out'), cv=$('#wd-cv'); $('#wd-r').closest('.f').style.display=$('#wd-rm').value==='e'?'':'none';
-  let prev=-Infinity, day=0; const D=etGet('wd-tbl').map(x=>({n:x[0],v:num(x[1]),p:num(x[2]),t:wdT(x[3])})).filter(d=>d.v>0&&d.p>=0&&d.p<=100&&isFinite(d.t)).map(d=>{ let t=d.t+day; if(t<prev){ day+=1440; t+=1440; } prev=t; return {...d,t,g:d.v*d.p/100*0.789}; });
-  let h='';
-  if(!(W>0)||!(r>0)||!(r<1.2)||!(beta>=0)){ out.innerHTML=note('info','Vul gewicht, een geldige verdelingsfactor r en de afbraaksnelheid in.'); cv.style.display='none'; return; }
-  if(D.length){ const t0=D[0].t, A=D.reduce((s,d)=>s+d.g,0); let c=0, peak=0, tp=t0, k=0; const pts=[]; let tend=t0;
-    for(let t=t0;t<=t0+3*1440;t++){ while(k<D.length&&D[k].t<=t){ c+=D[k].g/(r*W)*1.055; k++; } if(c>peak){ peak=c; tp=t; } pts.push([(t-t0)/60,c]); if(k>=D.length&&c<=0){ tend=t; break; } c=Math.max(0,c-beta/60); tend=t; }
-    const xmax=Math.max(1,(tend-t0)/60), first=wdHM(t0);
-    cv.style.display=''; chart(cv,{xmin:0,xmax,ymin:0,ymax:Math.max(0.6,peak*1.15),xlabel:`uren na ${first}`,ylabel:'alcohol in bloed (g/L)',series:[{fn:x=>{ let i=0; while(i<pts.length-1&&pts[i+1][0]<=x) i++; return pts[i]?pts[i][1]:NaN; },name:'Widmark'},{fn:()=>0.5,color:'--bad',dash:[5,4]},{fn:()=>0.2,color:'--warn',dash:[2,4]}]});
-    let l5=-1; pts.forEach((p,i)=>{ if(p[1]>0.5) l5=i; });
-    h+=`<div class="lbl">Geschatte piek</div><div class="big">${fmt(peak,2)} <small>g/L</small></div>`+kv([['Tijdstip piek',wdHM(tp)],['Alcohol totaal',`${fmt(A,1)} g (${fmt(A/10,1)} standaardglazen)`],['Verdelingsfactor r',fmt(r,3)],['Weer 0 g/L om',beta>0?wdHM(tend):'–'],['Onder 0,5 g/L vanaf',l5<0?'blijft eronder':l5<pts.length-1?wdHM(t0+(l5+1)):'–']]);
-  } else { cv.style.display='none'; h+=note('info','Vul minstens één drankje met volume, alcoholpercentage en tijdstip in.'); }
-  const cm=num($('#wd-m').value), mt=wdT($('#wd-mt').value), it=wdT($('#wd-it').value), b1=num($('#wd-b1').value), b2=num($('#wd-b2').value);
-  if(cm>=0&&isFinite(mt)&&isFinite(it)&&b1>=0&&b2>=b1){ let dt=(mt-it)/60; if(dt<0) dt+=24; const lo=cm+b1*dt, hi=cm+b2*dt, mid=cm+beta*dt;
-    h+=`<div class="lbl" style="margin-top:14px">Teruggerekend naar ${wdHM(it)}</div><div class="big">${fmt(lo,2)} – ${fmt(hi,2)} <small>g/L</small></div>`+kv([['Tijdsverschil',`${fmt(dt,2)} h`],[`Met β = ${fmt(beta,2)} g/L/h`,fmt(mid,2)+' g/L'],['Boven 0,5 g/L?',lo>0.5?'ja, ook met de laagste afbraak':hi>0.5?'mogelijk, afhankelijk van de afbraak':'nee']])+note('warn','Terugrekenen is alleen verdedigbaar als de opname op het incidenttijdstip voltooid was (meestal 1–2 uur na het laatste drankje).'); }
-  out.innerHTML=h+`<div class="formula">c = A / (r · W) × 1,055 − β · t · A = V × % vol × 0,789 · stippellijnen: 0,5 en 0,2 g/L</div>`; };
 /* /NT:widmark */
 /* NT:stature */
-/* ================= LICHAAMSLENGTE UIT BOTTEN ================= */
+/* ================= LICHAAMSLENGTE UIT BOTTEN =================
+   De velden, de uitkomst en de tekening staan in src/tools/Stature.vue; hier blijven de
+   regressiecoëfficiënten (SLF: [a, b, SE] per bot), de botnamen (SLN) en de gebruikelijke
+   bereiken in cm (SLR). */
 const SLF={mw:{fem:[2.32,65.53,3.94],tib:[2.42,81.93,4.00],fib:[2.60,75.50,3.86],hum:[2.89,78.10,4.57],rad:[3.79,79.42,4.66],uln:[3.76,75.55,4.72]},
  mb:{fem:[2.10,72.22,3.91],tib:[2.19,85.36,3.96],fib:[2.34,80.07,4.02],hum:[2.88,75.48,4.23],rad:[3.32,85.43,4.57],uln:[3.20,82.77,4.74]},
  vw:{fem:[2.47,54.10,3.72],tib:[2.90,61.53,3.66],fib:[2.93,59.61,3.57],hum:[3.36,57.97,4.45],rad:[4.74,54.93,4.24],uln:[4.27,57.76,4.30]},
  vb:{fem:[2.28,59.76,3.41],tib:[2.45,72.65,3.70],fib:[2.49,70.90,3.80],hum:[3.08,64.67,4.25],rad:[3.67,71.79,4.59],uln:[3.31,75.38,4.83]}};
 const SLN={fem:'Femur',tib:'Tibia',fib:'Fibula',hum:'Humerus',rad:'Radius',uln:'Ulna'}, SLR={fem:[30,65],tib:[24,55],fib:[24,55],hum:[20,45],rad:[15,35],uln:[17,38]};
-calc.stature=function(){ const F=SLF[$('#sl-sex').value+$('#sl-pop').value], age=num($('#sl-age').value), corr=age>30&&age<120?-0.06*(age-30):0, out=$('#sl-out'), cv=$('#sl-cv'); let warn='';
-  const R=Object.keys(SLN).map(k=>{ const L=num($('#sl-'+k).value); if(!(L>0)) return null; if(L<SLR[k][0]||L>SLR[k][1]) warn+=note('warn',`${SLN[k]} ${fmt(L,1)} cm valt buiten het gebruikelijke bereik voor volwassenen; controleer de eenheid (cm).`); const [a,b,se]=F[k]; return {k,n:SLN[k],L,est:a*L+b+corr,se}; }).filter(Boolean);
-  if(!R.length){ out.innerHTML=note('info','Vul de lengte van minstens één bot in.'); cv.style.display='none'; return; }
-  const best=R.reduce((a,b)=>b.se<a.se?b:a);
-  out.innerHTML=`<div class="lbl">Beste schatting (${best.n})</div><div class="big">${fmt(best.est,1)} <small>cm ± ${fmt(best.se,2)}</small></div>`+kv([['95%-interval',`${fmt(best.est-1.96*best.se,1)} – ${fmt(best.est+1.96*best.se,1)} cm`],['Leeftijdscorrectie',corr?fmt(corr,1)+' cm':'geen']])+warn+
-   `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Bot</th><th class="num">Lengte (cm)</th><th>Formule</th><th class="num">Schatting (cm)</th><th class="num">95%-interval</th></tr></thead><tbody>${R.map(r=>{ const [a,b]=F[r.k]; return `<tr><td>${r.n}</td><td class="num">${fmt(r.L,1)}</td><td>${fmt(a,2)} × L + ${fmt(b,2)}</td><td class="num">${fmt(r.est,1)}</td><td class="num">${fmt(r.est-1.96*r.se,1)} – ${fmt(r.est+1.96*r.se,1)}</td></tr>`; }).join('')}</tbody></table></div>`+(R.length>1&&Math.max(...R.map(r=>r.est))-Math.min(...R.map(r=>r.est))>2*Math.max(...R.map(r=>r.se))?note('warn','De schattingen per bot lopen ver uiteen; controleer of de botten van hetzelfde individu zijn en goed gemeten.'):'');
-  cv.style.display=''; const lo=Math.min(...R.map(r=>r.est-2*r.se))-3, hi=Math.max(...R.map(r=>r.est+2*r.se))+3, W=480, H=64+R.length*30;
-  pShow(cv,W,H,(x)=>{ const L=90, X=v=>L+(v-lo)/(hi-lo)*(W-L-20); x.font='12px '+PFONT(); x.textBaseline='middle';
-    const st=niceStep(hi-lo,6); for(let t=Math.ceil(lo/st)*st;t<=hi;t+=st){ x.strokeStyle=PCOL.line; x.beginPath(); x.moveTo(X(t),10); x.lineTo(X(t),H-40); x.stroke(); x.fillStyle=PCOL.muted; x.textAlign='center'; x.fillText(fmt(t,0),X(t),H-28); }
-    R.forEach((r,i)=>{ const y=24+i*30; x.fillStyle=PCOL.ink; x.textAlign='right'; x.fillText(r.n,L-10,y); x.strokeStyle=r===best?PCOL.acc:PCOL.muted; x.lineWidth=2; x.beginPath(); x.moveTo(X(r.est-1.96*r.se),y); x.lineTo(X(r.est+1.96*r.se),y); x.stroke(); x.fillStyle=r===best?PCOL.acc:PCOL.ink; x.beginPath(); x.arc(X(r.est),y,4,0,7); x.fill(); }); x.lineWidth=1; x.fillStyle=PCOL.muted; x.textAlign='left'; x.fillText('lichaamslengte (cm), 95%-interval',L,H-8); }); };
 /* /NT:stature */
 /* NT:ento */
-/* ================= ENTOMOLOGIE (GRAADDAGEN) ================= */
+/* ================= ENTOMOLOGIE (GRAADDAGEN) =================
+   De velden, de curve en de uitkomst staan in src/tools/Ento.vue; hier blijft de dagfunctie:
+   enDay() geeft de graaddagen van één dag uit minimum en maximum (of één daggemiddelde). */
 function enDay(lo,hi,base,meth){ if(hi==null) return Math.max(0,lo-base); if(meth==='trunc'){ lo=Math.max(lo,base); hi=Math.max(hi,base); } return Math.max(0,(lo+hi)/2-base); }
-calc.ento=function(){ const base=num($('#en-base').value), need=num($('#en-add').value), off=num($('#en-off').value)||0, meth=$('#en-meth').value, out=$('#en-out'), cv=$('#en-cv');
-  const D=$('#en-t').value.split(/\n/).map(l=>{ const dm=l.match(/(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/); const rest=dm?l.replace(dm[0],' '):l; const n=rest.trim().split(/[\s;\t]+/).filter(Boolean).map(num).filter(isFinite); if(!n.length) return null; const lo=n[0]+off, hi=n.length>1?n[1]+off:null; return {d:dm?new Date(+dm[3],+dm[2]-1,+dm[1]):null,lo:hi!=null?Math.min(lo,hi):lo,hi:hi!=null?Math.max(lo,hi):null}; }).filter(Boolean);
-  if(!D.length||!isFinite(base)||!(need>0)){ out.innerHTML=note('info','Vul drempel, benodigde ADD en minstens één dag met temperaturen in.'); cv.style.display='none'; return; }
-  D.forEach(d=>d.add=enDay(d.lo,d.hi,base,meth)); let cum=0, days=NaN; const pts=[[0,0]];
-  for(let i=D.length-1,j=1;i>=0;i--,j++){ const prev=cum; cum+=D[i].add; pts.push([j,cum]); if(isNaN(days)&&cum>=need){ days=j-1+(D[i].add>0?(need-prev)/D[i].add:1); } }
-  const fd=D[D.length-1].d, dstr=d=>`${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
-  let h=''; if(isFinite(days)){ let when=''; if(fd){ const ms=fd.getTime()+86400000-days*86400000, e=new Date(ms); when=dstr(e); }
-    h=`<div class="lbl">Minimaal PMI</div><div class="big">${fmt(days,1)} <small>dagen</small></div>`+kv([['Eileg uiterlijk rond',when||'– (vul datums in)'],['Benodigde ADD',fmt(need,0)+' °C·d'],['Totaal in de reeks',fmt(cum,1)+' °C·d']]);
-  } else h=`<div class="lbl">Minimaal PMI</div><div class="big">&gt; ${D.length} <small>dagen</small></div>`+note('warn',`De reeks levert ${fmt(cum,1)} °C·d op, minder dan de benodigde ${fmt(need,0)}. Voeg eerdere dagen toe.`);
-  if(D.some(d=>d.hi!=null&&d.hi<base)) h+=note('info','Op dagen waarop ook de maximumtemperatuur onder de drempel ligt, staat de ontwikkeling stil.');
-  out.innerHTML=h+`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Dag</th><th>Datum</th><th class="num">T gem. (°C)</th><th class="num">ADD</th><th class="num">Cumulatief terug</th></tr></thead><tbody>${D.map((d,i)=>{ const back=D.slice(i).reduce((s,q)=>s+q.add,0); return `<tr><td>${i-D.length+1}</td><td>${d.d?dstr(d.d):'–'}</td><td class="num">${fmt(d.hi!=null?(d.lo+d.hi)/2:d.lo,1)}</td><td class="num">${fmt(d.add,1)}</td><td class="num">${fmt(back,1)}</td></tr>`; }).join('')}</tbody></table></div><div class="formula">ADD = Σ max(0, T<sub>dag</sub> − T<sub>drempel</sub>) · dag 0 = vinddag</div>`;
-  cv.style.display=''; chart(cv,{xmin:0,xmax:D.length,ymin:0,ymax:Math.max(cum,need)*1.1,xlabel:'dagen terug vanaf de vinddag',ylabel:'cumulatieve ADD (°C·d)',series:[{pts,name:'ADD'},{fn:x=>{ let i=Math.min(Math.floor(x),pts.length-2); i=Math.max(0,i); const a=pts[i],b=pts[i+1]||a; return a[1]+(b[1]-a[1])*(x-a[0]); }},{fn:()=>need,color:'--warn',dash:[5,4]}]}); };
 /* /NT:ento */
 /* NT:glass */
-/* ================= GLASVERGELIJKING ================= */
+/* ================= GLASVERGELIJKING =================
+   De velden, de grafiek en de uitkomst staan in src/tools/Glass.vue; hier blijft de
+   opmaakhulp: glF() zet een getal met d decimalen neer met een komma ('–' als het geen getal is). */
 const glF=(v,d=5)=>isFinite(v)?v.toFixed(d).replace('.',','):'–';
-calc.glass=function(){ const K=numsC($('#gl-k').value), R=numsC($('#gl-r').value), crit=$('#gl-crit').value, smin=num($('#gl-smin').value)||0, a=num($('#gl-a').value)||0.01, out=$('#gl-out'), cv=$('#gl-cv');
-  if(K.length<2||!R.length){ out.innerHTML=note('info','Vul minstens twee metingen van het bekende glas en één gevonden fragment in.'); cv.style.display='none'; return; }
-  const mk=mean(K), sk=sd(K), s=Math.max(sk,smin), mr=mean(R), sr=R.length>1?sd(R):NaN;
-  const lo=crit==='r'?Math.min(...K):mk-(+crit)*s, hi=crit==='r'?Math.max(...K):mk+(+crit)*s, inn=R.map(v=>v>=lo-1e-12&&v<=hi+1e-12);
-  let wt=''; if(R.length>1){ const v1=Math.max(sk,smin)**2/K.length, v2=Math.max(sr,smin)**2/R.length, t=(mr-mk)/Math.sqrt(v1+v2), df=(v1+v2)**2/(v1*v1/(K.length-1)+v2*v2/(R.length-1)), p=2*(1-tcdf(Math.abs(t),df));
-    wt=kv([['t (Welch)',fmt(t,3)],['Vrijheidsgraden',fmt(df,1)],['p',p<0.001?'&lt; 0,001':fmt(p,3)],['Groep',p<a?`<span class="chip bad" style="vertical-align:middle">verschillend</span>`:`<span class="chip ok" style="vertical-align:middle">niet te onderscheiden</span>`]]); }
-  const nin=inn.filter(Boolean).length;
-  out.innerHTML=`<div class="lbl">Binnen het interval</div><div class="big">${nin} <small>van ${R.length} fragmenten</small></div>`+kv([['Bekend: gemiddelde ± s',`${glF(mk)} ± ${glF(sk)} (n = ${K.length})`],['Vergelijkingsinterval',`${glF(lo)} – ${glF(hi)}`],['Gevonden: gemiddelde',R.length>1?`${glF(mr)} ± ${glF(sr)} (n = ${R.length})`:glF(mr)]])+(sk<smin?note('info','De s van het bekende glas is kleiner dan de meetprecisie; de minimale s is gebruikt.'):'')+wt+
-   `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Fragment</th><th class="num">n<sub>D</sub></th><th class="num">Afstand (s)</th><th>Uitkomst</th></tr></thead><tbody>${R.map((v,i)=>`<tr><td>${i+1}</td><td class="num">${glF(v)}</td><td class="num">${fmt((v-mk)/s,1)}</td><td>${inn[i]?'niet te onderscheiden':'verschillend'}</td></tr>`).join('')}</tbody></table></div>`;
-  cv.style.display=''; const all=[...K,...R,lo,hi], x0=Math.min(...all), x1=Math.max(...all), pad=(x1-x0)*0.12||1e-4, W=480, H=150;
-  pShow(cv,W,H,(x)=>{ const L=80, X=v=>L+(v-(x0-pad))/((x1+pad)-(x0-pad))*(W-L-20); x.font='12px '+PFONT(); x.textBaseline='middle';
-    x.fillStyle='rgba(120,160,220,.18)'; x.fillRect(X(lo),20,X(hi)-X(lo),80); x.strokeStyle=PCOL.acc; x.setLineDash([4,3]); [lo,hi].forEach(v=>{ x.beginPath(); x.moveTo(X(v),18); x.lineTo(X(v),102); x.stroke(); }); x.setLineDash([]);
-    x.fillStyle=PCOL.ink; x.textAlign='right'; x.fillText('bekend',L-10,42); x.fillText('gevonden',L-10,80);
-    K.forEach(v=>{ x.fillStyle=PCOL.acc; x.beginPath(); x.arc(X(v),42,4,0,7); x.fill(); }); R.forEach((v,i)=>{ x.fillStyle=inn[i]?PCOL.ink:PCOL.bad||'#b0271f'; x.beginPath(); x.arc(X(v),80,4.5,0,7); x.fill(); });
-    const st=niceStep(x1-x0+2*pad,5); x.fillStyle=PCOL.muted; x.textAlign='center'; for(let t=Math.ceil((x0-pad)/st)*st,k=0;t<=x1+pad&&k<12;t+=st,k++) x.fillText(glF(t,4),X(t),H-30); x.fillText('brekingsindex n_D',(W+L)/2,H-10); }); };
 /* /NT:glass */
 /* NT:hwe */
 /* ================= HARDY-WEINBERG & FORENSISCHE KENGETALLEN ================= */
@@ -6661,30 +6545,14 @@ const elName=(st,lab,k)=>st.vals[k]||lab[k]||'';
    te definiëren. */
 /* /NT:facs */
 /* NT:mix */
-/* ================= MENGPROFIEL & LR ================= */
-ET('mx-tbl',[{h:'Locus',t:'txt',w:80},{h:'Allelen mengprofiel',t:'txt',w:130},{h:'Piekhoogtes (RFU)',t:'txt',w:150},{h:'Frequenties',t:'txt',w:150},{h:'Slachtoffer',t:'txt',w:70},{h:'Verdachte',t:'txt',w:70}],[['D3S1358','14 15 16 18','1450 1380 420 390','0,12 0,26 0,25 0,15','14 15','16 18'],['vWA','16 17 19','1500 1820 410','0,20 0,27 0,09','16 17','17 19'],['FGA','20 22 23 24','1320 400 1410 370','0,14 0,17 0,15 0,14','20 23','22 24'],['D8S1179','12 13 14','430 2650 380','0,14 0,31 0,21','13 13','12 14'],['TH01','6 9.3','1900 2200','0,23 0,31','6 9.3','6 9.3']],'mix');
+/* ================= MENGPROFIEL & LR =================
+   De velden, de locustabel en de uitkomst staan in src/tools/Mix.vue; hier blijven de twee
+   hulpfuncties: mxTok() splitst een cel in waarden, mxLR() geeft de likelihood ratio van een locus. */
 const mxTok=t=>String(t).trim().split(/[\s;\/]+/).filter(Boolean).map(x=>x.replace(',','.'));
 function mxLR(E,p,V,S,th){ /* E: allelen, p: {allel:freq}, V/S: genotypen */ const need=E.filter(a=>!V.includes(a)), seen={}; [...V,...S].forEach(a=>seen[a]=(seen[a]||0)+1); const n0=V.length+S.length;
   const pr=(a,cnt,n)=>((cnt[a]||0)*th+(1-th)*p[a])/(1+(n-1)*th); let den=0;
   for(let i=0;i<E.length;i++) for(let j=i;j<E.length;j++){ const g=[E[i],E[j]]; if(!need.every(a=>g.includes(a))) continue; const c1={...seen}, p1=pr(g[0],c1,n0); c1[g[0]]=(c1[g[0]]||0)+1; const p2=pr(g[1],c1,n0+1); den+=(i===j?1:2)*p1*p2; }
   return den>0?1/den:NaN; }
-calc.mix=function(){ const th=Math.min(Math.max(num($('#mx-th').value)||0,0),0.2), out=$('#mx-out'); const R=[], warn=[];
-  etGet('mx-tbl').forEach(r=>{ const loc=r[0].trim(), E=mxTok(r[1]); if(!loc||!E.length) return; const H=mxTok(r[2]).map(Number), F=mxTok(r[3]).map(Number), V=mxTok(r[4]), S=mxTok(r[5]); const o={loc,E,H,n:E.length};
-    if(new Set(E).size!==E.length){ warn.push(`${ud(loc)}: een allel staat dubbel in het mengprofiel.`); return; }
-    if(E.length>4) warn.push(`${ud(loc)}: meer dan vier allelen past niet bij twee bijdragers.`);
-    if(H.length===E.length&&H.every(h=>h>0)){ const tot=H.reduce((a,b)=>a+b,0), srt=[...H].sort((a,b)=>a-b); if(E.length===4){ o.mx=(srt[0]+srt[1])/tot; o.hbMin=srt[0]/srt[1]; o.hbMaj=srt[2]/srt[3]; } else if(E.length===2){ o.hb2=srt[0]/srt[1]; } }
-    if(V.length===2&&S.length===2&&F.length===E.length&&F.every(f=>f>0&&f<1)){ const p={}; E.forEach((a,i)=>p[a]=F[i]); const expl=E.every(a=>V.includes(a)||S.includes(a)), inside=[...V,...S].every(a=>E.includes(a));
-      if(!inside||!expl){ o.lr=0; o.note=!inside?'allel van slachtoffer of verdachte ontbreekt in het spoor':'niet alle allelen verklaard door slachtoffer + verdachte'; } else o.lr=mxLR(E,p,V,S,th); if(F.reduce((a,b)=>a+b,0)>1.0001) warn.push(`${ud(loc)}: de frequenties tellen op tot meer dan 1.`); }
-    else if(V.length||S.length||F.length) o.note='vul twee allelen per persoon en één frequentie per allel in';
-    R.push(o); });
-  if(!R.length){ out.innerHTML=note('info','Vul per locus de allelen van het mengprofiel in.'); return; }
-  const mxs=R.filter(r=>isFinite(r.mx)).map(r=>r.mx), Mx=mxs.length?mean(mxs):NaN, L=R.filter(r=>r.lr!=null&&isFinite(r.lr)), LR=L.length?L.reduce((a,r)=>a*r.lr,1):NaN, lg=LR>0?Math.log10(LR):NaN;
-  const verb=v=>v>1e6?'extreem veel waarschijnlijker':v>1e4?'zeer veel waarschijnlijker':v>100?'veel waarschijnlijker':v>10?'waarschijnlijker':v>2?'iets waarschijnlijker':'ongeveer even waarschijnlijk';
-  let h='';
-  if(L.length){ const inv=LR>0&&LR<1, v=inv?1/LR:LR; h+=`<div class="lbl">Likelihood ratio (${L.length} loci, θ = ${fmt(th,3)})</div><div class="big">${LR===0?'0 (uitsluiting)':sci(LR,3)}</div>`+kv([['log₁₀ LR',isFinite(lg)?fmt(lg,2):'–'],['Verbale term (NFI)',LR===0?'de verdachte past niet als bijdrager':`de bevindingen zijn ${verb(v)} onder ${inv?'H<sub>d</sub> (slachtoffer + onbekende)':'H<sub>p</sub> (slachtoffer + verdachte)'}${v>2?` dan onder ${inv?'H<sub>p</sub>':'H<sub>d</sub>'}`:''}`]]); }
-  h+=kv([['Mengverhouding M<sub>x</sub> (kleinste bijdrager)',isFinite(Mx)?`${fmt(Mx,2)} (ongeveer 1 : ${fmt((1-Mx)/Mx,1)}, uit ${mxs.length} loci met vier allelen)`:'niet te bepalen zonder een locus met vier allelen en piekhoogtes'],['Major en minor te scheiden?',isFinite(Mx)?(Mx<0.33?'ja, duidelijk verschil in bijdrage':'lastig: de bijdragen liggen dicht bij elkaar'):'–']]);
-  h+=`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Locus</th><th class="num">Allelen</th><th class="num">M<sub>x</sub></th><th class="num">H<sub>b</sub> major</th><th class="num">H<sub>b</sub> minor</th><th class="num">LR</th><th>Opmerking</th></tr></thead><tbody>${R.map(r=>`<tr><td>${ud(r.loc)}</td><td class="num">${r.n}</td><td class="num">${isFinite(r.mx)?fmt(r.mx,2):'–'}</td><td class="num">${isFinite(r.hbMaj)?fmt(r.hbMaj,2):isFinite(r.hb2)?fmt(r.hb2,2):'–'}</td><td class="num">${isFinite(r.hbMin)?fmt(r.hbMin,2):'–'}</td><td class="num">${r.lr==null?'–':r.lr===0?'0':sig(r.lr,3)}</td><td>${r.note||(isFinite(r.hbMaj)&&Math.min(r.hbMaj,r.hbMin)<0.6?'H<sub>b</sub> onder 0,60':'')}</td></tr>`).join('')}</tbody></table></div>`+warn.map(w=>note('warn',w)).join('')+note('info','Rekenvoorbeeld voor onderwijs: dit model gebruikt geen piekhoogtes, stutter of drop-out bij de LR en gaat uit van precies twee bijdragers.');
-  out.innerHTML=h+`<div class="formula">LR = Π 1 / Σ P(genotype onbekende | slachtoffer, verdachte, θ) · M<sub>x</sub> = (φ<sub>minor 1</sub> + φ<sub>minor 2</sub>) / Σφ</div>`; };
 /* /NT:mix */
 /* NT:news */
 /* ================= WAT IS ER NIEUW =================
