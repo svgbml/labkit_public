@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-21 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 286 van 286 controles binnen tolerantie.**
+**Resultaat: 308 van 308 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -43,6 +43,10 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | PCR-mastermix | NEB Taq, 25 en 50 µL | Taq 50 µL (µL) | 0,25 | 0,25 | +0.00% | ✅ | NEB-protocol M0273: 2,5 / 0,5 / 0,5 / 0,5 / 0,125 µL per 25 µL; Taq 0,25 µL per 50 µL |
 | PCR-cyclus | Primer-Tm (nearest-neighbor) | Tm forward (°C) | 65,22 | 65,2 | -0.03% | ✅ | Biopython Tm_NN (SantaLucia 1998, 50 mM Na⁺, 1,5 mM Mg²⁺, 0,8 mM dNTP, 0,2 µM primer) |
 | PCR-cyclus | Primer-Tm (nearest-neighbor) | Tm reverse (°C) | 64,15 | 64,1 | -0.08% | ✅ | Biopython Tm_NN (SantaLucia 1998, 50 mM Na⁺, 1,5 mM Mg²⁺, 0,8 mM dNTP, 0,2 µM primer) |
+| Primers oplossen | Primerkaart: zelfdimeer-ΔG van een GAATTC-3′-eind | zelfdimeer ΔG (kcal/mol) | -3,09 | -3,16 | +2.27% | ✅ | SantaLucia 1998, ΔG°37-tabel: GAATTC/GAATTC = 2 × 0,98 (GC-eind) − 1,30 − 1,00 − 0,88 − 1,00 − 1,30 + 0,43 (symmetrie) = −3,09 kcal/mol |
+| Primers oplossen | Primerpaar: kruisdimeer CGTTGA/TCAACG | kruisdimeer ΔG (kcal/mol) | -5,35 | -5,41 | +1.12% | ✅ | SantaLucia 1998, uitgewerkt voorbeeld: 5′-CGTTGA-3′ met zijn complement, ΔG°37 = −5,35 kcal/mol |
+| PCR-cyclus | In-silico PCR: productgrootte, lineair en circulair | product lineair (bp) | 622 | 622 | +0.00% | ✅ | Onafhankelijk berekend: productgrootte = einde reverse-site − begin forward-site (Python str.find op hetzelfde template); circulair met het nulpunt midden in het product |
+| PCR-cyclus | In-silico PCR: productgrootte, lineair en circulair | product circulair over het nulpunt (bp) | 622 | 622 | +0.00% | ✅ | Onafhankelijk berekend: productgrootte = einde reverse-site − begin forward-site (Python str.find op hetzelfde template); circulair met het nulpunt midden in het product |
 | PCR-cyclus | qPCR-efficiëntie uit helling | efficiëntie bij −3,80 (%) | 83,3 | 83,3 | +0.00% | ✅ | Pearson qPCR-efficiëntie: helling −3,80 → 83,3%; helling −3,3 → 100,9% |
 | PCR-cyclus | qPCR-efficiëntie uit helling | efficiëntie bij −3,3 (%) | 100,9 | 100,9 | +0.00% | ✅ | Pearson qPCR-efficiëntie: helling −3,80 → 83,3%; helling −3,3 → 100,9% |
 | PCR-cyclus | Amplificatie | kopieën | 4,0960e+08 | 4,1000e+08 | +0.10% | ✅ | KVV-studiemateriaal: 10⁵ × 2¹² = 4,1 × 10⁸ |
@@ -50,9 +54,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9386 | -0.62% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7803 | +0.32% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5478 | -1.39% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,947 | +0.27% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7848 | +0.91% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5568 | +0.23% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -271,6 +275,24 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Oplossing & buffer | Hydraatvariant | afwegen (g) | 2,681 | 2,681 | +0.01% | ✅ | 10 mM Na₂HPO₄·7H₂O (268,07 g/mol) in 1 L = 2,681 g |
 | Enzymkinetiek | Eadie-Hofstee | helling | -2 | -2 | -0.00% | ✅ | Exacte Michaelis-Menten-data (V_max 100, K_m 2): v tegen v/[S] heeft helling −K_m en y-asafsnede V_max |
 | Enzymkinetiek | Eadie-Hofstee | y-asafsnede | 100 | 100 | +0.00% | ✅ | Exacte Michaelis-Menten-data (V_max 100, K_m 2): v tegen v/[S] heeft helling −K_m en y-asafsnede V_max |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | EcoRI+HindIII circ fragment 1 (bp) | 2441 | 2441 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | EcoRI+HindIII circ fragment 2 (bp) | 983 | 983 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | EcoRI+HindIII circ fragment 3 (bp) | 514 | 514 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | EcoRI+HindIII aantal fragmenten | 3 | 3 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | EcoRI+HindIII lin fragment 1 (bp) | 2422 | 2422 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | EcoRI+HindIII lin fragment 2 (bp) | 983 | 983 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | EcoRI+HindIII lin fragment 3 (bp) | 514 | 514 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | EcoRI+HindIII lin fragment 4 (bp) | 19 | 19 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | EcoRI+HindIII aantal fragmenten | 4 | 4 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | BsaI+SfiI circ fragment 1 (bp) | 2746 | 2746 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | BsaI+SfiI circ fragment 2 (bp) | 1169 | 1169 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | BsaI+SfiI circ fragment 3 (bp) | 23 | 23 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | BsaI+SfiI aantal fragmenten | 3 | 3 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | PstI+NotI circ fragment 1 (bp) | 2390 | 2390 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | PstI+NotI circ fragment 2 (bp) | 1270 | 1270 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | PstI+NotI circ fragment 3 (bp) | 249 | 249 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | PstI+NotI circ fragment 4 (bp) | 29 | 29 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
+| Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | PstI+NotI aantal fragmenten | 4 | 4 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
 | Restrictiedigestie | Enzymvolume en star-activiteit | enzymvolume (µL) | 1 | 1 | +0.00% | ✅ | 1 µg DNA × 10 U/µg / 20 U/µL = 0,5 µL per enzym; twee enzymen in 50 µL = 2% (glycerol 1%) |
 | Restrictiedigestie | Enzymvolume en star-activiteit | glycerol (%) | 1 | 1 | +0.00% | ✅ | 1 µg DNA × 10 U/µg / 20 U/µL = 0,5 µL per enzym; twee enzymen in 50 µL = 2% (glycerol 1%) |
 | Eiwitzuiveringstabel | Zuiveringsfactor en ammoniumsulfaat | zuiveringsfactor | 166,7 | 167 | +0.20% | ✅ | SA stap 4 / SA stap 1 = (480/0,9)/(40/12,5) = 166,7; opbrengst 4800/8000 = 60%; 0 → 40% bij 0 °C: 515,35 × 0,4/(1 − 0,2722 × 0,4) = 231,3 g/L (Wingfield 2016) |
