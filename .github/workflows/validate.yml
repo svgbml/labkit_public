@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      # web/index.html is sinds S265 een build-uitvoer: hij moet passen bij src/, tools/nt/ en de bundel
+      # web/index.html is sinds S265 een build-uitvoer: hij moet passen bij src/ en de bundel
       - name: Vue-bundel klopt met src/
         run: npm ci && npx vite build && git diff --exit-code build/app.bundle.js
       - name: web/index.html klopt met de bronnen

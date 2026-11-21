@@ -2,14 +2,14 @@
 Labkit BML - fasecontrole / stage check.
 
 Controleert dat elke tool uit const TOOLS in minstens één fase staat
-(STAGES in tools/nt/99y_stage.js) en dat er geen onbekende ids of fasecodes in staan.
+(STAGES in src/legacy/nt/99y_stage.js) en dat er geen onbekende ids of fasecodes in staan.
 Gebruik: python tests/stages_check.py   (exitcode 1 bij problemen)
 """
 import pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-HTML = (ROOT / 'web' / 'index.html').read_text(encoding='utf8')
-JS = (ROOT / 'tools' / 'nt' / '99y_stage.js').read_text(encoding='utf8')
+HTML = (ROOT / 'src' / 'legacy' / 'core.js').read_text(encoding='utf8')   # TOOLS (sinds S269)
+JS = (ROOT / 'src' / 'legacy' / 'nt' / '99y_stage.js').read_text(encoding='utf8')
 
 tools = [x.strip().strip("'") for x in re.search(r"const TOOLS=\[(.*?)\];", HTML).group(1).split(',')]
 none = [x.strip().strip("'") for x in re.search(r"const STAGE_NONE=\[(.*?)\];", JS).group(1).split(',')]

@@ -1,4 +1,4 @@
-"""Maakt tools/nt/98_valid.js uit tests/VALIDATIE.md: per tool het aantal controles en hoeveel er binnen tolerantie zijn.
+"""Maakt src/generated/valid.js uit tests/VALIDATIE.md: per tool het aantal controles en hoeveel er binnen tolerantie zijn.
 De app toont dat als badge 'Gevalideerd' in de kop van de tool. Draai daarna tools/build.py (dat roept dit script zelf ook aan).
 Toolnamen in VALIDATIE.md worden gekoppeld aan de naam in de navigatie of de titel (h2) van de tool."""
 import html, json, os, re, sys
@@ -38,9 +38,9 @@ for line in md.splitlines():
 
 js = '/* gegenereerd door tools/build_validated.py uit tests/VALIDATIE.md; niet met de hand bewerken */\nconst VALIDATED=' + \
      json.dumps({k: list(v) for k, v in sorted(out.items())}, separators=(',', ':')) + ';'
-nt = os.path.join(R, 'tools', 'nt')
-open(os.path.join(nt, '98_valid.js'), 'w', encoding='utf8').write(js + '\n')
-open(os.path.join(nt, '98_valid.json'), 'w', encoding='utf8').write('{"id":"valid","lib":true}\n')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from genmod import write_module
+write_module('valid.js', 'build_validated.py', js, ['VALIDATED'])
 print(len(out), 'tools met validatie,', sum(v[0] for v in out.values()), 'controles')
 if unknown:
     sys.stdout.reconfigure(encoding='utf8')

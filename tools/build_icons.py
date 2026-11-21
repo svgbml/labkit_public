@@ -1,4 +1,4 @@
-"""Bouwt tools/nt/99ya_icon.js uit de pictogrammen in tools/icons/.
+"""Bouwt src/generated/icons.js uit de pictogrammen in tools/icons/.
 Gebruik: python tools/build_icons.py [deel1|alles]
 deel1 = alleen de pictogrammen van de 45 tools uit S7.
 
@@ -34,8 +34,8 @@ tmap = json.loads((S / 'tools.json').read_text(encoding='utf8'))
 if MODE == 'deel1':
     tmap = {k: v for k, v in tmap.items() if k in DEEL1}
 
-HTML = (ROOT / 'web' / 'index.html').read_text(encoding='utf8')
-tools = [x.strip().strip("'") for x in re.search(r"const TOOLS=\[(.*?)\];", HTML).group(1).split(',')]
+SRCJS = (ROOT / 'src' / 'legacy' / 'core.js').read_text(encoding='utf8')   # TOOLS staat sinds S269 daar
+tools = [x.strip().strip("'") for x in re.search(r"const TOOLS=\[(.*?)\];", SRCJS).group(1).split(',')]
 
 missing = sorted({v for v in tmap.values() if v not in glyphs})
 assert not missing, 'pictogram ontbreekt: ' + ', '.join(missing)
@@ -84,6 +84,7 @@ js = """/* ================= PICTOGRAM PER TOOL =================
 { const st=document.createElement('style'); st.id='lk-ico'; st.textContent=%s; document.head.appendChild(st); }
 """ % (len(tmap), len(set(tmap.values())), q)
 
-(ROOT / 'tools' / 'nt' / '99ya_icon.js').write_text(js, encoding='utf8')
-(ROOT / 'tools' / 'nt' / '99ya_icon.json').write_text('{"id":"icon","lib":true}\n', encoding='utf8')
+import sys; sys.path.insert(0, str(ROOT / 'tools'))
+from genmod import write_module
+write_module('icons.js', 'build_icons.py', js)
 print('%d vormen, %d tools met een pictogram, %d tekens CSS' % (len(set(tmap.values())), len(tmap), len(css)))

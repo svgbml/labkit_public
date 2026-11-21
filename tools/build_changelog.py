@@ -1,5 +1,5 @@
-"""Zet CHANGELOG.md om in tools/nt/97_news.js, de bron voor het paneel "Wat is er nieuw".
-Gebruik: python tools/build_changelog.py   (daarna tools/insert_tools.py)
+"""Zet CHANGELOG.md om in src/generated/news.js, de bron voor het paneel "Wat is er nieuw".
+Gebruik: python tools/build_changelog.py   (daarna npm run build)
 
 Een kopje `## <versie> - <datum>` wordt een blok; regels die met `- ` beginnen worden de punten.
 Het kopje "Nog niet uitgebracht" krijgt geen versienummer en wordt alleen getoond in de
@@ -7,10 +7,10 @@ volledige lijst, niet in het paneel na een update.
 """
 import os
 import re
+import sys
 
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(R, 'CHANGELOG.md')
-OUT = os.path.join(R, 'tools', 'nt', '97_news.js')
 
 blocks = []
 cur = None
@@ -47,7 +47,7 @@ js = ("/* ================= WAT IS ER NIEUW =================\n"
       "   Gegenereerd door tools/build_changelog.py uit CHANGELOG.md; niet met de hand bewerken.\n"
       "   Een blok zonder versienummer (v:'') is nog niet uitgebracht en verschijnt alleen in\n"
       "   de volledige lijst. */\nconst NEWS=[\n" + ',\n'.join(rows) + '\n];\n')
-open(OUT, 'w', encoding='utf8', newline='\n').write(js)
-open(OUT[:-3] + '.json', 'w', encoding='utf8', newline='\n').write('{"id":"news","lib":true}\n')
-print('%d versies, %d regels -> %s' % (len(blocks), sum(len(b['items']) for b in blocks),
-                                       os.path.basename(OUT)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from genmod import write_module
+OUT = write_module('news.js', 'build_changelog.py', js, ['NEWS'])
+print('%d versies, %d regels -> %s' % (len(blocks), sum(len(b['items']) for b in blocks), OUT))
