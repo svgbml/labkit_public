@@ -16,6 +16,8 @@
    de app (de inline scripts in src/shell/index.html, tools/nt/ en de componenten) leest ze als
    globale namen. De bundel staat daarom vóór die scripts in de pagina; het mounten zelf gebeurt
    pas in start(), zie hieronder. */
+/* de vertaling eerst (S271): trPlain/trCanvas moeten er zijn voordat er iets getekend wordt */
+import './lib/i18n.js';
 import './lib/helpers.js';
 import './lib/fit.js';
 import './lib/chart.js';

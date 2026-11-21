@@ -14,7 +14,7 @@ EDGE = ['', '0', '-5', 'abc', '1e12']
 EXPLORE = r"""
 (tool)=>{ const EDGE=['','0','-5','abc','1e12']; window.__i18nRec=true; const sec=document.getElementById('t-'+tool), keys=new Set(); window.__lkLeft=window.__lkLeft||new Set();
   /* Engels: tekst die nog precies een Nederlandse sleutel is (met een andere vertaling) is blijven staan.
-     Sinds fase 16 vertaalt geen observer meer na; elke tekst moet via t()/tHtml()/trPlain() of tStatic(). */
+     Sinds S271 vertaalt geen observer meer na; elke tekst moet via t()/tHtml()/trPlain() of tStatic(). */
   const left=root=>{ if(LANG!=='en'||!root) return; /* geen Nederlands maar wel een sleutel: 'Na' is natrium (Molmassa) */ const NOTDUTCH=new Set(['Na']);
     const hit=k=>{ const v=I18N_EN[k]; return v!=null&&v!==k&&i18nHasWords(k)&&!NOTDUTCH.has(k); };
     const walk=el=>{ if(el.nodeType!==1||I18N_SKIP.has(el.tagName)||(el.matches('section.tool')&&!el.classList.contains('active'))) return;
@@ -46,8 +46,6 @@ def main():
     with sync_playwright() as p:
         b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1400, 'height': 900})
         pg.add_init_script("try{localStorage.clear();localStorage.setItem('labkit:v1:lang','" + lang + "')}catch(e){}")
-        import os
-        if os.environ.get('LK_NOMO'): pg.add_init_script("window.__lkNoMO=true")   # ontwikkelhulp: de observer uit
         pg.goto(URL); pg.wait_for_timeout(800)
         tools = pg.evaluate('TOOLS')
         found.update(pg.evaluate("i18nCollect(document.getElementById('nav'))"))

@@ -7,7 +7,7 @@ import {live} from '../../lib/global.js';
    Hier blijft wat ook andere code aanroept: rpTools/rpSection (verzamelen) en rpDoc/rpPrint
    (het losse document; ook gebruikt door Afdrukken bij elke tool en onder de tekeningen). */
 function rpTools(){ return toolIndex().filter(t=>!['report','inst','start'].includes(t.id)); }
-function rpSection(id,withIn,withSrc){ const sec=$('#t-'+id); if(!sec) return ''; i18nEnsure(sec); try{ calc[id]&&calc[id](); }catch(e){}
+function rpSection(id,withIn,withSrc){ const sec=$('#t-'+id); if(!sec) return ''; try{ calc[id]&&calc[id](); }catch(e){}
   const title=sec.querySelector('.tool-head h2').textContent; let h=`<h2>${esc(title)}</h2>`;
   if(withIn){ const items=[]; sec.querySelectorAll('.panel input:not([type=checkbox]):not([type=radio]):not([type=search]), .panel select, .panel textarea').forEach(el=>{ if(el.closest('table')||!el.id) return; const lb=sec.querySelector(`label[for="${el.id}"]`); const v=el.tagName==='SELECT'?el.options[el.selectedIndex]?.text:el.value; if(lb&&v&&String(v).trim()) items.push(`<tr><th>${esc(lb.textContent.trim())}</th><td>${esc(v)}</td></tr>`); });
     if(items.length) h+=`<table class="kv">${items.join('')}</table>`;

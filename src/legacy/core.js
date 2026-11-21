@@ -17,7 +17,6 @@ function route(){
   current=TOOLS.includes(h)?h:'start';
   $$('.tool').forEach(s=>s.classList.toggle('active',s.id==='t-'+current));
   $$('#nav > a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+current));
-  i18nEnsure($('#t-'+current));
   if(calc[current]) calc[current]();
 }
 window.addEventListener('hashchange',route);

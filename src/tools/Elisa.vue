@@ -183,7 +183,7 @@ export default {
       onChange: () => { this.toText(); }
     });
     /* de ontwerper bouwt zijn DOM voordat de vertaallaag meeloopt; vertaal die nu eenmalig */
-    if (LANG === 'en' && typeof i18nWalk === 'function') i18nWalk(document.getElementById('el-pld'));
+    tStatic(document.getElementById('el-pld'));
     this.toPlate();
     this.draw();
   },

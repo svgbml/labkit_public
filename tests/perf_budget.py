@@ -4,7 +4,8 @@ Labkit BML - opstarttijd en taalbestanden.
 Laadt de app in het Nederlands en het Engels en controleert:
 - DOMContentLoaded blijft onder het budget (standaard 2500 ms; LABKIT_BUDGET_MS om aan te passen);
 - het Engelse woordenboek (i18n-en.js) wordt alleen voor Engels geladen;
-- in het Engels zijn na korte tijd alle tools vertaald (lazy vertalen loopt af);
+- in het Engels zijn de koppen van alle tools vertaald, ook van tools die niet open staan
+  (sinds S271 in één vertaalronde bij het opstarten, zonder observer of luie modus);
 - geen scriptfouten.
 Gebruik: python tests/perf_budget.py   (exitcode 1 bij problemen)
 """
@@ -27,14 +28,13 @@ def run(lang):
             pg.goto('about:blank'); pg.goto(URL); pg.wait_for_load_state('load')
             dcl = pg.evaluate("Math.round(performance.getEntriesByType('navigation')[0].domContentLoadedEventEnd)")
             best = dcl if best is None else min(best, dcl)
-        pg.wait_for_timeout(3000)
-        pending = pg.evaluate("[...document.querySelectorAll('section.tool')].filter(s=>s.__i18nPend).map(s=>s.id)")
+        pending = pg.evaluate("LANG!=='en'?[]:[...document.querySelectorAll('section.tool .tool-head h2')].filter(h=>{ const v=I18N_EN[h.innerHTML.trim()]; return v!=null&&v!==h.innerHTML.trim(); }).map(h=>h.closest('section').id)")
         b.close()
     issues = []
     if best > BUDGET: issues.append(f'DOMContentLoaded {best} ms > budget {BUDGET} ms')
     if lang == 'nl' and 'i18n-en.js' in files: issues.append('Engels woordenboek geladen in het Nederlands')
     if lang == 'en' and 'i18n-en.js' not in files: issues.append('Engels woordenboek niet geladen')
-    if pending: issues.append(f'{len(pending)} tools na 3 s nog niet vertaald: ' + ', '.join(pending[:5]))
+    if pending: issues.append(f'{len(pending)} toolkoppen niet vertaald: ' + ', '.join(pending[:5]))
     issues += ['scriptfout: ' + e for e in errs]
     print(f'[{lang}] DOMContentLoaded {best} ms (budget {BUDGET} ms)' + ('' if issues else ', in orde'))
     return issues
