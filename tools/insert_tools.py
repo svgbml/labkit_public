@@ -60,7 +60,7 @@ for m in mods:
         s=s.replace(mk,f'<!-- NT:{m["id"]} -->\n{m["_html"]}\n<!-- /NT:{m["id"]} -->\n\n'+mk,1)
     if m['_js']:
         s=s.replace(MK,f'/* NT:{m["id"]} */\n{m["_js"]}\n/* /NT:{m["id"]} */\n'+MK,1)
-# 3b. de Vue-bundel (Vite -> build/app.bundle.js) komt na alle modules, zodat hij de
+# 3b. de Vue-bundel (Vite -> build/app.bundle.js), zie hieronder voor de plek.
 #     helpers en de lib-modules hierboven al kan gebruiken. Hij wordt ingevoegd en niet als
 #     <script src> gekoppeld, zodat web/index.html een bestand blijft dat vanaf file:// werkt.
 BUNDLE=os.path.join(R,'build','app.bundle.js')
@@ -76,7 +76,14 @@ if not CHECK:
     assert not newer,('build/app.bundle.js is ouder dan '+str(len(newer))+' bestand(en) in src/ ('
                       +os.path.relpath(newer[0],R)+' …): draai eerst "npm run build:vue".')
 js=open(BUNDLE,encoding='utf8').read().strip()
-s=s.replace(MK,f'/* NT:vuebundle */\n{js}\n/* /NT:vuebundle */\n'+MK,1)
+# Sinds S267 staat de bundel vóór de oude inline scripts: hij levert de gedeelde helpers ($, num,
+# fmt, chart, …) op window, en die scripts gebruiken ze al tijdens het laden. Het mounten van de
+# componenten gebeurt pas in LabkitVue.start(), op de plek waar de bundel eerst stond (na alle
+# modules uit tools/nt/), zodat calc[tool] en de haken in dezelfde volgorde gezet worden.
+BMK='<!-- @bundle: de Vue-bundel met de gedeelde helpers (S267); tools/insert_tools.py zet hem hier -->'
+assert s.count(BMK)==1,'de @bundle-regel ontbreekt in het sjabloon'
+s=s.replace(BMK,f'<script>\n/* NT:vuebundle */\n{js}\n/* /NT:vuebundle */\n</script>',1)
+s=s.replace(MK,'LabkitVue.start();\n'+MK,1)
 
 # 4. TOOLS en TAGS
 tm=re.search(r"const TOOLS=\[(.*?)\];",s); ids=[x.strip().strip("'") for x in tm.group(1).split(',')]
