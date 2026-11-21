@@ -129,7 +129,9 @@ export default {
     /* de annealingtemperatuur uit het PCR-cyclus-gereedschap (globale yTa) */
     from() {
       const a = this.S.find(r => /anneal/i.test(r.n));
-      if (a && typeof yTa !== 'undefined' && isFinite(yTa)) a.t = String(Math.round(yTa * 10) / 10).replace('.', ',');
+      /* window.__pcrcVm is PCR-cyclus; window.__pcrVm is PCR-mastermix, niet verwarren */
+      const ta = window.__pcrcVm ? window.__pcrcVm.taAuto : NaN;
+      if (a && isFinite(ta)) a.t = String(Math.round(ta * 10) / 10).replace('.', ',');
     },
     /* de tekening op #pg-cv en de opslag; elke render en elke invoer-event roept dit aan */
     draw() {

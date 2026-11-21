@@ -8,7 +8,7 @@
      wordt na elke render opnieuw getekend, zoals bij Bufcap en Z′. De id's y-f, y-r, y-na,
      y-mg, y-dntp, y-pc, y-out, y-type, y-bp, y-n, y-dt, y-ds, y-ta, y-as, y-et, y-es, y-ramp,
      y-prog, y-cv, y-copy, y-copied, y-n0, y-eff, y-cyc, y-goal, y-q0, y-qf, y-cq en y-amp
-     blijven zoals ze waren. De annealingtemperatuur staat op window.__pcrVm.ta voor het
+     blijven zoals ze waren. De annealingtemperatuur staat op window.__pcrcVm.taAuto voor het
      programma-gereedschap (Gradiënt-PCR/PCR-programma, knop #pg-from). -->
 <template>
   <div class="stack">
@@ -232,7 +232,7 @@ export default {
   watch: {
     progText() { this.copied = ''; }
   },
-  mounted() { window.__pcrVm = this; this.draw(); },
+  mounted() { window.__pcrcVm = this; this.draw(); },
   updated() { this.draw(); },
   methods: {
     F, S, mm: mmLoc,
