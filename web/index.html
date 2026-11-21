@@ -713,87 +713,17 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
   <p>Laad een gelfoto, stel contrast bij, laat de lanen automatisch detecteren, zet labels en ladderwaarden erbij en meet onbekende banden. De foto blijft in je browser.</p></header>
   <div class="gfwrap">
     <div class="stack" style="gap:12px">
-      <div class="panel">
-        <h3>1 · Afbeelding</h3>
-        <input type="file" id="gf-file" accept="image/*" aria-label="Gelfoto kiezen">
-        <div class="row" style="margin-top:8px"><button type="button" id="gf-demo">Demo-gel laden</button></div>
-        <p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">PNG of JPG; je kunt ook een bestand op de afbeelding slepen. TIFF opent niet in de browser.</p>
-      </div>
-      <div class="panel">
-        <h3>2 · Bewerken</h3>
-        <div class="row" style="gap:14px"><label class="chk"><input type="checkbox" id="gf-inv"> Inverteren</label><label class="chk"><input type="checkbox" id="gf-gray" checked> Grijswaarden</label></div>
-        <div class="rng" style="margin-top:10px"><label for="gf-bri">Helderheid</label><input type="range" id="gf-bri" min="-60" max="60" value="0"><span id="gf-briv">0</span></div>
-        <div class="rng"><label for="gf-con">Contrast</label><input type="range" id="gf-con" min="0.5" max="3" step="0.05" value="1"><span id="gf-conv">1,00</span></div>
-        <div class="rng"><label for="gf-rot">Rechtzetten</label><input type="range" id="gf-rot" min="-15" max="15" step="0.25" value="0"><span id="gf-rotv">0°</span></div>
-        <div class="row" style="margin-top:8px"><button type="button" id="gf-auto">Automatisch rechtzetten</button><button type="button" id="gf-r90">⟳ 90°</button><button type="button" id="gf-flip">Spiegelen</button><button type="button" id="gf-crop">Bijsnijden</button><button type="button" id="gf-uncrop">Herstel</button></div>
-        <div class="row" id="gf-cropbar" style="margin-top:8px;display:none"><span style="font-size:13px;flex-basis:100%">Sleep een kader over de foto, of versleep de randen en hoeken van het kader om het bij te stellen.</span><button type="button" id="gf-cropfind" title="Zoekt het lichte gelvlak in de foto en zet het kader eromheen">Gel zoeken</button><button type="button" class="primary" id="gf-cropok">Toepassen</button><button type="button" id="gf-cropno">Annuleren</button></div>
-      </div>
-      <div class="panel">
-        <h3>3 · Lanen</h3>
-        <div class="row"><div class="f"><label for="gf-n">Aantal (leeg = auto)</label><input id="gf-n" inputmode="numeric" style="width:90px"></div><div class="f"><label>&nbsp;</label><button type="button" class="primary" id="gf-detect">Detecteer lanen</button></div></div>
-        <div class="row" style="margin-top:8px"><button type="button" id="gf-addlane">+ Lane (klik op foto)</button></div>
-        <div class="rng" style="margin-top:8px"><label for="gf-lw">Lanebreedte</label><input type="range" id="gf-lw" min="4" max="200" value="40"><span id="gf-lwv">40</span></div>
-        <div class="tbl-wrap" style="margin-top:8px;max-height:240px;overflow-y:auto"><table class="mini" id="gf-lanes"><thead><tr><th>#</th><th>Label</th><th title="Ladderlane">Ladder</th><th></th></tr></thead><tbody></tbody></table></div>
-        <p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Sleep de blauwe driehoekjes onder de gel om een lane te verschuiven; de oranje driehoekjes links zijn de ladderbanden.</p>
-      </div>
+      <div id="gf-app-img"></div>
+      <div id="gf-app-lanes"></div>
       <div class="panel">
         <h3>4 · Ladder &amp; banden meten</h3>
-        <div class="row"><div class="f"><label for="gf-lad">Ladder</label><select id="gf-lad"><option value="100">100 bp (1000–100)</option><option value="neb100">NEB 100 bp (1517–100)</option><option value="100p">100 bp plus (3000–100)</option><option value="neb1k">NEB 1 kb (10 000–500)</option><option value="1k">1 kb (10 000–250)</option><option value="k1k13">1 kb (10 000–250, 13 banden)</option><option value="k1kp">1 kb plus (25 000–250)</option><option value="h100">100 bp (1500–100)</option><option value="h100p">100 bp plus (3000, 1500–100)</option><option value="b50">50 bp (500–50)</option><option value="fast1">Fast DNA Ladder 1 (1200–100)</option><option value="ppp">Eiwit: Precision Plus (250–10 kDa)</option><option value="prplus">Eiwit: PageRuler Plus (250–10 kDa)</option><option value="custom">Eigen ladder…</option></select></div><div class="f"><label for="gf-unit">Eenheid</label><select id="gf-unit"><option value="bp">bp</option><option value="kb">kb</option><option value="kDa">kDa</option><option value="ng">ng (hoeveelheid)</option></select></div><div class="f"><label>&nbsp;</label><button type="button" class="primary" id="gf-bands">Detecteer banden</button></div></div>
-        <div class="f" id="gf-ladcw" style="margin-top:8px;display:none"><label for="gf-ladc">Eigen ladder, grootste eerst (spaties of ;)</label><input id="gf-ladc" class="mono" value="250 150 100 75 50 37 25 20 15 10"></div>
-        <div class="row" style="margin-top:8px"><button type="button" id="gf-addband">+ Ladderband (klik)</button><button type="button" id="gf-measure">Band meten (klik)</button><button type="button" id="gf-measall">Meet alle banden</button><button type="button" id="gf-clrmarks">Metingen wissen</button></div>
-        <div style="margin-top:10px"><button type="button" id="gf-vltog" aria-expanded="false">Ladder uit een foto (herkennen en virtueel naast de gel) ▸</button></div><div id="gf-vlbox" style="display:none;margin-top:6px">
-          <p class="hint" style="font-size:13px;color:var(--muted);margin:6px 0">Upload een foto of afbeelding van een ladder, bijvoorbeeld van de website van de leverancier. Labkit zoekt de ladderbanen, herkent het bandpatroon (afstanden en felle referentiebanden) in een bibliotheek van gangbare ladders en stelt de bandgroottes in. De cijfers op de afbeelding zelf worden niet gelezen: controleer de voorgestelde groottes.</p>
-          <div class="row" style="gap:8px;align-items:center"><input type="file" id="gf-vlfile" accept="image/*" aria-label="Ladderfoto kiezen"><button type="button" id="gf-vlclear">Verwijderen</button></div>
-          <canvas id="gf-vlcv" width="300" height="120" style="max-width:100%;margin-top:8px;display:none;border-radius:3px;cursor:pointer"></canvas>
-          <div id="gf-vlinfo" style="font-size:13px;margin-top:6px"></div>
-          <div class="fields" id="gf-vlf" style="margin-top:8px;display:none;grid-template-columns:1fr 1fr">
-            <div class="f"><label for="gf-vlpick">Herkend als</label><select id="gf-vlpick" style="width:100%"></select></div>
-            <div class="f"><label for="gf-vllab">Label boven virtuele ladder</label><input id="gf-vllab" class="txt" value="M"></div>
-            <div class="f" style="grid-column:1/-1"><label for="gf-vlsizes">Bandgroottes van boven naar beneden (leeg of – = overslaan)</label><input id="gf-vlsizes" class="mono"></div>
-          </div>
-          <div class="row" id="gf-vlbtns" style="margin-top:8px;gap:8px;display:none;align-items:center"><button type="button" class="primary" id="gf-vluse">Gebruik deze groottes voor de detectie</button><label style="font-size:13px;display:flex;gap:6px;align-items:center"><input type="checkbox" id="gf-vlshow" checked>Toon virtuele ladder rechts van de gel</label></div>
-        </div>
-        <div class="fields" style="margin-top:8px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
-          <div class="f"><label for="gf-bg">Achtergrond (densitometrie)</label><select id="gf-bg" style="width:100%"><option value="ball">Rolling ball</option><option value="valley">Dal tot dal</option><option value="none">Geen (laagste punt)</option></select></div>
-          <div class="f"><label for="gf-ball">Straal bal</label><div class="inu"><input id="gf-ball" inputmode="numeric" placeholder="auto"><span class="u">px</span></div></div>
-          <div class="f"><label for="gf-front">Front voor Rf</label><div class="inu"><input id="gf-front" inputmode="numeric" placeholder="onderkant"><span class="u">px</span></div></div>
-        </div>
-        <div class="fields" style="margin-top:8px;grid-template-columns:1fr 2fr">
-          <div class="f"><label for="gf-lload">Ladder geladen</label><div class="inu"><input id="gf-lload" inputmode="decimal" value="500"><span class="u">ng</span></div></div>
-          <div class="f"><label for="gf-lmass">ng per ladderband bij 500 ng (groot → klein)</label><input id="gf-lmass" class="mono" value="45 35 95 27 24 21 18 97 38 29 25 48"></div>
-        </div>
-        <div class="row" id="gf-ladsel" style="margin-top:8px;gap:4px;align-items:center"></div>
-        <div class="tbl-wrap" style="margin-top:8px;max-height:220px;overflow-y:auto"><table class="mini" id="gf-bt"><thead><tr><th class="num">y (px)</th><th class="num">bp</th><th title="Eigen tekst voor het label; leeg = de waarde">Label</th><th></th></tr></thead><tbody></tbody></table></div>
-        <div class="row" id="gf-sym" style="margin-top:6px;gap:4px;align-items:center"><span style="font-size:12.5px;color:var(--muted)">Symbool in label:</span><button type="button" data-sym="≥">≥</button><button type="button" data-sym="≤">≤</button><button type="button" data-sym="~">~</button><button type="button" data-sym="*">*</button><button type="button" data-sym="†">†</button><button type="button" data-sym="/">/</button><button type="button" data-sym="–">–</button><button type="button" data-sym="+">+</button><span style="font-size:12.5px;color:var(--muted);flex-basis:100%">⤓ voegt een band samen met de band eronder (voor samengeperste ladderbanden). Een samengevoegde band krijgt een label als 900/800 en telt niet mee voor de ijklijn.</span></div>
-        <div id="gf-marks" style="margin-top:8px"></div>
+        <div id="gf-app-lad"></div>
+        <div id="gf-app-virt"></div>
+        <div id="gf-app-dens"></div>
+        <div id="gf-app-bands"></div>
+        <div id="gf-app-marks"></div>
       </div>
-      <div class="panel">
-        <h3>5 · Opmaak</h3>
-        <div class="f"><label for="gf-title">Titel</label><input id="gf-title" class="txt" value="PCR-product, 1,5% agarose"></div>
-        <div class="rng" style="margin-top:8px"><label for="gf-fs">Lettergrootte</label><input type="range" id="gf-fs" min="10" max="48" value="18"><span id="gf-fsv">18</span></div>
-        <div class="row" style="margin-top:8px"><div class="f"><label for="gf-ang">Labelhoek</label><select id="gf-ang"><option value="auto" selected>Automatisch (kantelt bij overlap)</option><option value="0">Horizontaal</option><option value="45">45°</option><option value="90">Verticaal</option></select></div><div class="f"><label for="gx-mcol">Kleur metingen</label><select id="gx-mcol"><option value="#e8a317">Oranje</option><option value="#d62828">Rood</option><option value="#1d5bc4">Blauw</option><option value="#111111">Zwart</option></select></div></div>
-        <label class="chk" style="margin-top:10px"><input type="checkbox" id="gf-help" checked> Lane- en bandmarkeringen in de marge tonen</label>
-      </div>
-      <div class="panel">
-        <h3>6 · Exporteren</h3>
-        <div style="font-size:12.5px;color:var(--muted);margin-bottom:6px">Wat komt er in de afbeelding? De voorbeeldweergave volgt deze keuzes.</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px">
-          <label class="chk"><input type="checkbox" id="gx-title" checked> Titel</label>
-          <label class="chk"><input type="checkbox" id="gx-lanes" checked> Lanelabels</label>
-          <label class="chk"><input type="checkbox" id="gx-bp" checked> Ladderwaarden</label>
-          <label class="chk"><input type="checkbox" id="gx-ticks" checked> Streepjes ladder</label>
-          <label class="chk"><input type="checkbox" id="gx-unit" checked> Eenheid (bp/kDa)</label>
-          <label class="chk"><input type="checkbox" id="gx-marks" checked> Metingen</label>
-          <label class="chk"><input type="checkbox" id="gx-pad" checked> Witte rand</label>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <div class="f"><label for="gx-fmt">Formaat</label><select id="gx-fmt"><option value="png">PNG</option><option value="jpg">JPG</option></select></div>
-          <div class="f"><label for="gx-scale">Resolutie</label><select id="gx-scale"><option value="1">1×</option><option value="2" selected>2×</option><option value="3">3×</option></select></div>
-        </div>
-        <div class="f" style="margin-top:8px"><label for="gx-name">Bestandsnaam</label><input id="gx-name" class="txt" value="" placeholder="volgt de titel"></div>
-        <div class="row" style="margin-top:10px"><button type="button" class="primary" id="gf-dl" style="display:none">Downloaden</button><button type="button" id="gf-copy">Kopieer afbeelding</button></div>
-        <p id="gf-exmsg" style="font-size:12.5px;color:var(--muted);margin:8px 0 0">De gel zelf blijft onbewerkt: tekst, streepjes en metingen staan altijd in de witte marge eromheen. De blauwe en oranje markeringen in de editor komen niet in de export.</p>
-      </div>
+      <div id="gf-app-fmt"></div>
     </div>
     <div class="panel" id="gf-stage">
       <div class="row" id="gf-zoombar" style="gap:6px;margin-bottom:8px;align-items:center"><button type="button" id="gf-zout" aria-label="Uitzoomen" title="Uitzoomen">−</button><button type="button" id="gf-zfit" title="Hele foto tonen">Passend</button><button type="button" id="gf-zin" aria-label="Inzoomen" title="Inzoomen">+</button><span id="gf-zv" style="font-size:13px;color:var(--muted);min-width:44px">100%</span><span style="font-size:12.5px;color:var(--muted)">Ctrl + scrollen zoomt op de muis; ingezoomd verschuif je met de schuifbalken of door te slepen met de middelste muisknop.</span></div>
@@ -3001,10 +2931,17 @@ function drawProfile(cv,steps,n){
 const gf={unit:'bp',disp:'bp',angAuto:true,src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null};
 const gcv=$('#gf-cv');
 function gfStatus(t){ $('#gf-status').textContent=t; }
-function gfLoadCanvas(c){ gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; $('#gf-rot').value=0; $('#gf-rotv').textContent='0°'; gfUpdate(true); }
-function gfFromImage(img){ const M=2400, s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); gfLoadCanvas(c); gf.title=''; $('#gf-title').value=''; gf.marks=[]; let auto=false; { const bx=gfFindGel(); if(bx&&bx.w*bx.h<0.8*c.width*c.height){ gf.crop=bx; gf.cache={}; auto=true; } } gfDetectLanes(); if(gf.lanes.length>=2) gfDetectBands(); gfMarksTable(); gfStatus(`Geladen: ${img.naturalWidth} × ${img.naturalHeight} px${s<1?' (verkleind voor bewerking)':''}.${auto?' Gel automatisch bijgesneden (Herstel toont de hele foto).':''} ${gf.lanes.length} lanen gevonden. Staat de gel scheef? Gebruik "Automatisch rechtzetten".`); }
+/* De velden van de editor staan in Vue (src/tools/gelfoto/). Zet de motor er zelf een, dan
+   gaat dat via de invoer met een input-event erachter: daar reageert v-model op, net als bij
+   delen via een link en ongedaan maken. */
+function gfSetIn(id,v){ const el=$('#'+id); if(!el) return; el.value=String(v);
+  /* de vertaallaag zette de getallen in een invoerveld zelf om; binnen een Vue-boom komt hij
+     niet meer, dus doen we het hier voordat v-model de waarde overneemt */
+  if(LANG==='en'&&typeof i18nValue==='function'){ el.__iv=null; el.__typed=false; i18nValue(el); }
+  el.dispatchEvent(new Event('input',{bubbles:true})); }
+function gfLoadCanvas(c){ gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; gfSetIn('gf-rot',0); gfUpdate(true); }
+function gfFromImage(img){ const M=2400, s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); gfLoadCanvas(c); gf.title=''; gfSetIn('gf-title',''); gf.marks=[]; let auto=false; { const bx=gfFindGel(); if(bx&&bx.w*bx.h<0.8*c.width*c.height){ gf.crop=bx; gf.cache={}; auto=true; } } gfDetectLanes(); if(gf.lanes.length>=2) gfDetectBands(); gfMarksTable(); gfStatus(`Geladen: ${img.naturalWidth} × ${img.naturalHeight} px${s<1?' (verkleind voor bewerking)':''}.${auto?' Gel automatisch bijgesneden (Herstel toont de hele foto).':''} ${gf.lanes.length} lanen gevonden. Staat de gel scheef? Gebruik "Automatisch rechtzetten".`); }
 function gfFile(f){ if(!f) return; const url=URL.createObjectURL(f); const img=new Image(); img.onload=()=>{ gfFromImage(img); URL.revokeObjectURL(url); }; img.onerror=()=>gfStatus('Dit bestand kan de browser niet openen (bijvoorbeeld TIFF). Exporteer de foto als PNG of JPG.'); img.src=url; }
-$('#gf-file').addEventListener('change',e=>gfFile(e.target.files[0]));
 $('#gf-stage').addEventListener('dragover',e=>e.preventDefault());
 $('#gf-stage').addEventListener('drop',e=>{ e.preventDefault(); gfFile(e.dataTransfer.files[0]); });
 function gfDemo(){
@@ -3021,12 +2958,11 @@ function gfDemo(){
   x.filter='none';
   const id=x.getImageData(0,0,W,H), d=id.data; for(let i=0;i<d.length;i+=4){ const n=(Math.random()-0.5)*14; d[i]=Math.max(0,Math.min(255,d[i]+n)); d[i+1]=Math.max(0,Math.min(255,d[i+1]+n)); d[i+2]=Math.max(0,Math.min(255,d[i+2]+n)); } x.putImageData(id,0,0);
   gfLoadCanvas(c); gfStatus('Demo-gel geladen (getekend). Lanen en ladder zijn automatisch gedetecteerd.');
-  gf.title='Demo: PCR-product, 1,5% agarose'; $('#gf-title').value=gf.title;
-  $('#gf-n').value=''; gfDetectLanes(); gf.lanes.forEach((l,i)=>l.label=i===0?'M':i===nL-1?'NTC':String(i)); gfDetectBands(); gfLanesTable();
+  gf.title='Demo: PCR-product, 1,5% agarose'; gfSetIn('gf-title',gf.title);
+  gfSetIn('gf-n',''); gfDetectLanes(); gf.lanes.forEach((l,i)=>l.label=i===0?'M':i===nL-1?'NTC':String(i)); gfDetectBands(); gfLanesTable();
   if(gf.lanes[1]&&gf.bands.length>1){ const p=gfProc(); const y=gfPeakNear(gf.lanes[1].x,Ysz(650)*p.h/H); gf.marks=[{x:gf.lanes[1].x,y,bp:gfEst(y,gf.lanes[1].x)}]; }
   gfRender(); gfMarksTable();
 }
-$('#gf-demo').addEventListener('click',gfDemo);
 /* processing */
 function gfRotated(){
   const k=`${gf.rot90}|${gf.fine}|${gf.flip}`; if(gf.cache.rk===k) return gf.cache.rot;
@@ -3116,7 +3052,7 @@ function gfDetectLanes(){
   const wds=cand.filter(c=>!c.fill&&c.wd>2).map(c=>c.wd).sort((a,b)=>a-b);
   gf.lw=Math.round(isFinite(pitch)?Math.min(pitch*0.7,(wds[wds.length>>1]||pitch*0.6)*1.1):(wds[wds.length>>1]||40));
   const old=gf.lanes; gf.lanes=xs.map((x,i)=>({x,label:old[i]?old[i].label:(i===0?'M':String(i)),lad:old[i]?!!old[i].lad:false}));
-  gf.lw=Math.max(4,Math.min(200,gf.lw||40)); $('#gf-lw').value=gf.lw; $('#gf-lwv').textContent=gf.lw;
+  gf.lw=Math.max(4,Math.min(200,gf.lw||40)); gfSetIn('gf-lw',gf.lw);
   gf.ladder=Math.min(gf.ladder,Math.max(0,gf.lanes.length-1));
   const nW=cand.filter(c=>c.well).length;
   gfStatus(`${gf.lanes.length} lanen gevonden${nW?` (${nW} via de putjes van de kam)`:''}${filledN?` (waarvan ${filledN} lege lane${filledN>1?'n':''} aangevuld op basis van de vaste tussenafstand)`:''}.${N>0?'':' Klopt het aantal niet? Vul het verwachte aantal in en detecteer opnieuw.'}`);
@@ -3125,7 +3061,7 @@ function gfDetectLanes(){
 function laneProfile(cx){ const P=gfProc(), {w,h,sig}=P; const half=Math.max(1,Math.round(gf.lw*0.3)); const x0=Math.max(0,Math.round(cx-half)), x1=Math.min(w-1,Math.round(cx+half)); const pr=new Float32Array(h); for(let y=0;y<h;y++){ let s=0; for(let x=x0;x<=x1;x++) s+=sig[y*w+x]; pr[y]=s/(x1-x0+1); }
   const win=Math.max(5,Math.round(h/12)); const base=new Float32Array(h); for(let y=0;y<h;y++){ let m=Infinity; for(let k=Math.max(0,y-win);k<=Math.min(h-1,y+win);k++) m=Math.min(m,pr[k]); base[y]=m; } const bs=smooth(base,win/2); return smooth(pr.map((v,i)=>v-bs[i]),Math.max(1,h/300)); }
 function gfPeakNear(cx,y){ const pr=laneProfile(cx); const r=Math.round(gfProc().h/40); let best=Math.round(y); for(let k=Math.max(0,Math.round(y)-r);k<=Math.min(pr.length-1,Math.round(y)+r);k++) if(pr[k]>pr[best]) best=k; return best; }
-function gfLadder(){ if(gf.ladKey==='custom') return nums($('#gf-ladc').value.replace(/;/g,' ')).filter(v=>v>0).sort((a,b)=>b-a); return LADDERS[gf.ladKey]; }
+function gfLadder(){ if(gf.ladKey==='custom'){ const el=$('#gf-ladc'); return nums((el?el.value:'').replace(/;/g,' ')).filter(v=>v>0).sort((a,b)=>b-a); } return LADDERS[gf.ladKey]; }
 function gfWellRows(){ const h=gfProc().h, ys=[]; if(gf.wells&&isFinite(gf.wells.y)) for(let k=0;k<Math.max(3,gf.lanes.length);k++) ys.push(gf.wells.y); gf.lanes.forEach(l=>{ const pr=laneProfile(l.x), m=Math.max(...pr); peaks(pr,h/90,0.1*m).filter(o=>o.i<h*0.25).forEach(o=>ys.push(o.i)); });
   const rows=[]; ys.sort((a,b)=>a-b).forEach(y=>{ const r=rows.find(r=>Math.abs(r.y-y)<h/60); if(r){ r.n++; r.y=(r.y*(r.n-1)+y)/r.n; } else rows.push({y,n:1}); });
   return rows.filter(r=>gf.lanes.length>=3&&r.n>=Math.max(3,gf.lanes.length*0.6)).map(r=>r.y); }
@@ -3179,37 +3115,30 @@ function gfSyncBands(){ const A=gf.lanes[gf.ladder]; if(A){ A.bands=gf.bands; A.
 function gfSetActive(i){ gfSyncBands(); if(!gf.lanes[i]) return; gf.ladder=i; gf.lanes[i].lad=true; gf.bands=gf.lanes[i].bands||(gf.lanes[i].bands=[]); gfLanesTable(); gfBandsTable(); gfRender(); }
 function gfEst1(bands,y){ const b=(bands||[]).filter(b=>isFinite(b.bp)&&b.bp>0).sort((a,c)=>a.y-c.y); if(b.length<2) return NaN; let i=0; while(i<b.length-2&&y>b[i+1].y) i++; const p=b[i],q=b[i+1]; if(q.y===p.y) return NaN; const t=(y-p.y)/(q.y-p.y); return 10**(Math.log10(p.bp)+t*(Math.log10(q.bp)-Math.log10(p.bp))); }
 /* tables */
-function gfLanesTable(){ $('#gf-lanes tbody').innerHTML=gf.lanes.map((l,i)=>`<tr><td class="num">${i+1}</td><td><input class="txt" data-ll="${i}" value="${esc(l.label)}" style="width:110px"></td><td style="text-align:center"><input type="checkbox" data-lc="${i}" ${l.lad||i===gf.ladder?'checked':''} aria-label="Ladderlane ${i+1}"></td><td><button type="button" class="ghost" data-ld="${i}" aria-label="Verwijder lane">✕</button></td></tr>`).join('')||'<tr><td colspan="4" style="color:var(--muted)">Nog geen lanen.</td></tr>'; }
-$('#gf-lanes').addEventListener('input',e=>{ const i=e.target.dataset.ll; if(i!=null){ gf.lanes[+i].label=e.target.value; gfRender(); }});
-$('#gf-lanes').addEventListener('change',e=>{ const i=e.target.dataset.lc; if(i==null) return; const k=+i, l=gf.lanes[k]; gfSyncBands();
-  if(e.target.checked){ l.lad=true; if(!(l.bands&&l.bands.length)) gfDetectBandsFor(k); gfSetActive(k); }
-  else { l.lad=false; if(k===gf.ladder){ const o=gf.lanes.findIndex((m,j)=>j!==k&&m.lad); if(o>=0){ gf.ladder=o; gf.bands=gf.lanes[o].bands||[]; } else { l.lad=true; e.target.checked=true; gfStatus('Er moet minstens één ladderlane zijn.'); return; } } gfLanesTable(); gfBandsTable(); }
-  gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); gfRender(); });
-$('#gf-lanes').addEventListener('click',e=>{ const b=e.target.closest('[data-ld]'); if(b){ gfSyncBands(); const act=gf.lanes[gf.ladder]; gf.lanes.splice(+b.dataset.ld,1); let k=gf.lanes.indexOf(act); if(k<0) k=Math.max(0,gf.lanes.findIndex(l=>l.lad)); gf.ladder=k; gf.bands=gf.lanes[k]?(gf.lanes[k].bands||[]):[]; gfLanesTable(); gfBandsTable(); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); gfRender(); }});
+/* De lanen staan in src/tools/gelfoto/GfLanes.vue; hier alleen de haak die hem opwerkt. */
+function gfLanesTable(){ if(window.__gfRefresh) window.__gfRefresh(); }
+/* een lane aan- of afvinken als ladderlane. Er moet er altijd minstens één zijn; de
+   component rendert het vinkje uit gf.lanes, dus bij een weigering valt het vinkje terug. */
+function gfLaneLad(k,on){ const l=gf.lanes[k]; if(!l) return; gfSyncBands();
+  if(on){ l.lad=true; if(!(l.bands&&l.bands.length)) gfDetectBandsFor(k); gfSetActive(k); }
+  else { l.lad=false; if(k===gf.ladder){ const o=gf.lanes.findIndex((m,j)=>j!==k&&m.lad); if(o>=0){ gf.ladder=o; gf.bands=gf.lanes[o].bands||[]; } else { l.lad=true; gfLanesTable(); gfStatus('Er moet minstens één ladderlane zijn.'); return; } } gfLanesTable(); gfBandsTable(); }
+  gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); gfRender(); }
+function gfLaneDel(k){ gfSyncBands(); const act=gf.lanes[gf.ladder]; gf.lanes.splice(k,1); let i=gf.lanes.indexOf(act); if(i<0) i=Math.max(0,gf.lanes.findIndex(l=>l.lad)); gf.ladder=i; gf.bands=gf.lanes[i]?(gf.lanes[i].bands||[]):[]; gfLanesTable(); gfBandsTable(); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); gfRender(); }
 function gfBandTxt(b){ return b.lab&&String(b.lab).trim()?String(b.lab).trim():gfLab(b.bp); }
-function gfBandsTable(){ gfSyncBands(); const LL=gf.lanes.map((l,i)=>[l,i]).filter(([l,i])=>l.lad||i===gf.ladder); const sel=$('#gf-ladsel'); if(sel) sel.innerHTML=LL.length>1?'<span style="font-size:13px">Banden van ladderlane:</span>'+LL.map(([l,i])=>`<button type="button" data-la="${i}" class="${i===gf.ladder?'on':''}">${esc(l.label||String(i+1))}</button>`).join(''):''; $('#gf-bt tbody').innerHTML=gf.bands.map((b,i)=>`<tr><td class="num">${Math.round(b.y)}</td><td>${b.merged?'<span style="color:var(--muted)">samengevoegd</span>':inp(b.bp,72,`data-bb="${i}" aria-label="Bandgrootte"`)}</td><td><input class="txt" data-bl="${i}" value="${esc(b.lab||'')}" placeholder="${isFinite(b.bp)?esc(gfLab(b.bp)):''}" style="width:96px" aria-label="Label ladderband"></td><td style="white-space:nowrap">${b.merged?`<button type="button" class="ghost" data-bs="${i}" title="Samenvoeging ongedaan maken" aria-label="Splitsen">⤒</button>`:i<gf.bands.length-1?`<button type="button" class="ghost" data-bm="${i}" title="Samenvoegen met de band eronder" aria-label="Samenvoegen met volgende band">⤓</button>`:''}<button type="button" class="ghost" data-bd="${i}" aria-label="Verwijder band">✕</button></td></tr>`).join('')||'<tr><td colspan="4" style="color:var(--muted)">Nog geen ladderbanden.</td></tr>'; }
-let gfLabFocus=null;
-$('#gf-vltog').addEventListener('click',e=>{ const b=$('#gf-vlbox'), open=b.style.display==='none'; b.style.display=open?'':'none'; e.currentTarget.setAttribute('aria-expanded',String(open)); e.currentTarget.textContent=e.currentTarget.textContent.replace(/[▸▾]$/,open?'▾':'▸'); });
-$('#gf-vlfile').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const url=URL.createObjectURL(f), img=new Image(); img.onload=()=>{ gfVlLoad(img); URL.revokeObjectURL(url); }; img.onerror=()=>{ $('#gf-vlinfo').textContent='Dit bestand kan de browser niet openen. Gebruik PNG of JPG.'; }; img.src=url; });
-$('#gf-vlclear').addEventListener('click',()=>{ gf.vl=null; $('#gf-vlfile').value=''; $('#gf-vlinfo').textContent=''; $('#gf-vlf').style.display='none'; $('#gf-vlbtns').style.display='none'; gfVlPreview(); gfRender(); });
-$('#gf-vlpick').addEventListener('change',e=>{ if(gf.vl) gfVlApply(+e.target.value); });
-$('#gf-vlsizes').addEventListener('input',e=>{ const v=gf.vl; if(!v) return; const t=String(e.target.value).trim().split(/[\s;]+/).filter(Boolean).map(q=>/^[–-]$/.test(q)?NaN:num(q)); const L=v.lanes[v.li]; v.sizes=L.bands.map((_,j)=>t[j]??NaN); v.key='custom'; $('#gf-vlpick').value='-1'; v.cache=null; gfVlPreview(); gfRender(); });
-$('#gf-vlshow').addEventListener('change',e=>{ if(gf.vl){ gf.vl.show=e.target.checked; gfRender(); } });
-$('#gf-vllab').addEventListener('input',()=>gfRender());
-$('#gf-vlcv').addEventListener('click',e=>{ const v=gf.vl; if(!v||!v.lanes) return; const r=e.target.getBoundingClientRect(), sc=e.target.width/v.src.width*(r.width/e.target.width), px=(e.clientX-r.left)/sc; let bi=-1,bd=Infinity; v.lanes.forEach((L,i)=>{ const d=px<L.x0?L.x0-px:px>L.x1?px-L.x1:0; if(d<bd){bd=d;bi=i;} }); if(bi>=0&&bi!==v.li){ v.sizes=null; gfVlChoose(bi); } });
-$('#gf-vluse').addEventListener('click',()=>{ const v=gf.vl; if(!v) return; const sizes=v.sizes.filter(b=>isFinite(b)&&b>0); if(sizes.length<2){ gfStatus('Vul eerst minstens twee bandgroottes in.'); return; }
-  const k=v.key&&v.key!=='custom'&&LADDERS[v.key]&&LADDERS[v.key].join()===sizes.join()?v.key:null; const sel=$('#gf-lad');
-  if(k){ sel.value=k; } else if(v.key&&LADDERS[v.key]){ sel.value=v.key; } else { sel.value='custom'; $('#gf-ladc').value=sizes.join(' '); }
-  sel.dispatchEvent(new Event('change',{bubbles:true})); sel.dispatchEvent(new Event('input',{bubbles:true})); if(gf.lanes.length) gfDetectBands(); gfStatus(`Ladder ingesteld: ${sel.options[sel.selectedIndex].textContent}. De banden zijn opnieuw gedetecteerd.`); });
-$('#gf-ladsel').addEventListener('click',e=>{ const b=e.target.closest('[data-la]'); if(b) gfSetActive(+b.dataset.la); });
-$('#gf-bt').addEventListener('focusin',e=>{ if(e.target.dataset.bl!=null) gfLabFocus=+e.target.dataset.bl; });
-$('#gf-bt').addEventListener('input',e=>{ const i=e.target.dataset.bb, j=e.target.dataset.bl; if(i!=null){ gf.bands[+i].bp=num(e.target.value); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); gfRender(); } if(j!=null){ gf.bands[+j].lab=e.target.value; gfRender(); } });
+/* De banden staan in src/tools/gelfoto/GfBands.vue; gfSyncBands() houdt de banden van de
+   actieve lane en gf.bands gelijk, zoals eerst. */
+function gfBandsTable(){ gfSyncBands(); if(window.__gfRefresh) window.__gfRefresh(); }
+function gfBandBp(i,v){ if(!gf.bands[i]) return; gf.bands[i].bp=v; gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); gfRender(); }
 function gfMergeBands(i){ const a=gf.bands[i], b=gf.bands[i+1]; if(!a||!b) return; const parts=[a,b].map(gfBandTxt).filter(t=>t&&t!=='–'); gf.bands.splice(i,2,{y:(a.y+b.y)/2,bp:NaN,lab:parts.join('/'),merged:[...(a.merged||[a]),...(b.merged||[b])]}); }
 function gfSplitBand(i){ const m=gf.bands[i]; if(!m||!m.merged) return; gf.bands.splice(i,1,...m.merged.map(o=>({...o}))); gf.bands.sort((p,q)=>p.y-q.y); }
-$('#gf-sym').addEventListener('click',e=>{ const b=e.target.closest('[data-sym]'); if(!b) return; let i=gfLabFocus; if(i==null||!gf.bands[i]){ gfStatus('Klik eerst in een labelveld van de ladderbanden.'); return; } const el=$(`#gf-bt [data-bl="${i}"]`); if(el&&!el.value&&isFinite(gf.bands[i].bp)) el.value=gfLab(gf.bands[i].bp); const v=el?el.value:'', p=el&&el.selectionStart!=null?el.selectionStart:v.length; const nv=v.slice(0,p)+b.dataset.sym+v.slice(p); gf.bands[i].lab=nv; if(el){ el.value=nv; el.focus(); el.setSelectionRange(p+1,p+1); } gfRender(); });
-$('#gf-bt').addEventListener('click',e=>{ const bm=e.target.closest('[data-bm]'), bs=e.target.closest('[data-bs]'); if(bm||bs){ if(bm) gfMergeBands(+bm.dataset.bm); else gfSplitBand(+bs.dataset.bs); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfBandsTable(); gfMarksTable(); gfRender(); return; } const b=e.target.closest('[data-bd]'); if(b){ gf.bands.splice(+b.dataset.bd,1); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfBandsTable(); gfMarksTable(); gfRender(); }});
-function gfMarksTable(){ const el=$('#gf-marks'); if(!gf.marks.length){ el.innerHTML=''; return; } el.innerHTML=`<div class="tbl-wrap"><table class="mini"><thead><tr><th>Meting</th><th class="num">Lane</th><th class="num">≈ ${gf.disp==="kb"?"kb":gf.unit}</th><th></th></tr></thead><tbody>`+gf.marks.map((m,i)=>{ let li=0,bd=Infinity; gf.lanes.forEach((l,j)=>{ const d=Math.abs(l.x-m.x); if(d<bd){bd=d;li=j;} }); return `<tr><td>${i+1}</td><td class="num">${gf.lanes[li]?esc(gf.lanes[li].label):'–'}</td><td class="num"><b>${isFinite(m.bp)?gfSizeTxt(m.bp):'–'}</b>${isFinite(m.bp)&&/^[<>]/.test(gfSizeTxt(m.bp))?`<br><small title="Geëxtrapoleerd buiten de ladder; onbetrouwbaar">extrapolatie ≈ ${gfFmtSize(m.bp)}</small>`:''}</td><td><button type="button" class="ghost" data-md="${i}" aria-label="Verwijder meting">✕</button></td></tr>`; }).join('')+`</tbody></table></div>`; }
-$('#gf-marks').addEventListener('click',e=>{ const b=e.target.closest('[data-md]'); if(b){ gf.marks.splice(+b.dataset.md,1); gfMarksTable(); gfRender(); }});
+/* samenvoegen, splitsen en weghalen; de knoppen zitten in GfBands.vue */
+function gfBandMerge(i){ gfMergeBands(i); gfBandsAfter(); }
+function gfBandSplit(i){ gfSplitBand(i); gfBandsAfter(); }
+function gfBandDel(i){ gf.bands.splice(i,1); gfBandsAfter(); }
+function gfBandsAfter(){ gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfBandsTable(); gfMarksTable(); gfRender(); }
+/* De gemeten banden staan in src/tools/gelfoto/GfMarks.vue; hier wordt alleen de
+   intensiteit bijgewerkt en de component opgetikt. */
+function gfMarksTable(){ gfMarkInt(); if(window.__gfRefresh) window.__gfRefresh(); }
 /* render */
 const gfFmtSize=v=>!isFinite(v)?'–':gf.disp==='kb'?(v/1000).toLocaleString('nl-NL',{maximumFractionDigits:v<10000?2:1}):gf.unit==='kDa'?NL(Number(v.toPrecision(3)),v<10?1:0):Math.round(v).toLocaleString('nl-NL');
 /* weergave-eenheid: bp/kDa = maat zoals de ladder, kb = bp/1000, ng = hoeveelheid uit de massaladder */
@@ -3252,16 +3181,33 @@ function gfLadMatch(bands){ const ys=bands.map(b=>b.y), vs=bands.map(b=>b.v), n=
     if(best) out.push(best); });
   return out.sort((a,b)=>b.score-a.score); }
 function gfVlLoad(img){ const M=1400, sc=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)), c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*sc); c.height=Math.round(img.naturalHeight*sc); const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(img,0,0,c.width,c.height);
-  const lanes=gfLadAnalyze(c); gf.vl={src:c,lanes,li:0,show:true}; if(!lanes.length){ gf.vl.err=true; $('#gf-vlinfo').textContent='Geen ladderbaan gevonden. Gebruik een afbeelding met de ladder op een donkere achtergrond.'; gfVlPreview(); $('#gf-vlf').style.display='none'; $('#gf-vlbtns').style.display='none'; gfRender(); return; }
+  const lanes=gfLadAnalyze(c); gf.vl={src:c,lanes,li:0,show:true,pick:-1,info:''}; if(!lanes.length){ gf.vl.err=true; gf.vl.info='Geen ladderbaan gevonden. Gebruik een afbeelding met de ladder op een donkere achtergrond.'; if(window.__gfRefresh) window.__gfRefresh(); gfRender(); return; }
   gfVlChoose(0); }
-function gfVlChoose(li){ const v=gf.vl, L=v.lanes[li]; v.li=li; v.cands=gfLadMatch(L.bands).slice(0,5); const sel=$('#gf-vlpick');
-  sel.innerHTML=v.cands.map((c,i)=>{ const o=$(`#gf-lad option[value="${c.key}"]`); return `<option value="${i}">${esc(o?o.textContent:c.key)} · ${fmt(Math.min(1,Math.max(0,c.score))*100,0)}%</option>`; }).join('')+'<option value="-1">Eigen invoer</option>';
+/* een foto kiezen (de invoer staat in GfVirtual.vue) */
+function gfVlFile(f){ if(!f) return; const url=URL.createObjectURL(f), img=new Image(); img.onload=()=>{ gfVlLoad(img); URL.revokeObjectURL(url); }; img.onerror=()=>{ gf.vl={src:null,lanes:[],err:true,info:'Dit bestand kan de browser niet openen. Gebruik PNG of JPG.'}; if(window.__gfRefresh) window.__gfRefresh(); }; img.src=url; }
+function gfVlClear(){ gf.vl=null; const f=$('#gf-vlfile'); if(f) f.value=''; if(window.__gfRefresh) window.__gfRefresh(); gfRender(); }
+/* in het voorbeeld op een andere ladderbaan klikken */
+function gfVlPick(e){ const v=gf.vl; if(!v||!v.lanes) return; const cv=e.target, r=cv.getBoundingClientRect(), sc=cv.width/v.src.width*(r.width/cv.width), px=(e.clientX-r.left)/sc;
+  let bi=-1,bd=Infinity; v.lanes.forEach((L,i)=>{ const d=px<L.x0?L.x0-px:px>L.x1?px-L.x1:0; if(d<bd){bd=d;bi=i;} }); if(bi>=0&&bi!==v.li){ v.sizes=null; gfVlChoose(bi); } }
+/* zelf groottes intikken: dan is het een eigen ladder */
+function gfVlSizes(txt){ const v=gf.vl; if(!v) return; const t=String(txt).trim().split(/[\s;]+/).filter(Boolean).map(q=>/^[–-]$/.test(q)?NaN:num(q)); const L=v.lanes[v.li]; v.sizes=L.bands.map((_,j)=>t[j]??NaN); v.key='custom'; v.pick=-1; v.cache=null; if(window.__gfRefresh) window.__gfRefresh(); gfVlPreview(); gfRender(); }
+/* de herkende groottes als ladder voor de detectie gebruiken */
+function gfVlUse(){ const v=gf.vl; if(!v) return; const sizes=(v.sizes||[]).filter(b=>isFinite(b)&&b>0); if(sizes.length<2){ gfStatus('Vul eerst minstens twee bandgroottes in.'); return; }
+  const k=v.key&&v.key!=='custom'&&LADDERS[v.key]&&LADDERS[v.key].join()===sizes.join()?v.key:null;
+  const key=k||(v.key&&LADDERS[v.key]?v.key:'custom'), vm=window.__gfLadVm; if(!vm) return;
+  /* de keuzelijst staat in GfLadder.vue, en bij een eigen ladder zet Vue het veld voor de
+     groottes er pas bij de volgende render neer; daarna pas opnieuw detecteren */
+  vm.setLadder(key,sizes.join(' '),()=>{ if(gf.lanes.length) gfDetectBands();
+    const sel=$('#gf-lad'); gfStatus(`Ladder ingesteld: ${(sel&&sel.options[sel.selectedIndex]||{}).textContent}. De banden zijn opnieuw gedetecteerd.`); });
+  if(LMASS[key]) gfSetIn('gf-lmass',LMASS[key]); }
+function gfVlChoose(li){ const v=gf.vl, L=v.lanes[li]; v.li=li; v.cands=gfLadMatch(L.bands).slice(0,5);
   const pw=Math.max(3,Math.round((L.x1-L.x0)*0.12)), sx=Math.max(L.ra+2,L.x0-pw), ex=Math.min(L.rb-2,L.x1+pw), st=document.createElement('canvas'); st.width=ex-sx+1; st.height=L.y1-L.y0+1; st.getContext('2d').drawImage(v.src,sx,L.y0,st.width,st.height,0,0,st.width,st.height); v.strip=st; v.cache=null;
-  gfVlApply(v.cands.length?0:-1); $('#gf-vlf').style.display=''; $('#gf-vlbtns').style.display='flex';
-  $('#gf-vlinfo').textContent=`${v.lanes.length>1?v.lanes.length+' ladderbanen gevonden; klik in het voorbeeld op de ladder die je wilt gebruiken. ':''}${L.bands.length} banden in de gekozen ladder.`; gfVlPreview(); }
-function gfVlApply(ci){ const v=gf.vl, L=v.lanes[v.li]; $('#gf-vlpick').value=String(ci); if(ci>=0){ const c=v.cands[ci]; v.key=c.key; v.sizes=c.assign.slice(); } else { v.key='custom'; v.sizes=v.sizes||L.bands.map(()=>NaN); }
-  $('#gf-vlsizes').value=v.sizes.map(b=>isFinite(b)?String(b):'–').join(' '); v.cache=null; gfVlPreview(); gfRender(); }
-function gfVlPreview(){ const v=gf.vl, cv=$('#gf-vlcv'); if(!v){ cv.style.display='none'; return; } const sc=Math.min(1,560/v.src.width,260/v.src.height); cv.width=Math.round(v.src.width*sc); cv.height=Math.round(v.src.height*sc); cv.style.display=''; const x=cv.getContext('2d'); x.drawImage(v.src,0,0,cv.width,cv.height);
+  v.info=`${v.lanes.length>1?v.lanes.length+' ladderbanen gevonden; klik in het voorbeeld op de ladder die je wilt gebruiken. ':''}${L.bands.length} banden in de gekozen ladder.`;
+  gfVlApply(v.cands.length?0:-1); }
+function gfVlApply(ci){ const v=gf.vl, L=v.lanes[v.li]; v.pick=ci; if(ci>=0){ const c=v.cands[ci]; v.key=c.key; v.sizes=c.assign.slice(); } else { v.key='custom'; v.sizes=v.sizes||L.bands.map(()=>NaN); }
+  v.cache=null; if(window.__gfRefresh) window.__gfRefresh(); gfVlPreview(); gfRender(); }
+/* het voorbeeld tekenen op de canvas van de component; die staat er alleen als het vak open is */
+function gfVlPreview(){ const v=gf.vl, cv=$('#gf-vlcv'); if(!cv||!v||!v.src) return; const sc=Math.min(1,560/v.src.width,260/v.src.height); cv.width=Math.round(v.src.width*sc); cv.height=Math.round(v.src.height*sc); const x=cv.getContext('2d'); x.drawImage(v.src,0,0,cv.width,cv.height);
   (v.lanes||[]).forEach((L,i)=>{ x.strokeStyle=i===v.li?'#e8a317':'#1558b0'; x.lineWidth=i===v.li?3:1.5; x.strokeRect(L.x0*sc,L.y0*sc,(L.x1-L.x0)*sc,(L.y1-L.y0)*sc); if(i===v.li) L.bands.forEach((b,j)=>{ x.fillStyle=isFinite(v.sizes&&v.sizes[j])?'#e8a317':'#d62828'; x.fillRect(L.x1*sc+2,(L.y0+b.y)*sc-1.5,6,3); }); }); }
 /* gel-y van een grootte volgens de actieve ladder (inverse van de ijklijn, lineair in log bp) */
 function gfYofBp(bp){ gfSyncBands(); const LL=gf.lanes.filter(l=>l.lad&&(l.bands||[]).filter(q=>isFinite(q.bp)&&q.bp>0).length>=2).sort((p,q)=>q.x-p.x); const b=((LL[0]&&LL[0].bands)||gf.bands||[]).filter(q=>isFinite(q.bp)&&q.bp>0).sort((p,q)=>p.y-q.y); if(b.length<2||!(bp>0)) return NaN; const l=Math.log10(bp); let i=0; while(i<b.length-2&&l<Math.log10(b[i+1].bp)) i++; const p=b[i],q=b[i+1], lp=Math.log10(p.bp), lq=Math.log10(q.bp); if(lp===lq) return NaN; return p.y+(l-lp)/(lq-lp)*(q.y-p.y); }
@@ -3279,7 +3225,7 @@ function gfRender(exportMode,scale=1){
   if(gf.mode==='crop'&&!exportMode){ const r=gfRotated(); c.width=r.width; c.height=r.height; x.drawImage(r,0,0); const p=gf.pend; if(p){ x.fillStyle='rgba(0,0,0,.45)'; x.fillRect(0,0,r.width,p.y); x.fillRect(0,p.y+p.h,r.width,r.height-p.y-p.h); x.fillRect(0,p.y,p.x,p.h); x.fillRect(p.x+p.w,p.y,r.width-p.x-p.w,p.h); x.strokeStyle='#1558b0'; x.lineWidth=Math.max(2,r.width/300); x.strokeRect(p.x,p.y,p.w,p.h); const hs=Math.max(6,r.width/110); x.fillStyle='#fff'; [[0,0],[.5,0],[1,0],[0,.5],[1,.5],[0,1],[.5,1],[1,1]].forEach(([fx,fy])=>{ x.fillRect(p.x+p.w*fx-hs/2,p.y+p.h*fy-hs/2,hs,hs); x.strokeRect(p.x+p.w*fx-hs/2,p.y+p.h*fy-hs/2,hs,hs); }); } gf.layout={L:0,T:0,s:1,crop:true}; return c; }
   const o=gxOpts(), P=gfProc(), fs=gf.fs, U=gfDU(), edit=!exportMode&&o.help;
   const font=`600 ${fs}px Segoe UI, Arial, sans-serif`, sfont=`500 ${fs*0.85}px Segoe UI, Arial, sans-serif`, mfont=`600 ${fs*0.8}px Segoe UI, Arial, sans-serif`;
-  x.font=font; const vlabT=gf.vl&&gf.vl.strip&&gf.vl.show?($('#gf-vllab').value||'').trim():''; const maxW=Math.max(0,...gf.lanes.map(l=>x.measureText(uv(l.label||'')).width),vlabT?x.measureText(uv(vlabT)).width:0);
+  x.font=font; const vlabT=gf.vl&&gf.vl.strip&&gf.vl.show?String(gf.vlLab==null?'M':gf.vlLab).trim():''; const maxW=Math.max(0,...gf.lanes.map(l=>x.measureText(uv(l.label||'')).width),vlabT?x.measureText(uv(vlabT)).width:0);
   /* labelhoek: bij 'automatisch' kantelen alle lanelabels evenveel zodra twee buren elkaar zouden raken */
   let angD=gf.ang; if(gf.angAuto){ angD=0; const ls=gf.lanes.slice().sort((a,b)=>a.x-b.x); let dmin=Infinity, over=false; for(let i=1;i<ls.length;i++){ const d=ls[i].x-ls[i-1].x; dmin=Math.min(dmin,d); if((x.measureText(uv(ls[i].label||'')).width+x.measureText(uv(ls[i-1].label||'')).width)/2+fs*0.35>d) over=true; } if(over){ const need=Math.asin(Math.min(1,fs*1.1/Math.max(1,dmin)))*180/Math.PI; angD=[30,45,60,75,90].find(a=>a>=need)||90; } }
   gf.angEff=angD; const ang=angD*Math.PI/180;
@@ -3336,28 +3282,23 @@ function gfRender(exportMode,scale=1){
   return c;
 }
 let gfFine=0, gfFineT=null;
-function gfUpdate(){ gf.inv=$('#gf-inv').checked; gf.gray=$('#gf-gray').checked; gf.bri=+$('#gf-bri').value; gf.con=+$('#gf-con').value; gf.fine=+$('#gf-rot').value; gf.fs=+$('#gf-fs').value; gf.angAuto=$('#gf-ang').value==='auto'; gf.ang=gf.angAuto?0:+$('#gf-ang').value; gf.title=$('#gf-title').value; gf.lw=+$('#gf-lw').value; gf.ladKey=$('#gf-lad').value; gf.disp=$('#gf-unit').value; gf.unit=gf.disp==='kDa'?'kDa':'bp';
-  $('#gf-ladcw').style.display=gf.ladKey==='custom'?'':'none'; $('#gf-bt thead th:nth-child(2)').textContent=gf.unit;
-  $('#gf-briv').textContent=gf.bri; $('#gf-conv').textContent=fmt(gf.con,2); $('#gf-rotv').textContent=fmt(gf.fine,2)+'°'; $('#gf-fsv').textContent=gf.fs; $('#gf-lwv').textContent=gf.lw; gfMarksTable(); gfRender();
+function gfUpdate(){ if(!$('#gf-inv')) return;   /* de velden staan in Vue en zijn er pas na het mounten */
+  gf.inv=$('#gf-inv').checked; gf.gray=$('#gf-gray').checked; gf.bri=+$('#gf-bri').value; gf.con=+$('#gf-con').value; gf.fine=+$('#gf-rot').value; gf.fs=+$('#gf-fs').value; gf.angAuto=$('#gf-ang').value==='auto'; gf.ang=gf.angAuto?0:+$('#gf-ang').value; gf.title=$('#gf-title').value; gf.lw=+$('#gf-lw').value; gf.ladKey=$('#gf-lad').value; gf.disp=$('#gf-unit').value; gf.unit=gf.disp==='kDa'?'kDa':'bp';
+  gfMarksTable(); gfRender();
   if(gf.fine!==gfFine){ gfFine=gf.fine; clearTimeout(gfFineT); gfFineT=setTimeout(()=>{ if(gf.src) gfGeom(); },350); } }
 calc.gelfoto=e=>{ if(e&&e.target&&(e.target.closest('#gf-lanes')||e.target.closest('#gf-bt')||e.target.id==='gf-file'||e.target.id==='gf-n')) return; gfUpdate(); };
 function gfGeom(){ const had=gf.lanes.length>0, hb=gf.bands.length>0; gf.marks=[]; gfMarksTable(); if(had){ gfDetectLanes(); if(hb) gfDetectBands(); } else { gfLanesTable(); gfBandsTable(); gfRender(); } }
-$('#gf-r90').addEventListener('click',()=>{ gf.rot90=(gf.rot90+1)%4; gf.crop=null; gfGeom(); });
-$('#gf-flip').addEventListener('click',()=>{ gf.flip=!gf.flip; gfGeom(); });
-$('#gf-detect').addEventListener('click',gfDetectLanes);
-$('#gf-bands').addEventListener('click',()=>{ gf.ladKey=$('#gf-lad').value; gfDetectBands(); });
-function setMode(m){ gf.mode=gf.mode===m?null:m; ['crop','addlane','addband','measure'].forEach(k=>{ const b=$({crop:'#gf-crop',addlane:'#gf-addlane',addband:'#gf-addband',measure:'#gf-measure'}[k]); b.classList.toggle('on',gf.mode===k); }); $('#gf-cropbar').style.display=gf.mode==='crop'?'flex':'none'; gcv.style.cursor=gf.mode?'crosshair':'default'; gf.pend=gf.mode==='crop'&&gf.crop?{...gf.crop}:null; gfRender(); }
-$('#gf-crop').addEventListener('click',()=>{ if(gf.src) setMode('crop'); });
-$('#gf-addlane').addEventListener('click',()=>setMode('addlane'));
-$('#gf-addband').addEventListener('click',()=>setMode('addband'));
-$('#gf-measure').addEventListener('click',()=>{ if(gf.bands.filter(b=>isFinite(b.bp)).length<2){ gfStatus('Je hebt minstens twee ladderbanden met bp-waarde nodig om te meten.'); return; } setMode('measure'); });
-$('#gf-uncrop').addEventListener('click',()=>{ if(!gf.crop) return; gf.crop=null; gfGeom(); });
-$('#gf-cropno').addEventListener('click',()=>setMode('crop'));
-$('#gf-cropfind').addEventListener('click',()=>{ const b=gfFindGel(); if(b){ gf.pend=b; gfRender(); gfStatus('Kader om het gelvlak gezet; stel het bij en kies Toepassen.'); } else gfStatus('Geen duidelijk gelvlak gevonden; sleep zelf een kader.'); });
+function gfR90(){ gf.rot90=(gf.rot90+1)%4; gf.crop=null; gfGeom(); }
+function gfFlip(){ gf.flip=!gf.flip; gfGeom(); }
+function gfBandsBtn(){ gf.ladKey=$('#gf-lad').value; gfDetectBands(); }
+function setMode(m){ gf.mode=gf.mode===m?null:m; ['crop','addlane','addband','measure'].forEach(k=>{ const b=$({crop:'#gf-crop',addlane:'#gf-addlane',addband:'#gf-addband',measure:'#gf-measure'}[k]); if(b) b.classList.toggle('on',gf.mode===k); }); { const cb=$('#gf-cropbar'); if(cb) cb.style.display=gf.mode==='crop'?'flex':'none'; } gcv.style.cursor=gf.mode?'crosshair':'default'; gf.pend=gf.mode==='crop'&&gf.crop?{...gf.crop}:null; if(window.__gfRefresh) window.__gfRefresh(); gfRender(); }
+function gfMeasureBtn(){ if(gf.bands.filter(b=>isFinite(b.bp)).length<2){ gfStatus('Je hebt minstens twee ladderbanden met bp-waarde nodig om te meten.'); return; } setMode('measure'); }
+function gfUncrop(){ if(!gf.crop) return; gf.crop=null; gfGeom(); }
+function gfCropFind(){ const b=gfFindGel(); if(b){ gf.pend=b; gfRender(); gfStatus('Kader om het gelvlak gezet; stel het bij en kies Toepassen.'); } else gfStatus('Geen duidelijk gelvlak gevonden; sleep zelf een kader.'); }
 $('#gf-zin').addEventListener('click',()=>gfZoom((gf.zoom||1)*1.5)); $('#gf-zout').addEventListener('click',()=>gfZoom((gf.zoom||1)/1.5)); $('#gf-zfit').addEventListener('click',()=>gfZoom(1));
 $('#gf-view').addEventListener('wheel',e=>{ if(!e.ctrlKey&&!e.metaKey) return; e.preventDefault(); gfZoom((gf.zoom||1)*(e.deltaY<0?1.2:1/1.2),e.clientX,e.clientY); },{passive:false});
 gcv.addEventListener('auxclick',e=>{ if(e.button===1) e.preventDefault(); }); gcv.addEventListener('mousedown',e=>{ if(e.button===1) e.preventDefault(); });
-$('#gf-cropok').addEventListener('click',()=>{ const p=gf.pend; if(p&&p.w>10&&p.h>10){ gf.crop={x:p.x,y:p.y,w:p.w,h:p.h}; setMode('crop'); gfGeom(); gfStatus('Bijgesneden; lanen en ladder zijn opnieuw gedetecteerd.'); return; } setMode('crop'); });
+function gfCropOk(){ const p=gf.pend; if(p&&p.w>10&&p.h>10){ gf.crop={x:p.x,y:p.y,w:p.w,h:p.h}; setMode('crop'); gfGeom(); gfStatus('Bijgesneden; lanen en ladder zijn opnieuw gedetecteerd.'); return; } setMode('crop'); }
 /* welk deel van het bijsnijkader ligt onder de muis: rand (n/s/e/w), hoek of binnenkant (m) */
 function gfCropHit(p){ const q=gf.pend; if(!q||q.w<12||q.h<12) return null; const t=Math.max(10*p.s,6), nx0=Math.abs(p.x-q.x)<t, nx1=Math.abs(p.x-q.x-q.w)<t, ny0=Math.abs(p.y-q.y)<t, ny1=Math.abs(p.y-q.y-q.h)<t, inx=p.x>q.x-t&&p.x<q.x+q.w+t, iny=p.y>q.y-t&&p.y<q.y+q.h+t; if(!inx||!iny) return null;
   const v=ny0?'n':ny1?'s':'', h=nx0?'w':nx1?'e':''; if(v||h) return v+h; return p.x>q.x&&p.x<q.x+q.w&&p.y>q.y&&p.y<q.y+q.h?'m':null; }
@@ -3402,15 +3343,15 @@ gcv.addEventListener('pointerup',()=>{ if(gf.drag&&gf.drag.t==='band'){ gf.bands
 /* ================= EXPORT / DOWNLOADS ================= */
 const STANDALONE=!(window.claude&&typeof window.claude.use==='function');
 let dlCap=null;
-function showDl(){ $$('.dl-only').forEach(b=>b.style.display=''); $('#gf-dl').style.display=''; }
+/* dlShown: of opslaan hier kan. De exportknop van de gelfoto-editor staat in Vue en leest
+   deze vlag; showDl() loopt al voordat die component gemount is, dus hij tikt hem op. */
+let dlShown=false;
+function showDl(){ dlShown=true; $$('.dl-only').forEach(b=>b.style.display=''); if(window.__gfRefresh) window.__gfRefresh(); }
 if(STANDALONE) showDl(); else { try{ window.claude.use('downloads').then(d=>{ dlCap=d; if(d) showDl(); }).catch(()=>{}); }catch(e){} }
 async function saveBlob(name,blob){ if(dlCap){ await dlCap.save({filename:name,data:blob}); return; } const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },2000); }
 const safeName=s=>(String(s||'').trim().replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,'_').slice(0,80))||'labkit';
 const csvBlob=t=>{ const D=LANG==='en'?',':';'; return new Blob(['﻿'+t.split('\n').map(r=>r.split('\t').map(c=>{ c=trPlain(c,true); return /[;,"\n]/.test(c)?`"${c.replace(/"/g,'""')}"`:c; }).join(D)).join('\r\n')],{type:'text/csv'}); };
 async function dlMsg(el,fn){ try{ await fn(); el.textContent='Opgeslagen.'; }catch(err){ el.textContent=err&&err.code==='declined'?'Download geannuleerd.':'Downloaden lukte niet hier.'; } }
-$('#gf-dl').addEventListener('click',()=>{ if(!gf.src) return; const fmtx=$('#gx-fmt').value, sc=+$('#gx-scale').value; const c=gfRender(true,sc); const name=safeName($('#gx-name').value||gf.title||'gelfoto')+'.'+fmtx;
-  c.toBlob(b=>dlMsg($('#gf-exmsg'),()=>saveBlob(name,b)),fmtx==='jpg'?'image/jpeg':'image/png',0.95); });
-$('#gf-copy').addEventListener('click',async()=>{ if(!gf.src) return; const c=gfRender(true,+$('#gx-scale').value); try{ await navigator.clipboard.write([new ClipboardItem({'image/png':new Promise(r=>c.toBlob(r,'image/png'))})]); $('#gf-exmsg').textContent='Afbeelding gekopieerd; plak in Word, PowerPoint of je verslag.'; }catch(err){ $('#gf-exmsg').textContent='Kopiëren werd geblokkeerd; gebruik rechtsklik → Afbeelding opslaan als.'; } });
 gcv.addEventListener('contextmenu',()=>{ if(!gf.src||gf.mode) return; const c=gfRender(true,1); const ctx=gcv.getContext('2d'); gcv.width=c.width; gcv.height=c.height; ctx.drawImage(c,0,0); setTimeout(()=>gfRender(),4000); });
 
 /* ================= PLAKKEN UIT EXCEL ================= */
@@ -3547,13 +3488,12 @@ function gfIntensity(x,y){ const pr=laneProfile(x), h=pr.length, k=Math.max(0,Ma
   const half=pk/2, lim=Math.round(h/15); let l=k,r=k; while(l>0&&k-l<lim&&pr[l-1]>half) l--; while(r<h-1&&r-k<lim&&pr[r+1]>half) r++;
   const hw=Math.max(1,(r-l)/2), L=Math.max(0,Math.round(k-2*hw)), R=Math.min(h-1,Math.round(k+2*hw)); let s=0; for(let i=L;i<=R;i++) s+=Math.max(0,pr[i]); return s*Math.max(1,Math.round(gf.lw*0.6)); }
 function gfMarkInt(){ gf.marks.forEach(m=>{ if(m.int==null) m.int=gfIntensity(m.x,m.y); }); }
-{ const _mt=gfMarksTable; gfMarksTable=function(){ gfMarkInt(); _mt(); const tb=$('#gf-marks table'); if(!tb) return; const mx=Math.max(...gf.marks.map(m=>m.int||0)); tb.tHead.rows[0].insertCell(3).outerHTML='<th class="num" title="Geïntegreerde bandintensiteit, relatief t.o.v. de sterkste meting">Rel. int.</th>'; [...tb.tBodies[0].rows].forEach((tr,i)=>{ const c=tr.insertCell(3); c.className='num'; c.textContent=mx>0?fmt((gf.marks[i].int||0)/mx*100,0)+'%':'–'; }); }; }
-$('#gf-measall').addEventListener('click',()=>{
+function gfMeasAll(){
   if(gf.bands.filter(b=>isFinite(b.bp)).length<2){ gfStatus('Detecteer of vul eerst minstens twee ladderbanden in.'); return; }
   const h=gfProc().h; const profs=gf.lanes.map(l=>laneProfile(l.x)); const gmax=Math.max(...profs.map(p=>Math.max(...p)));
   const wells=gfWellRows(); let added=0; gf.lanes.forEach((l,li)=>{ if(li===gf.ladder||l.lad) return; const pr=profs[li], mx=Math.max(...pr); peaks(pr,h/60,Math.max(0.2*mx,0.1*gmax)).filter(o=>o.i>h*0.02&&o.i<h*0.96&&o.v>0.1*gmax&&!nearWell(o.i,wells)).forEach(o=>{ if(gf.marks.some(m=>Math.abs(m.x-l.x)<gf.lw/2&&Math.abs(m.y-o.i)<h/80)) return; gf.marks.push({x:l.x,y:o.i,bp:gfEst(o.i,l.x)}); added++; }); });
-  gfMarksTable(); gfRender(); gfStatus(`${added} banden gemeten in ${gf.lanes.filter((l,i)=>!(l.lad||i===gf.ladder)).length} lanen. Controleer de lijst; verwijder wat geen echte band is (bijvoorbeeld primer-dimeren).`); });
-$('#gf-clrmarks').addEventListener('click',()=>{ gf.marks=[]; gfMarksTable(); gfRender(); });
+  gfMarksTable(); gfRender(); gfStatus(`${added} banden gemeten in ${gf.lanes.filter((l,i)=>!(l.lad||i===gf.ladder)).length} lanen. Controleer de lijst; verwijder wat geen echte band is (bijvoorbeeld primer-dimeren).`); }
+function gfClearMarks(){ gf.marks=[]; gfMarksTable(); gfRender(); }
 
 
 /* ================= GELFOTO: ACHTERGROND EN Rf ================= */
@@ -3569,9 +3509,9 @@ function densArea(pr,k,mode,r){ const h=pr.length; k=Math.max(0,Math.min(h-1,Mat
   let l=k, rr=k; while(l>0&&k-l<lim&&c[l-1]>pk/2) l--; while(rr<h-1&&rr-k<lim&&c[rr+1]>pk/2) rr++; const hw=Math.max(1,(rr-l)/2), L=Math.max(0,Math.round(k-3*hw)), Rr=Math.min(h-1,Math.round(k+3*hw)); let s=0; for(let i=L;i<=Rr;i++) s+=Math.max(0,c[i]); return {area:s,l:L,r:Rr}; }
 gfIntensity=function(x,y){ const pr=laneProfileRaw(x), r=num($('#gf-ball').value); return densArea(pr,gfPeakNear(x,y),$('#gf-bg').value,isFinite(r)&&r>2?Math.min(r,pr.length):pr.length/12).area*Math.max(1,Math.round(gf.lw*0.6)); };
 function gfRf(y){ const h=gfProc().h, w=gfWellRows(), y0=w.length?Math.min(...w):0, fr=num($('#gf-front').value), y1=isFinite(fr)&&fr>y0?fr:h; return (y-y0)/(y1-y0); }
-{ const _mt2=gfMarksTable; gfMarksTable=function(){ _mt2(); const tb=$('#gf-marks table'); if(!tb) return; tb.tHead.rows[0].insertCell(4).outerHTML='<th class="num" title="Looplengte vanaf het slotje gedeeld door de afstand tot het front">Rf</th>'; [...tb.tBodies[0].rows].forEach((tr,i)=>{ const c=tr.insertCell(4); c.className='num'; const v=gfRf(gf.marks[i].y); c.textContent=isFinite(v)?fmt(v,3):'–'; }); }; }
-['gf-bg','gf-ball','gf-front'].forEach(id=>$('#'+id).addEventListener('input',()=>{ gf.marks.forEach(m=>m.int=null); gfMarksTable(); }));
-$('#gf-bg').addEventListener('change',()=>{ gf.marks.forEach(m=>m.int=null); gfMarksTable(); });
+/* De achtergrondkeuze, de straal en het front veranderen de gemeten intensiteit zelf, dus
+   die wordt opnieuw bepaald; GfDens.vue roept dit aan. */
+function gfDensChanged(){ gf.marks.forEach(m=>m.int=null); gfMarksTable(); }
 
 /* ================= GELFOTO: AUTOMATISCH RECHTZETTEN ================= */
 function gfAutoStraighten(){
@@ -3587,7 +3527,6 @@ function gfAutoStraighten(){
   best=Math.round(best*4)/4; $('#gf-rot').value=best; $('#gf-rot').dispatchEvent(new Event('input',{bubbles:true}));
   gfStatus(`Rechtgezet met ${fmt(best,2)}°. Lanen en ladder worden opnieuw gedetecteerd.`);
 }
-$('#gf-auto').addEventListener('click',gfAutoStraighten);
 
 /* ================= SESSIE OPSLAAN / OPENEN ================= */
 $('#sess-save').addEventListener('click',()=>{ try{ localStorage.setItem(TBLKEY,JSON.stringify(tblSnap())); }catch(e){}
@@ -3780,13 +3719,13 @@ if(window.__TAURI__&&window.__TAURI__.opener){ document.addEventListener('click'
 
 /* ================= GELFOTO: EIWITLADDERS EN MASSA PER BAND ================= */
 const LMASS={neb100:'45 35 95 27 24 21 18 97 38 29 25 48',neb1k:'42 42 50 42 33 125 48 36 42 42',k1k13:'28 28 28 28 18 92 34 34 20 92 23 30 45',k1kp:'16 28 28 28 28 18 92 34 34 20 92 23 30 45',h100:'70 50 40 40 30 30 90 40 30 40 40',h100p:'40 70 50 40 40 30 30 90 40 30 40 40'};
-$('#gf-lad').addEventListener('change',e=>{ const k=e.target.value; if(k==='ppp'||k==='prplus'){ $('#gf-unit').value='kDa'; } else if(k!=='custom'&&$('#gf-unit').value==='kDa') $('#gf-unit').value='bp'; if(LMASS[k]) $('#gf-lmass').value=LMASS[k]; $('#gf-unit').dispatchEvent(new Event('input',{bubbles:true})); });
 function gfMassSlope(){ const lad=gfLadder(), ms=stNums($('#gf-lmass').value), load=num($('#gf-lload').value)||500, L=gf.lanes[gf.ladder]; if(!L||!ms.length||gf.unit!=='bp') return NaN;
   const pairs=gf.bands.filter(b=>isFinite(b.bp)).map(b=>{ const i=lad.indexOf(Math.round(b.bp)); return i>=0&&isFinite(ms[i])?[ms[i]*load/500,gfIntensity(L.x,b.y)]:null; }).filter(Boolean);
   if(pairs.length<2) return NaN; return pairs.reduce((s,p)=>s+p[0]*p[1],0)/pairs.reduce((s,p)=>s+p[0]*p[0],0); }
-{ const _mt3=gfMarksTable; gfMarksTable=function(){ _mt3(); const tb=$('#gf-marks table'); if(!tb) return; const sl=gfMassSlope(); if(!isFinite(sl)) return; tb.tHead.rows[0].insertCell(5).outerHTML='<th class="num" title="Geschat uit de bandintensiteit van de massaladder (lineair door de oorsprong)">≈ ng</th>'; [...tb.tBodies[0].rows].forEach((tr,i)=>{ const c=tr.insertCell(5); c.className='num'; const v=(gf.marks[i].int||0)/sl; c.textContent=v>0?fmt(v,v<10?1:0):'–'; }); }; }
-['gf-lload','gf-lmass'].forEach(id=>$('#'+id).addEventListener('input',()=>{ gfMarksTable(); gfRender(); }));
-$('#gf-unit').addEventListener('change',()=>{ if($('#gf-unit').value==='ng'&&gf.unit==='bp'&&!isFinite(gfMassSlope())) gfStatus('Voor ng zijn een DNA-massaladder (ng per band), gemarkeerde ladderbanden en metingen nodig.'); else if($('#gf-unit').value==='ng'&&gf.unit!=='bp') gfStatus('ng werkt alleen met een DNA-ladder met bekende hoeveelheid per band.'); });
+/* De hoeveelheid per ladderband verandert alleen wat er in de tabel en op de foto staat. */
+function gfMassChanged(){ gfMarksTable(); gfRender(); }
+/* ng kan alleen met een DNA-massaladder; GfLadder.vue roept dit aan bij een andere eenheid. */
+function gfUnitMsg(){ if($('#gf-unit').value==='ng'&&gf.unit==='bp'&&!isFinite(gfMassSlope())) gfStatus('Voor ng zijn een DNA-massaladder (ng per band), gemarkeerde ladderbanden en metingen nodig.'); else if($('#gf-unit').value==='ng'&&gf.unit!=='bp') gfStatus('ng werkt alleen met een DNA-ladder met bekende hoeveelheid per band.'); }
 
 /* ================= OPLOSSING: STAPPENSCHEMA ALS AFBEELDING ================= */
 function bufImg(){ const cv=$('#bs-cv'); if(!cv) return; const title=$('#o-btitle').value.trim(), items=$$('#o-tbl tbody tr').map(tr=>({n:tr.querySelector('[data-k=n]').value||'component',out:tr.querySelector('[data-k=out]').textContent})).filter(x=>x.out&&x.out!=='–');

@@ -61,6 +61,13 @@ Lab calculator and gel-editor web app (Dutch first, English via a runtime transl
   - `uv(waarde)` om tekst van de gebruiker letterlijk te laten staan, `lkNumIn(waarde)` voor een getal in een voorbeeldwaarde (dat deed `i18nValue` eerst zelf).
 - **Eén sleutel per zin.** Een zin in stukjes vertalen levert sleutels op die in geen enkele taal te maken zijn.
 - `tests/i18n_vue.py` controleert statisch dat elke letterlijke `t('…')` en `tHtml('…')` een sleutel in `i18n/en.json` heeft, en meldt samengestelde teksten zodat je die zelf nakijkt.
+- De MutationObserver van de vertaallaag slaat sinds S225 **alles over wat binnen een `data-notr` staat**, niet alleen de host zelf. Een wijziging in een Vue-boom komt bij de observer aan als de host niet de target is (een nieuwe rij in een `tbody`, een tekstknoop in een cel), en `i18nWalk()` keek alleen naar het element dat hij kreeg: een getal als `0.179` ging dan weer terug naar `0,179`, want `i18nNum()` ziet een punt met drie cijfers erachter als een Nederlands duizendtal.
+- Zet de motor zelf een invoerveld van een Vue-tool (zoals de geleditor doet), dan hoort daar de omzetting van `i18nValue` bij en daarna een `input`-event; zie `gfSetIn()` in `web/index.html`.
+
+## Een tool waarvan de toestand buiten Vue blijft (de geleditor)
+- Het beeldwerk van de *Gelfoto-editor* staat in `web/index.html` en houdt zijn toestand in `gf`, een gewoon object. De componenten in `src/tools/gelfoto/` lezen daaruit; `src/tools/gelfoto/tick.js` heeft één reactieve teller en `window.__gfRefresh` laat de motor die optikken. `gfLanesTable()`, `gfBandsTable()` en `gfMarksTable()` zijn niets anders meer dan die tik.
+- **Laat elke computed zelf `this.tick` lezen** (de mixin `gfMix`), en zet er geen keten van computeds op: geeft een computed bij een nieuwe tik hetzelfde object terug (`gf.vl`, `gf.lanes`), dan waarschuwt Vue zijn afhankelijkheden niet en blijft de weergave staan. Geef van een lijst een verse kopie terug (`gf.bands.slice()`), want de motor wijzigt de lijst zelf.
+- Let op wanneer een veld er al is: een veld dat Vue pas later neerzet (het eigen-ladderveld achter een `v-if`) is er nog niet, dus kiest "ladder uit een foto" de ladder via `window.__gfLadVm.setLadder()` en doet de detectie in de `$nextTick` daarna.
 
 ## How the app is built
 - `web/index.html` is both source and build output (~830 KB). Older tools are edited in place.
