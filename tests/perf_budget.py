@@ -15,6 +15,7 @@ Laadt de app in het Nederlands en het Engels en controleert:
   LABKIT_GEL_MS (standaard 2000 ms);
 - typvertraging (S135): typen in de zwaarste tools (en in de gelfoto-editor met een geladen gel)
   geeft binnen LABKIT_INP_MS (standaard 100 ms) een volgende frame (Event Timing API).
+- schrijft de metingen naar tests/perf_result.json en, in GitHub Actions, een tabel naar de samenvatting van de run (S136).
 Mobiele Lighthouse staat in .github/workflows/lighthouse.yml (lighthouserc.mobile.json).
 Gebruik: python tests/perf_budget.py                     (exitcode 1 bij problemen)
          python tests/perf_budget.py --update-baseline   (huidige groottes als nieuwe basislijn;
@@ -44,6 +45,7 @@ GEL_BENCH = """async (src) => {
   const t3 = performance.now();
   return {laden: t1 - t0, rechtzetten: t2 - t1, meten: t3 - t2, totaal: t3 - t0, lanen: gf.lanes.length, banden: gf.marks.length};
 }"""
+RESULT = {}
 
 def sizes():
     out = {}
@@ -61,6 +63,7 @@ def size_check(update=False):
     issues = []
     for f, c in cur.items():
         b = base.get(f, {}).get('bytes')
+        RESULT.setdefault('grootte', {})[f] = {'bytes': c['bytes'], 'gzip': c['gzip'], 'basis': b}
         d = '' if not b else f' ({(c["bytes"] - b) / b * 100:+.1f}% t.o.v. basislijn)'
         print(f'[grootte] {f}: {c["bytes"] / 1024:.0f} kB, gzip {c["gzip"] / 1024:.0f} kB{d}')
         if b and c['bytes'] > b * (1 + GROWTH):
@@ -92,6 +95,7 @@ def mem_check():
     if end > HEAP_MB: issues.append(f'JS-heap {end:.1f} MB > limiet {HEAP_MB:.0f} MB')
     if not lanes: issues.append('gelfoto vond geen lanen in de testgel')
     issues += ['scriptfout: ' + e for e in errs]
+    RESULT['heap_mb'] = round(end, 1)
     return issues
 
 def run(lang):
@@ -115,6 +119,7 @@ def run(lang):
     if pending: issues.append(f'{len(pending)} toolkoppen niet vertaald: ' + ', '.join(pending[:5]))
     issues += ['scriptfout: ' + e for e in errs]
     print(f'[{lang}] DOMContentLoaded {best} ms (budget {BUDGET} ms)' + ('' if issues else ', in orde'))
+    RESULT.setdefault('opstart_ms', {})[lang] = best
     return issues
 
 def gel_inp_check():
@@ -128,6 +133,7 @@ def gel_inp_check():
         src = 'data:image/png;base64,' + base64.b64encode(GEL.read_bytes()).decode()
         runs = [pg.evaluate(GEL_BENCH, src) for _ in range(3)]
         best = min(runs, key=lambda r: r['totaal'])
+        RESULT['gel_ms'] = {k: round(best[k]) for k in ('laden', 'rechtzetten', 'meten', 'totaal')}
         print(f'[gelfoto] beste van 3: {best["totaal"]:.0f} ms (laden {best["laden"]:.0f}, rechtzetten {best["rechtzetten"]:.0f}, '
               f'meten {best["meten"]:.0f}); {best["lanen"]} lanen, {best["banden"]} banden (budget {GEL_MS:.0f} ms)')
         if best['totaal'] > GEL_MS: issues.append(f'gelfoto-benchmark {best["totaal"]:.0f} ms > budget {GEL_MS:.0f} ms')
@@ -152,10 +158,41 @@ def gel_inp_check():
                 if worst[tid] <= INP_MS: break
         b.close()
     top = sorted(worst.items(), key=lambda kv: -kv[1])
+    RESULT['typen_ms'] = {t: round(v) for t, v in top}
     print(f'[typen] traagste toetsaanslag per tool (budget {INP_MS:.0f} ms): ' + ', '.join(f'{t} {v:.0f}' for t, v in top[:5]))
     issues += [f'typen in {t} duurt {v:.0f} ms > {INP_MS:.0f} ms' for t, v in top if v > INP_MS]
     issues += ['scriptfout: ' + e for e in errs]
     return issues
+
+def summary(issues):
+    """Schrijft de metingen naar tests/perf_result.json en, in GitHub Actions, een tabel naar de samenvatting."""
+    (ROOT / 'tests' / 'perf_result.json').write_text(
+        json.dumps({**RESULT, 'problemen': issues}, indent=1, ensure_ascii=False), encoding='utf8')
+    path = os.environ.get('GITHUB_STEP_SUMMARY')
+    if not path: return
+    rows = []
+    o = RESULT.get('opstart_ms', {})
+    for lang, label in (('nl', 'Opstarten NL'), ('en', 'Opstarten EN')):
+        if lang in o: rows.append(f'| {label} | {o[lang]} ms | {BUDGET} ms |')
+    for f, g in RESULT.get('grootte', {}).items():
+        pct = f', {(g["bytes"] - g["basis"]) / g["basis"] * 100:+.1f}%' if g['basis'] else ''
+        rows.append(f'| Grootte {f} | {g["bytes"] / 1024:.0f} kB (gzip {g["gzip"] / 1024:.0f} kB){pct} | +{GROWTH * 100:.0f}% |')
+    if 'heap_mb' in RESULT:
+        rows.append(f'| JS-heap na alle tools | {RESULT["heap_mb"]} MB | {HEAP_MB:.0f} MB |')
+    if 'gel_ms' in RESULT:
+        g = RESULT['gel_ms']
+        rows.append(f'| Gelfoto-benchmark | {g["totaal"]} ms (laden {g["laden"]} ms, rechtzetten {g["rechtzetten"]} ms, '
+                    f'meten {g["meten"]} ms) | {GEL_MS:.0f} ms |')
+    if RESULT.get('typen_ms'):
+        t, v = next(iter(RESULT['typen_ms'].items()))
+        rows.append(f'| Traagste toetsaanslag | {t} {v} ms | {INP_MS:.0f} ms |')
+    lines = ['## Prestaties (tests/perf_budget.py)', '', '| Meting | Waarde | Budget |', '|---|---|---|', *rows, '']
+    if issues:
+        lines += ['**Problemen:**', ''] + [f'- {i}' for i in issues]
+    else:
+        lines.append('**Alles binnen budget.**')
+    with open(path, 'a', encoding='utf8') as fh:
+        fh.write('\n'.join(lines) + '\n')
 
 def main():
     issues = [f'[grootte] {i}' for i in size_check('--update-baseline' in sys.argv)]
@@ -163,6 +200,7 @@ def main():
         issues += [f'[{lang}] {i}' for i in run(lang)]
     issues += [f'[geheugen] {i}' for i in mem_check()]
     issues += [f'[gelfoto/typen] {i}' for i in gel_inp_check()]
+    summary(issues)
     for i in issues: print('  ' + i)
     sys.exit(1 if issues else 0)
 

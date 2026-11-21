@@ -53,4 +53,6 @@ jobs:
         if: always()
         with:
           name: validatierapport
-          path: tests/VALIDATIE.md
+          path: |
+            tests/VALIDATIE.md
+            tests/perf_result.json
