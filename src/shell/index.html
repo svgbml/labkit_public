@@ -1410,6 +1410,10 @@ function i18nWalk(el){ if(!el||el.nodeType!==1) return; if(el.hasAttribute('data
   if(i18nIsUnit(el)) el.__i18n=el.innerHTML; }
 let i18nMO=null;
 /* vertaal een tool-sectie volledig zodra hij nodig is (openen, rapport) */
+/* tStatic(root): vertaal een stuk DOM dat gewone code (geen Vue) net heeft gebouwd, één keer, en
+   geef root terug. Een Vue-boom (data-notr) blijft erbuiten; die vertaalt zichzelf met t()/tHtml().
+   Sinds S270 roept elke bouwer buiten Vue dit zelf aan, zodat de observer hieronder weg kan (S271). */
+function tStatic(root){ if(LANG!=='en'||!root) return root; if(root.__i18nPend) root.__i18nPend=false; i18nWalk(root); return root; }
 function i18nEnsure(sec){ if(!sec||!sec.__i18nPend) return; sec.__i18nPend=false; i18nWalk(sec); if(i18nMO) i18nMO.takeRecords(); }
 const i18nIdle=window.requestIdleCallback?f=>requestIdleCallback(f,{timeout:2000}):f=>setTimeout(()=>{ const t=performance.now(); f({didTimeout:false,timeRemaining:()=>Math.max(0,12-(performance.now()-t))}); },40);
 function i18nStart(){ document.documentElement.lang=LANG; if(LANG!=='en') return;
@@ -1429,7 +1433,7 @@ function i18nStart(){ document.documentElement.lang=LANG; if(LANG!=='en') return
        de target binnen een data-notr staat. */
     for(const t of set){ if(!t.isConnected||t.closest('[data-notr]')) continue; const ps=t.closest('section.tool'); if(ps&&ps.__i18nPend&&ps!==t&&!t.closest('.tool-head')) continue; let skip=false; for(const u of set){ if(u!==t&&u.contains(t)){ skip=true; break; } } if(!skip) i18nWalk(t); }
     i18nMO.takeRecords(); });
-  i18nMO.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['title','placeholder','aria-label']});
+  if(!window.__lkNoMO) i18nMO.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['title','placeholder','aria-label']});
   try{ if(typeof calc!=='undefined'&&calc[current]) calc[current](); }catch(e){} }
 /* verzamelen (alleen voor de ontwikkeltool tests/i18n_collect.py) */
 function i18nCollect(root){ const out=new Set(); const add=k=>{ if(i18nHasWords(k)) out.add(k); };

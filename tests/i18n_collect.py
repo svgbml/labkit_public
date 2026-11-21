@@ -12,7 +12,18 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 URL = (ROOT / 'web' / 'index.html').as_uri()
 EDGE = ['', '0', '-5', 'abc', '1e12']
 EXPLORE = r"""
-(tool)=>{ const EDGE=['','0','-5','abc','1e12']; window.__i18nRec=true; const sec=document.getElementById('t-'+tool), keys=new Set(); const grab=()=>{ for(const k of i18nCollect(sec)) keys.add(k); if(document.getElementById('upd-bar')) for(const k of i18nCollect(document.getElementById('upd-bar'))) keys.add(k); };
+(tool)=>{ const EDGE=['','0','-5','abc','1e12']; window.__i18nRec=true; const sec=document.getElementById('t-'+tool), keys=new Set(); window.__lkLeft=window.__lkLeft||new Set();
+  /* Engels: tekst die nog precies een Nederlandse sleutel is (met een andere vertaling) is blijven staan.
+     Sinds fase 16 vertaalt geen observer meer na; elke tekst moet via t()/tHtml()/trPlain() of tStatic(). */
+  const left=root=>{ if(LANG!=='en'||!root) return; /* geen Nederlands maar wel een sleutel: 'Na' is natrium (Molmassa) */ const NOTDUTCH=new Set(['Na']);
+    const hit=k=>{ const v=I18N_EN[k]; return v!=null&&v!==k&&i18nHasWords(k)&&!NOTDUTCH.has(k); };
+    const walk=el=>{ if(el.nodeType!==1||I18N_SKIP.has(el.tagName)||(el.matches('section.tool')&&!el.classList.contains('active'))) return;
+      for(const a of ['title','placeholder','aria-label']) if(el.hasAttribute(a)){ const k=i18nKey(i18nEsc(el.getAttribute(a))).key; if(hit(k)) window.__lkLeft.add(a+': '+k); }
+      if(i18nIsUnit(el)){ const k=i18nKey(el.innerHTML).key; if(hit(k)){ window.__lkLeft.add(k); return; } }
+      for(const n of el.childNodes){ if(n.nodeType===3&&/\S/.test(n.data)){ const k=i18nKey(i18nEsc(n.data.trim())).key; if(hit(k)) window.__lkLeft.add(k); } else if(n.nodeType===1) walk(n); } };
+    walk(root); };
+  const grab=()=>{ for(const k of i18nCollect(sec)) keys.add(k); if(document.getElementById('upd-bar')) for(const k of i18nCollect(document.getElementById('upd-bar'))) keys.add(k);
+    left(document.body); };   /* de hele pagina, behalve tools die niet open staan */
   const fire=el=>{ el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); };
   grab();
   if(tool==='gelfoto'){ ['gf-measall','gf-auto'].forEach(id=>{ try{ document.getElementById(id).click(); grab(); }catch(e){} }); }
@@ -35,6 +46,8 @@ def main():
     with sync_playwright() as p:
         b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1400, 'height': 900})
         pg.add_init_script("try{localStorage.clear();localStorage.setItem('labkit:v1:lang','" + lang + "')}catch(e){}")
+        import os
+        if os.environ.get('LK_NOMO'): pg.add_init_script("window.__lkNoMO=true")   # ontwikkelhulp: de observer uit
         pg.goto(URL); pg.wait_for_timeout(800)
         tools = pg.evaluate('TOOLS')
         found.update(pg.evaluate("i18nCollect(document.getElementById('nav'))"))
@@ -49,6 +62,8 @@ def main():
                 print('!', t, str(e)[:120])
             pg.wait_for_timeout(100)
             for k, v in pg.evaluate("[...I18N_MISS.entries()]"): miss.setdefault(k, t)
+            if not collect:
+                for k in pg.evaluate('[...(window.__lkLeft||[])]'): miss.setdefault('(niet vertaald) '+k, t)
         b.close()
     if collect:
         d = json.loads((ROOT / 'i18n' / 'en.json').read_text(encoding='utf-8')) if (ROOT / 'i18n' / 'en.json').exists() else {}

@@ -36,7 +36,7 @@
         <lk-note v-if="isotonic" kind="ok">{{ t('Ongeveer isotoon met bloedplasma (circa 275–300 mOsm/kg).') }}</lk-note>
         <!-- geen t(): deze regel heeft geen woord van twee letters, dus de vertaallaag heeft
              er nooit een sleutel voor gemaakt -->
-        <lk-formula html="osmolariteit = Σ c·ν · I = ½ Σ c·z²"/>
+        <lk-formula :html="tHtml('osmolariteit = Σ c·ν · I = ½ Σ c·z²')"/>
       </template>
     </div>
   </div>

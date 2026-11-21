@@ -48,7 +48,7 @@ export default {
       data: ['controle 3 1', 'controle 5 1', 'controle 6 1', 'controle 6 0', 'controle 8 1', 'controle 9 1',
         'controle 11 1', 'controle 12 0', 'controle 14 1', 'controle 15 0', 'behandeld 5 1', 'behandeld 8 0',
         'behandeld 10 1', 'behandeld 12 1', 'behandeld 14 0', 'behandeld 16 1', 'behandeld 18 0',
-        'behandeld 20 1', 'behandeld 22 0', 'behandeld 25 0'].join('\n'),
+        'behandeld 20 1', 'behandeld 22 0', 'behandeld 25 0'].map(l => l.replace(/^\w+/, w => trPlain(w))).join('\n'),
       unit: 'dagen'
     };
   },

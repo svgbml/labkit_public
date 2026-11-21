@@ -256,7 +256,7 @@ LKUI.etable = {
               slots.out ? slots.out({ri, ci, k: c.k, row: r}) : null)
             : h('td', null, cell(c, r, ri, ci)))),
           h('td', null, h('button', {type: 'button', class: 'ghost', 'data-del': '',
-            'aria-label': 'Verwijder',
+            'aria-label': trPlain('Verwijder'),
             onClick: () => put(props.rows.filter((_, i) => i !== ri))}, '\u2715'))
         ])))
       ]);

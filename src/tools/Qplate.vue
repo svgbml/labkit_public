@@ -65,7 +65,7 @@ const fnum = x => (typeof x === 'number' ? x : num(x));
 export default {
   name: 'Qplate',
   data() {
-    return {fmtSel: '96', rep: '3', s: 'Controle 1, Controle 2, Behandeld 1, Behandeld 2', tg: 'GAPDH, IL6',
+    return {fmtSel: '96', rep: '3', s: ['Controle 1', 'Controle 2', 'Behandeld 1', 'Behandeld 2'].map(x => trPlain(x)).join(', '), tg: 'GAPDH, IL6',
       std: '0', ntc: '1', dir: 'row', mar: '10', exp: 'eigen',
       over: false, need: 0, msg: '', tick: 0, gen: false};
   },

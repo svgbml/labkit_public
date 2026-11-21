@@ -60,7 +60,7 @@ function primerInfo(s,ion){
   const nn=tmNN(seq,io.na,io.mg,io.dntp,io.pc);
   return {seq,N,gc,gcp:gc/N*100,tm:isFinite(nn)?nn:basic,basic,nn,other,clamp:/[GC]$/.test(seq),rule:isFinite(nn)?'Nearest-neighbor (SantaLucia 1998)':(N<14?'4·GC + 2·AT':'64,9 + 41·(GC − 16,4)/N')};
 }
-const mmss2=s=>{ s=Math.round(s); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60; return h?`${h} u ${String(m).padStart(2,'0')} min`:m?`${m}:${String(x).padStart(2,'0')} min`:`${x} s`; };
+const mmss2=s=>{ s=Math.round(s); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60; return h?trPlain(`${h} u ${String(m).padStart(2,'0')} min`):m?`${m}:${String(x).padStart(2,'0')} min`:`${x} s`; };
 calc.pcrcyclus=function(){};
 function drawProfile(cv,steps,n){
   const W=480,H=210,dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=H*dpr; cv.style.width='100%'; cv.style.maxWidth=W+'px';

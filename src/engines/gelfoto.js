@@ -10,7 +10,9 @@ import {live} from '../lib/global.js';
 /* ================= GELFOTO-EDITOR ================= */
 const gf={unit:'bp',disp:'bp',angAuto:true,src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null};
 const gcv=$('#gf-cv');
-function gfStatus(t){ $('#gf-status').textContent=t; }
+/* Elke zin is een eigen vertaalsleutel (S270); een lege zin valt weg. #gf-status staat in een Vue-boom,
+   dus de DOM-vertaallaag kwam er nooit: in het Engels bleven deze meldingen eerst Nederlands. */
+function gfStatus(...zinnen){ $('#gf-status').textContent=zinnen.filter(Boolean).map(z=>trPlain(z)).join(' '); }
 /* De velden van de editor staan in Vue (src/tools/gelfoto/). Zet de motor er zelf een, dan
    gaat dat via de invoer met een input-event erachter: daar reageert v-model op, net als bij
    delen via een link en ongedaan maken. */
@@ -20,7 +22,7 @@ function gfSetIn(id,v){ const el=$('#'+id); if(!el) return; el.value=String(v);
   if(LANG==='en'&&typeof i18nValue==='function'){ el.__iv=null; el.__typed=false; i18nValue(el); }
   el.dispatchEvent(new Event('input',{bubbles:true})); }
 function gfLoadCanvas(c){ gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; gfSetIn('gf-rot',0); gfUpdate(true); }
-function gfFromImage(img){ const M=2400, s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); gfLoadCanvas(c); gf.title=''; gfSetIn('gf-title',''); gf.marks=[]; let auto=false; { const bx=gfFindGel(); if(bx&&bx.w*bx.h<0.8*c.width*c.height){ gf.crop=bx; gf.cache={}; auto=true; } } gfDetectLanes(); if(gf.lanes.length>=2) gfDetectBands(); gfMarksTable(); gfStatus(`Geladen: ${img.naturalWidth} × ${img.naturalHeight} px${s<1?' (verkleind voor bewerking)':''}.${auto?' Gel automatisch bijgesneden (Herstel toont de hele foto).':''} ${gf.lanes.length} lanen gevonden. Staat de gel scheef? Gebruik "Automatisch rechtzetten".`); }
+function gfFromImage(img){ const M=2400, s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); gfLoadCanvas(c); gf.title=''; gfSetIn('gf-title',''); gf.marks=[]; let auto=false; { const bx=gfFindGel(); if(bx&&bx.w*bx.h<0.8*c.width*c.height){ gf.crop=bx; gf.cache={}; auto=true; } } gfDetectLanes(); if(gf.lanes.length>=2) gfDetectBands(); gfMarksTable(); gfStatus(`Geladen: ${img.naturalWidth} × ${img.naturalHeight} px${s<1?' (verkleind voor bewerking)':''}.`, auto?'Gel automatisch bijgesneden (Herstel toont de hele foto).':'', `${gf.lanes.length} lanen gevonden.`, 'Staat de gel scheef? Gebruik "Automatisch rechtzetten".'); }
 function gfFile(f){ if(!f) return; const url=URL.createObjectURL(f); const img=new Image(); img.onload=()=>{ gfFromImage(img); URL.revokeObjectURL(url); }; img.onerror=()=>gfStatus('Dit bestand kan de browser niet openen (bijvoorbeeld TIFF). Exporteer de foto als PNG of JPG.'); img.src=url; }
 $('#gf-stage').addEventListener('dragover',e=>e.preventDefault());
 $('#gf-stage').addEventListener('drop',e=>{ e.preventDefault(); gfFile(e.dataTransfer.files[0]); });
@@ -135,7 +137,7 @@ function gfDetectLanes(){
   gf.lw=Math.max(4,Math.min(200,gf.lw||40)); gfSetIn('gf-lw',gf.lw);
   gf.ladder=Math.min(gf.ladder,Math.max(0,gf.lanes.length-1));
   const nW=cand.filter(c=>c.well).length;
-  gfStatus(`${gf.lanes.length} lanen gevonden${nW?` (${nW} via de putjes van de kam)`:''}${filledN?` (waarvan ${filledN} lege lane${filledN>1?'n':''} aangevuld op basis van de vaste tussenafstand)`:''}.${N>0?'':' Klopt het aantal niet? Vul het verwachte aantal in en detecteer opnieuw.'}`);
+  gfStatus(`${gf.lanes.length} lanen gevonden${nW?` (${nW} via de putjes van de kam)`:''}${filledN?` (waarvan ${filledN} lege lane${filledN>1?'n':''} aangevuld op basis van de vaste tussenafstand)`:''}.`, N>0?'':'Klopt het aantal niet? Vul het verwachte aantal in en detecteer opnieuw.');
   gfLanesTable(); gfRender();
 }
 function laneProfile(cx){ const P=gfProc(), {w,h,sig}=P; const half=Math.max(1,Math.round(gf.lw*0.3)); const x0=Math.max(0,Math.round(cx-half)), x1=Math.min(w-1,Math.round(cx+half)); const pr=new Float32Array(h); for(let y=0;y<h;y++){ let s=0; for(let x=x0;x<=x1;x++) s+=sig[y*w+x]; pr[y]=s/(x1-x0+1); }
@@ -278,7 +280,7 @@ function gfVlUse(){ const v=gf.vl; if(!v) return; const sizes=(v.sizes||[]).filt
   /* de keuzelijst staat in GfLadder.vue, en bij een eigen ladder zet Vue het veld voor de
      groottes er pas bij de volgende render neer; daarna pas opnieuw detecteren */
   vm.setLadder(key,sizes.join(' '),()=>{ if(gf.lanes.length) gfDetectBands();
-    const sel=$('#gf-lad'); gfStatus(`Ladder ingesteld: ${(sel&&sel.options[sel.selectedIndex]||{}).textContent}. De banden zijn opnieuw gedetecteerd.`); });
+    const sel=$('#gf-lad'); gfStatus(`Ladder ingesteld: ${uv((sel&&sel.options[sel.selectedIndex]||{}).textContent||'')}.`, 'De banden zijn opnieuw gedetecteerd.'); });
   if(LMASS[key]) gfSetIn('gf-lmass',LMASS[key]); }
 function gfVlChoose(li){ const v=gf.vl, L=v.lanes[li]; v.li=li; v.cands=gfLadMatch(L.bands).slice(0,5);
   const pw=Math.max(3,Math.round((L.x1-L.x0)*0.12)), sx=Math.max(L.ra+2,L.x0-pw), ex=Math.min(L.rb-2,L.x1+pw), st=document.createElement('canvas'); st.width=ex-sx+1; st.height=L.y1-L.y0+1; st.getContext('2d').drawImage(v.src,sx,L.y0,st.width,st.height,0,0,st.width,st.height); v.strip=st; v.cache=null;

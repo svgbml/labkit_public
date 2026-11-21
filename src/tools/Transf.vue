@@ -54,8 +54,8 @@ export default {
   data() {
     return {
       lv: '10', vng: '50', used: '1', tot: '1040', range: '30-300',
-      rows: [['Eigen ligatie', '10', '3', '19'], ['Eigen ligatie', '100', '31', '176'],
-        ['Eigen ligatie', '930', 'TNTC', 'TNTC'], ['Controle-insert', '100', '72', '118']]
+      rows: [[trPlain('Eigen ligatie'), '10', '3', '19'], [trPlain('Eigen ligatie'), '100', '31', '176'],
+        [trPlain('Eigen ligatie'), '930', 'TNTC', 'TNTC'], [trPlain('Controle-insert'), '100', '72', '118']]
     };
   },
   computed: {

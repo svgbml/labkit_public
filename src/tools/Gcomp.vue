@@ -51,7 +51,8 @@ const DATA = 'tijd\tWildtype\tMutant\n0\t0,050\t0,050\n1\t0,052\t0,051\n2\t0,066
 export default {
   name: 'Gcomp',
   data() {
-    return {tu: 'h', type: 'od', blank: '0', txt: lkNumIn(DATA)};
+    /* de kop van de voorbeelddata in de taal van de gebruiker (S270): de namen worden de reeksnamen */
+    return {tu: 'h', type: 'od', blank: '0', txt: lkNumIn(DATA.replace(/^tijd\tWildtype/, trPlain('tijd') + '\t' + trPlain('Wildtype')))};
   },
   computed: {
     dataLabel() {

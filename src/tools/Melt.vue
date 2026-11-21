@@ -62,7 +62,7 @@ const F = (x, d) => lkNumIn(fmt(x, d));
 function example() {
   const T = []; for (let t = 65; t <= 95.001; t += 0.5) T.push(Math.round(t * 10) / 10);
   const f = (t, tm, w, a) => a / (1 + Math.exp((t - tm) / w));
-  const rows = ['T (°C)\tMonster 1\tMonster 2\tNTC', ...T.map(t => [t, f(t, 84.5, 0.6, 10000) + 300,
+  const rows = [['T (°C)', trPlain('Monster 1'), trPlain('Monster 2'), 'NTC'].join('\t'), ...T.map(t => [t, f(t, 84.5, 0.6, 10000) + 300,
     f(t, 84.5, 0.6, 8000) + f(t, 76.0, 0.8, 2500) + 300, f(t, 76.2, 0.8, 3000) + 300]
     .map((v, i) => i ? Math.round(v) : String(v).replace('.', ',')).join('\t'))];
   return lkNumIn(rows.join('\n'));

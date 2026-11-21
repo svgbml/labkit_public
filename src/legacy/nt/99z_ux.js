@@ -235,7 +235,7 @@ const TOUR=[
 let tourAt=-1, tourKeys=null;
 function tourBox(){ let b=$('#lk-tour'); if(b) return b;
   document.body.insertAdjacentHTML('beforeend',`<div id="lk-tour" class="lk-tour" role="dialog" aria-modal="true" aria-labelledby="lk-tour-t" hidden><div class="lk-tour-ring" aria-hidden="true"></div><div class="lk-tour-card"><h3 id="lk-tour-t"></h3><p class="lk-tour-d"></p><div class="lk-tour-foot"><span class="lk-tour-dots" aria-hidden="true"></span><button type="button" class="ghost" data-tour="stop">Overslaan</button><button type="button" data-tour="prev">Vorige</button><button type="button" class="primary" data-tour="next">Volgende</button></div></div></div>`);
-  b=$('#lk-tour');
+  b=$('#lk-tour'); tStatic(b);
   b.addEventListener('click',e=>{ const t=e.target.closest('[data-tour]'); if(!t){ if(e.target===b) tourStop(); return; }
     if(t.dataset.tour==='stop') tourStop(); else tourGo(tourAt+(t.dataset.tour==='prev'?-1:1)); });
   return b; }
@@ -245,11 +245,11 @@ function tourGo(i){ if(i<0) return; if(i>=TOUR.length){ tourStop(); return; }
   tourAt=i; const b=tourBox(), s=TOUR[i],
     el=s.sel.split(',').map(x=>document.querySelector(x.trim())).find(e=>e&&e.offsetParent!==null);
   b.hidden=false; document.documentElement.classList.add('lk-tour-on');
-  $('#lk-tour-t').textContent=s.t; b.querySelector('.lk-tour-d').textContent=s.d;
+  $('#lk-tour-t').textContent=trPlain(s.t); b.querySelector('.lk-tour-d').textContent=trPlain(s.d);
   b.querySelector('.lk-tour-dots').innerHTML=TOUR.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('');
   b.querySelector('[data-tour=prev]').disabled=i===0;
   const nx=b.querySelector('[data-tour=next]'), last=i===TOUR.length-1, t=last?'Klaar':'Volgende';
-  if(nx.dataset.lkt!==t){ nx.dataset.lkt=t; nx.textContent=t; }
+  if(nx.dataset.lkt!==t){ nx.dataset.lkt=t; nx.textContent=trPlain(t); }
   const ring=b.querySelector('.lk-tour-ring'), card=b.querySelector('.lk-tour-card');
   const r=el&&el.offsetParent!==null?el.getBoundingClientRect():null;
   if(r&&r.width&&r.height){ if(el.scrollIntoView&&(r.top<0||r.bottom>innerHeight)){ el.scrollIntoView({block:'center'}); }

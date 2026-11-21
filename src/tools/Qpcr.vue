@@ -64,8 +64,8 @@ export default {
   data() {
     return {
       et: '100', er: '100', cal: '', mode: 'auto',
-      rows: [['Controle', lkNumIn('23,9'), '20'], ['Controle', '24', lkNumIn('20,1')], ['Controle', lkNumIn('24,1'), lkNumIn('19,9')],
-        ['Behandeld', lkNumIn('21,4'), lkNumIn('20,2')], ['Behandeld', lkNumIn('21,5'), lkNumIn('20,1')], ['Behandeld', lkNumIn('21,6'), lkNumIn('20,3')]],
+      rows: [[trPlain('Controle'), lkNumIn('23,9'), '20'], [trPlain('Controle'), '24', lkNumIn('20,1')], [trPlain('Controle'), lkNumIn('24,1'), lkNumIn('19,9')],
+        [trPlain('Behandeld'), lkNumIn('21,4'), lkNumIn('20,2')], [trPlain('Behandeld'), lkNumIn('21,5'), lkNumIn('20,1')], [trPlain('Behandeld'), lkNumIn('21,6'), lkNumIn('20,3')]],
       imp: '', refname: 'GAPDH', impMsg: null
     };
   },

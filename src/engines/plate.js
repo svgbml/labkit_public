@@ -136,6 +136,7 @@ function plateDesigner(host, opts) {
     <div class="pld-mc" data-pl="mc"></div>
     <div class="pld-warn" data-pl="warn"></div>
     <p class="pld-hint">Sleep over de putjes om te vullen. Met <b>Herhalingen</b> vul je replica's in één beweging; een klik op een rij- of kolomkop vult die hele rij of kolom.</p>`;
+  tStatic(host);   /* S270: gewone DOM, dus zelf vertalen (er is geen observer meer) */
 
   const q = n => host.querySelector(`[data-pl="${n}"]`);
   const rep = () => { const v = +(q('rep') || {}).value; return Math.max(1, Math.min(8, v || 1)); };
@@ -282,7 +283,7 @@ function plateDesigner(host, opts) {
           .filter(Boolean).join(' · ');
         h += `<div class="well${fill ? ' on' : ''}${txt && room ? ' wtxt' : ''}${tmode && k === wsel ? ' wsel' : ''}" data-notr="" data-w="${k}" title="${esc(tip)}"${
           fill ? ` style="--wc:${S.groups[gi].c};color:${inkOn(S.groups[gi].c)}"` : ''}>${txt && room ? `<span>${esc(txt)}</span>` : ''}</div>`; } }
-    g.innerHTML = h;
+    g.innerHTML = h; tStatic(g);
     const act = document.activeElement;
     if (!(act && act.dataset && act.dataset.plgn != null))
       q('legend').innerHTML = S.groups.map((x, i) =>
@@ -291,13 +292,14 @@ function plateDesigner(host, opts) {
         `<input data-plgn="${i}" value="${esc(x.n)}" aria-label="Naam van de groep"><span class="cnt" data-notr="">${cnt[i] || 0}</span>` +
         (S.groups.length > 1 ? `<button type="button" class="gdel" data-pldel="${i}" aria-label="Verwijder">✕</button>` : '') + '</div>').join('') +
         '<button type="button" class="grp addg" data-pl="add">+ kleur toevoegen</button>';
+    tStatic(q('legend'));
     q('tmode').setAttribute('aria-pressed', tmode ? 'true' : 'false');
     q('tmode').classList.toggle('primary', tmode);
     q('txtbar').hidden = !tmode;
     if (tmode && wsel) { q('sel').textContent = wsel; const w = q('wtext'); if (w !== document.activeElement) w.value = S.vals[wsel] || ''; }
     fitText(sz);
-    q('mc').innerHTML = mcText();
-    q('warn').innerHTML = warnText();
+    q('mc').innerHTML = mcText(); tStatic(q('mc'));
+    q('warn').innerHTML = warnText(); tStatic(q('warn'));
     q('keyv').hidden = S.seed == null;
     q('erase').setAttribute('aria-pressed', erase ? 'true' : 'false');
     q('erase').classList.toggle('primary', erase);
@@ -406,7 +408,7 @@ function plateDesigner(host, opts) {
         : p.i < 0 || p.i >= r || !isFinite(p.j) || p.j < 0 || p.j >= c ? 'Dat putje bestaat niet op deze plaat.'
         : (d === 'h' ? p.j + n : p.i + n) > (d === 'h' ? c : r) ? 'De reeks past zo niet op de plaat: kies minder stappen of een ander beginputje.'
         : (d === 'h' ? p.i + rp : p.j + rp) > (d === 'h' ? r : c) ? 'De herhalingen passen niet op de plaat.' : '';
-      if (bad) { f('err').textContent = bad; return; }   /* de vertaallaag pakt de nieuwe tekst zelf op */
+      if (bad) { f('err').textContent = trPlain(bad); return; }
       for (let t = 0; t < n; t++) { const lb = sig(c0 / Math.pow(fac, t), 3) + (u ? ' ' + u : '');
         for (let k = 0; k < rp; k++) { const ii = d === 'h' ? p.i + k : p.i + t, jj = d === 'h' ? p.j + t : p.j + k;
           S.wells[key(ii, jj)] = sel; S.vals[key(ii, jj)] = lb; } }
@@ -447,9 +449,9 @@ function plateDesigner(host, opts) {
     f('no').addEventListener('click', m.close);
     f('ok').addEventListener('click', () => {
       const sd = Math.round(num(f('s').value)), g = f('g').value === '' ? null : +f('g').value;
-      if (!isFinite(sd) || sd <= 0) { f('err').textContent = 'Vul een sleutelnummer groter dan 0 in.'; return; }
-      if (n < 2) { f('err').textContent = 'Vul eerst minstens twee putjes.'; return; }
-      if (!randomise(sd, g)) { f('err').textContent = 'Deze groep heeft te weinig putjes om door elkaar te halen.'; return; }
+      if (!isFinite(sd) || sd <= 0) { f('err').textContent = trPlain('Vul een sleutelnummer groter dan 0 in.'); return; }
+      if (n < 2) { f('err').textContent = trPlain('Vul eerst minstens twee putjes.'); return; }
+      if (!randomise(sd, g)) { f('err').textContent = trPlain('Deze groep heeft te weinig putjes om door elkaar te halen.'); return; }
       m.close(); keyDialog();
     });
     setTimeout(() => f('ok').focus(), 0);

@@ -54,7 +54,7 @@ export default {
     return {
       ng: g('cd-in', '1000'), vr: g('cd-vr', '10'), inh: g('cd-inh', '0'),
       nort: g('cd-nort', '1'), mar: g('cd-mar', '10'),
-      rows: [['Controle 1', '412'], ['Controle 2', '388'], ['Behandeld 1', '256'], ['Behandeld 2', '1190']]
+      rows: [[trPlain('Controle 1'), '412'], [trPlain('Controle 2'), '388'], [trPlain('Behandeld 1'), '256'], [trPlain('Behandeld 2'), '1190']]
     };
   },
   computed: {

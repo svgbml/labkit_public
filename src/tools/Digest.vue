@@ -17,7 +17,7 @@
         <div class="f">
           <label for="dg-e1">{{ t('Enzym 1') }}</label>
           <select id="dg-e1" v-model="e1">
-            <option v-for="k in enzymes" :key="k" :value="k">{{ k }}</option>
+            <option v-for="k in enzymes" :key="k" :value="k">{{ k === 'ander enzym' ? t(k) : k }}</option>
           </select>
         </div>
         <lk-field v-model="u1" :label="t('Activiteit enzym 1')" for-id="dg-u1" unit="U/µL"/>
@@ -25,7 +25,7 @@
           <label for="dg-e2">{{ t('Enzym 2 (dubbele digestie)') }}</label>
           <select id="dg-e2" v-model="e2">
             <option value="">{{ t('geen (enkele digestie)') }}</option>
-            <option v-for="k in enzymes" :key="k" :value="k">{{ k }}</option>
+            <option v-for="k in enzymes" :key="k" :value="k">{{ k === 'ander enzym' ? t(k) : k }}</option>
           </select>
         </div>
         <lk-field v-show="e2" v-model="u2" :label="t('Activiteit enzym 2')" for-id="dg-u2" unit="U/µL"/>

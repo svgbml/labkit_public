@@ -43,7 +43,7 @@ function drawQR(x,text,X,Y,size,ecl='M'){ const M=qrMatrix(text,ecl), n=M.length
 function appModal(html,onClose){ const ov=document.createElement('div'); ov.className='lk-modal'; ov.style.cssText='position:fixed;inset:0;background:rgba(15,20,30,.38);z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:10vh 12px 12px';
   ov.innerHTML=`<div role="dialog" aria-modal="true" style="background:var(--surface,#fff);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.25);width:min(560px,100%);max-height:80vh;overflow:auto;padding:16px">${html}</div>`;
   const close=()=>{ ov.remove(); document.removeEventListener('keydown',esc1); if(onClose) onClose(); }, esc1=e=>{ if(e.key==='Escape'){ e.preventDefault(); close(); } };
-  ov.addEventListener('mousedown',e=>{ if(e.target===ov) close(); }); document.addEventListener('keydown',esc1); document.body.appendChild(ov); return {ov,box:ov.firstChild,close}; }
+  ov.addEventListener('mousedown',e=>{ if(e.target===ov) close(); }); document.addEventListener('keydown',esc1); tStatic(ov); document.body.appendChild(ov); return {ov,box:ov.firstChild,close}; }
 
 /* --- opdrachtpalet (Ctrl+K) --- */
 const fold=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');

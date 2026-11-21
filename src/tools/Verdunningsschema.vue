@@ -90,7 +90,7 @@ export default {
   data() {
     return {
       title: stored('pv-title', loc('Decimale verdunningsreeks')), c0: stored('pv-c0', '1e9'),
-      cu: stored('pv-cu', 'KVE/mL'), f: stored('pv-f', '10'), n: stored('pv-n', '6'),
+      cu: stored('pv-cu', trPlain('KVE/mL')), f: stored('pv-f', '10'), n: stored('pv-n', '6'),
       v: stored('pv-v', '1000'), dil: stored('pv-dil', loc('fysiologisch zout')),
       lab: stored('pv-lab', 'exp'), plate: stored('pv-plate', '3'), pv: stored('pv-pv', '100'),
       labels: stored('pv-labels', ''), note: stored('pv-note', ''),
