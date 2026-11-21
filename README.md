@@ -143,12 +143,14 @@ Referenties zijn onder meer:
 
 ```
 npm install
+npm run build    # src/ -> web/index.html (na elke wijziging)
 npm run web      # web-app lokaal
+npm run check    # bouwen + alle tests (python tools/check.py --quick voor de snelle set)
 npm start        # desktopversie (Tauri; vereist Rust)
 npm run dist     # Windows-installer
 ```
 
-Projectindeling: `web/` bevat de app (één HTML-bestand met manifest en service worker, plus het Engelse woordenboek `i18n-en.js` dat alleen in het Engels wordt geladen), `src-tauri/` de desktopschil, `tests/` de validatie en `.github/workflows/` de publicatie naar GitHub Pages, de Windows-build en de validatie.
+Projectindeling: alle code staat in `src/` (Vue-componenten in `src/tools/`, gedeelde hulpfuncties en de vertaling in `src/lib/`, de geleditor, timers en plaatontwerper in `src/engines/`, oudere code in `src/legacy/`, de pagina zelf in `src/shell/`). `npm run build` bundelt dat met Vite en schrijft `web/index.html`: één HTML-bestand dat ook vanaf `file://` werkt, met manifest en service worker, plus het Engelse woordenboek `i18n-en.js` dat alleen in het Engels wordt geladen. Bewerk `web/index.html` nooit met de hand. Verder: `src-tauri/` de desktopschil, `tests/` de validatie en `.github/workflows/` de publicatie naar GitHub Pages, de Windows-build en de validatie. De werkregels voor wie aan de code werkt staan in `CLAUDE.md`.
 
 ## Disclaimer
 
