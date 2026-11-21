@@ -37,7 +37,7 @@ over:
 - **S91:** *Standaardcurve* reads a pasted plate grid, but not per instrument.
 - **S93:** *qPCR-analyse* reads a pasted Ct table by its header, but not per instrument.
 
-At the last full `python tools/check.py` (2026-11-21, after S263): **286 of 286 validation checks**, 0 layout problems in Dutch and 2 in English (the known label overflow in *PCR-mastermix*), 0 robustness problems, 0 untranslated texts. The *Gelfoto-editor › Rf-waarde* failure after the merge is fixed: *PCR-cyclus* and *PCR-mastermix* both used `window.__pcrVm`, so restoring a saved table after a reload crashed before the demo gel was loaded.
+At the last full `python tools/check.py` (2026-11-21, after S272, end of phase 16): **286 of 286 validation checks**, 0 layout problems in Dutch and 2 in English (the known label overflow in *PCR-mastermix*), 0 untranslated texts (including the new leftover-Dutch check), start-up 413/459 ms. `tests/robust_audit.py` could not finish on this machine: the browser runs out of memory while loading a page (see *Known bugs*). By the owner's decision (2026-11-21) that failure is **not blocking** on this machine and the test is not rerun here; it still runs in CI on GitHub.
 
 ### Vue migration: how far it is
 
