@@ -1,0 +1,14 @@
+{
+ "web/index.html": {
+  "bytes": 1167470,
+  "gzip": 372087
+ },
+ "web/i18n-en.js": {
+  "bytes": 488166,
+  "gzip": 146945
+ },
+ "build/app.bundle.js": {
+  "bytes": 1037624,
+  "gzip": 332687
+ }
+}
