@@ -170,7 +170,7 @@ export default {
   },
   updated() { this.draw(); },
   methods: {
-    vol, fmt,
+    vol, fmt, lkNumIn,
     draw() {
       const m = this.m;
       if (typeof qRack === 'function') qRack(m.n, m.V, m.T, m.V - m.T);

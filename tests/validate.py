@@ -989,6 +989,24 @@ def _(pg):
     r = pg.evaluate("(()=>{ const tr=[...document.querySelectorAll('#k-res table')].pop().querySelectorAll('tbody tr')[2]; return [__n(tr.cells[2].textContent),__n(tr.cells[3].textContent)]; })()")
     return [('helling', r[0], -2, 0.002), ('y-asafsnede', r[1], 100, 0.002)]
 
+@case('Plasmidekaart', 'pFA6a-kanMX6 uit GenBank', 'Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb: 3938 bp circulair, SP6-promotor op 3922..2 over het nulpunt) en Biopython Bio.Restriction (REBASE): 22 van de 50 enzymen knippen één keer, EcoRI op 1517 en BamHI op 44')
+def _(pg):
+    gb = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.gb').read_text(encoding='utf-8')
+    pg.evaluate("gb=>{__go('plasmid');__set('pl-enz','');__set('pl-uniq',true);__set('pl-prim','');__set('pl-seq',gb)}", gb)
+    kv = lambda lab: pg.evaluate("l=>__kv('#pl-out',l)", lab)
+    # de knipplaatsentabel is de tweede tabel in de uitvoer; zoek de rij van een enzym op
+    site = lambda e: pg.evaluate("e=>{const tb=[...document.querySelectorAll('#pl-out table')][1];"
+                                 "const r=[...tb.querySelectorAll('tbody tr')].find(r=>r.cells[0].textContent.trim()===e);"
+                                 "return r?__n(__el(r.cells[1])):NaN}", e)
+    # het kenmerk dat over het nulpunt loopt staat in de eerste tabel
+    sp6 = pg.evaluate("{const tb=document.querySelector('#pl-out table');"
+                      "const r=[...tb.querySelectorAll('tbody tr')].find(r=>/SP6 promoter/.test(r.cells[0].textContent));"
+                      "r?__n(__el(r.cells[2])):NaN}")
+    return [('lengte (bp)', kv('Lengte'), 3938, 0), ('GC (%)', kv('GC'), 47.92, 0.001),
+            ('kenmerken', kv('Kenmerken'), 18, 0), ('enzymen die één keer knippen', kv('Enzymen'), 22, 0),
+            ('EcoRI (positie)', site('EcoRI'), 1517, 0), ('BamHI (positie)', site('BamHI'), 44, 0),
+            ('SP6-promotor over het nulpunt (start)', sp6, 3922, 0)]
+
 @case('Restrictiedigestie', 'In-silico digestie van pFA6a-kanMX6', 'Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa')
 def _(pg):
     fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')

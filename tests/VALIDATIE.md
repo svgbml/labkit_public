@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-21 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 317 van 317 controles binnen tolerantie.**
+**Resultaat: 324 van 324 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -60,9 +60,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9401 | -0.46% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7741 | -0.48% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,552 | -0.64% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9444 | -0.01% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,784 | +0.80% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5582 | +0.47% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -284,6 +284,13 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Oplossing & buffer | Hydraatvariant | afwegen (g) | 2,681 | 2,681 | +0.01% | ✅ | 10 mM Na₂HPO₄·7H₂O (268,07 g/mol) in 1 L = 2,681 g |
 | Enzymkinetiek | Eadie-Hofstee | helling | -2 | -2 | -0.00% | ✅ | Exacte Michaelis-Menten-data (V_max 100, K_m 2): v tegen v/[S] heeft helling −K_m en y-asafsnede V_max |
 | Enzymkinetiek | Eadie-Hofstee | y-asafsnede | 100 | 100 | +0.00% | ✅ | Exacte Michaelis-Menten-data (V_max 100, K_m 2): v tegen v/[S] heeft helling −K_m en y-asafsnede V_max |
+| Plasmidekaart | pFA6a-kanMX6 uit GenBank | lengte (bp) | 3938 | 3938 | +0.00% | ✅ | Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb: 3938 bp circulair, SP6-promotor op 3922..2 over het nulpunt) en Biopython Bio.Restriction (REBASE): 22 van de 50 enzymen knippen één keer, EcoRI op 1517 en BamHI op 44 |
+| Plasmidekaart | pFA6a-kanMX6 uit GenBank | GC (%) | 47,92 | 47,9 | -0.04% | ✅ | Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb: 3938 bp circulair, SP6-promotor op 3922..2 over het nulpunt) en Biopython Bio.Restriction (REBASE): 22 van de 50 enzymen knippen één keer, EcoRI op 1517 en BamHI op 44 |
+| Plasmidekaart | pFA6a-kanMX6 uit GenBank | kenmerken | 18 | 18 | +0.00% | ✅ | Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb: 3938 bp circulair, SP6-promotor op 3922..2 over het nulpunt) en Biopython Bio.Restriction (REBASE): 22 van de 50 enzymen knippen één keer, EcoRI op 1517 en BamHI op 44 |
+| Plasmidekaart | pFA6a-kanMX6 uit GenBank | enzymen die één keer knippen | 22 | 22 | +0.00% | ✅ | Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb: 3938 bp circulair, SP6-promotor op 3922..2 over het nulpunt) en Biopython Bio.Restriction (REBASE): 22 van de 50 enzymen knippen één keer, EcoRI op 1517 en BamHI op 44 |
+| Plasmidekaart | pFA6a-kanMX6 uit GenBank | EcoRI (positie) | 1517 | 1517 | +0.00% | ✅ | Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb: 3938 bp circulair, SP6-promotor op 3922..2 over het nulpunt) en Biopython Bio.Restriction (REBASE): 22 van de 50 enzymen knippen één keer, EcoRI op 1517 en BamHI op 44 |
+| Plasmidekaart | pFA6a-kanMX6 uit GenBank | BamHI (positie) | 44 | 44 | +0.00% | ✅ | Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb: 3938 bp circulair, SP6-promotor op 3922..2 over het nulpunt) en Biopython Bio.Restriction (REBASE): 22 van de 50 enzymen knippen één keer, EcoRI op 1517 en BamHI op 44 |
+| Plasmidekaart | pFA6a-kanMX6 uit GenBank | SP6-promotor over het nulpunt (start) | 3922 | 3922 | +0.00% | ✅ | Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb: 3938 bp circulair, SP6-promotor op 3922..2 over het nulpunt) en Biopython Bio.Restriction (REBASE): 22 van de 50 enzymen knippen één keer, EcoRI op 1517 en BamHI op 44 |
 | Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | EcoRI+HindIII circ fragment 1 (bp) | 2441 | 2441 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
 | Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | EcoRI+HindIII circ fragment 2 (bp) | 983 | 983 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |
 | Restrictiedigestie | In-silico digestie van pFA6a-kanMX6 | EcoRI+HindIII circ fragment 3 (bp) | 514 | 514 | +0.00% | ✅ | Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa |

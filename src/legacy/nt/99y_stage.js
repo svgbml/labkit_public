@@ -18,7 +18,7 @@ const STAGES={
   steril:'va',passage:'v',medium:'v',transfect:'v',viab:'ua',desinf:'a',facs:'v',
   /* DNA */
   dna:'a',oligo:'v',pcr:'v',pcrcyclus:'v',qpcr:'a',melt:'a',gel:'va',gelfoto:'a',sds:'v',wb:'a',
-  ligatie:'v',transf:'ua',cdna:'v',qplate:'v',rnaq:'a',digest:'v',gradient:'v',
+  ligatie:'v',transf:'ua',cdna:'v',qplate:'v',rnaq:'a',digest:'v',plasmid:'v',gradient:'v',
   /* Forensisch */
   rmp:'a',strchk:'a',bpa:'a',pmi:'a',ystr:'a',kin:'a',widmark:'a',stature:'a',ento:'a',glass:'a',hwe:'a',mix:'a',
   /* Data */
