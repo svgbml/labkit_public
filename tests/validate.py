@@ -164,6 +164,12 @@ def _(pg):
     tms = pg.evaluate("__cells('#y-out tbody tr td:nth-child(4)')")
     return [('Tm forward (°C)', tms[0], 65.22, 0.002), ('Tm reverse (°C)', tms[1], 64.15, 0.002)]
 
+@case('Primers oplossen', 'Primerkaart: zelfdimeer-ΔG van een GAATTC-3′-eind', 'SantaLucia 1998, ΔG°37-tabel: GAATTC/GAATTC = 2 × 0,98 (GC-eind) − 1,30 − 1,00 − 0,88 − 1,00 − 1,30 + 0,43 (symmetrie) = −3,09 kcal/mol')
+def _(pg):
+    pg.evaluate("__go('oligo');__set('ol-seq','test\tTTTTTTTTGAATTC')")
+    g = pg.evaluate("__cells('#ol-cardout tbody tr td:nth-child(5)')")
+    return [('zelfdimeer ΔG (kcal/mol)', g[0], -3.09, 0.03)]
+
 @case('PCR-cyclus', 'qPCR-efficiëntie uit helling', 'Pearson qPCR-efficiëntie: helling −3,80 → 83,3%; helling −3,3 → 100,9%')
 def _(pg):
     pg.evaluate("__go('pcrcyclus');__set('y-q0','1e6');__set('y-qf','10');__set('y-cq','15 18,8 22,6')")
