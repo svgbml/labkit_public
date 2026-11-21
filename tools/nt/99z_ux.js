@@ -80,7 +80,7 @@ document.addEventListener('click',e=>{
   const s=e.target.closest('[data-wf-start]'); if(s){ const w=WF.find(x=>x.id===s.dataset.wfStart); if(!w) return; const prev=wfCur(); jset(WFKEY,{w:w.id}); location.hash='#'+(prev&&prev.id===w.id&&w.steps.includes(jget(WFKEY+':at','')||'')?jget(WFKEY+':at',''):w.steps[0]); return; }
   if(e.target.closest('[data-wf-stop]')){ jset(WFKEY,{}); wfRender(); if(current==='start') calc.start(); } });
 window.addEventListener('hashchange',()=>{ const w=wfCur(); if(w&&w.steps.includes(current)) jset(WFKEY+':at',current); wfRender(); });
-if(typeof bentoRender==='function'){ const _br=bentoRender; bentoRender=function(q){ const r=_br.apply(this,arguments); if(!(q||'').trim()&&!curTag()){ const t=$$('#bento-rest > .tile')[1]; if(t) t.insertAdjacentHTML('afterend',wfTile()); } return r; }; }
+/* de werkstroomtegel op de startpagina tekent src/tools/Start.vue (S263) */
 wfRender();
 
 /* ---------- eenheden in invoervelden: "50 mM", "0,5 µg/µL" of "250 nL" wordt omgerekend naar de eenheid van het veld ---------- */

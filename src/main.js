@@ -58,6 +58,8 @@ import Purif from './tools/Purif.vue';
 import Chrom from './tools/Chrom.vue';
 import Spec from './tools/Spec.vue';
 import Ic50 from './tools/Ic50.vue';
+import Start from './tools/Start.vue';
+import Settings from './tools/Settings.vue';
 import Telkamer from './tools/Telkamer.vue';
 import Passage from './tools/Passage.vue';
 import Desinf from './tools/Desinf.vue';
@@ -304,7 +306,7 @@ mountTool('#tf-app', Transf);
 calc.transf = () => {};
 
 /* PCR-cyclus tekent het programma op een canvas, dus calc.pcrcyclus() laat de component opnieuw
-   tekenen. De annealingtemperatuur staat op window.__pcrVm.taAuto voor de knop in het
+   tekenen. De annealingtemperatuur staat op window.__pcrcVm.taAuto voor de knop in het
    PCR-programma (#pg-from). */
 const yc = mountTool('#y-app', Pcrcyclus);
 calc.pcrcyclus = () => { if (yc && yc.vm) yc.vm.draw(); };
@@ -404,7 +406,7 @@ const pp = mountTool('#pp-app', Pipetteer);
 calc.ppip = () => { if (pp && pp.vm) pp.vm.draw(); };
 
 /* PCR-programma tekent op #pg-cv met de bestaande tekenfuncties; calc.pprog() laat de component
-   opnieuw tekenen. "Neem over uit PCR-cyclus" (#pg-from) leest de globale yTa van die tool. */
+   opnieuw tekenen. "Neem over uit PCR-cyclus" (#pg-from) leest window.__pcrcVm.taAuto van PCR-cyclus. */
 const pg = mountTool('#pg-app', PcrProgramma);
 calc.pprog = () => { if (pg && pg.vm) pg.vm.draw(); };
 
@@ -473,3 +475,10 @@ mountTool('#gf-app-marks', GfMarks);
 mountTool('#gf-app-fmt', GfFormat);
 /* calc.gelfoto blijft gfUpdate() in index.html: dat leest de velden en tekent opnieuw. */
 
+/* De app-schil (S263). De startpagina leest de navigatie, de fase, de favorieten en de werkstroom
+   bij elke calc.start(): die roepen stageSet(), de sterren in de navigatie en het stoppen van een
+   werkstroom al aan. Instellingen roept zelf applyUI() aan; calc.inst hoeft niets te doen. */
+const sp = mountTool('#bento', Start);
+calc.start = () => { if (sp && sp.vm) sp.vm.refresh(); };
+mountTool('#inst-app', Settings);
+calc.inst = () => {};

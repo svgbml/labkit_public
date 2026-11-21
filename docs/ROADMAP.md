@@ -7,10 +7,10 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Model** (last column) is the cheapest model that can do the step well, so the shared usage limit lasts longer. Done steps show "—".
 - **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (3 open steps).
 - **Sonnet**: the default. The design is settled and the step extends something that already exists, which includes almost every Vue conversion in phase 15 (76 open steps).
-- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps, and the heaviest Vue conversions (gel editor, Statistiek, Gelplanner, app shell) (55 open steps).
+- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps, and the heaviest Vue conversions (gel editor, Statistiek, Gelplanner, app shell) (54 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading and the alignment engine (28 open steps; S143–S146 is one row).
 
-**Total:** 265 steps (S0–S263, plus S204a) ≈ 130 hours; **103 done, 162 open**. Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 265 steps (S0–S263, plus S204a) ≈ 130 hours; **104 done, 161 open**. Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-21)
 
@@ -23,7 +23,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 4 recipes and sequences | S37–S47 | **part done:** S37–S40 ✅, S41–S47 open |
 | Phases 5–11 | S48–S146 | ⏳ not started (S45, S54, S82, S91, S93 partly there) |
 | Phases 12–14 Sanger, alignment, sequence toolbox | S147–S201 | ⏳ not started |
-| Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | **almost done:** S202–S262 ✅ (62 of 63; batches V1a–V7 merged on 2026-11-21), only S263 (app shell) left |
+| Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | ✅ done (batches V1a–V7 merged on 2026-11-21, S263 the same day) |
 
 **Checkmark audit.** Every ✅ in this file has its own `S<n>:` commit, and every `S<n>:` commit
 in the history has its ✅. Nothing is ticked that wasn't done, and nothing done is unticked.
@@ -36,11 +36,7 @@ over:
 - **S91:** *Standaardcurve* reads a pasted plate grid, but not per instrument.
 - **S93:** *qPCR-analyse* reads a pasted Ct table by its header, but not per instrument.
 
-At the last full `python tools/check.py` (2026-11-21, after merging batches V1a–V7, on Windows): **285 of 286
-validation checks**. The one failure is *Gelfoto-editor › Rf-waarde* ("Cannot read properties of null (reading
-'width')" in `gfRotated()`): it passed on the V6 and V7 branches and when run on its own, so it comes from the order
-of the cases after the merge (the page is reloaded earlier and `gf.src` is empty); still to fix. Layout: 0 problems in
-Dutch, 2 in English (the known label overflow in *PCR-mastermix*). Robustness: 0 problems.
+At the last full `python tools/check.py` (2026-11-21, after S263): **286 of 286 validation checks**, 0 layout problems in Dutch and 2 in English (the known label overflow in *PCR-mastermix*), 0 robustness problems, 0 untranslated texts. The *Gelfoto-editor › Rf-waarde* failure after the merge is fixed: *PCR-cyclus* and *PCR-mastermix* both used `window.__pcrVm`, so restoring a saved table after a reload crashed before the demo gel was loaded.
 
 ### Vue migration: how far it is
 
@@ -48,8 +44,8 @@ Dutch, 2 in English (the known label overflow in *PCR-mastermix*). Robustness: 0
 |---|---|---|
 | Foundation: Vite bundle, `src/lib/bridge.js`, shared components in `src/lib/ui.js` (incl. `lk-etable`), `t()`/`tHtml()`, `tests/i18n_vue.py` | ✅ | — |
 | Calculation tools on Vue | **all 87**: every tool of phase 15 is converted (S202–S262, batches V1a–V7), plus *pH bijstellen* and *Celkweekmedium klaarmaken* (built in Vue at S40) | — |
-| App shell (start page, Instellingen, navigation) | — | S263 |
-| Phase 15 steps | 62 of 63 (S202–S262, S204a) | 1 (S263) |
+| App shell (start page, Instellingen, navigation) | ✅ S263 (`Start.vue`, `Settings.vue`) | — |
+| Phase 15 steps | 63 of 63 | — |
 
 Four of the converted tools (*Significante cijfers*, *Welke pipet?*, *Z′-factor*,
 *Restrictiedigestie*) were done as groundwork before phase 15 had step numbers, so they have no
@@ -105,7 +101,7 @@ when that is more useful. Within a pair (a/b/c) do *a* first unless the row says
 | V4b ✅ | Sonnet | S243–S247 forensics, part 2 | — | one other V batch |
 | V5a ✅ | Sonnet | S250–S254 statistics tools and quality | — | one other V batch |
 | V5b ✅ | Sonnet | S257–S262 schemes, planner, report, plate, centrifuge, timers | — | one other V batch |
-| V6 🔨 (S263 left) | Opus 5 | S248–S249 *Statistiek*, S255–S256 *Gelplanner*, then S263 the app shell (last) | all other V batches before S263 | one V batch |
+| V6 ✅ | Opus 5 | S248–S249 *Statistiek*, S255–S256 *Gelplanner*, then S263 the app shell (last) | all other V batches before S263 | one V batch |
 | V7 ✅ | Opus 5 | S225–S226 *Gelfoto-editor* on Vue | — | one V batch |
 | **Wave 2: finish phase 4** | | | | |
 | P1 | Opus 5 | S42, S43 (Sonnet), S44, S45: primers, in-silico PCR and digest | V3a, V3b | E2, *any time* batches |
@@ -489,13 +485,9 @@ Ideas #369–#390. **S191 is cheap and independent**, so it is a good one to pul
 
 ## Phase 15: the remaining tools onto Vue (63 steps)
 
-**Af:** S202, S203, S204 en S204a. Negen tools zijn om (*Significante cijfers & afronden*,
-*Welke pipet?*, *Assaykwaliteit (Z′-factor)*, *Restrictiedigestie*, *Oplossing & buffer*,
-*Buffercapaciteit*, *Oplosbaarheid (Ksp)*, *Verdunning*, *Osmolariteit & ionsterkte*) en de
-laag eronder staat er: Vite bouwt `src/` tot één bundel, `src/lib/ui.js` heeft de gedeelde
-componenten (inclusief `lk-etable`, de bewerkbare tabel) en `t()` / `tHtml()` gebruiken
-dezelfde woordenlijst als de rest van de app. Zie `CLAUDE.md`. **Over: 76 tools en de
-app-schil**, vanaf S205.
+**Af (2026-11-21):** alle 63 stappen. Elke rekentool en de app-schil (startpagina en
+Instellingen) staan op Vue; de laag eronder is `src/lib/bridge.js` met de gedeelde componenten
+in `src/lib/ui.js` en `t()` / `tHtml()` tegen dezelfde woordenlijst. Zie `CLAUDE.md`.
 
 **Wat S204a opleverde voor de rest van de fase.** Negentien tabellen in zeventien tools komen
 nog uit `ET()`. Die ruilen nu alleen `ET(...)` voor `<lk-etable>`; de twee fouten die daar
@@ -588,7 +580,7 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S260 | — | *Kleuringsschema* naar Vue | ✅ `src/tools/Kleuringsschema.vue`, de tabel op `lk-etable`; alleen de sjablonen (`STN`) blijven in `tools/nt/44_stain.js`. Geen validatiegeval (het is een tekening) | Sonnet |
 | S261 | — | *Experimentplanner*, *Rapport / labjournaal* naar Vue | ✅ `src/tools/Planner.vue` (tabel op `lk-etable`) en `src/tools/Rapport.vue`. `rpTools`, `rpSection`, `rpDoc` en `rpPrint` blijven globaal in `tools/nt/62_report.js`, want de afdrukknoppen van andere tools gebruiken ze; het rapportdocument zelf blijft een string | Sonnet |
 | S262 | — | *Plaatindeling*, *Centrifuge*, *Timers* naar Vue | ✅ `src/tools/Centrifuge.vue`, `Timers.vue`, `Plaatindeling.vue`. De timer-motor (`timers`, `addTimer`, tik, piep, opslag) blijft globaal in `web/index.html`, want hij loopt door in andere tools; de plaatontwerper in `#w-pld` en `plateImg()` blijven de gedeelde motor (`plaatInit()` in `tools/nt/04_plaat.js`). Open punt, ouder dan deze stap: in het Engels vertaalt de MutationObserver getallen in een Vue-boom opnieuw (`i18nWalk` kijkt alleen naar `data-notr` op de knoop zelf) | Sonnet |
-| S263 | — | Startpagina en Instellingen naar Vue (de app-schil, geen rekentool) | Zoeken, fasen, tegels en instellingen werken | Opus 5 |
+| S263 | — | Startpagina en Instellingen naar Vue (de app-schil, geen rekentool) | ✅ `src/tools/Start.vue` en `src/tools/Settings.vue`. De startpagina was `bentoRender()` plus twee lagen erop (fasefilter in `99y_stage.js`, werkstroomtegel in `99z_ux.js`); die drie staan nu in één component, met dezelfde opbouw (`#bento-rest > .tile`, `#bento-q`) voor het kruimelpad en de rondleiding. Instellingen houdt alle id's; `applyUI()` en `checkUpdate()` blijven in `web/index.html`. Gecontroleerd in NL en EN: zoeken, tags, fasen, favorieten, werkstromen, thema, terugzetten en opslag | Opus 5 |
 
 ## What to pick up next
 

@@ -51,10 +51,7 @@ function navStageApply(){ const st=stageCur(), q=($('#nav-q').value||'').trim().
   kids.forEach((el,i)=>{ if(!el.classList.contains('navgroup')) return; let any=false; for(let j=i+1;j<kids.length&&kids[j].tagName==='A';j++) if(!kids[j].hidden) any=true; el.hidden=!any; }); }
 $('#nav-q').addEventListener('input',navStageApply);
 if(typeof navFavs==='function'){ const _nf2=navFavs; navFavs=function(){ const r=_nf2.apply(this,arguments); navStageApply(); return r; }; }
-/* startpagina: dezelfde fase toepassen op de tegels */
-if(typeof bentoRender==='function'){ const _brs=bentoRender, _ti=toolIndex;
-  bentoRender=function(q){ const st=stageCur(); if(st) toolIndex=()=>_ti().filter(t=>stageHas(t.id,st));
-    try{ return _brs.apply(this,arguments); } finally{ toolIndex=_ti; } }; }
+/* startpagina: src/tools/Start.vue past de fase zelf toe (S263) */
 navStageApply();
 
 /* ---------- kruimelpad (Fase > Groep > Tool) in de kop van elke tool, met de kleur van de fase ---------- */
@@ -73,6 +70,6 @@ document.addEventListener('click',e=>{
   const g=e.target.closest('[data-crumb-grp]'); if(!g) return; const first=g.dataset.crumbGrp;
   const tile=()=>$$('#bento-rest > .tile').find(x=>x.querySelector(`.tl a[href="#${first}"]`));
   setTimeout(()=>{ let t=tile();
-    if(!t&&stageCur()){ stageSet(''); t=tile(); } /* de gekozen fase verbergt deze groep: dan alle fasen laten zien */
+    if(!t&&stageCur()){ stageSet(''); setTimeout(()=>{ const u=tile(); if(u){ u.scrollIntoView({behavior:'smooth',block:'center'}); u.classList.add('lk-hl'); setTimeout(()=>u.classList.remove('lk-hl'),1600); } },80); return; } /* de gekozen fase verbergt deze groep: dan alle fasen laten zien; Vue tekent de tegels pas op de volgende tick */
     if(!t) return;
     t.scrollIntoView({behavior:'smooth',block:'center'}); t.classList.add('lk-hl'); setTimeout(()=>t.classList.remove('lk-hl'),1600); },140); });
