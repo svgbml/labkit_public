@@ -652,17 +652,9 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 <section class="tool" id="t-centrifuge" data-tool="centrifuge">
   <header class="tool-head"><h2>Centrifuge</h2>
   <p>Omrekenen tussen toerental en g-kracht. De straal hoort bij de rotor, niet bij de centrifuge; je vindt hem in de handleiding of op de rotor.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="z-r">Rotorstraal r</label><div class="inu"><input id="z-r" inputmode="decimal" value="8,4"><span class="u">cm</span></div></div>
-        <div class="f"><label for="z-rpm">Toerental</label><div class="inu"><input id="z-rpm" inputmode="decimal" value="13000"><span class="u">rpm</span></div></div>
-        <div class="f"><label for="z-g">g-kracht</label><div class="inu"><input id="z-g" inputmode="decimal" value=""><span class="u">× g</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Vul rpm óf × g in; het andere veld rekent mee.</p>
-    </div>
-    <div class="result" id="z-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Centrifuge.vue); de kop en de
+       bronregel blijven gewone HTML. -->
+  <div id="z-app"></div>
   <p class="src">RCF = 1,118 × 10⁻⁵ × r × rpm² (Sigma-Aldrich g-force calculator; Thermo Scientific Pierce Tech Tip #40).</p>
 </section>
 
@@ -670,35 +662,20 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 <section class="tool" id="t-timers" data-tool="timers">
   <header class="tool-head"><h2>Timers</h2>
   <p>Meerdere timers tegelijk. Je hoort een piep als een timer afloopt, ook als je in een andere tool werkt.</p></header>
-  <div class="panel" style="margin-bottom:14px">
-    <div class="row">
-      <div class="f"><label for="tm-name">Naam</label><input id="tm-name" class="txt" value="Incubatie" style="width:180px"></div>
-      <div class="f"><label for="tm-min">Minuten</label><input id="tm-min" inputmode="numeric" value="15" style="width:90px"></div>
-      <div class="f"><label for="tm-sec">Seconden</label><input id="tm-sec" inputmode="numeric" value="0" style="width:90px"></div>
-      <div class="f"><label>&nbsp;</label><button type="button" class="primary" id="tm-add">Timer toevoegen</button></div>
-    </div>
-    <div class="row" style="margin-top:12px" id="tm-presets"></div>
-  </div>
-  <div class="tgrid" id="tm-grid"></div>
+  <!-- Het formulier, de snelle timers en het rooster zijn een Vue-component (zie
+       src/tools/Timers.vue). De timers zelf (staat, tikken, piepen, bewaren, addTimer) blijven
+       hieronder in het script staan: ze lopen ook door als je in een andere tool werkt. -->
+  <div id="tm-app"></div>
 </section>
 
 <!-- ============ PLAAT ============ -->
 <section class="tool" id="t-plaat" data-tool="plaat">
   <header class="tool-head"><h2>Plaatindeling</h2>
   <p>Kies een groep en klik of sleep over de putjes. Putjes krijgen automatisch een replicaatnummer in leesvolgorde.</p></header>
-  <div class="panel">
-    <div class="row" style="justify-content:space-between;margin-bottom:12px">
-      <div class="f"><label for="w-title">Titel</label><input id="w-title" class="txt" value="ELISA / qPCR — plaat 1" style="width:240px"></div>
-      <div class="row"><button type="button" data-smp="plaat">Monsters…</button><button type="button" class="primary" id="w-copy">Kopieer als tabel</button><button type="button" id="w-csv" class="dl-only" style="display:none">Download CSV</button></div>
-    </div>
-    <div id="w-pld"></div>
-    <div class="row" style="margin-top:12px;gap:14px"><div class="f"><label for="w-pal">Kleurenpalet</label><select id="w-pal"><option value="std">Standaard</option><option value="okabe">Kleurenblind-veilig</option><option value="pastel">Pastel</option><option value="fel">Fel</option><option value="grijs">Grijstinten</option></select></div><div class="f"><label for="w-shape">Vorm putjes</label><select id="w-shape"><option value="rond">Rond</option><option value="vierkant">Vierkant</option></select></div><label class="chk" for="w-autolab"><input type="checkbox" id="w-autolab" checked> automatische labels (St1, Mo2 …)</label><label class="chk" for="w-leg"><input type="checkbox" id="w-leg" checked> legenda in afbeelding</label><span style="font-size:13px;color:var(--muted)">Klik op het kleurvakje van een groep voor een eigen kleur.</span></div>
-    <div class="f" style="margin-top:12px"><label for="w-note">Eigen tekst onder de afbeelding (bijv. verdunningen, incubatietijden)</label><textarea id="w-note" rows="2">Standaarden in duplo in kolom 1–2; monsters in drievoud.</textarea></div>
-    <h3 style="margin:16px 0 8px">Afbeelding</h3>
-    <canvas id="w-cv"></canvas><div class="pic-bar" data-picbar="w"></div>
-    <p id="w-copied" style="font-size:13px;color:var(--muted);margin:10px 0 0">De tabel plak je direct in Excel, Google Sheets of je labjournaal.</p>
-    <textarea id="w-fallback" rows="6" style="display:none;margin-top:10px" readonly></textarea>
-  </div>
+  <!-- De bediening is een Vue-component (zie src/tools/Plaatindeling.vue). De plaatontwerper in
+       #w-pld en de tekening op #w-cv komen uit de gedeelde modules (tools/nt/02_plate.js en
+       04_plaat.js); de component bouwt ze in mounted(). -->
+  <div id="w-app"></div>
 </section>
 
 <!-- ============ STANDAARDCURVE ============ -->
@@ -929,52 +906,14 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-pverd" data-tool="pverd">
   <header class="tool-head"><h2>Verdunningsschema</h2>
   <p>Tekent een seriële verdunningsreeks met buizen, overdrachtsvolumes en concentraties, eventueel met uitplaten. Download als afbeelding voor je protocol of labjournaal.</p></header>
-  <div class="picwrap">
-    <div class="pic-prev"><div class="result"><canvas id="pv-cv"></canvas><div class="pic-bar" data-picbar="pv"></div><div id="pv-out"></div></div></div>
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="pv-title">Titel</label><input id="pv-title" class="txt" value="Decimale verdunningsreeks"></div>
-        <div class="f"><label for="pv-c0">Concentratie stock</label><input id="pv-c0" inputmode="decimal" value="1e9"></div>
-        <div class="f"><label for="pv-cu">Eenheid</label><input id="pv-cu" class="txt" value="KVE/mL"></div>
-        <div class="f"><label for="pv-f">Factor per stap</label><div class="inu"><span class="u" style="border-left:1px solid var(--line);border-radius:4px 0 0 4px;border-right:0">1 :</span><input id="pv-f" inputmode="decimal" value="10" style="border-radius:0 4px 4px 0"></div></div>
-        <div class="f"><label for="pv-n">Aantal buizen</label><input id="pv-n" inputmode="numeric" value="6"></div>
-        <div class="f"><label for="pv-v">Volume per buis</label><div class="inu"><input id="pv-v" inputmode="decimal" value="1000"><span class="u">µL</span></div></div>
-        <div class="f"><label for="pv-dil">Verdunningsmiddel</label><input id="pv-dil" class="txt" value="fysiologisch zout"></div>
-        <div class="f"><label for="pv-lab">Buislabels</label><select id="pv-lab" style="width:100%"><option value="exp">10⁻¹, 10⁻² …</option><option value="ratio">1:10, 1:100 …</option><option value="num">1, 2, 3 …</option></select></div>
-        <div class="f"><label for="pv-plate">Uitplaten uit laatste</label><div class="inu"><input id="pv-plate" inputmode="numeric" value="3"><span class="u">buizen</span></div></div>
-        <div class="f"><label for="pv-pv">Uitplaatvolume</label><div class="inu"><input id="pv-pv" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
-        <div class="f" style="grid-column:1/-1"><label for="pv-labels">Eigen buislabels (komma-gescheiden, leeg = automatisch)</label><input id="pv-labels" class="txt" placeholder="bijv. stock, A, B, C, D, E, F"></div>
-        <div class="f" style="grid-column:1/-1"><label for="pv-note">Eigen tekst onder het schema</label><textarea id="pv-note" rows="2" placeholder="Bijv. incubatie, opmerkingen of verwijzing naar het protocol"></textarea></div>
-        <div class="f"><label for="pv-col">Kleur van de reeks</label><input type="color" id="pv-col" value="#1558b0" style="width:100%;height:32px;padding:2px"></div>
-        <label class="chk" for="pv-auto" style="grid-column:1/-1"><input type="checkbox" id="pv-auto" checked> Standaardtoelichting tonen</label>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De kleur in de buizen vervaagt per stap, maar niet op schaal: bij een factor 10 zou de kleur na twee stappen al onzichtbaar zijn. Lees de concentratie dus onder de buis, niet uit de kleur. Zet "Uitplaten" op 0 als je geen platen wilt tekenen. Uit de laatste buis houd je het overdrachtsvolume over; dat staat als opmerking onder het schema.</p>
-    </div>
-  </div>
+  <div id="pv-app"></div>
 </section>
 
 <!-- ============ PROTOCOLLEN: PIPETTEERSCHEMA ============ -->
 <section class="tool" id="t-ppip" data-tool="ppip">
   <header class="tool-head"><h2>Pipetteerschema</h2>
   <p>Algemeen pipetteerschema voor elke reactie of mengsel: componenten in rijen, buizen in kolommen. Geef per component een volume, of een stock- en eindconcentratie zodat Labkit het volume uitrekent. Eén component vult aan tot het eindvolume; optioneel met mastermix.</p></header>
-  <div class="picwrap">
-    <div class="pic-prev"><div class="result"><canvas id="pp-cv"></canvas><div class="pic-bar" data-picbar="pp"></div><div id="pp-out"></div></div></div>
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:span 2"><label for="pp-preset">Sjabloon</label><div class="row" style="gap:8px;flex-wrap:nowrap"><select id="pp-preset" style="flex:1;min-width:0"><option value="leeg">Leeg</option><option value="pcr" selected>PCR (Taq, 25 µL)</option><option value="qpcr">qPCR (SYBR Green, 20 µL)</option><option value="digest">Restrictiedigest (50 µL)</option><option value="ligatie">Ligatie (T4, 20 µL)</option><option value="bca">BSA-standaardreeks (BCA)</option><option value="medium">Kweekmedium met supplementen</option></select><button type="button" id="pp-load">Laden</button></div></div>
-        <div class="f" style="grid-column:span 2"><label for="pp-title">Titel</label><input id="pp-title" class="txt" value="Pipetteerschema PCR (25 µL per reactie)"></div>
-        <div class="f"><label for="pp-tot">Eindvolume per buis</label><div class="inu"><input id="pp-tot" inputmode="decimal" value="25"><span class="u" data-ppu>µL</span></div></div>
-        <div class="f"><label for="pp-unit">Volume-eenheid</label><select id="pp-unit" style="width:100%"><option>µL</option><option>mL</option></select></div>
-        <div class="f"><label for="pp-mm">Mastermix-kolom</label><select id="pp-mm" style="width:100%"><option value="1">ja, voor alle buizen + marge</option><option value="0">nee</option></select></div>
-        <div class="f"><label for="pp-marge">Marge mastermix</label><div class="inu"><input id="pp-marge" inputmode="decimal" value="10"><span class="u">%</span></div></div>
-        <div class="f" style="grid-column:1/-1"><label for="pp-note">Eigen tekst onder het schema</label><textarea id="pp-note" rows="2" placeholder="Bijv. incubatie, opmerkingen of verwijzing naar het protocol"></textarea></div>
-        <label class="chk" for="pp-auto" style="grid-column:1/-1"><input type="checkbox" id="pp-auto" checked> Standaardtoelichting tonen</label>
-      </div>
-      <div class="tbl-wrap" style="margin-top:14px"><table id="pp-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:10px"><button type="button" id="pp-addr">+ Component</button><button type="button" id="pp-addc">+ Buis</button><button type="button" id="pp-delc">− Laatste buis</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0"><b>Soort</b>: bij <i>volume</i> typ je per buis het volume; bij <i>eindconc.</i> vul je de stockconcentratie in en per buis de gewenste eindconcentratie (zelfde eenheid), dan volgt het volume uit C₁V₁ = C₂V₂; <i>aanvullen</i> vult de buis aan tot het eindvolume (laat de cellen leeg). Componenten met "nee" bij <i>In mix</i> pipetteer je per buis apart. Je kunt een blok uit Excel plakken.</p>
-    </div>
-  </div>
+  <div id="pp-app"></div>
   <div class="result" style="margin-top:16px"><h3 style="margin:0 0 10px;font-size:14px">Buizenrek</h3><canvas id="ppr-cv"></canvas><div class="pic-bar" data-picbar="ppr"></div></div>
 </section>
 
@@ -982,22 +921,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-pprog" data-tool="pprog">
   <header class="tool-head"><h2>PCR-programma</h2>
   <p>Tekent het temperatuurprofiel van een PCR- of incubatieprogramma met de cyclus aangegeven, zoals in protocollen en kitbijsluiters.</p></header>
-  <div class="picwrap">
-    <div class="pic-prev"><div class="result"><canvas id="pg-cv"></canvas><div class="pic-bar" data-picbar="pg"></div><div id="pg-out"></div></div></div>
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="pg-title">Titel</label><input id="pg-title" class="txt" value="PCR-programma"></div>
-        <div class="f"><label for="pg-cyc">Aantal cycli</label><input id="pg-cyc" inputmode="numeric" value="35"></div>
-        <div class="f"><label for="pg-scale">Breedte van een stap</label><select id="pg-scale" style="width:100%"><option value="time" selected>Op tijd (tijdas)</option><option value="eq">Even breed</option></select></div>
-        <div class="f"><label for="pg-time">Tijden tonen als</label><select id="pg-time" style="width:100%"><option value="mmss">2:00, 0:30</option><option value="txt">2 min, 30 s</option></select></div>
-        <div class="f" style="grid-column:1/-1"><label for="pg-note">Eigen tekst onder het schema</label><textarea id="pg-note" rows="2" placeholder="Bijv. incubatie, opmerkingen of verwijzing naar het protocol"></textarea></div>
-        <label class="chk" for="pg-auto" style="grid-column:1/-1"><input type="checkbox" id="pg-auto" checked> Standaardtoelichting tonen</label>
-      </div>
-      <div class="tbl-wrap" style="margin-top:14px"><table id="pg-tbl" class="mini"><thead><tr><th>Stap</th><th class="num">Temp. (°C)</th><th class="num">Tijd (m:ss of ∞)</th><th>In cyclus</th><th></th></tr></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:10px"><button type="button" id="pg-add">+ Stap</button><button type="button" id="pg-from">Neem over uit PCR-cyclus</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De aangevinkte stappen vormen samen de cyclus en moeten aaneengesloten zijn.</p>
-    </div>
-  </div>
+  <div id="pg-app"></div>
 </section>
 
 <!-- ============ GEVOELIGHEID: MIC EN ZONEDIAMETER ============ -->
@@ -2300,19 +2224,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-stain" data-tool="stain">
   <header class="tool-head"><h2>Kleuringsschema</h2>
   <p>Tekent een kleuringsprotocol als stappenafbeelding met reagens, tijd en kleur, met de verwachte uitkomst. Kies een standaardkleuring of maak je eigen.</p></header>
-  <div class="picwrap">
-    <div class="pic-prev"><div class="result"><canvas id="stn-cv"></canvas><div class="pic-bar" data-picbar="stn"></div><div id="stn-out"></div></div></div>
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="stn-pre">Kleuring</label><div class="row" style="gap:8px;flex-wrap:nowrap"><select id="stn-pre" style="flex:1;min-width:0"><option value="gram">Gramkleuring</option><option value="zn">Ziehl-Neelsen (zuurvast)</option><option value="spore">Sporenkleuring (Schaeffer-Fulton)</option></select><button type="button" id="stn-load">Laden</button></div></div>
-        <div class="f"><label for="stn-title">Titel</label><input id="stn-title" class="txt" value="Gramkleuring"></div>
-        <div class="f" style="grid-column:1/-1"><label for="stn-res">Uitkomst</label><input id="stn-res" class="txt" value="Gram-positief: paars · Gram-negatief: roze/rood"></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="stn-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="stn-tbl-add">+ Stap</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Tijd in seconden; laat leeg voor "kort" of "tot helder". Kleur als hexcode of naam. Volg altijd het protocol van je practicum of de fabrikant: tijden en reagentia verschillen.</p>
-    </div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Kleuringsschema.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="stn-app"></div>
   <p class="src">Gram: kristalviolet 1 min, jodium 1 min, ontkleuren tot het afloopvocht helder is, safranine 30 s – 1 min (ASM, Gram Stain Protocols, 2005; CDC, How to Perform a Gram Stain). Ziehl-Neelsen: verwarmde carbolfuchsine, ontkleuren met zuuralcohol, tegenkleuring methyleenblauw (ASM, Acid-Fast Stain Protocols, 2010). Schaeffer-Fulton: malachietgroen met stoom, spoelen, safranine (ASM, Endospore Stain Protocol, 2007).</p>
 </section>
 <!-- /NT:stain -->
@@ -2441,20 +2355,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-plan" data-tool="plan">
   <header class="tool-head"><h2>Experimentplanner</h2>
   <p>Zet de stappen van een experiment op een tijdlijn: wanneer begint en eindigt elke stap, hoeveel handwerk zit erin en past het binnen je labdag. Wachtstappen zet je met één klik als timers klaar, en de hele planning als agendabestand.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="xp-title">Titel</label><input id="xp-title" class="txt" value="Transformatie en uitplaten"></div>
-        <div class="f"><label for="xp-date">Datum</label><input id="xp-date" class="txt" placeholder="dd-mm-jjjj (leeg = vandaag)"></div>
-        <div class="f"><label for="xp-start">Starttijd</label><input id="xp-start" class="txt" value="09:00"></div>
-        <div class="f"><label for="xp-end">Labdag tot</label><input id="xp-end" class="txt" value="17:00"></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="xp-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="xp-tbl-add">+ Stap</button><button type="button" id="xp-tim">Wachtstappen als timers</button><button type="button" id="xp-ics">Naar agenda (.ics)</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Duur in minuten. "Wachten" zijn incubaties of looptijden waarin je iets anders kunt doen; die worden timers. Het .ics-bestand opent in Outlook, Google Agenda en Apple Agenda; elke stap wordt een afspraak in lokale tijd. Voorbeeld: transformatie volgens de Avans DNA-toolbox. Voorbeeldtijden zijn indicatief.</p>
-    </div>
-    <div class="result"><canvas id="xp-cv"></canvas><div class="pic-bar" data-picbar="xp"></div><div id="xp-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Planner.vue); de kop blijft
+       gewone HTML, zodat zijn vertaalsleutels blijven gelden. -->
+  <div id="xp-app"></div>
 </section>
 <!-- /NT:plan -->
 
@@ -2462,21 +2365,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-report" data-tool="report">
   <header class="tool-head"><h2>Rapport / labjournaal</h2>
   <p>Bundel de invoer en uitkomsten van meerdere tools in één rapport met afbeeldingen, tabellen en bronnen. Druk af als PDF of download als Word- of HTML-bestand voor je labjournaal.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="rp-title">Titel</label><input id="rp-title" class="txt" value="Labjournaal"></div>
-        <div class="f"><label for="rp-who">Naam</label><input id="rp-who" class="txt" placeholder="optioneel"></div>
-        <label class="chk" for="rp-src"><input type="checkbox" id="rp-src" checked> Bronnen opnemen</label>
-        <label class="chk" for="rp-in"><input type="checkbox" id="rp-in" checked> Invoer opnemen</label>
-      </div>
-      <div class="row" style="margin-top:10px;gap:8px"><button type="button" id="rp-recent">Laatst gebruikt</button><button type="button" id="rp-none">Niets</button></div>
-      <div id="rp-list" style="margin-top:10px;columns:3 220px;column-gap:18px"></div>
-      <div class="row" style="margin-top:12px;gap:8px"><button type="button" id="rp-print" class="primary">Afdrukken / PDF</button><button type="button" id="rp-docx">Download Word (.docx)</button><button type="button" id="rp-dl">Download HTML</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Kies "Opslaan als PDF" in het afdrukvenster voor een PDF. Het Word-bestand opent in Word, LibreOffice en Google Docs. Het rapport gebruikt de huidige invoer van elke tool; alles blijft op je eigen apparaat.</p>
-    </div>
-    <div class="result" id="rp-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Rapport.vue); de kop blijft
+       gewone HTML, zodat zijn vertaalsleutels blijven gelden. -->
+  <div id="rp-app"></div>
 </section>
 <!-- /NT:report -->
 
@@ -3029,42 +2920,25 @@ calc.gel=function(){};   /* de component (src/tools/Gel.vue) rekent zelf; LADDER
 /* ================= LIGATIE ================= */
 calc.ligatie=function(){};   /* de Vue-component (src/tools/Ligatie.vue) rekent zelf */
 
-/* ================= CENTRIFUGE ================= */
-let zLast='rpm';
-calc.centrifuge=function(e){
-  if(e&&e.target&&(e.target.id==='z-rpm'||e.target.id==='z-g')) zLast=e.target.id==='z-rpm'?'rpm':'g';
-  const r=num($('#z-r').value); let rpm=num($('#z-rpm').value), g=num($('#z-g').value);
-  const K=1.118e-5;
-  if(zLast==='rpm'&&isFinite(rpm)&&isFinite(r)){ g=K*r*rpm*rpm; if(document.activeElement.id!=='z-g') $('#z-g').value=Math.round(g); }
-  else if(zLast==='g'&&isFinite(g)&&isFinite(r)){ rpm=Math.sqrt(g/(K*r)); if(document.activeElement.id!=='z-rpm') $('#z-rpm').value=Math.round(rpm); }
-  const out=$('#z-out');
-  if(!isFinite(rpm)||!isFinite(g)||!isFinite(r)){ out.innerHTML=note('info','Vul de rotorstraal en rpm of × g in.'); return; }
-  out.innerHTML=`<div class="lbl">${zLast==='rpm'?'g-kracht':'Toerental'}</div><div class="big">${zLast==='rpm'?Math.round(g).toLocaleString('nl-NL')+' <small>× g</small>':Math.round(rpm).toLocaleString('nl-NL')+' <small>rpm</small>'}</div>`+
-   kv([['Rotorstraal',fmt(r,1)+' cm'],['rpm',Math.round(rpm).toLocaleString('nl-NL')],['RCF',Math.round(g).toLocaleString('nl-NL')+' × g']])+
-   `<div class="formula">RCF = 1,118 × 10⁻⁵ × r × rpm²</div>`+note('info','Controleer of de waarde binnen het maximum van de rotor valt en balanceer de buizen.');
-};
-
 /* ================= TIMERS ================= */
 let timers=[], tid=0;
 const TPRE=[['Centrifugeren',1,0],['Lysis 56 °C',10,0],['Gel draaien',30,0],['Incubatie 37 °C',60,0],['5 min',5,0]];
-$('#tm-presets').innerHTML='<span style="font-size:13px;color:var(--muted)">Snel:</span>'+TPRE.map((p,i)=>`<button type="button" data-tp="${i}">${p[0]} · ${p[1]}:${String(p[2]).padStart(2,'0')}</button>`).join('');
 function addTimer(name,secs){ timers.push({id:++tid,name,total:secs,rem:secs,run:false,end:0,done:false}); renderTimers(); }
 const mmss=s=>{ s=Math.max(0,Math.ceil(s)); const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60; return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0'); };
-function renderTimers(){
-  $('#tm-grid').innerHTML=timers.length?timers.map(t=>`<div class="timer ${t.done?'done':t.run?'running':''}" data-t="${t.id}"><div class="tn"><input class="txt" value="${esc(t.name)}" data-tname aria-label="Naam timer"><button type="button" class="ghost" data-tx aria-label="Verwijder timer">✕</button></div><div class="tt" data-tt>${mmss(t.rem)}</div><div class="progress"><i style="width:${(1-t.rem/t.total)*100}%"></i></div><div class="row"><button type="button" class="primary" data-ts>${t.done?'Stop alarm':t.run?'Pauze':t.rem<t.total?'Hervat':'Start'}</button><button type="button" data-tr>Reset</button><button type="button" data-tp1>+1 min</button></div></div>`).join(''):'<p style="color:var(--muted)">Nog geen timers. Voeg er een toe of kies een snelle timer.</p>';
-}
-$('#tm-add').addEventListener('click',()=>{ unlockAudio(); const s=(num($('#tm-min').value)||0)*60+(num($('#tm-sec').value)||0); if(s>0) addTimer($('#tm-name').value||'Timer',s); });
-$('#tm-presets').addEventListener('click',e=>{ const b=e.target.closest('[data-tp]'); if(b){ unlockAudio(); const p=TPRE[+b.dataset.tp]; addTimer(p[0],p[1]*60+p[2]); }});
-$('#tm-grid').addEventListener('click',e=>{
-  const el=e.target.closest('[data-t]'); if(!el) return; const t=timers.find(x=>x.id==el.dataset.t); unlockAudio();
-  if(e.target.closest('[data-tx]')) timers=timers.filter(x=>x!==t);
-  else if(e.target.closest('[data-ts]')){ if(t.done){ t.done=false; t.rem=t.total; t.run=false; } else if(t.run){ t.run=false; t.rem=(t.end-Date.now())/1000; } else { t.run=true; t.end=Date.now()+t.rem*1000; } }
-  else if(e.target.closest('[data-tr]')){ t.run=false; t.done=false; t.rem=t.total; }
-  else if(e.target.closest('[data-tp1]')){ t.total+=60; if(t.run) t.end+=60000; else t.rem+=60; t.done=false; }
-  else return;
+/* De weergave is de Vue-component Timers (src/tools/Timers.vue): die leest `timers` bij elke
+   tik van `tick`. renderTimers() blijft bestaan als "de lijst is veranderd"; wie de lijst wijzigt
+   (addTimer, tmAct, het herstellen uit localStorage) roept het aan. Voor de mount is er niets
+   te doen: de component leest de lijst zelf bij het opbouwen. */
+function renderTimers(){ if(window.__tmVm) window.__tmVm.tick++; }
+/* een knop op een timer: x = verwijderen, s = start/pauze/stop alarm, r = reset, p1 = +1 minuut */
+function tmAct(id,what){
+  const t=timers.find(x=>x.id==id); if(!t) return; unlockAudio();
+  if(what==='x') timers=timers.filter(x=>x!==t);
+  else if(what==='s'){ if(t.done){ t.done=false; t.rem=t.total; t.run=false; } else if(t.run){ t.run=false; t.rem=(t.end-Date.now())/1000; } else { t.run=true; t.end=Date.now()+t.rem*1000; } }
+  else if(what==='r'){ t.run=false; t.done=false; t.rem=t.total; }
+  else if(what==='p1'){ t.total+=60; if(t.run) t.end+=60000; else t.rem+=60; t.done=false; }
   renderTimers();
-});
-$('#tm-grid').addEventListener('input',e=>{ if(e.target.dataset.tname!=null){ const t=timers.find(x=>x.id==e.target.closest('[data-t]').dataset.t); t.name=e.target.value; }});
+}
 let lastBeep=0;
 setInterval(()=>{
   let changed=false, ringing=false;
@@ -3072,8 +2946,8 @@ setInterval(()=>{
   if(ringing&&Date.now()-lastBeep>2500){ beep(3,880); lastBeep=Date.now(); }
   const running=timers.filter(t=>t.run).sort((a,b)=>a.rem-b.rem)[0];
   document.title=ringing?'● Timer klaar — Labkit BML':running?`${mmss(running.rem)} ${running.name} — Labkit BML`:'Labkit BML';
-  if(changed) renderTimers();
-  else timers.forEach(t=>{ const el=document.querySelector(`[data-t="${t.id}"]`); if(el){ el.querySelector('[data-tt]').textContent=mmss(t.rem); el.querySelector('.progress i').style.width=(1-t.rem/t.total)*100+'%'; }});
+  /* de resterende tijd en de voortgangsbalk lopen mee: een nieuwe tik laat de component opnieuw tekenen */
+  if(changed||timers.some(t=>t.run)) renderTimers();
 },250);
 calc.timers=()=>{};
 
@@ -3081,7 +2955,7 @@ calc.timers=()=>{};
 buildReeks();
 buildLadder();
 renderTimers();
-['verdunning','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge'].forEach(k=>calc[k]());   /* 'oplossing' loopt pas na de receptenbibliotheek */
+['verdunning','reeks','telkamer','dna','pcr','gel','ligatie'].forEach(k=>calc[k]());   /* 'oplossing' loopt pas na de receptenbibliotheek */
 route();
 </script>
 <script>
@@ -3661,7 +3535,7 @@ document.addEventListener('paste',e=>{
 /* ================= TIMERMELDINGEN ================= */
 const notified=new Set();
 function askNotify(){ try{ if('Notification' in window&&Notification.permission==='default') Notification.requestPermission().catch(()=>{}); }catch(e){} }
-['#tm-add','#tm-presets'].forEach(s=>$(s).addEventListener('click',askNotify));
+/* askNotify() wordt door de component Timers aangeroepen bij Toevoegen en bij een snelle timer */
 setInterval(()=>{ timers.forEach(t=>{ if(t.done&&!notified.has(t.id)){ notified.add(t.id); try{ if('Notification' in window&&Notification.permission==='granted') new Notification('Timer klaar: '+t.name,{body:'Labkit BML',tag:'labkit-'+t.id}); }catch(e){} } if(!t.done) notified.delete(t.id); }); },1000);
 
 /* ================= INVOER ONTHOUDEN ================= */
@@ -3838,7 +3712,7 @@ const TBLDEF={
     get:()=>{ const m=window.__olVm; return m?m.getRows():[]; }, blank:()=>['',''], inputCols:[0,1]}
 };
 function tblSnap(){ const out={}; Object.keys(TBLDEF).forEach(id=>{ out[id]=[...document.querySelectorAll('#'+id+' tbody tr')].map(tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select')].map(e=>e.value)); });
-  out.reeks=reeksCounts; out.plate=Object.assign(wState(),{title:$('#w-title').value}); out.curve={model:$('#s-model').value,unit:$('#s-unit').value,blank:$('#s-blank').checked,logx:$('#s-logx').checked}; return out; }
+  out.reeks=reeksCounts; out.plate=Object.assign(wState(),{title:($('#w-title')||{}).value}); out.curve={model:$('#s-model').value,unit:$('#s-unit').value,blank:$('#s-blank').checked,logx:$('#s-logx').checked}; return out; }
 function tblRestore(){ let d=null; try{ d=JSON.parse(localStorage.getItem(TBLKEY)||'null'); }catch(e){} if(!d) return;
   Object.entries(TBLDEF).forEach(([id,def])=>{ const rows=d[id]; if(!Array.isArray(rows)||!rows.length) return; const vals=rows.map(r=>r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v)); /* een tabel die Vue rendert geeft een set() mee: innerHTML zou Vue overschrijven */ if(def.set) def.set(vals); else $('#'+id+' tbody').innerHTML=vals.map(def.row).join(''); });
   if(d.curve&&window.__curveVm) window.__curveVm.setOpts(d.curve);
@@ -3848,7 +3722,7 @@ function tblRestore(){ let d=null; try{ d=JSON.parse(localStorage.getItem(TBLKEY
   if(d.plate&&d.plate.wells&&wPld){ const oldTxt=pstore.get().wt;
     wPld.set({fmt:d.plate.fmt,wells:d.plate.wells,vals:d.plate.vals||oldTxt||{},seed:d.plate.seed,
       groups:d.plate.groups&&d.plate.groups.length?d.plate.groups:null});
-    if(d.plate.title!=null) $('#w-title').value=d.plate.title; } }
+    if(d.plate.title!=null){ const el=$('#w-title'); if(el){ el.value=d.plate.title; el.dispatchEvent(new Event('input',{bubbles:true})); } } } }
 let lastTbl='', tblDirty=false; ['input','change','click'].forEach(ev=>document.addEventListener(ev,()=>{ tblDirty=true; },true));
 setInterval(()=>{ try{ const t=JSON.stringify(tblSnap()); if(t!==lastTbl){ if(tblDirty) localStorage.setItem(TBLKEY,t); lastTbl=t; } }catch(e){} },1500);
 $('#reset-store').addEventListener('click',()=>{ try{ localStorage.removeItem(TBLKEY); }catch(e){} },true);
@@ -4092,29 +3966,6 @@ function pTube(x,cx,top,h,w,fill,alpha,col){ const bw=w/2; x.lineWidth=1.6; x.st
 const supNum=n=>String(n).replace(/-/g,'⁻').replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);
 function pNum(v){ if(!isFinite(v)) return '–'; if(v===0) return '0'; const e=Math.floor(Math.log10(Math.abs(v))); if(e>=-2&&e<4) return sig(v,3); const m=v/10**e; const ms=NL(Number(m.toFixed(2)),2); return (ms==='1'?'':ms+' × ')+'10'+supNum(e); }
 
-/* ================= VERDUNNINGSSCHEMA ================= */
-calc.pverd=function(){
-  const c0=num($('#pv-c0').value), cu=$('#pv-cu').value.trim(), f=num($('#pv-f').value), n=Math.max(1,Math.min(10,Math.round(num($('#pv-n').value)||1))), V=num($('#pv-v').value), dil=$('#pv-dil').value.trim()||'verdunningsmiddel';
-  const np=Math.max(0,Math.min(n,Math.round(num($('#pv-plate').value)||0))), pvol=num($('#pv-pv').value), lab=$('#pv-lab').value, title=$('#pv-title').value.trim(), out=$('#pv-out');
-  if(!(f>1)||!(V>0)){ out.innerHTML=note('bad','Factor moet groter dan 1 zijn en het volume groter dan 0.'); return; }
-  const tr=V/f, dv=V-tr, step=118, W=Math.max(520,70+(n+1)*step), NL_=pNotes('pv',W), AU=pAuto('pv'), NH=NL_.length?NL_.length*17+10:0, H=(title?40:0)+(np?405:300)-(AU?0:20)+NH;
-  const own=$('#pv-labels').value.split(',').map(t=>t.trim()); const label=i=>own[i]?own[i]:i===0?'stock':lab==='exp'&&f===10?'10'+supNum(-i):lab==='num'?String(i):'1 : '+pNum(f**i).replace(/ /g,'');
-  const colv=$('#pv-col').value, col=/^#[0-9a-f]{6}$/i.test(colv)?colv:PCOL.liquid;
-  pShow($('#pv-cv'),W,H,(x)=>{ const t0=pTitle(x,title,W), top=t0+70, th=110, tw=40;
-    for(let i=0;i<=n;i++){ const cx=50+i*step+20; const fillA=Math.max(0.06,0.55*Math.pow(1/f,i*0.45));
-      pTube(x,cx,top,th,tw,0.6,i===0?0.6:fillA,col);
-      x.fillStyle=PCOL.ink; x.textAlign='center'; x.font='600 13px '+PFONT(); x.fillText(label(i),cx,top-22);
-      x.font='12px '+PFONT(); x.fillStyle=PCOL.ink; x.fillText(isFinite(c0)?pNum(c0*f**-i):'',cx,top+th+20); x.fillStyle=PCOL.muted; x.fillText(isFinite(c0)?cu:'',cx,top+th+36);
-      if(i>0){ x.fillStyle=PCOL.muted; x.font='11.5px '+PFONT(); x.fillText(vol(dv),cx,top+th+58); (()=>{ const ws=dil.split(' '); let ln='', yy=top+th+73, k=0; ws.forEach(w=>{ if((ln+' '+w).trim().length>14&&ln&&k<1){ x.fillText(ln,cx,yy); yy+=14; ln=w; k++; } else ln=(ln+' '+w).trim(); }); x.fillText(ln.length>16?ln.slice(0,15)+'…':ln,cx,yy); })();
-        pArrow(x,cx-step+12,top-34,cx-10,top-14,PCOL.acc); x.fillStyle=PCOL.acc; x.font='600 12px '+PFONT(); x.fillText(vol(tr),cx-step/2,top-58); }
-      if(np&&i>n-np){ const py=top+th+130, r=32; x.lineWidth=1.6; x.strokeStyle=PCOL.ink; x.fillStyle='#fbf7ec'; x.beginPath(); x.ellipse(cx,py,r,r*0.42,0,0,7); x.fill(); x.stroke(); x.beginPath(); x.ellipse(cx,py-5,r,r*0.42,0,Math.PI,2*Math.PI); x.stroke();
-        x.strokeStyle=PCOL.acc; x.setLineDash([3,3]); x.beginPath(); x.moveTo(cx,top+th+94); x.lineTo(cx,py-20); x.stroke(); x.setLineDash([]);
-        x.fillStyle=PCOL.ink; x.font='11.5px '+PFONT(); x.fillText(isFinite(pvol)?vol(pvol)+' uitplaten':'uitplaten',cx,py+28); }
-    }
-    if(NL_.length) pDrawNotes(x,NL_,H-NH-(AU?14:0)+2); if(!AU) return; x.textAlign='left'; x.fillStyle=PCOL.muted; x.font='11.5px '+PFONT(); x.fillText(`Per buis ${vol(dv)} ${uv(dil)} + ${vol(tr)} uit de vorige buis; meng goed en wissel van tip na elke stap. Uit de laatste buis blijft ${vol(tr)} over.`,20,H-14); });
-  out.innerHTML=kv([['Overdracht per stap',vol(tr)],['Verdunningsmiddel per buis',vol(dv)],['Laatste buis',`1 : ${pNum(f**n).replace(/ /g,'')}${isFinite(c0)?' → '+sig(c0*f**-n,3)+' '+esc(cu):''}`],['Totaal verdunningsmiddel',vol(dv*n)]]);
-};
-
 /* ================= PIPETTEERSCHEMA ================= */
 const PPRE={
   leeg:{t:'Pipetteerschema',tot:'20',u:'µL',mm:'1',cols:['Buis 1','Buis 2','Buis 3'],rows:[['Water','fill','','',[]],['','vol','','',[]]]},
@@ -4129,27 +3980,6 @@ const ppWater=n=>/^(water|milli-?q|h2o|h₂o|aqua|nuclease[- ]?vrij water|demi)/
 function ppFromPreset(k){ const P=PPRE[k]||PPRE.leeg, nc=P.cols.length; return {cols:P.cols.map(n=>({n})),rows:P.rows.map(r=>({n:r[0],mode:r[1],st:r[2],cu:r[3],mm:r[5]!==0,v:Array.isArray(r[4])?(r[4].length?r[4].slice():Array(nc).fill('')):Array(nc).fill(r[4])}))}; }
 function ppMigrate(S){ if(!S||!Array.isArray(S.rows)||!Array.isArray(S.cols)) return null; if(S.rows.every(r=>r&&!Array.isArray(r)&&Array.isArray(r.v))) return S;
   const nc=S.cols.length; return {cols:S.cols.map(c=>({n:c.n})),rows:S.rows.map((r,i)=>({n:r[0]||'',mode:ppWater(r[0])?'fill':'vol',st:'',cu:'',mm:i!==S.tmplRow,v:Array.from({length:nc},(_,j)=>r[j+1]??'')}))}; }
-let ppState=ppMigrate(pstore.get().pp)||ppFromPreset('pcr');
-function ppBuild(){ const S=ppState, sel=(i,v,o)=>`<select data-f="${o}" data-r="${i}">`;
-  $('#pp-tbl thead').innerHTML=`<tr><th>Component</th><th>Soort</th><th class="num">Stock</th><th>Conc.-eenheid</th>${S.cols.map((c,j)=>`<th><input class="txt" data-cn="${j}" value="${esc(c.n)}" style="width:96px;font-weight:600"></th>`).join('')}<th>In mix</th><th></th></tr>`;
-  $('#pp-tbl tbody').innerHTML=S.rows.map((r,i)=>{ const isC=r.mode==='conc', isF=r.mode==='fill';
-    return `<tr><td><input class="txt" data-f="n" data-r="${i}" value="${esc(r.n)}" style="width:170px"></td>`+
-    `<td><select data-f="mode" data-r="${i}"><option value="vol"${r.mode==='vol'?' selected':''}>volume</option><option value="conc"${isC?' selected':''}>eindconc.</option><option value="fill"${isF?' selected':''}>aanvullen</option></select></td>`+
-    `<td><input data-f="st" data-r="${i}" inputmode="decimal" value="${esc(r.st||'')}" style="text-align:right;width:72px"${isC?'':' disabled placeholder="–"'}></td>`+
-    `<td><input class="txt" data-f="cu" data-r="${i}" value="${esc(r.cu||'')}" style="width:72px"${isC?'':' disabled placeholder="–"'}></td>`+
-    S.cols.map((c,j)=>`<td><input data-f="v" data-r="${i}" data-c="${j}" inputmode="decimal" value="${esc(r.v[j]??'')}" style="text-align:right;width:96px" placeholder="${isF?'auto':isC?'eind':''}"></td>`).join('')+
-    `<td><select data-f="mm" data-r="${i}"><option value="1"${r.mm?' selected':''}>ja</option><option value="0"${r.mm?'':' selected'}>nee</option></select></td><td><button type="button" class="ghost" data-pdel="${i}" aria-label="Verwijder">✕</button></td></tr>`; }).join(''); }
-$('#pp-tbl').addEventListener('input',e=>{ const t=e.target; if(t.dataset.cn!=null){ ppState.cols[+t.dataset.cn].n=t.value; return; } const r=ppState.rows[+t.dataset.r]; if(!r) return; const f=t.dataset.f;
-  if(f==='v') r.v[+t.dataset.c]=t.value; else if(f==='n'||f==='st'||f==='cu') r[f]=t.value; });
-$('#pp-tbl').addEventListener('change',e=>{ const t=e.target; const r=ppState.rows[+t.dataset.r]; if(!r||t.tagName!=='SELECT') return; if(t.dataset.f==='mm') r.mm=t.value==='1'; else if(t.dataset.f==='mode'){ r.mode=t.value; if(t.value==='fill') r.v=r.v.map(()=>''); } ppBuild(); calc.ppip(); });
-$('#pp-tbl').addEventListener('click',e=>{ const b=e.target.closest('[data-pdel]'); if(!b) return; ppState.rows.splice(+b.dataset.pdel,1); ppBuild(); calc.ppip(); });
-$('#pp-tbl').addEventListener('paste',e=>{ const t=e.target; if(t.dataset.f!=='v'&&t.dataset.f!=='n') return; const txt=(e.clipboardData||window.clipboardData).getData('text')||''; if(!/[\t\n]/.test(txt.trim())) return; e.preventDefault();
-  const rows=txt.replace(/\r/g,'').replace(/\n+$/,'').split('\n').map(l=>l.split('\t')), nc=ppState.cols.length, r0=+t.dataset.r, c0=t.dataset.f==='n'?-1:+t.dataset.c;
-  rows.forEach((cells,k)=>{ const ri=r0+k; while(ppState.rows.length<=ri) ppState.rows.push({n:'',mode:'vol',st:'',cu:'',mm:true,v:Array(nc).fill('')}); cells.forEach((v,j)=>{ const ci=c0+j; if(ci===-1) ppState.rows[ri].n=v.trim(); else if(ci>=0&&ci<nc) ppState.rows[ri].v[ci]=v.trim(); }); }); ppBuild(); calc.ppip(); });
-$('#pp-addr').addEventListener('click',()=>{ ppState.rows.push({n:'',mode:'vol',st:'',cu:'',mm:true,v:Array(ppState.cols.length).fill('')}); ppBuild(); calc.ppip(); });
-$('#pp-addc').addEventListener('click',()=>{ ppState.cols.push({n:'Buis '+(ppState.cols.length+1)}); ppState.rows.forEach(r=>r.v.push(r.mode==='fill'?'':(r.v[r.v.length-1]??''))); ppBuild(); calc.ppip(); });
-$('#pp-delc').addEventListener('click',()=>{ if(ppState.cols.length<=1) return; ppState.cols.pop(); ppState.rows.forEach(r=>r.v.pop()); ppBuild(); calc.ppip(); });
-$('#pp-load').addEventListener('click',()=>{ const k=$('#pp-preset').value, P=PPRE[k]; if(!P) return; ppState=ppFromPreset(k); $('#pp-title').value=P.t; $('#pp-tot').value=P.tot; $('#pp-unit').value=P.u; $('#pp-mm').value=P.mm; ppBuild(); ['pp-title','pp-tot'].forEach(id=>$('#'+id).dispatchEvent(new Event('input',{bubbles:true}))); ['pp-unit','pp-mm'].forEach(id=>$('#'+id).dispatchEvent(new Event('change',{bubbles:true}))); calc.ppip(); });
 const ppEnzyme=n=>/(polymerase|taq|ligase|enzym|-hf\b|\bU\/µL|\bri\b|EcoRI|HindIII|BamHI|NotI|XhoI|PstI)/i.test(String(n));
 /* ---------- buizenrek bij het pipetteerschema: elke kolom is een buis ---------- */
 function ppRack(S,V,tot,u,mmOn,mmV){ const cv=$('#ppr-cv'); if(!cv||typeof pRack!=='function') return;
@@ -4165,62 +3995,6 @@ function ppRack(S,V,tot,u,mmOn,mmV){ const cv=$('#ppr-cv'); if(!cv||typeof pRack
     if(cut){ x.fillStyle=PCOL.muted; x.font='11.5px '+PFONT(); x.textAlign='left'; x.textBaseline='alphabetic';
       x.fillText(`Alleen de eerste ${RMAX} buizen zijn getekend.`,20,H-8); } });
 }
-calc.ppip=function(){
-  const S=ppState, tot=num($('#pp-tot').value), u=$('#pp-unit').value, mmOn=$('#pp-mm').value==='1', marge=num($('#pp-marge').value)||0, title=$('#pp-title').value.trim(), out=$('#pp-out');
-  $$('[data-ppu]').forEach(x=>x.textContent=u); pstore.set('pp',S);
-  const nc=S.cols.length, nr=S.rows.length, warn=[];
-  const wi=S.rows.findIndex(r=>r.mode==='fill');
-  S.rows.forEach((r,i)=>{ if(r.mode==='fill'&&i!==wi) warn.push(`${ud(r.n||'?')}: maar één component kan aanvullen; deze telt als volume.`); });
-  const V=S.rows.map((r,i)=>S.cols.map((c,j)=>{ const raw=String(r.v[j]??'').trim();
-    if(r.mode==='conc'){ const st=num(r.st), cf=num(raw); if(raw==='') return NaN; if(!(st>0)) return NaN; return cf*tot/st; }
-    if(i===wi&&raw==='') return NaN; return num(raw); }));
-  const C=S.rows.map(r=>r.mode==='conc'?S.cols.map((c,j)=>num(r.v[j])):null);
-  S.rows.forEach((r,i)=>{ if(r.mode!=='conc') return; const st=num(r.st); if(!(st>0)) warn.push(`${ud(r.n||'?')}: vul de stockconcentratie in.`); else if(C[i].some(c=>c>st)) warn.push(`${ud(r.n||'?')}: de eindconcentratie is hoger dan de stock; dat kan niet.`); });
-  if(!isFinite(tot)&&S.rows.some(r=>r.mode!=='vol')) warn.push('Vul het eindvolume per buis in.');
-  if(wi>=0&&isFinite(tot)) S.cols.forEach((c,j)=>{ if(String(S.rows[wi].v[j]??'').trim()!=='') return; const s=V.reduce((a,r,i)=>i===wi?a:a+(isFinite(r[j])?r[j]:0),0); V[wi][j]=tot-s; if(tot-s<-1e-9) warn.push(`${ud(c.n)}: de componenten zijn samen meer dan ${fmt(tot,2)} ${u}.`); });
-  const colTot=S.cols.map((c,j)=>V.reduce((a,r)=>a+(isFinite(r[j])?r[j]:0),0));
-  const mmN=nc*(1+marge/100), wMin=wi>=0?Math.min(...V[wi].filter(isFinite)):NaN;
-  const same=f=>f.length&&f.every(v=>Math.abs(v-f[0])<1e-9);
-  const mmCol=V.map((r,i)=>{ if(!S.rows[i].mm) return NaN; if(i===wi&&isFinite(wMin)) return wMin*mmN; const f=r.filter(isFinite); if(!f.length) return NaN; return same(f)?f[0]*mmN:NaN; });
-  const varRows=V.map((r,i)=>{ const f=r.filter(isFinite); return S.rows[i].mm&&i!==wi&&f.length>1&&!same(f); });
-  if(mmOn&&varRows.some(Boolean)) warn.push(`Niet in elke buis hetzelfde volume: ${ud(varRows.map((v,i)=>v?(S.rows[i].n||'?'):'').filter(Boolean).join(', '))}. Zet die op "nee" bij In mix of maak aparte mixen.`);
-  S.cols.forEach((c,j)=>{ if(isFinite(tot)&&Math.abs(colTot[j]-tot)>1e-6&&wi<0) warn.push(`${ud(c.n)}: totaal ${fmt(colTot[j],3)} ${u} wijkt af van ${fmt(tot,2)} ${u}.`); });
-  const anyC=S.rows.some(r=>r.mode==='conc'), cnum=v=>isFinite(v)?NL(Number(v.toPrecision(4)),4):'–';
-  const finTxt=i=>{ if(!C[i]) return ''; const f=C[i].filter(isFinite); return !f.length?'–':same(f)?cnum(f[0])+' '+(S.rows[i].cu||''):'per buis'; };
-  const stTxt=i=>S.rows[i].mode==='conc'&&isFinite(num(S.rows[i].st))?cnum(num(S.rows[i].st))+' '+(S.rows[i].cu||''):'';
-  const hdr=[...S.cols.map(c=>c.n),...(mmOn?[`Mastermix (${fmt(mmN,1)}×)`]:[])];
-  const fv=v=>isFinite(v)?NL(Number(v.toFixed(3)),3):'–';
-  const body=S.rows.map((r,i)=>[r.n||'',...V[i].map(fv),...(mmOn?[r.mm?fv(mmCol[i]):'apart']:[])]);
-  const totRow=['Totaal',...colTot.map(fv),...(mmOn?[fv(mmCol.filter(isFinite).reduce((a,b)=>a+b,0))]:[])];
-  const mmTot=mmCol.filter(isFinite).reduce((a,b)=>a+b,0);
-  ppRack(S,V,tot,u,mmOn,mmTot);
-  const perTube=mmTot/mmN, apart=S.rows.filter(r=>!r.mm&&r.n), fillN=wi>=0?(S.rows[wi].n||'Water'):'';
-  const extra=wi>=0&&S.rows[wi].mm?S.cols.map((c,j)=>[c.n,V[wi][j]-wMin]).filter(e=>e[1]>1e-9):[];
-  const ord=S.rows.map((r,i)=>i).filter(i=>S.rows[i].n&&(!mmOn||S.rows[i].mm)).sort((a,b)=>(a===wi?-1:b===wi?1:0)||(ppEnzyme(S.rows[a].n)-ppEnzyme(S.rows[b].n))||a-b);
-  const hasEnz=S.rows.some(r=>r.n&&ppEnzyme(r.n));
-  const listNum=s=>LANG==='en'?s.replace(i18nNumRe,m=>i18nNum(m)):s, trN=n=>LANG==='en'?trPlain(n,true):n;
-  const foot=[mmOn?`Mastermix: ${fmt(nc,0)} buizen + ${fmt(marge,0)}% marge; verdeel ${fv(perTube)} ${u} per buis.`:'',mmOn&&apart.length?`Daarna per buis apart: ${uv(apart.map(r=>trN(r.n)).join(', '))}.`:'',mmOn&&extra.length?`Extra ${uv(fillN)} apart: ${uv(extra.map(e=>`${trN(e[0])} ${listNum(fv(e[1]))} ${u}`).join(', '))}.`:'',wi>=0?`${uv(fillN)} vult aan tot het eindvolume.`:'',hasEnz?'Enzym als laatste toevoegen en op ijs werken.':''].filter(Boolean);
-  const showSt=anyC, nFix=showSt?2:0, cw0=Math.max(170,...S.rows.map(r=>String(r.n).length*7.4+30)), cwS=96, cw=Math.max(92,...hdr.map(h=>h.length*7.2+24)), W=Math.round(cw0+cwS*nFix+cw*hdr.length+40), varC=S.rows.some((r,i)=>C[i]&&finTxt(i)==='per buis'), rh=varC?36:30, t0=title?40:0, NL_=pNotes('pp',W), AU=pAuto('pp'), NH=NL_.length?NL_.length*17+12:0, H=t0+rh*(body.length+2)+(AU?foot.length*16+22:16)+NH;
-  pShow($('#pp-cv'),W,H,(x)=>{ pTitle(x,title,W); const L=20, T=t0+6; const colX=j=>L+cw0+cwS*nFix+cw*j;
-    x.fillStyle=PCOL.accSoft; x.fillRect(L,T,W-40,rh); if(mmOn){ x.fillStyle='#fdf3e7'; x.fillRect(colX(nc),T+rh,cw,rh*(body.length+1)); }
-    x.font='600 12.5px '+PFONT(); x.fillStyle=PCOL.ink; x.textAlign='left'; x.textBaseline='middle'; x.fillText(`Component (${u})`,L+8,T+rh/2); x.textAlign='center'; if(showSt){ x.fillText('Stock',L+cw0+cwS/2,T+rh/2); x.fillText('Eind',L+cw0+cwS*1.5,T+rh/2); } hdr.forEach((h,j)=>x.fillText(h,colX(j)+cw/2,T+rh/2));
-    body.forEach((r,i)=>{ const y=T+rh*(i+1); if(!S.rows[i].mm&&mmOn){ x.fillStyle='#f6f7f9'; x.fillRect(L,y,W-40,rh); } x.font=(i===wi?'italic ':'')+'12.5px '+PFONT(); x.fillStyle=PCOL.ink; x.textAlign='left'; x.fillText(r[0],L+8,y+rh/2); x.textAlign='center';
-      if(showSt){ x.fillStyle=PCOL.muted; x.font='12px '+PFONT(); x.fillText(stTxt(i),L+cw0+cwS/2,y+rh/2); x.fillText(finTxt(i),L+cw0+cwS*1.5,y+rh/2); x.font='12.5px '+PFONT(); }
-      const two=C[i]&&finTxt(i)==='per buis';
-      r.slice(1).forEach((v,j)=>{ x.fillStyle=String(v).startsWith('-')?PCOL.warn:PCOL.ink; x.font='12.5px '+PFONT(); x.fillText(v,colX(j)+cw/2,y+rh/2-(two&&j<nc?7:0)); if(two&&j<nc&&isFinite(C[i][j])){ x.fillStyle=PCOL.muted; x.font='10.5px '+PFONT(); x.fillText(cnum(C[i][j])+' '+(S.rows[i].cu||''),colX(j)+cw/2,y+rh/2+9); } }); });
-    const yt=T+rh*(body.length+1); x.font='600 12.5px '+PFONT(); x.fillStyle=PCOL.ink; x.textAlign='left'; x.fillText(totRow[0],L+8,yt+rh/2); x.textAlign='center'; totRow.slice(1).forEach((v,j)=>x.fillText(v,colX(j)+cw/2,yt+rh/2));
-    x.strokeStyle=PCOL.line; x.lineWidth=1; for(let i=0;i<=body.length+2;i++){ x.beginPath(); x.moveTo(L,T+rh*i); x.lineTo(W-20,T+rh*i); x.stroke(); }
-    x.strokeStyle=PCOL.ink; x.lineWidth=1.4; x.beginPath(); x.moveTo(L,yt); x.lineTo(W-20,yt); x.stroke(); x.beginPath(); x.moveTo(L,T+rh); x.lineTo(W-20,T+rh); x.stroke();
-    x.textAlign='left'; x.textBaseline='alphabetic'; x.font='11.5px '+PFONT(); x.fillStyle=PCOL.muted;
-    const fy=T+rh*(body.length+2)+18; if(AU) foot.forEach((f,k)=>x.fillText(f,L,fy+k*16)); if(NL_.length) pDrawNotes(x,NL_,AU?fy+foot.length*16+8:fy); });
-  $('#pp-cv')._data={head:['Component',...(showSt?['Stock','Eind']:[]),...hdr],rows:[...body,totRow].map((r,k)=>{ const row=r.map((v,q)=>q&&isFinite(num(v))?num(v):v); return showSt?[row[0],k<nr?stTxt(k):'',k<nr?finTxt(k):'',...row.slice(1)]:row; })};
-  const steps=[]; const nm=i=>ud(S.rows[i].n), ul=a=>`<ul class="ppl">${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
-  if(mmOn){ if(ord.length) steps.push(`<span>Maak de mastermix voor ${fmt(mmN,1)} reacties, in deze volgorde:</span>`+ul(ord.map(i=>`${nm(i)} ${fv(mmCol[i])} ${u}`))); steps.push(`Verdeel ${fv(perTube)} ${u} mastermix per buis.`); apart.forEach(r=>{ const i=S.rows.indexOf(r); steps.push(`<span>Voeg per buis ${nm(i)} toe:</span>`+ul(S.cols.map((c,j)=>[c,j]).filter(([c,j])=>!(V[i][j]===0)).map(([c,j])=>`${ud(c.n)} ${fv(V[i][j])} ${u}`))); }); if(extra.length) steps.push(`<span>Extra ${ud(fillN)} per buis:</span>`+ul(extra.map(e=>`${ud(e[0])} ${fv(e[1])} ${u}`))); }
-  else if(ord.length) steps.push(`<span>Pipetteer per buis in deze volgorde (volumes in het schema):</span>`+ul(ord.map(i=>nm(i))));
-  if(hasEnz) steps.push('Enzym als laatste toevoegen en op ijs werken.');
-  out.innerHTML=warn.map(w=>note('warn',w)).join('')+(steps.length?`<ol class="steps">${steps.map(s=>`<li>${s}</li>`).join('')}</ol>`:'')+(anyC?`<div class="formula">V = C<sub>eind</sub> × V<sub>eind</sub> / C<sub>stock</sub> (C₁V₁ = C₂V₂)</div>`:'');
-};
-
 /* ================= PCR-PROGRAMMA ================= */
 const PGDEF=[['Initiële denaturatie','95','2:00',false],['Denaturatie','95','0:30',true],['Annealing','54','0:30',true],['Extensie','72','1:00',true],['Eindextensie','72','5:00',false],['Bewaren','10','∞',false]];
 const pgRow=r=>`<tr><td><input class="txt" data-k="n" value="${esc(r[0])}" style="width:150px"></td><td><input data-k="t" inputmode="decimal" value="${esc(r[1])}" style="text-align:right;width:70px"></td><td><input data-k="d" value="${esc(r[2])}" style="text-align:right;width:80px"></td><td style="text-align:center"><input type="checkbox" data-k="c" ${r[3]?'checked':''} aria-label="In cyclus"></td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
@@ -4231,56 +4005,6 @@ $('#pg-tbl').addEventListener('change',e=>{ if(e.target.type==='checkbox') calc.
 $('#pg-from').addEventListener('click',()=>{ const rows=$$('#pg-tbl tbody tr'); const a=rows.find(r=>/anneal/i.test(r.querySelector('[data-k=n]').value)); if(a&&window.__pcrVm&&isFinite(window.__pcrVm.taAuto)) a.querySelector('[data-k=t]').value=String(Math.round(window.__pcrVm.taAuto*10)/10).replace('.',','); calc.pprog(); });
 function pgSecs(t){ t=String(t).trim(); if(/^(∞|inf|oneindig|hold)$/i.test(t)) return Infinity; const m=t.match(/^(\d+):(\d{1,2})$/); if(m) return +m[1]*60+ +m[2]; const n=num(t.replace(/\s*(s|sec)$/i,'')); if(/min/i.test(t)) return num(t)*60; return n; }
 function pgFmt(s,mode){ if(s===Infinity) return '∞'; if(!isFinite(s)) return '?'; if(mode==='txt') return s>=60?(s%60?`${Math.floor(s/60)} min ${s%60} s`:`${s/60} min`):`${s} s`; return `${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,'0')}`; }
-calc.pprog=function(){
-  const steps=$$('#pg-tbl tbody tr').map(tr=>({n:tr.querySelector('[data-k=n]').value.trim(),t:num(tr.querySelector('[data-k=t]').value),d:tr.querySelector('[data-k=d]').value,s:pgSecs(tr.querySelector('[data-k=d]').value),c:tr.querySelector('[data-k=c]').checked}));
-  pstore.set('pg',steps.map(s=>[s.n,String(s.t).replace('.',','),s.d,s.c]));
-  const cyc=Math.max(1,Math.round(num($('#pg-cyc').value)||1)), mode=$('#pg-time').value, title=$('#pg-title').value.trim(), out=$('#pg-out');
-  const ok=steps.filter(s=>isFinite(s.t)); if(ok.length<1){ out.innerHTML=note('info','Vul minstens één stap met temperatuur in.'); return; }
-  const ci=steps.map((s,i)=>s.c?i:-1).filter(i=>i>=0); const contig=ci.length===0||ci[ci.length-1]-ci[0]===ci.length-1;
-  /* Op een tijdas is de breedte van een stap evenredig met zijn duur, met een ondergrens
-     zodat een stap van een paar seconden zichtbaar blijft; de as is daardoor niet strikt
-     lineair voor de kortste stappen. Een stap zonder tijd (∞) krijgt de ondergrens. */
-  const L=56, SWMIN=70, budget=steps.length*104;
-  const secs=steps.map(st=>isFinite(st.s)&&st.s>0?st.s:0), totS=secs.reduce((a,b)=>a+b,0);
-  const byTime=$('#pg-scale').value!=='eq'&&totS>0;
-  const wid=byTime?secs.map(v=>Math.max(SWMIN,v>0?budget*v/totS:SWMIN)):steps.map(()=>104);
-  const X=[]; wid.reduce((a,w,i)=>{ X[i]=L+a; return a+w; },0);
-  const totW=wid.reduce((a,b)=>a+b,0);
-  const W=Math.max(520,L+totW+34), NL_=pNotes('pg',W), NH=NL_.length?NL_.length*17+10:0, H=(title?40:0)+320+NH;
-  const tmin=Math.min(0,...ok.map(s=>s.t)), tmax=Math.max(100,...ok.map(s=>s.t));
-  pShow($('#pg-cv'),W,H,(x)=>{ const t0=pTitle(x,title,W), top=t0+64, bot=H-62-NH; if(NL_.length) pDrawNotes(x,NL_,H-NH+4); const Y=t=>bot-(t-tmin)/(tmax-tmin)*(bot-top);
-    x.font='11px '+PFONT(); x.textAlign='right'; x.fillStyle=PCOL.muted; x.strokeStyle=PCOL.soft; x.lineWidth=1; [0,25,50,75,100].forEach(v=>{ if(v<tmin||v>tmax) return; x.beginPath(); x.moveTo(L,Y(v)); x.lineTo(W-16,Y(v)); x.stroke(); x.fillText(v+' °C',L-6,Y(v)); });
-    if(contig&&ci.length){ const le=ci[ci.length-1], x0=X[ci[0]]+4, x1=X[le]+wid[le]-4; x.fillStyle=PCOL.accSoft; x.fillRect(x0,top-44,x1-x0,bot-top+44); x.fillStyle=PCOL.acc; x.font='600 13px '+PFONT(); x.textAlign='center'; x.fillText(`${cyc}×`,(x0+x1)/2,top-50); x.strokeStyle=PCOL.acc; x.lineWidth=1.4; x.beginPath(); x.moveTo(x0+2,top-34); x.lineTo(x0+2,top-40); x.lineTo(x1-2,top-40); x.lineTo(x1-2,top-34); x.stroke(); }
-    x.strokeStyle=PCOL.ink; x.lineWidth=2.4; x.beginPath(); let prev=null;
-    steps.forEach((s,i)=>{ if(!isFinite(s.t)) return; const ramp=Math.min(28,wid[i]*0.4), xa=X[i]+(prev==null?0:ramp), xb=X[i]+wid[i], y=Y(s.t); if(prev==null) x.moveTo(xa,y); else x.lineTo(xa,y); x.lineTo(xb,y); prev=y; });
-    x.stroke();
-    /* op een tijdas zijn korte stappen smal: tekst die niet past wordt kleiner gezet,
-       afgebroken over regels of weggelaten, zodat labels elkaar niet overlappen */
-    const fitTxt=(t,w)=>{ if(x.measureText(uv(t)).width<=w) return t; let r=t;
-      while(r.length>1&&x.measureText(uv(r+'…')).width>w) r=r.slice(0,-1);
-      return r.length>1?r+'…':''; };
-    steps.forEach((s,i)=>{ if(!isFinite(s.t)) return;
-      /* temperatuur en tijd boven het vlakke deel, dus naast de helling; de naam onder de hele stap */
-      const rmp=i===0?0:Math.min(28,wid[i]*0.4), xm=X[i]+rmp+(wid[i]-rmp)/2, xn=X[i]+wid[i]/2,
-        y=Y(s.t), room=wid[i]-rmp-6;
-      x.textAlign='center'; x.fillStyle=PCOL.ink;
-      x.font='600 12.5px '+PFONT(); let tt=`${NL(s.t,1)} °C`;
-      if(x.measureText(tt).width>room){ x.font='600 11px '+PFONT(); }
-      if(x.measureText(tt).width<=room) x.fillText(tt,xm,y-11);
-      x.font='12px '+PFONT(); const dt=pgFmt(s.s,mode);
-      if(x.measureText(dt).width<=room) x.fillText(dt,xm,y+13);
-      x.fillStyle=PCOL.muted; x.font='11.5px '+PFONT();
-      /* eerst vertalen, dan pas afbreken: een afgekapt woord hoort geen eigen vertaalsleutel
-         te worden, dus de stukken gaan als gebruikerstekst (uv) naar het canvas */
-      const room2=wid[i]-6, words=trCanvas(String(s.n||'')).split(' '); let line='', ly=bot+20, lines=0;
-      words.forEach(w=>{ const t2=(line+' '+w).trim();
-        if(x.measureText(uv(t2)).width>room2&&line){ if(lines<1){ x.fillText(uv(line),xn,ly); ly+=14; lines++; line=w; } else line=t2; }
-        else line=t2; });
-      if(line) x.fillText(uv(fitTxt(line,room2)),xn,ly); });
-  });
-  const tCyc=ci.reduce((a,i)=>a+(isFinite(steps[i].s)?steps[i].s:0),0), tOther=steps.filter((s,i)=>!s.c&&isFinite(s.s)).reduce((a,s)=>a+s.s,0);
-  out.innerHTML=(contig?'':note('bad','De aangevinkte stappen zijn niet aaneengesloten; de cyclus wordt niet getekend.'))+kv([['Stappen in cyclus',ci.length],['Looptijd zonder op- en afkoelen',mmss2(tCyc*cyc+tOther)]])+`<div class="formula">Looptijd = som van de staptijden; de echte tijd is langer door de opwarm- en afkoelsnelheid van het apparaat.</div>`;
-};
 
 
 function kwCalc(G,alpha){ const all=[]; G.forEach((g,gi)=>g.v.forEach(v=>all.push({v,gi}))); const N=all.length, k=G.length; all.sort((a,b)=>a.v-b.v);
@@ -5463,29 +5187,33 @@ function wCells(){ const S=wState(), {r,c}=wDims(), {lab}=wLabels();
   const cell=k=>{ const g=S.wells[k], gn=g!=null&&S.groups[g]?S.groups[g].n:'', own=S.vals[k];
     return own?own+(gn?` (${gn})`:''):(gn?`${gn} ${(lab[k]||'').replace(/^\D+/,'')}`.trim():''); };
   return {r,c,cell}; }
-$('#w-copy').addEventListener('click',async()=>{ const {r,c,cell}=wCells();
+/* de tekst voor het klembord (tabel) en voor het CSV-bestand; de knoppen zelf staan in de Vue-component
+   Plaatindeling (src/tools/Plaatindeling.vue), die deze twee functies aanroept */
+function plaatTSV(){ const {r,c,cell}=wCells();
   let t=$('#w-title').value+'\n\t'+Array.from({length:c},(_,j)=>j+1).join('\t')+'\n';
   for(let i=0;i<r;i++){ t+=WRL[i]; for(let j=1;j<=c;j++) t+='\t'+cell(WRL[i]+j); t+='\n'; }
-  t=i18nTSV(t); try{ await navigator.clipboard.writeText(t); $('#w-copied').textContent='Gekopieerd. Plak in Excel, Sheets of je labjournaal.'; $('#w-fallback').style.display='none'; }
-  catch(e){ const f=$('#w-fallback'); f.value=t; f.style.display='block'; f.select(); $('#w-copied').textContent='Kopiëren werd geblokkeerd. Selecteer en kopieer de tekst hieronder.'; } });
-$('#w-csv').addEventListener('click',()=>{ const {r,c,cell}=wCells();
+  return i18nTSV(t); }
+function plaatCSV(){ const {r,c,cell}=wCells();
   let t='\t'+Array.from({length:c},(_,j)=>j+1).join('\t');
   for(let i=0;i<r;i++){ t+='\n'+WRL[i]; for(let j=1;j<=c;j++) t+='\t'+cell(WRL[i]+j); }
-  dlMsg($('#w-copied'),()=>saveBlob(safeName($('#w-title').value)+'.csv',csvBlob(t))); });
+  return t; }
 
-/* ---------- opmaakkeuzes gaan naar de ontwerper, de afbeelding volgt ---------- */
-$('#w-pal').addEventListener('change',e=>{ const pal=PALS[e.target.value]; if(!pal||!wPld) return; wPld.palette(pal); plateImg(); });
-$('#w-shape').addEventListener('change',e=>{ if(wPld) wPld.shape(e.target.value); plateImg(); });
-$('#w-autolab').addEventListener('change',e=>{ if(wPld) wPld.autoLabel(e.target.checked); plateImg(); });
-$('#w-leg').addEventListener('change',()=>plateImg());
-['w-title','w-note'].forEach(id=>$('#'+id).addEventListener('input',()=>plateImg()));
+/* de keuzes (palet, vorm, labels, legenda, titel, tekst) en de knoppen regelt de component; die roept
+   plateImg() aan en geeft palet, vorm en labels door aan de ontwerper (wPld) */
 calc.plaat=()=>{ plateImg(); };
 
-wPld=plateDesigner($('#w-pld'),{fmt:'8x12',shape:$('#w-shape').value,autoLabel:$('#w-autolab').checked,
-  palette:PALS[$('#w-pal').value]||GCOL, name:()=>$('#w-title').value,
-  groups:[{n:'Standaard',c:GCOL[0]},{n:'Blanco',c:GCOL[8]},{n:'Monster',c:GCOL[1]},{n:'Pos. controle',c:GCOL[2]}],
-  onChange(){ try{ plateImg(); }catch(e){} }});
-wExample();
+/* De gedeelde plaatontwerper bouwt de plaat in #w-pld, dat in de component staat. Daarom wordt hij pas
+   gemaakt als de component er is: Plaatindeling.vue roept dit aan in mounted(). Een Vue-mount wist de
+   inhoud van zijn host, dus vroeger bouwen heeft geen zin. De andere tools (qPCR, ELISA) maken hun
+   eigen ontwerper en veranderen niet. */
+function plaatInit(){
+  if(wPld) return;
+  wPld=plateDesigner($('#w-pld'),{fmt:'8x12',shape:$('#w-shape').value,autoLabel:$('#w-autolab').checked,
+    palette:PALS[$('#w-pal').value]||GCOL, name:()=>$('#w-title').value,
+    groups:[{n:'Standaard',c:GCOL[0]},{n:'Blanco',c:GCOL[8]},{n:'Monster',c:GCOL[1]},{n:'Pos. controle',c:GCOL[2]}],
+    onChange(){ try{ plateImg(); }catch(e){} }});
+  wExample();
+}
 /* /NT:plaatui */
 /* NT:oplosui */
 /* ================= OPLOSSING & BUFFER: BIBLIOTHEEK EN BALANS =================
@@ -5619,58 +5347,12 @@ calc.steril=function(){};
 calc.passage=function(){};
 /* /NT:passage */
 /* NT:stain */
-/* ================= KLEURINGSSCHEMA ================= */
+/* ================= KLEURINGSSCHEMA =================
+   De tabel, de velden en de tekening staan in src/tools/Kleuringsschema.vue; hier blijven de
+   standaardkleuringen (STN) staan, waaruit de component zijn beginwaarden en "Laden" haalt. */
 const STN={gram:{t:'Gramkleuring',r:'Gram-positief: paars · Gram-negatief: roze/rood',s:[['Kristalviolet','60','#6b2fa3'],['Spoelen met water','','#9cc7e8'],['Jodium (Lugol)','60','#8a5a14'],['Spoelen met water','','#9cc7e8'],['Ontkleuren (alcohol/aceton)','','#d9d9d9'],['Spoelen met water','','#9cc7e8'],['Safranine','45','#d23a5c'],['Spoelen en drogen','','#9cc7e8']]},
  zn:{t:'Ziehl-Neelsen (zuurvaste kleuring)',r:'Zuurvast: rood · niet zuurvast: blauw',s:[['Carbolfuchsine, verwarmen tot damp','300','#c2185b'],['Spoelen met water','','#9cc7e8'],['Ontkleuren met zuuralcohol','','#d9d9d9'],['Spoelen met water','','#9cc7e8'],['Methyleenblauw','60','#1e5aa8'],['Spoelen en drogen','','#9cc7e8']]},
  spore:{t:'Sporenkleuring (Schaeffer-Fulton)',r:'Sporen: groen · vegetatieve cellen: roze/rood',s:[['Malachietgroen boven stoom','300','#2e8b57'],['Spoelen met water','','#9cc7e8'],['Safranine','45','#d23a5c'],['Spoelen en drogen','','#9cc7e8']]}};
-const stnT=ET('stn-tbl',[{h:'Stap / reagens',t:'txt',w:200},{h:'Tijd (s)',t:'num',w:64},{h:'Kleur',t:'txt',w:80}],STN.gram.s,'stain');
-$('#stn-load').addEventListener('click',()=>{ const P=STN[$('#stn-pre').value]; $('#stn-title').value=P.t; $('#stn-res').value=P.r; ['stn-title','stn-res'].forEach(id=>$('#'+id).dispatchEvent(new Event('input',{bubbles:true}))); stnT.set(P.s); });
-calc.stain=function(){ const S=etGet('stn-tbl').filter(r=>r[0].trim()), title=$('#stn-title').value, res=$('#stn-res').value, out=$('#stn-out');
-  if(!S.length){ out.innerHTML=note('info','Voeg minstens één stap toe.'); return; }
-  /* Tijdlijn: de breedte van een stap is evenredig met zijn tijd, met een ondergrens zodat
-     een korte stap leesbaar blijft. Stappen zonder tijd (spoelen, ontkleuren tot helder)
-     krijgen die ondergrens en een druppel in plaats van een blok met tijd. */
-  const tt=v=>{ const s=num(v); if(!isFinite(s)) return 'kort / tot helder'; return s>=60?(s%60?`${Math.floor(s/60)} min ${s%60} s`:`${s/60} min`):`${s} s`; };
-  const secs=S.map(r=>{ const v=num(r[1]); return isFinite(v)&&v>0?v:0; }), totS=secs.reduce((a,b)=>a+b,0);
-  const MINW=78, budget=Math.max(560,S.length*96);
-  const wid=S.map((r,i)=>totS>0&&secs[i]>0?Math.max(MINW,budget*secs[i]/totS):MINW);
-  const X=[]; wid.reduce((a,w,i)=>{ X[i]=20+a; return a+w; },0);
-  const totW=wid.reduce((a,b)=>a+b,0), W=Math.max(520,totW+40), BH=30, H=(title?40:0)+150+(res?34:0);
-  const colOf=r=>/^#[0-9a-f]{3,8}$/i.test(r[2])?r[2]:'#9aa6b2';
-  pShow($('#stn-cv'),W,H,(x)=>{ const t0=pTitle(x,title,W), by=t0+74;
-    S.forEach((r,i)=>{ const c=colOf(r), w=wid[i], xa=X[i], xm=xa+w/2, hasT=secs[i]>0;
-      /* balk van de stap */
-      x.fillStyle=c; x.globalAlpha=hasT?0.9:0.35; x.beginPath(); x.roundRect(xa+1,by,w-2,BH,5); x.fill(); x.globalAlpha=1;
-      x.strokeStyle=PCOL.line; x.lineWidth=1; x.beginPath(); x.roundRect(xa+1,by,w-2,BH,5); x.stroke();
-      /* druppel reagens boven de balk */
-      const dy=by-14, dr=7;
-      x.fillStyle=c; x.beginPath(); x.moveTo(xm,dy-dr*1.5); x.quadraticCurveTo(xm+dr,dy-dr*0.2,xm+dr*0.72,dy+dr*0.35);
-      x.quadraticCurveTo(xm,dy+dr*1.25,xm-dr*0.72,dy+dr*0.35); x.quadraticCurveTo(xm-dr,dy-dr*0.2,xm,dy-dr*1.5); x.closePath();
-      if(hasT) x.fill(); else { x.strokeStyle=c; x.lineWidth=1.6; x.stroke(); }
-      /* volgnummer in de balk */
-      x.fillStyle=inkOn(c); x.font='600 12px '+PFONT(); x.textAlign='center'; x.textBaseline='middle';
-      if(hasT) x.fillText(String(i+1),xm,by+BH/2);
-      else { x.fillStyle=PCOL.muted; x.fillText(String(i+1),xm,by+BH/2); }
-      /* naam en tijd onder de balk, passend gemaakt op de breedte */
-      const room=w-8;
-      x.fillStyle=PCOL.ink; x.font='11.5px '+PFONT();
-      const words=trCanvas(String(r[0]||'')).split(' '); let line='', ly=by+BH+18, lines=0;
-      words.forEach(wd=>{ const t2=(line+' '+wd).trim();
-        if(x.measureText(uv(t2)).width>room&&line){ if(lines<2){ x.fillText(uv(line),xm,ly); ly+=14; lines++; line=wd; } else line=t2; }
-        else line=t2; });
-      if(line){ let r2=line; while(r2.length>1&&x.measureText(uv(r2+'…')).width>room) r2=r2.slice(0,-1);
-        x.fillText(uv(r2===line?line:r2+'…'),xm,ly); ly+=14; }
-      /* in de tekening een kort tijdlabel; de volledige omschrijving staat in de tabel */
-      x.fillStyle=PCOL.muted; x.font='11px '+PFONT(); x.fillText(hasT?tt(r[1]):'kort',xm,ly); });
-    /* tijdas onder de balken */
-    x.strokeStyle=PCOL.line; x.lineWidth=1; x.beginPath(); x.moveTo(20,by-30); x.lineTo(20+totW,by-30); x.stroke();
-    x.fillStyle=PCOL.muted; x.font='10.5px '+PFONT(); x.textAlign='left'; x.textBaseline='alphabetic';
-    x.fillText('0',20,by-35); x.textAlign='right';
-    if(totS>0) x.fillText(tt(String(totS)),20+totW,by-35);
-    x.textAlign='center'; x.fillText('tijd',20+totW/2,by-35);
-    if(res){ x.fillStyle=PCOL.ink; x.font='600 12.5px '+PFONT(); x.textAlign='left'; x.textBaseline='alphabetic'; x.fillText(res,20,H-14); } });
-  const tot=S.reduce((s,r)=>s+(num(r[1])||0),0);
-  out.innerHTML=kv([['Stappen',S.length],['Wachttijd in totaal (zonder spoelen)',tt(String(tot))]]); };
 /* /NT:stain */
 /* NT:cdna */
 /* ================= CDNA-SYNTHESE =================
@@ -6047,36 +5729,17 @@ function titrPH(pka,acid,Ca,Va,Cb,Vb){ const n=pka.length, Ka=pka.map(p=>Math.po
 calc.kjel=function(){};
 /* /NT:kjel */
 /* NT:plan */
-/* ================= EXPERIMENTPLANNER ================= */
-ET('xp-tbl',[{h:'Stap',t:'txt',w:200},{h:'Duur (min)',t:'num',w:80},{h:'Soort',t:'sel',o:['handwerk','wachten']}],[['Competente cellen ontdooien op ijs','10','wachten'],['DNA toevoegen en mengen','10','handwerk'],['Incuberen op ijs','30','wachten'],['Heat shock 42 °C','1','handwerk'],['Herstel in SOC, 37 °C schudden','60','wachten'],['Uitplaten op LB-amp','20','handwerk'],['Gel gieten voor kolonie-PCR','30','handwerk'],['Platen incuberen 37 °C','960','wachten']],'plan');
-const hm2m=t=>{ const m=String(t).match(/^(\d{1,2})[:.](\d{2})$/); return m?+m[1]*60+ +m[2]:NaN; }, m2hm=m=>{ const d=Math.floor(m/1440), r=((m%1440)+1440)%1440; return `${String(Math.floor(r/60)).padStart(2,'0')}:${String(Math.round(r%60)).padStart(2,'0')}${d>0?` (+${d} d)`:''}`; };
-$('#xp-tim').addEventListener('click',()=>{ const S=etGet('xp-tbl').filter(r=>r[0].trim()&&r[2]==='wachten'&&num(r[1])>0); S.forEach(r=>addTimer(r[0],num(r[1])*60)); if(S.length) location.hash='#timers'; });
-calc.plan=function(){ const S=etGet('xp-tbl').filter(r=>r[0].trim()).map(r=>({n:r[0],d:Math.min(Math.max(num(r[1])||0,0),1e5),w:r[2]==='wachten'})), t0=hm2m($('#xp-start').value), te=hm2m($('#xp-end').value), out=$('#xp-out'), title=$('#xp-title').value;
-  if(!S.length||!isFinite(t0)){ out.innerHTML=note('info','Vul een starttijd (uu:mm) en minstens één stap in.'); return; }
-  let t=t0; S.forEach(s=>{ s.a=t; s.b=t+s.d; t=s.b; }); const tot=t-t0, hands=S.filter(s=>!s.w).reduce((a,s)=>a+s.d,0), dayEnd=isFinite(te)?te:Infinity, lastHands=S.filter(s=>!s.w).reduce((a,s)=>Math.max(a,s.b),t0);
-  const span=Math.min(tot,Math.max(...S.filter(s=>!s.w||s.d<=240).map(s=>s.b))-t0||tot), W=760, rh=24, H=60+S.length*rh+40, L=230, sc=(W-L-30)/Math.max(span,1);
-  pShow($('#xp-cv'),W,H,(x)=>{ pTitle(x,title,W); const Y=i=>46+i*rh; x.font='12px '+PFONT(); x.textBaseline='middle';
-    const stp=Math.max(60,Math.ceil(span/12/60)*60); for(let m=Math.ceil(t0/60)*60,k=0;m<=t0+span&&k<40;m+=stp,k++){ const X=L+(m-t0)*sc; x.strokeStyle=PCOL.line; x.beginPath(); x.moveTo(X,40); x.lineTo(X,H-26); x.stroke(); x.fillStyle=PCOL.muted; x.textAlign='center'; x.fillText(m2hm(m).slice(0,5),X,H-14); }
-    if(isFinite(te)&&te<=t0+span){ const X=L+(te-t0)*sc; x.strokeStyle=PCOL.warn; x.setLineDash([4,4]); x.beginPath(); x.moveTo(X,40); x.lineTo(X,H-26); x.stroke(); x.setLineDash([]); }
-    S.forEach((s,i)=>{ x.fillStyle=PCOL.ink; x.textAlign='left'; x.fillText(uv(s.n.length>32?s.n.slice(0,31)+'…':s.n),10,Y(i)+rh/2); const a=L+(s.a-t0)*sc, b=L+Math.min(s.b-t0,span)*sc; x.fillStyle=s.w?'#cfe0f5':PCOL.acc; x.fillRect(a,Y(i)+5,Math.max(2,b-a),rh-10); if(s.b-t0>span){ x.fillStyle=PCOL.muted; x.fillText('→ '+m2hm(s.b),Math.min(b+4,W-x.measureText('→ '+m2hm(s.b)).width-8),Y(i)+rh/2); } }); });
-  const rows=S.map(s=>[s.n,m2hm(s.a),m2hm(s.b),s.d,s.w?'wachten':'handwerk']);
-  out.innerHTML=`<div class="lbl">Klaar om</div><div class="big">${m2hm(t)}</div>`+kv([['Totale duur',`${Math.floor(tot/60)} u ${Math.round(tot%60)} min`],['Handwerk',`${Math.floor(hands/60)} u ${Math.round(hands%60)} min`],['Laatste handwerk klaar om',m2hm(lastHands)]])+(lastHands>dayEnd?note('warn',`Het laatste handwerk eindigt na ${m2hm(dayEnd)}; begin eerder of verplaats een stap naar de volgende dag.`):'')+
-   `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Stap</th><th>Start</th><th>Klaar</th><th class="num">min</th><th>Soort</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${ud(r[0])}</td><td>${r[1]}</td><td>${r[2]}</td><td class="num">${r[3]}</td><td>${r[4]}</td></tr>`).join('')}</tbody></table></div>`; };
-
-function xpDate(){ const m=String($('#xp-date').value).trim().match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/); const d=m?new Date(+m[3],+m[2]-1,+m[1]):new Date(); d.setHours(0,0,0,0); return d; }
-$('#xp-ics').addEventListener('click',()=>{ const S=etGet('xp-tbl').filter(r=>r[0].trim()).map(r=>({n:r[0],d:Math.min(Math.max(num(r[1])||0,0),1e5),w:r[2]==='wachten'})), t0=hm2m($('#xp-start').value); if(!S.length||!isFinite(t0)) return;
-  const base=xpDate(), p2=v=>String(v).padStart(2,'0'), ts=m=>{ const d=new Date(base.getTime()+m*60000); return `${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}T${p2(d.getHours())}${p2(d.getMinutes())}00`; }, now=new Date(), stamp=`${now.getUTCFullYear()}${p2(now.getUTCMonth()+1)}${p2(now.getUTCDate())}T${p2(now.getUTCHours())}${p2(now.getUTCMinutes())}${p2(now.getUTCSeconds())}Z`, escI=s=>String(s).replace(/\\/g,'\\\\').replace(/[,;]/g,m=>'\\'+m).replace(/\n/g,'\\n');
-  const title=$('#xp-title').value||'Experiment'; let t=t0; const ev=S.map((s,i)=>{ const a=t, b=t+Math.max(s.d,1); t+=s.d; return ['BEGIN:VEVENT',`UID:labkit-${stamp}-${i}@labkit-bml`,`DTSTAMP:${stamp}`,`DTSTART:${ts(a)}`,`DTEND:${ts(b)}`,`SUMMARY:${escI(title+': '+s.n)}`,`DESCRIPTION:${escI((s.w?'wachten':'handwerk')+', '+s.d+' min')}`,`TRANSP:${s.w?'TRANSPARENT':'OPAQUE'}`,'END:VEVENT'].join('\r\n'); });
-  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Labkit BML//Experimentplanner//NL','CALSCALE:GREGORIAN',...ev,'END:VCALENDAR'].join('\r\n')+'\r\n';
-  saveBlob((title.replace(/[^\w\- ]+/g,'').trim()||'experiment')+'.ics',new Blob([ics],{type:'text/calendar'})).catch(()=>{}); });
+/* ================= EXPERIMENTPLANNER =================
+   De tabel (#xp-tbl), de invoer, het rekenwerk, de tekening en de knoppen staan in
+   src/tools/Planner.vue; calc.plan staat in src/main.js. Niets hieruit wordt nog door
+   andere code gebruikt. */
 /* /NT:plan */
 /* NT:report */
-/* ================= RAPPORT / LABJOURNAAL ================= */
+/* ================= RAPPORT / LABJOURNAAL =================
+   De bediening en de melding staan in src/tools/Rapport.vue; calc.report staat in src/main.js.
+   Hier blijft wat ook andere code aanroept: rpTools/rpSection (verzamelen) en rpDoc/rpPrint
+   (het losse document; ook gebruikt door Afdrukken bij elke tool en onder de tekeningen). */
 function rpTools(){ return toolIndex().filter(t=>!['report','inst','start'].includes(t.id)); }
-function rpBuildList(sel){ $('#rp-list').innerHTML=rpTools().map(t=>`<label class="chk" style="display:flex;break-inside:avoid;margin:2px 0"><input type="checkbox" data-rp="${t.id}"${sel.includes(t.id)?' checked':''}> ${esc(t.name)}</label>`).join(''); }
-rpBuildList(jget(RKEY,[]).slice(0,4));
-$('#rp-recent').addEventListener('click',()=>{ rpBuildList(jget(RKEY,[]).slice(0,6)); calc.report(); });
-$('#rp-none').addEventListener('click',()=>{ rpBuildList([]); calc.report(); });
 function rpSection(id,withIn,withSrc){ const sec=$('#t-'+id); if(!sec) return ''; i18nEnsure(sec); try{ calc[id]&&calc[id](); }catch(e){}
   const title=sec.querySelector('.tool-head h2').textContent; let h=`<h2>${esc(title)}</h2>`;
   if(withIn){ const items=[]; sec.querySelectorAll('.panel input:not([type=checkbox]):not([type=radio]):not([type=search]), .panel select, .panel textarea').forEach(el=>{ if(el.closest('table')||!el.id) return; const lb=sec.querySelector(`label[for="${el.id}"]`); const v=el.tagName==='SELECT'?el.options[el.selectedIndex]?.text:el.value; if(lb&&v&&String(v).trim()) items.push(`<tr><th>${esc(lb.textContent.trim())}</th><td>${esc(v)}</td></tr>`); });
@@ -6085,20 +5748,11 @@ function rpSection(id,withIn,withSrc){ const sec=$('#t-'+id); if(!sec) return ''
   const res=sec.querySelector('.result'); if(res){ const cl=res.cloneNode(true); cl.querySelectorAll('button,.row').forEach(b=>b.remove()); const cvs=res.querySelectorAll('canvas'), ccl=cl.querySelectorAll('canvas'); ccl.forEach((c,i)=>{ const o=cvs[i]; if(o&&o.width&&o.style.display!=='none'){ const img=document.createElement('img'); img.src=o.toDataURL('image/png'); img.style.maxWidth='100%'; img.style.width=o.style.maxWidth||'auto'; c.replaceWith(img); } else c.remove(); }); h+=`<div class="res">${cl.innerHTML}</div>`; }
   if(withSrc){ const s=sec.querySelector('.src'); if(s) h+=`<p class="src">${s.innerHTML}</p>`; }
   return `<section>${h}</section>`; }
-function rpHTML(){ return rpDoc([...document.querySelectorAll('[data-rp]:checked')].map(c=>c.dataset.rp),$('#rp-in').checked,$('#rp-src').checked,$('#rp-title').value,$('#rp-who').value); }
 /* los document met een of meer tools; ook gebruikt door Afdrukken per tool */
 function rpDoc(ids,wi,ws,title,who){ const d=new Date().toLocaleDateString(LANG==='en'?'en-GB':'nl-NL',{day:'numeric',month:'long',year:'numeric'});
   const css='body{font-family:system-ui,Segoe UI,Arial,sans-serif;color:#1f2933;margin:24px;font-size:13px}h1{font-size:22px;margin:0}h2{font-size:16px;margin:22px 0 8px;border-bottom:1px solid #c9ced6;padding-bottom:4px}.meta{color:#5f6b7a;margin:4px 0 12px}table{border-collapse:collapse;margin:6px 0;font-size:12px}table.kv th{text-align:left;font-weight:600;padding:2px 12px 2px 0;color:#5f6b7a}table.grid th,table.grid td,.res table th,.res table td{border:1px solid #d9dde3;padding:3px 6px;text-align:left}dl.kv{display:grid;grid-template-columns:auto auto;gap:2px 16px;margin:6px 0}dl.kv dt{color:#5f6b7a}dl.kv dd{margin:0;font-weight:600}.lbl{color:#5f6b7a;font-size:12px}.big{font-size:22px;font-weight:700}.note{border-left:3px solid #c9ced6;padding:4px 8px;margin:6px 0;background:#f6f7f9}.note.warn{border-color:#c2410c}.note.bad{border-color:#b0271f}.chip{font-size:11px;padding:1px 6px;border-radius:3px;background:#eef0f3}.src,.formula{color:#5f6b7a;font-size:11px}section{break-inside:avoid-page}img{display:block;margin:8px 0}';
   return `<!DOCTYPE html><html lang="${LANG}"><head><meta charset="utf-8"><title>${esc(title)}</title><style>${css}</style></head><body><h1>${esc(title)}</h1><div class="meta">${[esc(who||''),esc($('#sess-name')?$('#sess-name').value:''),d,'Labkit BML '+APPVER].filter(Boolean).join(' · ')}</div>${ids.map(id=>rpSection(id,wi,ws)).join('')}</body></html>`; }
 function rpPrint(html){ const f=document.createElement('iframe'); f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0'; document.body.appendChild(f); const d=f.contentWindow.document; d.open(); d.write(html); d.close(); setTimeout(()=>{ try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){} setTimeout(()=>f.remove(),3000); },400); }
-$('#rp-print').addEventListener('click',()=>rpPrint(rpHTML()));
-$('#rp-dl').addEventListener('click',()=>{ const b=new Blob([rpHTML()],{type:'text/html'}), a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=($('#rp-title').value||'labjournaal').replace(/[^\w\- ]+/g,'')+'.html'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000); });
-document.addEventListener('change',e=>{ if(e.target.dataset&&e.target.dataset.rp!=null) calc.report(); });
-calc.report=function(){ const ids=[...document.querySelectorAll('[data-rp]:checked')].map(c=>c.dataset.rp), T=rpTools(), out=$('#rp-out');
-  out.innerHTML=ids.length?`<div class="lbl">In het rapport</div><div class="big">${ids.length} <small>tools</small></div><ol class="steps">${ids.map(id=>`<li>${esc((T.find(t=>t.id===id)||{}).name||id)}</li>`).join('')}</ol>`:note('info','Vink de tools aan die in het rapport moeten.'); };
-
-$('#rp-docx').addEventListener('click',()=>{ const html=rpHTML(), d=new DOMParser().parseFromString(html,'text/html'), t=$('#rp-title').value||'Labjournaal'; d.querySelectorAll('style').forEach(x=>x.remove()); const host=document.createElement('div'); host.style.cssText='position:absolute;left:-99999px;top:0'; host.setAttribute('data-notr',''); host.innerHTML=d.body.innerHTML; document.body.appendChild(host);
-  const imgs=[...host.querySelectorAll('img')]; Promise.all(imgs.map(im=>im.complete?1:new Promise(r=>{ im.onload=im.onerror=r; }))).then(()=>{ try{ saveBlob((t.replace(/[^\w\- ]+/g,'').trim()||'labjournaal')+'.docx',htmlToDocx(host,t)).catch(()=>{}); } finally { host.remove(); } }); });
 /* /NT:report */
 /* NT:widmark */
 /* ================= BLOEDALCOHOL (WIDMARK) =================

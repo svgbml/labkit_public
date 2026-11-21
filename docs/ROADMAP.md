@@ -581,12 +581,12 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S254 | — | *Meetonzekerheid*, *Pipetkalibratie* naar Vue | ✅ `src/tools/Munc.vue` en `src/tools/Pipcal.vue`. De berekening staat nu als `muncCalc()` in `tools/nt/32_munc.js` en als `pipcalCalc()` in `tools/nt/30_pipcal.js`, ongewijzigd uit `calc.munc` en `calc.pipcal`; de bronnentabel van Meetonzekerheid is een `<lk-etable>` en de balken worden na elke render met `pShow()` getekend | — |
 | S255 | — | *Gelplanner* naar Vue, deel 1: de gel van bovenaf en de laantabel | Zelfde uitkomsten; validatie blijft staan | Opus 5 |
 | S256 | — | *Gelplanner* naar Vue, deel 2: de verwachte gel, het slotvolume en de looptijd | Zelfde uitkomsten; validatie blijft staan | Opus 5 |
-| S257 | — | *Pipetteerschema* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S258 | — | *PCR-programma* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S259 | — | *Verdunningsschema* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S260 | — | *Kleuringsschema* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S261 | — | *Experimentplanner*, *Rapport / labjournaal* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S262 | — | *Plaatindeling*, *Centrifuge*, *Timers* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S257 | — | *Pipetteerschema* naar Vue | ✅ `src/tools/Pipetteer.vue`; eigen tabel (een kolom per buis past niet in `lk-etable`) met eigen plak-handler. `PPRE`, `ppMigrate` en het buizenrek (`ppRack`, gewone HTML) blijven in `web/index.html`; `#pp-cv._data` blijft gezet | Sonnet |
+| S258 | — | *PCR-programma* naar Vue | ✅ `src/tools/PcrProgramma.vue`; `PGDEF`, `pgSecs`, `pgFmt` en (voor *PCR-cyclus*) `mmss2`/`yTa` blijven in `web/index.html`; de stappen blijven in `pstore` | Sonnet |
+| S259 | — | *Verdunningsschema* naar Vue | ✅ `src/tools/Verdunningsschema.vue`; de tekenhulpjes (`pTube`, `pArrow`, `pNum`, …) blijven in `web/index.html` | Sonnet |
+| S260 | — | *Kleuringsschema* naar Vue | ✅ `src/tools/Kleuringsschema.vue`, de tabel op `lk-etable`; alleen de sjablonen (`STN`) blijven in `tools/nt/44_stain.js`. Geen validatiegeval (het is een tekening) | Sonnet |
+| S261 | — | *Experimentplanner*, *Rapport / labjournaal* naar Vue | ✅ `src/tools/Planner.vue` (tabel op `lk-etable`) en `src/tools/Rapport.vue`. `rpTools`, `rpSection`, `rpDoc` en `rpPrint` blijven globaal in `tools/nt/62_report.js`, want de afdrukknoppen van andere tools gebruiken ze; het rapportdocument zelf blijft een string | Sonnet |
+| S262 | — | *Plaatindeling*, *Centrifuge*, *Timers* naar Vue | ✅ `src/tools/Centrifuge.vue`, `Timers.vue`, `Plaatindeling.vue`. De timer-motor (`timers`, `addTimer`, tik, piep, opslag) blijft globaal in `web/index.html`, want hij loopt door in andere tools; de plaatontwerper in `#w-pld` en `plateImg()` blijven de gedeelde motor (`plaatInit()` in `tools/nt/04_plaat.js`). Open punt, ouder dan deze stap: in het Engels vertaalt de MutationObserver getallen in een Vue-boom opnieuw (`i18nWalk` kijkt alleen naar `data-notr` op de knoop zelf) | Sonnet |
 | S263 | — | Startpagina en Instellingen naar Vue (de app-schil, geen rekentool) | Zoeken, fasen, tegels en instellingen werken | Opus 5 |
 
 ## What to pick up next
