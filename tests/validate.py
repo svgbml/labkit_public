@@ -180,7 +180,7 @@ def _(pg):
 @case('qPCR-analyse', 'ΔΔCt (Livak)', 'CASRAI rekenvoorbeeld: controle 24,0/20,0, behandeld 21,5/20,2 → 6,5×')
 def _(pg):
     pg.evaluate("""__go('qpcr');__set('qp-et','100');__set('qp-er','100');__set('qp-m','livak');
-      document.querySelector('#qp-tbl tbody').innerHTML=[['Controle',24.0,20.0],['Behandeld',21.5,20.2]].map(qpRow).join(''); calc.qpcr(); __set('qp-cal','Controle');""")
+      __tbl('qp-tbl',[['Controle',24.0,20.0],['Behandeld',21.5,20.2]],'qpcr'); __set('qp-cal','Controle');""")
     return [('fold change', pg.evaluate("__big('#qp-res')"), 6.498, 0.002)]
 
 @case('qPCR-analyse', 'Pfaffl (efficiëntie-gecorrigeerd)', 'CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9×')
@@ -242,7 +242,7 @@ def _(pg):
 # ---------------- Transformatie ----------------
 def _tf(pg, lv, vng, used, tot, rows):
     pg.evaluate(f"""__go('transf');__set('tf-range','1-100000');__set('tf-lv','{lv}');__set('tf-vng','{vng}');__set('tf-used','{used}');__set('tf-tot','{tot}');
-      document.querySelector('#tf-tbl tbody').innerHTML={rows!r}.map(r=>tfRow(r)).join(''); calc.transf();""")
+      __tbl('tf-tbl',{rows!r},'transf');""")
     return pg.evaluate("__big('#tf-out')")
 
 @case('Transformatie', 'Rekenvoorbeeld iGEM', 'iGEM Troubleshooting Transformations: 1 µL van 0,05 ng/µL, 100 van 1000 µL uitgeplaat, 250 kolonies → 5 × 10⁷ kve/µg')

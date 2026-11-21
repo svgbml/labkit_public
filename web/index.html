@@ -615,62 +615,8 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 <section class="tool" id="t-dna" data-tool="dna">
   <header class="tool-head"><h2>DNA-kwantificatie</h2>
   <p>Concentratie en zuiverheid uit absorptie, normaliseren naar een vaste input (zoals voor STR-amplificatie) en omrekenen tussen ng, pmol en kopieën.</p></header>
-  <div class="stack">
-    <div class="grid2">
-      <div class="panel">
-        <h3>A₂₆₀ → concentratie</h3>
-        <div class="fields">
-          <div class="f"><label for="n-a260">A₂₆₀</label><input id="n-a260" inputmode="decimal" value="0,85"></div>
-          <div class="f"><label for="n-a280">A₂₈₀</label><input id="n-a280" inputmode="decimal" value="0,46"></div>
-          <div class="f"><label for="n-a230">A₂₃₀</label><input id="n-a230" inputmode="decimal" value="0,41"></div>
-          <div class="f" data-expert=""><label for="n-a320">A₃₂₀ (achtergrond)</label><input id="n-a320" inputmode="decimal" value="" placeholder="optioneel"></div>
-          <div class="f"><label for="n-type">Type</label><select id="n-type" style="width:100%"><option value="50">dsDNA (50)</option><option value="33">ssDNA (33)</option><option value="40">RNA (40)</option></select></div>
-          <div class="f"><label for="n-df">Verdunningsfactor</label><input id="n-df" inputmode="decimal" value="10"></div>
-          <div class="f" data-expert=""><label for="n-pl">Weglengte</label><div class="inu"><input id="n-pl" inputmode="decimal" value="1"><span class="u">cm</span></div></div>
-          <div class="f"><label for="n-vol">Elutievolume</label><div class="inu"><input id="n-vol" inputmode="decimal" value="50"><span class="u">µL</span></div></div>
-        </div>
-      </div>
-      <div class="result" id="n-out"></div>
-    </div>
-    <div class="grid2">
-      <div class="panel">
-        <h3>Normaliseren naar vaste input</h3>
-        <div class="fields">
-          <div class="f"><label for="m-c">Concentratie extract</label><div class="inu"><input id="m-c" inputmode="decimal" value="0,35"><span class="u">ng/µL</span></div></div>
-          <div class="f"><label for="m-ng">Gewenste input</label><div class="inu"><input id="m-ng" inputmode="decimal" value="1"><span class="u">ng</span></div></div>
-          <div class="f"><label for="m-v">In totaal volume</label><div class="inu"><input id="m-v" inputmode="decimal" value="15"><span class="u">µL</span></div></div>
-        </div>
-        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Concentratie in ng/µL, bijvoorbeeld uit de berekening hierboven of uit qPCR-kwantificatie.</p>
-      </div>
-      <div class="result" id="m-out"></div>
-    </div>
-    <div class="grid2">
-      <div class="panel">
-        <h3>ng ↔ pmol ↔ kopieën</h3>
-        <div class="fields">
-          <div class="f"><label for="p-ng">Massa</label><div class="inu"><input id="p-ng" inputmode="decimal" value="50"><span class="u">ng</span></div></div>
-          <div class="f"><label for="p-bp">Lengte</label><div class="inu"><input id="p-bp" inputmode="decimal" value="1000"><span class="u">bp / nt</span></div></div>
-          <div class="f"><label for="p-t">Type</label><select id="p-t" style="width:100%"><option value="660">dsDNA (≈ 660 g/mol per bp)</option><option value="330">ssDNA (≈ 330 g/mol per nt)</option></select></div>
-          <div class="f"><label for="p-vol">In volume (optioneel)</label><div class="inu"><input id="p-vol" inputmode="decimal" value="10"><span class="u">µL</span></div></div>
-        </div>
-      </div>
-      <div class="result" id="p-out"></div>
-    </div>
-  </div>
-    <div class="grid2">
-      <div class="panel">
-        <h3>Forensische qPCR-kwantificatie <span class="example">voorbeeld</span></h3>
-        <div class="fields">
-          <div class="f"><label for="fq-s">Klein autosomaal doel</label><div class="inu"><input id="fq-s" inputmode="decimal" value="0,25"><span class="u">ng/µL</span></div></div>
-          <div class="f"><label for="fq-l">Groot autosomaal doel</label><div class="inu"><input id="fq-l" inputmode="decimal" value="0,05"><span class="u">ng/µL</span></div></div>
-          <div class="f"><label for="fq-y">Y-doel (mannelijk)</label><div class="inu"><input id="fq-y" inputmode="decimal" value="0,02"><span class="u">ng/µL</span></div></div>
-          <div class="f"><label for="fq-ng">Gewenste STR-input</label><div class="inu"><input id="fq-ng" inputmode="decimal" value="1"><span class="u">ng</span></div></div>
-          <div class="f"><label for="fq-v">Max. volume in PCR</label><div class="inu"><input id="fq-v" inputmode="decimal" value="15"><span class="u">µL</span></div></div>
-        </div>
-        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Concentraties zoals een kwantificatiekit met een kort en een lang autosomaal doel en een Y-doel ze geeft (bijvoorbeeld Quantifiler Trio).</p>
-      </div>
-      <div class="result" id="fq-out"></div>
-    </div>
+  <!-- Het bewerkbare deel staat in src/tools/Dna.vue (Vue); kop en bronregel blijven gewone HTML. De forensische qPCR-kwantificatie (fq-*) hoort er ook bij. -->
+  <div id="dna-app"></div>
   <p class="src">Forensische kwantificatie: degradatie-index = klein / groot autosomaal doel; DI ≤ 1 wijst op intact DNA, boven 1 mogelijk degradatie (Thermo Fisher, Behind the Bench); indeling 1–10 matig en &gt; 10 sterk gedegradeerd volgens Othram. Omrekenfactoren A₂₆₀ = 1 bij 1 cm: dsDNA 50, ssDNA 33, RNA 40 µg/mL; zuiver DNA A₂₆₀/A₂₈₀ ≈ 1,8–2,0 en A₂₆₀/A₂₃₀ ≥ 2,0 (Eppendorf Application Note 279). ≈ 6,6 pg DNA per diploïde menselijke cel; STR-kits werken doorgaans het best rond 0,5–2 ng input (NIST, Butler &amp; McCord, AAFS 2006 workshop; PMC9267064).</p>
 </section>
 
@@ -706,39 +652,8 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 <section class="tool" id="t-gel" data-tool="gel">
   <header class="tool-head"><h2>Agarosegel &amp; bandgrootte</h2>
   <p>Gel gieten, loopbuffer verdunnen en de grootte van onbekende banden schatten met een standaardcurve uit je ladder.</p></header>
-  <div class="stack">
-    <div class="grid2">
-      <div class="panel">
-        <h3>Gel gieten</h3>
-        <div class="fields">
-          <div class="f"><label for="g-pct">Agarose</label><div class="inu"><input id="g-pct" inputmode="decimal" value="1,5"><span class="u">% w/v</span></div></div>
-          <div class="f"><label for="g-vol">Gelvolume</label><div class="inu"><input id="g-vol" inputmode="decimal" value="50"><span class="u">mL</span></div></div>
-          <div class="f"><label for="g-size">Verwachte fragmentgrootte</label><div class="inu"><input id="g-size" inputmode="decimal" value="500"><span class="u">bp</span></div></div>
-        </div>
-        <h3 style="margin-top:16px">Loopbuffer</h3>
-        <div class="fields">
-          <div class="f" data-expert=""><label for="g-bs">Stock</label><select id="g-bs" style="width:100%"><option value="50">50X TAE</option><option value="10">10X TBE</option><option value="5">5X TBE</option></select></div>
-          <div class="f" data-expert=""><label for="g-bw">Werkconcentratie</label><select id="g-bw" style="width:100%"><option value="1">1X</option><option value="0.5">0,5X</option></select></div>
-          <div class="f" data-expert=""><label for="g-bv">Volume</label><div class="inu"><input id="g-bv" inputmode="decimal" value="500"><span class="u">mL</span></div></div>
-        </div>
-      </div>
-      <div class="result" id="g-out"></div>
-    </div>
-    <div class="grid2">
-      <div class="panel">
-        <h3>Bandgrootte schatten <span class="example">voorbeeld</span></h3>
-        <div class="row">
-          <div class="f"><label for="b-ladder">Ladder</label><select id="b-ladder"><option value="100">100 bp-ladder (1000–100)</option><option value="neb100">NEB 100 bp (1517–100)</option><option value="100p">100 bp plus (3000–100)</option><option value="1k">1 kb-ladder (10 000–250)</option></select></div>
-          <div class="f"><label for="b-unk">Onbekende banden, afstand (mm)</label><input id="b-unk" inputmode="decimal" value="31 44,5" style="width:180px"></div>
-        </div>
-        <div class="tbl-wrap" style="margin-top:12px;max-height:360px;overflow-y:auto">
-          <table id="b-tbl"><thead><tr><th class="num">Ladderband (bp)</th><th class="num">Afstand vanaf putje (mm)</th></tr></thead><tbody></tbody></table>
-        </div>
-        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">Vul alleen banden in die je duidelijk ziet; de curve gebruikt elke rij met een afstand. Controleer bandgroottes met het datasheet van jouw ladder.</p>
-      </div>
-      <div class="result" id="b-out"><canvas id="b-cv" width="420" height="260"></canvas><div id="b-res"></div></div>
-    </div>
-  </div>
+  <!-- de velden en uitkomsten staan in src/tools/Gel.vue -->
+  <div id="g-app"></div>
   <p class="src">Scheidingsbereik per gelpercentage: Thermo Fisher, Invitrogen School of Molecular Biology, Nucleic acid electrophoresis workflow (tabellen 2 en 3). Bandgrootte: interpolatie op log₁₀(bp) tussen de twee dichtstbijzijnde ladderbanden; de rechte lijn en R² tonen alleen hoe lineair de ladder loopt.</p>
 </section>
 
@@ -840,61 +755,8 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 <section class="tool" id="t-pcrcyclus" data-tool="pcrcyclus">
   <header class="tool-head"><h2>PCR-cyclus</h2>
   <p>Primer-T<sub>m</sub> en annealingtemperatuur, een compleet cyclerprogramma met looptijd, en de rekenkunde van amplificatie en qPCR-efficiëntie.</p></header>
-  <div class="stack">
-    <div class="grid2">
-      <div class="panel">
-        <h3>Primers <span class="example">voorbeeld</span></h3>
-        <div class="f"><label for="y-f">Forward primer (5′→3′)</label><input id="y-f" class="mono" value="AGCTGACCTGAAGGCTCTGAAG"></div>
-        <div class="f" style="margin-top:10px"><label for="y-r">Reverse primer (5′→3′)</label><input id="y-r" class="mono" value="TCGTCGTACTTGACCAGGCTAT"></div>
-        <div class="fields" style="margin-top:12px">
-          <div class="f" data-expert=""><label for="y-na">Na⁺/K⁺</label><div class="inu"><input id="y-na" inputmode="decimal" value="50"><span class="u">mM</span></div></div>
-          <div class="f" data-expert=""><label for="y-mg">Mg²⁺</label><div class="inu"><input id="y-mg" inputmode="decimal" value="1,5"><span class="u">mM</span></div></div>
-          <div class="f" data-expert=""><label for="y-dntp">dNTP totaal</label><div class="inu"><input id="y-dntp" inputmode="decimal" value="0,8"><span class="u">mM</span></div></div>
-          <div class="f" data-expert=""><label for="y-pc">Primer</label><div class="inu"><input id="y-pc" inputmode="decimal" value="0,2"><span class="u">µM</span></div></div>
-        </div>
-        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">T<sub>m</sub> volgens nearest-neighbor (SantaLucia 1998) met correctie voor zout, Mg²⁺ en dNTP's, zoals moderne primerprogramma's. dNTP totaal = 4 × de concentratie per dNTP (200 µM elk = 0,8 mM). De eenvoudige GC-formule staat ter vergelijking ernaast.</p>
-      </div>
-      <div class="result" id="y-out"></div>
-    </div>
-    <div class="grid2">
-      <div class="panel">
-        <h3>Programma</h3>
-        <div class="fields">
-          <div class="f"><label for="y-type">Type</label><select id="y-type" style="width:100%"><option value="std">Gezuiverd template</option><option value="col">Kolonie-PCR</option></select></div>
-          <div class="f"><label for="y-bp">Ampliconlengte</label><div class="inu"><input id="y-bp" inputmode="decimal" value="650"><span class="u">bp</span></div></div>
-          <div class="f"><label for="y-n">Cycli</label><input id="y-n" inputmode="numeric" value="30"></div>
-          <div class="f"><label for="y-dt">Denaturatie</label><div class="inu"><input id="y-dt" inputmode="decimal" value="95"><span class="u">°C</span></div></div>
-          <div class="f"><label for="y-ds">Tijd denaturatie</label><div class="inu"><input id="y-ds" inputmode="numeric" value="30"><span class="u">s</span></div></div>
-          <div class="f"><label for="y-ta">Annealing</label><div class="inu"><input id="y-ta" inputmode="decimal" value="" placeholder="auto"><span class="u">°C</span></div></div>
-          <div class="f"><label for="y-as">Tijd annealing</label><div class="inu"><input id="y-as" inputmode="numeric" value="30"><span class="u">s</span></div></div>
-          <div class="f"><label for="y-et">Extensie</label><div class="inu"><input id="y-et" inputmode="decimal" value="68"><span class="u">°C</span></div></div>
-          <div class="f"><label for="y-es">Tijd extensie</label><div class="inu"><input id="y-es" inputmode="numeric" value="" placeholder="auto"><span class="u">s</span></div></div>
-          <div class="f" data-expert=""><label for="y-ramp">Opwarm-/afkoelsnelheid</label><div class="inu"><input id="y-ramp" inputmode="decimal" value="3"><span class="u">°C/s</span></div></div>
-        </div>
-        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Laat annealing en extensietijd leeg voor een automatische waarde. De opwarmsnelheid verschilt per cycler; zie de handleiding voor de echte waarde.</p>
-      </div>
-      <div class="result"><div id="y-prog"></div><canvas id="y-cv" style="margin-top:8px"></canvas></div>
-    </div>
-    <div class="grid2">
-      <div class="panel">
-        <h3>Amplificatie</h3>
-        <div class="fields">
-          <div class="f"><label for="y-n0">Startkopieën</label><input id="y-n0" inputmode="decimal" value="300"></div>
-          <div class="f"><label for="y-eff">Efficiëntie</label><div class="inu"><input id="y-eff" inputmode="decimal" value="95"><span class="u">%</span></div></div>
-          <div class="f"><label for="y-cyc">Na cycli</label><input id="y-cyc" inputmode="numeric" value="30"></div>
-          <div class="f"><label for="y-goal">Doel (kopieën)</label><input id="y-goal" inputmode="decimal" value="1e10"></div>
-        </div>
-        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">300 kopieën ≈ 1 ng humaan genomisch DNA per autosomaal locus (zie DNA-kwantificatie).</p>
-        <h3 style="margin-top:18px">qPCR-efficiëntie uit verdunningsreeks <span class="example">voorbeeld</span></h3>
-        <div class="fields">
-          <div class="f"><label for="y-q0">Hoogste standaard (kopieën)</label><input id="y-q0" inputmode="decimal" value="1e6"></div>
-          <div class="f"><label for="y-qf">Verdunningsfactor</label><input id="y-qf" inputmode="decimal" value="10"></div>
-        </div>
-        <div class="f" style="margin-top:10px"><label for="y-cq">Cq-waarden, hoogste standaard eerst (per regel of met spaties)</label><textarea id="y-cq" rows="2">15,12 18,41 21,80 25,08 28,51</textarea></div>
-      </div>
-      <div class="result" id="y-amp"></div>
-    </div>
-  </div>
+  <!-- Het bewerkbare deel staat in src/tools/Pcrcyclus.vue (Vue); kop en bronregel blijven gewone HTML. -->
+  <div id="y-app"></div>
   <p class="src">Programma volgens NEB Taq-richtlijnen: initiële denaturatie 30 s bij 95 °C (kolonie-PCR 5 min), 25–35 cycli, annealing 15–60 s rond T<sub>m</sub> − 5 °C, extensie bij 68 °C met 1 min/kb (45–60 s onder 1 kb), eindextensie 5 min; T<sub>m</sub> van beide primers boven 45 °C en binnen 5 °C van elkaar. Primer-T<sub>m</sub>: nearest-neighbor-parameters van SantaLucia (PNAS 1998), zoutcorrectie ΔS + 0,368·(N−1)·ln[Na⁺] met [Na⁺]<sub>eq</sub> = [Na⁺] + 120·√([Mg²⁺] − [dNTP]) (von Ahsen e.a., Clin Chem 2001), zoals in Primer3. qPCR: E = 10<sup>−1/helling</sup> − 1, acceptabel 90–110% (helling −3,58 tot −3,10) en R² ≥ 0,98 (JoVE 54067).</p>
 </section>
 
@@ -1009,25 +871,8 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 <section class="tool" id="t-qpcr" data-tool="qpcr">
   <header class="tool-head"><h2>qPCR-analyse (ΔΔCt)</h2>
   <p>Relatieve genexpressie van een doelgen ten opzichte van een referentiegen en een kalibrator, met de 2<sup>−ΔΔCt</sup>-methode en de efficiëntie-gecorrigeerde Pfaffl-methode. Herhalingen: geef ze dezelfde monsternaam.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" data-expert=""><label for="qp-et">Efficiëntie doelgen</label><div class="inu"><input id="qp-et" inputmode="decimal" value="100"><span class="u">%</span></div></div>
-        <div class="f" data-expert=""><label for="qp-er">Efficiëntie referentiegen</label><div class="inu"><input id="qp-er" inputmode="decimal" value="100"><span class="u">%</span></div></div>
-        <div class="f"><label for="qp-cal">Kalibrator (controle)</label><select id="qp-cal" style="width:100%"></select></div>
-        <div class="f"><label for="qp-m">Grafiek toont</label><select id="qp-m" style="width:100%"><option value="auto">Automatisch</option><option value="livak">2^−ΔΔCt (Livak)</option><option value="pfaffl">Pfaffl</option></select></div>
-      </div>
-      <h3 style="margin-top:16px">Ct-waarden <span class="example">voorbeeld</span></h3>
-      <div class="tbl-wrap"><table id="qp-tbl" class="mini"><thead><tr><th>Monster</th><th class="num">Ct doelgen</th><th class="num">Ct referentiegen</th><th></th></tr></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:10px"><button type="button" id="qp-add">+ Rij</button></div>
-      <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:13.5px">Ct-export van het qPCR-apparaat inlezen</summary>
-        <div class="f" style="margin-top:8px"><label for="qp-imp">Plak de export (kolommen monster, target en Ct of Cq; met kopregel)</label><textarea id="qp-imp" rows="5" spellcheck="false" placeholder="Sample&#9;Target&#9;Cq&#10;Controle&#9;GAPDH&#9;20,1"></textarea></div>
-        <div class="row" style="margin-top:8px"><div class="f" data-expert=""><label for="qp-refname">Naam referentiegen in de export</label><input id="qp-refname" class="txt" value="GAPDH" style="width:140px"></div><button type="button" id="qp-impgo" style="align-self:flex-end">Inlezen</button></div><div id="qp-impmsg"></div>
-      </details>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Efficiëntie haal je uit een verdunningsreeks (PCR-cyclus → qPCR-efficiëntie). Laat beide op 100% voor de klassieke 2<sup>−ΔΔCt</sup>.</p>
-    </div>
-    <div class="result"><canvas id="qp-cv"></canvas><div id="qp-res"></div></div>
-  </div>
+  <!-- Het bewerkbare deel (velden, Ct-tabel, Ct-export inlezen en uitkomst) staat sinds S232 in src/tools/Qpcr.vue (host #qpc-app); de ids (qp-*) zijn gebleven. -->
+  <div id="qpc-app"></div>
   <p class="src">ΔCt = Ct<sub>doel</sub> − Ct<sub>ref</sub>; ΔΔCt = ΔCt<sub>monster</sub> − ΔCt<sub>kalibrator</sub>; fold change = 2<sup>−ΔΔCt</sup> (Livak &amp; Schmittgen, Methods 2001). Pfaffl: ratio = E<sub>doel</sub><sup>ΔCt doel (kalibrator − monster)</sup> / E<sub>ref</sub><sup>ΔCt ref (kalibrator − monster)</sup> (Pfaffl, Nucleic Acids Res 2001). Voorbeeld: het rekenvoorbeeld van CASRAI (controle 24,0/20,0; behandeld 21,5/20,2 → 6,5×).</p>
 </section>
 
@@ -1105,27 +950,8 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-transf" data-tool="transf">
   <header class="tool-head"><h2>Transformatie &amp; blauw-wit</h2>
   <p>Aantal transformanten, verhouding wit/blauw en transformatiefrequentie (transformanten per µg vector) uit je plaattellingen, voor je eigen ligatie en de controle.</p></header>
-  <div class="grid2">
-    <div class="stack">
-      <div class="panel">
-        <h3>Transformatie</h3>
-        <div class="fields">
-          <div class="f"><label for="tf-lv">Ligatievolume</label><div class="inu"><input id="tf-lv" inputmode="decimal" value="10"><span class="u">µL</span></div></div>
-          <div class="f"><label for="tf-vng">Vector in ligatie</label><div class="inu"><input id="tf-vng" inputmode="decimal" value="50"><span class="u">ng</span></div></div>
-          <div class="f"><label for="tf-used">Getransformeerd</label><div class="inu"><input id="tf-used" inputmode="decimal" value="1"><span class="u">µL ligatie</span></div></div>
-          <div class="f"><label for="tf-tot">Totaal na herstel (cellen + SOC)</label><div class="inu"><input id="tf-tot" inputmode="decimal" value="1040"><span class="u">µL</span></div></div>
-          <div class="f"><label for="tf-range">Telbare platen</label><select id="tf-range" style="width:100%"><option value="30-300">30–300 kolonies</option><option value="20-400">20–400 kolonies</option><option value="1-100000">Alle platen met kolonies</option></select></div>
-        </div>
-      </div>
-      <div class="panel">
-        <h3>Plaattellingen <span class="example">voorbeeld</span></h3>
-        <div class="tbl-wrap"><table id="tf-tbl" class="mini"><thead><tr><th>Experiment</th><th class="num">Uitgeplaat (µL)</th><th class="num">Blauw</th><th class="num">Wit</th><th></th></tr></thead><tbody></tbody></table></div>
-        <div class="row" style="margin-top:10px"><button type="button" id="tf-add">+ Plaat</button></div>
-        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Platen met dezelfde naam bij Experiment worden samen verwerkt. Heb je de rest geconcentreerd (centrifugeren, pellet in ±200 µL), vul dan het oorspronkelijke volume in dat op die plaat terechtkwam, bijvoorbeeld 930 µL.</p>
-      </div>
-    </div>
-    <div class="result" id="tf-out"></div>
-  </div>
+  <!-- bewerkbaar deel: src/tools/Transf.vue (host #tf-app) -->
+  <div id="tf-app"></div>
   <p class="src">Transformatie-efficiëntie = kolonies / µg DNA / fractie uitgeplaat (NEB FAQ C2925; iGEM Troubleshooting Transformations: 250 kolonies, 100 van 1000 µL, 0,05 ng → 5 × 10⁷ kve/µg). Wit = lacZα onderbroken door een insert; niet elke witte kolonie bevat het juiste insert en een blauwe kolonie kan soms toch een insert hebben (Promega pGEM-T Easy FAQ, TM042). Werkwijze en 5 ng vector per µL ligatie: Avans DNA toolbox, Lab 3–4 (electroporatie en blauw-witscreening).</p>
 </section>
 
@@ -2657,27 +2483,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-qplate" data-tool="qplate">
   <header class="tool-head"><h2>qPCR-plaatindeling</h2>
   <p>Zet monsters, standaardreeksen en NTC's automatisch in replicaten op een 96- of 384-wells qPCR-plaat, per doelgen gekleurd, met het aantal reacties per mastermix en een exporteerbare plaatlijst.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="qp2-fmt">Plaat</label><select id="qp2-fmt" style="width:100%"><option value="96">96-wells (8 × 12)</option><option value="384">384-wells (16 × 24)</option></select></div>
-        <div class="f"><label for="qp2-rep">Replicaten</label><input id="qp2-rep" inputmode="numeric" value="3"></div>
-        <div class="f" style="grid-column:1/-1"><label for="qp2-s">Monsters (komma-gescheiden)</label><div class="row" style="gap:6px"><input id="qp2-s" class="txt" value="Controle 1, Controle 2, Behandeld 1, Behandeld 2" style="flex:1;min-width:0"><button type="button" data-smp="qplate">Monsters…</button></div></div>
-        <div class="f" style="grid-column:1/-1"><label for="qp2-t">Doelgenen (komma-gescheiden)</label><input id="qp2-t" class="txt" value="GAPDH, IL6"></div>
-        <div class="f"><label for="qp2-std">Standaardreeks: aantal punten</label><input id="qp2-std" inputmode="numeric" value="0"></div>
-        <div class="f"><label for="qp2-ntc">NTC per doelgen</label><input id="qp2-ntc" inputmode="numeric" value="1"></div>
-        <div class="f"><label for="qp2-dir">Vullen per</label><select id="qp2-dir" style="width:100%"><option value="row">rij (A1, A2, …)</option><option value="col">kolom (A1, B1, …)</option></select></div>
-        <div class="f"><label for="qp2-mar">Marge mastermix</label><div class="inu"><input id="qp2-mar" inputmode="decimal" value="10"><span class="u">%</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Elk doelgen begint op een nieuwe rij (of kolom), zodat je per gen één mastermix met een multichannelpipet kunt verdelen. De mix zelf reken je uit met het Pipetteerschema (sjabloon qPCR).</p>
-      <div class="row" style="margin-top:12px;gap:10px;align-items:flex-end">
-        <div class="f"><label for="qp2-exp">Exportvorm plaatlijst</label><select id="qp2-exp"><option value="eigen">eigen tabel (Well, Monster, Doel, Taak)</option><option value="abi">Applied Biosystems (Well Position, Sample Name, Target Name, Task)</option><option value="cfx">Bio-Rad CFX (Well, Target, Content, Sample)</option></select></div>
-        <button type="button" id="qp2-dl">Plaatlijst downloaden</button>
-      </div>
-      <p id="qp2-msg" style="font-size:13px;color:var(--muted);margin:8px 0 0">Welke kolommen de qPCR-software bij het importeren verwacht, verschilt per versie: kijk in het importvenster na hoe de kolommen worden toegewezen.</p>
-    </div>
-    <div class="result"><canvas id="qp2-cv"></canvas><div class="pic-bar" data-picbar="qp2"></div><div id="qp2-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel (velden, tekening, mastermixen, export) staat in src/tools/Qplate.vue (Vue);
+       kop, plaatontwerper (#qp2-pld, eigen DOM-widget) en bronregel blijven gewone HTML. -->
+  <div id="qp-app"></div>
   <div class="panel" style="margin-top:14px">
     <h3 style="margin:0 0 8px;font-size:15px">De plaat bijstellen</h3>
     <p style="font-size:13px;color:var(--muted);margin:0 0 10px;max-width:80ch">Hieronder staat dezelfde plaat in de plaatontwerper. Je kunt er putjes bij verven, leeghalen of een andere naam geven; de tekening, de mastermixen en de plaatlijst volgen meteen. Verander je hierboven een instelling, dan wordt de plaat opnieuw gevuld en gaan je eigen wijzigingen verloren.</p>
@@ -3533,54 +3341,7 @@ calc.telkamer=function(){};
 calc.teller=function(){};
 
 /* ================= DNA ================= */
-calc.dna=function(){
-  /* A260 */
-  const a260=num($('#n-a260').value), a280=num($('#n-a280').value), a230=num($('#n-a230').value), a320=num($('#n-a320').value)||0;
-  const f=num($('#n-type').value), df=num($('#n-df').value)||1, pl=num($('#n-pl').value)||1, v=num($('#n-vol').value);
-  const out=$('#n-out');
-  if(!isFinite(a260)){ out.innerHTML=note('info','Vul A₂₆₀ in.'); }
-  else{
-    const c=(a260-a320)*f*df/pl;
-    if(a260-a320<0){ out.innerHTML=note('warn','A₂₆₀ is lager dan A₃₂₀; controleer de blanco en de meting.'); }
-    else {
-    const rows=[], notes=[];
-    const isRNA=f===40, lo=isRNA?1.9:1.8, hi=isRNA?2.2:2.0;
-    if(isFinite(a280)&&a280>0&&!(a280-a320>0)) notes.push(note('warn','A₂₈₀ is niet groter dan A₃₂₀: de verhouding 260/280 is niet te berekenen.'));
-    if(isFinite(a280)&&a280-a320>0){ const r=(a260-a320)/(a280-a320); const ok=r>=lo&&r<=hi;
-      rows.push(['A₂₆₀/A₂₈₀',`<span class="chip ${ok?'ok':r<lo?'bad':'warn'}">${fmt(r,2)}</span>`]);
-      if(r<lo) notes.push(note('bad','260/280 te laag: wijst op eiwit- of fenolverontreiniging.'));
-      else if(r>hi) notes.push(note('warn',isRNA?'260/280 hoger dan verwacht.':'260/280 hoog: mogelijk RNA in je DNA-extract.'));
-    }
-    if(isFinite(a230)&&a230>0&&!(a230-a320>0)) notes.push(note('warn','A₂₃₀ is niet groter dan A₃₂₀: de verhouding 260/230 is niet te berekenen.'));
-    if(isFinite(a230)&&a230-a320>0){ const r=(a260-a320)/(a230-a320); const ok=r>=2.0;
-      rows.push(['A₂₆₀/A₂₃₀',`<span class="chip ${ok?'ok':r>=1.8?'warn':'bad'}">${fmt(r,2)}</span>`]);
-      if(!ok) notes.push(note(r>=1.8?'warn':'bad','260/230 lager dan 2,0: mogelijk zouten (guanidine), koolhydraten of fenol van de extractie.'));
-    }
-    if(isFinite(v)) rows.push(['Opbrengst in '+fmt(v,0)+' µL',sig(c*v/1000,3)+' µg']);
-    out.innerHTML=`<div class="lbl">Concentratie</div><div class="big">${sig(c,3)} <small>ng/µL</small></div>`+kv(rows)+notes.join('')+`<div class="formula">c = (A₂₆₀ − A₃₂₀) × ${f} × ${fmt(df,1)} / ${fmt(pl,2)} cm · ratio's: (A₂₆₀ − A₃₂₀) / (A₂ₓ₀ − A₃₂₀)</div>`; }
-  }
-  /* normalize */
-  const mc=num($('#m-c').value), ng=num($('#m-ng').value), mv=num($('#m-v').value);
-  const mo=$('#m-out');
-  if(isFinite(mc)&&isFinite(ng)&&isFinite(mv)&&mc>0&&ng>0&&mv>0){
-    const vd=ng/mc, w=mv-vd;
-    let h=`<div class="lbl">Pipetteer</div><div class="big">${vol(vd)} <small>DNA</small></div>`;
-    h+=kv([['Water / TE',w>=0?vol(w):'–'],['Totaal',vol(mv)],['Eindconcentratie',sig(ng/mv,3)+' ng/µL'],['≈ diploïde genomen',fmt(ng*1000/6.6,0)],['≈ kopieën per autosomaal locus',fmt(ng*1000/6.6*2,0)]]);
-    if(w<0) h+=note('bad',`Het extract is te verdund: ${vol(vd)} past niet in ${vol(mv)}. Maximaal haalbaar: ${sig(mc*mv,3)} ng. Concentreer het extract of gebruik het maximale volume.`);
-    else if(vd<1){ const sub=Math.pow(10,Math.ceil(Math.log10(1/vd))); h+=note('warn',`Minder dan 1 µL is onnauwkeurig. Verdun het extract eerst 1:${sub} (${sig(mc/sub,3)} ng/µL); pipetteer dan ${vol(vd*sub)}.`); }
-    if(ng<0.1) h+=note('warn','Onder ca. 100 pg nemen stochastische effecten toe (allel-drop-out, onbalans).');
-    mo.innerHTML=h;
-  } else mo.innerHTML=note('info','Vul concentratie, gewenste input en volume in.');
-  /* ng-pmol */
-  const png=num($('#p-ng').value), bp=num($('#p-bp').value), mwb=num($('#p-t').value), pvol=num($('#p-vol').value);
-  const po=$('#p-out');
-  if(isFinite(png)&&isFinite(bp)&&bp>0){
-    const mw=bp*mwb, pmol=png*1000/mw, copies=pmol*1e-12*6.02214076e23;
-    const rows=[['Molmassa',sci(mw,3)+' g/mol'],['Hoeveelheid',sig(pmol*1000,3)+' fmol'],['Kopieën',sci(copies,3)]];
-    if(isFinite(pvol)&&pvol>0) rows.push(['Concentratie',sig(pmol/pvol*1000,3)+' nM'],['Kopieën per µL',sci(copies/pvol,3)]);
-    po.innerHTML=`<div class="lbl">Hoeveelheid</div><div class="big">${sig(pmol,3)} <small>pmol</small></div>`+kv(rows)+`<div class="formula">pmol = ng × 1000 / (lengte × ${mwb})</div>`;
-  } else po.innerHTML=note('info','Vul massa en lengte in.');
-};
+calc.dna=function(){};   /* de component (src/tools/Dna.vue) rekent zelf */
 
 /* ================= PCR ================= */
 const QPRE={
@@ -3642,62 +3403,7 @@ $('#q-copy').addEventListener('click',async()=>{ try{ await navigator.clipboard.
 const GELR=[[0.5,2000,50000],[0.6,1000,20000],[0.7,800,12000],[0.8,800,10000],[0.9,600,10000],[1.0,400,8000],[1.2,300,7000],[1.5,200,3000],[2.0,100,2000],[3.0,25,1000],[4.0,10,500],[5.0,10,300]];
 const LADDERS={'k1k13':[10000,8000,6000,5000,4000,3000,2500,2000,1500,1000,750,500,250],'k1kp':[25000,10000,8000,6000,5000,4000,3000,2500,2000,1500,1000,750,500,250],'h100':[1500,1000,900,800,700,600,500,400,300,200,100],'h100p':[3000,1500,1000,900,800,700,600,500,400,300,200,100],'b50':[500,400,300,250,200,150,100,50],'fast1':[1200,700,500,300,200,100],'neb1k':[10000,8000,6000,5000,4000,3000,2000,1500,1000,500],'neb100':[1517,1200,1000,900,800,700,600,500,400,300,200,100],'ppp':[250,150,100,75,50,37,25,20,15,10],'prplus':[250,130,100,70,55,35,25,15,10],'100':[1000,900,800,700,600,500,400,300,200,100],'100p':[3000,2000,1500,1200,1000,900,800,700,600,500,400,300,200,100],'1k':[10000,8000,6000,5000,4000,3500,3000,2500,2000,1500,1000,750,500,250]};
 const LEX={'100':[14,17,20.5,24.5,29,34,40,47.5,56,67]};
-function buildLadder(){ const k=$('#b-ladder').value; const ex=LEX[k]||[]; $('#b-tbl tbody').innerHTML=LADDERS[k].map((bp,i)=>`<tr><td class="num">${bp.toLocaleString('nl-NL')}</td><td><input data-bp="${bp}" inputmode="decimal" value="${ex[i]!=null?String(ex[i]).replace('.',','):''}" style="text-align:right;width:110px;margin-left:auto;display:block"></td></tr>`).join(''); }
-$('#b-ladder').addEventListener('change',()=>{ buildLadder(); calc.gel(); });
-calc.gel=function(){
-  const pct=num($('#g-pct').value), gv=num($('#g-vol').value), size=num($('#g-size').value);
-  const bs=num($('#g-bs').value), bw=num($('#g-bw').value), bv=num($('#g-bv').value);
-  const out=$('#g-out');
-  const g=pct/100*gv; const st=bw/bs*bv;
-  let h=`<div class="lbl">Agarose afwegen</div><div class="big">${mass(g)}</div>`;
-  const bname=$('#g-bs').selectedOptions[0].text;
-  h+=kv([['In loopbuffer',fmt(gv,0)+' mL '+(bw===1?'1X':'0,5X')],[`${bname} voor ${fmt(bv,0)} mL`,vol(st*1000)],['+ water',vol((bv-st)*1000)]]);
-  let rec='';
-  if(isFinite(size)&&size>0){
-    const fits=GELR.filter(r=>size>=r[1]&&size<=r[2]);
-    let best=null,bd=1e9; fits.forEach(r=>{ const mid=(Math.log10(r[1])+Math.log10(r[2]))/2; const d=Math.abs(Math.log10(size)-mid); if(d<bd){bd=d;best=r;} });
-    rec=`<div style="margin:12px 0 6px;font-weight:600;font-size:14px">Geschikt voor ${size.toLocaleString('nl-NL')} bp</div><div class="tbl-wrap"><table><thead><tr><th class="num">Gel %</th><th class="num">Scheidt (bp)</th><th></th></tr></thead><tbody>`+
-      GELR.map(r=>{ const inR=size>=r[1]&&size<=r[2]; return `<tr class="${r===best?'hl':inR?'':'dim'}"><td class="num">${fmt(r[0],1)}</td><td class="num">${r[1].toLocaleString('nl-NL')}–${r[2].toLocaleString('nl-NL')}</td><td>${r===best?'<span class="chip ok">beste keus</span>':inR?'<span class="chip info">kan</span>':''}</td></tr>`; }).join('')+`</tbody></table></div>`;
-    if(isFinite(pct)){ const cur=GELR.find(r=>Math.abs(r[0]-pct)<1e-9); if(cur&&!(size>=cur[1]&&size<=cur[2])) h+=note('warn',`${fmt(pct,1)}% scheidt ${cur[1]}–${cur[2]} bp; je fragment valt erbuiten.`); }
-  }
-  out.innerHTML=h+rec;
-  calcBands();
-};
-function calcBands(){
-  const pts=$$('#b-tbl input').map(i=>({bp:+i.dataset.bp,d:num(i.value)})).filter(p=>isFinite(p.d));
-  const unk=list($('#b-unk').value.replace(/(\d),(\d)/g,'$1.$2'));
-  const res=$('#b-res'), cv=$('#b-cv'), ctx=cv.getContext('2d');
-  const cs=getComputedStyle(document.documentElement), C=k=>cs.getPropertyValue(k).trim();
-  const dpr=window.devicePixelRatio||1, W=420,H=260; cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.clearRect(0,0,W,H);
-  if(pts.length<2){ res.innerHTML=note('info','Vul minstens twee ladderafstanden in.'); return; }
-  const n=pts.length, xs=pts.map(p=>p.d), ys=pts.map(p=>Math.log10(p.bp));
-  const mx=xs.reduce((a,b)=>a+b)/n, my=ys.reduce((a,b)=>a+b)/n;
-  let sxy=0,sxx=0,syy=0; for(let i=0;i<n;i++){ sxy+=(xs[i]-mx)*(ys[i]-my); sxx+=(xs[i]-mx)**2; syy+=(ys[i]-my)**2; }
-  const b=sxy/sxx, a=my-b*mx, r2=(sxy*sxy)/(sxx*syy);
-  const sp=pts.slice().sort((p,q)=>p.d-q.d); const local=d=>{ if(d<sp[0].d||d>sp[sp.length-1].d) return 10**(a+b*d); let i=0; while(i<sp.length-2&&d>sp[i+1].d) i++; const p=sp[i],q=sp[i+1]; if(q.d===p.d) return p.bp; return 10**(Math.log10(p.bp)+(d-p.d)/(q.d-p.d)*(Math.log10(q.bp)-Math.log10(p.bp))); };
-  const est=unk.map(d=>({d,bp:local(d)}));
-  cv._data={head:['type','afstand (mm)','grootte (bp)'],rows:[...pts.map(p=>['ladder',p.d,p.bp]),...est.map(e=>['onbekend',e.d,Math.round(e.bp)])]};
-  /* plot */
-  const pad={l:52,r:12,t:12,b:34};
-  const allx=xs.concat(unk), xmin=Math.min(...allx)*0.9, xmax=Math.max(...allx)*1.05;
-  const ally=ys.concat(est.map(e=>Math.log10(e.bp))), ymin=Math.floor(Math.min(...ally)*10)/10, ymax=Math.ceil(Math.max(...ally)*10)/10;
-  const X=v=>pad.l+(v-xmin)/(xmax-xmin)*(W-pad.l-pad.r), Y=v=>H-pad.b-(v-ymin)/(ymax-ymin)*(H-pad.t-pad.b);
-  ctx.font='11px '+C('--font-ui'); ctx.fillStyle=C('--muted'); ctx.strokeStyle=C('--line'); ctx.lineWidth=1;
-  [50,100,200,300,500,1000,2000,3000,5000,10000].forEach(t=>{ const lv=Math.log10(t); if(lv<ymin||lv>ymax) return; ctx.beginPath(); ctx.moveTo(pad.l,Y(lv)); ctx.lineTo(W-pad.r,Y(lv)); ctx.stroke(); ctx.textAlign='right'; ctx.textBaseline='middle'; ctx.fillText(t>=1000?(t/1000)+' kb':t,pad.l-6,Y(lv)); });
-  ctx.textAlign='center'; ctx.textBaseline='top';
-  const raw=(xmax-xmin)/7||1, pw=10**Math.floor(Math.log10(raw)), fr=raw/pw, step=(fr<1.5?1:fr<3?2:fr<7?5:10)*pw; for(let t=Math.ceil(xmin/step)*step,k=0;t<=xmax&&k<40;t+=step,k++){ ctx.fillText(String(Number(t.toPrecision(6))).replace('.',','),X(t),H-pad.b+6); }
-  ctx.fillText('afstand (mm)',(W+pad.l)/2,H-14);
-  ctx.strokeStyle=C('--accent'); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(X(xmin),Y(a+b*xmin)); ctx.lineTo(X(xmax),Y(a+b*xmax)); ctx.save(); ctx.rect(pad.l,pad.t,W-pad.l-pad.r,H-pad.t-pad.b); ctx.clip(); ctx.stroke(); ctx.restore();
-  ctx.fillStyle=C('--ink'); pts.forEach(p=>{ ctx.beginPath(); ctx.arc(X(p.d),Y(Math.log10(p.bp)),3.5,0,7); ctx.fill(); });
-  ctx.fillStyle=C('--bad'); est.forEach(e=>{ const y=Math.log10(e.bp); ctx.beginPath(); ctx.arc(X(e.d),Y(y),5,0,7); ctx.fill(); });
-  /* text */
-  const inRange=e=>e.bp>=Math.min(...pts.map(p=>p.bp))&&e.bp<=Math.max(...pts.map(p=>p.bp));
-  res.innerHTML=`<div class="lbl" style="margin-top:10px">Geschatte grootte</div>`+(est.length?`<div class="big">${est.map(e=>Math.round(e.bp).toLocaleString('nl-NL')).join(' · ')} <small>bp</small></div>`:'<p>Vul afstanden van onbekende banden in.</p>')+
-    kv([['R²',`<span class="chip ${r2>=0.98?'ok':'warn'}">${fmt(r2,4)}</span>`],['Curve',`log₁₀(bp) = ${fmt(a,3)} ${b<0?'−':'+'} ${fmt(Math.abs(b),4)}·d`]])+
-    (est.some(e=>!inRange(e))?note('warn','Een band valt buiten het bereik van je ladder; de schatting is dan onbetrouwbaar.'):'')+
-    (r2<0.98?note('warn','R² onder 0,98: gebruik alleen ladderbanden rond je onbekende band.'):'');
-}
+calc.gel=function(){};   /* de component (src/tools/Gel.vue) rekent zelf; LADDERS, LEX en GELR blijven hier voor Gelplanner en Gelfoto */
 
 /* ================= LIGATIE ================= */
 calc.ligatie=function(){
@@ -3882,61 +3588,16 @@ function tmNN(seq,naMM,mgMM,dntpMM,primerUM){
   const C=primerUM*1e-6, x=1; /* primer in overmaat t.o.v. template (PCR): ln(C_primer) */
   return H*1000/(S+1.987*Math.log(C/x))-273.15;
 }
-function primerInfo(s){
+function primerInfo(s,ion){
   const seq=String(s).toUpperCase().replace(/[^A-Z]/g,''); const N=seq.length; if(!N) return null;
   const c=b=>(seq.match(new RegExp(b,'g'))||[]).length; const A=c('A'),T=c('T'),G=c('G'),C=c('C'); const other=N-A-T-G-C;
   const gc=G+C; const basic=N<14?4*gc+2*(A+T):64.9+41*(gc-16.4)/N;
-  const nn=tmNN(seq,num($('#y-na').value)||0,num($('#y-mg').value)||0,num($('#y-dntp').value)||0,num($('#y-pc').value)||0.2);
+  const io=ion||{na:num($('#y-na').value)||0,mg:num($('#y-mg').value)||0,dntp:num($('#y-dntp').value)||0,pc:num($('#y-pc').value)||0.2};
+  const nn=tmNN(seq,io.na,io.mg,io.dntp,io.pc);
   return {seq,N,gc,gcp:gc/N*100,tm:isFinite(nn)?nn:basic,basic,nn,other,clamp:/[GC]$/.test(seq),rule:isFinite(nn)?'Nearest-neighbor (SantaLucia 1998)':(N<14?'4·GC + 2·AT':'64,9 + 41·(GC − 16,4)/N')};
 }
 const mmss2=s=>{ s=Math.round(s); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60; return h?`${h} u ${String(m).padStart(2,'0')} min`:m?`${m}:${String(x).padStart(2,'0')} min`:`${x} s`; };
-let yTa=NaN, yProgText='';
-calc.pcrcyclus=function(){
-  /* primers */
-  const F=primerInfo($('#y-f').value), R=primerInfo($('#y-r').value); const out=$('#y-out');
-  if(F&&R){
-    const chip=(ok,t)=>`<span class="chip ${ok?'ok':'warn'}">${t}</span>`;
-    const d=Math.abs(F.tm-R.tm); yTa=Math.min(F.tm,R.tm)-5;
-    let h=`<div class="lbl">Startwaarde annealing</div><div class="big">${fmt(yTa,1)} <small>°C</small></div>`;
-    h+=`<div class="tbl-wrap"><table class="mini"><thead><tr><th></th><th class="num">Lengte</th><th class="num">GC</th><th class="num">T<sub>m</sub></th><th class="num">GC-formule</th></tr></thead><tbody>`+
-      [['Forward',F],['Reverse',R]].map(([n,p])=>`<tr><td>${n}</td><td class="num">${chip(p.N>=18&&p.N<=40,p.N+' nt')}</td><td class="num">${chip(p.gcp>=40&&p.gcp<=60,fmt(p.gcp,0)+'%')}</td><td class="num">${chip(p.tm>45,fmt(p.tm,1)+' °C')}</td><td class="num" style="color:var(--muted)">${fmt(p.basic,1)} °C</td></tr>`).join('')+`</tbody></table></div>`;
-    h+=kv([['ΔT<sub>m</sub>',chip(d<=5,fmt(d,1)+' °C')],['Formule',F.rule]]);
-    const notes=[]; if(d>5) notes.push(note('warn','T<sub>m</sub> van de primers verschilt meer dan 5 °C.')); if(F.tm<=45||R.tm<=45) notes.push(note('warn','Een T<sub>m</sub> onder 45 °C is laag voor PCR.')); [F,R].forEach((p,i)=>{ if(p.gcp<40||p.gcp>60) notes.push(note('warn',`${i?'Reverse':'Forward'}: GC-gehalte buiten 40–60%.`)); if(p.other) notes.push(note('info',`${i?'Reverse':'Forward'}: ${p.other} niet-ACGT-teken(s) genegeerd.`)); });
-    if(yTa>=65) notes.push(note('info','Annealing ≥ 65 °C: een 2-staps PCR (annealing en extensie samen) is mogelijk.'));
-    out.innerHTML=h+notes.join('')+`<div class="formula">T<sub>a</sub> = laagste T<sub>m</sub> − 5 °C</div>`;
-    $('#y-ta').placeholder=fmt(yTa,1)+' (auto)';
-  } else out.innerHTML=note('info','Vul beide primersequenties in.');
-  /* program */
-  const col=$('#y-type').value==='col', bp=num($('#y-bp').value), n=Math.round(num($('#y-n').value)||30);
-  const dT=num($('#y-dt').value)||95, dS=num($('#y-ds').value)||30, taIn=num($('#y-ta').value), Ta=isFinite(taIn)?taIn:(isFinite(yTa)?Math.round(yTa*2)/2:55), aS=num($('#y-as').value)||30;
-  const eT=num($('#y-et').value)||68, esIn=num($('#y-es').value), eS=isFinite(esIn)?esIn:(isFinite(bp)?(bp<1000?60:Math.ceil(bp/1000*60/15)*15):60), ramp=num($('#y-ramp').value)||3;
-  const iS=col?300:30, fS=300;
-  const steps=[['Initiële denaturatie',dT,iS,false],['Denaturatie',dT,dS,true],['Annealing',Ta,aS,true],['Extensie',eT,eS,true],['Eindextensie',eT,fS,false],['Bewaren',4,Infinity,false]];
-  const rampT=(a,b)=>Math.abs(a-b)/ramp;
-  const cyc=dS+aS+eS+rampT(dT,Ta)+rampT(Ta,eT)+rampT(eT,dT);
-  const total=rampT(25,dT)+iS+n*cyc-rampT(eT,dT)+fS+rampT(eT,4);
-  let h=`<div class="lbl">Totale looptijd (schatting)</div><div class="big">${mmss2(total)}</div>`;
-  h+=`<div class="tbl-wrap"><table class="mini"><thead><tr><th>Stap</th><th class="num">°C</th><th class="num">Tijd</th><th></th></tr></thead><tbody>`+steps.map(s=>`<tr${s[3]?' class="hl"':''}><td>${s[0]}</td><td class="num">${fmt(s[1],1)}</td><td class="num">${s[2]===Infinity?'∞':mmss2(s[2])}</td><td>${s[0]==='Denaturatie'?`<span class="chip info">${n}×</span>`:''}</td></tr>`).join('')+`</tbody></table></div>`;
-  const warns=[]; if(n<25||n>35) warns.push(note('info','25–35 cycli is gebruikelijk; tot 45 alleen voor zeer weinig template.')); if(aS<15||aS>60) warns.push(note('warn','Annealingtijd buiten 15–60 s.'));
-  h+=warns.join('')+`<div class="row" style="margin-top:8px"><button type="button" id="y-copy">Kopieer programma</button><span id="y-copied" style="font-size:13px;color:var(--muted)"></span></div>`;
-  $('#y-prog').innerHTML=h;
-  yProgText=['Stap\tTemperatuur (°C)\tTijd\tCycli',...steps.map(s=>`${s[0]}\t${s[1]}\t${s[2]===Infinity?'∞':mmss2(s[2])}\t${s[3]?n:1}`)].join('\n');
-  $('#y-copy').onclick=async()=>{ try{ await navigator.clipboard.writeText(i18nTSV(yProgText)); $('#y-copied').textContent='Gekopieerd.'; }catch(e){ $('#y-copied').textContent='Kopiëren geblokkeerd.'; } };
-  drawProfile($('#y-cv'),steps,n);
-  /* amplification */
-  const N0=num($('#y-n0').value), E=(num($('#y-eff').value)||100)/100, c=num($('#y-cyc').value), goal=num($('#y-goal').value);
-  let a='';
-  if(isFinite(N0)&&N0>0&&isFinite(c)){ const Nn=N0*(1+E)**c; a+=`<div class="lbl">Theoretisch na ${fmt(c,0)} cycli</div><div class="big">${sci(Nn,3)} <small>kopieën</small></div>`+kv([['Vermenigvuldiging',sci((1+E)**c,3)+'×'],['Per cyclus',fmt(1+E,3)+'×'],...(isFinite(goal)&&goal>N0?[[`Cycli tot ${sci(goal,2)}`,fmt(Math.log(goal/N0)/Math.log(1+E),1)]]:[])])+note('info','In de praktijk vlakt de reactie af (plateau) als primers, dNTP\'s of polymerase opraken; de formule geldt alleen in de exponentiële fase.'); }
-  const cq=nums($('#y-cq').value), q0=num($('#y-q0').value), qf=num($('#y-qf').value);
-  if(cq.length>=3&&q0>0&&qf>1){
-    const lq=cq.map((_,i)=>Math.log10(q0/qf**i)); const r=linreg(lq,cq); const eff=(10**(-1/r.b)-1)*100; const ok=eff>=90&&eff<=110;
-    a+=`<div class="lbl" style="margin-top:14px">qPCR-efficiëntie</div><div class="big">${fmt(eff,1)} <small>%</small> <span class="chip ${ok?'ok':'warn'}" style="vertical-align:middle">${ok?'binnen 90–110%':'buiten 90–110%'}</span></div>`+
-      kv([['Helling',fmt(r.b,3)],['Intercept',fmt(r.a,2)],['R²',`<span class="chip ${r.r2>=0.98?'ok':'warn'}">${fmt(r.r2,4)}</span>`],['Amplificatiefactor',fmt(10**(-1/r.b),3)]])+
-      (eff>110?note('warn','> 110% wijst vaak op remming in de geconcentreerde standaarden, primer-dimeren of pipetteerfouten in de reeks.'):eff<90?note('warn','< 90%: controleer primerontwerp, remmers en pipetteerwerk.'):'')+
-      `<div class="formula">E = 10<sup>−1/helling</sup> − 1</div>`;
-  }
-  $('#y-amp').innerHTML=a||note('info','Vul startkopieën en cycli in.');
-};
+calc.pcrcyclus=function(){};
 function drawProfile(cv,steps,n){
   const W=480,H=210,dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=H*dpr; cv.style.width='100%'; cv.style.maxWidth=W+'px';
   const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
@@ -4474,11 +4135,7 @@ document.addEventListener('click',e=>{
 });
 
 /* ================= qPCR ΔΔCt ================= */
-const QPDATA=[['Controle',23.9,20.0],['Controle',24.0,20.1],['Controle',24.1,19.9],['Behandeld',21.4,20.2],['Behandeld',21.5,20.1],['Behandeld',21.6,20.3]];
-const qpRow=r=>`<tr><td><input class="txt" data-n value="${esc(r[0]??'')}" style="width:130px"></td><td>${inp(r[1],80,'data-t')}</td><td>${inp(r[2],80,'data-r')}</td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
-$('#qp-tbl tbody').innerHTML=QPDATA.map(qpRow).join('');
-$('#qp-add').addEventListener('click',()=>$('#qp-tbl tbody').insertAdjacentHTML('beforeend',qpRow(['','',''])));
-$('#qp-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); calc.qpcr(); }});
+/* de tool zelf staat sinds S232 in src/tools/Qpcr.vue; barChart() blijft hier staan */
 function barChart(cv,cats,vals,lo,hi,o){
   const W=480,H=300,dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=H*dpr; cv.style.width='100%'; cv.style.maxWidth=W+'px';
   const x=cv.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,W,H); const cs=getComputedStyle(document.documentElement), C=k=>cs.getPropertyValue(k).trim();
@@ -4494,47 +4151,13 @@ function barChart(cv,cats,vals,lo,hi,o){
   x.save(); x.translate(14,(H-pad.b+pad.t)/2); x.rotate(-Math.PI/2); x.textAlign='center'; x.textBaseline='middle'; x.fillStyle=C('--muted'); x.font='12px '+C('--font-ui'); x.fillText(o.ylabel,0,0); x.restore();
   cv._data={head:['monster',o.ylabel,'ondergrens','bovengrens'],rows:cats.map((c,i)=>[c,vals[i],lo[i],hi[i]])};
 }
-calc.qpcr=function(){
-  const eT=num($('#qp-et').value)||100, eR=num($('#qp-er').value)||100, Et=1+eT/100, Er=1+eR/100;
-  const groups=[]; const byName={};
-  $$('#qp-tbl tbody tr').forEach(tr=>{ const n=(tr.querySelector('[data-n]').value||'').trim(), t=num(tr.querySelector('[data-t]').value), r=num(tr.querySelector('[data-r]').value); if(!n||!isFinite(t)||!isFinite(r)) return; if(!byName[n]){ byName[n]={n,t:[],r:[]}; groups.push(byName[n]); } byName[n].t.push(t); byName[n].r.push(r); });
-  const sel=$('#qp-cal'), cur=sel.value; sel.innerHTML=groups.map(g=>`<option>${esc(g.n)}</option>`).join(''); if(groups.some(g=>g.n===cur)) sel.value=cur;
-  const res=$('#qp-res'), cv=$('#qp-cv');
-  if(groups.length<2){ res.innerHTML=note('info','Vul Ct-waarden in voor minstens twee monsters (kalibrator en een testmonster).'); return; }
-  groups.forEach(g=>{ g.mt=mean(g.t); g.mr=mean(g.r); const d=g.t.map((t,i)=>t-g.r[i]); g.dct=mean(d); g.sd=sd(d); });
-  const cal=byName[sel.value]||groups[0];
-  groups.forEach(g=>{ g.ddct=g.dct-cal.dct; g.fc=2**(-g.ddct); g.lo=2**(-(g.ddct+g.sd)); g.hi=2**(-(g.ddct-g.sd)); g.pf=Et**(cal.mt-g.mt)/Er**(cal.mr-g.mr); });
-  const mode=$('#qp-m').value, usePf=mode==='pfaffl'||(mode==='auto'&&(eT!==100||eR!==100));
-  barChart(cv,groups.map(g=>g.n),groups.map(g=>usePf?g.pf:g.fc),groups.map(g=>usePf?NaN:g.lo),groups.map(g=>usePf?NaN:g.hi),{ylabel:usePf?'relatieve expressie (Pfaffl)':'fold change (2^−ΔΔCt)',cal:cal.n});
-  const test=groups.filter(g=>g!==cal);
-  let h=`<div class="lbl" style="margin-top:8px">${ud(test[0].n)} t.o.v. ${ud(cal.n)}</div><div class="big">${sig(usePf?test[0].pf:test[0].fc,3)}<small>× ${usePf?'(Pfaffl)':'(2<sup>−ΔΔCt</sup>)'}</small></div>`;
-  h+=`<div class="tbl-wrap"><table class="mini"><thead><tr><th>Monster</th><th class="num">n</th><th class="num">Ct doel</th><th class="num">Ct ref</th><th class="num">ΔCt</th><th class="num">SD</th><th class="num">ΔΔCt</th><th class="num">2^−ΔΔCt</th><th class="num">Bereik</th><th class="num">Pfaffl</th><th class="num">log₂ FC</th></tr></thead><tbody>`+
-    groups.map(g=>`<tr${g===cal?' class="dim"':''}><td>${ud(g.n)}${g===cal?' (kalibrator)':''}</td><td class="num">${g.t.length}</td><td class="num">${fmt(g.mt,2)}</td><td class="num">${fmt(g.mr,2)}</td><td class="num">${fmt(g.dct,2)}</td><td class="num">${g.t.length>1?fmt(g.sd,2):''}</td><td class="num">${fmt(g.ddct,2)}</td><td class="num">${sig(g.fc,3)}</td><td class="num">${g.t.length>1?sig(g.lo,3)+' – '+sig(g.hi,3):''}</td><td class="num">${sig(g.pf,3)}</td><td class="num">${fmt(Math.log2(usePf?g.pf:g.fc),2)}</td></tr>`).join('')+`</tbody></table></div>`;
-  const n=[];
-  [['doelgen',eT],['referentiegen',eR]].forEach(([k,e])=>{ if(e<90||e>110) n.push(note('warn',`Efficiëntie ${k} ${fmt(e,0)}% valt buiten 90–110%; gebruik de Pfaffl-uitkomst en controleer de assay.`)); });
-  if(groups.some(g=>g.t.length<3)) n.push(note('info','Minder dan 3 herhalingen per monster: de spreiding is onbetrouwbaar.'));
-  res.innerHTML=h+n.join('')+`<div class="formula">Bereik = 2<sup>−(ΔΔCt ± SD)</sup>; doe statistiek op ΔCt-waarden, niet op fold changes.</div>`;
-};
 
 /* ================= GROEICURVE =================
    Verhuisd naar src/tools/Groei.vue: de metingen (gc-tbl, een <lk-etable>), de velden, bestWindow()
    en de uitkomst. src/main.js zet calc.groei zo dat de tekening opnieuw wordt gemaakt. */
 calc.groei=function(){};
 
-/* ================= FORENSISCHE KWANTIFICATIE ================= */
-function fqCalc(){
-  const S=num($('#fq-s').value), L=num($('#fq-l').value), Yc=num($('#fq-y').value), ng=num($('#fq-ng').value), V=num($('#fq-v').value), out=$('#fq-out');
-  if(!(S>0)){ out.innerHTML=note('info','Vul minstens de concentratie van het kleine autosomale doel in.'); return; }
-  let h=''; const rows=[];
-  if(L>0){ const DI=S/L; const cls=DI<=1?['ok','intact']:DI<=10?['warn','matig gedegradeerd']:['bad','sterk gedegradeerd']; h+=`<div class="lbl">Degradatie-index</div><div class="big">${fmt(DI,2)} <span class="chip ${cls[0]}" style="vertical-align:middle">${cls[1]}</span></div>`; rows.push(['DI = klein / groot',fmt(DI,2)]);
-    if(DI>1) h+=note(DI>10?'bad':'warn',DI>10?'Sterke degradatie: een volledig STR-profiel is onwaarschijnlijk; overweeg mini-STR\'s of andere methoden.':'Mogelijke degradatie. Grote STR-loci vallen eerder weg; meer input kan helpen. Remming geeft een vergelijkbaar patroon, dus kijk ook naar de IPC.'); }
-  else h+=`<div class="lbl">Degradatie-index</div><div class="big">–</div>`+note('info','Geen groot autosomaal doel ingevuld (of niet gedetecteerd): DI niet te berekenen.');
-  if(isFinite(Yc)){ if(Yc>0){ const fem=Math.max(0,S-Yc); rows.push(['Mannelijk DNA (Y)',sig(Yc,3)+' ng/µL'],['Vrouwelijk deel (schatting)',sig(fem,3)+' ng/µL'],['Man : vrouw',fem>0?`1 : ${fmt(fem/Yc,1)}`:'alleen mannelijk']); if(fem/Yc>=100) h+=note('warn','Mannelijk deel is 1:100 of kleiner: autosomale STR\'s tonen de man waarschijnlijk niet; overweeg Y-STR\'s.'); }
-    else rows.push(['Mannelijk DNA (Y)','niet gedetecteerd']); }
-  if(isFinite(ng)&&ng>0){ const vd=ng/S; rows.push([`Extract voor ${fmt(ng,2)} ng`,isFinite(V)&&vd>V?`${vol(V)} (max., ${sig(S*V,3)} ng)`:vol(vd)]); if(isFinite(V)&&vd<=V) rows.push(['Aanvullen met water/TE',vol(V-vd)]); if(vd<1) h+=note('warn','Minder dan 1 µL extract: maak eerst een verdunning.'); }
-  out.innerHTML=h+kv(rows);
-}
-{ const _dna=calc.dna; calc.dna=function(e){ _dna(e); fqCalc(); }; }
+/* FORENSISCHE KWANTIFICATIE (fq-*) zit sinds S228 in src/tools/Dna.vue */
 
 /* ================= GELFOTO: DENSITOMETRIE EN AUTOMATISCH METEN ================= */
 function gfIntensity(x,y){ const pr=laneProfile(x), h=pr.length, k=Math.max(0,Math.min(h-1,Math.round(y))), pk=pr[k]; if(!(pk>0)) return 0;
@@ -4822,37 +4445,6 @@ calc.stat=function(){
   }
 };
 
-/* ================= TRANSFORMATIE ================= */
-const TFDATA=[['Eigen ligatie',10,3,19],['Eigen ligatie',100,31,176],['Eigen ligatie',930,'TNTC','TNTC'],['Controle-insert',100,72,118]];
-const tfRow=r=>`<tr><td><input class="txt" data-n value="${esc(r[0]??'')}" style="width:140px"></td><td>${inp(r[1],80,'data-v')}</td><td><input data-b value="${esc(r[2]??'')}" inputmode="decimal" style="text-align:right;width:70px"></td><td><input data-w value="${esc(r[3]??'')}" inputmode="decimal" style="text-align:right;width:70px"></td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
-$('#tf-tbl tbody').innerHTML=TFDATA.map(tfRow).join('');
-$('#tf-add').addEventListener('click',()=>{ $('#tf-tbl tbody').insertAdjacentHTML('beforeend',tfRow(['',100,'',''])); });
-$('#tf-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); calc.transf(); }});
-calc.transf=function(){
-  const lv=num($('#tf-lv').value), vng=num($('#tf-vng').value), used=num($('#tf-used').value), tot=num($('#tf-tot').value);
-  const [lo,hi]=$('#tf-range').value.split('-').map(Number), out=$('#tf-out');
-  const ng=vng/lv*used, ug=ng/1000;
-  const G={};
-  $$('#tf-tbl tbody tr').forEach(tr=>{ const n=(tr.querySelector('[data-n]').value||'').trim()||'Experiment', v=num(tr.querySelector('[data-v]').value), bR=tr.querySelector('[data-b]').value.trim(), wR=tr.querySelector('[data-w]').value.trim();
-    if(bR===''&&wR==='') return; const tn=x=>/^(>|tntc)/i.test(x); const b=num(bR), w=num(wR); (G[n]=G[n]||[]).push({v,b:tn(bR)?Infinity:(isFinite(b)?b:0),w:tn(wR)?Infinity:(isFinite(w)?w:0)}); });
-  const names=Object.keys(G);
-  if(!names.length){ out.innerHTML=note('info','Vul de tellingen per plaat in.'); return; }
-  if(!(ng>0)||!(tot>0)){ out.innerHTML=note('bad','Vul ligatievolume, hoeveelheid vector, getransformeerd volume en totaalvolume in.'); return; }
-  const res=names.map(n=>{ const P=G[n].filter(p=>p.v>0); const fin=P.filter(p=>isFinite(p.b+p.w)); let use=fin.filter(p=>p.b+p.w>=lo&&p.b+p.w<=hi), est=false; if(!use.length){ use=fin.filter(p=>p.b+p.w>0); est=true; }
-    const sv=use.reduce((a,p)=>a+p.v,0), sb=use.reduce((a,p)=>a+p.b,0), sw=use.reduce((a,p)=>a+p.w,0), col=sb+sw;
-    const T=sv>0?col/sv*tot:NaN, W=sv>0?sw/sv*tot:NaN;
-    return {n,plates:P.length,used:use.length,est,T,W,Bl:T-W,pw:col>0?sw/col*100:NaN,ratio:sb>0?sw/sb:Infinity,freq:T/ug,wfreq:W/ug,sv,col}; });
-  const main=res[0];
-  let h=`<div class="lbl">${ud(main.n)}: transformatiefrequentie</div><div class="big">${sci(main.freq,2)} <small>transformanten/µg vector</small></div>`;
-  h+=kv([['Vector per transformatie',fmt(ng,3)+' ng'],['Transformanten totaal',isFinite(main.T)?fmt(Math.round(main.T),0):'–'],['Waarvan wit',isFinite(main.W)?fmt(Math.round(main.W),0)+` (${fmt(main.pw,1)} %)`:'–'],['Verhouding wit : blauw',isFinite(main.ratio)?fmt(main.ratio,2)+' : 1':'alleen wit'],['Witte transformanten/µg',sci(main.wfreq,2)]]);
-  h+=`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Experiment</th><th class="num">Platen gebruikt</th><th class="num">Transformanten</th><th class="num">Wit</th><th class="num">% wit</th><th class="num">Wit : blauw</th><th class="num">Frequentie (per µg)</th></tr></thead><tbody>${res.map(r=>`<tr><td>${esc(r.n)}</td><td class="num">${r.used} van ${r.plates}</td><td class="num">${isFinite(r.T)?fmt(Math.round(r.T),0):'–'}</td><td class="num">${isFinite(r.W)?fmt(Math.round(r.W),0):'–'}</td><td class="num">${fmt(r.pw,1)}</td><td class="num">${isFinite(r.ratio)?fmt(r.ratio,2):'–'}</td><td class="num">${sci(r.freq,2)}</td></tr>`).join('')}</tbody></table></div>`;
-  res.filter(r=>r.est).forEach(r=>{ h+=note('warn',`${ud(r.n)}: geen plaat binnen ${lo}–${hi} kolonies; berekend met alle platen met kolonies. Markeer als schatting.`); });
-  res.filter(r=>r.used>0&&r.col<10).forEach(r=>{ h+=note('warn',`${ud(r.n)}: minder dan 10 kolonies geteld; de verhouding wit/blauw is dan erg onzeker.`); });
-  h+=`<div class="formula">transformanten = Σ kolonies / Σ uitgeplaat volume × ${fmt(tot,0)} µL · vector = ${fmt(vng,1)} ng / ${fmt(lv,1)} µL × ${fmt(used,2)} µL = ${fmt(ng,3)} ng · frequentie = transformanten / µg vector</div>`;
-  h+=note('info','Wit betekent dat lacZα onderbroken is, niet dat het juiste insert erin zit. Controleer witte kolonies met een kolonie-PCR of restrictieanalyse.');
-  out.innerHTML=h;
-};
-
 /* ================= ANOVA + TUKEY ================= */
 function erfcF(x){ const z=Math.abs(x), t=1/(1+0.5*z); const r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277))))))))); return x>=0?r:2-r; }
 const PhiF=z=>0.5*erfcF(-z/Math.SQRT2);
@@ -5028,7 +4620,7 @@ $('#pg-tbl tbody').innerHTML=(pstore.get().pg||PGDEF).map(pgRow).join('');
 $('#pg-add').addEventListener('click',()=>{ $('#pg-tbl tbody').insertAdjacentHTML('beforeend',pgRow(['Stap','72','1:00',false])); calc.pprog(); });
 $('#pg-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); calc.pprog(); }});
 $('#pg-tbl').addEventListener('change',e=>{ if(e.target.type==='checkbox') calc.pprog(); });
-$('#pg-from').addEventListener('click',()=>{ const rows=$$('#pg-tbl tbody tr'); const a=rows.find(r=>/anneal/i.test(r.querySelector('[data-k=n]').value)); if(a&&typeof yTa!=='undefined'&&isFinite(yTa)) a.querySelector('[data-k=t]').value=String(Math.round(yTa*10)/10).replace('.',','); calc.pprog(); });
+$('#pg-from').addEventListener('click',()=>{ const rows=$$('#pg-tbl tbody tr'); const a=rows.find(r=>/anneal/i.test(r.querySelector('[data-k=n]').value)); if(a&&window.__pcrVm&&isFinite(window.__pcrVm.taAuto)) a.querySelector('[data-k=t]').value=String(Math.round(window.__pcrVm.taAuto*10)/10).replace('.',','); calc.pprog(); });
 function pgSecs(t){ t=String(t).trim(); if(/^(∞|inf|oneindig|hold)$/i.test(t)) return Infinity; const m=t.match(/^(\d+):(\d{1,2})$/); if(m) return +m[1]*60+ +m[2]; const n=num(t.replace(/\s*(s|sec)$/i,'')); if(/min/i.test(t)) return num(t)*60; return n; }
 function pgFmt(s,mode){ if(s===Infinity) return '∞'; if(!isFinite(s)) return '?'; if(mode==='txt') return s>=60?(s%60?`${Math.floor(s/60)} min ${s%60} s`:`${s/60} min`):`${s} s`; return `${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,'0')}`; }
 calc.pprog=function(){
@@ -5114,17 +4706,6 @@ function gfMassSlope(){ const lad=gfLadder(), ms=stNums($('#gf-lmass').value), l
 { const _mt3=gfMarksTable; gfMarksTable=function(){ _mt3(); const tb=$('#gf-marks table'); if(!tb) return; const sl=gfMassSlope(); if(!isFinite(sl)) return; tb.tHead.rows[0].insertCell(5).outerHTML='<th class="num" title="Geschat uit de bandintensiteit van de massaladder (lineair door de oorsprong)">≈ ng</th>'; [...tb.tBodies[0].rows].forEach((tr,i)=>{ const c=tr.insertCell(5); c.className='num'; const v=(gf.marks[i].int||0)/sl; c.textContent=v>0?fmt(v,v<10?1:0):'–'; }); }; }
 ['gf-lload','gf-lmass'].forEach(id=>$('#'+id).addEventListener('input',()=>{ gfMarksTable(); gfRender(); }));
 $('#gf-unit').addEventListener('change',()=>{ if($('#gf-unit').value==='ng'&&gf.unit==='bp'&&!isFinite(gfMassSlope())) gfStatus('Voor ng zijn een DNA-massaladder (ng per band), gemarkeerde ladderbanden en metingen nodig.'); else if($('#gf-unit').value==='ng'&&gf.unit!=='bp') gfStatus('ng werkt alleen met een DNA-ladder met bekende hoeveelheid per band.'); });
-
-/* ================= qPCR: Ct-EXPORT INLEZEN ================= */
-function qpImport(){ const txt=$('#qp-imp').value, ref=$('#qp-refname').value.trim().toLowerCase(), msg=$('#qp-impmsg'); const lines=txt.replace(/\r/g,'').split('\n').filter(l=>l.trim()); if(lines.length<2){ msg.innerHTML=note('info','Plak de export met kopregel.'); return; }
-  const sp=l=>l.includes('\t')?l.split('\t'):l.includes(';')?l.split(';'):l.split(','); let hi=lines.findIndex(l=>/(ct|cq)/i.test(l)&&/(sample|monster|naam|name)/i.test(l)); if(hi<0) hi=0; const H=sp(lines[hi]).map(h=>h.trim().toLowerCase());
-  const ci=H.findIndex(h=>/^(ct|cq|c[tq] mean|ct value|cq value)$/.test(h))>=0?H.findIndex(h=>/^(ct|cq|c[tq] mean|ct value|cq value)$/.test(h)):H.findIndex(h=>/\b(ct|cq)\b/.test(h)), si=H.findIndex(h=>/(sample|monster|naam|name)/.test(h)), ti=H.findIndex(h=>/(target|detector|gen|gene|doel)/.test(h));
-  if(ci<0||si<0||ti<0){ msg.innerHTML=note('bad','Kolommen voor monster, target en Ct/Cq niet gevonden in de kopregel.'); return; }
-  const recs=lines.slice(hi+1).map(l=>sp(l).map(x=>x.trim())).map(c=>({s:c[si],t:(c[ti]||'').toLowerCase(),ct:num(String(c[ci]).replace(/undetermined|n\/a/i,''))})).filter(r=>r.s&&isFinite(r.ct));
-  const targets=[...new Set(recs.map(r=>r.t))]; if(!ref||!targets.includes(ref)){ msg.innerHTML=note('bad',`Referentiegen niet gevonden. Gevonden targets: ${targets.map(esc).join(', ')}.`); return; }
-  const tgt=targets.find(t=>t!==ref); const by={}; recs.forEach(r=>{ (by[r.s]=by[r.s]||{})[r.t]=(by[r.s][r.t]||[]).concat(r.ct); });
-  const rows=[]; Object.entries(by).forEach(([s,o])=>{ const a=o[tgt]||[], b=o[ref]||[]; for(let i=0;i<Math.max(a.length,b.length);i++) rows.push([s,a[i]??(a.length?mean(a):NaN),b[i]??(b.length?mean(b):NaN)]); });
-  $('#qp-tbl tbody').innerHTML=rows.map(qpRow).join(''); calc.qpcr(); msg.innerHTML=note('info',`${rows.length} rijen ingelezen: doelgen "${esc(tgt)}", referentiegen "${esc(ref)}".`); }
 
 /* ================= OPLOSSING: STAPPENSCHEMA ALS AFBEELDING ================= */
 function bufImg(){ const cv=$('#bs-cv'); if(!cv) return; const title=$('#o-btitle').value.trim(), items=$$('#o-tbl tbody tr').map(tr=>({n:tr.querySelector('[data-k=n]').value||'component',out:tr.querySelector('[data-k=out]').textContent})).filter(x=>x.out&&x.out!=='–');
@@ -6629,8 +6210,13 @@ calc.cdna=function(){ const ng=num($('#cd-in').value), vr=num($('#cd-vr').value)
    plaatlijst lezen altijd de toestand van de ontwerper, niet de invoer.
    Eén groep per doelgen, de naam van het putje is de naam van het monster. De taak volgt uit
    die naam, zodat één veld genoeg is: St1…Stn standaard, NTC een no-template control, al het
-   andere een monster. */
-let qpPld=null, qpGen=false, qpSig='', qpOver=false, qpNeed=0;
+   andere een monster.
+
+   De velden, de tekening, de mastermixen en de exportknop staan sinds S230 in src/tools/Qplate.vue
+   (host #qp-app); de component leest de plaat met qpRows() en schrijft hem met qpPld.set().
+   De plaatontwerper zelf blijft een DOM-widget op #qp2-pld, buiten de Vue-boom, zodat de
+   vertaallaag zijn knoppen blijft vertalen. */
+let qpPld=null;
 const QPRL='ABCDEFGHIJKLMNOP';
 const qpTask=n=>/^St\d+$/i.test(n)?'standaard':(/^NTC$/i.test(n)?'NTC':'monster');
 /* de plaat zoals hij nu staat, als lijst putjes */
@@ -6650,62 +6236,20 @@ const QPEXP={
   cfx:{ext:'csv',sep:',',head:['Well','Target','Content','Sample'],
        row:w=>[w.w,w.t,{standaard:'Std',NTC:'NTC',monster:'Unkn'}[w.task],w.s]}
 };
-function qpExport(){ const {rows}=qpRows(), msg=$('#qp2-msg');
-  if(!rows.length){ msg.textContent='De plaat is leeg; er is niets om te exporteren.'; return; }
-  const F=QPEXP[$('#qp2-exp').value]||QPEXP.eigen, name=safeName(trPlain('qPCR-plaatindeling'));
+/* geeft de melding terug die onder de knop komt (Dutch, de component vertaalt hem) */
+async function qpExport(kind){ const {rows}=qpRows(), msg={};
+  if(!rows.length) return 'De plaat is leeg; er is niets om te exporteren.';
+  const F=QPEXP[kind]||QPEXP.eigen, name=safeName(trPlain('qPCR-plaatindeling'));
   if(F.own){ const t=[F.head.join('\t'),...rows.map(w=>F.row(w).join('\t'))].join('\n');
-    dlMsg(msg,()=>saveBlob(name+'.csv',csvBlob(t))); return; }
+    await dlMsg(msg,()=>saveBlob(name+'.csv',csvBlob(t))); return msg.textContent; }
   const q=c=>{ c=String(c==null?'':c); return F.sep===','&&/[",\n]/.test(c)?`"${c.replace(/"/g,'""')}"`:c; };
   const t=[F.head.join(F.sep),...rows.map(w=>F.row(w).map(q).join(F.sep))].join('\r\n')+'\r\n';
-  dlMsg(msg,()=>saveBlob(name+'.'+F.ext,new Blob([t],{type:F.ext==='csv'?'text/csv':'text/plain'}))); }
+  await dlMsg(msg,()=>saveBlob(name+'.'+F.ext,new Blob([t],{type:F.ext==='csv'?'text/csv':'text/plain'}))); return msg.textContent; }
 
-/* tekening, mastermixen en exportdata uit de huidige plaat */
-function qpDraw(over,need){ const {R,C,rows,groups}=qpRows(), out=$('#qp2-out'), cv=$('#qp2-cv'), f=R>8;
-  if(!rows.length){ out.innerHTML=note('info','Vul minstens één monster en één doelgen in.'); cv.style.display='none'; return; }
-  const cnt=groups.map((g,i)=>rows.filter(w=>w.ti===i).length);
-  const cs=f?24:44, W=40+C*cs+20, H=60+R*cs+20+groups.length*18, mar=(num($('#qp2-mar').value)||0)/100;
-  pShow(cv,W,H,(x)=>{ x.font='600 11px '+PFONT(); x.fillStyle=PCOL.muted; x.textAlign='center'; x.textBaseline='middle';
-    for(let c=0;c<C;c++) x.fillText(String(c+1),40+c*cs+cs/2,40); for(let r=0;r<R;r++) x.fillText(QPRL[r],22,56+r*cs+cs/2);
-    for(let r=0;r<R;r++) for(let c=0;c<C;c++){ const w=rows.find(q=>q.r===r&&q.c===c), cx=40+c*cs+cs/2, cy=56+r*cs+cs/2;
-      x.beginPath(); x.arc(cx,cy,cs/2-2,0,7);
-      if(w){ const col=SERCOL[w.ti%SERCOL.length]; x.fillStyle=w.task==='NTC'?'#fff':col+(w.task==='standaard'?'88':'33'); x.fill();
-        x.strokeStyle=col; x.lineWidth=w.task==='NTC'?2:1.2; x.stroke();
-        if(!f&&w.s){ x.fillStyle=PCOL.ink; x.font='9.5px '+PFONT(); const lab=w.s.length>7?w.s.slice(0,6)+'…':w.s; x.fillText(uv(lab),cx,cy); } }
-      else { x.strokeStyle=PCOL.line; x.lineWidth=1; x.stroke(); } }
-    x.textAlign='left'; x.font='12px '+PFONT();
-    groups.forEach((g,i)=>{ if(!cnt[i]) return; const y=56+R*cs+18+i*18; x.fillStyle=SERCOL[i%SERCOL.length]; x.fillRect(40,y-6,12,12);
-      /* naam en aantal blijven letterlijk, alleen het woord erachter wordt vertaald; eerder
-         werd de genaam zelf deel van de vertaalsleutel, dus elke nieuwe naam lekte weg */
-      x.fillStyle=PCOL.ink; x.fillText(uv(g.n+': '+cnt[i])+' wells',58,y); }); });
-  cv.style.display=''; cv._data={head:['Well','Monster','Doel','Taak'],rows:rows.map(w=>[w.w,w.s,w.t,w.task])};
-  out.innerHTML=(over?note('bad',`De plaat is vol: ${rows.length} van de benodigde ${need} wells passen. Kies 384 wells, minder replicaten of minder monsters.`):'')+
-    kv([['Wells gebruikt',`${rows.length} van ${R*C}`],...groups.map((g,i)=>cnt[i]?[`Mastermix ${ud(g.n)}`,`${cnt[i]} reacties → maak voor ${fmt(cnt[i]*(1+mar),1)}`]:null).filter(Boolean)]); }
-
-calc.qplate=function(){ if(!qpPld) return;
-  /* Alleen de velden die de indeling bepalen mogen de plaat opnieuw vullen. De exportvorm en
-     de marge van de mastermix doen dat niet, want dan zou een eigen wijziging op de plaat
-     verdwijnen zodra je een ander exportformaat kiest. */
-  const sig=JSON.stringify(['qp2-fmt','qp2-rep','qp2-s','qp2-t','qp2-std','qp2-ntc','qp2-dir'].map(i=>$('#'+i).value));
-  if(sig===qpSig){ qpDraw(qpOver,qpNeed); return; }
-  qpSig=sig;
-  const f=$('#qp2-fmt').value==='384', R=f?16:8, C=f?24:12;
-  const rep=Math.min(48,Math.max(1,Math.round(num($('#qp2-rep').value)||1))), byRow=$('#qp2-dir').value==='row';
-  const S=$('#qp2-s').value.split(',').map(s=>s.trim()).filter(Boolean).slice(0,384), T=$('#qp2-t').value.split(',').map(s=>s.trim()).filter(Boolean).slice(0,24);
-  const nst=Math.min(24,Math.max(0,Math.round(num($('#qp2-std').value)||0))), nntc=Math.min(24,Math.max(0,Math.round(num($('#qp2-ntc').value)||0)));
-  if(!S.length||!T.length){ $('#qp2-out').innerHTML=note('info','Vul minstens één monster en één doelgen in.'); $('#qp2-cv').style.display='none';
-    qpGen=true; try{ qpPld.set({fmt:f?'16x24':'8x12',wells:{},vals:{},groups:[{n:'Doel',c:SERCOL[0]}]}); } finally { qpGen=false; } return; }
-  const lineLen=byRow?C:R, nLines=byRow?R:C, wells={}, vals={}; let line=0, pos=0, over=false, n=0;
-  T.forEach((t,ti)=>{ if(pos>0){ line++; pos=0; }
-    const items=[...Array.from({length:nst},(_,i)=>({s:'St'+(i+1)})),...S.map(s=>({s})),...Array.from({length:nntc},()=>({s:'NTC'}))];
-    items.forEach(it=>{ for(let k=0;k<rep&&!over;k++){ if(pos>=lineLen){ line++; pos=0; } if(line>=nLines){ over=true; return; }
-      const r=byRow?line:pos, c=byRow?pos:line, key=QPRL[r]+(c+1); wells[key]=ti; vals[key]=it.s; pos++; n++; } }); });
-  const need=T.length*(nst+S.length+nntc)*rep; qpOver=over; qpNeed=need;
-  qpGen=true; try{ qpPld.set({fmt:f?'16x24':'8x12',wells,vals,groups:T.map((t,i)=>({n:t,c:SERCOL[i%SERCOL.length]}))}); } finally { qpGen=false; }
-  qpDraw(over,need); };
+calc.qplate=function(){};
 
 qpPld=plateDesigner($('#qp2-pld'),{fmt:'8x12',autoLabel:false,name:()=>trPlain('qPCR-plaatindeling'),
-  groups:[{n:'Doel',c:SERCOL[0]}], onChange(){ if(!qpGen) try{ qpDraw(false,0); }catch(e){} }});
-$('#qp2-dl').addEventListener('click',qpExport);
+  groups:[{n:'Doel',c:SERCOL[0]}], onChange(){ try{ if(window.__qpVm) window.__qpVm.onPlate(); }catch(e){} }});
 /* /NT:qplate */
 /* NT:rnaq */
 /* ================= RNA-KWALITEIT ================= */
@@ -8039,7 +7583,7 @@ sLoad('bradford');
 tblRestore();
 gfDemo();
 ['verdunning','oplossing','reeks','telkamer','dna','pcr','gel','ligatie','centrifuge','curve','enzym','pcrcyclus','qpcr','groei','transf','stat','pverd','ppip','pprog','mic','gcomp','wb','melt','spec','units','inoc','molm','hh','rmp','seed','oligo','sds','micro'].forEach(k=>{ try{ calc[k](); }catch(e){ console.error(k,e); } });
-ppBuild(); $('#qp-impgo').addEventListener('click',qpImport); { const _op=calc.oplossing; calc.oplossing=function(e){ _op(e); try{ bufImg(); }catch(err){} }; } ['o-btitle','o-note'].forEach(id=>$('#'+id).addEventListener('input',()=>bufImg())); try{ bufImg(); }catch(e){} try{ calc.ppip(); }catch(e){ console.error(e); }
+ppBuild(); { const _op=calc.oplossing; calc.oplossing=function(e){ _op(e); try{ bufImg(); }catch(err){} }; } ['o-btitle','o-note'].forEach(id=>$('#'+id).addEventListener('input',()=>bufImg())); try{ bufImg(); }catch(e){} try{ calc.ppip(); }catch(e){ console.error(e); }
 applyUI();
 decorateXL();
 route();
