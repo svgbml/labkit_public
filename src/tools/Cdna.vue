@@ -19,6 +19,7 @@
         </div>
         <lk-field v-model="nort" :label="t('No-RT-controles')" for-id="cd-nort" inputmode="numeric" data-expert=""/>
         <lk-field v-model="mar" :label="t('Marge')" for-id="cd-mar" unit="%" data-expert=""/>
+        <lk-overage v-model="ov" for-id="cd-ov" :why="why" data-expert=""/>
       </div>
       <lk-etable table-id="cd-tbl" :cols="cols" v-model:rows="rows" add-id="cd-tbl-add"/>
       <div class="row" style="margin-top:8px">
@@ -32,7 +33,7 @@
         <lk-note v-for="(w, i) in m.warn" :key="i" kind="warn" :html="w"/>
         <lk-big :label="t('RT-mastermix voor ' + F(m.N, 1) + ' reacties')" :value="F(10 * m.N, 1)" sub="µL" top="0"/>
         <lk-table :cols="mixCols" :rows="mixRows"/>
-        <lk-note v-if="m.nrt" kind="info">{{ t('Maak voor de ' + m.nrt + ' no-RT-controle(s) apart ' + F(9 * m.nrt * (1 + m.mar), 1) + ' µL mix zonder reverse transcriptase (vervang de RT door water), of haal de RT-volumes uit de totale mix.') }}</lk-note>
+        <lk-note v-if="m.nrt" kind="info">{{ t('Maak voor de ' + m.nrt + ' no-RT-controle(s) apart ' + F(9 * m.Nrt, 1) + ' µL mix zonder reverse transcriptase (vervang de RT door water), of haal de RT-volumes uit de totale mix.') }}</lk-note>
         <h3 style="font-size:14px;margin:14px 0 4px">{{ t('Per monster') }}</h3>
         <lk-table :cols="sampCols" :rows="sampRows" :wrap="true" style="margin-top:0"/>
       </template>
@@ -42,6 +43,7 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {overage} from '../lib/overage.js';
 
 const F = (x, d) => lkNumIn(fmt(x, d));
 
@@ -53,7 +55,7 @@ export default {
     const g = (id, d) => (st[id] != null ? String(st[id]) : d);
     return {
       ng: g('cd-in', '1000'), vr: g('cd-vr', '10'), inh: g('cd-inh', '0'),
-      nort: g('cd-nort', '1'), mar: g('cd-mar', '10'),
+      nort: g('cd-nort', '1'), mar: g('cd-mar', '10'), ov: g('cd-ov', 'pct'),
       rows: [[trPlain('Controle 1'), '412'], [trPlain('Controle 2'), '388'], [trPlain('Behandeld 1'), '256'], [trPlain('Behandeld 2'), '1190']]
     };
   },
@@ -62,6 +64,7 @@ export default {
       return [{h: this.t('Monster'), t: 'txt', w: 120}, {h: this.t('RNA (ng/µL)'), t: 'num', w: 90}];
     },
     /* alle maten uit één plek; de weergave leest hier alleen uit */
+    why() { return overage((this.m ? this.m.rows.length : 0) + (Math.min(96, Math.max(0, Math.round(num(this.nort) || 0)))), this.ov, num(this.mar) || 0).why; },
     m() {
       const ng = num(this.ng), vr = num(this.vr) || 10, inh = this.inh === '1';
       const nrt = Math.min(96, Math.max(0, Math.round(num(this.nort) || 0))), mar = (num(this.mar) || 0) / 100;
@@ -76,10 +79,11 @@ export default {
         if (v < 0.5 && ok) warn.push(this.tHtml(ud(s.n) + ': minder dan 0,5 µL RNA; verdun het RNA eerst voor nauwkeurig pipetteren.'));
         return [esc(s.n), ok ? F(v, 2) : this.t('te verdund'), ok ? F(vr - v, 2) : '–'];
       });
-      const N = (S.length + nrt) * (1 + mar);
+      const pct = num(this.mar) || 0, {mult: N} = overage(S.length + nrt, this.ov, pct),
+        Nrt = overage(nrt, this.ov, pct).mult;
       const M = [['10× RT-buffer', 2.0], ['25× dNTP-mix (100 mM)', 0.8], ['10× random primers', 2.0],
         ...(inh ? [['RNase-remmer', 1.0]] : []), ['Water', inh ? 3.2 : 4.2], ['MultiScribe RT', 1.0]];
-      return {warn, rows, N, nrt, mar, M};
+      return {warn, rows, N, Nrt, nrt, mar, M};
     },
     mixCols() {
       const t = this.t;

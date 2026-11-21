@@ -941,6 +941,16 @@ def _(pg):
     pg.evaluate("__set('d-c1u','X');__set('d-c2u','X');__set('d-c1','50');__set('d-c2','1');__set('d-v2','500')")
     return [('V₁ (µL)', v, 1.25, 0.001), ('foutmelding bij C₂ > C₁', 1 if bad else 0, 1, 0)]
 
+@case('Verdunning', 'Antistofverdunning met overmaat', 'Onafhankelijk berekend: 1:1000, 2 blots × 10 mL + 10% = 22 mL → 22 µL antistof en 21,978 mL buffer; met +1 reactie 3 × 10 mL → 30 µL')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('ab-d','1000');__set('ab-u','mL');__set('ab-v','10');__set('ab-k','2');__set('ab-ov','pct');__set('ab-x','10')")
+    pg.wait_for_timeout(100)
+    ab = pg.evaluate("__big('#ab-out')"); buf = pg.evaluate("__kv('#ab-out','Buffer')")
+    pg.evaluate("__set('ab-ov','plus1')"); pg.wait_for_timeout(100)
+    p1 = pg.evaluate("__big('#ab-out')")
+    pg.evaluate("__set('ab-ov','pct')")
+    return [('antistof (µL)', ab, 22, 0.001), ('buffer (mL)', buf, 21.978, 0.001), ('antistof met +1 reactie (µL)', p1, 30, 0.001)]
+
 @case('Telkamer', 'Komma als scheidingsteken', '"12,15,14,18" zijn vier vaktellingen: gemiddeld 14,75 per vak')
 def _(pg):
     pg.evaluate("__go('telkamer');__set('k-ch','0.1');kSq();__set('k-sq','1');__set('k-live','12,15,14,18');__set('k-dead','');__set('k-df','1')")

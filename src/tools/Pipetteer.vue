@@ -59,6 +59,7 @@
           </select>
         </div>
         <lk-field v-model="marge" :label="t('Marge mastermix')" for-id="pp-marge" unit="%"/>
+        <lk-overage v-model="ov" for-id="pp-ov" :why="m.why"/>
         <div class="f" style="grid-column:1/-1">
           <label for="pp-note">{{ t('Eigen tekst onder het schema') }}</label>
           <textarea id="pp-note" rows="2" v-model="note"
@@ -122,6 +123,7 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {overage} from '../lib/overage.js';
 
 const PRESETS = [{v: 'leeg', n: 'Leeg'}, {v: 'pcr', n: 'PCR (Taq, 25 µL)'},
   {v: 'qpcr', n: 'qPCR (SYBR Green, 20 µL)'}, {v: 'digest', n: 'Restrictiedigest (50 µL)'},
@@ -149,7 +151,7 @@ export default {
       S,
       title: stored('pp-title', loc('Pipetteerschema PCR (25 µL per reactie)')),
       tot: stored('pp-tot', '25'), unit: stored('pp-unit', 'µL'), mm: stored('pp-mm', '1'),
-      marge: stored('pp-marge', '10'), note: stored('pp-note', ''), auto: stored('pp-auto', true)
+      marge: stored('pp-marge', '10'), ov: stored('pp-ov', 'pct'), note: stored('pp-note', ''), auto: stored('pp-auto', true)
     };
   },
   computed: {
@@ -174,7 +176,7 @@ export default {
       if (!isFinite(tot) && S.rows.some(r => r.mode !== 'vol')) warn.push(t('Vul het eindvolume per buis in.'));
       if (wi >= 0 && isFinite(tot)) S.cols.forEach((c, j) => { if (String(S.rows[wi].v[j] ?? '').trim() !== '') return; const s = V.reduce((a, r, i) => i === wi ? a : a + (isFinite(r[j]) ? r[j] : 0), 0); V[wi][j] = tot - s; if (tot - s < -1e-9) warn.push(t(uv(trN(c.n)) + ': de componenten zijn samen meer dan ' + fmt(tot, 2) + ' ' + u + '.')); });
       const colTot = S.cols.map((c, j) => V.reduce((a, r) => a + (isFinite(r[j]) ? r[j] : 0), 0));
-      const mmN = nc * (1 + marge / 100), wMin = wi >= 0 ? Math.min(...V[wi].filter(isFinite)) : NaN;
+      const {mult: mmN, why} = overage(nc, this.ov, marge), wMin = wi >= 0 ? Math.min(...V[wi].filter(isFinite)) : NaN;
       const same = f => f.length && f.every(v => Math.abs(v - f[0]) < 1e-9);
       const mmCol = V.map((r, i) => { if (!S.rows[i].mm) return NaN; if (i === wi && isFinite(wMin)) return wMin * mmN; const f = r.filter(isFinite); if (!f.length) return NaN; return same(f) ? f[0] * mmN : NaN; });
       const varRows = V.map((r, i) => { const f = r.filter(isFinite); return S.rows[i].mm && i !== wi && f.length > 1 && !same(f); });
@@ -193,8 +195,8 @@ export default {
       const ord = S.rows.map((r, i) => i).filter(i => S.rows[i].n && (!mmOn || S.rows[i].mm)).sort((a, b) => (a === wi ? -1 : b === wi ? 1 : 0) || (ppEnzyme(S.rows[a].n) - ppEnzyme(S.rows[b].n)) || a - b);
       const hasEnz = S.rows.some(r => r.n && ppEnzyme(r.n));
       const listNum = s => LANG === 'en' ? s.replace(i18nNumRe, m => i18nNum(m)) : s;
-      const foot = [mmOn ? `Mastermix: ${fmt(nc, 0)} buizen + ${fmt(marge, 0)}% marge; verdeel ${fv(perTube)} ${u} per buis.` : '', mmOn && apart.length ? `Daarna per buis apart: ${uv(apart.map(r => trN(r.n)).join(', '))}.` : '', mmOn && extra.length ? `Extra ${uv(fillN)} apart: ${uv(extra.map(e => `${trN(e[0])} ${listNum(fv(e[1]))} ${u}`).join(', '))}.` : '', wi >= 0 ? `${uv(fillN)} vult aan tot het eindvolume.` : '', hasEnz ? 'Enzym als laatste toevoegen en op ijs werken.' : ''].filter(Boolean);
-      return {S, tot, u, mmOn, marge, nc, nr, warn, wi, V, C, colTot, mmN, wMin, mmCol, anyC, cnum, finTxt, stTxt, hdr, fv, body, totRow, mmTot, perTube, apart, fillN, extra, ord, hasEnz, foot, trN,
+      const foot = [mmOn ? (this.ov === 'plus1' ? `Mastermix: ${fmt(nc, 0)} buizen + 1 reactie; verdeel ${uv(listNum(fv(perTube)) + ' ' + u)} per buis.` : this.ov === 'none' ? `Mastermix: ${fmt(nc, 0)} buizen, geen overmaat; verdeel ${uv(listNum(fv(perTube)) + ' ' + u)} per buis.` : `Mastermix: ${fmt(nc, 0)} buizen + ${fmt(marge, 0)}% marge; verdeel ${fv(perTube)} ${u} per buis.`) : '', mmOn && apart.length ? `Daarna per buis apart: ${uv(apart.map(r => trN(r.n)).join(', '))}.` : '', mmOn && extra.length ? `Extra ${uv(fillN)} apart: ${uv(extra.map(e => `${trN(e[0])} ${listNum(fv(e[1]))} ${u}`).join(', '))}.` : '', wi >= 0 ? `${uv(fillN)} vult aan tot het eindvolume.` : '', hasEnz ? 'Enzym als laatste toevoegen en op ijs werken.' : ''].filter(Boolean);
+      return {S, why, tot, u, mmOn, marge, nc, nr, warn, wi, V, C, colTot, mmN, wMin, mmCol, anyC, cnum, finTxt, stTxt, hdr, fv, body, totRow, mmTot, perTube, apart, fillN, extra, ord, hasEnz, foot, trN,
         steps: this.buildSteps({S, u, mmOn, wi, V, mmN, mmCol, fv, perTube, apart, fillN, extra, ord, hasEnz, trN})};
     }
   },

@@ -16,6 +16,7 @@
         <lk-field v-model="ns" :label="t('Monsters')" for-id="q-n" inputmode="numeric"/>
         <lk-field v-model="nc" :label="t('Controles (NTC, positief)')" for-id="q-ctrl" inputmode="numeric"/>
         <lk-field data-expert="" v-model="extra" :label="t('Extra marge')" for-id="q-extra" unit="%"/>
+        <lk-overage data-expert="" v-model="ov" for-id="q-ov" :why="m.why"/>
         <lk-field v-model="rv" :label="t('Reactievolume')" for-id="q-v" unit="µL"/>
         <lk-field v-model="tv" :label="t('Template per reactie')" for-id="q-t" unit="µL"/>
       </div>
@@ -61,7 +62,7 @@
     </div>
     <div id="q-msg">
       <lk-note v-if="m.water < 0" kind="bad">{{ t('De componenten passen niet in ' + vol(m.V) + ': ' + vol(-m.water) + ' te veel. Verlaag het templatevolume of gebruik geconcentreerdere stocks.') }}</lk-note>
-      <lk-note kind="info">{{ t('Mix voor ' + fmt(m.N, 1) + ' reacties (' + m.n + ' buizen + ' + fmt(m.extra, 0) + '%). Verdeel ' + vol(m.V - m.T) + ' mix per buis en voeg ' + vol(m.T) + ' template toe; NTC krijgt ' + vol(m.T) + ' water. Polymerase als laatste toevoegen, alles op ijs.') }}</lk-note>
+      <lk-note kind="info">{{ t(mixTxt) }} {{ t('Verdeel ' + uv(lkNumIn(vol(m.V - m.T))) + ' mix per buis en voeg ' + uv(lkNumIn(vol(m.T))) + ' template toe; NTC krijgt ' + uv(lkNumIn(vol(m.T))) + ' water. Polymerase als laatste toevoegen, alles op ijs.') }}</lk-note>
     </div>
     <lk-formula :html="formula"/>
   </div>
@@ -69,6 +70,7 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {overage} from '../lib/overage.js';
 
 const dec = x => (isFinite(x) ? lkNumIn(String(x).replace('.', ',')) : '');
 
@@ -97,7 +99,7 @@ export default {
     const st = typeof storeGet === 'function' ? storeGet() : {};
     const g = (id, d) => (st[id] != null ? String(st[id]) : d);
     return {
-      ns: g('q-n', lkNumIn('8')), nc: g('q-ctrl', lkNumIn('2')), extra: g('q-extra', lkNumIn('10')),
+      ns: g('q-n', lkNumIn('8')), nc: g('q-ctrl', lkNumIn('2')), extra: g('q-extra', lkNumIn('10')), ov: g('q-ov', 'pct'),
       rv: g('q-v', lkNumIn('25')), tv: g('q-t', lkNumIn('2')),
       preset: 'taq', rows: [], copied: ''
     };
@@ -109,10 +111,16 @@ export default {
     formula() {
       return this.tHtml('volume = eindconc / stockconc × reactievolume · enzym: (U per 50 µL × volume/50) / (U/µL) · water vult aan tot reactievolume');
     },
+    mixTxt() {
+      const m = this.m, N = fmt(m.N, 1);
+      return this.ov === 'plus1' ? 'Mix voor ' + N + ' reacties (' + m.n + ' buizen + 1 reactie).'
+        : this.ov === 'none' ? 'Mix voor ' + N + ' reacties (' + m.n + ' buizen, geen overmaat).'
+          : 'Mix voor ' + N + ' reacties (' + m.n + ' buizen + ' + fmt(m.extra, 0) + '%).';
+    },
     /* het rekenwerk van de oude calc.pcr(), één keer */
     m() {
       const n = (num(this.ns) || 0) + (num(this.nc) || 0), extra = num(this.extra) || 0;
-      const V = num(this.rv), T = num(this.tv) || 0, N = n * (1 + extra / 100);
+      const V = num(this.rv), T = num(this.tv) || 0, {mult: N, why} = overage(n, this.ov, extra);
       let sum = 0;
       const per = [];
       this.rows.forEach(r => {
@@ -123,7 +131,7 @@ export default {
         per.push(pr);
       });
       const water = V - sum - T;
-      return {n, extra, V, T, N, per, water, sum,
+      return {n, extra, why, V, T, N, per, water, sum,
         waterTxt: vol(water), waterMix: vol(water * N), totTxt: vol(V - T), totMix: vol((V - T) * N),
         tTxt: vol(T), tMix: vol(T * n)};
     },

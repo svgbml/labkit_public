@@ -11,6 +11,7 @@ import {h, onMounted, onUnmounted, watch} from 'vue';
      <lk-note kind="warn">tekst</lk-note>        een melding (info, warn, bad, ok)
      <lk-kv :rows="[[label, waarde], …]">        de definitielijst met uitkomsten
      <lk-field label="…" for="x-id" unit="µL">   een veld met label en eenheid
+     <lk-overage v-model="ov" for-id="x-ov" :why="…">   overmaat: % marge, +1 reactie of geen
      <lk-table :cols="…" :rows="…" table-id>     een tabel met koppen en getalkolommen
      <lk-etable table-id="os-tbl" v-model:rows>   een bewerkbare tabel (in plaats van ET())
      <lk-big :value="…" sub="per reactie">       het grote getal bovenaan een uitkomst
@@ -87,6 +88,23 @@ LKUI.field = {
       props.unit
         ? h('div', {class: 'inu'}, [input(), h('span', {class: 'u'}, props.unit)])
         : input()
+    ]);
+  }
+};
+
+/* de overmaatkeuze bij een mastermix: % marge, +1 reactie of geen. why is de uitleg eronder. */
+LKUI.overage = {
+  props: {modelValue: {type: String, default: 'pct'}, forId: String, why: String},
+  emits: ['update:modelValue'],
+  setup(props, {emit}) {
+    const tr = s => (typeof trPlain === 'function' ? trPlain(s) : s);
+    const opts = [['pct', '% marge (veld hieronder/ernaast)'], ['plus1', '+1 reactie'], ['none', 'geen']];
+    const pick = e => emit('update:modelValue', e.target.value);
+    return () => h('div', {class: 'f'}, [
+      h('label', {for: props.forId}, tr('Overmaat')),
+      h('select', {id: props.forId, style: 'width:100%', value: props.modelValue, onChange: pick, onInput: pick},
+        opts.map(([v, l]) => h('option', {value: v, selected: v === props.modelValue}, tr(l)))),
+      props.why ? h('p', {style: 'font-size:12px;color:var(--muted);margin:4px 0 0'}, tr(props.why)) : null
     ]);
   }
 };
@@ -273,6 +291,7 @@ export function lkUiInstall(app) {
   app.component('lk-big', LKUI.big);
   app.component('lk-field', LKUI.field);
   app.component('lk-table', LKUI.table);
+  app.component('lk-overage', LKUI.overage);
   app.component('lk-formula', LKUI.formula);
   app.component('lk-steps', LKUI.steps);
   app.component('lk-etable', LKUI.etable);

@@ -33,6 +33,7 @@
         <lk-field v-model="upg" :label="t('Enzym per µg DNA')" for-id="dg-upg" unit="U"/>
         <lk-field v-model="n" :label="t('Aantal reacties')" for-id="dg-n" inputmode="numeric"/>
         <lk-field v-model="x" :label="t('Extra marge')" for-id="dg-x" unit="%"/>
+        <lk-overage v-model="ov" for-id="dg-ov" :why="m.why"/>
         <label class="chk" for="dg-bsa">
           <input type="checkbox" id="dg-bsa" v-model="bsa"> {{ t('BSA toevoegen (100× stock)') }}
         </label>
@@ -83,6 +84,7 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {overage} from '../lib/overage.js';
 import {ENZ, enzInfo, cuts, digest} from '../lib/digest.js';
 import {cleanTemplate} from '../lib/primer.js';
 
@@ -94,7 +96,7 @@ export default {
   name: 'Digest',
   data() {
     return {c: lkNumIn('250'), ng: lkNumIn('1000'), v: lkNumIn('50'), e1: 'EcoRI', u1: lkNumIn('20'),
-      e2: 'HindIII', u2: lkNumIn('20'), upg: lkNumIn('10'), n: '4', x: lkNumIn('10'), bsa: false,
+      e2: 'HindIII', u2: lkNumIn('20'), upg: lkNumIn('10'), n: '4', x: lkNumIn('10'), ov: 'pct', bsa: false,
       seq: '', circ: true};
   },
   methods: {
@@ -114,10 +116,11 @@ export default {
       const c = num(this.c), ng = num(this.ng), V = num(this.v);
       const u1 = num(this.u1), u2 = num(this.u2), upg = num(this.upg);
       const n = Math.round(num(this.n)) || 1, x = (num(this.x) || 0) / 100;
+      const ovg = overage(n, this.ov, num(this.x) || 0);
       const U = upg * ng / 1000, vd = ng / c, v1 = U / u1, v2 = this.e2 ? U / u2 : 0;
       const vb = V / 10, vbsa = this.bsa ? V / 100 : 0, enz = v1 + v2;
       return {c, ng, V, u1, u2, upg, n, x, U, vd, v1, v2, vb, vbsa, enz,
-        water: V - vd - vb - vbsa - enz, mult: n * (1 + x), gly: enz / V * 50};
+        water: V - vd - vb - vbsa - enz, mult: ovg.mult, why: ovg.why, gly: enz / V * 50};
     },
     valid() {
       const m = this.m;
