@@ -1,11 +1,12 @@
-/* ================= BLAND-ALTMAN ================= */
-calc.bland=function(){ const pct=$('#ba-m').value==='pct', lim=num($('#ba-lim').value), out=$('#ba-out'), cv=$('#ba-cv');
-  const P=$('#ba-d').value.split(/\n/).map(l=>l.trim().split(/[\s;\t]+/).map(num)).filter(r=>r.length>=2&&isFinite(r[0])&&isFinite(r[1])).map(([a,b])=>{ const m=(a+b)/2; return [m,pct?(m!==0?(b-a)/m*100:NaN):b-a]; }).filter(p=>isFinite(p[1]));
-  if(P.length<3){ out.innerHTML=note('info','Vul minstens drie paren metingen in (twee getallen per regel).'); cv.style.display='none'; return; }
+/* ================= BLAND-ALTMAN =================
+   De velden en de uitkomst staan in src/tools/Bland.vue; hier blijft het rekenwerk, waar het
+   validatiegeval aan hangt: blandPairs() leest de paren (gemiddelde, verschil) uit de tekst en
+   blandCalc() geeft de bias, de grenzen van overeenstemming met hun 95%-interval en de
+   regressie van het verschil op het gemiddelde. */
+function blandPairs(txt,pct){
+  return txt.split(/\n/).map(l=>l.trim().split(/[\s;\t]+/).map(num)).filter(r=>r.length>=2&&isFinite(r[0])&&isFinite(r[1])).map(([a,b])=>{ const m=(a+b)/2; return [m,pct?(m!==0?(b-a)/m*100:NaN):b-a]; }).filter(p=>isFinite(p[1])); }
+function blandCalc(P){
   const n=P.length, d=P.map(p=>p[1]), m=P.map(p=>p[0]), b=mean(d), s=sd(d), t=tinv(0.975,n-1), lo=b-1.96*s, hi=b+1.96*s, seB=s/Math.sqrt(n), seL=Math.sqrt(3*s*s/n), r=linreg(m,d);
-  const mx=mean(m), sxx=m.reduce((a,v)=>a+(v-mx)**2,0), res=d.reduce((a,v,i)=>a+(v-(r.a+r.b*m[i]))**2,0), seb=Math.sqrt(res/(n-2)/sxx), tb=r.b/seb, pb=2*(1-tcdf(Math.abs(tb),n-2)), u=pct?'%':'';
+  const mx=mean(m), sxx=m.reduce((a,v)=>a+(v-mx)**2,0), res=d.reduce((a,v,i)=>a+(v-(r.a+r.b*m[i]))**2,0), seb=Math.sqrt(res/(n-2)/sxx), tb=r.b/seb, pb=2*(1-tcdf(Math.abs(tb),n-2));
   const p0=2*(1-tcdf(Math.abs(b/seB),n-1));
-  out.innerHTML=`<div class="lbl">Bias (B − A)</div><div class="big">${sig(b,3)}${u} <small>95%: ${sig(b-t*seB,3)} – ${sig(b+t*seB,3)}</small></div>`+kv([['Grenzen van overeenstemming',`${sig(lo,3)} – ${sig(hi,3)}${u}`],['95%-interval ondergrens',`${sig(lo-t*seL,3)} – ${sig(lo+t*seL,3)}`],['95%-interval bovengrens',`${sig(hi-t*seL,3)} – ${sig(hi+t*seL,3)}`],['SD van de verschillen',sig(s,3)+u],['Bias ≠ 0?',`p ${p0<0.001?'&lt; 0,001':'= '+fmt(p0,3)} (gepaarde t-toets)`],['Proportionele afwijking',`helling ${sig(r.b,3)}, p ${pb<0.001?'&lt; 0,001':'= '+fmt(pb,3)}`],['Paren',n]])+
-   (pb<0.05?note('warn','Het verschil hangt samen met de grootte van de meting; overweeg verschillen in procenten of een log-transformatie.'):'')+(lim>0?note(Math.max(Math.abs(lo-t*seL),Math.abs(hi+t*seL))<=lim?'ok':'warn',`Met het 95%-interval van de grenzen meegenomen liggen de verschillen ${Math.max(Math.abs(lo-t*seL),Math.abs(hi+t*seL))<=lim?'binnen':'niet zeker binnen'} ±${sig(lim,3)}${u}.`):'')+`<div class="formula">d̄ ± 1,96·s<sub>d</sub> · SE(grens) ≈ √(3s<sub>d</sub>²/n)</div>`;
-  const ys=[...d,lo-t*seL,hi+t*seL], y0=Math.min(...ys), y1=Math.max(...ys), pd=(y1-y0)*0.1||1, x0=Math.min(...m), x1=Math.max(...m), px=(x1-x0)*0.06||1;
-  cv.style.display=''; chart(cv,{xmin:x0-px,xmax:x1+px,ymin:y0-pd,ymax:y1+pd,xlabel:'gemiddelde van A en B',ylabel:pct?'verschil (%)':'verschil B − A',series:[{fn:()=>b,name:'bias'},{fn:()=>lo,color:'--warn',dash:[5,4]},{fn:()=>hi,color:'--warn',dash:[5,4]},{pts:P,color:'--ink',name:'monsters'}]}); };
+  return {n,d,m,b,s,t,lo,hi,seB,seL,r,pb,p0}; }

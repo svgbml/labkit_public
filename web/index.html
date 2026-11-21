@@ -2212,19 +2212,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-pipcal" data-tool="pipcal">
   <header class="tool-head"><h2>Pipetkalibratie</h2>
   <p>Gravimetrische controle van een pipet: weegresultaten omrekenen naar volume met de Z-factor, en de systematische en toevallige fout vergelijken met de grenzen uit ISO 8655.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="pc-v">Ingesteld volume</label><div class="inu"><input id="pc-v" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
-        <div class="f"><label for="pc-nom">Nominaal volume pipet</label><div class="inu"><input id="pc-nom" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
-        <div class="f" data-expert=""><label for="pc-t">Watertemperatuur</label><div class="inu"><input id="pc-t" inputmode="decimal" value="21,5"><span class="u">°C</span></div></div>
-        <div class="f"><label for="pc-ch">Type</label><select id="pc-ch" style="width:100%"><option value="1">enkelkanaals</option><option value="2">meerkanaals (grenzen × 2)</option></select></div>
-        <div class="f" style="grid-column:1/-1"><label for="pc-m">Wegingen (mg) <span class="example">voorbeeld</span></label><textarea id="pc-m" rows="4">99,61 99,72 99,58 99,80 99,66 99,70 99,63 99,75 99,69 99,60</textarea></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Minstens 4 wegingen voor een routinecheck, 10 voor een kalibratie. Laat pipet, tips en water vooraf op kamertemperatuur komen en gebruik een verdampingsval. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result" id="pc-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Pipcal.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="pc-app"></div>
   <p class="src">V<sub>i</sub> = m<sub>i</sub> × Z; systematische fout e<sub>s</sub> = (V̄ − V<sub>s</sub>) / V<sub>s</sub> × 100%; toevallige fout CV = s / V̄ × 100% (ISO 8655-6; INTEGRA, Calibration check; Radwag, Gravimetric determination of pipette errors). Z-factor van gedestilleerd water bij 1 atm en maximaal toelaatbare fouten per nominaal volume: Mettler Toledo, SOP Pipette Quick Check (tabellen 3 en 4, ISO 8655). De grenzen gelden bij het nominale volume; fabrikantspecificaties zijn vaak strenger.</p>
 </section>
 <!-- /NT:pipcal -->
@@ -2233,18 +2223,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-westgard" data-tool="westgard">
   <header class="tool-head"><h2>Westgard / Levey-Jennings</h2>
   <p>Zet controlemetingen in een Levey-Jennings-kaart en controleer ze automatisch op de Westgard-regels.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="wg-m">Streefwaarde (gemiddelde)</label><input id="wg-m" inputmode="decimal" value="5,0"></div>
-        <div class="f"><label for="wg-s">Standaardafwijking</label><input id="wg-s" inputmode="decimal" value="0,2"></div>
-        <div class="f" style="grid-column:1/-1"><label for="wg-x">Controlemetingen in volgorde <span class="example">voorbeeld</span></label><textarea id="wg-x" rows="5">5,1 4,9 5,0 5,2 4,8 5,1 5,3 5,0 4,9 5,45 5,46 5,1 4,7 5,0 5,25 5,22 5,28 5,3 5,0 4,95 4,4</textarea></div>
-        <label class="chk" for="wg-est" style="grid-column:1/-1"><input type="checkbox" id="wg-est"> Gemiddelde en SD schatten uit de eerste 20 metingen</label>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Gebruik een streefwaarde en SD uit een eerdere stabiele periode (minstens 20 metingen), niet uit de reeks die je beoordeelt. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="wg-cv"></canvas><div id="wg-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Westgard.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="wg-app"></div>
   <p class="src">Westgard-regels: 1<sub>2s</sub> waarschuwing; 1<sub>3s</sub>, 2<sub>2s</sub>, R<sub>4s</sub>, 4<sub>1s</sub> en 10<sub>x̄</sub> afkeuring (Westgard, Barry, Hunt &amp; Groth, Clin Chem 27:493–501, 1981; westgard.com, "Westgard Rules"). R<sub>4s</sub> hier toegepast op twee opeenvolgende metingen.</p>
 </section>
 <!-- /NT:westgard -->
@@ -2253,19 +2234,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-munc" data-tool="munc">
   <header class="tool-head"><h2>Meetonzekerheid</h2>
   <p>Onzekerheidsbudget voor een resultaat dat uit een product of quotiënt van grootheden volgt, zoals een concentratie uit massa, zuiverheid en volume. Geeft de gecombineerde en uitgebreide onzekerheid en welke bron het meest bijdraagt.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="mu-res">Resultaat</label><input id="mu-res" inputmode="decimal" value="0,1000"></div>
-        <div class="f"><label for="mu-unit">Eenheid</label><input id="mu-unit" class="txt" value="mol/L"></div>
-        <div class="f" data-expert=""><label for="mu-k">Dekkingsfactor k</label><input id="mu-k" inputmode="decimal" value="2"></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="mu-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="mu-tbl-add">+ Bron</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per bron de waarde en de onzekerheid zoals opgegeven: een standaardonzekerheid (bijvoorbeeld de SD van herhaalde metingen), een tolerantie ±a (certificaat of glaswerk) of een relatieve waarde in %. Voorbeeld: 0,1000 M NaCl uit 5,844 g in een maatkolf van 1 L.</p>
-    </div>
-    <div class="result"><canvas id="mu-cv"></canvas><div id="mu-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Munc.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="mu-app"></div>
   <p class="src">GUM (JCGM 100:2008) en Eurachem/CITAC Guide CG 4, Quantifying Uncertainty in Analytical Measurement (QUAM, 3e ed., 2012): bij een product of quotiënt combineren relatieve standaardonzekerheden als u<sub>c</sub>/y = √Σ(u<sub>i</sub>/x<sub>i</sub>)²; tolerantie met rechthoekige verdeling u = a/√3, met driehoekige verdeling u = a/√6 (QUAM §8.1); uitgebreide onzekerheid U = k·u<sub>c</sub>, k = 2 geeft ongeveer 95%.</p>
 </section>
 <!-- /NT:munc -->
@@ -2274,24 +2245,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-mval" data-tool="mval">
   <header class="tool-head"><h2>Methodevalidatie</h2>
   <p>Kernparameters van een analysemethode in één overzicht: herhaalbaarheid, juistheid via terugvinding, lineariteit en de detectie- en bepalingsgrens, met eigen acceptatiecriteria.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="mv-rep">Herhaalde metingen van één monster <span class="example">voorbeeld</span></label><textarea id="mv-rep" rows="2">10,2 10,05 9,98 10,11 10,24 9,92</textarea></div>
-        <div class="f"><label for="mv-b">Gemeten zonder spike</label><input id="mv-b" inputmode="decimal" value="10,08"></div>
-        <div class="f"><label for="mv-sp">Gemeten met spike</label><input id="mv-sp" inputmode="decimal" value="14,86"></div>
-        <div class="f"><label for="mv-add">Toegevoegd (spike)</label><input id="mv-add" inputmode="decimal" value="5"></div>
-        <div class="f" style="grid-column:1/-1"><label for="mv-x">Lineariteit: concentraties</label><input id="mv-x" class="txt" value="0 2 4 6 8 10 12"></div>
-        <div class="f" style="grid-column:1/-1"><label for="mv-y">Signaal</label><input id="mv-y" class="txt" value="0,012 0,214 0,405 0,61 0,797 1,012 1,19"></div>
-        <div class="f"><label for="mv-cvmax">Max. CV</label><div class="inu"><input id="mv-cvmax" inputmode="decimal" value="5"><span class="u">%</span></div></div>
-        <div class="f"><label for="mv-rlo">Terugvinding van</label><div class="inu"><input id="mv-rlo" inputmode="decimal" value="90"><span class="u">%</span></div></div>
-        <div class="f"><label for="mv-rhi">tot</label><div class="inu"><input id="mv-rhi" inputmode="decimal" value="110"><span class="u">%</span></div></div>
-        <div class="f"><label for="mv-r2">Min. R²</label><input id="mv-r2" inputmode="decimal" value="0,995"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Acceptatiecriteria verschillen per methode en concentratieniveau; neem ze over uit je validatieplan. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="mv-cv"></canvas><div id="mv-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Mval.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="mv-app"></div>
   <p class="src">Begrippen en LOD/LOQ: ICH Q2(R2) Validation of Analytical Procedures (2023): LOD = 3,3·σ/S, LOQ = 10·σ/S met σ de reststandaardafwijking van de regressie en S de helling. Terugvinding = (gemeten met spike − zonder spike) / toegevoegd × 100% (Eurachem Guide, The Fitness for Purpose of Analytical Methods, 2e ed., 2014). Herhaalbaarheid als CV = s / x̄.</p>
 </section>
 <!-- /NT:mval -->
@@ -2682,31 +2638,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-bland" data-tool="bland">
   <header class="tool-head"><h2>Bland-Altman (methodevergelijking)</h2>
   <p>Vergelijk twee meetmethoden op dezelfde monsters: gemiddeld verschil (bias), grenzen van overeenstemming met betrouwbaarheidsintervallen, en een controle op proportionele afwijking.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="ba-d">Methode A en methode B, één monster per regel <span class="example">voorbeeld</span></label><textarea id="ba-d" rows="10">4,8 5,1
-6,2 6,0
-7,9 8,3
-5,5 5,9
-9,8 10,4
-3,1 3,0
-6,7 7,2
-8,4 8,6
-4,2 4,6
-7,1 7,0
-5,9 6,4
-10,6 11,1
-3,8 4,1
-6,0 6,1
-8,9 9,6</textarea></div>
-        <div class="f"><label for="ba-m">Verschil als</label><select id="ba-m"><option value="abs">B − A (absoluut)</option><option value="pct">(B − A) / gemiddelde (%)</option></select></div>
-        <div class="f"><label for="ba-lim">Klinisch aanvaardbaar verschil (optioneel)</label><input id="ba-lim" inputmode="decimal" value=""></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Twee kolommen plakken uit Excel kan. Een hoge correlatie zegt niets over overeenstemming; daarvoor is deze analyse bedoeld. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="ba-cv"></canvas><div id="ba-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Bland.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ba-app"></div>
   <p class="src">Bias = gemiddeld verschil d̄; grenzen van overeenstemming d̄ ± 1,96·s<sub>d</sub>; 95%-interval van de bias d̄ ± t·s<sub>d</sub>/√n en van elke grens ± t·√(3s<sub>d</sub>²/n) (Bland &amp; Altman, Lancet 327:307–310, 1986; Stat Methods Med Res 8:135–160, 1999). Proportionele afwijking: regressie van het verschil op het gemiddelde (Bland &amp; Altman 1999, §3).</p>
 </section>
 <!-- /NT:bland -->
@@ -2715,19 +2649,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-roc" data-tool="roc">
   <header class="tool-head"><h2>ROC-curve &amp; diagnostische test</h2>
   <p>ROC-curve en oppervlak onder de curve (AUC) uit meetwaarden van positieve en negatieve monsters, de afkapwaarde met de hoogste Youden-index, en sensitiviteit, specificiteit, voorspellende waarden en likelihoodratio's bij een gekozen afkapwaarde.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="ro-p">Positief (ziek, aanwezig) <span class="example">voorbeeld</span></label><textarea id="ro-p" rows="3">2,8 3,5 1,9 4,2 3,1 2,4 5,0 3,8 2,2 4,6 3,3 1,6 2,9 3,7 4,9</textarea></div>
-        <div class="f" style="grid-column:1/-1"><label for="ro-n">Negatief (gezond, afwezig)</label><textarea id="ro-n" rows="3">1,1 0,8 1,5 2,0 0,6 1,3 1,9 0,9 1,2 2,6 1,4 0,7 1,0 1,7 2,3 1,1 0,5 1,6</textarea></div>
-        <div class="f"><label for="ro-dir">Richting</label><select id="ro-dir"><option value="hi">hoger = positief</option><option value="lo">lager = positief</option></select></div>
-        <div class="f"><label for="ro-c">Afkapwaarde (leeg = optimaal)</label><input id="ro-c" inputmode="decimal" value=""></div>
-        <div class="f"><label for="ro-prev">Prevalentie</label><div class="inu"><input id="ro-prev" inputmode="decimal" value="10"><span class="u">%</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Waarden van monsters waarvan je de echte status kent (referentietest). Een waarde gelijk aan de afkapwaarde telt als positief. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="ro-cv"></canvas><div id="ro-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Roc.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ro-app"></div>
   <p class="src">AUC = kans dat een willekeurig positief monster hoger scoort dan een negatief (Mann-Whitney, gelijke waarden tellen half); 95%-interval met de standaardfout van Hanley &amp; McNeil, Radiology 143:29–36 (1982). Youden-index J = sensitiviteit + specificiteit − 1 (Youden, Cancer 3:32–35, 1950). PPV en NPV met de regel van Bayes bij de opgegeven prevalentie; LR+ = sens/(1 − spec), LR− = (1 − sens)/spec.</p>
 </section>
 <!-- /NT:roc -->
@@ -2736,35 +2660,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-km" data-tool="km">
   <header class="tool-head"><h2>Overlevingscurve (Kaplan-Meier)</h2>
   <p>Kaplan-Meier-overlevingscurves per groep met censurering, mediane overlevingstijd, 95%-intervallen en de log-ranktoets, bijvoorbeeld voor overleving van dieren, cellijnen of tijd tot een gebeurtenis.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="km-d">Groep, tijd, status per regel <span class="example">voorbeeld</span></label><textarea id="km-d" rows="12">controle 3 1
-controle 5 1
-controle 6 1
-controle 6 0
-controle 8 1
-controle 9 1
-controle 11 1
-controle 12 0
-controle 14 1
-controle 15 0
-behandeld 5 1
-behandeld 8 0
-behandeld 10 1
-behandeld 12 1
-behandeld 14 0
-behandeld 16 1
-behandeld 18 0
-behandeld 20 1
-behandeld 22 0
-behandeld 25 0</textarea></div>
-        <div class="f"><label for="km-u">Tijdseenheid</label><input id="km-u" class="txt" value="dagen"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Status 1 = gebeurtenis (bijvoorbeeld overleden), 0 = gecensureerd (nog in leven bij het einde of uitgevallen). Zonder groepsnaam: alleen tijd en status. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="km-cv"></canvas><div id="km-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Km.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="km-app"></div>
   <p class="src">Kaplan-Meier: S(t) = Π(1 − d<sub>i</sub>/n<sub>i</sub>) (Kaplan &amp; Meier, J Am Stat Assoc 53:457–481, 1958); 95%-interval met de variantie van Greenwood en de log(−log)-transformatie (Kalbfleisch &amp; Prentice 1980). Log-ranktoets: χ² = (O − E)ᵀV⁻¹(O − E) met k − 1 vrijheidsgraden (Mantel 1966; Peto &amp; Peto 1972). Mediaan: eerste tijd waarop S(t) ≤ 0,5.</p>
 </section>
 <!-- /NT:km -->
@@ -5642,28 +5540,29 @@ function betaInvUp(x,n,cl){ /* Clopper-Pearson bovengrens via bisectie op de bin
    calc.kin wordt daar gezet, want de rest van de app roept hem aan. */
 /* /NT:kin */
 /* NT:pipcal */
-/* ================= PIPETKALIBRATIE ================= */
+/* ================= PIPETKALIBRATIE =================
+   De velden en de uitkomst staan in src/tools/Pipcal.vue; hier blijven de Z-tabel en de ISO 8655-grenzen
+   (waar het validatiegeval aan hangt) en pipcalCalc(), dat de wegingen omrekent naar volumes met de
+   Z-factor en de systematische en toevallige fout toetst aan die grenzen. */
 const ZTAB=[[15,1.0020],[15.5,1.0020],[16,1.0021],[16.5,1.0022],[17,1.0023],[17.5,1.0024],[18,1.0025],[18.5,1.0026],[19,1.0027],[19.5,1.0028],[20,1.0029],[20.5,1.0030],[21,1.0031],[21.5,1.0032],[22,1.0033],[22.5,1.0034],[23,1.0035],[23.5,1.0036],[24,1.0038],[24.5,1.0039],[25,1.0040],[25.5,1.0041],[26,1.0043],[26.5,1.0044],[27,1.0045],[27.5,1.0047],[28,1.0048],[28.5,1.0050],[29,1.0051],[29.5,1.0052],[30,1.0054]];
 const ISOLIM=[[1,5,5],[2,4,2],[5,2.5,1.5],[10,1.2,0.8],[20,1,0.5],[50,1,0.4],[100,0.8,0.3],[200,0.8,0.3],[500,0.8,0.3],[1000,0.8,0.3],[2000,0.8,0.3],[5000,0.8,0.3],[10000,0.6,0.3]];
 const zFactor=t=>{ if(t<=15) return ZTAB[0][1]; if(t>=30) return ZTAB[ZTAB.length-1][1]; const i=ZTAB.findIndex(r=>r[0]>=t); const a=ZTAB[i-1], b=ZTAB[i]; return a[1]+(b[1]-a[1])*(t-a[0])/(b[0]-a[0]); };
-calc.pipcal=function(){ const Vs=num($('#pc-v').value), nom=num($('#pc-nom').value), t=num($('#pc-t').value), m=numsC($('#pc-m').value), mc=num($('#pc-ch').value)||1, out=$('#pc-out');
-  if(!(Vs>0)||m.length<2){ out.innerHTML=note('info','Vul het ingestelde volume en minstens twee wegingen in.'); return; }
+function pipcalCalc(Vs,nom,t,m,mc){
+  if(!(Vs>0)||m.length<2) return null;
   const Z=zFactor(isFinite(t)?t:20), V=m.map(x=>x*Z), Vm=mean(V), s=sd(V), es=(Vm-Vs)/Vs*100, cv=s/Vm*100;
   const lim=isFinite(nom)?ISOLIM.reduce((a,b)=>Math.abs(Math.log(b[0]/nom))<Math.abs(Math.log(a[0]/nom))?b:a):null;
   const limS=lim?lim[1]*lim[0]/Vs*mc:NaN, limR=lim?lim[2]*lim[0]/Vs*mc:NaN; /* ISO-grenzen in µL bij nominaal volume, omgerekend naar % bij ingesteld volume */
-  const okS=Math.abs(es)<=limS, okR=cv<=limR, chip=ok=>`<span class="chip ${ok?'ok':'bad'}" style="vertical-align:middle">${ok?'voldoet':'voldoet niet'}</span>`;
-  let h=`<div class="lbl">Gemiddeld volume</div><div class="big">${fmt(Vm,3)} <small>µL</small></div>`+kv([['Systematische fout e<sub>s</sub>',`${fmt(es,2)}% (${fmt(Vm-Vs,3)} µL) ${isFinite(limS)?chip(okS):''}`],['Toevallige fout CV',`${fmt(cv,2)}% (s = ${fmt(s,3)} µL) ${isFinite(limR)?chip(okR):''}`],['Z-factor',fmt(Z,4)+' µL/mg'],['Aantal wegingen',m.length]]);
-  if(lim) h+=kv([['ISO 8655-grens e<sub>s</sub>',`± ${fmt(lim[1]*lim[0]*mc/100,3)} µL (± ${fmt(limS,2)}% bij ${fmt(Vs,0)} µL)`],['ISO 8655-grens CV',`${fmt(lim[2]*lim[0]*mc/100,3)} µL (${fmt(limR,2)}% bij ${fmt(Vs,0)} µL)`]]);
-  if(lim&&Math.abs(lim[0]-nom)/nom>0.05) h+=note('info',`Geen ISO-tabelwaarde voor ${fmt(nom,0)} µL; de grenzen van ${fmt(lim[0],0)} µL zijn gebruikt.`);
-  if(m.length<4) h+=note('warn','Gebruik minstens 4 wegingen voor een betrouwbare schatting.');
-  if(isFinite(limS)&&(!okS||!okR)) h+=note('bad','Buiten de ISO-grenzen: controleer de techniek (voorbevochtigen, verticaal pipetteren, tip) en laat de pipet zo nodig kalibreren.');
-  out.innerHTML=h+`<div class="formula">V = m × Z · e<sub>s</sub> = (V̄ − V<sub>s</sub>) / V<sub>s</sub> · CV = s / V̄</div>`; };
+  const okS=Math.abs(es)<=limS, okR=cv<=limR;
+  return {Vs,nom,mc,n:m.length,Z,Vm,s,es,cv,lim,limS,limR,okS,okR}; }
 /* /NT:pipcal */
 /* NT:westgard */
-/* ================= WESTGARD / LEVEY-JENNINGS ================= */
-calc.westgard=function(){ const xs=numsC($('#wg-x').value), out=$('#wg-out'), cv=$('#wg-cv'); let m=num($('#wg-m').value), s=num($('#wg-s').value);
-  if($('#wg-est').checked&&xs.length>=2){ const b=xs.slice(0,20); m=mean(b); s=sd(b); }
-  if(!xs.length||!isFinite(m)||!(s>0)){ out.innerHTML=note('info','Vul streefwaarde, SD en metingen in.'); cv.style.display='none'; return; } cv.style.display='';
+/* ================= WESTGARD / LEVEY-JENNINGS =================
+   De velden en de uitkomst staan in src/tools/Westgard.vue; hier blijft het rekenwerk:
+   westgardCalc() schat (op verzoek) het gemiddelde en de SD uit de eerste 20 metingen, rekent de
+   z-scores uit en past de Westgard-regels toe (1₂ₛ als waarschuwing, de rest als afkeuring). */
+function westgardCalc(xs,m,s,est){
+  if(est&&xs.length>=2){ const b=xs.slice(0,20); m=mean(b); s=sd(b); }
+  if(!xs.length||!isFinite(m)||!(s>0)) return null;
   const z=xs.map(x=>(x-m)/s), V=xs.map(()=>[]), add=(i,r)=>{ if(!V[i].includes(r)) V[i].push(r); };
   z.forEach((v,i)=>{ if(Math.abs(v)>3) add(i,'1₃ₛ'); else if(Math.abs(v)>2) add(i,'1₂ₛ');
     if(i>=1&&((z[i]>2&&z[i-1]>2)||(z[i]<-2&&z[i-1]<-2))){ add(i,'2₂ₛ'); add(i-1,'2₂ₛ'); }
@@ -5671,42 +5570,34 @@ calc.westgard=function(){ const xs=numsC($('#wg-x').value), out=$('#wg-out'), cv
     if(i>=3){ const w=z.slice(i-3,i+1); if(w.every(v=>v>1)||w.every(v=>v<-1)) for(let k=i-3;k<=i;k++) add(k,'4₁ₛ'); }
     if(i>=9){ const w=z.slice(i-9,i+1); if(w.every(v=>v>0)||w.every(v=>v<0)) for(let k=i-9;k<=i;k++) add(k,'10ₓ'); } });
   const rej=V.map(v=>v.some(r=>r!=='1₂ₛ')), warnOnly=V.map((v,i)=>!rej[i]&&v.length>0), nRej=rej.filter(Boolean).length;
-  const lo=Math.min(m-3.5*s,...xs), hi=Math.max(m+3.5*s,...xs);
-  const C=chart(cv,{xmin:0.5,xmax:xs.length+0.5,ymin:lo,ymax:hi,xlabel:'meting',ylabel:'waarde',series:[{fn:()=>m,color:'--ink'},...[1,2,3].flatMap(k=>[{fn:()=>m+k*s,color:k===3?'--bad':k===2?'--warn':'--line',dash:[5,4]},{fn:()=>m-k*s,color:k===3?'--bad':k===2?'--warn':'--line',dash:[5,4]}]),{pts:xs.map((x,i)=>[i+1,x]).filter((p,i)=>!rej[i]&&!warnOnly[i]),color:'--accent'},{pts:xs.map((x,i)=>[i+1,x]).filter((p,i)=>warnOnly[i]),color:'--warn',r:4.5},{pts:xs.map((x,i)=>[i+1,x]).filter((p,i)=>rej[i]),color:'--bad',r:5}]});
-  const ctx=cv.getContext('2d'); ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--muted'); ctx.lineWidth=1; ctx.beginPath(); xs.forEach((x,i)=>{ i?ctx.lineTo(C.X(i+1),C.Y(x)):ctx.moveTo(C.X(i+1),C.Y(x)); }); ctx.stroke();
-  const rows=xs.map((x,i)=>[i+1,x,z[i],V[i]]).filter(r=>r[3].length);
-  out.innerHTML=`<div class="lbl">Afgekeurde metingen</div><div class="big">${nRej} <small>van ${xs.length}</small></div>`+kv([['Streefwaarde ± SD',`${sig(m,4)} ± ${sig(s,3)}`],['Waarschuwingen (alleen 1₂ₛ)',warnOnly.filter(Boolean).length],['CV',fmt(s/m*100,1)+'%']])+
-   (rows.length?`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th class="num">#</th><th class="num">Waarde</th><th class="num">z</th><th>Regels</th></tr></thead><tbody>${rows.map(r=>`<tr><td class="num">${r[0]}</td><td class="num">${sig(r[1],4)}</td><td class="num">${fmt(r[2],2)}</td><td>${r[3].map(t=>`<span class="chip ${t==='1₂ₛ'?'warn':'bad'}" style="margin-right:3px">${t}</span>`).join('')}</td></tr>`).join('')}</tbody></table></div>`:note('ok','Geen overtredingen van de Westgard-regels.'))+
-   `<div class="formula">z = (x − x̄) / s · 1₃ₛ: |z| &gt; 3 · 2₂ₛ: 2× z &gt; 2 aan dezelfde kant · R₄ₛ: verschil &gt; 4s · 4₁ₛ: 4× |z| &gt; 1 zelfde kant · 10ₓ: 10× zelfde kant van het gemiddelde</div>`; };
+  return {m,s,z,V,rej,warnOnly,nRej}; }
 /* /NT:westgard */
 /* NT:munc */
-/* ================= MEETONZEKERHEID ================= */
+/* ================= MEETONZEKERHEID =================
+   De velden, de tabel en de uitkomst staan in src/tools/Munc.vue; hier blijft het rekenwerk:
+   muncCalc() zet elke bron om naar een relatieve standaardonzekerheid, combineert ze en rekent
+   het aandeel per bron uit. MUT (de soorten onzekerheid) blijft hier staan, want de
+   validatie zet er rijen mee in de tabel. */
 const MUT=['standaard (u)','tolerantie, rechthoekig (±a)','tolerantie, driehoekig (±a)','relatief (%)'];
-ET('mu-tbl',[{h:'Bron',t:'txt',w:150},{h:'Waarde',t:'num',w:84},{h:'Onzekerheid',t:'num',w:84},{h:'Soort',t:'sel',o:MUT}],[['Massa NaCl (g)',5.844,0.0005,MUT[0]],['Zuiverheid NaCl',0.995,0.005,MUT[1]],['Volume maatkolf (mL)',1000,0.4,MUT[2]],['Temperatuur volume (mL)',1000,0.21,MUT[0]],['Molmassa NaCl (g/mol)',58.443,0.0006,MUT[0]]],'munc');
-calc.munc=function(){ const res=num($('#mu-res').value), k=num($('#mu-k').value)||2, un=$('#mu-unit').value, out=$('#mu-out'), cv=$('#mu-cv');
-  const R=etGet('mu-tbl').map(r=>{ const v=num(r[1]), a=num(r[2]), t=MUT.indexOf(r[3]); let u=NaN, rel=NaN; if(t===3){ rel=a/100; } else { u=t===1?a/Math.sqrt(3):t===2?a/Math.sqrt(6):a; rel=Math.abs(u/v); } return {n:r[0]||'?',v,a,t,u,rel}; }).filter(r=>isFinite(r.rel));
-  if(!R.length){ out.innerHTML=note('info','Vul per bron een waarde en onzekerheid in.'); cv.style.display='none'; return; }
+function muncCalc(res,k,rows){
+  const R=rows.map(r=>{ const v=num(r[1]), a=num(r[2]), t=MUT.indexOf(r[3]); let u=NaN, rel=NaN; if(t===3){ rel=a/100; } else { u=t===1?a/Math.sqrt(3):t===2?a/Math.sqrt(6):a; rel=Math.abs(u/v); } return {n:r[0]||'?',v,a,t,u,rel}; }).filter(r=>isFinite(r.rel));
+  if(!R.length) return null;
   const ss=R.reduce((s,r)=>s+r.rel*r.rel,0), urel=Math.sqrt(ss), uc=isFinite(res)?urel*Math.abs(res):NaN, U=k*uc;
   R.forEach(r=>r.c=r.rel*r.rel/ss); const top=R.reduce((a,b)=>b.c>a.c?b:a);
-  out.innerHTML=`<div class="lbl">Uitgebreide onzekerheid (k = ${fmt(k,1)})</div><div class="big">${isFinite(U)?sig(U,2)+' <small>'+esc(un)+'</small>':fmt(k*urel*100,2)+' <small>%</small>'}</div>`+kv([['Resultaat',isFinite(res)?`${sig(res,6)} ± ${sig(U,2)} ${esc(un)}`:'–'],['Relatieve gecombineerde onzekerheid',fmt(urel*100,3)+'%'],['Gecombineerde standaardonzekerheid u<sub>c</sub>',isFinite(uc)?sig(uc,3)+' '+esc(un):'–'],['Grootste bijdrage',`${ud(top.n)} (${fmt(top.c*100,0)}%)`]])+
-   `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Bron</th><th class="num">u</th><th class="num">u/x (%)</th><th class="num">Bijdrage</th></tr></thead><tbody>${R.map(r=>`<tr><td>${ud(r.n)}</td><td class="num">${isFinite(r.u)?sig(r.u,3):'–'}</td><td class="num">${fmt(r.rel*100,4)}</td><td class="num">${fmt(r.c*100,1)}%</td></tr>`).join('')}</tbody></table></div><div class="formula">u<sub>c</sub>/y = √Σ(u<sub>i</sub>/x<sub>i</sub>)² · rechthoekig u = a/√3 · driehoekig u = a/√6 · U = k·u<sub>c</sub></div>`;
-  cv.style.display=''; const W=480, bh=24, H=R.length*bh+50;
-  pShow(cv,W,H,(x)=>{ const L=170, mx=Math.max(...R.map(r=>r.c)); x.font='12px '+PFONT(); x.textBaseline='middle'; R.forEach((r,i)=>{ const y=20+i*bh; x.fillStyle=PCOL.ink; x.textAlign='right'; let lb=r.n; if(x.measureText(uv(lb)).width>L-16){ while(lb.length>1&&x.measureText(uv(lb+'…')).width>L-16) lb=lb.slice(0,-1); lb+='…'; } x.fillText(uv(lb),L-8,y+bh/2); x.fillStyle=r===top?PCOL.warn:PCOL.acc; const w=(W-L-60)*r.c/mx; x.fillRect(L,y+4,w,bh-8); x.fillStyle=PCOL.muted; x.textAlign='left'; x.fillText(fmt(r.c*100,0)+'%',L+w+6,y+bh/2); }); x.fillStyle=PCOL.muted; x.textAlign='left'; x.fillText('bijdrage aan u²',L,H-12); }); };
+  return {R,ss,urel,uc,U,top,k}; }
 /* /NT:munc */
 /* NT:mval */
-/* ================= METHODEVALIDATIE ================= */
-calc.mval=function(){ const rep=numsC($('#mv-rep').value), b=num($('#mv-b').value), sp=num($('#mv-sp').value), ad=num($('#mv-add').value), X=numsC($('#mv-x').value), Y=numsC($('#mv-y').value), out=$('#mv-out'), cv=$('#mv-cv');
-  const cmax=num($('#mv-cvmax').value), rlo=num($('#mv-rlo').value), rhi=num($('#mv-rhi').value), r2min=num($('#mv-r2').value);
-  const chip=(ok,t)=>`<span class="chip ${ok?'ok':'bad'}" style="vertical-align:middle;margin-left:6px">${t||(ok?'voldoet':'voldoet niet')}</span>`, rows=[]; let pass=0, tot=0;
-  if(rep.length>=2){ const c=sd(rep)/mean(rep)*100, ok=!(c>cmax); tot++; pass+=ok; rows.push(['Herhaalbaarheid (CV)',`${fmt(c,2)}% (x̄ = ${sig(mean(rep),4)}, s = ${sig(sd(rep),3)}, n = ${rep.length})`+(isFinite(cmax)?chip(ok):'')]); }
-  if([b,sp,ad].every(isFinite)&&ad!==0){ const r=(sp-b)/ad*100, ok=!(r<rlo||r>rhi); tot++; pass+=ok; rows.push(['Terugvinding',fmt(r,1)+'%'+(isFinite(rlo)&&isFinite(rhi)?chip(ok):'')]); }
-  let fit=null;
+/* ================= METHODEVALIDATIE =================
+   De velden en de uitkomst staan in src/tools/Mval.vue; hier blijft het rekenwerk: mvalCalc()
+   rekent de herhaalbaarheid (CV), de terugvinding en de lineariteit met LOD en LOQ uit en
+   toetst ze aan de acceptatiecriteria. */
+function mvalCalc(rep,b,sp,ad,X,Y,cmax,rlo,rhi,r2min){
+  let pass=0, tot=0, repR=null, recR=null, fit=null;
+  if(rep.length>=2){ const c=sd(rep)/mean(rep)*100, ok=!(c>cmax); tot++; pass+=ok; repR={c,ok,m:mean(rep),s:sd(rep),n:rep.length,chip:isFinite(cmax)}; }
+  if([b,sp,ad].every(isFinite)&&ad!==0){ const r=(sp-b)/ad*100, ok=!(r<rlo||r>rhi); tot++; pass+=ok; recR={r,ok,chip:isFinite(rlo)&&isFinite(rhi)}; }
   if(X.length>=3&&X.length===Y.length){ const L=linreg(X,Y), res=Y.map((y,i)=>y-(L.a+L.b*X[i])), sxy=Math.sqrt(res.reduce((s,r)=>s+r*r,0)/(X.length-2)); fit={...L,sxy,res}; const ok=!(L.r2<r2min); tot++; pass+=ok;
-    rows.push(['Lineariteit R²',fmt(L.r2,5)+(isFinite(r2min)?chip(ok):'')],['Helling / intercept',`${sig(L.b,4)} / ${sig(L.a,3)}`],['LOD (3,3·σ/S)',sig(3.3*sxy/Math.abs(L.b),3)],['LOQ (10·σ/S)',sig(10*sxy/Math.abs(L.b),3)]); }
-  else if(X.length||Y.length) rows.push(['Lineariteit','vul evenveel concentraties als signalen in (minstens 3)']);
-  if(!rows.length){ out.innerHTML=note('info','Vul ten minste één onderdeel in.'); cv.style.display='none'; return; }
-  out.innerHTML=`<div class="lbl">Criteria voldaan</div><div class="big">${pass} <small>van ${tot}</small></div>`+kv(rows);
-  if(fit){ cv.style.display=''; const xmax=Math.max(...X)*1.05||1, ymin=Math.min(0,...Y), ymax=Math.max(...Y)*1.08; chart(cv,{xmin:0,xmax,ymin,ymax,xlabel:'concentratie',ylabel:'signaal',series:[{fn:x=>fit.a+fit.b*x,name:'regressielijn'},{pts:X.map((x,i)=>[x,Y[i]]),color:'--warn'}]}); } else cv.style.display='none'; };
+    fit.ok=ok; fit.chip=isFinite(r2min); fit.lod=3.3*sxy/Math.abs(L.b); fit.loq=10*sxy/Math.abs(L.b); }
+  return {pass,tot,rep:repR,rec:recR,fit,badLin:!fit&&!!(X.length||Y.length)}; }
 /* /NT:mval */
 /* NT:mpn */
 /* ================= MPN ================= */
@@ -6306,49 +6197,44 @@ calc.viab=function(){};
 calc.desinf=function(){};
 /* /NT:desinf */
 /* NT:bland */
-/* ================= BLAND-ALTMAN ================= */
-calc.bland=function(){ const pct=$('#ba-m').value==='pct', lim=num($('#ba-lim').value), out=$('#ba-out'), cv=$('#ba-cv');
-  const P=$('#ba-d').value.split(/\n/).map(l=>l.trim().split(/[\s;\t]+/).map(num)).filter(r=>r.length>=2&&isFinite(r[0])&&isFinite(r[1])).map(([a,b])=>{ const m=(a+b)/2; return [m,pct?(m!==0?(b-a)/m*100:NaN):b-a]; }).filter(p=>isFinite(p[1]));
-  if(P.length<3){ out.innerHTML=note('info','Vul minstens drie paren metingen in (twee getallen per regel).'); cv.style.display='none'; return; }
+/* ================= BLAND-ALTMAN =================
+   De velden en de uitkomst staan in src/tools/Bland.vue; hier blijft het rekenwerk, waar het
+   validatiegeval aan hangt: blandPairs() leest de paren (gemiddelde, verschil) uit de tekst en
+   blandCalc() geeft de bias, de grenzen van overeenstemming met hun 95%-interval en de
+   regressie van het verschil op het gemiddelde. */
+function blandPairs(txt,pct){
+  return txt.split(/\n/).map(l=>l.trim().split(/[\s;\t]+/).map(num)).filter(r=>r.length>=2&&isFinite(r[0])&&isFinite(r[1])).map(([a,b])=>{ const m=(a+b)/2; return [m,pct?(m!==0?(b-a)/m*100:NaN):b-a]; }).filter(p=>isFinite(p[1])); }
+function blandCalc(P){
   const n=P.length, d=P.map(p=>p[1]), m=P.map(p=>p[0]), b=mean(d), s=sd(d), t=tinv(0.975,n-1), lo=b-1.96*s, hi=b+1.96*s, seB=s/Math.sqrt(n), seL=Math.sqrt(3*s*s/n), r=linreg(m,d);
-  const mx=mean(m), sxx=m.reduce((a,v)=>a+(v-mx)**2,0), res=d.reduce((a,v,i)=>a+(v-(r.a+r.b*m[i]))**2,0), seb=Math.sqrt(res/(n-2)/sxx), tb=r.b/seb, pb=2*(1-tcdf(Math.abs(tb),n-2)), u=pct?'%':'';
+  const mx=mean(m), sxx=m.reduce((a,v)=>a+(v-mx)**2,0), res=d.reduce((a,v,i)=>a+(v-(r.a+r.b*m[i]))**2,0), seb=Math.sqrt(res/(n-2)/sxx), tb=r.b/seb, pb=2*(1-tcdf(Math.abs(tb),n-2));
   const p0=2*(1-tcdf(Math.abs(b/seB),n-1));
-  out.innerHTML=`<div class="lbl">Bias (B − A)</div><div class="big">${sig(b,3)}${u} <small>95%: ${sig(b-t*seB,3)} – ${sig(b+t*seB,3)}</small></div>`+kv([['Grenzen van overeenstemming',`${sig(lo,3)} – ${sig(hi,3)}${u}`],['95%-interval ondergrens',`${sig(lo-t*seL,3)} – ${sig(lo+t*seL,3)}`],['95%-interval bovengrens',`${sig(hi-t*seL,3)} – ${sig(hi+t*seL,3)}`],['SD van de verschillen',sig(s,3)+u],['Bias ≠ 0?',`p ${p0<0.001?'&lt; 0,001':'= '+fmt(p0,3)} (gepaarde t-toets)`],['Proportionele afwijking',`helling ${sig(r.b,3)}, p ${pb<0.001?'&lt; 0,001':'= '+fmt(pb,3)}`],['Paren',n]])+
-   (pb<0.05?note('warn','Het verschil hangt samen met de grootte van de meting; overweeg verschillen in procenten of een log-transformatie.'):'')+(lim>0?note(Math.max(Math.abs(lo-t*seL),Math.abs(hi+t*seL))<=lim?'ok':'warn',`Met het 95%-interval van de grenzen meegenomen liggen de verschillen ${Math.max(Math.abs(lo-t*seL),Math.abs(hi+t*seL))<=lim?'binnen':'niet zeker binnen'} ±${sig(lim,3)}${u}.`):'')+`<div class="formula">d̄ ± 1,96·s<sub>d</sub> · SE(grens) ≈ √(3s<sub>d</sub>²/n)</div>`;
-  const ys=[...d,lo-t*seL,hi+t*seL], y0=Math.min(...ys), y1=Math.max(...ys), pd=(y1-y0)*0.1||1, x0=Math.min(...m), x1=Math.max(...m), px=(x1-x0)*0.06||1;
-  cv.style.display=''; chart(cv,{xmin:x0-px,xmax:x1+px,ymin:y0-pd,ymax:y1+pd,xlabel:'gemiddelde van A en B',ylabel:pct?'verschil (%)':'verschil B − A',series:[{fn:()=>b,name:'bias'},{fn:()=>lo,color:'--warn',dash:[5,4]},{fn:()=>hi,color:'--warn',dash:[5,4]},{pts:P,color:'--ink',name:'monsters'}]}); };
+  return {n,d,m,b,s,t,lo,hi,seB,seL,r,pb,p0}; }
 /* /NT:bland */
 /* NT:roc */
-/* ================= ROC-CURVE ================= */
-calc.roc=function(){ const hi=$('#ro-dir').value==='hi', P=numsC($('#ro-p').value).map(v=>hi?v:-v), N=numsC($('#ro-n').value).map(v=>hi?v:-v), cu=num($('#ro-c').value), prev=num($('#ro-prev').value)/100, out=$('#ro-out'), cv=$('#ro-cv');
-  if(P.length<2||N.length<2){ out.innerHTML=note('info','Vul minstens twee positieve en twee negatieve waarden in.'); cv.style.display='none'; return; }
+/* ================= ROC-CURVE =================
+   De velden en de uitkomst staan in src/tools/Roc.vue; hier blijft het rekenwerk, waar het
+   validatiegeval aan hangt: rocCalc() geeft de AUC met de standaardfout van Hanley & McNeil,
+   de ROC-punten, de optimale afkapwaarde (Youden) en de maten bij de gekozen afkapwaarde.
+   P en N zijn de waarden al in de gekozen richting (bij "lager = positief" met -1 vermenigvuldigd). */
+function rocCalc(P,N,cu,prev,hi){
   const np=P.length, nn=N.length; let U=0; P.forEach(p=>N.forEach(q=>{ U+=p>q?1:p===q?0.5:0; })); const A=U/(np*nn), Q1=A/(2-A), Q2=2*A*A/(1+A), se=Math.sqrt((A*(1-A)+(np-1)*(Q1-A*A)+(nn-1)*(Q2-A*A))/(np*nn));
   const cuts=[...new Set([...P,...N])].sort((a,b)=>b-a), at=c=>({c,se:P.filter(v=>v>=c).length/np,sp:N.filter(v=>v<c).length/nn}), pts=[[0,0],...cuts.map(c=>{ const r=at(c); return [1-r.sp,r.se]; }),[1,1]];
   let best=null; cuts.forEach(c=>{ const r=at(c); r.J=r.se+r.sp-1; if(!best||r.J>best.J) best=r; }); const ch=isFinite(cu)?at(hi?cu:-cu):best, rc=v=>hi?v:-v;
   const ppv=prev>0&&prev<1?ch.se*prev/(ch.se*prev+(1-ch.sp)*(1-prev)):NaN, npv=prev>0&&prev<1?ch.sp*(1-prev)/(ch.sp*(1-prev)+(1-ch.se)*prev):NaN, lrp=ch.sp<1?ch.se/(1-ch.sp):Infinity, lrn=ch.sp>0?(1-ch.se)/ch.sp:NaN;
-  out.innerHTML=`<div class="lbl">AUC</div><div class="big">${fmt(A,3)} <small>95%: ${fmt(Math.max(0,A-1.96*se),3)} – ${fmt(Math.min(1,A+1.96*se),3)}</small></div>`+kv([['Optimale afkapwaarde (Youden)',`${sig(rc(best.c),4)} (J = ${fmt(best.J,3)})`],[isFinite(cu)?`Bij afkapwaarde ${sig(cu,4)}`:'Bij de optimale afkapwaarde',`sensitiviteit ${fmt(ch.se*100,1)}%, specificiteit ${fmt(ch.sp*100,1)}%`],[`PPV / NPV bij ${fmt(prev*100,1)}% prevalentie`,`${fmt(ppv*100,1)}% / ${fmt(npv*100,1)}%`],['LR+ / LR−',`${isFinite(lrp)?fmt(lrp,2):'∞'} / ${fmt(lrn,3)}`],['Positief / negatief',`${np} / ${nn}`]])+(A<0.5?note('warn','AUC onder 0,5: draai de richting om.'):'')+`<div class="formula">AUC = U/(n<sub>p</sub>·n<sub>n</sub>) · J = sens + spec − 1</div>`;
-  cv.style.display=''; const g=chart(cv,{xmin:0,xmax:1,ymin:0,ymax:1,w:420,h:380,xlabel:'1 − specificiteit',ylabel:'sensitiviteit',series:[{fn:x=>x,color:'--muted',dash:[4,4]},{pts:[[1-ch.sp,ch.se]],color:'--warn',r:5,name:'afkapwaarde'}]});
-  const c=cv.getContext('2d'); c.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#1558b0'; c.lineWidth=2; c.beginPath(); pts.forEach((p,i)=>i?c.lineTo(g.X(p[0]),g.Y(p[1])):c.moveTo(g.X(p[0]),g.Y(p[1]))); c.stroke(); cv._data={head:['1 − specificiteit','sensitiviteit'],rows:pts}; };
+  return {np,nn,A,se,pts,best,ch,rc,ppv,npv,lrp,lrn}; }
 /* /NT:roc */
 /* NT:km */
-/* ================= KAPLAN-MEIER ================= */
+/* ================= KAPLAN-MEIER =================
+   De velden en de uitkomst staan in src/tools/Km.vue; hier blijven het rekenwerk, waar het
+   validatiegeval aan hangt: kmFit() geeft de Kaplan-Meier-stappen met het 95%-interval
+   (Greenwood, log(-log)) en de mediaan, kmLogrank() de log-ranktoets over k groepen. */
 function kmFit(R){ const T=[...new Set(R.filter(r=>r.e).map(r=>r.t))].sort((a,b)=>a-b); let S=1, v=0; const steps=[];
   T.forEach(t=>{ const n=R.filter(r=>r.t>=t).length, d=R.filter(r=>r.t===t&&r.e).length; if(!n) return; S*=1-d/n; if(n>d) v+=d/(n*(n-d)); let lo=NaN, hi=NaN; if(S>0&&S<1){ const se=Math.sqrt(v)/Math.abs(Math.log(S)), c=Math.log(-Math.log(S)); lo=Math.exp(-Math.exp(c+1.96*se)); hi=Math.exp(-Math.exp(c-1.96*se)); } steps.push({t,n,d,S,lo,hi}); });
   const med=steps.find(s=>s.S<=0.5+1e-12); return {steps,med:med?med.t:NaN}; }
-calc.km=function(){ const un=$('#km-u').value, out=$('#km-out'), cv=$('#km-cv');
-  const R=$('#km-d').value.split(/\n/).map(l=>{ const t=l.trim().split(/[\s;\t]+/).filter(Boolean); if(t.length<2) return null; let g='alle', a=t; if(t.length>=3&&!isFinite(num(t[0]))) { g=t[0]; a=t.slice(1); } else if(t.length>=3) { g=t[0]; a=t.slice(1); } const tt=num(a[0]), e=num(a[1]); if(!(tt>=0)||!(e===0||e===1)) return null; return {g,t:tt,e:e===1}; }).filter(Boolean);
-  if(R.length<2){ out.innerHTML=note('info','Vul per regel een groep (optioneel), een tijd en een status (1 of 0) in.'); cv.style.display='none'; return; }
-  const G=[...new Set(R.map(r=>r.g))].slice(0,8), F=G.map(g=>({g,R:R.filter(r=>r.g===g),...kmFit(R.filter(r=>r.g===g))}));
-  let lr=''; if(G.length>1){ const T=[...new Set(R.filter(r=>r.e&&G.includes(r.g)).map(r=>r.t))].sort((a,b)=>a-b), k=G.length, O=Array(k).fill(0), E=Array(k).fill(0), V=Array.from({length:k},()=>Array(k).fill(0));
-    T.forEach(t=>{ const n=G.map(g=>R.filter(r=>r.g===g&&r.t>=t).length), d=G.map(g=>R.filter(r=>r.g===g&&r.t===t&&r.e).length), N=n.reduce((a,b)=>a+b,0), D=d.reduce((a,b)=>a+b,0); if(N<2) return; for(let i=0;i<k;i++){ O[i]+=d[i]; E[i]+=D*n[i]/N; for(let j=0;j<k;j++) V[i][j]+=D*(N-D)/(N-1)*(n[i]/N)*((i===j?1:0)-n[j]/N); } });
+function kmLogrank(R,G){ const T=[...new Set(R.filter(r=>r.e&&G.includes(r.g)).map(r=>r.t))].sort((a,b)=>a-b), k=G.length, O=Array(k).fill(0), E=Array(k).fill(0), V=Array.from({length:k},()=>Array(k).fill(0));
+  T.forEach(t=>{ const n=G.map(g=>R.filter(r=>r.g===g&&r.t>=t).length), d=G.map(g=>R.filter(r=>r.g===g&&r.t===t&&r.e).length), N=n.reduce((a,b)=>a+b,0), D=d.reduce((a,b)=>a+b,0); if(N<2) return; for(let i=0;i<k;i++){ O[i]+=d[i]; E[i]+=D*n[i]/N; for(let j=0;j<k;j++) V[i][j]+=D*(N-D)/(N-1)*(n[i]/N)*((i===j?1:0)-n[j]/N); } });
     const m=k-1, x=O.slice(0,m).map((o,i)=>o-E[i]), Vm=V.slice(0,m).map(r=>r.slice(0,m)); let chi=NaN; try{ const Vi=invMat(Vm); chi=x.reduce((s,xi,i)=>s+xi*x.reduce((t,xj,j)=>t+Vi[i][j]*xj,0),0); }catch(e){}
-    const p=isFinite(chi)?1-chicdf(chi,m):NaN; lr=kv([['Log-ranktoets',isFinite(chi)?`χ² = ${fmt(chi,2)}, df = ${m}, p ${p<0.001?'&lt; 0,001':'= '+fmt(p,3)}`:'–'],...G.map((g,i)=>[`${esc(g)}: waargenomen / verwacht`,`${O[i]} / ${fmt(E[i],1)}`])]); }
-  out.innerHTML=`<div class="tbl-wrap"><table class="mini"><thead><tr><th>Groep</th><th class="num">n</th><th class="num">Gebeurtenissen</th><th class="num">Mediaan (${ud(un)})</th></tr></thead><tbody>${F.map(f=>`<tr><td>${ud(f.g)}</td><td class="num">${f.R.length}</td><td class="num">${f.R.filter(r=>r.e).length}</td><td class="num">${isFinite(f.med)?fmt(f.med,2):'niet bereikt'}</td></tr>`).join('')}</tbody></table></div>`+lr+
-   `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Groep</th><th class="num">Tijd</th><th class="num">At risk</th><th class="num">Gebeurtenissen</th><th class="num">S(t)</th><th class="num">95%-interval</th></tr></thead><tbody>${F.flatMap(f=>f.steps.slice(0,100).map(s=>`<tr><td>${ud(f.g)}</td><td class="num">${fmt(s.t,2)}</td><td class="num">${s.n}</td><td class="num">${s.d}</td><td class="num">${fmt(s.S,3)}</td><td class="num">${isFinite(s.lo)?fmt(s.lo,3)+' – '+fmt(s.hi,3):'–'}</td></tr>`)).join('')}</tbody></table></div>`+`<div class="formula">S(t) = Π (1 − d<sub>i</sub>/n<sub>i</sub>) · tekens: gecensureerd</div>`;
-  const tmax=Math.max(...R.map(r=>r.t)); cv.style.display=''; const g=chart(cv,{xmin:0,xmax:tmax*1.05||1,ymin:0,ymax:1.05,xlabel:`tijd (${uv(un)})`,ylabel:'overleving S(t)',legend:F.map((f,i)=>[f.g,SERCOL[i%SERCOL.length]]),legendPos:'br',series:[]});
-  const c=cv.getContext('2d'); F.forEach((f,i)=>{ const col=SERCOL[i%SERCOL.length]; c.strokeStyle=col; c.lineWidth=2; c.beginPath(); c.moveTo(g.X(0),g.Y(1)); let S=1; f.steps.forEach(s=>{ c.lineTo(g.X(s.t),g.Y(S)); c.lineTo(g.X(s.t),g.Y(s.S)); S=s.S; }); c.lineTo(g.X(Math.max(...f.R.map(r=>r.t))),g.Y(S)); c.stroke(); c.lineWidth=1.5;
-    f.R.filter(r=>!r.e).forEach(r=>{ const st=f.steps.filter(s=>s.t<=r.t), y=st.length?st[st.length-1].S:1; c.beginPath(); c.moveTo(g.X(r.t),g.Y(y)-5); c.lineTo(g.X(r.t),g.Y(y)+5); c.stroke(); }); });
-  cv._data={head:['groep','tijd','S(t)'],rows:F.flatMap(f=>f.steps.map(s=>[f.g,s.t,s.S]))}; };
+  const p=isFinite(chi)?1-chicdf(chi,m):NaN; return {O,E,m,chi,p}; }
 /* /NT:km */
 /* NT:purif */
 /* ================= EIWITZUIVERINGSTABEL =================

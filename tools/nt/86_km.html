@@ -1,34 +1,8 @@
 <section class="tool" id="t-km" data-tool="km">
   <header class="tool-head"><h2>Overlevingscurve (Kaplan-Meier)</h2>
   <p>Kaplan-Meier-overlevingscurves per groep met censurering, mediane overlevingstijd, 95%-intervallen en de log-ranktoets, bijvoorbeeld voor overleving van dieren, cellijnen of tijd tot een gebeurtenis.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="km-d">Groep, tijd, status per regel <span class="example">voorbeeld</span></label><textarea id="km-d" rows="12">controle 3 1
-controle 5 1
-controle 6 1
-controle 6 0
-controle 8 1
-controle 9 1
-controle 11 1
-controle 12 0
-controle 14 1
-controle 15 0
-behandeld 5 1
-behandeld 8 0
-behandeld 10 1
-behandeld 12 1
-behandeld 14 0
-behandeld 16 1
-behandeld 18 0
-behandeld 20 1
-behandeld 22 0
-behandeld 25 0</textarea></div>
-        <div class="f"><label for="km-u">Tijdseenheid</label><input id="km-u" class="txt" value="dagen"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Status 1 = gebeurtenis (bijvoorbeeld overleden), 0 = gecensureerd (nog in leven bij het einde of uitgevallen). Zonder groepsnaam: alleen tijd en status. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="km-cv"></canvas><div id="km-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Km.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="km-app"></div>
   <p class="src">Kaplan-Meier: S(t) = Π(1 − d<sub>i</sub>/n<sub>i</sub>) (Kaplan &amp; Meier, J Am Stat Assoc 53:457–481, 1958); 95%-interval met de variantie van Greenwood en de log(−log)-transformatie (Kalbfleisch &amp; Prentice 1980). Log-ranktoets: χ² = (O − E)ᵀV⁻¹(O − E) met k − 1 vrijheidsgraden (Mantel 1966; Peto &amp; Peto 1972). Mediaan: eerste tijd waarop S(t) ≤ 0,5.</p>
 </section>
