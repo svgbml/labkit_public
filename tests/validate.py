@@ -601,12 +601,12 @@ def _(pg):
 
 @case('Primers oplossen', 'Stock 100 µM', 'IDT: V (µL) = nmol / µM × 1000 → 28,4 nmol in 284 µL; werkoplossing 10 µM, 100 µL → 10 µL stock')
 def _(pg):
-    pg.evaluate("__go('oligo');document.querySelector('#ol-tbl tbody').innerHTML=olRow(['F',28.4]);__set('ol-s','100');__set('ol-w','10');__set('ol-wv','100')")
+    pg.evaluate("__go('oligo');__tbl('ol-tbl',[['F',28.4]],'oligo');__set('ol-s','100');__set('ol-w','10');__set('ol-wv','100')")
     return [('µL buffer', pg.evaluate("__n(document.querySelector('#ol-tbl [data-o]').textContent)"), 284, 0.001), ('µL stock', pg.evaluate("__big('#ol-out')"), 10, 0.001)]
 
 @case('SDS-PAGE monsters', 'Laadschema', 'Rekentest: 20 µg van 2,4 µg/µL = 8,33 µL; 4× buffer in 20 µL = 5 µL; water 6,67 µL')
 def _(pg):
-    pg.evaluate("__go('sds');document.querySelector('#ss-tbl tbody').innerHTML=ssRow(['A',2.4]);__set('ss-ug','20');__set('ss-x','4');__set('ss-v','20')")
+    pg.evaluate("__go('sds');__tbl('ss-tbl',[['A',2.4]],'sds');__set('ss-ug','20');__set('ss-x','4');__set('ss-v','20')")
     v = pg.evaluate("[...document.querySelector('#ss-res tbody tr').cells].slice(1,4).map(c=>__n(c.textContent))")
     return [('monster', v[0], 8.33, 0.002), ('buffer', v[1], 5, 0.001), ('water', v[2], 6.67, 0.002)]
 

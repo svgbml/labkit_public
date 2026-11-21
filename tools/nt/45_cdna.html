@@ -1,20 +1,8 @@
 <section class="tool" id="t-cdna" data-tool="cdna">
   <header class="tool-head"><h2>cDNA-synthese (RT-mix)</h2>
   <p>Normaliseer RNA-monsters naar dezelfde input voor reverse transcriptie en reken de 2× RT-mastermix uit, met een no-RT-controle.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="cd-in">RNA per reactie</label><div class="inu"><input id="cd-in" inputmode="decimal" value="1000"><span class="u">ng</span></div></div>
-        <div class="f"><label for="cd-vr">RNA + water per reactie</label><div class="inu"><input id="cd-vr" inputmode="decimal" value="10"><span class="u">µL</span></div></div>
-        <div class="f" data-expert=""><label for="cd-inh">RNase-remmer in de mix</label><select id="cd-inh" style="width:100%"><option value="0">nee</option><option value="1">ja (1 µL)</option></select></div>
-        <div class="f" data-expert=""><label for="cd-nort">No-RT-controles</label><input id="cd-nort" inputmode="numeric" value="1"></div>
-        <div class="f" data-expert=""><label for="cd-mar">Marge</label><div class="inu"><input id="cd-mar" inputmode="decimal" value="10"><span class="u">%</span></div></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="cd-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="cd-tbl-add">+ Monster</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">RNA-concentraties uit de spectrofotometer (zie RNA-kwaliteit). De mix volgt de High-Capacity cDNA Reverse Transcription Kit (20 µL: 10 µL 2× mix + 10 µL RNA). Bij een andere kit pas je de volumes in het Pipetteerschema aan. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result" id="cd-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Cdna.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="cd-app"></div>
   <p class="src">Per 20 µL-reactie: 2,0 µL 10× RT-buffer, 0,8 µL 25× dNTP-mix (100 mM), 2,0 µL 10× random primers, 1,0 µL MultiScribe RT, 4,2 µL water (zonder remmer) of 1,0 µL RNase-remmer + 3,2 µL water; maximaal 2 µg totaal-RNA per 20 µL (Thermo Fisher, High-Capacity cDNA Reverse Transcription Kit User Guide, MAN0017977). De no-RT-controle krijgt dezelfde mix zonder reverse transcriptase.</p>
 </section>
