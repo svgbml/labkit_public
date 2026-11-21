@@ -1,7 +1,7 @@
 <!-- ================= GELFOTO-EDITOR, PANEEL 4: DE LADDERBANDEN =================
      Welke ladderlane je bekijkt, de banden van die lane met hun grootte en hun label, en de
      symbolen die je in een label kunt zetten (≥, ~, †, …). De banden zelf komen uit de
-     detectie in web/index.html (gfFindLadder, gfPeakNear) en worden ook op de foto versleept;
+     detectie in src/engines/gelfoto.js (gfFindLadder, gfPeakNear) en worden ook op de foto versleept;
      die code blijft daar en tikt deze component op.
 
      Een samengevoegde band (⤓, voor samengeperste ladderbanden) houdt zijn label als 900/800

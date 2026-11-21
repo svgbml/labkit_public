@@ -4,7 +4,7 @@
      die ladder virtueel naast de gel zetten.
 
      Het herkennen (gfLadAnalyze, gfLadMatch) en het tekenen (gfVlPreview op #gf-vlcv,
-     gfVlWarp naast de gel) blijven in web/index.html; die zetten gf.vl en tikken deze
+     gfVlWarp naast de gel) blijven in src/engines/gelfoto.js; die zetten gf.vl en tikken deze
      component op. De id's gf-vlfile, gf-vlcv, gf-vlpick, gf-vllab en gf-vlsizes blijven,
      want de motor leest het label uit gf-vllab en tekent op de canvas. -->
 <template>

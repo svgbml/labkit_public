@@ -1,7 +1,7 @@
 <!-- ================= GELFOTO-EDITOR, PANEEL 1 EN 2 =================
      De foto kiezen en bijstellen. De velden houden hun id's (gf-inv, gf-gray, gf-bri, gf-con,
-     gf-rot), want gfUpdate() in web/index.html leest ze daar uit; het beeldwerk zelf blijft
-     daar staan. De knoppen roepen de motorfuncties in index.html aan, via een methode: een
+     gf-rot), want gfUpdate() in src/engines/gelfoto.js leest ze daar uit; het beeldwerk zelf blijft
+     daar staan. De knoppen roepen de motorfuncties in src/engines/gelfoto.js aan, via een methode: een
      gecompileerd template zoekt een naam op de component, niet in de globale omgeving.
 
      De waarden naast de schuifregelaars stonden eerst als textContent in gfUpdate(); nu

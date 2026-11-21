@@ -1,7 +1,7 @@
 <!-- ================= GELFOTO-EDITOR, PANEEL 4: ACHTERGROND, Rf EN MASSA =================
      De velden voor de densitometrie (hoe de achtergrond onder een band wordt bepaald), het
      front voor R<sub>f</sub> en de massa per ladderband. Het rekenwerk zelf (rolling ball,
-     densArea, gfRf, gfMassSlope) blijft in web/index.html en leest deze velden op hun id. -->
+     densArea, gfRf, gfMassSlope) blijft in src/engines/gelfoto.js en leest deze velden op hun id. -->
 <template>
   <div>
     <div class="fields" style="margin-top:8px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">

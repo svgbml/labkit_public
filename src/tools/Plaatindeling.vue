@@ -2,8 +2,8 @@
      De bediening van de tool: titel, knoppen, palet, vorm, vinkjes, toelichting en de tekst
      onder de tekening. Wat NIET in de component zit:
      - de plaatontwerper in #w-pld (klik of sleep over de putjes, groepen, legenda): dat is de
-       gedeelde ontwerper uit tools/nt/02_plate.js, die ook qPCR en ELISA gebruiken. plaatInit()
-       in tools/nt/04_plaat.js bouwt hem in mounted(), want een Vue-mount wist zijn host;
+       gedeelde ontwerper uit src/engines/plate.js, die ook qPCR en ELISA gebruiken. plaatInit()
+       in src/engines/plate.js bouwt hem in mounted(), want een Vue-mount wist zijn host;
      - de tekening op #w-cv: plateImg() in dezelfde module (de ontwerper roept die aan bij elke
        wijziging); de component roept hem aan bij elke keuze;
      - de tekst voor "Kopieer als tabel" en "Download CSV": plaatTSV() en plaatCSV().

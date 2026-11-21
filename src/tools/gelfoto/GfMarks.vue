@@ -5,9 +5,9 @@
      Eerst bouwde gfMarksTable() deze tabel als string HTML, en drie losse stukken code
      plakten er achteraf een kolom bij met insertCell(). Die drie zijn nu gewoon kolommen
      hieronder; het rekenwerk eronder (gfIntensity, gfRf, gfMassSlope, gfSizeTxt) blijft in
-     web/index.html staan, want dat hoort bij het beeldwerk.
+     src/engines/gelfoto.js staan, want dat hoort bij het beeldwerk.
 
-     gf.marks is een gewoon object in index.html. De motor roept na elke verandering
+     gf.marks is een gewoon object in src/engines/gelfoto.js. De motor roept na elke verandering
      gfMarksTable() aan; die tikt gfTick op en dan rekent `rows` opnieuw. -->
 <template>
   <div style="margin-top:8px">

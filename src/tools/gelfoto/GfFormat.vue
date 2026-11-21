@@ -1,7 +1,7 @@
 <!-- ================= GELFOTO-EDITOR, PANEEL 5 EN 6: OPMAAK EN EXPORT =================
      De opmaak van de afbeelding (titel, lettergrootte, labelhoek, kleur van de metingen) en
      wat er in de export terechtkomt. gfRender() leest deze velden op hun id uit gxOpts() en
-     gfUpdate(); het tekenen zelf blijft in web/index.html.
+     gfUpdate(); het tekenen zelf blijft in src/engines/gelfoto.js.
 
      De gx-velden worden onthouden in localStorage (NOPERSIST laat alleen gf- vallen). De
      herstelcode in index.html loopt voordat Vue mount, dus de component leest die waarden

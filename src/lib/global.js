@@ -4,3 +4,16 @@
 export function expose(o) {
   for (const k in o) window[k] = o[k];
 }
+
+/* Voor code met toestand (de motoren in src/engines/): een getter (en voor let/function een
+   setter) op window in plaats van een kopie. `timers = timers.filter(…)` in de module, of
+   `gfIntensity = function(…)` in een ander blok, is dan overal te zien. Een const krijgt alleen
+   een getter. */
+export function live(o) {
+  for (const k in o) {
+    const d = o[k];
+    Object.defineProperty(window, k, Array.isArray(d)
+      ? {get: d[0], set: d[1], configurable: true, enumerable: true}
+      : {get: d, configurable: true, enumerable: true});
+  }
+}

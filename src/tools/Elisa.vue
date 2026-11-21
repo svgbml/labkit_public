@@ -3,7 +3,7 @@
      blancocorrectie, de 4PL-fit met lmfit (500 iteraties) of de lineaire fit, het terugrekenen
      en het bereik. Alleen de weergave is opnieuw opgebouwd met de gedeelde componenten.
 
-     De plaatontwerper (plateDesigner, zie tools/nt/02_plate.js) is een widget van gewone DOM.
+     De plaatontwerper (plateDesigner, zie src/engines/plate.js) is een widget van gewone DOM.
      Hij wordt in mounted() op #el-pld gezet, een leeg element waar Vue nooit kinderen in
      rendert. De plaatindeling in het tekstvak (#el-l) blijft de bron voor de berekening: de
      ontwerper vult dat vak en leest het terug. Zie ook elBlocks() in 94_elisa.js.

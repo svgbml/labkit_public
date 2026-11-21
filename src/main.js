@@ -21,6 +21,10 @@ import './lib/fit.js';
 import './lib/chart.js';
 import './lib/parse.js';
 import './lib/storage.js';
+/* de motoren (S268): toestand die buiten Vue blijft en door meerdere tools gebruikt wordt */
+import './engines/timers.js';
+import './engines/gelfoto.js';
+import './engines/plate.js';
 import {mountTool} from './lib/bridge.js';
 import Sigfig from './tools/Sigfig.vue';
 import Zprime from './tools/Zprime.vue';
@@ -462,8 +466,8 @@ export function start() {
   calc.timers = () => {};
 
   /* Plaatindeling: de bediening zit in de component; de gedeelde plaatontwerper (#w-pld) en de
-     tekening (#w-cv) komen uit tools/nt/02_plate.js en 04_plaat.js en worden in mounted() gebouwd.
-     calc.plaat() (= plateImg()) staat in 04_plaat.js. */
+     tekening (#w-cv) komen uit src/engines/plate.js en worden in mounted() gebouwd.
+     calc.plaat() (= plateImg()) staat in src/engines/plate.js. */
   mountTool('#w-app', Plaatindeling);
   /* Statistiek tekent bij de ANOVA staafjes, dus calc.stat() laat de component opnieuw tekenen;
      de rest van de uitkomst volgt uit de velden en rekent zichzelf opnieuw. */

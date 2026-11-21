@@ -1,7 +1,7 @@
 <!-- ================= GELFOTO-EDITOR, PANEEL 3: DE LANEN =================
      Het aantal lanen, de lanebreedte en de tabel met de lanen: naam, of het een ladderlane is
      en weghalen. De detectie zelf (gfDetectLanes, de kamtanden, het slepen van de driehoekjes
-     onder de gel) blijft in web/index.html; die zet gf.lanes en tikt de componenten op.
+     onder de gel) blijft in src/engines/gelfoto.js; die zet gf.lanes en tikt de componenten op.
 
      De id's gf-n, gf-detect, gf-addlane, gf-lw en gf-lanes blijven: gfDetectLanes() leest het
      aantal uit gf-n, gfUpdate() de breedte uit gf-lw, en tests/validate.py zet gf-n zo. -->
@@ -67,7 +67,7 @@ export default {
     return {n: '', lw: '40'};
   },
   computed: {
-    /* gf.lanes is een gewone lijst in index.html; de motor tikt na elke verandering op.
+    /* gf.lanes is een gewone lijst in src/engines/gelfoto.js; de motor tikt na elke verandering op.
        slice() geeft een verse lijst: een computed die hetzelfde object teruggeeft waarschuwt
        zijn afhankelijkheden niet, en de motor wijzigt de lanen in de lijst zelf (gfDetectBands
        hernoemt ze bijvoorbeeld). */

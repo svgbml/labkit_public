@@ -66,7 +66,7 @@ export default {
       this.$nextTick(() => { calc.gelfoto(); });
     }
   },
-  /* "ladder uit een foto" in web/index.html kiest een ladder voor ons; zoals bij __oplosVm
+  /* "ladder uit een foto" in src/engines/gelfoto.js kiest een ladder voor ons; zoals bij __oplosVm
      staat de instantie daarom op window. Zelf het veld in de DOM zetten kan niet: het
      eigen-ladderveld bestaat pas nadat Vue het heeft neergezet. */
   mounted() { window.__gfLadVm = this; },

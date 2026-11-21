@@ -1,10 +1,10 @@
 <!-- ================= TIMERS =================
      Het formulier, de snelle timers en het rooster van timers. De timers zelf blijven buiten de
      component: `timers`, `tid`, addTimer(), tmAct(), mmss(), het interval dat tikt en piept, de
-     melding en het bewaren in localStorage staan in web/index.html, omdat timers doorlopen en
+     melding en het bewaren in localStorage staan in src/engines/timers.js, omdat timers doorlopen en
      piepen terwijl je in een andere tool werkt, en omdat de Experimentplanner addTimer() aanroept.
 
-     De component leest die lijst bij elke `tick`: renderTimers() in index.html verhoogt hem
+     De component leest die lijst bij elke `tick`: renderTimers() in src/engines/timers.js verhoogt hem
      (via window.__tmVm), bij elke wijziging en elke 250 ms zolang een timer loopt.
      De id's tm-name, tm-min, tm-sec, tm-add, tm-presets en tm-grid blijven zoals ze waren. -->
 <template>
@@ -59,7 +59,7 @@ export default {
       return TPRE.map(p => ({label: this.t(p[0]) + ' · ' + p[1] + ':' + String(p[2]).padStart(2, '0')}));
     },
     /* een weergaveregel per timer; `tick` is de enige afhankelijkheid, de timers zelf zijn gewone
-       objecten die de engine in index.html bijwerkt */
+       objecten die de engine in src/engines/timers.js bijwerkt */
     list() {
       this.tick;
       const t = this.t;
