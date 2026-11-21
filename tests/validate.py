@@ -120,13 +120,13 @@ def _(pg):
 def _(pg):
     pg.evaluate("""__go('groei');__set('g2-tu','h');__set('g2-type','kve');__set('g2-win','man');__set('g2-from','1');__set('g2-to','5');
       const t=[2,3,4,5,6], l=[6.0,6.7,7.3,8.0,8.7];
-      document.querySelector('#gc-tbl tbody').innerHTML=t.map((x,i)=>gcRow([x,Number((10**l[i]).toPrecision(6))],i)).join(''); calc.groei();""")
+      __tbl('gc-tbl',t.map((x,i)=>[x,Number((10**l[i]).toPrecision(6))]),'groei');""")
     return [('verdubbelingstijd (min)', pg.evaluate("__big('#gc-res')"), 26.96, 0.01)]
 
 @case('Groeicurve', 'OD₆₀₀, twee punten in log-fase', 'Science Insights rekenvoorbeeld: OD 0,05 → 0,8 in 2 h, µ = 1,39 h⁻¹, t_d = 30 min')
 def _(pg):
     pg.evaluate("""__go('groei');__set('g2-tu','h');__set('g2-type','od');__set('g2-blank','0');__set('g2-win','man');__set('g2-from','1');__set('g2-to','3');
-      document.querySelector('#gc-tbl tbody').innerHTML=[[1,0.05],[2,0.2],[3,0.8]].map((r,i)=>gcRow(r,i)).join(''); calc.groei();""")
+      __tbl('gc-tbl',[[1,0.05],[2,0.2],[3,0.8]],'groei');""")
     return [('verdubbelingstijd (min)', pg.evaluate("__big('#gc-res')"), 30.0, 0.005), ('µ (h⁻¹)', pg.evaluate("__kv('#gc-res','Specifieke')"), 1.386, 0.005)]
 
 @case('Telkamer', 'Neubauer, erytrocyten', 'ProSciTech: 528 cellen in 5 groepsvakken (0,2 mm²), 1:200 → 5,28 × 10⁶/µL')

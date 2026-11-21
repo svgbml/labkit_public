@@ -1,32 +1,8 @@
 <section class="tool" id="t-facs" data-tool="facs">
   <header class="tool-head"><h2>Flowcytometrie (panel &amp; controles)</h2>
   <p>Antilichaamcocktail voor meerkleuren-flowcytometrie uit de titratie per antilichaam, het overzicht van controlebuisjes (ongekleurd, single-stain, FMO), de stain index en de absolute celconcentratie met telbeads.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="fc-n">Aantal monsters</label><input id="fc-n" inputmode="numeric" value="12"></div>
-        <div class="f"><label for="fc-x">Overmaat</label><div class="inu"><input id="fc-x" inputmode="decimal" value="10"><span class="u">%</span></div></div>
-        <div class="f"><label for="fc-v">Kleuringsvolume per test</label><div class="inu"><input id="fc-v" inputmode="decimal" value="50"><span class="u">µL</span></div></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="fc-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="fc-tbl-add">+ Antilichaam</button></div>
-      <h3 style="margin:16px 0 6px;font-size:14px">Stain index</h3>
-      <div class="fields">
-        <div class="f"><label for="fc-mp">MFI positief</label><input id="fc-mp" inputmode="decimal" value="18500"></div>
-        <div class="f"><label for="fc-mn">MFI negatief</label><input id="fc-mn" inputmode="decimal" value="210"></div>
-        <div class="f"><label for="fc-sd">SD negatief</label><input id="fc-sd" inputmode="decimal" value="95"></div>
-      </div>
-      <h3 style="margin:16px 0 6px;font-size:14px">Telbeads</h3>
-      <div class="fields">
-        <div class="f"><label for="fc-ce">Events cellen</label><input id="fc-ce" inputmode="decimal" value="24500"></div>
-        <div class="f"><label for="fc-be">Events beads</label><input id="fc-be" inputmode="decimal" value="5200"></div>
-        <div class="f"><label for="fc-bc">Concentratie beads</label><div class="inu"><input id="fc-bc" inputmode="decimal" value="1000"><span class="u">beads/µL</span></div></div>
-        <div class="f"><label for="fc-bv">Volume beads</label><div class="inu"><input id="fc-bv" inputmode="decimal" value="50"><span class="u">µL</span></div></div>
-        <div class="f"><label for="fc-sv">Volume monster</label><div class="inu"><input id="fc-sv" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Titratie als verdunning 1:x in het kleuringsvolume (uit je eigen titratie of het datasheet). FMO = alle antilichamen behalve één; zet "ja" bij markers waarvan de grens tussen positief en negatief lastig te leggen is. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><div id="fc-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Facs.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="fc-app"></div>
   <p class="src">Volume antilichaam per test = kleuringsvolume / titratie; de rest is FACS-buffer. Controles: ongekleurd, één single-stain per fluorochroom voor compensatie en FMO-controles voor het zetten van gates (Cossarizza e.a., Guidelines for the use of flow cytometry and cell sorting in immunological studies, Eur J Immunol 51:2708–3145, 2021; Roederer, Cytometry 45:194–205, 2001). Stain index = (MFI<sub>pos</sub> − MFI<sub>neg</sub>) / (2 × SD<sub>neg</sub>) (Maecker e.a., Cytometry A 62:169–173, 2004). Telbeads: cellen/µL = (events cellen / events beads) × (aantal toegevoegde beads / volume monster) (Thermo Fisher, CountBright Absolute Counting Beads, productinformatie).</p>
 </section>

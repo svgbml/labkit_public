@@ -23,6 +23,11 @@ import Bufcap from './tools/Bufcap.vue';
 import Ksp from './tools/Ksp.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
+import Reeks from './tools/Reeks.vue';
+import Facs from './tools/Facs.vue';
+import Transfect from './tools/Transfect.vue';
+import Mic from './tools/Mic.vue';
+import Groei from './tools/Groei.vue';
 import Titr from './tools/Titr.vue';
 import Hh from './tools/Hh.vue';
 import Edta from './tools/Edta.vue';
@@ -75,6 +80,29 @@ calc.verdunning = () => {};
 
 mountTool('#os-app', Osmo);
 calc.osmo = () => {};
+
+/* Verdunningsreeks & KVE: de tellingen staan in de globale reeksCounts (bewaard door tblSnap(),
+   gezet door tests/validate.py), en buildReeks() in web/index.html laadt ze via deze instantie. */
+const rk = mountTool('#r-app', Reeks);
+if (rk) window.__reeksVm = rk.vm;
+calc.reeks = () => {};
+
+/* Flowcytometrie: de antilichamentabel (fc-tbl) en de uitkomst zitten in de component. */
+mountTool('#fc-app', Facs);
+calc.facs = () => {};
+
+/* Transfectie (Lipofectamine 3000): de velden en de uitkomst zitten in de component. */
+mountTool('#trf-app', Transfect);
+calc.transfect = () => {};
+
+/* Antibiotica-gevoeligheid: beide tabellen (mi-tbl, mz-tbl) en de uitkomsten zitten in de component. */
+mountTool('#mi-app', Mic);
+calc.mic = () => {};
+
+/* Groeicurve: de metingen (gc-tbl), de velden en de uitkomst zitten in de component. De tekening
+   blijft met chart() gemaakt, dus calc.groei() laat de component opnieuw tekenen. */
+const gr = mountTool('#g2-app', Groei);
+calc.groei = () => { if (gr && gr.vm) gr.vm.draw(); };
 
 /* Titratiecurve tekent een curve, dus calc.titr() laat de component opnieuw tekenen. */
 const ti = mountTool('#ti-app', Titr);

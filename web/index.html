@@ -588,31 +588,9 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 <section class="tool" id="t-reeks" data-tool="reeks">
   <header class="tool-head"><h2>Verdunningsreeks &amp; KVE</h2>
   <p>Plan een decimale reeks en reken uit plaattellingen het aantal kolonievormende eenheden per mL terug.</p></header>
-  <div class="grid2">
-    <div class="stack">
-      <div class="panel">
-        <h3>1 · Reeks maken</h3>
-        <div class="fields">
-          <div class="f"><label for="r-f">Factor per stap</label><div class="inu"><span class="u" style="border-left:1px solid var(--line);border-radius:8px 0 0 8px;border-right:0">1 :</span><input id="r-f" inputmode="decimal" value="10" style="border-radius:0 8px 8px 0"></div></div>
-          <div class="f"><label for="r-n">Aantal buizen</label><input id="r-n" inputmode="numeric" value="7"></div>
-          <div class="f"><label for="r-v">Volume per buis</label><div class="inu"><input id="r-v" inputmode="decimal" value="1000"><span class="u">µL</span></div></div>
-        </div>
-        <p class="mono" id="r-plan" style="margin:12px 0 0;font-size:14px"></p>
-      </div>
-      <div class="panel">
-        <h3>2 · Tellingen invullen <span class="example">voorbeeld</span></h3>
-        <div class="fields">
-          <div class="f"><label for="r-pv">Uitgeplaat volume</label><div class="inu"><input id="r-pv" inputmode="decimal" value="0,1"><span class="u">mL</span></div></div>
-          <div class="f" data-expert=""><label for="r-range">Telbaar bereik per plaat</label><select id="r-range"><option value="30-300">30–300 (AOAC / USDA)</option><option value="25-250">25–250 (APHA)</option><option value="15-300">15–300 (BAM 2025)</option><option value="10-300-iso">10–300 (NEN-EN-ISO 7218, twee opeenvolgende verdunningen)</option></select></div>
-        </div>
-        <div class="tbl-wrap" style="margin-top:12px">
-          <table id="r-tbl"><thead><tr><th>Buis</th><th class="num">Verdunning</th><th class="num">Plaat 1</th><th class="num">Plaat 2</th><th>Status</th></tr></thead><tbody></tbody></table>
-        </div>
-        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">Leeg laten = niet uitgeplaat. Typ <span class="mono">&gt;</span> of <span class="mono">TNTC</span> voor ontelbaar.</p>
-      </div>
-    </div>
-    <div class="result" id="r-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Reeks.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="r-app"></div>
   <p class="src">Rekenwijze en telbare bereiken: FDA Bacteriological Analytical Manual, hoofdstuk 3 (Aerobic Plate Count). Gewogen gemiddelde over telbare platen: N = ΣC / (V × Σ nᵢ·dᵢ). NEN-EN-ISO 7218:2007/A1:2013 §10.3.2: platen met 10–300 kolonies van twee opeenvolgende verdunningen, N = ΣC / (V × (n₁ + 0,1·n₂) × d).</p>
 </section>
 
@@ -1047,22 +1025,9 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 <section class="tool" id="t-groei" data-tool="groei">
   <header class="tool-head"><h2>Groeicurve</h2>
   <p>Specifieke groeisnelheid, verdubbelingstijd en lag-fase uit OD₆₀₀-metingen of kiemgetallen. De exponentiële fase wordt automatisch gezocht.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="g2-tu">Tijdseenheid</label><select id="g2-tu" style="width:100%"><option value="h">uur</option><option value="min">minuten</option></select></div>
-        <div class="f"><label for="g2-type">Meetwaarde</label><select id="g2-type" style="width:100%"><option value="od">OD₆₀₀</option><option value="kve">KVE/mL of cellen/mL</option></select></div>
-        <div class="f" data-expert=""><label for="g2-blank">Blanco (medium)</label><input id="g2-blank" inputmode="decimal" value="0"></div>
-        <div class="f" data-expert=""><label for="g2-fac">Cellen/mL bij OD 1,0</label><input id="g2-fac" inputmode="decimal" value="8e8"></div>
-        <div class="f"><label for="g2-win">Exponentiële fase</label><select id="g2-win" style="width:100%"><option value="auto">Automatisch</option><option value="man">Zelf kiezen</option></select></div>
-        <div class="f"><label for="g2-from">Van punt / tot punt</label><div class="inu"><input id="g2-from" inputmode="numeric" value="4" style="border-radius:4px 0 0 4px"><input id="g2-to" inputmode="numeric" value="9" style="border-radius:0 4px 4px 0;border-left:0"></div></div>
-      </div>
-      <h3 style="margin-top:16px">Metingen <span class="example">voorbeeld</span></h3>
-      <div class="tbl-wrap"><table id="gc-tbl" class="mini"><thead><tr><th class="num">#</th><th class="num">Tijd</th><th class="num">Waarde</th><th></th></tr></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:10px"><button type="button" id="gc-add">+ Meetpunt</button></div>
-    </div>
-    <div class="result"><canvas id="gc-cv"></canvas><div id="gc-res"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Groei.vue); de kop en de
+       bronregel blijven gewone HTML. -->
+  <div id="g2-app"></div>
   <p class="src">N(t) = N₀·e<sup>µt</sup>, µ = helling van ln(waarde) tegen tijd in de exponentiële fase, t<sub>d</sub> = ln 2 / µ (ConductScience, Doubling Time Calculator). OD₆₀₀ en kiemgetal hangen alleen tot ongeveer OD 1,0 lineair samen (JoVE Science Education, Growth Curves); ± 8 × 10⁸ E. coli-cellen per mL bij OD₆₀₀ = 1 is een vuistregel, kalibreer voor je eigen stam. Voorbeelddata zijn verzonnen.</p>
 </section>
 
@@ -1269,33 +1234,8 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-mic" data-tool="mic">
   <header class="tool-head"><h2>Antibiotica-gevoeligheid</h2>
   <p>MIC uit een microdilutiereeks en S/I/R-interpretatie van MIC's of remzones (disk-diffusie) met de breekpunten die je zelf uit de actuele EUCAST-tabel invult.</p></header>
-  <div class="stack">
-    <div class="grid2">
-      <div class="panel">
-        <h3>MIC (microdilutie)</h3>
-        <div class="fields">
-          <div class="f"><label for="mi-c0">Hoogste concentratie (put 1)</label><input id="mi-c0" inputmode="decimal" value="64"></div>
-          <div class="f"><label for="mi-f">Verdunningsfactor</label><input id="mi-f" inputmode="decimal" value="2"></div>
-          <div class="f"><label for="mi-n">Aantal putjes</label><input id="mi-n" inputmode="numeric" value="10"></div>
-          <div class="f"><label for="mi-u">Eenheid</label><input id="mi-u" class="txt" value="mg/L"></div>
-          <div class="f" data-expert=""><label for="mi-od">Groei bij OD ≥</label><input id="mi-od" inputmode="decimal" value="0,1"></div>
-        </div>
-        <div class="tbl-wrap" style="margin-top:12px"><table id="mi-tbl" class="mini"><thead><tr><th>Isolaat / antibioticum</th><th>Groei per putje (+/− of OD's)</th><th class="num">S ≤</th><th class="num">R &gt;</th><th></th></tr></thead><tbody></tbody></table></div>
-        <div class="row" style="margin-top:10px"><button type="button" id="mi-add">+ Rij</button></div>
-        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Groei per putje van hoog naar laag: <span class="mono">− − − − + + + + + +</span> of OD-waarden. Breekpunten in dezelfde eenheid; leeg laten = alleen MIC.</p>
-      </div>
-      <div class="result" id="mi-out"></div>
-    </div>
-    <div class="grid2">
-      <div class="panel">
-        <h3>Remzones (disk-diffusie)</h3>
-        <div class="tbl-wrap"><table id="mz-tbl" class="mini"><thead><tr><th>Antibioticum (disk)</th><th class="num">Zone (mm)</th><th class="num">S ≥ (mm)</th><th class="num">R &lt; (mm)</th><th></th></tr></thead><tbody></tbody></table></div>
-        <div class="row" style="margin-top:10px"><button type="button" id="mz-add">+ Antibioticum</button></div>
-        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De voorbeeldbreekpunten zijn verzonnen; neem altijd de waarden uit de actuele EUCAST-breekpuntentabel voor jouw micro-organisme en diskinhoud.</p>
-      </div>
-      <div class="result" id="mz-out"></div>
-    </div>
-  </div>
+  <!-- Het bewerkbare deel staat in src/tools/Mic.vue (S217). Kop en bronregel blijven hier. -->
+  <div id="mi-app"></div>
   <p class="src">Interpretatie volgens EUCAST: S (gevoelig, standaarddosering) als MIC ≤ S-breekpunt of zone ≥ S-breekpunt; R (resistent) als MIC &gt; R-breekpunt of zone &lt; R-breekpunt; daartussen I (gevoelig bij verhoogde blootstelling). MIC = laagste concentratie zonder zichtbare groei (ISO 20776-1, bouillonmicrodilutie). Breekpunten: EUCAST Clinical Breakpoint Tables (eucast.org), per micro-organisme en per versie verschillend.</p>
 </section>
 
@@ -3193,21 +3133,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-transfect" data-tool="transfect">
   <header class="tool-head"><h2>Transfectie (Lipofectamine 3000)</h2>
   <p>Hoeveelheden DNA of siRNA, P3000, Lipofectamine 3000 en Opti-MEM per putje en als mastermix voor een hele plaat, geschaald naar het kweekformaat volgens het protocol van de fabrikant.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="trf-type">Nucleïnezuur</label><select id="trf-type"><option value="dna">plasmide-DNA</option><option value="si">siRNA</option></select></div>
-        <div class="f"><label for="trf-fmt">Formaat</label><select id="trf-fmt"><option value="0.2">96-well</option><option value="0.5">48-well</option><option value="1" selected>24-well</option><option value="2">12-well</option><option value="5">6-well</option><option value="11.05">schaal 60 mm</option><option value="28.95">schaal 10 cm</option><option value="39.47">T-75</option><option value="92.11">T-175</option></select></div>
-        <div class="f"><label for="trf-dose">Lipofectamine-dosis</label><select id="trf-dose"><option value="hi">hoog (1,5 µL per 24-well)</option><option value="lo">laag (0,75 µL per 24-well)</option><option value="both">beide testen (optimalisatie)</option></select></div>
-        <div class="f"><label for="trf-n">Aantal putjes</label><input id="trf-n" inputmode="numeric" value="6"></div>
-        <div class="f"><label for="trf-x">Extra</label><div class="inu"><input id="trf-x" inputmode="decimal" value="10"><span class="u">%</span></div></div>
-        <div class="f"><label for="trf-st">Stock DNA</label><div class="inu"><input id="trf-st" inputmode="decimal" value="1"><span class="u">µg/µL</span></div></div>
-        <div class="f"><label for="trf-sist">Stock siRNA</label><div class="inu"><input id="trf-sist" inputmode="decimal" value="10"><span class="u">µM</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Zaai de cellen zo dat ze bij transfectie 70–90% confluent zijn. Bepaal de beste Lipofectamine-dosis eerst met beide doses; schaal daarna met de vermenigvuldigingsfactor. Gebruik serumvrij Opti-MEM voor de complexen.</p>
-    </div>
-    <div class="result"><div id="trf-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Transfect.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="trf-app"></div>
   <p class="src">Thermo Fisher, Lipofectamine 3000 Reagent User Guide (MAN0009872) en de tabel "Scaling up or down Lipofectamine 3000 reagent transfections": per 24-well 2 × 25 µL Opti-MEM, 0,5 µg DNA, 1 µL P3000 (2 µL/µg DNA) en 0,75 of 1,5 µL Lipofectamine 3000, of 15 pmol siRNA zonder P3000; vermenigvuldigingsfactoren 0,2 (96-well) tot 92,11 (T-175). Voor de grote formaten noemt de tabel een DNA-bereik; hier staat de ondergrens. Complexen 10–15 min bij kamertemperatuur incuberen.</p>
 </section>
 <!-- /NT:transfect -->
@@ -3426,33 +3354,9 @@ behandeld 25 0</textarea></div>
 <section class="tool" id="t-facs" data-tool="facs">
   <header class="tool-head"><h2>Flowcytometrie (panel &amp; controles)</h2>
   <p>Antilichaamcocktail voor meerkleuren-flowcytometrie uit de titratie per antilichaam, het overzicht van controlebuisjes (ongekleurd, single-stain, FMO), de stain index en de absolute celconcentratie met telbeads.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="fc-n">Aantal monsters</label><input id="fc-n" inputmode="numeric" value="12"></div>
-        <div class="f"><label for="fc-x">Overmaat</label><div class="inu"><input id="fc-x" inputmode="decimal" value="10"><span class="u">%</span></div></div>
-        <div class="f"><label for="fc-v">Kleuringsvolume per test</label><div class="inu"><input id="fc-v" inputmode="decimal" value="50"><span class="u">µL</span></div></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="fc-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="fc-tbl-add">+ Antilichaam</button></div>
-      <h3 style="margin:16px 0 6px;font-size:14px">Stain index</h3>
-      <div class="fields">
-        <div class="f"><label for="fc-mp">MFI positief</label><input id="fc-mp" inputmode="decimal" value="18500"></div>
-        <div class="f"><label for="fc-mn">MFI negatief</label><input id="fc-mn" inputmode="decimal" value="210"></div>
-        <div class="f"><label for="fc-sd">SD negatief</label><input id="fc-sd" inputmode="decimal" value="95"></div>
-      </div>
-      <h3 style="margin:16px 0 6px;font-size:14px">Telbeads</h3>
-      <div class="fields">
-        <div class="f"><label for="fc-ce">Events cellen</label><input id="fc-ce" inputmode="decimal" value="24500"></div>
-        <div class="f"><label for="fc-be">Events beads</label><input id="fc-be" inputmode="decimal" value="5200"></div>
-        <div class="f"><label for="fc-bc">Concentratie beads</label><div class="inu"><input id="fc-bc" inputmode="decimal" value="1000"><span class="u">beads/µL</span></div></div>
-        <div class="f"><label for="fc-bv">Volume beads</label><div class="inu"><input id="fc-bv" inputmode="decimal" value="50"><span class="u">µL</span></div></div>
-        <div class="f"><label for="fc-sv">Volume monster</label><div class="inu"><input id="fc-sv" inputmode="decimal" value="100"><span class="u">µL</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Titratie als verdunning 1:x in het kleuringsvolume (uit je eigen titratie of het datasheet). FMO = alle antilichamen behalve één; zet "ja" bij markers waarvan de grens tussen positief en negatief lastig te leggen is. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><div id="fc-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Facs.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="fc-app"></div>
   <p class="src">Volume antilichaam per test = kleuringsvolume / titratie; de rest is FACS-buffer. Controles: ongekleurd, één single-stain per fluorochroom voor compensatie en FMO-controles voor het zetten van gates (Cossarizza e.a., Guidelines for the use of flow cytometry and cell sorting in immunological studies, Eur J Immunol 51:2708–3145, 2021; Roederer, Cytometry 45:194–205, 2001). Stain index = (MFI<sub>pos</sub> − MFI<sub>neg</sub>) / (2 × SD<sub>neg</sub>) (Maecker e.a., Cytometry A 62:169–173, 2004). Telbeads: cellen/µL = (events cellen / events beads) × (aantal toegevoegde beads / volume monster) (Thermo Fisher, CountBright Absolute Counting Beads, productinformatie).</p>
 </section>
 <!-- /NT:facs -->
@@ -3746,66 +3650,13 @@ function hydSel(name){ const f=hydFind(name); return `<select data-k="h" data-g=
    opdrachtpalet een recept kunnen laden. */
 function loadRecipe(k){ recipeKey=k; const vm=window.__oplosVm; if(vm){ vm.preset=k; } }
 calc.oplossing=function(){ try{ bufImg(); }catch(e){} };
-/* ================= REEKS / KVE ================= */
+/* ================= REEKS / KVE =================
+   De velden, de tabel en de uitkomst staan in src/tools/Reeks.vue. De tellingen per buis
+   blijven hier staan, want tblSnap()/tblRestore() bewaren ze en tests/validate.py zet ze;
+   buildReeks() laadt ze daarna in de component. */
 let reeksCounts={4:['TNTC','TNTC'],5:['243','251'],6:['27','31']};
-function buildReeks(){
-  const f=num($('#r-f').value), n=Math.max(1,Math.min(12,Math.round(num($('#r-n').value)||1)));
-  const tb=$('#r-tbl tbody'); let h='';
-  for(let i=1;i<=n;i++){ const c=reeksCounts[i]||['','']; h+=`<tr data-i="${i}"><td>${i}</td><td class="num">${f===10?`10<sup>−${i}</sup>`:'1 : '+sig(f**i,4)}</td><td><input data-p="0" value="${esc(c[0])}" style="width:90px;text-align:right"></td><td><input data-p="1" value="${esc(c[1])}" style="width:90px;text-align:right"></td><td data-st></td></tr>`; }
-  tb.innerHTML=h;
-}
-calc.reeks=function(e){
-  if(e&&e.target&&(e.target.id==='r-f'||e.target.id==='r-n')) buildReeks();
-  if(e&&e.target&&e.target.dataset&&e.target.dataset.p!=null){ const i=e.target.closest('tr').dataset.i; reeksCounts[i]=reeksCounts[i]||['','']; reeksCounts[i][e.target.dataset.p]=e.target.value; }
-  const f=num($('#r-f').value), V=num($('#r-v').value);
-  const tr=V/f, dil=V-tr;
-  $('#r-plan').innerHTML=isFinite(tr)&&f>1?`Per buis: ${vol(dil)} verdunningsvloeistof (bijv. fysiologisch zout) + ${vol(tr)} uit de vorige buis. Meng goed en wissel van tip na elke stap.`:'Factor moet groter dan 1 zijn.';
-  const pv=num($('#r-pv').value); const iso=$('#r-range').value==='10-300-iso'; const [lo,hi]=$('#r-range').value.split('-').map(Number);
-  let sumC=0, sumND=0, used=[], allCounts=[];
-  $$('#r-tbl tbody tr').forEach(row=>{
-    const i=+row.dataset.i, d=f**-i; let tags=[];
-    row.querySelectorAll('input').forEach(inp=>{
-      const raw=inp.value.trim(); if(raw==='') return;
-      if(/^(>|≥|\+{2,}|∞)|tntc|tmtc|ontelbaar|te\s*veel|overgroei|confluent/i.test(raw)){ tags.push('TNTC'); allCounts.push({d,c:Infinity}); return; }
-      if(!/^\d+([.,]\d+)?$/.test(raw)){ tags.push('?'); return; }
-      const c=num(raw); if(!isFinite(c)) return;
-      allCounts.push({d,c});
-      if(c>=lo&&c<=hi){ sumC+=c; sumND+=d; used.push({i,c,d}); tags.push('ok'); } else tags.push(c<lo?'laag':'hoog');
-    });
-    const st=row.querySelector('[data-st]');
-    if(!tags.length){ st.innerHTML=''; row.className='dim'; return; }
-    row.className=tags.includes('ok')?'hl':'';
-    const okN=tags.filter(t=>t==='ok').length;
-    st.innerHTML=tags.includes('?')&&!okN?`<span class="chip warn">niet herkend</span>`:okN?`<span class="chip ok">${okN}× telbaar</span>`:tags.includes('TNTC')||tags.includes('hoog')?`<span class="chip warn">te vol</span>`:`<span class="chip warn">&lt; ${lo}</span>`;
-  });
-  const out=$('#r-out');
-  if(!isFinite(pv)||pv<=0){ out.innerHTML=note('bad','Vul het uitgeplate volume in (bijv. 0,1 mL bij spreiden).'); return; }
-  /* ISO 7218: gewogen gemiddelde over twee opeenvolgende verdunningen */
-  let extra='';
-  if(iso&&used.length){ const steps=[...new Set(used.map(u=>u.i))].sort((a,b)=>a-b); let keep=steps.slice(0,2);
-    if(keep.length===2&&keep[1]!==keep[0]+1){ extra+=note('warn',`De telbare verdunningen (stap ${keep[0]} en ${keep[1]}) zijn niet opeenvolgend; alleen stap ${keep[0]} is gebruikt.`); keep=[keep[0]]; }
-    if(steps.length>keep.length&&steps.length>2) extra+=note('info',`Meer dan twee telbare verdunningen; volgens ISO 7218 zijn alleen stap ${keep.join(' en ')} gebruikt.`);
-    used=used.filter(u=>keep.includes(u.i)); sumC=used.reduce((a,u)=>a+u.c,0); sumND=used.reduce((a,u)=>a+u.d,0); }
-  { const by={}; allCounts.filter(x=>isFinite(x.c)&&x.c>0).forEach(x=>{ const k=Math.round(-Math.log(x.d)/Math.log(f)); (by[k]=by[k]||[]).push(x.c); }); const ks=Object.keys(by).map(Number).sort((a,b)=>a-b);
-    for(let q=0;q<ks.length-1;q++){ if(ks[q+1]!==ks[q]+1) continue; const av=a=>a.reduce((x,y)=>x+y,0)/a.length, m1=av(by[ks[q]]), m2=av(by[ks[q+1]]), r=m1/m2; if(Math.min(m1,m2)>=10&&f>1&&(r>f*2.5||r<f/2.5)) extra+=note('warn',`Stap ${ks[q]} en ${ks[q+1]}: de tellingen verschillen een factor ${sig(r,2)} in plaats van ongeveer ${sig(f,3)}. Controleer de verdunningsstap (pipetteren, mengen) of de telling.`); } }
-  if(sumND>0){
-    const N=sumC/(pv*sumND);
-    out.innerHTML=`<div class="lbl">Concentratie in onverdunde suspensie</div><div class="big">${sci(N,2)} <small>KVE/mL</small></div>`+
-      kv([['Telbare platen',used.length],['Som kolonies ΣC',fmt(sumC,0)],['Σ nᵢ·dᵢ',sci(sumND,3)],['Uitgeplaat',fmt(pv,3)+' mL']])+
-      `<div class="formula">N = ΣC / (V × Σ nᵢ·dᵢ) = ${fmt(sumC,0)} / (${fmt(pv,3)} × ${sci(sumND,3)})</div>`+
-      extra+note('info','Rond af op twee significante cijfers bij rapporteren.');
-  } else if(allCounts.length){
-    const fin=allCounts.filter(x=>isFinite(x.c));
-    let est='';
-    if(fin.length){
-      const above=fin.filter(x=>x.c>hi), below=fin.filter(x=>x.c<lo);
-      if(below.length&&!above.length){ const b=below.sort((a,z)=>z.d-a.d)[0]; est=`&lt; ${sci(lo/(pv*b.d),2)}`; out.innerHTML=`<div class="lbl">Geschat (EAPC)</div><div class="big">${est} <small>KVE/mL</small></div>`+note('warn',`Alle platen onder ${lo} kolonies. Rapporteer als kleiner dan ${lo} × 1/d bij de minst verdunde plaat (BAM).`); return; }
-      const a=fin.sort((p,q)=>Math.abs(p.c-hi)-Math.abs(q.c-hi))[0]; est=sci(a.c/(pv*a.d),2);
-      out.innerHTML=`<div class="lbl">Geschat (EAPC)</div><div class="big">≈ ${est} <small>KVE/mL</small></div>`+note('warn',`Geen plaat binnen ${lo}–${hi}. Schatting op basis van de plaat die het dichtst bij ${hi} ligt; markeer als geschat.`); return;
-    }
-    out.innerHTML=note('warn','Alle platen zijn ontelbaar (TNTC). Plaat hogere verdunningen uit.');
-  } else out.innerHTML=`<div class="lbl">Resultaat</div>`+note('info','Vul tellingen in om de KVE/mL te berekenen.');
-};
+function buildReeks(){ const vm=window.__reeksVm; if(vm) vm.load(reeksCounts); }
+calc.reeks=function(){};
 
 /* ================= TELKAMER ================= */
 /* vaktellingen zijn hele getallen: komma, puntkomma, spatie en enter scheiden altijd */
@@ -4702,7 +4553,7 @@ gcv.addEventListener('contextmenu',()=>{ if(!gf.src||gf.mode) return; const c=gf
 $('#q-csv').addEventListener('click',()=>dlMsg($('#q-copied'),()=>saveBlob('pcr-mastermix.csv',csvBlob(qText))));
 
 /* ================= PLAKKEN UIT EXCEL ================= */
-const ADDBTN={'q-tbl':'#q-add','o-tbl':'#o-add','qp-tbl':'#qp-add','gc-tbl':'#gc-add','tf-tbl':'#tf-add','mi-tbl':'#mi-add','mz-tbl':'#mz-add','wb-tbl':'#wb-add','rm-tbl':'#rm-add','ol-tbl':'#ol-add','ss-tbl':'#ss-add'};
+const ADDBTN={'q-tbl':'#q-add','o-tbl':'#o-add','qp-tbl':'#qp-add','tf-tbl':'#tf-add','wb-tbl':'#wb-add','rm-tbl':'#rm-add','ol-tbl':'#ol-add','ss-tbl':'#ss-add'};
 document.addEventListener('paste',e=>{
   const el=e.target; if(el.tagName!=='INPUT') return; const td=el.closest('td'), tb=el.closest('tbody'); if(!td||!tb) return;
   const txt=(e.clipboardData||window.clipboardData).getData('text')||''; if(!/[\t\n]/.test(txt.trim())) return;
@@ -4845,34 +4696,10 @@ calc.qpcr=function(){
   res.innerHTML=h+n.join('')+`<div class="formula">Bereik = 2<sup>−(ΔΔCt ± SD)</sup>; doe statistiek op ΔCt-waarden, niet op fold changes.</div>`;
 };
 
-/* ================= GROEICURVE ================= */
-const GCDATA=[[0,0.05],[0.5,0.052],[1,0.058],[1.5,0.075],[2,0.11],[2.5,0.17],[3,0.26],[3.5,0.40],[4,0.60],[4.5,0.85],[5,1.10],[6,1.45],[7,1.55]];
-const gcRow=(r,i)=>`<tr><td class="num">${i+1}</td><td>${inp(r[0],80,'data-t')}</td><td>${inp(r[1],90,'data-y')}</td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
-$('#gc-tbl tbody').innerHTML=GCDATA.map(gcRow).join('');
-function gcRenum(){ $$('#gc-tbl tbody tr').forEach((tr,i)=>tr.cells[0].textContent=i+1); }
-$('#gc-add').addEventListener('click',()=>{ $('#gc-tbl tbody').insertAdjacentHTML('beforeend',gcRow(['',''],$$('#gc-tbl tbody tr').length)); });
-$('#gc-tbl').addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); gcRenum(); calc.groei(); }});
-function bestWindow(t,ly){ const n=t.length, minL=n>=6?4:3; let best=null; for(let i=0;i<n;i++) for(let j=i+minL-1;j<n;j++){ const r=linreg(t.slice(i,j+1),ly.slice(i,j+1)); if(r.b>0&&r.r2>=0.98&&(!best||r.b>best.r.b*1.0001||(Math.abs(r.b-best.r.b)<=best.r.b*1e-4&&j-i>best.j-best.i))) best={i,j,r}; } return best; }
-calc.groei=function(){
-  const tu=$('#g2-tu').value, type=$('#g2-type').value, blank=type==='od'?(num($('#g2-blank').value)||0):0, fac=num($('#g2-fac').value);
-  const pts=$$('#gc-tbl tbody tr').map((tr,idx)=>({idx,t:num(tr.querySelector('[data-t]').value),y:num(tr.querySelector('[data-y]').value)})).filter(p=>isFinite(p.t)&&isFinite(p.y)).map(p=>({...p,v:p.y-blank})).sort((a,b)=>a.t-b.t);
-  const ok=pts.filter(p=>p.v>0), res=$('#gc-res'), cv=$('#gc-cv');
-  if(ok.length<3){ res.innerHTML=note('info','Vul minstens drie meetpunten met een waarde boven de blanco in.'); return; }
-  const th=ok.map(p=>tu==='min'?p.t/60:p.t), ly=ok.map(p=>Math.log(p.v));
-  let w;
-  if($('#g2-win').value==='man'){ const a=Math.max(1,Math.round(num($('#g2-from').value)||1))-1, b=Math.min(ok.length,Math.round(num($('#g2-to').value)||ok.length))-1; if(b-a<1){ res.innerHTML=note('bad','Kies minstens twee punten voor de exponentiële fase.'); return; } w={i:a,j:b,r:linreg(th.slice(a,b+1),ly.slice(a,b+1))}; }
-  else { w=bestWindow(th,ly); if(!w){ res.innerHTML=note('warn','Geen exponentiële fase gevonden (geen reeks van 3–4 punten met R² ≥ 0,98). Kies het venster zelf.'); return; } $('#g2-from').value=w.i+1; $('#g2-to').value=w.j+1; }
-  const mu=w.r.b, td=Math.log(2)/mu, lag=(ly[0]-w.r.a)/mu, tconv=v=>tu==='min'?v*60:v;
-  const inW=(i)=>i>=w.i&&i<=w.j;
-  const ymin=Math.min(...ok.map(p=>p.v))/1.6, ymax=Math.max(...ok.map(p=>p.v))*1.6;
-  chart(cv,{xmin:Math.min(...ok.map(p=>p.t)),xmax:Math.max(...ok.map(p=>p.t)),ymin,ymax,logy:true,xlabel:`tijd (${tu==='min'?'min':'uur'})`,ylabel:type==='od'?'OD₆₀₀ (log-schaal)':'KVE/mL (log-schaal)',
-    series:[{pts:ok.filter((p,i)=>!inW(i)).map(p=>[p.t,p.v]),color:'--muted',name:'meting'},{pts:ok.filter((p,i)=>inW(i)).map(p=>[p.t,p.v]),color:'--accent',r:4.5,name:'exponentiële fase'},{fn:t=>Math.exp(w.r.a+mu*(tu==='min'?t/60:t)),x0:ok[Math.max(0,w.i-1)].t,x1:ok[Math.min(ok.length-1,w.j+1)].t,color:'--bad',dash:[5,4],name:'exponentiële fit'}],
-    legend:[['exponentiële fase','--accent'],['fit','--bad']],legendPos:'br'});
-  const rows=[['Specifieke groeisnelheid µ',fmt(mu,3)+' h⁻¹'],['Verdubbelingstijd',fmt(td*60,1)+' min'],['Generaties per uur',fmt(1/td,2)],['Exponentiële fase',`punt ${ok[w.i].idx+1}–${ok[w.j].idx+1} (${fmt(ok[w.i].t,2)}–${fmt(ok[w.j].t,2)} ${tu==='min'?'min':'u'})`],['R² (ln-waarde)',fmt(w.r.r2,4)],['Lag-fase',lag>th[0]?fmt(tconv(lag),2)+(tu==='min'?' min':' u'):'geen'],['Maximum',sig(Math.max(...ok.map(p=>p.v)),3)]];
-  if(type==='od'&&isFinite(fac)) rows.push(['Cellen/mL aan einde exp. fase (schatting)',sci(ok[w.j].v*fac,2)]);
-  const n=[]; if(type==='od'&&ok[w.j].v>1.0) n.push(note('warn','Het venster loopt boven OD 1,0; daar is OD niet meer evenredig met het celaantal. Verdun of kies een eerder venster.')); if(w.j-w.i+1<4) n.push(note('info','Het venster bevat maar 3 punten; meet vaker in de exponentiële fase.'));
-  res.innerHTML=`<div class="lbl" style="margin-top:8px">Verdubbelingstijd</div><div class="big">${fmt(td*60,1)} <small>min</small></div>`+kv(rows)+n.join('')+`<div class="formula">ln(y) = ${fmt(w.r.a,3)} + ${fmt(mu,4)}·t (t in uur) · t<sub>d</sub> = ln 2 / µ</div>`;
-};
+/* ================= GROEICURVE =================
+   Verhuisd naar src/tools/Groei.vue: de metingen (gc-tbl, een <lk-etable>), de velden, bestWindow()
+   en de uitkomst. src/main.js zet calc.groei zo dat de tekening opnieuw wordt gemaakt. */
+calc.groei=function(){};
 
 /* ================= FORENSISCHE KWANTIFICATIE ================= */
 function fqCalc(){
@@ -4953,10 +4780,7 @@ const TBLDEF={
   'o-tbl':{row:r=>'',num:[1,2],set:v=>{ const m=window.__oplosVm; if(m) m.setRows(v); },
     push:r=>{ const m=window.__oplosVm; if(m) m.pushRow(r); }},
   'qp-tbl':{row:qpRow,num:[1,2]},
-  'gc-tbl':{row:(r)=>gcRow(r,0),num:[0,1]},
   'tf-tbl':{row:(r)=>tfRow(r),num:[1]},
-  'mi-tbl':{row:(r)=>miRow(r),num:[2,3]},
-  'mz-tbl':{row:(r)=>mzRow(r),num:[1,2,3]},
   'wb-tbl':{row:(r)=>wbRow(r),num:[1,2]},
   'rm-tbl':{row:(r)=>rmRow(r),num:[1,2]},
   'ol-tbl':{row:(r)=>olRow(r),num:[1]},
@@ -4965,7 +4789,7 @@ const TBLDEF={
 function tblSnap(){ const out={}; Object.keys(TBLDEF).forEach(id=>{ out[id]=[...document.querySelectorAll('#'+id+' tbody tr')].map(tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select')].map(e=>e.value)); });
   out.reeks=reeksCounts; out.plate=Object.assign(wState(),{title:$('#w-title').value}); out.curve={model:$('#s-model').value,unit:$('#s-unit').value,blank:$('#s-blank').checked,logx:$('#s-logx').checked}; return out; }
 function tblRestore(){ let d=null; try{ d=JSON.parse(localStorage.getItem(TBLKEY)||'null'); }catch(e){} if(!d) return;
-  Object.entries(TBLDEF).forEach(([id,def])=>{ const rows=d[id]; if(!Array.isArray(rows)||!rows.length) return; const vals=rows.map(r=>r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v)); /* een tabel die Vue rendert geeft een set() mee: innerHTML zou Vue overschrijven */ if(def.set) def.set(vals); else $('#'+id+' tbody').innerHTML=vals.map(def.row).join(''); }); gcRenum();
+  Object.entries(TBLDEF).forEach(([id,def])=>{ const rows=d[id]; if(!Array.isArray(rows)||!rows.length) return; const vals=rows.map(r=>r.map((v,i)=>def.num.includes(i)?(v===''?NaN:num(v)):v)); /* een tabel die Vue rendert geeft een set() mee: innerHTML zou Vue overschrijven */ if(def.set) def.set(vals); else $('#'+id+' tbody').innerHTML=vals.map(def.row).join(''); });
   if(d.curve&&window.__curveVm) window.__curveVm.setOpts(d.curve);
   if(d.reeks&&typeof d.reeks==='object'){ reeksCounts=d.reeks; buildReeks(); }
   /* oudere sessies bewaarden de tekst per putje apart onder pstore 'wt' en kenden geen
@@ -5510,40 +5334,9 @@ function parseCols(txt){ const lines=String(txt).replace(/\r/g,'').split('\n').f
   const series=[]; for(let j=1;j<nc;j++) series.push({name:head[j]||('Reeks '+j),y:rows.map(r=>r[j])}); return {xname:head[0],x,series}; }
 const SERCOL=['#1558b0','#c2410c','#15803d','#7c3aed','#b91c1c','#0e7490','#a16207','#be185d'];
 
-/* ================= ANTIBIOTICA-GEVOELIGHEID ================= */
-const MIDATA=[['E. coli – ampicilline','- - - - - + + + + +','8','8'],['E. coli – ciprofloxacine','- - - - - - - - - +','0,25','0,5'],['S. aureus – gentamicine','- - - - - - + + + +','1','1']];
-const MZDATA=[['Antibioticum A (10 µg)','24','20','17'],['Antibioticum B (30 µg)','15','20','17'],['Antibioticum C (5 µg)','18','20','17']];
-const miRow=r=>`<tr><td><input class="txt" data-n value="${esc(r[0])}" style="width:180px"></td><td><input class="mono" data-g value="${esc(r[1])}" style="width:220px"></td><td>${inp(r[2],60,'data-s')}</td><td>${inp(r[3],60,'data-r')}</td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
-const mzRow=r=>`<tr><td><input class="txt" data-n value="${esc(r[0])}" style="width:180px"></td><td>${inp(r[1],60,'data-z')}</td><td>${inp(r[2],60,'data-s')}</td><td>${inp(r[3],60,'data-r')}</td><td><button type="button" class="ghost" data-del aria-label="Verwijder">✕</button></td></tr>`;
-$('#mi-tbl tbody').innerHTML=MIDATA.map(miRow).join(''); $('#mz-tbl tbody').innerHTML=MZDATA.map(mzRow).join('');
-$('#mi-add').addEventListener('click',()=>{ $('#mi-tbl tbody').insertAdjacentHTML('beforeend',miRow(['','','',''])); });
-$('#mz-add').addEventListener('click',()=>{ $('#mz-tbl tbody').insertAdjacentHTML('beforeend',mzRow(['','','',''])); });
-['#mi-tbl','#mz-tbl'].forEach(t=>$(t).addEventListener('click',e=>{ if(e.target.closest('[data-del]')){ e.target.closest('tr').remove(); calc.mic(); }}));
-const sirChip=c=>c==='?'?'<span class="chip info">reeks te kort</span>':c==='S'?'<span class="chip ok">S</span>':c==='R'?'<span class="chip bad">R</span>':c==='I'?'<span class="chip warn">I</span>':'–';
-function micOf(gr,conc){ /* gr: true = groei, van hoog naar laag */ let mic=NaN, skip=false, firstGrowth=gr.findIndex(g=>g);
-  if(firstGrowth<0) return {mic:conc[gr.length-1],lt:true,skip:false};
-  if(firstGrowth===0) return {mic:conc[0],gt:true,skip:gr.slice(1).some(g=>!g)};
-  mic=conc[firstGrowth-1]; skip=gr.slice(firstGrowth).some(g=>!g); return {mic,skip}; }
-calc.mic=function(){
-  const c0=num($('#mi-c0').value), f=num($('#mi-f').value)||2, n=Math.max(2,Math.min(24,Math.round(num($('#mi-n').value)||10))), u=$('#mi-u').value, odT=num($('#mi-od').value);
-  const conc=[...Array(n).keys()].map(i=>c0/f**i);
-  const rows=$$('#mi-tbl tbody tr').map(tr=>{ const raw=tr.querySelector('[data-g]').value.trim(); let gr;
-    if(/[+\-−]/.test(raw)&&!/\d/.test(raw)) gr=raw.replace(/\s+/g,'').replace(/−/g,'-').split('').filter(ch=>ch==='+'||ch==='-').map(ch=>ch==='+');
-    else gr=stNums(raw).map(v=>v>=odT);
-    return {name:tr.querySelector('[data-n]').value,gr,s:num(tr.querySelector('[data-s]').value),r:num(tr.querySelector('[data-r]').value)}; }).filter(r=>r.gr.length);
-  const out=$('#mi-out'); if(!rows.length){ out.innerHTML=note('info','Vul per rij de groei per putje in.'); return; }
-  const fmtc=v=>sig(v,3);
-  let h=`<div class="lbl">Concentratiereeks</div><div class="mono" style="font-size:12.5px;margin-bottom:10px">${conc.map(fmtc).join(' · ')} ${esc(u)}</div>`;
-  h+=`<div class="tbl-wrap"><table class="mini"><thead><tr><th>Isolaat / antibioticum</th><th class="num">MIC (${esc(u)})</th><th>Interpretatie</th><th>Opmerking</th></tr></thead><tbody>`;
-  rows.forEach(r=>{ const g=r.gr.slice(0,n); const m=micOf(g,conc); let cat='';
-    if(isFinite(r.s)||isFinite(r.r)){ if(m.gt) cat=isFinite(r.r)&&m.mic>=r.r?'R':'?'; else if(m.lt) cat=isFinite(r.s)&&m.mic<=r.s?'S':'?'; else cat=isFinite(r.s)&&m.mic<=r.s?'S':isFinite(r.r)&&m.mic>r.r?'R':'I'; }
-    const rem=[m.skip?'overgeslagen putje (groei na een put zonder groei): herhaal':'',m.gt?'groei in alle putjes':'',m.lt?'geen groei in de reeks':'',g.length<n?`${g.length} van ${n} putjes ingevuld`:''].filter(Boolean).join('; ');
-    h+=`<tr><td>${esc(r.name)}</td><td class="num"><b>${m.gt?'&gt; ':m.lt?'≤ ':''}${fmtc(m.mic)}</b></td><td>${sirChip(cat)}</td><td style="font-size:12.5px">${rem}</td></tr>`; });
-  h+=`</tbody></table></div><div class="formula">MIC = laagste concentratie zonder zichtbare groei · S als MIC ≤ S-breekpunt, R als MIC &gt; R-breekpunt, anders I</div>`;
-  out.innerHTML=h;
-  const zr=$$('#mz-tbl tbody tr').map(tr=>({n:tr.querySelector('[data-n]').value,z:num(tr.querySelector('[data-z]').value),s:num(tr.querySelector('[data-s]').value),r:num(tr.querySelector('[data-r]').value)})).filter(x=>isFinite(x.z));
-  $('#mz-out').innerHTML=zr.length?`<div class="tbl-wrap"><table class="mini"><thead><tr><th>Antibioticum</th><th class="num">Zone (mm)</th><th>Interpretatie</th></tr></thead><tbody>${zr.map(x=>{ const c=isFinite(x.s)&&x.z>=x.s?'S':isFinite(x.r)&&x.z<x.r?'R':(isFinite(x.s)||isFinite(x.r))?'I':''; return `<tr><td>${esc(x.n)}</td><td class="num">${fmt(x.z,0)}</td><td>${sirChip(c)}</td></tr>`; }).join('')}</tbody></table></div><div class="formula">S als zone ≥ S-breekpunt · R als zone &lt; R-breekpunt · anders I</div>`:note('info','Vul zonediameters in.');
-};
+/* ================= ANTIBIOTICA-GEVOELIGHEID =================
+   Verhuisd naar src/tools/Mic.vue (MIDATA, micOf, de S/I/R-regels en de tabellen mi-tbl en mz-tbl). */
+calc.mic=function(){};
 
 /* ================= GROEICURVES VERGELIJKEN (GOMPERTZ) ================= */
 function gompertz(t,p){ const [A,mu,lam]=p; return A*Math.exp(-Math.exp(mu*Math.E/A*(lam-t)+1)); }
@@ -7654,19 +7447,7 @@ const KSP=[['AgCl',1.77e-10,1,1,143.32],['AgBr',5.35e-13,1,1,187.77],['AgI',8.52
 function kspSolve(K,x,y,cm,ca){ const f=s=>x*Math.log(x*s+cm)+y*Math.log(y*s+ca)-Math.log(K); let lo=0, hi=1; while(f(hi)<0&&hi<1e6) hi*=10; if(f(lo)>=0) return 0; for(let i=0;i<200;i++){ const m=(lo+hi)/2; if(f(m)<0) lo=m; else hi=m; } return (lo+hi)/2; }
 /* /NT:ksp */
 /* NT:transfect */
-/* ================= TRANSFECTIE (LIPOFECTAMINE 3000) ================= */
-const TRF_SEED={'0.2':'1–4 × 10⁴','1':'0,5–2 × 10⁵','5':'0,25–1 × 10⁶'}, TRF_MED={'0.2':'100 µL','0.5':'250 µL','1':'500 µL','2':'1 mL','5':'2 mL','11.05':'5 mL','28.95':'10 mL','39.47':'15 mL','92.11':'35 mL'};
-calc.transfect=function(){ const f=num($('#trf-fmt').value), si=$('#trf-type').value==='si', dose=$('#trf-dose').value, n=Math.round(num($('#trf-n').value)), x=(num($('#trf-x').value)||0)/100, st=num($('#trf-st').value), sst=num($('#trf-sist').value), out=$('#trf-out');
-  if(!(f>0)||!(n>=1)||n>1e4){ out.innerHTML=note('info','Kies een formaat en vul het aantal putjes in.'); return; }
-  const m=n*(1+x), opti=25*f, dna=0.5*f, p3=si?0:1*f, pm=15*f, L=dose==='lo'?[0.75*f]:dose==='hi'?[1.5*f]:[0.75*f,1.5*f];
-  const nuc=si?(sst>0?pm/sst:NaN):(st>0?dna/st:NaN), row=(a,b,c)=>`<tr><td>${a}</td><td class="num">${b}</td><td class="num">${c}</td></tr>`;
-  let h=`<div class="lbl">Complex per putje</div><div class="big">${vol(2*opti)}</div>`+kv([['Per putje',si?`${fmt(pm,1)} pmol siRNA`:`${sig(dna,3)} µg DNA${f>=11?` (tabel: ${sig(dna,3)}–${sig(2*dna,3)} µg)`:''}`],['Lipofectamine 3000 per putje',L.map(v=>vol(v)).join(' en ')],['Kweekmedium per putje',TRF_MED[$('#trf-fmt').value]||'–'],['Cellen zaaien',TRF_SEED[$('#trf-fmt').value]?TRF_SEED[$('#trf-fmt').value]+' per putje':'zie protocol van de cellijn'],['Mastermix voor',`${n} putjes + ${fmt(x*100,0)}% = ${fmt(m,1)}`]]);
-  h+=`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Buis A: verdund nucleïnezuur</th><th class="num">Per putje</th><th class="num">Mastermix</th></tr></thead><tbody>${row('Opti-MEM',vol(opti),vol(opti*m))}${row(si?`siRNA (${fmt(sst,1)} µM)`:`DNA (${fmt(st,2)} µg/µL)`,vol(nuc),vol(nuc*m))}${si?'':row('P3000',vol(p3),vol(p3*m))}</tbody></table></div>`;
-  L.forEach((l,i)=>{ h+=`<div class="tbl-wrap" style="margin-top:10px"><table class="mini"><thead><tr><th>Buis B${L.length>1?(i?' (hoog)':' (laag)'):''}: verdund Lipofectamine</th><th class="num">Per putje</th><th class="num">Mastermix</th></tr></thead><tbody>${row('Opti-MEM',vol(opti),vol(opti*m))}${row('Lipofectamine 3000',vol(l),vol(l*m))}</tbody></table></div>`; });
-  if(dose==='both') h+=note('info','Bij twee doses maak je buis A twee keer zo groot (of twee keer) en deel je hem 1:1 over beide buizen B.');
-  if(!si&&st>0&&(st<0.5||st>5)) h+=note('warn','De fabrikant adviseert een DNA-stock van 0,5–5 µg/µL.');
-  if(nuc<0.5) h+=note('warn','Minder dan 0,5 µL nucleïnezuur per putje; werk met de mastermix of verdun de stock.');
-  out.innerHTML=h+`<ol class="steps" style="margin-top:10px"><li>Buis A en B apart mengen.</li><li>Buis A 1:1 bij buis B voegen en mengen.</li><li>10–15 min incuberen bij kamertemperatuur.</li><li>${vol(2*opti)} complex per putje druppelsgewijs toevoegen.</li><li>2–4 dagen kweken en analyseren.</li></ol>`; };
+/* Transfectie (Lipofectamine 3000): het rekenwerk en de weergave staan in src/tools/Transfect.vue. */
 /* /NT:transfect */
 /* NT:viab */
 /* ================= VIABILITEIT (TRYPAANBLAUW) ================= */
@@ -7783,19 +7564,10 @@ function elBlocks(st){
 const elName=(st,lab,k)=>st.vals[k]||lab[k]||'';
 /* /NT:elisa */
 /* NT:facs */
-/* ================= FLOWCYTOMETRIE ================= */
-ET('fc-tbl',[{h:'Marker',t:'txt',w:110},{h:'Fluorochroom',t:'txt',w:120},{h:'Titratie 1:',t:'num',w:70},{h:'FMO-controle',t:'sel',o:['nee','ja']}],[['CD3','FITC',100,'nee'],['CD4','PE',200,'nee'],['CD8','APC',100,'nee'],['CD25','PE-Cy7',50,'ja'],['CD127','BV421',50,'ja'],['Viability','7-AAD',100,'nee']],'facs');
-calc.facs=function(){ const n=Math.round(num($('#fc-n').value)), x=(num($('#fc-x').value)||0)/100, V=num($('#fc-v').value), out=$('#fc-out');
-  const A=etGet('fc-tbl').map(r=>({m:r[0]||'?',f:r[1]||'?',t:num(r[2]),fmo:r[3]==='ja'})).filter(a=>a.t>=1); let h='';
-  if(n>=1&&n<=5000&&V>0&&A.length){ A.forEach(a=>a.v=V/a.t); const m=n*(1+x), ab=A.reduce((s,a)=>s+a.v,0), buf=V-ab, fl=[...new Set(A.map(a=>a.f))], fmo=A.filter(a=>a.fmo);
-    h+=`<div class="lbl">Cocktail voor ${n} monsters + ${fmt(x*100,0)}%</div><div class="big">${vol(V*m)} <small>totaal</small></div><div class="tbl-wrap" style="margin-top:10px"><table class="mini"><thead><tr><th>Antilichaam</th><th class="num">Titratie</th><th class="num">Per test</th><th class="num">Cocktail (${fmt(m,1)}×)</th></tr></thead><tbody>${A.map(a=>`<tr><td>${ud(a.m)} ${ud(a.f)}</td><td class="num">1:${fmt(a.t,0)}</td><td class="num">${vol(a.v)}</td><td class="num">${vol(a.v*m)}</td></tr>`).join('')}<tr><td>FACS-buffer</td><td></td><td class="num">${vol(buf)}</td><td class="num">${vol(buf*m)}</td></tr><tr class="hl"><td>Totaal</td><td></td><td class="num">${vol(V)}</td><td class="num">${vol(V*m)}</td></tr></tbody></table></div>`;
-    if(buf<0) h+=note('bad','De antilichamen samen zijn meer dan het kleuringsvolume; vergroot het volume of verlaag de hoeveelheden.');
-    if(fl.length<A.length) h+=note('bad','Twee antilichamen hebben hetzelfde fluorochroom; dat is in één buis niet te onderscheiden.');
-    h+=`<div class="lbl" style="margin-top:14px">Controlebuisjes</div><div class="tbl-wrap"><table class="mini"><thead><tr><th>Controle</th><th class="num">Aantal</th><th>Inhoud</th></tr></thead><tbody><tr><td>Ongekleurd</td><td class="num">1</td><td>cellen in ${vol(V)} FACS-buffer</td></tr>${A.map(a=>`<tr><td>Single-stain ${ud(a.f)}</td><td class="num">1</td><td>${vol(a.v)} ${ud(a.m)} + ${vol(V-a.v)} buffer</td></tr>`).join('')}${fmo.map(a=>`<tr><td>FMO zonder ${ud(a.m)}</td><td class="num">1</td><td>${ud(A.filter(b=>b!==a).map(b=>vol(b.v)+' '+b.m).join(', '))} + ${vol(V-(ab-a.v))} buffer</td></tr>`).join('')}<tr class="hl"><td>Buisjes totaal</td><td class="num">${n+1+A.length+fmo.length}</td><td>${n} monsters + ${1+A.length+fmo.length} controles</td></tr></tbody></table></div>`;
-  } else h+=note('info','Vul het aantal monsters, het kleuringsvolume en minstens één antilichaam met titratie in.');
-  const mp=num($('#fc-mp').value), mn=num($('#fc-mn').value), sdn=num($('#fc-sd').value); if(isFinite(mp)&&isFinite(mn)&&sdn>0) h+=`<div class="lbl" style="margin-top:14px">Stain index</div><div class="big">${sig((mp-mn)/(2*sdn),3)}</div>`+kv([['Signaal / achtergrond',mn>0?fmt(mp/mn,1):'–']]);
-  const ce=num($('#fc-ce').value), be=num($('#fc-be').value), bc=num($('#fc-bc').value), bv=num($('#fc-bv').value), sv=num($('#fc-sv').value); if(ce>=0&&be>0&&bc>0&&bv>0&&sv>0){ const c=ce/be*bc*bv/sv; h+=`<div class="lbl" style="margin-top:14px">Absolute celconcentratie</div><div class="big">${sig(c,3)} <small>cellen/µL</small></div>`+kv([['Per mL',sci(c*1000,3)],['Beads toegevoegd',fmt(bc*bv,0)]])+(be<1000?note('info','Minder dan 1000 bead-events: neem meer events op voor een betrouwbare telling.'):''); }
-  out.innerHTML=h+`<div class="formula">V<sub>antilichaam</sub> = V<sub>test</sub> / titratie · SI = (MFI<sub>pos</sub> − MFI<sub>neg</sub>) / (2·SD<sub>neg</sub>)</div>`; };
+/* ================= FLOWCYTOMETRIE =================
+   Verhuisd naar src/tools/Facs.vue: de antilichamentabel (fc-tbl, een <lk-etable>) en de
+   uitkomst staan daar. calc.facs wordt in src/main.js gezet; deze module hoeft niets meer
+   te definiëren. */
 /* /NT:facs */
 /* NT:mix */
 /* ================= MENGPROFIEL & LR ================= */
