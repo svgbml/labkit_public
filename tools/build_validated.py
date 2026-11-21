@@ -1,5 +1,5 @@
 """Maakt tools/nt/98_valid.js uit tests/VALIDATIE.md: per tool het aantal controles en hoeveel er binnen tolerantie zijn.
-De app toont dat als badge 'Gevalideerd' in de kop van de tool. Draai daarna tools/insert_tools.py.
+De app toont dat als badge 'Gevalideerd' in de kop van de tool. Draai daarna tools/build.py (dat roept dit script zelf ook aan).
 Toolnamen in VALIDATIE.md worden gekoppeld aan de naam in de navigatie of de titel (h2) van de tool."""
 import html, json, os, re, sys
 

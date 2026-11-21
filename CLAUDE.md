@@ -30,9 +30,9 @@ Lab calculator and gel-editor web app (Dutch first, English via a runtime transl
 - **Het rekenwerk gaat ongewijzigd mee.** Die functies staan achter de 276 validatiegevallen met gepubliceerde referentiewaarden (ISO 8655, GUM, NEB, Laemmli, Hanahan); opnieuw uitschrijven levert niets op en zet die waarden op het spel. Alleen de weergave wordt opnieuw opgebouwd.
 
 ## De Vite-bundel
-- De Vue-code staat in `src/` en wordt door Vite gebundeld: `npm run build:vue` → `build/app.bundle.js` (één IIFE, geen hash, alles erin). `tools/insert_tools.py` zet die inhoud in `web/index.html`.
+- De Vue-code staat in `src/` en wordt door Vite gebundeld: `npm run build:vue` → `build/app.bundle.js` (één IIFE, geen hash, alles erin). `tools/insert_tools.py` (aangeroepen door `tools/build.py`) zet die inhoud in de gegenereerde `web/index.html`.
 - **Geen `dist/`, geen code-splitting, geen dynamische `import()`.** `web/index.html` moet vanaf `file://` werken en alle vijf de testsuites openen de app zo; vanaf `file://` zijn ES-modules geblokkeerd (nagemeten). Daarom ook geen hashnamen en hoeft `web/sw.js` niets te weten van de bundel.
-- `build/app.bundle.js` gaat mee in de repo, net als `web/index.html` zelf: wie alleen de niet-Vue tools aanpast heeft dan nog steeds alleen Python nodig. Verander je iets in `src/`, draai dan `npm run build:vue` vóór `tools/insert_tools.py` (`npm run check` doet beide).
+- `build/app.bundle.js` gaat mee in de repo, net als `web/index.html` zelf: wie alleen de niet-Vue tools aanpast heeft dan nog steeds alleen Python nodig. Verander je iets in `src/`, draai dan `npm run build` (bundel + `tools/build.py`); `npm run check` doet de bundel en alle tests.
 - Vue zit in de bundel en de bundel gaat in `index.html`, dus de MIT-melding staat als banner in de code; de volledige tekst staat in `licenses/vue-LICENSE.txt`.
 - In lib-modus vervangt Vite `process.env.NODE_ENV` niet zelf; die `define` staat in `vite.config.js` en zonder hem valt de app om met "process is not defined".
 
@@ -70,7 +70,8 @@ Lab calculator and gel-editor web app (Dutch first, English via a runtime transl
 - Let op wanneer een veld er al is: een veld dat Vue pas later neerzet (het eigen-ladderveld achter een `v-if`) is er nog niet, dus kiest "ladder uit een foto" de ladder via `window.__gfLadVm.setLadder()` en doet de detectie in de `$nextTick` daarna.
 
 ## How the app is built
-- `web/index.html` is both source and build output (~830 KB). Older tools are edited in place.
+- **`web/index.html` is generated (since S265); never edit it by hand.** Its source is `src/shell/index.html` (head, nav, inline JS) with `<!-- @include … -->` lines for files under `src/shell/`. `npm run build` (Vite bundle + `python tools/build.py`) writes it; `python tools/build.py` alone is enough when `src/` (outside `src/shell/`) did not change. CI runs `python tools/build.py --check` and fails when the committed `web/index.html` is out of date, so commit the regenerated file with your change.
+- Code that used to be "edited in place in `index.html`" (the helpers, the gel-editor and timer engines, the DOM translation layer, `tblRestore()`, the paste handler, `gfSetIn()`) now lives in `src/shell/index.html` until phase 16 moves it into `src/lib/` and `src/engines/`. Where this file says `web/index.html` for such code, read `src/shell/index.html`.
 - Newer tools are modules in `tools/nt/` (`NN_id.json` + `.html` + `.js`), injected by `python tools/insert_tools.py` between `<!-- NT:id -->` / `/* NT:id */` markers. **Never edit inside those markers in `index.html`**: change the module file and re-run the insert. A module with `"lib":true` is JS only.
 - New features of the UX layer go in `tools/nt/99z_ux.js`; generated data comes from a build script: `tools/nt/98_valid.js` from `python tools/build_validated.py`, `tools/nt/99ya_icon.js` from `python tools/build_icons.py` (sources in `tools/icons/`), `tools/nt/97_news.js` from `python tools/build_changelog.py` (source `CHANGELOG.md`).
 - Stages (prepare/perform/analyse) live in `tools/nt/99y_stage.js`; `tests/stages_check.py` fails when a tool has no stage.
@@ -91,4 +92,4 @@ Lab calculator and gel-editor web app (Dutch first, English via a runtime transl
 ## Conventions
 - No external libraries or CDNs: everything stays in `web/`, works offline and from `file://`.
 - Use the existing helpers (`$`, `$$`, `num`, `esc`, `note`, `appModal`, `toolSnap`/`toolApply`, `lkMainWatch`, `jget`/`jset`) and theme variables (`--accent`, `--surface`, …) so all themes keep working.
-- Version bumps only via `python tools/bump_version.py x.y.z`, and only when asked.
+- Version bumps only via `python tools/bump_version.py x.y.z`, and only when asked (it sets `APPVER` in `src/shell/index.html` and in the generated file).

@@ -9,6 +9,7 @@
     "start": "tauri dev",
     "dist": "tauri build",
     "web": "npx --yes serve web",
+    "build": "vite build && python tools/build.py",
     "check": "npm run build:vue && python tools/check.py",
     "check:quick": "npm run build:vue && python tools/check.py --quick",
     "build:vue": "vite build",
