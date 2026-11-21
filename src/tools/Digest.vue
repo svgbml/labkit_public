@@ -99,6 +99,14 @@ export default {
       e2: 'HindIII', u2: lkNumIn('20'), upg: lkNumIn('10'), n: '4', x: lkNumIn('10'), ov: 'pct', bsa: false,
       seq: '', circ: true};
   },
+  mounted() {
+    matRegister('digest', () => {
+      const m = this.m;
+      if (!this.valid) return [];
+      return [...this.mixRows.filter(r => !r.cls).map(r => [r[0], r[2] === '–' ? r[1] : r[2]]),
+        [trPlain('Reactiebuisjes'), '× ' + fmt(m.n, 0)]];
+    });
+  },
   methods: {
     F,
     /* een laan in de Gelplanner met de fragmenten als verwachte banden (lk-etable zet push()) */

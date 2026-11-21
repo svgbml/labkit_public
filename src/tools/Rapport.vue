@@ -13,9 +13,12 @@
         <div class="f"><label for="rp-who">{{ t('Naam') }}</label><input id="rp-who" class="txt" :placeholder="t('optioneel')" v-model="who"></div>
         <label class="chk" for="rp-src"><input type="checkbox" id="rp-src" v-model="withSrc"> {{ t('Bronnen opnemen') }}</label>
         <label class="chk" for="rp-in"><input type="checkbox" id="rp-in" v-model="withIn"> {{ t('Invoer opnemen') }}</label>
+        <label class="chk" for="rp-mat"><input type="checkbox" id="rp-mat" v-model="withMat"> {{ t('Materiaallijst opnemen') }}</label>
+        <label class="chk" for="rp-qr"><input type="checkbox" id="rp-qr" v-model="withQr"> {{ t('QR-code per tool') }}</label>
       </div>
       <div class="row" style="margin-top:10px;gap:8px">
         <button type="button" id="rp-recent" @click="recent">{{ t('Laatst gebruikt') }}</button>
+        <button type="button" id="rp-prep" @click="prep">{{ t('Alle voorbereidingstools') }}</button>
         <button type="button" id="rp-none" @click="sel = []">{{ t('Niets') }}</button>
       </div>
       <div id="rp-list" style="margin-top:10px;columns:3 220px;column-gap:18px">
@@ -49,7 +52,7 @@ export default {
   data() {
     return {
       title: stored('rp-title', 'Labjournaal'), who: stored('rp-who', ''),
-      withSrc: !!stored('rp-src', true), withIn: !!stored('rp-in', true),
+      withSrc: !!stored('rp-src', true), withIn: !!stored('rp-in', true), withMat: !!stored('rp-mat', true), withQr: !!stored('rp-qr', true),
       tools: rpTools(), sel: jget(RKEY, []).slice(0, 4)
     };
   },
@@ -60,7 +63,12 @@ export default {
   },
   methods: {
     recent() { this.sel = jget(RKEY, []).slice(0, 6); },
-    html() { return rpDoc(this.ids, this.withIn, this.withSrc, this.title, this.who); },
+    prep() {
+      const all = this.tools.map(t => t.id).filter(id => stageHas(id, 'v')), r = jget(RKEY, []);
+      const used = all.filter(id => r.includes(id));
+      this.sel = used.length ? used : all;
+    },
+    html() { return rpDoc(this.ids, this.withIn, this.withSrc, this.title, this.who, {mat: this.withMat, qr: this.withQr}); },
     print() { rpPrint(this.html()); },
     dl() {
       const b = new Blob([this.html()], {type: 'text/html'}), a = document.createElement('a');

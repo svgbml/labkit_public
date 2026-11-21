@@ -54,6 +54,15 @@ def _(pg):
     vals = pg.evaluate("__mass('#o-tbl tbody tr [data-k=out]')")
     return [('NaCl (g)', vals[0], 8.0, 0.01), ('KCl (g)', vals[1], 0.2, 0.02), ('Na₂HPO₄ (g)', vals[2], 1.44, 0.02), ('KH₂PO₄ (g)', vals[3], 0.24, 0.03)]
 
+@case('Rapport / protocol', 'Materiaallijst van PBS 1X, 1 L', 'Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄): de materiaallijst neemt de massa uit Oplossing & buffer over')
+def _(pg):
+    pg.evaluate("__go('oplossing');__set('o-v','1');__set('o-vu','L');__set('o-preset','pbs')")
+    v = pg.evaluate("matList('oplossing').map(r=>/\\bmg\\b/.test(r[1])?__n(r[1])/1000:__n(r[1]))")
+    ok = pg.evaluate("qrSvg('https://example.org/x', 100).startsWith('<svg')")
+    d = pg.evaluate("(()=>{ const h=rpDoc(['oplossing'], true, true, 't', '', {mat:true, qr:true}); return h.includes('Materiaallijst') && h.includes('<svg'); })()")
+    return [('NaCl (g)', v[0], 8.0, 0.01), ('KCl (g)', v[1], 0.2, 0.02), ('Na₂HPO₄ (g)', v[2], 1.44, 0.02), ('KH₂PO₄ (g)', v[3], 0.24, 0.03),
+            ('qrSvg geeft svg', 1.0 if ok else 0.0, 1.0, 0), ('protocol bevat lijst en QR', 1.0 if d else 0.0, 1.0, 0)]
+
 @case('Oplossing & buffer', 'TBE 10X, 1 L', 'Bio-Rad Bulletin 6205 (108 g Tris, 55 g boorzuur per liter)')
 def _(pg):
     pg.evaluate("__go('oplossing');__set('o-v','1');__set('o-vu','L');__set('o-preset','tbe10')")

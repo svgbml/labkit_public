@@ -4743,5 +4743,17 @@
 "overnacht": "overnight",
 "{#} s": "{#} s",
 "{#} °C": "{#} °C",
-"+{#} reactie": "+{#} reaction"
+"+{#} reactie": "+{#} reaction",
+"Materiaallijst opnemen": "Include material list",
+"QR-code per tool": "QR code per tool",
+"Alle voorbereidingstools": "All preparation tools",
+"Materiaal": "Materials",
+"Materiaallijst": "Material list",
+"Scan om deze invoer in Labkit te openen": "Scan to open this input in Labkit",
+"Gedemineraliseerd water tot": "Demineralised water up to",
+"Maatcilinder of maatkolf": "Measuring cylinder or volumetric flask",
+"PCR-buisjes": "PCR tubes",
+"Filtertips": "Filter tips",
+"Reactiebuisjes": "Reaction tubes",
+"component": "component"
 }

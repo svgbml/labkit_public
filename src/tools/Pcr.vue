@@ -158,6 +158,12 @@ export default {
   },
   mounted() {
     this.draw();
+    matRegister('pcr', () => {
+      const {per, N, water, n} = this.m;
+      const L = [];
+      this.rows.forEach((r, i) => { if (isFinite(per[i])) L.push([r.n, lkNumIn(vol(per[i] * N))]); });
+      return [...L, [trPlain('Water'), lkNumIn(vol(water * N))], [trPlain('PCR-buisjes'), '× ' + fmt(n, 0)], [trPlain('Filtertips'), '']];
+    });
     /* het CSV-knopje staat standaard verborgen en wordt door showDl() getoond; dat liep al
        vóórdat deze component de knop had gerenderd */
     if (typeof showDl === 'function' && typeof STANDALONE !== 'undefined' && STANDALONE) showDl();

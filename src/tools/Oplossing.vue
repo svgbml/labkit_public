@@ -253,7 +253,14 @@ export default {
   watch: {
     preset(k) { if (k) { this.loadPreset(k); this.untick(); } }
   },
-  mounted() { this.redraw(); },
+  mounted() {
+    this.redraw();
+    matRegister('oplossing', () => {
+      if (!this.filled.length) return [];
+      const L = this.filled.map(i => [this.rows[i].n || trPlain('component', true), lkNumIn(mass(this.masses[i]))]);
+      return [...L, [trPlain('Gedemineraliseerd water tot'), this.vtxt], [trPlain('Maatcilinder of maatkolf'), this.vtxt]];
+    });
+  },
   updated() { this.redraw(); }
 };
 </script>
