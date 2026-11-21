@@ -1,18 +1,8 @@
 <section class="tool" id="t-edta" data-tool="edta">
   <header class="tool-head"><h2>Waterhardheid (EDTA-titratie)</h2>
   <p>Totale hardheid (Ca + Mg) uit een complexometrische titratie met EDTA, met omrekening naar mmol/L, mg CaCO₃/L, Duitse en Franse graden, en apart calcium en magnesium als je ook een calciumtitratie hebt gedaan.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="ed-c">Concentratie EDTA</label><div class="inu"><input id="ed-c" inputmode="decimal" value="0,0100"><span class="u">mol/L</span></div></div>
-        <div class="f"><label for="ed-vs">Volume monster</label><div class="inu"><input id="ed-vs" inputmode="decimal" value="50,00"><span class="u">mL</span></div></div>
-        <div class="f"><label for="ed-vt">EDTA totaal (pH 10, EBT)</label><div class="inu"><input id="ed-vt" inputmode="decimal" value="12,35"><span class="u">mL</span></div></div>
-        <div class="f"><label for="ed-vb">Blanco</label><div class="inu"><input id="ed-vb" inputmode="decimal" value="0,05"><span class="u">mL</span></div></div>
-        <div class="f"><label for="ed-vca">EDTA calcium (pH 12–13, optioneel)</label><div class="inu"><input id="ed-vca" inputmode="decimal" value="8,90"><span class="u">mL</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Totale hardheid: gebufferd op pH 10 met Eriochroomzwart T. Calcium: pH 12–13 met NaOH (Mg slaat neer als Mg(OH)₂) en murexide of calconcarbonzuur. De blanco wordt van beide titraties afgetrokken. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><div id="ed-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Edta.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ed-app"></div>
   <p class="src">EDTA reageert 1:1 met Ca²⁺ en Mg²⁺: c(Ca+Mg) = c<sub>EDTA</sub> · (V − V<sub>blanco</sub>) / V<sub>monster</sub> (ISO 6059:1984; calcium: ISO 6058:1984; Harris, Quantitative Chemical Analysis, hfst. 11). 1 mmol/L = 100,09 mg CaCO₃/L = 5,61 °dH (1 °dH = 10 mg CaO/L) = 10 °fH. M(Ca) = 40,078 en M(Mg) = 24,305 g/mol.</p>
 </section>

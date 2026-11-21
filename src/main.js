@@ -30,6 +30,14 @@ import Munc from './tools/Munc.vue';
 import Pipcal from './tools/Pipcal.vue';
 import Verdunning from './tools/Verdunning.vue';
 import Osmo from './tools/Osmo.vue';
+import Titr from './tools/Titr.vue';
+import Hh from './tools/Hh.vue';
+import Edta from './tools/Edta.vue';
+import Molm from './tools/Molm.vue';
+import Kjel from './tools/Kjel.vue';
+import Units from './tools/Units.vue';
+import Enzym from './tools/Enzym.vue';
+import Curve from './tools/Curve.vue';
 
 mountTool('#sf-app', Sigfig);
 calc.sigfig = () => {};
@@ -68,6 +76,36 @@ calc.verdunning = () => {};
 
 mountTool('#os-app', Osmo);
 calc.osmo = () => {};
+
+/* Titratiecurve tekent een curve, dus calc.titr() laat de component opnieuw tekenen. */
+const ti = mountTool('#ti-app', Titr);
+calc.titr = () => { if (ti && ti.vm) ti.vm.draw(); };
+
+mountTool('#hh-app', Hh);
+calc.hh = () => {};
+
+mountTool('#ed-app', Edta);
+calc.edta = () => {};
+
+/* Molmassa: parseFormula() en ATOM blijven in web/index.html; de component roept ze aan. */
+mountTool('#mm-app', Molm);
+calc.molm = () => {};
+
+mountTool('#kj-app', Kjel);
+calc.kjel = () => {};
+
+mountTool('#un-app', Units);
+calc.units = () => {};
+
+/* Enzymkinetiek tekent een grafiek, dus calc.enzym() laat de component opnieuw tekenen. mmFit()
+   blijft in web/index.html. De tabel #k-tbl is een <lk-etable> en zet zelf TBLDEF['k-tbl']. */
+const en = mountTool('#en-app', Enzym);
+calc.enzym = () => { if (en && en.vm) en.vm.draw(); };
+
+/* Standaardcurve tekent een grafiek, dus calc.curve() laat de component opnieuw tekenen. fitCurve()
+   blijft in web/index.html. De tabellen #s-std en #s-unk zijn <lk-etable> met berekende kolommen. */
+const cu = mountTool('#cu-app', Curve);
+calc.curve = () => { if (cu && cu.vm) cu.vm.draw(); };
 
 /* Overlevingscurve tekent een curve, dus calc.km() laat de component opnieuw tekenen. */
 const km = mountTool('#km-app', Km);

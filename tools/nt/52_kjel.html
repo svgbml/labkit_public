@@ -1,18 +1,8 @@
 <section class="tool" id="t-kjel" data-tool="kjel">
   <header class="tool-head"><h2>Kjeldahl (eiwit uit stikstof)</h2>
   <p>Stikstofgehalte uit de titratie na Kjeldahl-destructie en destillatie, en het ruw-eiwitgehalte met de omrekenfactor voor je product.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="kj-m">Ingewogen monster</label><div class="inu"><input id="kj-m" inputmode="decimal" value="1,0025"><span class="u">g</span></div></div>
-        <div class="f"><label for="kj-c">Concentratie H⁺ titrant</label><div class="inu"><input id="kj-c" inputmode="decimal" value="0,1"><span class="u">mol/L</span></div></div>
-        <div class="f"><label for="kj-vs">Titrant monster</label><div class="inu"><input id="kj-vs" inputmode="decimal" value="15,40"><span class="u">mL</span></div></div>
-        <div class="f"><label for="kj-vb">Titrant blanco</label><div class="inu"><input id="kj-vb" inputmode="decimal" value="0,20"><span class="u">mL</span></div></div>
-        <div class="f"><label for="kj-f">Omrekenfactor</label><select id="kj-f" style="width:100%"><option value="6.25">6,25 algemeen, vlees, vis, ei</option><option value="6.38" selected>6,38 melk en zuivel</option><option value="5.7">5,70 tarwe en tarwebloem</option><option value="5.95">5,95 rijst</option><option value="5.71">5,71 soja</option><option value="5.55">5,55 gelatine</option><option value="5.4">5,40 oliezaden, noten</option></select></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Bij zwavelzuur als titrant vul je de H⁺-concentratie in: 0,05 M H₂SO₄ = 0,1 mol/L H⁺. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result" id="kj-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Kjel.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="kj-app"></div>
   <p class="src">%N = 1,4007 × c(H⁺) × (V − V<sub>b</sub>) / m; % ruw eiwit = %N × factor (AOAC Official Method 991.20; ISO 8968-1; YSI/SI Analytics, Kjeldahl Analysis for Nitrogen and Protein). Omrekenfactoren volgens Jones en Codex Alimentarius; 6,25 gaat uit van 16% stikstof in eiwit (FAO, Food energy – methods of analysis, 2003).</p>
 </section>

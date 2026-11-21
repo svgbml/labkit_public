@@ -1,19 +1,8 @@
 <section class="tool" id="t-titr" data-tool="titr">
   <header class="tool-head"><h2>Titratiecurve</h2>
   <p>Berekent de pH-curve van een zuur getitreerd met NaOH of een base getitreerd met HCl, ook voor meerwaardige zuren, met equivalentiepunten en halfequivalentiepunten.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="ti-type">Analyt</label><select id="ti-type" style="width:100%"><option value="acid">zuur, getitreerd met NaOH</option><option value="base">base, getitreerd met HCl</option></select></div>
-        <div class="f"><label for="ti-pre">Voorbeeld</label><select id="ti-pre" style="width:100%"><option value="">eigen pKₐ</option><option value="4,76">azijnzuur (4,76)</option><option value="2,15 7,20 12,35">fosforzuur (2,15; 7,20; 12,35)</option><option value="-6">HCl (sterk zuur)</option><option value="9,25">ammoniak (pKₐ NH₄⁺ 9,25)</option><option value="8,07">Tris (8,07)</option></select></div>
-        <div class="f"><label for="ti-pka">pKₐ-waarden</label><input id="ti-pka" class="txt" value="4,76"></div>
-        <div class="f"><label for="ti-ca">Concentratie analyt</label><div class="inu"><input id="ti-ca" inputmode="decimal" value="0,1"><span class="u">M</span></div></div>
-        <div class="f"><label for="ti-va">Volume analyt</label><div class="inu"><input id="ti-va" inputmode="decimal" value="25"><span class="u">mL</span></div></div>
-        <div class="f"><label for="ti-cb">Concentratie titrant</label><div class="inu"><input id="ti-cb" inputmode="decimal" value="0,1"><span class="u">M</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">pKₐ-waarden van het geprotoneerde zuur, gescheiden door spaties (voor een base: de pKₐ van het geconjugeerde zuur). Bij 25 °C, zonder activiteitscorrectie.</p>
-    </div>
-    <div class="result"><canvas id="ti-cv"></canvas><div id="ti-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Titr.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ti-app"></div>
   <p class="src">Exacte oplossing van de ladingsbalans [H⁺] + [Na⁺] = [OH⁻] + [Cl⁻] + Σ(lading × fractie × c) met de fracties van Hₙ…A uit de pKₐ-waarden en K<sub>w</sub> = 10⁻¹⁴ (Harris, Quantitative Chemical Analysis, 9e ed., hfst. 10–11). Equivalentiepunt k: V = k·c<sub>analyt</sub>·V<sub>analyt</sub> / c<sub>titrant</sub>; bij een halfequivalentiepunt geldt pH ≈ pKₐ.</p>
 </section>
