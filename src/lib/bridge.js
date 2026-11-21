@@ -55,9 +55,13 @@ export function mountTool(sel, options, opts = {}) {
        dan de innerHTML zelf, precies zoals de DOM-laag een heel element opzoekt, dus de
        bestaande sleutels met tags erin blijven gelden. Houd één sleutel per zin: een zin in
        stukjes vertalen levert sleutels op die in geen enkele taal te maken zijn. */
+    /* Staat er geen vertaling tegenover de tekst (en in het Nederlands is dat altijd), dan
+       haalt i18nStrip() de markeringen van uv() weg; in het Engels gaan de getallen daar nog
+       wel door, want anders blijft een samengestelde regel zonder sleutel met komma's staan.
+       Dat deed de DOM-laag ook: trPlain() zet de getallen om als hij de sleutel niet vindt. */
     app.config.globalProperties.tHtml = h => {
-      if (LANG !== 'en' || typeof i18nLook !== 'function') return h;
-      const r = i18nLook(h); return r ? r.out : h;
+      if (LANG !== 'en' || typeof i18nLook !== 'function') return i18nStrip(h);
+      const r = i18nLook(h); return r ? r.out : lkNumHtml(i18nStrip(h));
     };
     app.config.globalProperties.uv = uv;
     app.config.globalProperties.esc = esc;
@@ -74,9 +78,31 @@ export function mountTool(sel, options, opts = {}) {
       });
     }
     const vm = app.mount(host);
+    /* eerst de standaardwaarden vastleggen, dan de bewaarde invoer terugzetten: wat hierna
+       binnenkomt hoort als "veranderd" te gelden */
+    lkMarkDefaults(host);
     restoreInputs(host);
     return {app, vm};
   } catch (e) { console.error('Vue kon ' + sel + ' niet opzetten', e); return null; }
+}
+
+/* De laag "Meer instellingen" (xpChanged in web/index.html) en de invoeropslag vergelijken een
+   veld met zijn standaardwaarde: defaultValue, defaultChecked of de optie met defaultSelected.
+   Die komen uit de HTML, en Vue zet alleen de eigenschap, dus zonder dit zou elk veld van een
+   Vue-tool als "veranderd" gelden en zou een geavanceerd veld nooit verborgen worden. Wat de
+   component bij het opzetten neerzet is hier de standaard; een waarde die daarna binnenkomt
+   (een deellink, de geschiedenis) geldt dus wel als veranderd, en dat hoort ook. */
+function lkMarkDefaults(host) {
+  host.querySelectorAll('input,textarea,select').forEach(el => {
+    if (el.tagName === 'SELECT') {
+      const o = el.options[el.selectedIndex];
+      if (o) o.defaultSelected = true;
+    } else if (el.type === 'checkbox' || el.type === 'radio') {
+      el.defaultChecked = el.checked;
+    } else {
+      el.defaultValue = el.value;
+    }
+  });
 }
 
 /* De invoeropslag (restore() in web/index.html) zet bij het laden de bewaarde waarden terug,
@@ -103,3 +129,20 @@ function restoreInputs(host) {
    In het Nederlands staat het al goed, dus dan blijft de tekst zoals hij is. */
 export const lkNumIn = v => (LANG === 'en' && typeof i18nNum === 'function'
   ? String(v).replace(/\d+(?:[.,]\d+)*/g, m => i18nNum(m)) : String(v));
+
+/* De knoppenbalk onder een tekening, zoals picBar() in tools/nt/01_pic.js hem maakt. Die
+   balken worden bij het opstarten één keer in de pagina gezet, dus een Vue-tool die zijn
+   tekening zelf rendert maakt hem hier en vertaalt de teksten zelf: de vertaallaag van de DOM
+   komt niet in een Vue-boom. */
+export const lkPicBar = key => {
+  const t = s => (typeof trPlain === 'function' ? trPlain(s) : s);
+  return `<button type="button" data-png="${key}">PNG</button>`
+    + `<button type="button" data-svg="${key}">SVG</button>`
+    + `<button type="button" data-copy="${key}">${t('Kopieer afbeelding')}</button>`
+    + `<button type="button" data-picprint="${key}">${t('Afdrukken')}</button>`;
+};
+
+/* Hetzelfde voor een stukje HTML: alleen de tekst tussen de tags gaat erdoor, want in een
+   attribuut (style="font-weight:400") staan ook getallen en die horen te blijven. */
+export const lkNumHtml = h => (LANG !== 'en' ? String(h)
+  : String(h).split(/(<[^>]*>)/).map(p => (p.charAt(0) === '<' ? p : lkNumIn(p))).join(''));

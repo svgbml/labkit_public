@@ -827,69 +827,9 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 <section class="tool" id="t-stat" data-tool="stat">
   <header class="tool-head"><h2>Statistiek</h2>
   <p>Beschrijvende statistiek, uitbijtertoetsen en de toetsen uit het Tabellenboek Statistiek, met de volledige toetsingsprocedure. Plak een kolom uit Excel of typ getallen gescheiden door spaties of enters.</p></header>
-  <div class="grid2">
-    <div class="stack">
-      <div class="panel">
-        <div class="fields">
-          <div class="f"><label for="st-test">Toets</label><select id="st-test" style="width:100%">
-            <option value="desc">Beschrijvend en uitbijters</option>
-            <option value="t1">t-toets, één steekproef tegen µ₀</option>
-            <option value="t2">t-toets, twee onafhankelijke groepen</option>
-            <option value="tp">t-toets, gepaarde waarnemingen</option>
-            <option value="wil">Wilcoxon-rangtekentoets</option>
-            <option value="anova">ANOVA (één factor) + Tukey</option>
-            <option value="kw">Kruskal-Wallis + Dunn</option>
-            <option value="anova2">Tweeweg-ANOVA (twee factoren)</option>
-            <option value="reg">Lineaire regressie</option>
-            <option value="power">Steekproefgrootte (power)</option>
-            <option value="chi">χ²-toets</option>
-          </select></div>
-          <div class="f"><label for="st-alpha">Significantieniveau α</label><select id="st-alpha" style="width:100%"><option value="0.05">0,05</option><option value="0.01">0,01</option><option value="0.10">0,10</option></select></div>
-          <div class="f" data-st-show="t1 t2 tp wil power"><label for="st-side">Toetsing</label><select id="st-side" style="width:100%"><option value="2">Tweezijdig (≠)</option><option value="r">Rechtszijdig (A &gt; B of &gt; µ₀)</option><option value="l">Linkszijdig (A &lt; B of &lt; µ₀)</option></select></div>
-          <div class="f" data-st-show="t1 wil"><label for="st-mu">Referentiewaarde µ₀</label><input id="st-mu" inputmode="decimal" value="0"></div>
-        </div>
-      </div>
-      <div class="panel" data-st-show="desc t1 t2 tp wil reg">
-        <div class="fields" style="grid-template-columns:1fr 1fr">
-          <div class="f"><label for="st-na">Naam groep A</label><input id="st-na" class="txt" value="Middel 1"></div>
-          <div class="f" data-st-show="desc t2 tp wil reg"><label for="st-nb">Naam groep B</label><input id="st-nb" class="txt" value="Middel 2"></div>
-          <div class="f"><label for="st-a">Waarden A <span class="example">voorbeeld</span></label><textarea id="st-a" rows="7">0,7 -1,6 -0,2 -1,2 -0,1 3,4 3,7 0,8 0,0 2,0</textarea></div>
-          <div class="f" data-st-show="desc t2 tp wil reg"><label for="st-b">Waarden B <span id="st-bopt" style="font-weight:400">(optioneel)</span></label><textarea id="st-b" rows="7">1,9 0,8 1,1 0,1 -0,1 4,4 5,5 1,6 4,6 3,4</textarea></div>
-        </div>
-        <p style="font-size:13px;color:var(--muted);margin:8px 0 0" id="st-hint">Bij een gepaarde toets horen de waarden op dezelfde plek bij elkaar (zelfde proefpersoon, monster of plaat).</p>
-      </div>
-      <div class="panel" data-st-show="anova2">
-        <div class="f"><label for="st-two">Per regel: niveau factor A / niveau factor B: waarden <span class="example">voorbeeld</span></label><textarea id="st-two" rows="7" spellcheck="false">LB / 30 °C: 0,82 0,79 0,85 0,80
-LB / 37 °C: 1,21 1,18 1,25 1,19
-M9 / 30 °C: 0,41 0,44 0,39 0,43
-M9 / 37 °C: 0,55 0,52 0,58 0,54</textarea></div>
-        <div class="fields" style="margin-top:10px"><div class="f"><label for="st-fa">Naam factor A</label><input id="st-fa" class="txt" value="Medium"></div><div class="f"><label for="st-fb">Naam factor B</label><input id="st-fb" class="txt" value="Temperatuur"></div></div>
-        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">Gebalanceerd ontwerp: elke combinatie even vaak gemeten. Voorbeelddata (OD na 6 uur) zijn verzonnen.</p>
-      </div>
-      <div class="panel" data-st-show="power">
-        <div class="fields">
-          <div class="f"><label for="st-ptype">Opzet</label><select id="st-ptype" style="width:100%"><option value="2">Twee onafhankelijke groepen</option><option value="1">Gepaard of één steekproef</option></select></div>
-          <div class="f"><label for="st-pd">Verschil dat je wilt aantonen</label><input id="st-pd" inputmode="decimal" value="0,5"></div>
-          <div class="f"><label for="st-psd">Standaardafwijking (uit eerdere metingen)</label><input id="st-psd" inputmode="decimal" value="1"></div>
-          <div class="f"><label for="st-pw">Gewenste power</label><div class="inu"><input id="st-pw" inputmode="decimal" value="80"><span class="u">%</span></div></div>
-        </div>
-        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">Bij gepaard: gebruik de standaardafwijking van de verschillen.</p>
-      </div>
-      <div class="panel" data-st-show="anova kw">
-        <div class="f"><label for="st-groups">Groepen: één groep per regel, eventueel met naam en dubbele punt <span class="example">voorbeeld</span></label><textarea id="st-groups" rows="5">ctrl: 4,17 5,58 5,18 6,11 4,50 4,61 5,17 4,53 5,33 5,14
-trt1: 4,81 4,17 4,41 3,59 5,87 3,83 6,03 4,89 4,32 4,69
-trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
-        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">Plakken uit Excel kan ook: per regel een naam, een tab en dan de waarden. Voorbeeld: drooggewicht van planten onder een controle en twee behandelingen (R-dataset PlantGrowth, Dobson 1983).</p>
-      </div>
-      <div class="panel" data-st-show="chi">
-        <div class="f"><label for="st-obs">Waargenomen aantallen <span class="example">voorbeeld</span></label><textarea id="st-obs" rows="3">315 108 101 32</textarea></div>
-        <div class="f" style="margin-top:12px"><label for="st-exp">Verwachte verhouding of verwachte aantallen</label><input id="st-exp" class="mono" value="9 3 3 1"></div>
-        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">Eén regel met aantallen = aanpassingstoets (laat de verwachting leeg voor een gelijke verdeling). Meerdere regels = kruistabel (rijen × kolommen); dan wordt de verwachting uit de rij- en kolomtotalen berekend.</p>
-      </div>
-    </div>
-    <div class="result" id="st-out"></div>
-  </div>
-  <div class="panel" style="margin-top:16px" id="st-dpanel"><h3>Per groep</h3><div id="st-desc"></div></div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Stat.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="st-app"></div>
   <p class="src">Kritieke waarden zoals in het Tabellenboek Statistiek (J.P.M. Andries, Avans): t tweezijdig (Bijlage 4), F (5 en 6), χ² (7), Kolmogorov-Smirnov met geschatte µ en σ (Lilliefors, 8), Dixon Q (9), Grubbs tweezijdig (10), Wilcoxon (11). Grubbs: G = max|xᵢ − x̄| / s, voor n &gt; 10 G<sub>krit</sub> = (n−1)/√n · √(t²/(n−2+t²)) met t bij α/(2n) en n−2 vrijheidsgraden (NIST/SEMATECH e-Handbook 1.3.5.17.1). Dixon: Q = sprong / spreidingsbreedte (Rorabacher, Anal. Chem. 1991). Welch-toets: t = (x̄₁−x̄₂)/√(s₁²/n₁+s₂²/n₂) met Welch–Satterthwaite-vrijheidsgraden. p-waarden exact uit de t-, F- en χ²-verdeling; Wilcoxon exact zonder gelijke waarden, anders normale benadering met correctie. One-way ANOVA met Tukey-Kramer: q = |x̄ᵢ − x̄ⱼ| / √(MS<sub>binnen</sub>/2 · (1/nᵢ + 1/nⱼ)), p uit de studentized range-verdeling (zoals TukeyHSD in R, Tukey-post-hoc in JASP en GraphPad Prism). Kruskal-Wallis: H met correctie voor gelijke waarden, χ²-benadering; Dunn (1964) z-toets op gemiddelde rangen met Bonferroni-correctie (zoals kruskal.test en dunn.test in R). Voorbeelddata: Student (1908), slaapwinst van twee middelen bij 10 proefpersonen (Cushny &amp; Peebles); χ²: Mendel, erwten 315/108/101/32 tegen 9:3:3:1.</p>
 </section>
 
@@ -2273,47 +2213,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-gplan" data-tool="gplan">
   <header class="tool-head"><h2>Gelplanner</h2>
   <p>Tekent de gel van bovenaf: de geldrager, de kam en elk slotje met monsternaam, kleur en volume. Zet de afbeelding naast je gelfoto in het labjournaal.</p></header>
-  <div class="picwrap">
-    <div class="pic-prev">
-      <div class="result"><canvas id="gp-cv"></canvas><div class="pic-bar" data-picbar="gp"></div><div id="gp-out"></div></div>
-      <div class="result" style="margin-top:16px"><h3 style="margin:0 0 10px;font-size:14px">Verwachte gel</h3><canvas id="gpp-cv"></canvas><div class="pic-bar" data-picbar="gpp"></div><div id="gpp-out"></div></div>
-    </div>
-    <div>
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="gp-title">Titel</label><input id="gp-title" class="txt" value="1% agarosegel, 1× TAE, 100 V"></div>
-        <div class="f"><label for="gp-type">Geltype</label><select id="gp-type" style="width:100%"><option value="dna" selected>Agarose (DNA)</option><option value="sds">SDS-PAGE (eiwit)</option></select></div>
-        <div class="f"><label for="gp-lad">Ladder</label><select id="gp-lad" style="width:100%"></select></div>
-        <div class="f"><label for="gp-tray">Geldrager</label><select id="gp-tray" style="width:100%">
-          <option value="7x7">Mini, 7 × 7 cm</option>
-          <option value="7x10" selected>Mini, 7 × 10 cm</option>
-          <option value="10x15">Midi, 10 × 15 cm</option>
-          <option value="15x15">Midi, 15 × 15 cm</option>
-          <option value="20x25">Maxi, 20 × 25 cm</option>
-        </select></div>
-        <div class="f"><label for="gp-comb">Tanden op de kam</label><input id="gp-comb" inputmode="numeric" value="10"></div>
-        <div class="f"><label for="gp-ladlane">Ladder in laan</label><input id="gp-ladlane" inputmode="numeric" value="1"></div>
-        <div class="f" data-expert=""><label for="gp-pct">Gelpercentage</label><div class="inu"><input id="gp-pct" inputmode="decimal" value="1"><span class="u">% w/v</span></div></div>
-        <div class="f"><label for="gp-volt">Spanning</label><div class="inu"><input id="gp-volt" inputmode="decimal" value="100"><span class="u">V</span></div></div>
-        <div class="f"><label for="gp-elec">Afstand tussen de elektroden</label><div class="inu"><input id="gp-elec" inputmode="decimal" value="15"><span class="u">cm</span></div></div>
-        <div class="f"><label for="gp-buf">Loopbuffer (stock)</label><select id="gp-buf" style="width:100%"><option value="50">50× TAE</option><option value="10">10× TBE</option><option value="5">5× TBE</option></select></div>
-        <div class="f"><label for="gp-stain">Kleuring in de gel</label><select id="gp-stain" style="width:100%"><option value="g10k">GelRed of SYBR Safe, 10 000× stock</option><option value="etbr">Ethidiumbromide, 10 mg/mL</option><option value="none">Geen (achteraf kleuren)</option></select></div>
-        <div class="f"><label for="gp-dyex">Laadbuffer sterkte</label><div class="inu"><input id="gp-dyex" inputmode="decimal" value="6"><span class="u">×</span></div></div>
-        <div class="f" data-expert=""><label for="gp-tooth">Breedte van een tand</label><div class="inu"><input id="gp-tooth" inputmode="decimal" value="5,5"><span class="u">mm</span></div></div>
-        <div class="f" data-expert=""><label for="gp-thick">Dikte van de kam</label><div class="inu"><input id="gp-thick" inputmode="decimal" value="1,5"><span class="u">mm</span></div></div>
-        <div class="f" data-expert=""><label for="gp-gelmm">Dikte van de gel</label><div class="inu"><input id="gp-gelmm" inputmode="decimal" value="6"><span class="u">mm</span></div></div>
-        <div class="f"><label for="gp-dye">Laadbuffer</label><input id="gp-dye" class="txt" value="6× loading dye"></div>
-        <div class="f" style="grid-column:1/-1"><label for="gp-note">Eigen tekst onder het schema</label><textarea id="gp-note" rows="2" placeholder="Bijv. verwachte fragmentgrootten, looptijd of een verwijzing naar het protocol"></textarea></div>
-        <label class="chk" for="gp-auto" style="grid-column:1/-1"><input type="checkbox" id="gp-auto" checked> Standaardtoelichting tonen</label>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="gp-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="gp-tbl-add">+ Laan</button><button type="button" data-smp="gplan">Monsters…</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De lanen worden van links naar rechts in de slotjes gezet. Laat de naam leeg om een slotje over te slaan. Zet bij <i>Verwachte banden</i> de grootten die je verwacht, gescheiden door een spatie; die worden in de verwachte gel getekend.</p>
-    </div>
-    <div class="result" id="gp-cast" style="margin-top:16px"></div>
-    <div class="result" id="gp-run" style="margin-top:16px"></div>
-    </div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Gelplan.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="gp-app"></div>
   <p class="src">Bandposities volgen uit lineaire interpolatie van log(grootte) tegen de loopafstand tussen de grootste en de kleinste band van de gekozen ladder; dat is hetzelfde verband als de standaardcurve in <i>Agarosegel &amp; bandgrootte</i>. Prestained eiwitladders: Bio-Rad Precision Plus Protein Dual Color (alle banden blauw, 75 en 25 kDa rood) en Thermo Scientific PageRuler Plus Prestained (alle banden blauw, 70 kDa groen en 25 kDa rood). Maten van veelgebruikte geldragers en kammen van Bio-Rad (Mini-Sub Cell GT en Wide Mini-Sub Cell GT, instructiehandleiding) en Thermo Scientific (Owl EasyCast B1/B2). Het slotvolume volgt uit de slotmaten: breedte × kamdikte × (geldikte − 1 mm bodem), waarbij 1 mm³ = 1 µL; er wordt tot 80% gevuld, want een vol slotje loopt over in de buurlaan. De loopbuffer in een 6× laadbuffer betekent 1 deel buffer op 5 delen monster. Scheidingsbereik per agarosepercentage naar dezelfde tabel als de tool <i>Agarosegel &amp; bandgrootte</i>. Kleuring: GelRed en SYBR Safe worden als 1× uit een 10 000×-stock in de gel gebruikt; ethidiumbromide op 0,5 µg/mL uit een stock van 10 mg/mL. De looptijd is een schatting: de snelheid van het blauwe front is evenredig met de veldsterkte en neemt af bij een hoger agarosepercentage, geijkt op een minigel die bij 10 V/cm in ongeveer 35 minuten 6 cm loopt; reken op een marge van ongeveer een derde. Richtlijn 5–10 V/cm uit de gangbare protocollen (Sambrook &amp; Russell; Bio-Rad, Mini-Sub Cell GT). Posities van de kleurfronten in TAE/TBE naar NEB (Gel Loading Dye, Purple 6X) en Sambrook &amp; Russell, Molecular Cloning, tabel bij agarosegelelektroforese.</p>
 </section>
 <!-- /NT:gplan -->
@@ -2773,6 +2675,10 @@ function i18nStart(){ document.documentElement.lang=LANG; if(LANG!=='en') return
   const drain=d=>{ do{ const s=pend.shift(); if(s) i18nEnsure(s); } while(pend.length&&!d.didTimeout&&d.timeRemaining()>6); if(pend.length) i18nIdle(drain); };
   i18nIdle(drain);
   i18nMO=new MutationObserver(recs=>{ const set=new Set(); for(const r of recs){ const t=r.type==='characterData'?r.target.parentElement:r.target; if(t) set.add(t); }
+    /* Vue bezit zijn eigen DOM (data-notr) en vertaalt zelf met t()/tHtml(). Een walk die
+       bij de host begint stopt daar al, maar een mutatie binnen die boom levert een node die
+       er middenin zit; dan ging de tekst er alsnog langs en werd een getal dat de component
+       al had omgezet een tweede keer gedraaid (1.789 werd weer 1,789). */
     for(const t of set){ if(!t.isConnected||t.closest('[data-notr]')) continue; const ps=t.closest('section.tool'); if(ps&&ps.__i18nPend&&ps!==t&&!t.closest('.tool-head')) continue; let skip=false; for(const u of set){ if(u!==t&&u.contains(t)){ skip=true; break; } } if(!skip) i18nWalk(t); }
     i18nMO.takeRecords(); });
   i18nMO.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['title','placeholder','aria-label']});
@@ -3763,169 +3669,12 @@ function wilcoxDist(n){ const max=n*(n+1)/2; let f=new Float64Array(max+1); f[0]
 function wilcoxCrit(n,a){ if(n<1) return NaN; const cdf=wilcoxDist(n); let c=-1; for(let s=0;s<cdf.length;s++){ if(cdf[s]<=a+1e-12) c=s; else break; } return c; }
 function rankAbs(d){ const idx=d.map((v,i)=>[Math.abs(v),i]).sort((a,b)=>a[0]-b[0]); const r=new Array(d.length); let ties=0, tcorr=0; for(let i=0;i<idx.length;){ let j=i; while(j+1<idx.length&&idx[j+1][0]===idx[i][0]) j++; const rk=(i+j)/2+1; for(let k=i;k<=j;k++) r[idx[k][1]]=rk; const t=j-i+1; if(t>1){ ties++; tcorr+=t*t*t-t; } i=j+1; } return {r,ties,tcorr}; }
 const pfmt=p=>!isFinite(p)?'–':p<0.0001?'&lt; 0,0001':sig(p,3);
-function stShow(){ const t=$('#st-test').value; $$('[data-st-show]').forEach(el=>{ el.style.display=el.dataset.stShow.split(' ').includes(t)?'':'none'; }); $('#st-bopt').style.display=t==='desc'?'':'none'; $('#st-dpanel').querySelector('h3').textContent='Per groep'; $('#st-hint').style.display=t==='tp'||t==='wil'?'':'none'; $('label[for=st-a]').firstChild.textContent=t==='reg'?'x-waarden (onafhankelijk) ':'Waarden A '; $('label[for=st-b]').firstChild.textContent=t==='reg'?'y-waarden (afhankelijk) ':'Waarden B '; }
-calc.stat=function(){
-  stShow();
-  const T=$('#st-test').value, alpha=num($('#st-alpha').value), side=$('#st-side').value, mu0=num($('#st-mu').value)||0;
-  const nA=$('#st-na').value||'A', nB=$('#st-nb').value||'B';
-  const A=stNums($('#st-a').value), B=stNums($('#st-b').value), out=$('#st-out');
-  const useB=['desc','t2','tp','wil'].includes(T)&&B.length>0;
-  /* tabel per groep */
-  const AG=(T==='anova'||T==='kw')?stGroups($('#st-groups').value):[];
-  const groups=(T==='chi'||T==='power'||T==='anova2'||T==='reg')?[]:(T==='anova'||T==='kw')?AG.map(g=>[g.name,g.v]):[[nA,A]].concat(useB?[[nB,B]]:[]);
-  if(T==='tp'&&A.length===B.length&&A.length>1) groups.push([`Verschil (${nA} − ${nB})`,A.map((v,i)=>v-B[i])]);
-  const D=groups.filter(g=>g[1].length>0).map(g=>[g[0],stDesc(g[1],alpha)]);
-  $('#st-dpanel').style.display=D.length?'':'none';
-  if(D.length){
-    const r=(lab,f)=>`<tr><td>${lab}</td>${D.map(([,o])=>`<td class="num">${f(o)}</td>`).join('')}</tr>`;
-    const yes=(c)=>c?'<span class="chip bad">uitbijter</span>':'<span class="chip ok">geen</span>';
-    $('#st-desc').innerHTML=`<div class="tbl-wrap"><table class="mini"><thead><tr><th></th>${D.map(([n])=>`<th class="num">${esc(n)}</th>`).join('')}</tr></thead><tbody>`+
-      r('n',o=>o.n)+r('Gemiddelde',o=>sig(o.m,5))+r('Mediaan',o=>sig(o.med,5))+r('Standaardafwijking s',o=>o.n>1?sig(o.sd,4):'–')+r('Standaardfout (s/√n)',o=>o.n>1?sig(o.sem,4):'–')+r('Variatiecoëfficiënt',o=>o.n>1&&isFinite(o.cv)?fmt(o.cv,1)+' %':'–')+r('Minimum',o=>sig(o.min,5))+r('Maximum',o=>sig(o.max,5))+
-      r(`${fmt((1-alpha)*100,0)}%-betrouwbaarheidsinterval`,o=>o.n>1?`${sig(o.ci[0],4)} – ${sig(o.ci[1],4)}`:'–')+r('t (tweezijdig, df = n−1)',o=>o.n>1?fmt(o.tq,3):'–')+
-      r('Grubbs G (verdachte waarde)',o=>o.gr?`${fmt(o.gr.G,3)} (${sig(o.gr.val,5)})`:'–')+r('Grubbs G<sub>krit</sub>',o=>o.gr?fmt(o.gr.crit.v,3)+(o.gr.crit.tab?' (tabel 10)':''):'–')+r('Grubbs: uitbijter?',o=>o.gr?yes(o.gr.G>o.gr.crit.v):'–')+
-      r('Dixon Q (verdachte waarde)',o=>o.dx?`${fmt(o.dx.Q,3)} (${sig(o.dx.val,5)})`:'–')+r('Dixon Q<sub>krit</sub>',o=>o.dx&&isFinite(o.dx.crit)?fmt(o.dx.crit,3)+' (tabel 9)':'–')+r('Dixon: uitbijter?',o=>o.dx&&isFinite(o.dx.crit)?yes(o.dx.Q>o.dx.crit):'–')+
-      r('Normaliteit: D (Lilliefors)',o=>isFinite(o.lD)?fmt(o.lD,3):'–')+r('D<sub>krit</sub> (α = 0,05, tabel 8)',o=>isFinite(o.lC)?fmt(o.lC,3):'–')+r('Normaal verdeeld?',o=>isFinite(o.lD)?(o.lD>o.lC?'<span class="chip warn">nee</span>':'<span class="chip ok">aanname houdbaar</span>'):'–')+
-      `</tbody></table></div>`;
-  } else $('#st-desc').innerHTML='';
-  const H0=(h0,h1)=>`<li><b>Hypothesen.</b> H₀: ${h0}; H₁: ${h1}.</li>`;
-  const sideTxt=(two,r,l)=>side==='2'?two:side==='r'?r:l;
-  const decide=(rej,txtRej,txtAcc)=>`<li><b>Beslissing.</b> ${rej?'H₀ verwerpen':'H₀ niet verwerpen'} (α = ${fmt(alpha,2)}).</li><li><b>Conclusie.</b> ${rej?txtRej:txtAcc}</li>`;
-  const pSide=(t,df)=>side==='2'?2*(1-tcdf(Math.abs(t),df)):side==='r'?1-tcdf(t,df):tcdf(t,df);
-  const tCritTxt=(df)=>{ const tc=tinv(1-(side==='2'?alpha/2:alpha),df); return {tc,txt:`${side==='2'?'±':side==='r'?'+':'−'}${fmt(tc,3)} (df = ${fmt(df,df%1?2:0)}, ${side==='2'?'tweezijdig':'eenzijdig'})`}; };
-  const rejT=(t,tc)=>side==='2'?Math.abs(t)>tc:side==='r'?t>tc:t<-tc;
-  const head=(lab,val)=>`<div class="lbl">${lab}</div><div class="big">${val}</div>`;
-  let h='';
-  if(T==='desc'){
-    if(!A.length){ out.innerHTML=note('info','Vul waarden in bij groep A.'); return; }
-    const o=D[0][1];
-    h=head(ud(nA)+': gemiddelde ± s',`${sig(o.m,4)} <small>± ${o.n>1?sig(o.sd,3):'–'} (n = ${o.n})</small>`)+kv([['Mediaan',sig(o.med,4)],[`${fmt((1-alpha)*100,0)}%-BI gemiddelde`,o.n>1?`${sig(o.ci[0],4)} – ${sig(o.ci[1],4)}`:'–'],['Variatiecoëfficiënt',o.n>1?fmt(o.cv,1)+' %':'–']]);
-    const flags=D.flatMap(([n,o])=>[o.gr&&o.gr.G>o.gr.crit.v?`Grubbs: ${sig(o.gr.val,5)} in ${esc(n)} is een uitbijter (G = ${fmt(o.gr.G,3)} &gt; ${fmt(o.gr.crit.v,3)}).`:null,o.dx&&isFinite(o.dx.crit)&&o.dx.Q>o.dx.crit?`Dixon: ${sig(o.dx.val,5)} in ${esc(n)} is een uitbijter (Q = ${fmt(o.dx.Q,3)} &gt; ${fmt(o.dx.crit,3)}).`:null]).filter(Boolean);
-    h+=flags.length?note('warn',flags.join('<br>')+' Verwijder een waarde alleen met een aanwijsbare oorzaak en noteer dat in je labjournaal; test maar één waarde per keer.'):note('info','Geen uitbijters volgens Grubbs en Dixon.');
-    if(D.some(([,o])=>o.n<3)) h+=note('info','Uitbijtertoetsen hebben minstens 3 waarden nodig.');
-    h+=`<div class="formula">s = √(Σ(xᵢ − x̄)² / (n − 1)) · BI = x̄ ± t · s/√n · G = max|xᵢ − x̄| / s · Q = sprong / spreidingsbreedte</div>`;
-    out.innerHTML=h; return;
-  }
-  if(T==='t1'){
-    if(A.length<2){ out.innerHTML=note('info','Vul minstens twee waarden in.'); return; }
-    const o=stDesc(A,alpha), t=(o.m-mu0)/o.sem, df=o.n-1, p=pSide(t,df), {tc,txt}=tCritTxt(df), rej=rejT(t,tc);
-    h=head('t-toets, één steekproef',`t = ${fmt(t,3)} <small>p = ${pfmt(p)}</small>`)+`<ol class="steps">`+H0(`µ = ${sig(mu0,4)}`,sideTxt(`µ ≠ ${sig(mu0,4)}`,`µ &gt; ${sig(mu0,4)}`,`µ &lt; ${sig(mu0,4)}`))+`<li><b>Toetsingsgrootheid.</b> t = (x̄ − µ₀) / (s/√n) = (${sig(o.m,5)} − ${sig(mu0,4)}) / (${sig(o.sd,4)}/√${o.n}) = <b>${fmt(t,3)}</b></li><li><b>Kritieke waarde</b> (tabel 4): t = ${txt}</li><li><b>p-waarde</b> = ${pfmt(p)}</li>`+decide(rej,`Het gemiddelde van ${ud(nA)} wijkt significant af van ${sig(mu0,4)}.`,`Er is geen significant verschil met ${sig(mu0,4)} aangetoond.`)+`</ol>`;
-    out.innerHTML=h; return;
-  }
-  if(T==='t2'){
-    if(A.length<2||B.length<2){ out.innerHTML=note('info','Vul in beide groepen minstens twee waarden in.'); return; }
-    const a=stDesc(A,alpha), b=stDesc(B,alpha); const big=a.sd>=b.sd?a:b, sml=a.sd>=b.sd?b:a;
-    const F=big.sd**2/sml.sd**2, d1=big.n-1, d2=sml.n-1, Fc=finv(1-alpha/2,d1,d2), pF=Math.min(1,2*(1-fcdf(F,d1,d2))), eq=F<=Fc;
-    const sp2=((a.n-1)*a.sd**2+(b.n-1)*b.sd**2)/(a.n+b.n-2), tP=(a.m-b.m)/Math.sqrt(sp2*(1/a.n+1/b.n)), dfP=a.n+b.n-2;
-    const va=a.sd**2/a.n, vb=b.sd**2/b.n, tW=(a.m-b.m)/Math.sqrt(va+vb), dfW=(va+vb)**2/(va*va/(a.n-1)+vb*vb/(b.n-1));
-    const t=eq?tP:tW, df=eq?dfP:dfW, p=pSide(t,df), {tc,txt}=tCritTxt(df), rej=rejT(t,tc);
-    h=head(eq?'t-toets, gelijke varianties':'Welch-toets, ongelijke varianties',`t = ${fmt(t,3)} <small>p = ${pfmt(p)}</small>`)+`<ol class="steps">`+
-      `<li><b>Eerst F-toets op gelijke varianties.</b> F = s²<sub>groot</sub> / s²<sub>klein</sub> = ${sig(big.sd,4)}² / ${sig(sml.sd,4)}² = <b>${fmt(F,3)}</b>; F<sub>krit</sub> (tweezijdig, df ${d1}; ${d2}) = ${fmt(Fc,3)}; p = ${pfmt(pF)} → ${eq?'varianties gelijk, gebruik de gepoolde t-toets':'varianties verschillen, gebruik de Welch-toets'}.</li>`+
-      H0(`µ<sub>${ud(nA)}</sub> = µ<sub>${ud(nB)}</sub>`,sideTxt(`µ<sub>${ud(nA)}</sub> ≠ µ<sub>${ud(nB)}</sub>`,`µ<sub>${ud(nA)}</sub> &gt; µ<sub>${ud(nB)}</sub>`,`µ<sub>${ud(nA)}</sub> &lt; µ<sub>${ud(nB)}</sub>`))+
-      (eq?`<li><b>Toetsingsgrootheid.</b> s<sub>p</sub> = √(((n₁−1)s₁² + (n₂−1)s₂²)/(n₁+n₂−2)) = ${sig(Math.sqrt(sp2),4)}; t = (x̄₁ − x̄₂) / (s<sub>p</sub>·√(1/n₁ + 1/n₂)) = (${sig(a.m,5)} − ${sig(b.m,5)}) / (${sig(Math.sqrt(sp2),4)}·√(1/${a.n} + 1/${b.n})) = <b>${fmt(t,3)}</b></li>`
-         :`<li><b>Toetsingsgrootheid.</b> t = (x̄₁ − x̄₂) / √(s₁²/n₁ + s₂²/n₂) = (${sig(a.m,5)} − ${sig(b.m,5)}) / √(${sig(a.sd,4)}²/${a.n} + ${sig(b.sd,4)}²/${b.n}) = <b>${fmt(t,3)}</b>; df (Welch–Satterthwaite) = ${fmt(dfW,2)}</li>`)+
-      `<li><b>Kritieke waarde</b>: t = ${txt}</li><li><b>p-waarde</b> = ${pfmt(p)}</li>`+decide(rej,`De gemiddelden van ${ud(nA)} en ${ud(nB)} verschillen significant.`,`Er is geen significant verschil tussen ${ud(nA)} en ${ud(nB)} aangetoond.`)+`</ol>`+
-      kv([['Verschil gemiddelden',sig(a.m-b.m,4)],[eq?'Ter vergelijking: Welch':'Ter vergelijking: gepoold',eq?`t = ${fmt(tW,3)}, df = ${fmt(dfW,2)}, p = ${pfmt(pSide(tW,dfW))}`:`t = ${fmt(tP,3)}, df = ${dfP}, p = ${pfmt(pSide(tP,dfP))}`]]);
-    out.innerHTML=h; return;
-  }
-  if(T==='tp'){
-    if(A.length!==B.length||A.length<2){ out.innerHTML=note('bad',`Een gepaarde toets heeft evenveel waarden in A en B nodig (nu ${A.length} en ${B.length}).`); return; }
-    const d=A.map((v,i)=>v-B[i]), o=stDesc(d,alpha), t=o.m/o.sem, df=o.n-1, p=pSide(t,df), {tc,txt}=tCritTxt(df), rej=rejT(t,tc);
-    h=head('Gepaarde t-toets',`t = ${fmt(t,3)} <small>p = ${pfmt(p)}</small>`)+`<ol class="steps">`+H0('µ<sub>d</sub> = 0 (geen verschil per paar)',sideTxt('µ<sub>d</sub> ≠ 0','µ<sub>d</sub> &gt; 0 (A groter)','µ<sub>d</sub> &lt; 0 (A kleiner)'))+`<li><b>Verschillen</b> d = A − B: gemiddelde d̄ = ${sig(o.m,4)}, s<sub>d</sub> = ${sig(o.sd,4)}, n = ${o.n}</li><li><b>Toetsingsgrootheid.</b> t = d̄ / (s<sub>d</sub>/√n) = ${sig(o.m,4)} / (${sig(o.sd,4)}/√${o.n}) = <b>${fmt(t,3)}</b></li><li><b>Kritieke waarde</b> (tabel 4): t = ${txt}</li><li><b>p-waarde</b> = ${pfmt(p)}</li>`+decide(rej,`Er is een significant verschil tussen ${ud(nA)} en ${ud(nB)} binnen de paren.`,`Er is geen significant verschil binnen de paren aangetoond.`)+`</ol>`+kv([[`${fmt((1-alpha)*100,0)}%-BI van het verschil`,`${sig(o.ci[0],4)} – ${sig(o.ci[1],4)}`]]);
-    out.innerHTML=h; return;
-  }
-  if(T==='wil'){
-    const paired=B.length>0;
-    if(paired&&A.length!==B.length){ out.innerHTML=note('bad',`Gepaard: evenveel waarden in A en B nodig (nu ${A.length} en ${B.length}). Laat B leeg om tegen µ₀ te toetsen.`); return; }
-    const d0=paired?A.map((v,i)=>v-B[i]):A.map(v=>v-mu0), d=d0.filter(v=>v!==0), n=d.length;
-    if(n<5){ out.innerHTML=note('info','Te weinig verschillen ongelijk aan nul (minstens 5 nodig; tabel 11 begint bij n = 5).'); return; }
-    const {r,ties,tcorr}=rankAbs(d); let Wp=0,Wm=0; d.forEach((v,i)=>{ if(v>0) Wp+=r[i]; else Wm+=r[i]; });
-    const Tst=side==='2'?Math.min(Wp,Wm):side==='r'?Wm:Wp;
-    let p, method, crit=NaN;
-    if(!ties&&n<=50){ const cdf=wilcoxDist(n); const c=cdf[Math.floor(Tst+1e-9)]; p=side==='2'?Math.min(1,2*c):c; method='exact'; crit=wilcoxCrit(n,side==='2'?alpha/2:alpha); }
-    else { const m=n*(n+1)/4, s=Math.sqrt(n*(n+1)*(2*n+1)/24-tcorr/48), z=(Tst-m+0.5)/s; p=side==='2'?Math.min(1,2*ncdf(z)):ncdf(z); method='normale benadering (gelijke waarden)'; crit=wilcoxCrit(n,side==='2'?alpha/2:alpha); }
-    const rej=p<alpha;
-    h=head('Wilcoxon-rangtekentoets',`T = ${fmt(Tst,1)} <small>p = ${pfmt(p)}</small>`)+`<ol class="steps">`+H0(paired?'de mediaan van de verschillen A − B is 0':`de mediaan is ${sig(mu0,4)}`,sideTxt('mediaan ≠ 0','A groter (mediaan &gt; 0)','A kleiner (mediaan &lt; 0)'))+
-      `<li><b>Rangnummers</b> van |d| (${n} verschillen ≠ 0${d0.length-n?`, ${d0.length-n} nul weggelaten`:''}${ties?`, ${ties}× gelijke waarden → gemiddelde rang`:''}): W₊ = ${fmt(Wp,1)}, W₋ = ${fmt(Wm,1)}</li><li><b>Toetsingsgrootheid</b> T = ${side==='2'?'min(W₊, W₋)':side==='r'?'W₋':'W₊'} = <b>${fmt(Tst,1)}</b></li><li><b>Kritieke waarde</b> (tabel 11, ${side==='2'?'tweezijdig':'eenzijdig'}): ${crit>=0?crit:'niet beschikbaar (n te klein)'}; verwerp H₀ als T ≤ kritieke waarde</li><li><b>p-waarde</b> = ${pfmt(p)} (${method})</li>`+
-      decide(rej,'Er is een significant verschil.','Er is geen significant verschil aangetoond.')+`</ol>`;
-    out.innerHTML=h; return;
-  }
-  if(T==='anova'){
-    if(AG.length<2||AG.some(g=>g.v.length<2)){ out.innerHTML=note('info','Vul minstens twee groepen in met elk minstens twee waarden.'); return; }
-    const R=anovaCalc(AG,alpha), rej=R.F>R.Fc;
-    h=head('One-way ANOVA',`F = ${fmt(R.F,3)} <small>p = ${pfmt(R.p)}</small>`)+`<ol class="steps">`+H0('alle groepsgemiddelden zijn gelijk','minstens één gemiddelde wijkt af')+
-      `<li><b>Toetsingsgrootheid.</b> F = MS<sub>tussen</sub> / MS<sub>binnen</sub> = ${sig(R.MSB,4)} / ${sig(R.MSW,4)} = <b>${fmt(R.F,3)}</b> (df ${R.dfB}; ${R.dfW})</li><li><b>Kritieke waarde</b> (F-verdeling, eenzijdig): F = ${fmt(R.Fc,3)}</li><li><b>p-waarde</b> = ${pfmt(R.p)}</li>`+decide(rej,'Minstens één groep verschilt significant; zie de Tukey-vergelijkingen.','Er is geen significant verschil tussen de groepen aangetoond.')+`</ol>`+
-      `<div class="tbl-wrap"><table class="mini"><thead><tr><th>Bron</th><th class="num">SS</th><th class="num">df</th><th class="num">MS</th><th class="num">F</th><th class="num">p</th></tr></thead><tbody><tr><td>Tussen groepen</td><td class="num">${sig(R.SSB,5)}</td><td class="num">${R.dfB}</td><td class="num">${sig(R.MSB,5)}</td><td class="num">${fmt(R.F,3)}</td><td class="num">${pfmt(R.p)}</td></tr><tr><td>Binnen groepen</td><td class="num">${sig(R.SSW,5)}</td><td class="num">${R.dfW}</td><td class="num">${sig(R.MSW,5)}</td><td></td><td></td></tr><tr><td>Totaal</td><td class="num">${sig(R.SSB+R.SSW,5)}</td><td class="num">${R.N-1}</td><td></td><td></td><td></td></tr></tbody></table></div>`+
-      `<div class="lbl" style="margin-top:12px">Tukey-vergelijkingen (q<sub>krit</sub> = ${fmt(R.qc,3)})</div><div class="tbl-wrap"><table class="mini" id="st-tukey"><thead><tr><th>Vergelijking</th><th class="num">Verschil</th><th class="num">${fmt((1-alpha)*100,0)}%-BI</th><th class="num">p (Tukey)</th><th></th></tr></thead><tbody>${R.pairs.map(q=>`<tr><td>${esc(q.a)} − ${esc(q.b)}</td><td class="num">${sig(q.d,4)}</td><td class="num">${sig(q.lo,3)} – ${sig(q.hi,3)}</td><td class="num">${pfmt(q.p)}</td><td>${q.p<alpha?'<span class="chip bad">verschil</span>':'<span class="chip ok">geen</span>'}</td></tr>`).join('')}</tbody></table></div>`+
-      kv([['Effectgrootte η²',fmt(R.eta,3)]])+`<canvas id="stb-cv" style="margin-top:12px"></canvas><div class="pic-bar">${typeof picBar==='function'?picBar('stb'):''}</div>`;
-    if(D.some(([,o])=>isFinite(o.lD)&&o.lD>o.lC)) h+=note('warn','Niet alle groepen lijken normaal verdeeld (Lilliefors); ANOVA veronderstelt normaliteit en gelijke varianties.');
-    out.innerHTML=h; try{ stBars($('#stb-cv'),AG,R,alpha); }catch(e){} return;
-  }
-  if(T==='kw'){
-    if(AG.length<2||AG.some(g=>!g.v.length)){ out.innerHTML=note('info','Vul minstens twee groepen met waarden in.'); return; }
-    const R=kwCalc(AG,alpha), rej=R.p<alpha;
-    h=head('Kruskal-Wallis-toets',`H = ${fmt(R.H,3)} <small>p = ${pfmt(R.p)}</small>`)+`<ol class="steps">`+H0('alle groepen komen uit dezelfde verdeling (gelijke medianen)','minstens één groep wijkt af')+
-      `<li><b>Rangnummers</b> over alle ${R.N} waarnemingen samen${R.ties?` (gelijke waarden krijgen de gemiddelde rang; correctiefactor ${fmt(R.C,4)})`:''}; gemiddelde rang per groep: ${AG.map((g,i)=>`${esc(g.name)} ${fmt(R.mr[i],2)}`).join(', ')}</li>`+
-      `<li><b>Toetsingsgrootheid.</b> H = 12/(N(N+1)) · Σ Rᵢ²/nᵢ − 3(N+1)${R.ties?', gedeeld door de correctiefactor':''} = <b>${fmt(R.H,3)}</b>, df = ${R.k-1}</li><li><b>Kritieke waarde</b> (χ², tabel 7): ${fmt(R.Hc,3)}</li><li><b>p-waarde</b> = ${pfmt(R.p)} (χ²-benadering)</li>`+decide(rej,'Minstens één groep verschilt significant; zie de Dunn-vergelijkingen.','Er is geen significant verschil tussen de groepen aangetoond.')+`</ol>`+
-      `<div class="lbl" style="margin-top:12px">Dunn-vergelijkingen (Bonferroni-correctie, ${R.pairs.length} vergelijkingen)</div><div class="tbl-wrap"><table class="mini" id="st-dunn"><thead><tr><th>Vergelijking</th><th class="num">Verschil gem. rang</th><th class="num">z</th><th class="num">p</th><th class="num">p (Bonferroni)</th><th></th></tr></thead><tbody>${R.pairs.map(q=>`<tr><td>${esc(q.a)} − ${esc(q.b)}</td><td class="num">${fmt(q.d,2)}</td><td class="num">${fmt(q.z,3)}</td><td class="num">${pfmt(q.p)}</td><td class="num">${pfmt(q.padj)}</td><td>${q.padj<alpha?'<span class="chip bad">verschil</span>':'<span class="chip ok">geen</span>'}</td></tr>`).join('')}</tbody></table></div>`;
-    if(AG.some(g=>g.v.length<5)) h+=note('info','Bij groepen kleiner dan 5 is de χ²-benadering voor H minder nauwkeurig.');
-    out.innerHTML=h; return;
-  }
-  if(T==='power'){
-    const d=num($('#st-pd').value)/num($('#st-psd').value), pw=(num($('#st-pw').value)||80)/100, two=side==='2', ty=$('#st-ptype').value;
-    if(!(d>0)||!(pw>0&&pw<1)){ out.innerHTML=note('info','Vul een verschil, standaardafwijking en power (tussen 0 en 100%) in.'); return; }
-    let n=2; while(n<100000&&powerT(n,d,alpha,two,ty)<pw) n=n<50?n+1:Math.ceil(n*1.05);
-    if(n>50){ let lo=Math.floor(n/1.05)-1, hi=n; while(hi-lo>1){ const m=Math.floor((lo+hi)/2); if(powerT(m,d,alpha,two,ty)>=pw) hi=m; else lo=m; } n=hi; }
-    const curve=[]; for(let k=2;k<=Math.max(10,Math.ceil(n*2));k+=Math.max(1,Math.round(n/40))) curve.push([k,powerT(k,d,alpha,two,ty)*100]);
-    h=head(ty==='2'?'Benodigd aantal per groep':'Benodigd aantal paren / metingen',`n = ${n} <small>${ty==='2'?`(totaal ${2*n})`:''}</small>`)+kv([['Effectgrootte d = verschil / SD',fmt(d,3)],['Werkelijke power bij n = '+n,fmt(powerT(n,d,alpha,two,ty)*100,1)+' %'],['α, toetsing',`${fmt(alpha,2)}, ${two?'tweezijdig':'eenzijdig'}`]])+`<canvas id="st-pcv" style="margin-top:12px"></canvas>`+`<div class="formula">Power uit de niet-centrale t-verdeling met niet-centraliteit ${ty==='2'?'d·√(n/2)':'d·√n'} (zoals G*Power en statsmodels). Cohen: d = 0,2 klein, 0,5 middel, 0,8 groot.</div>`;
-    out.innerHTML=h; chart($('#st-pcv'),{xmin:2,xmax:curve[curve.length-1][0],ymin:0,ymax:100,xlabel:ty==='2'?'n per groep':'n',ylabel:'power (%)',series:[{pts:curve,name:'power',r:2.5},{fn:()=>pw*100,color:'--bad',dash:[5,4],name:'doel'}]}); return;
-  }
-  if(T==='reg'){
-    const n=Math.min(A.length,B.length); if(n<3){ out.innerHTML=note('info','Vul minstens drie x- en y-waarden in, in dezelfde volgorde.'); return; }
-    const X=A.slice(0,n), Y=B.slice(0,n), r=linreg(X,Y), mx=mean(X), sxx=X.reduce((s,x)=>s+(x-mx)**2,0), res=Y.map((y,i)=>y-(r.a+r.b*X[i])), syx=Math.sqrt(res.reduce((s,e)=>s+e*e,0)/(n-2));
-    const seb=syx/Math.sqrt(sxx), sea=syx*Math.sqrt(1/n+mx*mx/sxx), tb=r.b/seb, pb=2*(1-tcdf(Math.abs(tb),n-2)), tq=tinv(1-alpha/2,n-2);
-    h=head('Lineaire regressie',`y = ${sig(r.a,4)} ${r.b<0?'−':'+'} ${sig(Math.abs(r.b),4)}·x <small>R² = ${fmt(r.r2,4)}</small>`)+kv([['Helling b',`${sig(r.b,4)} ± ${sig(seb,3)} (SE)`],[`${fmt((1-alpha)*100,0)}%-BI helling`,`${sig(r.b-tq*seb,4)} – ${sig(r.b+tq*seb,4)}`],['Intercept a',`${sig(r.a,4)} ± ${sig(sea,3)} (SE)`],[`${fmt((1-alpha)*100,0)}%-BI intercept`,`${sig(r.a-tq*sea,4)} – ${sig(r.a+tq*sea,4)}`],['Reststandaardafwijking s<sub>y·x</sub>',sig(syx,4)],['Toets helling ≠ 0',`t = ${fmt(tb,3)}, df = ${n-2}, p = ${pfmt(pb)}`],['Correlatie r',fmt(Math.sign(r.b)*Math.sqrt(r.r2),4)]])+
-      `<canvas id="st-rcv" style="margin-top:12px"></canvas><div class="lbl" style="margin-top:8px">Residuen</div><canvas id="st-rescv"></canvas>`+(pb>=alpha?note('info','De helling is niet significant van 0 verschillend.'):'');
-    out.innerHTML=h; const x0=Math.min(...X), x1=Math.max(...X), pad=(x1-x0)*0.05, band=(x,k)=>r.a+r.b*x+k*tq*syx*Math.sqrt(1/n+(x-mx)**2/sxx), pband=(x,k)=>r.a+r.b*x+k*tq*syx*Math.sqrt(1+1/n+(x-mx)**2/sxx);
-    const ys=[...Y,pband(x0-pad,-1),pband(x1+pad,1),pband(x0-pad,1),pband(x1+pad,-1)];
-    chart($('#st-rcv'),{xmin:x0-pad,xmax:x1+pad,ymin:Math.min(...ys),ymax:Math.max(...ys),xlabel:$('#st-na').value||'x',ylabel:$('#st-nb').value||'y',series:[{fn:x=>r.a+r.b*x,name:'regressielijn'},{fn:x=>band(x,1),color:'--accent',dash:[3,3],name:'BI boven'},{fn:x=>band(x,-1),color:'--accent',dash:[3,3],name:'BI onder'},{fn:x=>pband(x,1),color:'--muted',dash:[6,4],name:'PI boven'},{fn:x=>pband(x,-1),color:'--muted',dash:[6,4],name:'PI onder'},{pts:X.map((x,i)=>[x,Y[i]]),color:'--ink',name:'meting'}],legend:[['regressielijn','--accent'],[`${fmt((1-alpha)*100,0)}%-BI (gemiddelde)`,'--accent'],['voorspellingsinterval','--muted']]});
-    const rm=Math.max(...res.map(Math.abs))*1.2||1; chart($('#st-rescv'),{xmin:x0-pad,xmax:x1+pad,ymin:-rm,ymax:rm,h:200,xlabel:'x',ylabel:'residu',series:[{pts:X.map((x,i)=>[x,res[i]]),color:'--ink',name:'residu'},{fn:()=>0,color:'--muted',name:'nul'}]});
-    return;
-  }
-  if(T==='anova2'){
-    const fa=$('#st-fa').value||'A', fb=$('#st-fb').value||'B';
-    const cells=$('#st-two').value.split('\n').map(l=>{ const m=l.match(/^([^:]+):(.*)$/); if(!m) return null; const parts=m[1].split('/').map(x=>x.trim()); if(parts.length!==2) return null; return {a:parts[0],b:parts[1],v:stNums(m[2])}; }).filter(c=>c&&c.v.length);
-    if(cells.length<4){ out.innerHTML=note('info','Vul minstens 2 × 2 combinaties in, zoals "LB / 37 °C: 1,2 1,3 1,1".'); return; }
-    const R=anova2(cells); if(R.err){ out.innerHTML=note('bad',R.err); return; }
-    const row=(nm,o)=>`<tr><td>${nm}</td><td class="num">${sig(o.ss,5)}</td><td class="num">${o.df}</td><td class="num">${sig(o.ms,5)}</td><td class="num">${o.F!=null?fmt(o.F,3):''}</td><td class="num">${o.p!=null?pfmt(o.p):''}</td><td>${o.p!=null?(o.p<alpha?'<span class="chip bad">significant</span>':'<span class="chip ok">niet sign.</span>'):''}</td></tr>`;
-    h=head('Tweeweg-ANOVA',`${R.A.length} × ${R.B.length} <small>n = ${R.n} per combinatie</small>`)+`<div class="tbl-wrap"><table class="mini" id="st-a2"><thead><tr><th>Bron</th><th class="num">SS</th><th class="num">df</th><th class="num">MS</th><th class="num">F</th><th class="num">p</th><th></th></tr></thead><tbody>${row(esc(fa),R.a)+row(esc(fb),R.b)+row('Interactie '+esc(fa)+' × '+esc(fb),R.ab)+row('Rest (binnen)',R.e)}</tbody></table></div>`+
-      `<div class="lbl" style="margin-top:12px">Celgemiddelden</div><div class="tbl-wrap"><table class="mini"><thead><tr><th>${esc(fa)} \\ ${esc(fb)}</th>${R.B.map(b=>`<th class="num">${esc(b)}</th>`).join('')}</tr></thead><tbody>${R.A.map((a,i)=>`<tr><td>${esc(a)}</td>${R.cm[i].map(v=>`<td class="num">${sig(v,4)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`+
-      (R.ab.p<alpha?note('warn','De interactie is significant: het effect van de ene factor hangt af van de andere. Interpreteer de hoofdeffecten voorzichtig.'):'')+`<div class="formula">F = MS<sub>effect</sub> / MS<sub>rest</sub>; kritieke F (α = ${fmt(alpha,2)}): ${fmt(finv(1-alpha,R.a.df,R.e.df),3)} voor ${esc(fa)}, ${fmt(finv(1-alpha,R.b.df,R.e.df),3)} voor ${esc(fb)}, ${fmt(finv(1-alpha,R.ab.df,R.e.df),3)} voor de interactie</div>`;
-    out.innerHTML=h; return;
-  }
-  if(T==='chi'){
-    const lines=$('#st-obs').value.split('\n').map(stNums).filter(r=>r.length);
-    if(!lines.length){ out.innerHTML=note('info','Vul waargenomen aantallen in.'); return; }
-    let chi=0, df, E, O, rows=[], warn=false, yates=NaN;
-    if(lines.length===1){
-      O=lines[0]; const k=O.length, tot=O.reduce((a,b)=>a+b,0); let ex=stNums($('#st-exp').value); if(!ex.length) ex=O.map(()=>1);
-      if(ex.length!==k){ out.innerHTML=note('bad',`Aantal verwachte waarden (${ex.length}) is niet gelijk aan het aantal categorieën (${k}).`); return; }
-      const es=ex.reduce((a,b)=>a+b,0); E=ex.map(v=>v/es*tot); df=k-1;
-      O.forEach((o,i)=>{ const c=(o-E[i])**2/E[i]; chi+=c; if(E[i]<5) warn=true; rows.push([`Categorie ${i+1}`,o,E[i],c]); });
-    } else {
-      const c=Math.max(...lines.map(r=>r.length)); if(lines.some(r=>r.length!==c)){ out.innerHTML=note('bad','Alle rijen van de kruistabel moeten evenveel kolommen hebben.'); return; }
-      const R=lines.map(r=>r.reduce((a,b)=>a+b,0)), C=[...Array(c).keys()].map(j=>lines.reduce((a,r)=>a+r[j],0)), N=R.reduce((a,b)=>a+b,0);
-      df=(lines.length-1)*(c-1); yates=0;
-      lines.forEach((r,i)=>r.forEach((o,j)=>{ const e=R[i]*C[j]/N, x=(o-e)**2/e; chi+=x; yates+=(Math.max(0,Math.abs(o-e)-0.5))**2/e; if(e<5) warn=true; rows.push([`Rij ${i+1}, kolom ${j+1}`,o,e,x]); }));
-    }
-    const p=1-chicdf(chi,df), cc=chiinv(1-alpha,df), rej=chi>cc;
-    h=head('χ²-toets',`χ² = ${fmt(chi,3)} <small>p = ${pfmt(p)}</small>`)+`<ol class="steps">`+H0(lines.length===1?'de waargenomen verdeling volgt de verwachte verhouding':'rij- en kolomvariabele zijn onafhankelijk',lines.length===1?'de verdeling wijkt af':'er is samenhang')+
-      `<li><b>Toetsingsgrootheid.</b> χ² = Σ (O − E)² / E = <b>${fmt(chi,3)}</b>, df = ${df}</li><li><b>Kritieke waarde</b> (tabel 7): χ² = ${fmt(cc,3)}</li><li><b>p-waarde</b> = ${pfmt(p)}</li>`+decide(rej,lines.length===1?'De waarnemingen wijken significant af van de verwachte verhouding.':'Er is een significante samenhang.',lines.length===1?'De waarnemingen passen bij de verwachte verhouding.':'Er is geen significante samenhang aangetoond.')+`</ol>`+
-      `<div class="tbl-wrap"><table class="mini"><thead><tr><th>Cel</th><th class="num">Waargenomen O</th><th class="num">Verwacht E</th><th class="num">(O − E)²/E</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td class="num">${fmt(r[1],2)}</td><td class="num">${fmt(r[2],2)}</td><td class="num">${fmt(r[3],3)}</td></tr>`).join('')}</tbody></table></div>`;
-    if(warn) h+=note('warn','Eén of meer verwachte aantallen zijn kleiner dan 5; de χ²-benadering is dan onbetrouwbaar. Voeg categorieën samen of gebruik een exacte toets.');
-    if(lines.length===2&&lines[0].length===2) h+=note('info',`2×2-tabel met Yates-correctie: χ² = ${fmt(yates,3)}, p = ${pfmt(1-chicdf(yates,1))}.`);
-    out.innerHTML=h; return;
-  }
-};
+/* De velden, de tabel per groep en de uitkomst van alle elf toetsen staan in
+   src/tools/Stat.vue (S248 en S249). Het rekenwerk hierboven en hieronder blijft onveranderd,
+   want daar hangen de validatiegevallen aan.
+
+   calc.stat() blijft bestaan omdat de rest van de app het aanroept na het delen van een link,
+   ongedaan maken en bij het openen; de component rekent zelf opnieuw en tekent opnieuw. */
 
 /* ================= ANOVA + TUKEY ================= */
 function erfcF(x){ const z=Math.abs(x), t=1/(1+0.5*z); const r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277))))))))); return x>=0?r:2-r; }
@@ -5435,15 +5184,11 @@ const gpBands = () => (typeof LADDERS !== 'undefined' && LADDERS[$('#gp-lad').va
 function gpMig(size, lo, hi) { if (!(size > 0) || !(hi > lo)) return NaN;
   const f = (Math.log10(hi) - Math.log10(size)) / (Math.log10(hi) - Math.log10(lo));
   return 0.1 + 0.78 * Math.max(0, Math.min(1, f)); }
-function gpLadFill() { const sel = $('#gp-lad'), cur = sel.value, L = GPLAD[gpMode()];
-  sel.innerHTML = L.map(([k, n]) => `<option value="${k}">${n}</option>`).join('');
-  sel.value = L.some(([k]) => k === cur) ? cur : L[0][0]; }
 const gpTray = () => GPTRAY[$('#gp-tray').value] || GPTRAY['7x10'];
 const gpTeeth = () => Math.max(1, Math.min(30, Math.round(num($('#gp-comb').value) || 10)));
-const gpT = ET('gp-tbl', [{h: 'Monster', t: 'txt', w: 150}, {h: 'Monster (µL)', t: 'num', w: 72},
-  {h: 'Verwachte banden', t: 'txt', w: 120}, {h: 'Kleur', t: 'col', d: '#1558b0'}],
-  [['Ladder', '5', '', '#c2410c'], ['Monster 1', '10', '500', '#1558b0'],
-    ['Monster 2', '10', '1500 700', '#1558b0'], ['Negatieve controle', '10', '', '#5f6b7a']], 'gplan');
+/* De laantabel is sinds S255 een <lk-etable> in src/tools/Gelplan.vue; de kolommen en de
+   beginrijen staan daar. etGet('gp-tbl') leest hem gewoon uit, want de component rendert
+   dezelfde invoervelden in dezelfde volgorde. */
 const gpLadLane = () => Math.max(0, Math.min(30, Math.round(num($('#gp-ladlane').value) || 0)));
 /* slotvolume uit de maten van kam en gel; 1 mm3 = 1 uL en een slotje wordt tot 80% gevuld */
 const GPFILL = 0.8, GPFLOOR = 1;
@@ -5466,9 +5211,12 @@ function gpFronts(pct) { if (!(pct > 0)) return null;
     return [ip(a[1], b[1]), ip(a[2], b[2])]; }
   return null; }
 
-calc.gplan = function () {
+/* De gel van bovenaf. De component roept dit na elke render aan; een virtuele DOM heeft op
+   een <canvas> geen nut, en tekst op een canvas loopt al door trCanvas(). De invoer wordt uit
+   de velden gelezen, net als eerst: de component houdt met v-model dezelfde id's bij. */
+function gpDrawTop() {
   const rows = etGet('gp-tbl'), teeth = gpTeeth(), [tw, tl] = gpTray();
-  const title = $('#gp-title').value.trim(), dye = $('#gp-dye').value.trim(), out = $('#gp-out');
+  const title = $('#gp-title').value.trim(), dye = $('#gp-dye').value.trim();
   const lanes = rows.slice(0, teeth);
 
   /* De breedte volgt het aantal slotjes; de lengte volgt de verhouding van de drager, maar
@@ -5546,24 +5294,7 @@ calc.gplan = function () {
       x.fillText(dye ? `Volume per slotje is inclusief ${uv(dye)}.` : 'Volume per slotje is inclusief de laadbuffer.', 20, H - 14); }
   });
 
-  const used = lanes.filter(r => String(r[0] || '').trim());
-  const vols = used.map(r => num(r[1])).filter(v => isFinite(v) && v > 0);
-  const bb = gpBands(), cap = gpWell();
-  const tot = vols.map(v => v + gpDye(v)), dyeTot = vols.reduce((a, v) => a + gpDye(v), 0);
-  out.innerHTML = kv([['Gebruikte slotjes', `${used.length} van ${teeth}`],
-    ['Grootste laadvolume per slotje', tot.length ? NL(Math.max(...tot), 1) + ' µL' : '–'],
-    ['Totaal te laden', tot.length ? NL(tot.reduce((a, b) => a + b, 0), 1) + ' µL' : '–'],
-    ['Laadbuffer in totaal', dyeTot ? NL(dyeTot, 1) + ' µL' : '–'],
-    ['Slotvolume (tot 80% vullen)', cap ? `${NL(cap.max, 1)} µL van ${NL(cap.geom, 1)} µL` : '–'],
-    ['Ladder', bb.length ? `${bb.length} banden, ${NL(bb[bb.length - 1], 0)}\u2013${NL(bb[0], 0)} ${gpUnit()}` : '\u2013']]);
-  if (cap) { const over = tot.filter(v => v > cap.max).length;
-    if (over) out.insertAdjacentHTML('beforeend', note('bad', `${over} laan(en) laden meer dan de ${NL(cap.max, 1)} µL die in een slotje past; het monster loopt dan over in de buurlaan.`)); }
-  else out.insertAdjacentHTML('beforeend', note('warn', 'Vul de maten van de kam en de gel in om het slotvolume te berekenen.'));
-  gpPredict();
-  gpCast();
-  gpRun();
-  if (rows.length > teeth) out.insertAdjacentHTML('beforeend', note('warn', `Er staan ${rows.length} lanen in de tabel maar de kam heeft ${teeth} tanden; de laatste lanen worden niet getekend.`));
-};
+}
 
 /* ---------- verwachte gel: de banden zoals ze na het lopen zouden moeten staan ----------
    De posities komen uit de ladder (log(grootte) lineair tegen de loopafstand), hetzelfde
@@ -5571,12 +5302,13 @@ calc.gplan = function () {
    bepaalt niet de positie maar levert wel de waarschuwing of het fragment binnen het
    scheidingsbereik van dat percentage valt. */
 const gpSizes = t => String(t || '').split(/[\s,;]+/).map(num).filter(v => isFinite(v) && v > 0);
-function gpPredict() {
+function gpDrawPredict() {
   const rows = etGet('gp-tbl'), teeth = gpTeeth(), lanes = rows.slice(0, teeth);
-  const bands = gpBands(), sds = gpMode() === 'sds', out = $('#gpp-out'), ladLane = gpLadLane();
+  const bands = gpBands(), sds = gpMode() === 'sds', ladLane = gpLadLane();
   const any = lanes.some(r => gpSizes(r[2]).length);
-  if (!bands.length || (!any && !ladLane)) { $('#gpp-cv').style.display = 'none'; out.innerHTML = note('info', 'Vul bij een laan de verwachte banden in om de verwachte gel te tekenen.'); return; }
-  $('#gpp-cv').style.display = '';
+  /* de component beslist met v-show of de tekening in beeld staat; hier alleen de vraag of er
+     iets te tekenen valt */
+  if (!bands.length || (!any && !ladLane)) return;
   const lo = bands[bands.length - 1], hi = bands[0];
   const GW = Math.max(360, Math.min(680, teeth * 46 + 120)), GH = 300, W = GW + 120;
   const maxLab = Math.max(6, ...lanes.map(r => String(r[0] || '').length));
@@ -5615,98 +5347,26 @@ function gpPredict() {
     x.fillStyle = PCOL.muted; x.font = '11px ' + PFONT(); x.textAlign = 'left';
     x.fillText(sds ? 'Verwacht beeld na Coomassie-kleuring; posities uit de ladder.' : 'Verwacht beeld onder UV; posities uit de ladder.', gx, gy + GH + 36);
   });
-  /* waarschuwingen: buiten de ladder of buiten het scheidingsbereik van het percentage */
-  const all = lanes.flatMap(r => gpSizes(r[2]));
-  const high = all.filter(v => v > hi), low = all.filter(v => v < lo), msg = [];
-  if (high.length) msg.push(note('warn', `${high.length} verwachte band(en) zijn groter dan de grootste ladderband; die positie is een schatting.`));
-  if (low.length) msg.push(note('warn', `${low.length} verwachte band(en) zijn kleiner dan de kleinste ladderband; die positie is een schatting.`));
-  if (!sds && typeof GELR !== 'undefined' && all.length) {
-    const pct = num($('#gp-pct').value), cur = GELR.find(g => Math.abs(g[0] - pct) < 1e-9);
-    if (cur) { const bad = all.filter(v => v < cur[1] || v > cur[2]);
-      if (bad.length) msg.push(note('warn', `Bij ${NL(pct, 1)}% agarose scheidt de gel ${NL(cur[1], 0)}–${NL(cur[2], 0)} bp; ${bad.length} verwachte band(en) vallen daarbuiten.`)); }
-  }
-  out.innerHTML = msg.join('') || kv([['Verwachte banden', all.length], ['Lanen met banden', lanes.filter(r => gpSizes(r[2]).length).length]]);
 }
-$('#gp-tray').addEventListener('change', () => calc.gplan());
 
-/* ---------- gel gieten: percentage-advies en een receptkaart voor de gekozen drager ---------- */
+/* ---------- gel gieten ----------
+   Het percentage-advies en de receptkaart staan in src/tools/Gelplan.vue; hier blijft de
+   kleuring staan: de naam en hoeveel er per mL gel in gaat. */
 const GPSTAIN = {g10k: ['GelRed / SYBR Safe (1× uit 10 000×)', v => v / 10 * 1], etbr: ['Ethidiumbromide (0,5 µg/mL)', v => v * 0.05], none: [null, null]};
-function gpCast() {
-  const box = $('#gp-cast'), sds = gpMode() === 'sds', [tw, tl] = gpTray();
-  const thick = num($('#gp-gelmm').value), pct = num($('#gp-pct').value);
-  const sizes = etGet('gp-tbl').slice(0, gpTeeth()).flatMap(r => gpSizes(r[2]));
-  if (sds) { box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Gel gieten</h3>' +
-      note('info', 'Een SDS-PAGE-gel giet je met acrylamide, niet met agarose; gebruik het protocol van je practicum voor het scheidings- en stapelgel.'); return; }
-
-  /* advies: welk percentage scheidt alle verwachte fragmenten */
-  let adv = '';
-  if (sizes.length && typeof GELR !== 'undefined') {
-    const lo = Math.min(...sizes), hi = Math.max(...sizes);
-    const fits = GELR.filter(g => lo >= g[1] && hi <= g[2]);
-    let best = null, bd = 1e9;
-    fits.forEach(g => { const mid = (Math.log10(g[1]) + Math.log10(g[2])) / 2, d = Math.abs((Math.log10(lo) + Math.log10(hi)) / 2 - mid); if (d < bd) { bd = d; best = g; } });
-    if (best) adv = note(Math.abs(best[0] - pct) < 1e-9 ? 'ok' : 'info',
-      `Voor ${NL(lo, 0)}–${NL(hi, 0)} bp is ${NL(best[0], 1)}% agarose de beste keus (scheidt ${NL(best[1], 0)}–${NL(best[2], 0)} bp).` +
-      (Math.abs(best[0] - pct) < 1e-9 ? '' : ` <button type="button" class="ghost" data-gp-pct="${best[0]}">Overnemen</button>`));
-    else adv = note('warn', `Geen enkel percentage scheidt ${NL(lo, 0)} tot ${NL(hi, 0)} bp in één gel; overweeg twee gels of een ander bereik.`);
-  }
-
-  /* receptkaart */
-  const V = (thick > 0) ? tw * tl * (thick / 10) : NaN;      /* cm × cm × cm = mL */
-  const g = isFinite(V) ? pct / 100 * V : NaN;
-  const stock = num($('#gp-buf').value), bufName = $('#gp-buf').selectedOptions[0].text;
-  const st = isFinite(V) ? V / stock : NaN;
-  const [stName, stFn] = GPSTAIN[$('#gp-stain').value] || GPSTAIN.none;
-  const rows = [['Gelvolume', isFinite(V) ? `${NL(V, 0)} mL` : '–'],
-    ['Agarose afwegen', isFinite(g) ? mass(g) : '–'],
-    ['Loopbuffer voor de gel', isFinite(st) ? `${ud(bufName)} ${vol(st * 1000)}` : '–'],
-    ['+ water', isFinite(V) ? vol((V - st) * 1000) : '–']];
-  if (stName && isFinite(V)) rows.push([stName, vol(stFn(V))]);
-  box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Gel gieten</h3>' + adv + kv(rows) +
-    (thick > 0
-      ? `<p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Drager ${NL(tw, 0)} × ${NL(tl, 0)} cm bij een geldikte van ${NL(thick, 1)} mm. Smelten in de magnetron, laten afkoelen tot ongeveer 60 °C en pas daarna de kleuring toevoegen en gieten.</p>`
-      : note('warn', 'Vul een geldikte groter dan nul in om het gelvolume te berekenen.'));
-}
 document.addEventListener('click', e => { const b = e.target.closest('[data-gp-pct]'); if (!b) return;
   $('#gp-pct').value = NL(num(b.dataset.gpPct), 1); $('#gp-pct').dispatchEvent(new Event('input', {bubbles: true})); });
-['gp-pct', 'gp-dyex', 'gp-tooth', 'gp-thick', 'gp-gelmm'].forEach(id => $('#' + id).addEventListener('input', () => calc.gplan()));
 
-/* ---------- looptijd: hoe lang tot het blauwe front op de gewenste plek staat ----------
+/* ---------- looptijd ----------
    De snelheid van bromofenolblauw is evenredig met de veldsterkte en loopt terug bij een
    hoger percentage agarose. De ijking (10 V/cm, 1%: 6 cm in 35 min) komt uit een gangbare
-   minigel; de uitkomst is dus een schatting met een ruime marge, geen meetwaarde. */
+   minigel; de uitkomst is dus een schatting met een ruime marge, geen meetwaarde. De tekst
+   eromheen staat in src/tools/Gelplan.vue. */
 const GPV0 = 6 / 35 / 10;   /* cm per minuut per V/cm bij 1% agarose */
 const gpSpeed = (E, pct) => (E > 0 && pct > 0) ? GPV0 * E / Math.sqrt(pct) : NaN;
 const gpMin = m => !isFinite(m) ? '–' : m >= 60 ? `${Math.floor(m / 60)} u ${Math.round(m % 60)} min` : `${Math.round(m)} min`;
-function gpRun() {
-  const box = $('#gp-run'), sds = gpMode() === 'sds';
-  const V = num($('#gp-volt').value), d = num($('#gp-elec').value), pct = num($('#gp-pct').value);
-  const [, tl] = gpTray(), target = tl * 0.6;                /* tot ongeveer 60% van de gel */
-  if (sds) { box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' +
-      note('info', 'Voor SDS-PAGE hangt de looptijd af van het geltype en het buffersysteem; volg het protocol van je practicum.'); return; }
-  if (!(V > 0) || !(d > 0)) { box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' +
-      note('warn', 'Vul de spanning en de afstand tussen de elektroden in voor een schatting van de looptijd.'); return; }
-  const E = V / d, v = gpSpeed(E, pct), t = v > 0 ? target / v : NaN;
-  const rows = [['Veldsterkte', `${NL(Number(E.toFixed(2)), 2)} V/cm`],
-    ['Snelheid van het blauwe front', isFinite(v) ? `${NL(Number(v.toFixed(2)), 2)} cm/min` : '–'],
-    ['Looptijd tot ' + NL(Number(target.toFixed(1)), 1) + ' cm', isFinite(t) ? `${gpMin(t * 0.75)} – ${gpMin(t * 1.3)}` : '–']];
-  let msg = '';
-  if (E > 10) msg += note('warn', `${NL(Number(E.toFixed(1)), 1)} V/cm is hoog; boven 10 V/cm warmt de gel op en lopen de banden scheef.`);
-  else if (E < 3) msg += note('warn', `${NL(Number(E.toFixed(1)), 1)} V/cm is laag; onder 3 V/cm diffunderen kleine fragmenten uit en wordt de band vaag.`);
-  /* loopt het kleinste fragment van de gel af voordat het front er is? */
-  const sizes = etGet('gp-tbl').slice(0, gpTeeth()).flatMap(r => gpSizes(r[2])), fr = gpFronts(pct);
-  if (sizes.length && fr) { const sm = Math.min(...sizes);
-    if (sm < fr[0]) msg += note('warn', `Het kleinste fragment van ${NL(sm, 0)} bp loopt vóór het blauwe front uit; stop eerder of kies een hoger percentage agarose.`);
-  }
-  box.innerHTML = '<h3 style="margin:0 0 6px;font-size:14px">Looptijd</h3>' + kv(rows) + msg +
-    `<p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Stop wanneer het blauwe front ongeveer ${NL(Number(target.toFixed(1)), 1)} cm van de slotjes staat, dus ruim vóór de rand van de gel. De tijd is een schatting; kijk naar het front, niet naar de klok.</p>`;
-}
-['gp-buf', 'gp-stain'].forEach(id => $('#' + id).addEventListener('change', () => calc.gplan()));
-['gp-volt', 'gp-elec'].forEach(id => $('#' + id).addEventListener('input', () => calc.gplan()));
-$('#gp-ladlane').addEventListener('input', () => calc.gplan());
-$('#gp-type').addEventListener('change', () => { gpLadFill(); calc.gplan(); });
-$('#gp-lad').addEventListener('change', () => calc.gplan());
-gpLadFill();
+/* De velden en de uitkomstenlijst staan in src/tools/Gelplan.vue; calc.gplan() daar laat de
+   component opnieuw tekenen. Een verandering in een veld komt via v-model binnen, dus de
+   koppelingen die hier stonden zijn niet meer nodig. */
 /* /NT:gplan */
 /* NT:osmo */
 /* ================= OSMOLARITEIT & IONSTERKTE =================
@@ -6461,16 +6121,24 @@ const xpOn=id=>!!jget(XKEY,{})[id];
 const xpDefault=el=>el.type==='checkbox'?el.defaultChecked:el.tagName==='SELECT'?(([...el.options].find(o=>o.defaultSelected)||el.options[0]||{}).value):el.defaultValue;
 const xpChanged=box=>[...box.querySelectorAll('input,select,textarea')].some(el=>el.type==='checkbox'?el.checked!==el.defaultChecked:String(el.value)!==String(xpDefault(el)));
 function xpApply(id){ const sec=$('#t-'+id); if(!sec) return; const on=xpOn(id);
-  sec.querySelectorAll('[data-expert]').forEach(box=>{ box.hidden=!on&&!xpChanged(box); });
-  const t=on?'Minder instellingen':'Meer instellingen';
+  /* xpApply() loopt sinds S255 ook na een render (zie xpInit), dus een veld dat van zijn
+     standaard afwijkt komt nu meteen tevoorschijn in plaats van pas bij het opstarten. Een
+     veld waarin iemand staat te typen blijft staan, ook als het weer op de standaard komt. */
+  sec.querySelectorAll('[data-expert]').forEach(box=>{ box.hidden=!on&&!xpChanged(box)&&!box.contains(document.activeElement); });
+  /* de knop staat soms in een Vue-boom en wordt dan niet door de DOM-laag vertaald */
+  const t=trPlain(on?'Minder instellingen':'Meer instellingen');
   sec.querySelectorAll('[data-xp]').forEach(b=>{ b.setAttribute('aria-pressed',on?'true':'false');
     if(b.dataset.lkx!==t){ b.dataset.lkx=t; b.textContent=t; } }); }
 function xpToggle(id){ const all=jget(XKEY,{}); if(all[id]) delete all[id]; else all[id]=1; jset(XKEY,all); xpApply(id); }
-$$('section.tool[data-tool]').forEach(sec=>{ const ex=[...sec.querySelectorAll('[data-expert]')]; if(!ex.length) return;
+/* Een Vue-tool rendert zijn velden pas na de eerste render, dus dit loopt daarna nog een keer:
+   een host die zijn knop al heeft wordt overgeslagen. */
+function xpInit(){ $$('section.tool[data-tool]').forEach(sec=>{ const ex=[...sec.querySelectorAll('[data-expert]')]; if(!ex.length) return;
   const id=sec.dataset.tool, hosts=[];
   ex.forEach(e=>{ const h=e.closest('.fields')||e; if(!hosts.includes(h)) hosts.push(h); });
-  hosts.forEach(h=>h.insertAdjacentHTML('afterend',`<div class="lk-xp-row"><button type="button" class="lk-xp" data-xp="${id}" aria-pressed="false" title="Toon of verberg de geavanceerde instellingen van deze tool">Meer instellingen</button></div>`));
-  xpApply(id); });
+  hosts.forEach(h=>{ const n=h.nextElementSibling; if(n&&n.classList.contains('lk-xp-row')) return;
+    h.insertAdjacentHTML('afterend',`<div class="lk-xp-row"><button type="button" class="lk-xp" data-xp="${id}" aria-pressed="false" title="${esc(trPlain('Toon of verberg de geavanceerde instellingen van deze tool'))}">${trPlain('Meer instellingen')}</button></div>`); });
+  xpApply(id); }); }
+xpInit(); lkMainWatch(xpInit,120);
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-xp]'); if(b) xpToggle(b.dataset.xp); });
 window.addEventListener('hashchange',()=>setTimeout(()=>xpApply(current),0));
 
@@ -6577,9 +6245,9 @@ smpUse('plaat',names=>{ if(typeof wPld==='undefined'||!wPld||!names.length) retu
   Object.keys(bl).forEach(k=>{ const n=names[bl[k]]; if(n) st.vals[k]=n; else delete st.vals[k]; });
   wPld.set(st); });
 /* Gelplanner: één laan per naam, met de volumes en kleur van de eerste laan */
-smpUse('gplan',names=>{ if(typeof gpT==='undefined'||!gpT||!names.length) return;
+smpUse('gplan',names=>{ const T=TBLDEF['gp-tbl']; if(!T||!T.set||!names.length) return;
   const old=etGet('gp-tbl'), base=old[0]||['','10','','#1558b0'];
-  gpT.set(names.map((n,i)=>{ const r=(old[i]||base).slice(); r[0]=n; return r; })); });
+  T.set(names.map((n,i)=>{ const r=(old[i]||base).slice(); r[0]=n; return r; })); });
 /* qPCR-plaatindeling: het komma-gescheiden veld met monsters */
 smpUse('qplate',names=>{ const el=$('#qp2-s'); if(!el||!names.length) return;
   el.value=names.join(', '); el.__typed=true;

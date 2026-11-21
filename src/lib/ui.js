@@ -11,7 +11,7 @@ import {h, onMounted, onUnmounted, watch} from 'vue';
      <lk-note kind="warn">tekst</lk-note>        een melding (info, warn, bad, ok)
      <lk-kv :rows="[[label, waarde], …]">        de definitielijst met uitkomsten
      <lk-field label="…" for="x-id" unit="µL">   een veld met label en eenheid
-     <lk-table :cols="…" :rows="…">              een tabel met koppen en getalkolommen
+     <lk-table :cols="…" :rows="…" table-id>     een tabel met koppen en getalkolommen
      <lk-etable table-id="os-tbl" v-model:rows>   een bewerkbare tabel (in plaats van ET())
      <lk-big :value="…" sub="per reactie">       het grote getal bovenaan een uitkomst
 
@@ -94,9 +94,12 @@ LKUI.field = {
 /* een tabel. cols is [{h:'kop', num:true}, …] en rows is [[cel, …], …] of
    {cells:[…], cls:'hl'}. Een cel mag HTML zijn. */
 LKUI.table = {
-  props: {cols: {type: Array, default: () => []}, rows: {type: Array, default: () => []}, wrap: {type: Boolean, default: true}},
+  props: {cols: {type: Array, default: () => []}, rows: {type: Array, default: () => []},
+    wrap: {type: Boolean, default: true},
+    /* de id van de tabel zelf; tests/validate.py zoekt een tabel soms op id op (#st-tukey) */
+    tableId: String},
   setup(props) {
-    const table = () => h('table', {class: 'mini'}, [
+    const table = () => h('table', {class: 'mini', id: props.tableId}, [
       h('thead', null, h('tr', null, props.cols.map(c =>
         h('th', {class: c.num ? 'num' : null, innerHTML: String(c.h == null ? '' : c.h)})))),
       h('tbody', null, props.rows.filter(Boolean).map(r => {
