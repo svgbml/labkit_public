@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-21 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 308 van 308 controles binnen tolerantie.**
+**Resultaat: 317 van 317 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -12,6 +12,12 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Oplossing & buffer | PBS 1X, 1 L | KCl (g) | 0,2 | 0,2013 | +0.64% | ✅ | Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄) |
 | Oplossing & buffer | PBS 1X, 1 L | Na₂HPO₄ (g) | 1,44 | 1,42 | -1.39% | ✅ | Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄) |
 | Oplossing & buffer | PBS 1X, 1 L | KH₂PO₄ (g) | 0,24 | 0,245 | +2.07% | ✅ | Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄) |
+| Rapport / protocol | Materiaallijst van PBS 1X, 1 L | NaCl (g) | 8 | 8,006 | +0.08% | ✅ | Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄): de materiaallijst neemt de massa uit Oplossing & buffer over |
+| Rapport / protocol | Materiaallijst van PBS 1X, 1 L | KCl (g) | 0,2 | 0,2013 | +0.64% | ✅ | Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄): de materiaallijst neemt de massa uit Oplossing & buffer over |
+| Rapport / protocol | Materiaallijst van PBS 1X, 1 L | Na₂HPO₄ (g) | 1,44 | 1,42 | -1.39% | ✅ | Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄): de materiaallijst neemt de massa uit Oplossing & buffer over |
+| Rapport / protocol | Materiaallijst van PBS 1X, 1 L | KH₂PO₄ (g) | 0,24 | 0,245 | +2.07% | ✅ | Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄): de materiaallijst neemt de massa uit Oplossing & buffer over |
+| Rapport / protocol | Materiaallijst van PBS 1X, 1 L | qrSvg geeft svg | 1 | 1 | +0.00% | ✅ | Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄): de materiaallijst neemt de massa uit Oplossing & buffer over |
+| Rapport / protocol | Materiaallijst van PBS 1X, 1 L | protocol bevat lijst en QR | 1 | 1 | +0.00% | ✅ | Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄): de materiaallijst neemt de massa uit Oplossing & buffer over |
 | Oplossing & buffer | TBE 10X, 1 L | Tris (g) | 108 | 107,8 | -0.17% | ✅ | Bio-Rad Bulletin 6205 (108 g Tris, 55 g boorzuur per liter) |
 | Oplossing & buffer | TBE 10X, 1 L | boorzuur (g) | 55 | 55,03 | +0.05% | ✅ | Bio-Rad Bulletin 6205 (108 g Tris, 55 g boorzuur per liter) |
 | Oplossing & buffer | TAE 50X, 1 L | Tris (g) | 242,3 | 242,3 | +0.00% | ✅ | Sambrook & Russell, Molecular Cloning (3e druk), Appendix 1: 242 g Tris-base en 18,6 g EDTA-Na₂·2H₂O (= 50 mM) per liter 50x TAE |
@@ -54,9 +60,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,947 | +0.27% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7848 | +0.91% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5568 | +0.23% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9401 | -0.46% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7741 | -0.48% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,552 | -0.64% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -266,6 +272,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | QR-code (delen) | QR-code leesbaar | decodeert (300 tekens) | 1 | 1 | +0.00% | ✅ | QR-code volgens ISO/IEC 18004, gecontroleerd door de QR-decoder van OpenCV |
 | Verdunning | Eigen eenheid per concentratie | V₁ (µL) | 1,25 | 1,25 | +0.00% | ✅ | 50 mM naar 2,5 µM in 25 mL: V₁ = 2,5 × 10⁻⁶ × 25 mL / 0,050 = 1,25 µL; C₂ > C₁ geeft een foutmelding |
 | Verdunning | Eigen eenheid per concentratie | foutmelding bij C₂ > C₁ | 1 | 1 | +0.00% | ✅ | 50 mM naar 2,5 µM in 25 mL: V₁ = 2,5 × 10⁻⁶ × 25 mL / 0,050 = 1,25 µL; C₂ > C₁ geeft een foutmelding |
+| Verdunning | Antistofverdunning met overmaat | antistof (µL) | 22 | 22 | +0.00% | ✅ | Onafhankelijk berekend: 1:1000, 2 blots × 10 mL + 10% = 22 mL → 22 µL antistof en 21,978 mL buffer; met +1 reactie 3 × 10 mL → 30 µL |
+| Verdunning | Antistofverdunning met overmaat | buffer (mL) | 21,98 | 21,98 | +0.00% | ✅ | Onafhankelijk berekend: 1:1000, 2 blots × 10 mL + 10% = 22 mL → 22 µL antistof en 21,978 mL buffer; met +1 reactie 3 × 10 mL → 30 µL |
+| Verdunning | Antistofverdunning met overmaat | antistof met +1 reactie (µL) | 30 | 30 | +0.00% | ✅ | Onafhankelijk berekend: 1:1000, 2 blots × 10 mL + 10% = 22 mL → 22 µL antistof en 21,978 mL buffer; met +1 reactie 3 × 10 mL → 30 µL |
 | Telkamer | Komma als scheidingsteken | vakken | 4 | 4 | +0.00% | ✅ | "12,15,14,18" zijn vier vaktellingen: gemiddeld 14,75 per vak |
 | Telkamer | Komma als scheidingsteken | cellen/mL | 1,4750e+05 | 1,4800e+05 | +0.34% | ✅ | "12,15,14,18" zijn vier vaktellingen: gemiddeld 14,75 per vak |
 | Verdunningsreeks & KVE | ISO 7218 en ontelbare platen | KVE/mL | 1,9182e+05 | 1,9000e+05 | -0.95% | ✅ | NEN-EN-ISO 7218 §10.3.2: N = ΣC / (V × (n₁ + 0,1·n₂) × d) = 422 / (0,1 × 2,2 × 10⁻²) = 1,9 × 10⁵; ">300" telt als ontelbaar |
