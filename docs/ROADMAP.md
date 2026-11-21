@@ -544,11 +544,11 @@ gesplitst; loopt een stap toch uit, splits hem dan verder in plaats van hem half
 | S217 | — | *Antibiotica-gevoeligheid* naar Vue | ✅ `src/tools/Mic.vue`; `mi-tbl` en `mz-tbl` staan op `lk-etable`, hun vaste `TBLDEF`/`ADDBTN`-ingangen zijn weg. `micOf()` en de S/I/R-regels gaan ongewijzigd mee. Open (gedeeld, ook *Osmolariteit* en *Verdunningsreeks*): de UX-laag verbergt `data-expert`-velden voordat de Vue-bundel draait, dus in een Vue-tool staan die velden altijd open | Sonnet |
 | S218 | — | *Groeicurve* naar Vue | ✅ `src/tools/Groei.vue`; `gc-tbl` op `lk-etable` (nieuwe optie `numbered` voor de kolom #), de grafiek blijft `chart()` en `calc.groei()` tekent opnieuw. De twee validatiegevallen vullen de tabel nu met `__tbl()` in plaats van `gcRow()`; verwachte waarden ongewijzigd. `lk-etable` zet in het Engels voortaan een punt in een getal dat van buiten komt (een teruggezette tabel las 0,077 als 77) | Sonnet |
 | S219 | — | *Transfectie (Lipofectamine 3000)* naar Vue | ✅ `src/tools/Transfect.vue`; het rekenwerk, `TRF_SEED`/`TRF_MED` en de stappen gaan ongewijzigd mee, `tools/nt/81_transfect.js` is leeg op een opmerking na. Geen nieuwe vertaalsleutels nodig | Sonnet |
-| S220 | — | *Telkamer*, *Celpassageplanner* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S221 | — | *Desinfectietest (log-reductie)*, *Sterilisatie (D, z, F₀)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S222 | — | *Groeicurves vergelijken*, *Viabiliteit (trypaanblauw)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S223 | — | *Cellen uitzaaien*, *MPN (meest waarschijnlijk aantal)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
-| S224 | — | *Microscoop-kalibratie*, *Inoculum (OD verdunnen)*, *Teller* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S220 | ✅ | *Telkamer*, *Celpassageplanner* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S221 | ✅ | *Desinfectietest (log-reductie)*, *Sterilisatie (D, z, F₀)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S222 | ✅ | *Groeicurves vergelijken*, *Viabiliteit (trypaanblauw)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S223 | ✅ | *Cellen uitzaaien*, *MPN (meest waarschijnlijk aantal)* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
+| S224 | ✅ | *Microscoop-kalibratie*, *Inoculum (OD verdunnen)*, *Teller* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |
 | S225 | — | *Gelfoto-editor* naar Vue, deel 1: de velden en de uitkomsten; het beeldwerk op het canvas blijft | Zelfde uitkomsten; validatie blijft staan | Opus 5 |
 | S226 | — | *Gelfoto-editor* naar Vue, deel 2: de laanbewerking en de ladderlabels | Zelfde uitkomsten; validatie blijft staan | Opus 5 |
 | S227 | — | *PCR-cyclus* naar Vue | Zelfde uitkomsten; validatie blijft staan | Sonnet |

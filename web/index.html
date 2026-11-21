@@ -598,23 +598,9 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 <section class="tool" id="t-telkamer" data-tool="telkamer">
   <header class="tool-head"><h2>Telkamer</h2>
   <p>Celconcentratie en levensvatbaarheid uit een Bürker-, Neubauer- of Fuchs-Rosenthal-telling. Tel cellen op de boven- en linkerlijn wel mee, op de onder- en rechterlijn niet.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="k-ch">Telkamer</label><select id="k-ch" style="width:100%"><option value="0.1">Bürker / Bürker-Türk (0,1 mm diep)</option><option value="0.1n">Neubauer improved (0,1 mm diep)</option><option value="0.2">Fuchs-Rosenthal (0,2 mm diep)</option></select></div>
-        <div class="f"><label for="k-sq">Geteld vak</label><select id="k-sq" style="width:100%"></select></div>
-      </div>
-      <div class="f" style="margin-top:12px"><label for="k-live">Tellingen levende / alle cellen per vak <span class="example">voorbeeld</span></label><textarea id="k-live" rows="2">52 47 55 49</textarea></div>
-      <div class="f" style="margin-top:12px"><label for="k-dead">Dode cellen (blauw, trypaanblauw) per vak, optioneel</label><textarea id="k-dead" rows="2">4 6 3 5</textarea></div>
-      <div class="fields" style="margin-top:12px">
-        <div class="f"><label for="k-df">Verdunningsfactor</label><input id="k-df" inputmode="decimal" value="2"></div>
-        <div class="f" data-expert=""><label for="k-sv">Volume suspensie</label><div class="inu"><input id="k-sv" inputmode="decimal" value="10"><span class="u">mL</span></div></div>
-        <div class="f" data-expert=""><label for="k-need">Nodig: cellen</label><input id="k-need" inputmode="decimal" value="1e5"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Trypaanblauw 1:1 = factor 2. Tel per vak hele cellen; scheid de tellingen met een spatie, komma, puntkomma of enter.</p>
-    </div>
-    <div class="result" id="k-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Telkamer.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="k-app"></div>
   <p class="src">Vakmaten: Marienfeld, Counting grids (Bürker en Neubauer: diepte 0,1 mm, groot vak 1 mm² = 0,1 µL, groepsvak 0,04 mm² = 0,004 µL; Fuchs-Rosenthal: diepte 0,2 mm).</p>
 </section>
 
@@ -622,19 +608,7 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 <section class="tool" id="t-teller" data-tool="teller">
   <header class="tool-head"><h2>Teller</h2>
   <p>Turf met de toetsen 1–9 terwijl je door de microscoop kijkt. Backspace maakt de laatste tik ongedaan.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="row" style="justify-content:space-between;margin-bottom:12px">
-        <div class="row">
-          <div class="f"><label for="c-preset">Indeling</label><select id="c-preset"><option value="diff">Differentiële leukocytentelling</option><option value="ld">Levend / dood</option><option value="kol">Koloniemorfologie (3 typen)</option><option value="gram">Gramkleuring (4 typen)</option><option value="vrij">Vrij (1 categorie)</option></select></div>
-          <div class="f"><label for="c-target">Stop bij totaal</label><input id="c-target" inputmode="numeric" value="100" style="width:100px"></div>
-        </div>
-        <div class="row"><button type="button" id="c-undo">Ongedaan maken</button><button type="button" id="c-reset">Alles op 0</button><button type="button" id="c-addcat">+ Categorie</button></div>
-      </div>
-      <div class="row" style="gap:14px;margin-bottom:12px"><span class="big" id="c-total" style="margin:0">0</span><div style="flex:1;min-width:160px"><div class="progress"><i id="c-bar"></i></div></div><span id="c-state"></span></div>
-      <div class="cgrid" id="c-grid"></div>
-    </div>
-  </div>
+  <div id="c-app"></div>
 </section>
 
 <!-- ============ DNA ============ -->
@@ -1243,29 +1217,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-gcomp" data-tool="gcomp">
   <header class="tool-head"><h2>Groeicurves vergelijken</h2>
   <p>Meerdere stammen of condities tegelijk: fit van het gemodificeerde Gompertz-model met maximale groeisnelheid, lag-fase en verdubbelingstijd per curve.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="gm-tu">Tijdseenheid</label><select id="gm-tu" style="width:100%"><option value="h">uur</option><option value="min">minuten</option></select></div>
-        <div class="f"><label for="gm-type">Meetwaarde</label><select id="gm-type" style="width:100%"><option value="od">OD₆₀₀</option><option value="kve">KVE/mL</option></select></div>
-        <div class="f"><label for="gm-blank">Blanco (OD)</label><input id="gm-blank" inputmode="decimal" value="0"></div>
-      </div>
-      <div class="f" style="margin-top:12px"><label for="gm-data">Data: eerste kolom tijd, daarna één kolom per stam (eerste regel = namen) <span class="example">voorbeeld</span></label><textarea id="gm-data" rows="11" spellcheck="false">tijd	Wildtype	Mutant
-0	0,050	0,050
-1	0,052	0,051
-2	0,066	0,054
-3	0,121	0,062
-4	0,262	0,083
-5	0,522	0,135
-6	0,870	0,245
-7	1,180	0,430
-8	1,380	0,680
-9	1,480	0,930
-10	1,520	1,110</textarea></div>
-      <p style="font-size:13px;color:var(--muted);margin:8px 0 0">Plak direct uit Excel. De voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="gm-cv"></canvas><div id="gm-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Gcomp.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="gm-app"></div>
   <p class="src">Gemodificeerd Gompertz-model: y = A·exp(−exp(µ<sub>m</sub>·e/A·(λ − t) + 1)) met y = ln(N/N₀), µ<sub>m</sub> = maximale specifieke groeisnelheid, λ = lag-tijd en A = ln(N<sub>max</sub>/N₀) (Zwietering e.a., Appl. Environ. Microbiol. 56:1875–1881, 1990). Verdubbelingstijd t<sub>d</sub> = ln 2 / µ<sub>m</sub>.</p>
 </section>
 
@@ -1326,20 +1280,7 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-inoc" data-tool="inoc">
   <header class="tool-head"><h2>Inoculum (OD verdunnen)</h2>
   <p>Hoeveel cultuur en medium je nodig hebt om op een start-OD of een celdichtheid te beginnen, bijvoorbeeld voor een groeicurve, MIC-bepaling of transformatie.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="io-od">Gemeten OD₆₀₀ (cultuur)</label><input id="io-od" inputmode="decimal" value="1,6"></div>
-        <div class="f" data-expert=""><label for="io-df">Gemeten in verdunning</label><div class="inu"><span class="u" style="border-left:1px solid var(--line);border-radius:4px 0 0 4px;border-right:0">1 :</span><input id="io-df" inputmode="decimal" value="1" style="border-radius:0 4px 4px 0"></div></div>
-        <div class="f" data-expert=""><label for="io-bl">Blanco (medium)</label><input id="io-bl" inputmode="decimal" value="0,05"></div>
-        <div class="f"><label for="io-to">Gewenste start-OD</label><input id="io-to" inputmode="decimal" value="0,05"></div>
-        <div class="f"><label for="io-v">Eindvolume</label><div class="inu"><input id="io-v" inputmode="decimal" value="50"><span class="u">mL</span></div></div>
-        <div class="f" data-expert=""><label for="io-fac">Cellen/mL bij OD 1,0</label><input id="io-fac" inputmode="decimal" value="8e8"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Meet boven OD ≈ 1 in een verdunning (bijv. 1:10) voor een betrouwbare waarde.</p>
-    </div>
-    <div class="result" id="io-out"></div>
-  </div>
+  <div id="io-app"></div>
   <p class="src">OD<sub>cultuur</sub> = (gemeten − blanco) × verdunning; V<sub>cultuur</sub> = OD<sub>start</sub> × V<sub>eind</sub> / OD<sub>cultuur</sub> (C₁V₁ = C₂V₂). OD₆₀₀ is tot ongeveer 1,0 evenredig met het celaantal; ≈ 8 × 10⁸ E. coli-cellen/mL bij OD 1 is een vuistregel (Agilent, E. coli Cell Culture Concentration from OD600).</p>
 </section>
 
@@ -2628,15 +2569,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-mpn" data-tool="mpn">
   <header class="tool-head"><h2>MPN (meest waarschijnlijk aantal)</h2>
   <p>Het meest waarschijnlijke aantal organismen per mL of g uit een buisjesreeks met positieve en negatieve buizen, met een 95%-betrouwbaarheidsinterval. Werkt voor elke combinatie van verdunningen en aantallen buizen.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields"><div class="f"><label for="mp-u">Eenheid monster</label><select id="mp-u" style="width:100%"><option>g</option><option>mL</option></select></div></div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="mp-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="mp-tbl-add">+ Verdunning</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per verdunning de hoeveelheid oorspronkelijk monster per buis (bijv. 0,1 g, 0,01 g, 0,001 g), het aantal buizen en het aantal positieve buizen. Voorbeeld: 3-buizenreeks met uitslag 3-1-0.</p>
-    </div>
-    <div class="result" id="mp-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Mpn.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="mp-app"></div>
   <p class="src">MPN als maximum-likelihoodschatting: los λ op uit Σ p<sub>i</sub>·m<sub>i</sub>·e<sup>−λm<sub>i</sub></sup> / (1 − e<sup>−λm<sub>i</sub></sup>) = Σ (n<sub>i</sub> − p<sub>i</sub>)·m<sub>i</sub> (FDA Bacteriological Analytical Manual, Appendix 2: Most Probable Number from Serial Dilutions; Jarvis, Wilrich &amp; Wilrich, J Appl Microbiol 109:1660, 2010). 95%-interval via de standaardfout van ln λ uit de Fisher-informatie; de BAM-tabellen gebruiken een iets andere methode, dus de grenzen kunnen licht afwijken.</p>
 </section>
 <!-- /NT:mpn -->
@@ -2656,21 +2591,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-steril" data-tool="steril">
   <header class="tool-head"><h2>Sterilisatie (D, z, F₀)</h2>
   <p>D-waarde uit een overlevingscurve, z-waarde uit D-waarden bij verschillende temperaturen, en de letaliteit F₀ van een stoomsterilisatiecyclus uit een temperatuurlog.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="ste-t">Overlevingscurve: tijd (min)</label><input id="ste-t" class="txt" value="0 2 4 6 8 10"></div>
-        <div class="f" style="grid-column:1/-1"><label for="ste-n">Levende kiemen (KVE/mL)</label><input id="ste-n" class="txt" value="1e6 2,1e5 4,3e4 9,8e3 1,9e3 4,1e2"></div>
-        <div class="f" style="grid-column:1/-1"><label for="ste-zt">z-waarde: temperaturen (°C)</label><input id="ste-zt" class="txt" value="110 115 121"></div>
-        <div class="f" style="grid-column:1/-1"><label for="ste-zd">D-waarden (min)</label><input id="ste-zd" class="txt" value="19 6,1 1,5"></div>
-        <div class="f"><label for="ste-dt">Logging-interval</label><div class="inu"><input id="ste-dt" inputmode="decimal" value="1"><span class="u">min</span></div></div>
-        <div class="f"><label for="ste-z">z voor F₀</label><div class="inu"><input id="ste-z" inputmode="decimal" value="10"><span class="u">°C</span></div></div>
-        <div class="f" style="grid-column:1/-1"><label for="ste-log">Temperatuurlog autoclaaf (°C)</label><textarea id="ste-log" rows="3">100 108 115 119 121 121,5 121,8 122 122 122 121,9 122 122,1 122 121,8 122 122 121,7 118 110 102</textarea></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Getallen scheiden met spaties; wetenschappelijke notatie mag (1e6). Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="ste-cv"></canvas><div id="ste-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Steril.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ste-app"></div>
   <p class="src">D-waarde = −1 / helling van log₁₀ N tegen tijd; z-waarde = −1 / helling van log₁₀ D tegen temperatuur; F₀ = Δt · Σ 10<sup>(T − 121,1)/z</sup> met z = 10 °C en referentietemperatuur 121,1 °C (Ph. Eur. 5.1.5, Application of the F₀ concept to steam sterilisation of aqueous preparations; PDA Technical Report No. 1, 2007). Ph. Eur. 5.1.1 hanteert voor stoomsterilisatie als referentie 15 min bij 121 °C.</p>
 </section>
 <!-- /NT:steril -->
@@ -2679,21 +2602,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-passage" data-tool="passage">
   <header class="tool-head"><h2>Celpassageplanner</h2>
   <p>Wanneer is je fles confluent, en welke splitratio past bij het moment waarop je weer wilt passeren? Op basis van verdubbelingstijd, oppervlak en confluente dichtheid.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="ps-fmt">Kweekformaat</label><select id="ps-fmt" style="width:100%"><option value="25">T25-fles (25 cm²)</option><option value="75" selected>T75-fles (75 cm²)</option><option value="175">T175-fles (175 cm²)</option><option value="9.5">6-wells (9,5 cm²)</option><option value="55">petrischaal 10 cm (55 cm²)</option></select></div>
-        <div class="f"><label for="ps-n">Cellen nu in de fles</label><input id="ps-n" inputmode="decimal" value="2e6"></div>
-        <div class="f"><label for="ps-td">Verdubbelingstijd</label><div class="inu"><input id="ps-td" inputmode="decimal" value="24"><span class="u">u</span></div></div>
-        <div class="f"><label for="ps-cd">Dichtheid bij confluentie</label><div class="inu"><input id="ps-cd" inputmode="decimal" value="1e5"><span class="u">cellen/cm²</span></div></div>
-        <div class="f"><label for="ps-pct">Passeren bij</label><div class="inu"><input id="ps-pct" inputmode="decimal" value="80"><span class="u">% confluent</span></div></div>
-        <div class="f"><label for="ps-lag">Hersteltijd na passage</label><div class="inu"><input id="ps-lag" inputmode="decimal" value="12"><span class="u">u</span></div></div>
-        <div class="f"><label for="ps-want">Volgende passage over</label><div class="inu"><input id="ps-want" inputmode="decimal" value="3"><span class="u">dagen</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Haal verdubbelingstijd en confluente dichtheid uit je eigen tellingen of het datasheet van de cellijn (bijvoorbeeld ATCC); ze verschillen sterk per lijn. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result" id="ps-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Passage.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ps-app"></div>
   <p class="src">Exponentiële groei N(t) = N₀·2<sup>t/t<sub>d</sub></sup>; tijd tot doel t = t<sub>lag</sub> + t<sub>d</sub>·log₂(N<sub>doel</sub>/N₀). Na een splitsing 1:n duurt het t<sub>lag</sub> + t<sub>d</sub>·log₂(n) om terug te komen op dezelfde dichtheid (ATCC Animal Cell Culture Guide; Freshney, Culture of Animal Cells, 7e ed., 2016, hfst. 14). Oppervlakken: Corning, Cell Culture Surface Areas and Recommended Medium Volumes.</p>
 </section>
 <!-- /NT:passage -->
@@ -3144,21 +3055,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-viab" data-tool="viab">
   <header class="tool-head"><h2>Viabiliteit (trypaanblauw)</h2>
   <p>Levende celdichtheid en viabiliteit uit een telling met trypaanblauw in een Neubauer-telkamer, met betrouwbaarheidsintervallen voor de telling en het volume dat je nodig hebt om cellen in te zaaien.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="vb-l">Levende cellen (ongekleurd)</label><input id="vb-l" inputmode="numeric" value="182"></div>
-        <div class="f"><label for="vb-d">Dode cellen (blauw)</label><input id="vb-d" inputmode="numeric" value="14"></div>
-        <div class="f"><label for="vb-sq">Getelde grote vierkanten</label><input id="vb-sq" inputmode="numeric" value="4"></div>
-        <div class="f"><label for="vb-df">Verdunningsfactor</label><input id="vb-df" inputmode="decimal" value="2"></div>
-        <div class="f"><label for="vb-v">Volume celsuspensie</label><div class="inu"><input id="vb-v" inputmode="decimal" value="10"><span class="u">mL</span></div></div>
-        <div class="f"><label for="vb-t">Gewenst aantal levende cellen</label><input id="vb-t" inputmode="decimal" value="2e5"></div>
-        <div class="f"><label for="vb-n">Aantal putjes of flessen</label><input id="vb-n" inputmode="numeric" value="6"></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Eén groot vierkant van een Neubauer-kamer is 1 mm² × 0,1 mm = 0,1 µL. Trypaanblauw 1:1 met de suspensie gemengd geeft verdunningsfactor 2. Tel binnen 3–5 minuten na mengen; daarna kleuren ook levende cellen. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><div id="vb-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Viab.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="vb-app"></div>
   <p class="src">Cellen/mL = telling / aantal vierkanten × verdunningsfactor × 10⁴; viabiliteit = levend / (levend + dood) (Strober, Curr Protoc Immunol 111:A3.B.1–A3.B.3, 2015). Interval van een telling: exact Poisson-interval (Garwood, Biometrika 28:437–442, 1936); viabiliteit: Wilson-scoreinterval (Wilson, J Am Stat Assoc 22:209–212, 1927). Tel minstens 100–200 cellen voor een onzekerheid rond 10%.</p>
 </section>
 <!-- /NT:viab -->
@@ -3167,20 +3066,9 @@ trt2: 6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26</textarea></div>
 <section class="tool" id="t-desinf" data-tool="desinf">
   <header class="tool-head"><h2>Desinfectietest (log-reductie)</h2>
   <p>Log-reductie van een desinfectiemiddel in een kwantitatieve suspensietest per testorganisme, getoetst aan de eis van de gekozen EN-norm.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="ds-req">Eis</label><select id="ds-req"><option value="5">5 lg: bactericide (EN 1276, EN 13727)</option><option value="4">4 lg: fungicide of gistdodend (EN 1650, EN 13624)</option><option value="4v">4 lg: virusdodend (EN 14476)</option><option value="e">eigen eis</option></select></div>
-        <div class="f"><label for="ds-own">Eigen eis</label><div class="inu"><input id="ds-own" inputmode="decimal" value="3"><span class="u">lg</span></div></div>
-        <div class="f"><label for="ds-dil">Verdunning in testmengsel</label><input id="ds-dil" inputmode="decimal" value="10"></div>
-        <div class="f"><label for="ds-dl">Detectiegrens N<sub>a</sub></label><div class="inu"><input id="ds-dl" inputmode="decimal" value="140"><span class="u">kve/mL</span></div></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="ds-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="ds-tbl-add">+ Organisme</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">N: kve/mL in de testsuspensie. N<sub>a</sub>: kve/mL in het testmengsel na de contacttijd, teruggerekend uit de telplaten van het geneutraliseerde mengsel. Vul 0 in als er niets groeide; dan geldt de detectiegrens. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><div id="ds-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Desinf.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ds-app"></div>
   <p class="src">EN 1276:2019 (fase 2, stap 1): 1 mL testsuspensie in een testmengsel van 10 mL, dus N<sub>0</sub> = N/10; reductie R = lg N<sub>0</sub> − lg N<sub>a</sub>. Eisen: ≥ 5 lg bactericide (EN 1276, EN 13727), ≥ 4 lg fungicide/gistdodend (EN 1650, EN 13624) en virusdodend (EN 14476); samenvatting in Evans Vanodine, EN Disinfectant Test Methods (2012). De testsuspensie hoort bij EN 1276 tussen 1,5 en 5,0 × 10⁸ kve/mL te liggen. Controles van de methode (neutralisatie, validatiesuspensie) zijn hier niet meegenomen.</p>
 </section>
 <!-- /NT:desinf -->
@@ -3389,21 +3277,9 @@ behandeld 25 0</textarea></div>
 <section class="tool" id="t-seed" data-tool="seed">
   <header class="tool-head"><h2>Cellen uitzaaien</h2>
   <p>Hoeveel celsuspensie en medium je nodig hebt om een plaat of fles op een gewenste dichtheid in te zetten.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="sd-c">Celconcentratie suspensie</label><div class="inu"><input id="sd-c" inputmode="decimal" value="8e5"><span class="u">cellen/mL</span></div></div>
-        <div class="f"><label for="sd-fmt">Kweekformaat</label><select id="sd-fmt" style="width:100%"><option value="0.32|0.1">96-wells (0,32 cm²)</option><option value="0.95|0.3">48-wells (0,95 cm²)</option><option value="1.9|0.5" selected>24-wells (1,9 cm²)</option><option value="3.8|1">12-wells (3,8 cm²)</option><option value="9.5|2">6-wells (9,5 cm²)</option><option value="25|5">T25-fles (25 cm²)</option><option value="75|15">T75-fles (75 cm²)</option></select></div>
-        <div class="f"><label for="sd-mode">Dichtheid opgeven als</label><select id="sd-mode" style="width:100%"><option value="well">cellen per putje/fles</option><option value="cm2">cellen per cm²</option></select></div>
-        <div class="f"><label for="sd-n">Gewenste dichtheid</label><input id="sd-n" inputmode="decimal" value="5e4"></div>
-        <div class="f"><label for="sd-v">Volume per putje/fles</label><div class="inu"><input id="sd-v" inputmode="decimal" value="0,5"><span class="u">mL</span></div></div>
-        <div class="f"><label for="sd-w">Aantal putjes/flessen</label><input id="sd-w" inputmode="numeric" value="24"></div>
-        <div class="f" data-expert=""><label for="sd-x">Extra marge</label><div class="inu"><input id="sd-x" inputmode="decimal" value="10"><span class="u">%</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">De celconcentratie haal je uit de tool Telkamer. Bij het kiezen van een formaat wordt het gebruikelijke werkvolume ingevuld.</p>
-    </div>
-    <div class="result" id="sd-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Seed.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="sd-app"></div>
   <p class="src">Groeioppervlak en werkvolume per formaat: Corning, Cell Culture Surface Areas and Recommended Medium Volumes (96-wells 0,32 cm²; 24-wells 1,9 cm²; 6-wells 9,5 cm²; T25 25 cm²; T75 75 cm²). V<sub>suspensie</sub> = benodigde cellen / celconcentratie.</p>
 </section>
 
@@ -3451,21 +3327,7 @@ behandeld 25 0</textarea></div>
 <section class="tool" id="t-micro" data-tool="micro">
   <header class="tool-head"><h2>Microscoop-kalibratie</h2>
   <p>IJk het oculairmicrometer met een objectmicrometer en reken gemeten schaaldelen om naar micrometers. Per objectief een eigen ijkfactor.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="mc-obj">Objectief</label><select id="mc-obj" style="width:100%"><option>4</option><option>10</option><option selected>40</option><option>100</option></select></div>
-        <div class="f"><label for="mc-oc">Oculair</label><div class="inu"><input id="mc-oc" inputmode="decimal" value="10"><span class="u">×</span></div></div>
-        <div class="f"><label for="mc-fn">Gezichtsveldgetal (FN)</label><div class="inu"><input id="mc-fn" inputmode="decimal" value="20"><span class="u">mm</span></div></div>
-        <div class="f"><label for="mc-od">Oculair-schaaldelen</label><input id="mc-od" inputmode="decimal" value="40"></div>
-        <div class="f"><label for="mc-sd">vallen samen met object-schaaldelen</label><input id="mc-sd" inputmode="decimal" value="10"></div>
-        <div class="f"><label for="mc-su">Eén object-schaaldeel</label><div class="inu"><input id="mc-su" inputmode="decimal" value="10"><span class="u">µm</span></div></div>
-      </div>
-      <div class="f" style="margin-top:12px"><label for="mc-m">Gemeten objecten, in oculair-schaaldelen <span class="example">voorbeeld</span></label><textarea id="mc-m" rows="2">3 3,5 2,8 3,2 3,1</textarea></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Een standaard-objectmicrometer is 1 mm verdeeld in 100 delen: één schaaldeel is 10 µm.</p>
-    </div>
-    <div class="result" id="mc-out"></div>
-  </div>
+  <div id="mc-app"></div>
   <p class="src">IJkfactor (µm per oculair-schaaldeel) = object-schaaldelen × µm per schaaldeel / oculair-schaaldelen; totale vergroting = objectief × oculair; gezichtsvelddiameter = gezichtsveldgetal / objectiefvergroting (Nikon MicroscopyU, Eyepiece reticle calibration en Field of view).</p>
 </section>
 
@@ -3661,58 +3523,14 @@ calc.reeks=function(){};
 /* ================= TELKAMER ================= */
 /* vaktellingen zijn hele getallen: komma, puntkomma, spatie en enter scheiden altijd */
 function kList(txt){ const n=[], bad=[]; String(txt).split(/[\s,;]+/).filter(Boolean).forEach(t=>{ /^\d{1,6}$/.test(t)?n.push(+t):bad.push(t); }); return {n,bad}; }
-calc.telkamer=function(){
-  const depth=$('#k-ch').value.startsWith('0.2')?0.2:0.1;
-  const area=num($('#k-sq').value); const vSq=area*depth; // µL per square
-  const pl=kList($('#k-live').value), pd=kList($('#k-dead').value), live=pl.n, dead=pd.n, df=num($('#k-df').value)||1;
-  const out=$('#k-out');
-  if(!live.length){ out.innerHTML=note('info','Vul de tellingen per vak in.')+(pl.bad.length?note('warn',`Niet herkend als hele telling: ${pl.bad.map(ud).join(', ')}.`):''); return; }
-  const mL=live.reduce((a,b)=>a+b,0)/live.length;
-  const conc=mL/vSq*1000*df; // cells/mL
-  let h=`<div class="lbl">Levende cellen</div><div class="big">${sci(conc,3)} <small>cellen/mL</small></div>`;
-  const rows=[['Vakken geteld',live.length],['Gemiddeld per vak',fmt(mL,1)],['Volume per vak',fmt(vSq,5)+' µL'],['Factor (×1000/V·df)',sci(1000/vSq*df,3)]];
-  if(dead.length){
-    const md=dead.reduce((a,b)=>a+b,0)/dead.length; const tot=mL+md; const via=mL/tot*100;
-    rows.push(['Dode cellen/mL',sci(md/vSq*1000*df,3)],['Totaal cellen/mL',sci(tot/vSq*1000*df,3)]);
-    h+=`<div style="margin-bottom:10px">Levensvatbaarheid <span class="chip ${via>=90?'ok':via>=80?'warn':'bad'}">${fmt(via,1)}%</span></div>`;
-  }
-  const sv=num($('#k-sv').value); if(isFinite(sv)) rows.push(['Totaal in suspensie',sci(conc*sv,3)+' cellen']);
-  const need=num($('#k-need').value); if(isFinite(need)&&conc>0) rows.push([`Volume voor ${sci(need,2)} cellen`,vol(need/conc*1000)]);
-  h+=kv(rows);
-  const cv=live.length>1?Math.sqrt(live.reduce((a,b)=>a+(b-mL)**2,0)/(live.length-1))/mL*100:0;
-  const bad=[...pl.bad,...pd.bad]; if(bad.length) h+=note('warn',`Overgeslagen (geen hele telling): ${bad.map(ud).join(', ')}. Tel per vak alleen hele cellen.`);
-  if(dead.length&&dead.length!==live.length) h+=note('warn',`Levend heeft ${live.length} vakken en dood ${dead.length}; tel beide in dezelfde vakken.`);
-  if(mL<10) h+=note('warn','Gemiddeld minder dan 10 cellen per vak: tel meer of grotere vakken voor een betrouwbare schatting.');
-  if(cv>25) h+=note('warn',`Grote spreiding tussen vakken (CV ${fmt(cv,0)}%). Controleer of de suspensie goed gemengd en de kamer egaal gevuld is.`);
-  h+=`<div class="formula">cellen/mL = gem. telling / V<sub>vak</sub>(µL) × 1000 × verdunning</div>`;
-  out.innerHTML=h;
-};
+/* De velden en de uitkomst staan in src/tools/Telkamer.vue; kList() hierboven blijft, want
+   de component gebruikt hem. */
+calc.telkamer=function(){};
 
 /* ================= TELLER ================= */
-const CPRESETS={diff:['Neutrofielen','Lymfocyten','Monocyten','Eosinofielen','Basofielen'],ld:['Levend','Dood'],kol:['Type A','Type B','Type C'],gram:['Gram+ kokken','Gram+ staven','Gram− kokken','Gram− staven'],vrij:['Telling']};
-let cats=[], hist=[];
-function setCats(k){ cats=CPRESETS[k].map(n=>({n,c:0})); hist=[]; renderCounter(); }
-function renderCounter(flash){
-  const tot=cats.reduce((a,b)=>a+b.c,0), target=num($('#c-target').value);
-  $('#c-grid').innerHTML=cats.map((x,i)=>`<div role="button" tabindex="0" class="cbtn${flash===i?' flash':''}" data-ci="${i}"><span class="key">${i<9?i+1:''}</span><span class="nm" contenteditable="true" data-cn="${i}" spellcheck="false">${esc(x.n)}</span><span class="ct">${x.c}</span><span class="pc">${tot?fmt(x.c/tot*100,1):'0'}%</span></div>`).join('');
-  $('#c-total').innerHTML=`${tot}${isFinite(target)&&target>0?` <small>/ ${target}</small>`:''}`;
-  $('#c-bar').style.width=(isFinite(target)&&target>0?Math.min(100,tot/target*100):0)+'%';
-  $('#c-state').innerHTML=isFinite(target)&&tot>=target&&target>0?'<span class="chip ok">Doel bereikt</span>':'';
-}
-function bump(i){ const target=num($('#c-target').value); const tot=cats.reduce((a,b)=>a+b.c,0); if(isFinite(target)&&target>0&&tot>=target){ beep(1,330); return; } cats[i].c++; hist.push(i); if(isFinite(target)&&tot+1===target) beep(2,990); renderCounter(i); }
-$('#c-grid').addEventListener('click',e=>{ if(e.target.closest('[data-cn]')) return; const b=e.target.closest('[data-ci]'); if(b){ unlockAudio(); bump(+b.dataset.ci); }});
-$('#c-grid').addEventListener('input',e=>{ const n=e.target.closest('[data-cn]'); if(n) cats[+n.dataset.cn].n=n.textContent; });
-$('#c-preset').addEventListener('change',e=>setCats(e.target.value));
-$('#c-undo').addEventListener('click',()=>{ const i=hist.pop(); if(i!=null&&cats[i]) { cats[i].c--; renderCounter(); }});
-$('#c-reset').addEventListener('click',()=>{ cats.forEach(x=>x.c=0); hist=[]; renderCounter(); });
-$('#c-addcat').addEventListener('click',()=>{ cats.push({n:'Categorie '+(cats.length+1),c:0}); renderCounter(); });
-calc.teller=()=>renderCounter();
-document.addEventListener('keydown',e=>{
-  if(current!=='teller') return;
-  const t=e.target, ae=document.activeElement; if(t.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(t.tagName)||['INPUT','TEXTAREA','SELECT'].includes(ae?.tagName)||ae?.isContentEditable||e.ctrlKey||e.metaKey||e.altKey) return;
-  if(/^[1-9]$/.test(e.key)){ const i=+e.key-1; if(cats[i]){ e.preventDefault(); unlockAudio(); bump(i); } }
-  else if(e.key==='Backspace'){ e.preventDefault(); $('#c-undo').click(); }
-});
+/* De indelingen, de tellers, de toetsen 1–9/Backspace en het bewaren van de stand staan in
+   src/tools/Teller.vue (zelfde localStorage-sleutel labkit:v1:teller). */
+calc.teller=function(){};
 
 /* ================= DNA ================= */
 calc.dna=function(){
@@ -3950,7 +3768,6 @@ calc.timers=()=>{};
 
 /* ---------- init ---------- */
 buildReeks();
-setCats('diff');
 buildLadder();
 loadQ('taq');
 renderTimers();
@@ -4603,15 +4420,18 @@ $('#nav-q').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const a=$('#nav
 
 /* ================= TELKAMER: VAKKEN PER KAMER ================= */
 const KSQ={'0.1':[[1,'Groot vak: 1,0 mm² (100 nL = 0,1 µL)'],[0.04,'Groepsvak (Bürker/Bürker-Türk): 0,04 mm² (4 nL = 0,004 µL)'],[0.0025,'Klein vak (Bürker-Türk): 0,0025 mm² (0,25 nL)']],'0.1n':[[1,'Groot vak: 1,0 mm² (100 nL = 0,1 µL)'],[0.0625,'Hoekvakje (1/16 groot vak): 0,0625 mm² (6,25 nL)'],[0.04,'Groepsvak midden (1/25 groot vak): 0,04 mm² (4 nL = 0,004 µL)'],[0.0025,'Klein vak (Neubauer): 0,0025 mm² (0,25 nL)']],'0.2':[[1,'Groot vak: 1,0 mm² (200 nL = 0,2 µL)'],[0.0625,'Klein vak: 0,0625 mm² (12,5 nL)']]};
-function kSq(){ const el=$('#k-sq'), cur=el.value; el.innerHTML=KSQ[$('#k-ch').value].map(([v,t])=>`<option value="${v}">${t}</option>`).join(''); if([...el.options].some(o=>o.value===cur)) el.value=cur; }
-$('#k-ch').addEventListener('change',kSq); kSq();
+/* De vakken van k-sq worden nu door de component getekend (Vue rendert pas bij de volgende tick).
+   kSq() blijft bestaan voor tests/validate.py, die na een kamerwissel meteen een vak kiest: hij
+   laat de component direct, synchroon, opnieuw tekenen, dus de opties staan er dan al. */
+function kSq(){ const vm=window.__telkamerVm; if(vm&&vm.$&&vm.$.update) vm.$.update(); }
 
-/* ================= TIMERS EN TELLER BEWAREN ================= */
-const TKEY='labkit:v1:timers', CKEY='labkit:v1:teller';
+/* ================= TIMERS BEWAREN ================= */
+/* De stand van de teller bewaart de component zelf (labkit:v1:teller). */
+const TKEY='labkit:v1:timers';
 try{ const t=JSON.parse(localStorage.getItem(TKEY)||'[]'); if(Array.isArray(t)&&t.length){ timers=t; tid=Math.max(...t.map(x=>x.id)); renderTimers(); }
-  const c=JSON.parse(localStorage.getItem(CKEY)||'null'); if(c&&Array.isArray(c.cats)&&c.cats.length){ cats=c.cats; hist=c.hist||[]; if(c.preset) $('#c-preset').value=c.preset; renderCounter(); } }catch(e){}
-let lastT='',lastC='';
-setInterval(()=>{ try{ const t=JSON.stringify(timers.map(x=>({...x,rem:Math.round(x.rem*10)/10}))); if(t!==lastT){ localStorage.setItem(TKEY,t); lastT=t; } const c=JSON.stringify({cats,hist:hist.slice(-500),preset:$('#c-preset').value}); if(c!==lastC){ localStorage.setItem(CKEY,c); lastC=c; } }catch(e){} },1000);
+  }catch(e){}
+let lastT='';
+setInterval(()=>{ try{ const t=JSON.stringify(timers.map(x=>({...x,rem:Math.round(x.rem*10)/10}))); if(t!==lastT){ localStorage.setItem(TKEY,t); lastT=t; } }catch(e){} },1000);
 
 /* ================= KOPIËREN NAAR EXCEL ================= */
 function cellText(td){ const ins=[...td.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select,textarea')]; if(ins.length) return ins.map(i=>i.tagName==='SELECT'?(i.options[i.selectedIndex]?i.options[i.selectedIndex].text:i.value):i.value).join(' ').trim();
@@ -4636,8 +4456,8 @@ function flashBtn(b,t){ const o=b.dataset.label||b.textContent; b.dataset.label=
 async function copyRich(tsv,html,btn){ try{ if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write) await navigator.clipboard.write([new ClipboardItem({'text/plain':new Blob([tsv],{type:'text/plain'}),'text/html':new Blob([html],{type:'text/html'})})]); else await navigator.clipboard.writeText(tsv); flashBtn(btn,'Gekopieerd'); }
   catch(e){ try{ await navigator.clipboard.writeText(tsv); flashBtn(btn,'Gekopieerd'); }catch(e2){ flashBtn(btn,'Geblokkeerd'); } } }
 function decorateXL(){
-  $$('main table').forEach(t=>{ if(t.dataset.xl) return; t.dataset.xl='1'; const anchor=t.closest('.tbl-wrap')||t; const bar=document.createElement('div'); bar.className='xlbar'; bar.innerHTML='<button type="button" class="xlbtn" data-xl-table title="Kopieert de tabel; plak in Excel met Ctrl+V">Kopieer naar Excel</button>'; anchor.parentNode.insertBefore(bar,anchor); });
-  $$('main canvas').forEach(cv=>{ if(cv.dataset.xl||cv.id==='gf-cv'||cv.id==='gf-vlcv') return; cv.dataset.xl='1'; const bar=document.createElement('div'); bar.className='xlbar'; bar.innerHTML='<button type="button" class="xlbtn" data-xl-img title="Plak als afbeelding in Excel, Word of PowerPoint">Kopieer grafiek</button><button type="button" class="xlbtn" data-xl-data title="Kopieert de gegevens achter de grafiek; plak in Excel om zelf een grafiek te maken">Kopieer data</button>'; cv.after(bar); });
+  $$('main table').forEach(t=>{ if(t.dataset.xl) return; t.dataset.xl='1'; const anchor=t.closest('.tbl-wrap')||t; const bar=document.createElement('div'); bar.className='xlbar'; bar.innerHTML='<button type="button" class="xlbtn" data-xl-table title="'+trPlain('Kopieert de tabel; plak in Excel met Ctrl+V')+'">'+trPlain('Kopieer naar Excel')+'</button>'; anchor.parentNode.insertBefore(bar,anchor); });
+  $$('main canvas').forEach(cv=>{ if(cv.dataset.xl||cv.id==='gf-cv'||cv.id==='gf-vlcv') return; cv.dataset.xl='1'; const bar=document.createElement('div'); bar.className='xlbar'; bar.innerHTML='<button type="button" class="xlbtn" data-xl-img title="'+trPlain('Plak als afbeelding in Excel, Word of PowerPoint')+'">'+trPlain('Kopieer grafiek')+'</button><button type="button" class="xlbtn" data-xl-data title="'+trPlain('Kopieert de gegevens achter de grafiek; plak in Excel om zelf een grafiek te maken')+'">'+trPlain('Kopieer data')+'</button>'; cv.after(bar); });
 }
 /* één MutationObserver voor alle nabewerkingen van het werkvlak; elke taak heeft zijn eigen wachttijd */
 const MAINW=[]; function lkMainWatch(fn,ms){ MAINW.push({fn,ms,t:null}); }
@@ -5345,19 +5165,8 @@ function fitGompertz(t,y){ const A0=Math.max(...y)||1; let best=null; const n=t.
   const mu0=Math.max(best?best.s:0.5,1e-3), lam0=best?Math.max(0,t[best.i]-y[best.i]/mu0):0;
   const r=lmfit((x,p)=>gompertz(x,[p[0],Math.exp(p[1]),p[2]]),[A0,Math.log(mu0),lam0],t,y,600); const p=[r.p[0],Math.exp(r.p[1]),r.p[2]];
   const my=mean(y), ssr=y.reduce((s,v,i)=>s+(v-gompertz(t[i],p))**2,0), sst=y.reduce((s,v)=>s+(v-my)**2,0); return {A:p[0],mu:p[1],lam:p[2],r2:1-ssr/sst}; }
-calc.gcomp=function(){
-  const D=parseCols($('#gm-data').value), out=$('#gm-out'), cv=$('#gm-cv'); if(!D||!D.series.length){ out.innerHTML=note('info','Plak een tijdkolom en minstens één kolom met metingen.'); return; }
-  const tu=$('#gm-tu').value, isOD=$('#gm-type').value==='od', blank=isOD?(num($('#gm-blank').value)||0):0;
-  const res=[]; const ser=[]; let ymax=0, tmax=0;
-  D.series.forEach((s,k)=>{ const pts=D.x.map((t,i)=>[t,s.y[i]-blank]).filter(p=>isFinite(p[0])&&isFinite(p[1])&&p[1]>0); if(pts.length<5) return;
-    const th=pts.map(p=>tu==='min'?p[0]/60:p[0]), y0=pts[0][1], ly=pts.map(p=>Math.log(p[1]/y0)); const F=fitGompertz(th,ly);
-    res.push({name:s.name,...F,td:Math.log(2)/F.mu*60}); const col=SERCOL[k%SERCOL.length];
-    ser.push({pts:pts.map((p,i)=>[p[0],ly[i]]),color:col,name:s.name}); ser.push({fn:x=>gompertz(tu==='min'?x/60:x,[F.A,F.mu,F.lam]),color:col,name:s.name+' (fit)'});
-    ymax=Math.max(ymax,...ly); tmax=Math.max(tmax,...pts.map(p=>p[0])); });
-  if(!res.length){ out.innerHTML=note('info','Elke reeks heeft minstens 5 meetpunten boven de blanco nodig.'); return; }
-  chart(cv,{xmin:0,xmax:tmax,ymin:Math.min(0,-0.2),ymax:ymax*1.1,xlabel:`tijd (${tu==='min'?'min':'uur'})`,ylabel:'ln(N/N₀)',series:ser,legend:res.map((r,k)=>[r.name,SERCOL[k%SERCOL.length]]),legendPos:'br'});
-  out.innerHTML=`<div class="tbl-wrap" style="margin-top:8px"><table class="mini"><thead><tr><th>Curve</th><th class="num">µ<sub>m</sub> (h⁻¹)</th><th class="num">Verdubbelingstijd (min)</th><th class="num">Lag λ (${tu==='min'?'min':'u'})</th><th class="num">A = ln(N<sub>max</sub>/N₀)</th><th class="num">R²</th></tr></thead><tbody>${res.map(r=>`<tr><td>${esc(r.name)}</td><td class="num">${fmt(r.mu,3)}</td><td class="num">${fmt(r.td,1)}</td><td class="num">${fmt(tu==='min'?r.lam*60:r.lam,2)}</td><td class="num">${fmt(r.A,2)}</td><td class="num">${fmt(r.r2,4)}</td></tr>`).join('')}</tbody></table></div>`+(isOD&&res.length?note('info','Boven OD ≈ 1 is OD niet meer evenredig met het celaantal; dat drukt A en de plateaufase.'):'');
-};
+/* De velden en de uitkomst staan in src/tools/Gcomp.vue; calc.gcomp laat de tekening opnieuw maken (zie src/main.js). */
+calc.gcomp=function(){};
 
 /* ================= WESTERN BLOT ================= */
 const WBDATA=[['Controle',15200,30100,true],['Controle',14800,29500,true],['Behandeling 1',31500,30800,false],['Behandeling 1',29800,29900,false],['Behandeling 2',8200,31200,false],['Behandeling 2',7600,30500,false]];
@@ -5424,12 +5233,8 @@ const AAM={A:71.0788,R:156.1875,N:114.1038,D:115.0886,C:103.1388,E:129.1155,Q:12
 /* ================= EENHEDEN ================= */
 calc.units=function(){}; /* de component src/tools/Units.vue rekent zelf */
 /* ================= INOCULUM ================= */
-calc.inoc=function(){
-  const od=num($('#io-od').value), df=num($('#io-df').value)||1, bl=num($('#io-bl').value)||0, to=num($('#io-to').value), V=num($('#io-v').value), fac=num($('#io-fac').value), out=$('#io-out');
-  const odc=(od-bl)*df; if(!(odc>0)||!(to>0)||!(V>0)){ out.innerHTML=note('info','Vul gemeten OD, gewenste OD en volume in.'); return; }
-  if(to>=odc){ out.innerHTML=note('bad','De gewenste OD is hoger dan die van de cultuur; laat de cultuur langer groeien of concentreer de cellen.'); return; }
-  const vc=to*V/odc; out.innerHTML=`<div class="lbl">Pipetteer</div><div class="big">${vol(vc*1000)} <small>cultuur</small></div>`+kv([['Medium',vol((V-vc)*1000)],['OD cultuur (gecorrigeerd)',fmt(odc,3)],['Verdunning','1 : '+sig(odc/to,4)],['Cellen/mL bij start (schatting)',isFinite(fac)?sci(to*fac,2):'–']])+((od-bl)>1?note('warn','De meting ligt boven OD 1; daar is OD niet meer lineair. Meet in een verdunning.'):'')+`<div class="formula">V<sub>cultuur</sub> = ${fmt(to,3)} × ${fmt(V,1)} mL / ${fmt(odc,3)}</div>`;
-};
+/* De velden en de uitkomst staan in src/tools/Inoc.vue. */
+calc.inoc=function(){};
 /* ================= KLEUREN: HULPFUNCTIES ================= */
 const PALS={std:['#1558b0','#c2410c','#15803d','#7c3aed','#b91c1c','#0e7490','#a16207','#be185d'],okabe:['#0072B2','#D55E00','#009E73','#CC79A7','#E69F00','#56B4E9','#F0E442','#000000'],pastel:['#8fb8e8','#f2a98a','#9fd4a8','#c9b3ec','#f0a3a3','#93d3dc','#e6cf8a','#eeaacd'],fel:['#0057ff','#ff5a00','#00a43b','#9b1dff','#e6002d','#00a9c7','#d99a00','#ff1f8e'],grijs:['#1f2933','#4b5563','#6b7280','#9ca3af','#374151','#111827','#808891','#b6bcc4']};
 
@@ -5541,12 +5346,8 @@ window.addEventListener('hashchange',()=>{ const id=(location.hash||'').slice(1)
 $('#reset-store').addEventListener('click',()=>{ try{ localStorage.removeItem(RKEY); localStorage.removeItem(FKEY); }catch(e){} },true);
 
 /* ================= CELLEN UITZAAIEN ================= */
-$('#sd-fmt').addEventListener('change',e=>{ $('#sd-v').value=e.target.value.split('|')[1].replace('.',','); calc.seed(); });
-calc.seed=function(){ const C=num($('#sd-c').value), [area]=$('#sd-fmt').value.split('|').map(Number), mode=$('#sd-mode').value, d=num($('#sd-n').value), v=num($('#sd-v').value), n=Math.round(num($('#sd-w').value)), x=(num($('#sd-x').value)||0)/100, out=$('#sd-out');
-  if(!(C>0)||!(d>0)||!(v>0)||!(n>0)){ out.innerHTML=note('info','Vul celconcentratie, dichtheid, volume en aantal in.'); return; }
-  const per=mode==='cm2'?d*area:d, tot=n*v*(1+x), cells=per*n*(1+x), vs=cells/C;
-  if(vs>tot){ out.innerHTML=note('bad',`De suspensie is te verdund: je hebt ${vol(vs*1000)} nodig voor ${vol(tot*1000)} totaal. Centrifugeer de cellen en neem ze op in minder medium (minstens ${sci(cells/tot,2)} cellen/mL).`); return; }
-  out.innerHTML=`<div class="lbl">Celsuspensie</div><div class="big">${vol(vs*1000)}</div>`+kv([['Medium erbij',vol((tot-vs)*1000)],['Totaal mengsel',vol(tot*1000)+` (${n} × ${vol(v*1000)} + ${fmt(x*100,0)}%)`],['Cellen per putje/fles',sci(per,3)],['Dichtheid',sci(per/area,3)+' cellen/cm²'],['Concentratie mengsel',sci(per/v,3)+' cellen/mL']])+`<ol class="steps"><li>Meng ${vol(vs*1000)} celsuspensie met ${vol((tot-vs)*1000)} medium.</li><li>Verdeel ${vol(v*1000)} per putje of fles; meng de suspensie tussendoor.</li></ol><div class="formula">V<sub>suspensie</sub> = cellen per putje × aantal × (1 + marge) / celconcentratie</div>`; };
+/* De velden en de uitkomst staan in src/tools/Seed.vue. */
+calc.seed=function(){};
 
 /* ================= PRIMERS OPLOSSEN ================= */
 const OLDATA=[['Forward',28.4],['Reverse',31.9]];
@@ -5574,11 +5375,8 @@ calc.sds=function(){ const ug=num($('#ss-ug').value), X=num($('#ss-x').value), V
   out.innerHTML=`<div class="tbl-wrap"><table class="mini" id="ss-res"><thead><tr><th>Monster</th><th class="num">Monster (µL)</th><th class="num">${X}× buffer (µL)</th><th class="num">Water (µL)</th><th class="num">Totaal (µL)</th></tr></thead><tbody>${rows.map(r=>{ const vs=ug/r.c, w=room-vs; return `<tr><td>${esc(r.n)}</td><td class="num">${fmt(vs,2)}</td><td class="num">${fmt(vb,2)}</td><td class="num">${w>=0?fmt(w,2):'<span class="chip bad">past niet</span>'}</td><td class="num">${fmt(V,1)}</td></tr>`; }).join('')}</tbody></table></div>`+(bad.length?note('bad',`${bad.map(r=>esc(r.n)).join(', ')}: te verdund voor ${fmt(ug,1)} µg in ${fmt(V,1)} µL. Maximaal ${fmt(Math.min(...bad.map(r=>r.c))*room,1)} µg per laan, of vergroot het laadvolume.`):'')+rows.filter(r=>ug/r.c<1).map(r=>note('warn',`${esc(r.n)}: minder dan 1 µL monster; verdun het monster eerst.`)).join('')+`<div class="formula">monster = ${fmt(ug,1)} µg / concentratie · buffer = ${fmt(V,1)} / ${X} = ${fmt(vb,2)} µL · water vult aan</div>`; };
 
 /* ================= MICROSCOOP ================= */
-calc.micro=function(){ const obj=num($('#mc-obj').value), oc=num($('#mc-oc').value), fn=num($('#mc-fn').value), od=num($('#mc-od').value), sdv=num($('#mc-sd').value), su=num($('#mc-su').value), out=$('#mc-out');
-  if(!(od>0)||!(sdv>0)||!(su>0)){ out.innerHTML=note('info','Vul de samenvallende schaaldelen in.'); return; }
-  const k=sdv*su/od, m=stNums($('#mc-m').value).filter(v=>v>0).map(v=>v*k), rows=[['Totale vergroting',isFinite(obj*oc)?fmt(obj*oc,0)+'×':'–'],['Gezichtsvelddiameter',fn>0&&obj>0?fmt(fn/obj*1000,0)+' µm':'–']];
-  if(m.length){ rows.push(['Gemeten objecten (µm)',m.map(v=>fmt(v,1)).join(' · ')],['Gemiddelde',fmt(mean(m),2)+' µm'+(m.length>1?` ± ${fmt(sd(m),2)} (n = ${m.length})`:'')]); }
-  out.innerHTML=`<div class="lbl">IJkfactor bij ${fmt(obj,0)}× objectief</div><div class="big">${fmt(k,2)} <small>µm per schaaldeel</small></div>`+kv(rows)+`<div class="formula">ijkfactor = ${fmt(sdv,1)} × ${fmt(su,1)} µm / ${fmt(od,1)} · grootte = schaaldelen × ijkfactor</div>`+note('info','De ijkfactor geldt alleen voor dit objectief en deze microscoop; ijk elk objectief apart.'); };
+/* De velden en de uitkomst staan in src/tools/Micro.vue; stNums(), mean() en sd() blijven hier. */
+calc.micro=function(){};
 /* ---------- init new tools ---------- */
 /* NT:ntlib */
 /* ================= NIEUWE TOOLS: GEDEELDE HULPFUNCTIES ================= */
@@ -6738,16 +6536,8 @@ calc.mval=function(){ const rep=numsC($('#mv-rep').value), b=num($('#mv-b').valu
 /* /NT:mval */
 /* NT:mpn */
 /* ================= MPN ================= */
-ET('mp-tbl',[{h:'Monster per buis',t:'num',w:90},{h:'Buizen',t:'num',w:64},{h:'Positief',t:'num',w:64}],[[0.1,3,3],[0.01,3,1],[0.001,3,0]],'mpn');
-calc.mpn=function(){ const u=$('#mp-u').value, out=$('#mp-out'), D=etGet('mp-tbl').map(r=>({m:num(r[0]),n:Math.round(num(r[1])),p:Math.round(num(r[2]))})).filter(d=>d.m>0&&d.n>0&&d.p>=0&&d.p<=d.n);
-  if(!D.length){ out.innerHTML=note('info','Vul per verdunning de hoeveelheid monster per buis, het aantal buizen en het aantal positieve buizen in.'); return; }
-  const code=D.map(d=>d.p).join('-');
-  if(D.every(d=>d.p===0)){ const mt=D.reduce((s,d)=>s+d.n*d.m,0); out.innerHTML=`<div class="lbl">MPN (${code})</div><div class="big">&lt; ${sig(-Math.log(0.05)/mt,2)} <small>per ${u}</small></div>`+note('info','Geen positieve buizen: dit is de bovengrens (95%) bij nul positieven.'); return; }
-  if(D.every(d=>d.p===d.n)){ out.innerHTML=`<div class="lbl">MPN (${code})</div><div class="big">te hoog</div>`+note('warn','Alle buizen positief: het aantal is groter dan de reeks kan meten. Verdun verder.'); return; }
-  const g=l=>D.reduce((s,d)=>s+d.p*d.m*Math.exp(-l*d.m)/(1-Math.exp(-l*d.m))-(d.n-d.p)*d.m,0);
-  let lo=1e-9, hi=1e12; for(let i=0;i<200;i++){ const mid=Math.sqrt(lo*hi); if(g(mid)>0) lo=mid; else hi=mid; } const lam=Math.sqrt(lo*hi);
-  const I=D.reduce((s,d)=>{ const e=Math.exp(-lam*d.m); return s+d.n*d.m*d.m*e/(1-e); },0), se=1/(lam*Math.sqrt(I)), cl=[lam*Math.exp(-1.96*se),lam*Math.exp(1.96*se)];
-  out.innerHTML=`<div class="lbl">MPN (${code})</div><div class="big">${sig(lam,2)} <small>per ${u}</small></div>`+kv([['95%-interval',`${sig(cl[0],2)} – ${sig(cl[1],2)} per ${u}`],['log₁₀ MPN',fmt(Math.log10(lam),2)],['Buizen totaal',D.reduce((s,d)=>s+d.n,0)]])+`<div class="formula">Σ p·m·e<sup>−λm</sup>/(1 − e<sup>−λm</sup>) = Σ (n − p)·m</div>`; };
+/* De velden, de tabel en de uitkomst staan in src/tools/Mpn.vue. */
+calc.mpn=function(){};
 /* /NT:mpn */
 /* NT:ic50 */
 /* ================= DOSIS-RESPONS =================
@@ -6755,26 +6545,13 @@ calc.mpn=function(){ const u=$('#mp-u').value, out=$('#mp-out'), D=etGet('mp-tbl
 /* /NT:ic50 */
 /* NT:steril */
 /* ================= STERILISATIE ================= */
-calc.steril=function(){ const out=$('#ste-out'), cv=$('#ste-cv'), T=numsC($('#ste-t').value), N=numsC($('#ste-n').value), ZT=numsC($('#ste-zt').value), ZD=numsC($('#ste-zd').value), dt=num($('#ste-dt').value), z=num($('#ste-z').value)||10, LG=numsC($('#ste-log').value);
-  const rows=[]; let curve=null;
-  if(T.length>=2&&T.length===N.length&&N.every(v=>v>0)){ const L=linreg(T,N.map(v=>Math.log10(v))); const D=-1/L.b; curve={L,D}; rows.push(['D-waarde',isFinite(D)&&D>0?`${sig(D,3)} min`:'– (geen afname)'],['R² overlevingscurve',fmt(L.r2,4)],['Log-reductie over de reeks',fmt(Math.log10(N[0]/N[N.length-1]),2)]); }
-  if(ZT.length>=2&&ZT.length===ZD.length&&ZD.every(v=>v>0)){ const L=linreg(ZT,ZD.map(v=>Math.log10(v))); rows.push(['z-waarde',`${sig(-1/L.b,3)} °C`]); }
-  if(LG.length&&dt>0){ const F=dt*LG.reduce((s,t)=>s+Math.pow(10,(t-121.1)/z),0), hold=LG.filter(t=>t>=121).length*dt; rows.push(['F₀',`${fmt(F,1)} min`],['Tijd ≥ 121 °C',`${fmt(hold,1)} min`],['Hoogste temperatuur',`${fmt(Math.max(...LG),1)} °C`]); if(curve&&curve.D>0) rows.push(['Log-reductie bij deze F₀',fmt(F/curve.D,1)+' (met de D-waarde hierboven, als die bij 121 °C hoort)']); }
-  if(!rows.length){ out.innerHTML=note('info','Vul een overlevingscurve, D-waarden of een temperatuurlog in.'); cv.style.display='none'; return; }
-  out.innerHTML=kv(rows)+`<div class="formula">D = −1/helling(log N, t) · z = −1/helling(log D, T) · F₀ = Δt·Σ10<sup>(T−121,1)/z</sup></div>`;
-  if(curve){ cv.style.display=''; chart(cv,{logy:true,xmin:Math.min(...T),xmax:Math.max(...T),ymin:Math.min(...N)/3,ymax:Math.max(...N)*3,xlabel:'tijd (min)',ylabel:'levende kiemen',series:[{fn:t=>Math.pow(10,curve.L.a+curve.L.b*t),name:'regressie'},{pts:T.map((t,i)=>[t,N[i]]),color:'--warn'}]}); } else cv.style.display='none'; };
+/* De velden en de uitkomst staan in src/tools/Steril.vue; calc.steril laat de tekening opnieuw maken (zie src/main.js). */
+calc.steril=function(){};
 /* /NT:steril */
 /* NT:passage */
 /* ================= CELPASSAGEPLANNER ================= */
-calc.passage=function(){ const A=num($('#ps-fmt').value), N=num($('#ps-n').value), td=num($('#ps-td').value), cd=num($('#ps-cd').value), pc=(num($('#ps-pct').value)||80)/100, lag=num($('#ps-lag').value)||0, want=num($('#ps-want').value), out=$('#ps-out');
-  if(!(A>0&&N>0&&td>0&&cd>0)){ out.innerHTML=note('info','Vul formaat, aantal cellen, verdubbelingstijd en confluente dichtheid in.'); return; }
-  const target=A*cd*pc, now=N/(A*cd)*100, hrs=N>=target?0:td*Math.log2(target/N), d=h=>{ const dd=Math.floor(h/24), hh=Math.round(h-dd*24); return dd?`${dd} d ${hh} u`:`${hh} u`; };
-  let h=`<div class="lbl">Tijd tot ${fmt(pc*100,0)}% confluent</div><div class="big">${N>=target?'nu':d(hrs)}</div>`+kv([['Confluentie nu (schatting)',fmt(now,0)+'%'],['Cellen bij '+fmt(pc*100,0)+'%',sci(target,3)],['Celdichtheid nu',sci(N/A,3)+' cellen/cm²']]);
-  const R=[2,3,4,5,6,8,10,15,20].map(n=>({n,t:lag+td*Math.log2(n)}));
-  if(isFinite(want)&&want>0){ const best=R.reduce((a,b)=>Math.abs(b.t-want*24)<Math.abs(a.t-want*24)?b:a); h+=note('info',`Voor een volgende passage over ${fmt(want,1)} dagen past splitratio 1:${best.n} (klaar na ${d(best.t)}); zaai dan ${sci(target/best.n,3)} cellen in.`); }
-  h+=`<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Splitratio</th><th class="num">Cellen inzaaien</th><th class="num">Weer ${fmt(pc*100,0)}% na</th></tr></thead><tbody>${R.map(r=>`<tr><td>1:${r.n}</td><td class="num">${sci(target/r.n,3)}</td><td class="num">${d(r.t)}</td></tr>`).join('')}</tbody></table></div>`;
-  if(now>100) h+=note('warn','Meer cellen dan bij volledige confluentie: controleer het aantal of de confluente dichtheid.');
-  out.innerHTML=h+`<div class="formula">t = t<sub>lag</sub> + t<sub>d</sub> · log₂(n)</div>`; };
+/* De velden en de uitkomst staan in src/tools/Passage.vue. */
+calc.passage=function(){};
 /* /NT:passage */
 /* NT:stain */
 /* ================= KLEURINGSSCHEMA ================= */
@@ -7453,26 +7230,13 @@ function kspSolve(K,x,y,cm,ca){ const f=s=>x*Math.log(x*s+cm)+y*Math.log(y*s+ca)
 /* ================= VIABILITEIT (TRYPAANBLAUW) ================= */
 function poisCI(k){ return [k>0?chiinv(0.025,2*k)/2:0,chiinv(0.975,2*k+2)/2]; }
 function wilsonCI(x,n,z=1.96){ if(!(n>0)) return [NaN,NaN]; const p=x/n, d=1+z*z/n, c=(p+z*z/(2*n))/d, h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d; return [Math.max(0,c-h),Math.min(1,c+h)]; }
-calc.viab=function(){ const L=Math.round(num($('#vb-l').value)), D=Math.round(num($('#vb-d').value))||0, sq=num($('#vb-sq').value), df=num($('#vb-df').value)||1, V=num($('#vb-v').value), T=num($('#vb-t').value), n=Math.round(num($('#vb-n').value))||1, out=$('#vb-out');
-  if(!(L>=0)||!(sq>0)||L+D<=0||L>1e7||D>1e7){ out.innerHTML=note('info','Vul het aantal levende en dode cellen en het aantal vierkanten in.'); return; }
-  const f=df*1e4/sq, cL=L*f, cT=(L+D)*f, via=L/(L+D), [a,b]=poisCI(L), [w1,w2]=wilsonCI(L,L+D);
-  let h=`<div class="lbl">Levende cellen</div><div class="big">${sci(cL,3)} <small>per mL</small></div>`+kv([['95%-interval (telling)',`${sci(a*f,3)} – ${sci(b*f,3)} per mL`],['Viabiliteit',`${fmt(via*100,1)}% (95%: ${fmt(w1*100,1)}–${fmt(w2*100,1)}%)`],['Totaal (levend + dood)',sci(cT,3)+' per mL'],['Levende cellen in de suspensie',V>0?sci(cL*V,3):'–']]);
-  if(T>0&&cL>0){ const v=T/cL*1000; h+=kv([['Volume per putje voor '+sci(T,3)+' cellen',vol(v)],[`Voor ${n} putjes`,vol(v*n)+(V>0&&v*n/1000>V?' <span class="chip warn" style="vertical-align:middle">meer dan je hebt</span>':'')]]); }
-  if(L<100) h+=note('info',`Met ${L} getelde levende cellen is de relatieve onzekerheid ongeveer ${fmt(100/Math.sqrt(Math.max(L,1)),0)}%; tel meer vierkanten.`);
-  if(L/sq>100) h+=note('warn','Meer dan 100 cellen per vierkant: verdun de suspensie voor een betrouwbare telling.');
-  if(via<0.9) h+=note('warn','Viabiliteit onder 90%: voor transfectie en de meeste experimenten is dat aan de lage kant.');
-  out.innerHTML=h+`<div class="formula">cellen/mL = N / vierkanten × verdunning × 10⁴ · viabiliteit = levend / totaal</div>`; };
+/* De velden en de uitkomst staan in src/tools/Viab.vue. */
+calc.viab=function(){};
 /* /NT:viab */
 /* NT:desinf */
 /* ================= DESINFECTIETEST ================= */
-ET('ds-tbl',[{h:'Organisme',t:'txt',w:170},{h:'N (kve/mL)',t:'num',w:100},{h:'N<sub>a</sub> (kve/mL)',t:'num',w:100}],[['Pseudomonas aeruginosa',3.2e8,85],['Escherichia coli',2.4e8,0],['Staphylococcus aureus',4.1e8,2600],['Enterococcus hirae',1.9e8,310]],'desinf');
-calc.desinf=function(){ const rq=$('#ds-req').value, req=rq==='e'?num($('#ds-own').value):parseFloat(rq), dil=num($('#ds-dil').value)||10, dl=num($('#ds-dl').value)||0, out=$('#ds-out'); $('#ds-own').closest('.f').style.display=rq==='e'?'':'none';
-  const R=etGet('ds-tbl').map(r=>{ const N=num(r[1]), Na=num(r[2]); if(!(N>0)||!(Na>=0)) return null; const below=Na<dl||Na===0, nA=below?Math.max(dl,1e-9):Na, red=Math.log10(N/dil)-Math.log10(nA); return {n:r[0]||'?',N,Na,below,red,ok:red>=req-1e-9,rng:N>=1.5e8&&N<=5e8}; }).filter(Boolean);
-  if(!R.length){ out.innerHTML=note('info','Vul per organisme N en N<sub>a</sub> in.'); return; }
-  const all=R.every(r=>r.ok), mn=R.reduce((a,b)=>b.red<a.red?b:a);
-  out.innerHTML=`<div class="lbl">Eis ${fmt(req,1)} lg</div><div class="big">${all?'voldoet':'voldoet niet'}<span class="chip ${all?'ok':'bad'}" style="vertical-align:middle;margin-left:6px">${R.filter(r=>r.ok).length} van ${R.length}</span></div>`+kv([['Laagste reductie',`${ud(mn.n)}: ${mn.below?'≥ ':''}${fmt(mn.red,2)} lg`]])+
-   `<div class="tbl-wrap" style="margin-top:12px"><table class="mini"><thead><tr><th>Organisme</th><th class="num">N<sub>0</sub> = N/${fmt(dil,0)}</th><th class="num">N<sub>a</sub></th><th class="num">Reductie (lg)</th><th>Eis</th></tr></thead><tbody>${R.map(r=>`<tr><td>${ud(r.n)}</td><td class="num">${sci(r.N/dil,3)}</td><td class="num">${r.below?'&lt; '+sci(dl,2):sci(r.Na,3)}</td><td class="num">${r.below?'≥ ':''}${fmt(r.red,2)}</td><td>${r.ok?'voldoet':'voldoet niet'}</td></tr>`).join('')}</tbody></table></div>`+
-   (rq!=='e'&&R.some(r=>!r.rng)?note('warn','Een testsuspensie ligt buiten 1,5–5,0 × 10⁸ kve/mL; bij EN 1276 is de test dan niet geldig.'):'')+(R.some(r=>r.below&&!r.ok)?note('info','N<sub>a</sub> ligt onder de detectiegrens, maar de testsuspensie is te laag om de eis aan te tonen.'):'')+`<div class="formula">R = lg(N/${fmt(dil,0)}) − lg N<sub>a</sub></div>`; };
+/* De velden, de tabel en de uitkomst staan in src/tools/Desinf.vue. */
+calc.desinf=function(){};
 /* /NT:desinf */
 /* NT:bland */
 /* ================= BLAND-ALTMAN ================= */
@@ -7818,7 +7582,7 @@ function reportPng(cv,noTitle){ const tool=(cv.closest('section.tool')||{dataset
   else { try{ root.removeAttribute('data-theme'); Object.defineProperty(window,'devicePixelRatio',{get:()=>S,configurable:true}); if(calc[tool]) calc[tool](); const c=document.createElement('canvas'); c.width=cv.width; c.height=cv.height; const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(cv,0,0); img=c; } finally { delete window.devicePixelRatio; if(th) root.setAttribute('data-theme',th); try{ if(calc[tool]) calc[tool](); }catch(e){} } }
   if(noTitle&&cv._p){ const cut=34*S, c2=document.createElement('canvas'); c2.width=img.width; c2.height=img.height-cut; c2.getContext('2d').drawImage(img,0,-cut); img=c2; }
   return new Promise(res=>img.toBlob(b=>b.arrayBuffer().then(ab=>res(new Blob([pngDpi(new Uint8Array(ab),300)],{type:'image/png'}))),'image/png')); }
-function reportBtns(){ $$('main canvas').forEach(cv=>{ if(cv.id==='gf-cv') return; const bar=cv.nextElementSibling; if(!bar||!bar.classList.contains('xlbar')) return; if(!bar.querySelector('[data-rep]')) bar.insertAdjacentHTML('afterbegin','<button type="button" class="xlbtn" data-rep title="PNG op een witte achtergrond met donkere assen, drie keer de schermresolutie (300 dpi), ook in het donkere thema">Download voor verslag (wit, 300 dpi)</button>'); if(cv._p&&!bar.querySelector('[data-rep-nt]')) bar.insertAdjacentHTML('afterbegin','<label class="chk" style="font-size:12px;margin-right:auto" title="Figuurtitels horen in het onderschrift onder de figuur"><input type="checkbox" data-rep-nt> zonder titel</label>'); }); }
+function reportBtns(){ $$('main canvas').forEach(cv=>{ if(cv.id==='gf-cv') return; const bar=cv.nextElementSibling; if(!bar||!bar.classList.contains('xlbar')) return; if(!bar.querySelector('[data-rep]')) bar.insertAdjacentHTML('afterbegin','<button type="button" class="xlbtn" data-rep title="'+trPlain('PNG op een witte achtergrond met donkere assen, drie keer de schermresolutie (300 dpi), ook in het donkere thema')+'">'+trPlain('Download voor verslag (wit, 300 dpi)')+'</button>'); if(cv._p&&!bar.querySelector('[data-rep-nt]')) bar.insertAdjacentHTML('afterbegin','<label class="chk" style="font-size:12px;margin-right:auto" title="Figuurtitels horen in het onderschrift onder de figuur"><input type="checkbox" data-rep-nt> zonder titel</label>'); }); }
 lkMainWatch(reportBtns,150); setTimeout(reportBtns,300);
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-rep]'); if(!b) return; const bar=b.parentNode, cv=bar.previousElementSibling; if(!cv||cv.tagName!=='CANVAS'||!cv.width) return; const nt=bar.querySelector('[data-rep-nt]'); reportPng(cv,nt&&nt.checked).then(blob=>saveBlob(`${(cv.closest('section.tool')||{dataset:{}}).dataset.tool||'grafiek'}-verslag.png`,blob)).catch(()=>{}); });
 /* /NT:app */

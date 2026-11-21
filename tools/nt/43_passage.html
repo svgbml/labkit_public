@@ -1,20 +1,8 @@
 <section class="tool" id="t-passage" data-tool="passage">
   <header class="tool-head"><h2>Celpassageplanner</h2>
   <p>Wanneer is je fles confluent, en welke splitratio past bij het moment waarop je weer wilt passeren? Op basis van verdubbelingstijd, oppervlak en confluente dichtheid.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="ps-fmt">Kweekformaat</label><select id="ps-fmt" style="width:100%"><option value="25">T25-fles (25 cm²)</option><option value="75" selected>T75-fles (75 cm²)</option><option value="175">T175-fles (175 cm²)</option><option value="9.5">6-wells (9,5 cm²)</option><option value="55">petrischaal 10 cm (55 cm²)</option></select></div>
-        <div class="f"><label for="ps-n">Cellen nu in de fles</label><input id="ps-n" inputmode="decimal" value="2e6"></div>
-        <div class="f"><label for="ps-td">Verdubbelingstijd</label><div class="inu"><input id="ps-td" inputmode="decimal" value="24"><span class="u">u</span></div></div>
-        <div class="f"><label for="ps-cd">Dichtheid bij confluentie</label><div class="inu"><input id="ps-cd" inputmode="decimal" value="1e5"><span class="u">cellen/cm²</span></div></div>
-        <div class="f"><label for="ps-pct">Passeren bij</label><div class="inu"><input id="ps-pct" inputmode="decimal" value="80"><span class="u">% confluent</span></div></div>
-        <div class="f"><label for="ps-lag">Hersteltijd na passage</label><div class="inu"><input id="ps-lag" inputmode="decimal" value="12"><span class="u">u</span></div></div>
-        <div class="f"><label for="ps-want">Volgende passage over</label><div class="inu"><input id="ps-want" inputmode="decimal" value="3"><span class="u">dagen</span></div></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Haal verdubbelingstijd en confluente dichtheid uit je eigen tellingen of het datasheet van de cellijn (bijvoorbeeld ATCC); ze verschillen sterk per lijn. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result" id="ps-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Passage.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ps-app"></div>
   <p class="src">Exponentiële groei N(t) = N₀·2<sup>t/t<sub>d</sub></sup>; tijd tot doel t = t<sub>lag</sub> + t<sub>d</sub>·log₂(N<sub>doel</sub>/N₀). Na een splitsing 1:n duurt het t<sub>lag</sub> + t<sub>d</sub>·log₂(n) om terug te komen op dezelfde dichtheid (ATCC Animal Cell Culture Guide; Freshney, Culture of Animal Cells, 7e ed., 2016, hfst. 14). Oppervlakken: Corning, Cell Culture Surface Areas and Recommended Medium Volumes.</p>
 </section>

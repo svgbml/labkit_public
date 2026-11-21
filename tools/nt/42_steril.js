@@ -1,9 +1,3 @@
 /* ================= STERILISATIE ================= */
-calc.steril=function(){ const out=$('#ste-out'), cv=$('#ste-cv'), T=numsC($('#ste-t').value), N=numsC($('#ste-n').value), ZT=numsC($('#ste-zt').value), ZD=numsC($('#ste-zd').value), dt=num($('#ste-dt').value), z=num($('#ste-z').value)||10, LG=numsC($('#ste-log').value);
-  const rows=[]; let curve=null;
-  if(T.length>=2&&T.length===N.length&&N.every(v=>v>0)){ const L=linreg(T,N.map(v=>Math.log10(v))); const D=-1/L.b; curve={L,D}; rows.push(['D-waarde',isFinite(D)&&D>0?`${sig(D,3)} min`:'– (geen afname)'],['R² overlevingscurve',fmt(L.r2,4)],['Log-reductie over de reeks',fmt(Math.log10(N[0]/N[N.length-1]),2)]); }
-  if(ZT.length>=2&&ZT.length===ZD.length&&ZD.every(v=>v>0)){ const L=linreg(ZT,ZD.map(v=>Math.log10(v))); rows.push(['z-waarde',`${sig(-1/L.b,3)} °C`]); }
-  if(LG.length&&dt>0){ const F=dt*LG.reduce((s,t)=>s+Math.pow(10,(t-121.1)/z),0), hold=LG.filter(t=>t>=121).length*dt; rows.push(['F₀',`${fmt(F,1)} min`],['Tijd ≥ 121 °C',`${fmt(hold,1)} min`],['Hoogste temperatuur',`${fmt(Math.max(...LG),1)} °C`]); if(curve&&curve.D>0) rows.push(['Log-reductie bij deze F₀',fmt(F/curve.D,1)+' (met de D-waarde hierboven, als die bij 121 °C hoort)']); }
-  if(!rows.length){ out.innerHTML=note('info','Vul een overlevingscurve, D-waarden of een temperatuurlog in.'); cv.style.display='none'; return; }
-  out.innerHTML=kv(rows)+`<div class="formula">D = −1/helling(log N, t) · z = −1/helling(log D, T) · F₀ = Δt·Σ10<sup>(T−121,1)/z</sup></div>`;
-  if(curve){ cv.style.display=''; chart(cv,{logy:true,xmin:Math.min(...T),xmax:Math.max(...T),ymin:Math.min(...N)/3,ymax:Math.max(...N)*3,xlabel:'tijd (min)',ylabel:'levende kiemen',series:[{fn:t=>Math.pow(10,curve.L.a+curve.L.b*t),name:'regressie'},{pts:T.map((t,i)=>[t,N[i]]),color:'--warn'}]}); } else cv.style.display='none'; };
+/* De velden en de uitkomst staan in src/tools/Steril.vue; calc.steril laat de tekening opnieuw maken (zie src/main.js). */
+calc.steril=function(){};

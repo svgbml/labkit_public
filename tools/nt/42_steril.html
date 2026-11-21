@@ -1,20 +1,8 @@
 <section class="tool" id="t-steril" data-tool="steril">
   <header class="tool-head"><h2>Sterilisatie (D, z, F₀)</h2>
   <p>D-waarde uit een overlevingscurve, z-waarde uit D-waarden bij verschillende temperaturen, en de letaliteit F₀ van een stoomsterilisatiecyclus uit een temperatuurlog.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields">
-        <div class="f" style="grid-column:1/-1"><label for="ste-t">Overlevingscurve: tijd (min)</label><input id="ste-t" class="txt" value="0 2 4 6 8 10"></div>
-        <div class="f" style="grid-column:1/-1"><label for="ste-n">Levende kiemen (KVE/mL)</label><input id="ste-n" class="txt" value="1e6 2,1e5 4,3e4 9,8e3 1,9e3 4,1e2"></div>
-        <div class="f" style="grid-column:1/-1"><label for="ste-zt">z-waarde: temperaturen (°C)</label><input id="ste-zt" class="txt" value="110 115 121"></div>
-        <div class="f" style="grid-column:1/-1"><label for="ste-zd">D-waarden (min)</label><input id="ste-zd" class="txt" value="19 6,1 1,5"></div>
-        <div class="f"><label for="ste-dt">Logging-interval</label><div class="inu"><input id="ste-dt" inputmode="decimal" value="1"><span class="u">min</span></div></div>
-        <div class="f"><label for="ste-z">z voor F₀</label><div class="inu"><input id="ste-z" inputmode="decimal" value="10"><span class="u">°C</span></div></div>
-        <div class="f" style="grid-column:1/-1"><label for="ste-log">Temperatuurlog autoclaaf (°C)</label><textarea id="ste-log" rows="3">100 108 115 119 121 121,5 121,8 122 122 122 121,9 122 122,1 122 121,8 122 122 121,7 118 110 102</textarea></div>
-      </div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Getallen scheiden met spaties; wetenschappelijke notatie mag (1e6). Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><canvas id="ste-cv"></canvas><div id="ste-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Steril.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ste-app"></div>
   <p class="src">D-waarde = −1 / helling van log₁₀ N tegen tijd; z-waarde = −1 / helling van log₁₀ D tegen temperatuur; F₀ = Δt · Σ 10<sup>(T − 121,1)/z</sup> met z = 10 °C en referentietemperatuur 121,1 °C (Ph. Eur. 5.1.5, Application of the F₀ concept to steam sterilisation of aqueous preparations; PDA Technical Report No. 1, 2007). Ph. Eur. 5.1.1 hanteert voor stoomsterilisatie als referentie 15 min bij 121 °C.</p>
 </section>

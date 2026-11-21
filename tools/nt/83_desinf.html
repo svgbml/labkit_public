@@ -1,19 +1,8 @@
 <section class="tool" id="t-desinf" data-tool="desinf">
   <header class="tool-head"><h2>Desinfectietest (log-reductie)</h2>
   <p>Log-reductie van een desinfectiemiddel in een kwantitatieve suspensietest per testorganisme, getoetst aan de eis van de gekozen EN-norm.</p></header>
-  <div class="stack">
-    <div class="panel">
-      <div class="fields">
-        <div class="f"><label for="ds-req">Eis</label><select id="ds-req"><option value="5">5 lg: bactericide (EN 1276, EN 13727)</option><option value="4">4 lg: fungicide of gistdodend (EN 1650, EN 13624)</option><option value="4v">4 lg: virusdodend (EN 14476)</option><option value="e">eigen eis</option></select></div>
-        <div class="f"><label for="ds-own">Eigen eis</label><div class="inu"><input id="ds-own" inputmode="decimal" value="3"><span class="u">lg</span></div></div>
-        <div class="f"><label for="ds-dil">Verdunning in testmengsel</label><input id="ds-dil" inputmode="decimal" value="10"></div>
-        <div class="f"><label for="ds-dl">Detectiegrens N<sub>a</sub></label><div class="inu"><input id="ds-dl" inputmode="decimal" value="140"><span class="u">kve/mL</span></div></div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="ds-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="ds-tbl-add">+ Organisme</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">N: kve/mL in de testsuspensie. N<sub>a</sub>: kve/mL in het testmengsel na de contacttijd, teruggerekend uit de telplaten van het geneutraliseerde mengsel. Vul 0 in als er niets groeide; dan geldt de detectiegrens. Voorbeelddata zijn verzonnen.</p>
-    </div>
-    <div class="result"><div id="ds-out"></div></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Desinf.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="ds-app"></div>
   <p class="src">EN 1276:2019 (fase 2, stap 1): 1 mL testsuspensie in een testmengsel van 10 mL, dus N<sub>0</sub> = N/10; reductie R = lg N<sub>0</sub> − lg N<sub>a</sub>. Eisen: ≥ 5 lg bactericide (EN 1276, EN 13727), ≥ 4 lg fungicide/gistdodend (EN 1650, EN 13624) en virusdodend (EN 14476); samenvatting in Evans Vanodine, EN Disinfectant Test Methods (2012). De testsuspensie hoort bij EN 1276 tussen 1,5 en 5,0 × 10⁸ kve/mL te liggen. Controles van de methode (neutralisatie, validatiesuspensie) zijn hier niet meegenomen.</p>
 </section>

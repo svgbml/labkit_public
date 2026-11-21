@@ -1,14 +1,8 @@
 <section class="tool" id="t-mpn" data-tool="mpn">
   <header class="tool-head"><h2>MPN (meest waarschijnlijk aantal)</h2>
   <p>Het meest waarschijnlijke aantal organismen per mL of g uit een buisjesreeks met positieve en negatieve buizen, met een 95%-betrouwbaarheidsinterval. Werkt voor elke combinatie van verdunningen en aantallen buizen.</p></header>
-  <div class="grid2">
-    <div class="panel">
-      <div class="fields"><div class="f"><label for="mp-u">Eenheid monster</label><select id="mp-u" style="width:100%"><option>g</option><option>mL</option></select></div></div>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="mp-tbl" class="mini"><thead></thead><tbody></tbody></table></div>
-      <div class="row" style="margin-top:8px"><button type="button" id="mp-tbl-add">+ Verdunning</button></div>
-      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">Per verdunning de hoeveelheid oorspronkelijk monster per buis (bijv. 0,1 g, 0,01 g, 0,001 g), het aantal buizen en het aantal positieve buizen. Voorbeeld: 3-buizenreeks met uitslag 3-1-0.</p>
-    </div>
-    <div class="result" id="mp-out"></div>
-  </div>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Mpn.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="mp-app"></div>
   <p class="src">MPN als maximum-likelihoodschatting: los λ op uit Σ p<sub>i</sub>·m<sub>i</sub>·e<sup>−λm<sub>i</sub></sup> / (1 − e<sup>−λm<sub>i</sub></sup>) = Σ (n<sub>i</sub> − p<sub>i</sub>)·m<sub>i</sub> (FDA Bacteriological Analytical Manual, Appendix 2: Most Probable Number from Serial Dilutions; Jarvis, Wilrich &amp; Wilrich, J Appl Microbiol 109:1660, 2010). 95%-interval via de standaardfout van ln λ uit de Fisher-informatie; de BAM-tabellen gebruiken een iets andere methode, dus de grenzen kunnen licht afwijken.</p>
 </section>
