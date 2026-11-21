@@ -970,6 +970,21 @@ def _(pg):
     r = pg.evaluate("(()=>{ const tr=[...document.querySelectorAll('#k-res table')].pop().querySelectorAll('tbody tr')[2]; return [__n(tr.cells[2].textContent),__n(tr.cells[3].textContent)]; })()")
     return [('helling', r[0], -2, 0.002), ('y-asafsnede', r[1], 100, 0.002)]
 
+@case('Restrictiedigestie', 'In-silico digestie van pFA6a-kanMX6', 'Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa')
+def _(pg):
+    fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')
+    out = []
+    for e1, e2, circ, exp in (('EcoRI', 'HindIII', True, [2441, 983, 514]), ('EcoRI', 'HindIII', False, [2422, 983, 514, 19]),
+                              ('BsaI', 'SfiI', True, [2746, 1169, 23]), ('PstI', 'NotI', True, [2390, 1270, 249, 29])):
+        pg.evaluate("([fa,e1,e2,c])=>{__go('digest');__set('dg-e1',e1);__set('dg-e2',e2);__set('dg-circ',c);__set('dg-seq',fa)}", [fa, e1, e2, circ])
+        # de laatste tabel in #dg-frag is die met de fragmenten (de eerste geeft de knipplaatsen)
+        got = pg.evaluate("[...[...document.querySelectorAll('#dg-frag table')].pop().querySelectorAll('tbody tr td:first-child')].map(e=>__n(__el(e)))")
+        for i, x in enumerate(exp):
+            out.append((f"{e1}+{e2} {'circ' if circ else 'lin'} fragment {i + 1} (bp)", got[i] if i < len(got) else float('nan'), x, 0))
+        out.append((f"{e1}+{e2} aantal fragmenten", len(got), len(exp), 0))
+    pg.evaluate("__set('dg-e1','EcoRI');__set('dg-e2','HindIII');__set('dg-seq','')")
+    return out
+
 @case('Restrictiedigestie', 'Enzymvolume en star-activiteit', '1 µg DNA × 10 U/µg / 20 U/µL = 0,5 µL per enzym; twee enzymen in 50 µL = 2% (glycerol 1%)')
 def _(pg):
     pg.evaluate("__go('digest');__set('dg-c','250');__set('dg-ng','1000');__set('dg-v','50');__set('dg-u1','20');__set('dg-u2','20');__set('dg-upg','10');__set('dg-e2','HindIII')")
