@@ -170,6 +170,13 @@ def _(pg):
     g = pg.evaluate("__cells('#ol-cardout tbody tr td:nth-child(5)')")
     return [('zelfdimeer ΔG (kcal/mol)', g[0], -3.09, 0.03)]
 
+@case('Primers oplossen', 'Primerpaar: kruisdimeer CGTTGA/TCAACG', 'SantaLucia 1998, uitgewerkt voorbeeld: 5′-CGTTGA-3′ met zijn complement, ΔG°37 = −5,35 kcal/mol')
+def _(pg):
+    pg.evaluate("__go('oligo');__set('ol-seq','a\tCGTTGA\\nb\tTCAACG')")
+    pg.wait_for_selector('#ol-pf')  # de keuzelijsten rendert Vue pas bij twee primers
+    pg.evaluate("__set('ol-pf','0');__set('ol-pr','1')")
+    return [('kruisdimeer ΔG (kcal/mol)', pg.evaluate("__kv('#ol-pair','Kruisdimeer')"), -5.35, 0.02)]
+
 @case('PCR-cyclus', 'qPCR-efficiëntie uit helling', 'Pearson qPCR-efficiëntie: helling −3,80 → 83,3%; helling −3,3 → 100,9%')
 def _(pg):
     pg.evaluate("__go('pcrcyclus');__set('y-q0','1e6');__set('y-qf','10');__set('y-cq','15 18,8 22,6')")

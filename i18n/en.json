@@ -4646,5 +4646,15 @@
 "{*} vormt een sterke haarspeld.": "{*} forms a strong hairpin.",
 "{*} eindigt niet op G of C (geen GC-klem).": "{*} does not end in G or C (no GC clamp).",
 "{*} heeft een reeks van {#} of meer dezelfde basen.": "{*} has a run of {#} or more identical bases.",
-"ΔG in kcal/mol bij {#} °C (nearest-neighbor, SantaLucia {#}; haarspeldlus SantaLucia & Hicks {#}). Grenzen volgens Premier Biosoft.": "ΔG in kcal/mol at {#} °C (nearest-neighbor, SantaLucia {#}; hairpin loop SantaLucia & Hicks {#}). Limits from Premier Biosoft."
+"ΔG in kcal/mol bij {#} °C (nearest-neighbor, SantaLucia {#}; haarspeldlus SantaLucia & Hicks {#}). Grenzen volgens Premier Biosoft.": "ΔG in kcal/mol at {#} °C (nearest-neighbor, SantaLucia {#}; hairpin loop SantaLucia & Hicks {#}). Limits from Premier Biosoft.",
+"Forward primer": "Forward primer",
+"Reverse primer": "Reverse primer",
+"Primerpaar": "Primer pair",
+"Kies twee verschillende primers.": "Pick two different primers.",
+"ΔT<sub>m</sub>": "ΔT<sub>m</sub>",
+"Kruisdimeer": "Cross-dimer",
+"De primers vormen samen een dimeer aan het 3′-eind.": "Together the primers form a dimer at the 3′ end.",
+"De primers vormen samen een sterk dimeer.": "Together the primers form a strong dimer.",
+"Het primerpaar past bij elkaar.": "The primer pair fits together.",
+"Primers": "Primers"
 }

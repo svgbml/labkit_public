@@ -41,6 +41,12 @@
       <h3 v-html="tHtml('Primerkaart <span class=&quot;example&quot;>voorbeeld</span>')"></h3>
       <div class="f"><label for="ol-seq">{{ t('Primers, één per regel: naam en sequentie (5′→3′)') }}</label>
         <textarea id="ol-seq" class="mono" rows="4" v-model="seqs" spellcheck="false"></textarea></div>
+      <div class="fields" v-if="cards.length >= 2" style="margin-top:12px">
+        <div class="f"><label for="ol-pf">{{ t('Forward primer') }}</label>
+          <select id="ol-pf" v-model="pf"><option v-for="(c, i) in cards" :key="i" :value="String(i)">{{ c.name }}</option></select></div>
+        <div class="f"><label for="ol-pr">{{ t('Reverse primer') }}</label>
+          <select id="ol-pr" v-model="pr"><option v-for="(c, i) in cards" :key="i" :value="String(i)">{{ c.name }}</option></select></div>
+      </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0" v-html="tHtml('T<sub>m</sub> nearest-neighbor bij 50 mM Na⁺, 1,5 mM Mg²⁺, 0,8 mM dNTP en 0,2 µM primer (de standaard van PCR-cyclus). ΔG bij 37 °C van het sterkste perfect gepaarde stuk.')"></p>
       <div class="row" style="margin-top:10px"><button type="button" class="primary" id="ol-card" @click="card" :disabled="!cards.length">{{ t('Primerkaart afdrukken') }}</button></div>
     </div>
@@ -49,6 +55,15 @@
         <lk-table :cols="cardCols" :rows="cardRows"/>
         <lk-note v-for="(x, i) in cardNotes" :key="i" kind="warn">{{ x }}</lk-note>
         <lk-note v-if="!cardNotes.length" kind="ok">{{ t('Geen opvallende dimeren of haarspelden.') }}</lk-note>
+        <template v-if="cards.length >= 2">
+          <h3 style="margin-top:14px">{{ t('Primerpaar') }}</h3>
+          <lk-note v-if="!pair" kind="info">{{ t('Kies twee verschillende primers.') }}</lk-note>
+          <template v-else>
+            <div id="ol-pair"><lk-kv :rows="pairRows"/></div>
+            <lk-note v-for="(x, i) in pairNotes" :key="i" kind="warn" :html="x"/>
+            <lk-note v-if="!pairNotes.length" kind="ok">{{ t('Het primerpaar past bij elkaar.') }}</lk-note>
+          </template>
+        </template>
         <lk-formula :html="tHtml('Grenzen: zelfdimeer ΔG &amp;lt; −5 (3′-eind) of −6 kcal/mol; haarspeld &amp;lt; −2 (3′-eind) of −3 kcal/mol')"/>
       </template>
       <lk-note v-else kind="info">{{ t('Plak een of meer primersequenties.') }}</lk-note>
@@ -59,7 +74,7 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
-import {parsePrimers, analyse, dimerBad, hairBad} from '../lib/primer.js';
+import {parsePrimers, analyse, dimer, dimerBad, hairBad} from '../lib/primer.js';
 
 const F = (x, d) => lkNumIn(fmt(x, d));
 const val = x => (x == null || x === '' || (typeof x === 'number' && !isFinite(x)) ? '' : String(x).replace('.', ','));
@@ -79,6 +94,7 @@ export default {
     return {
       seqs: st['ol-seq'] != null ? String(st['ol-seq'])
         : trPlain('Forward', true) + '\tAGCTGACCTGAAGGCTCTGAAG\n' + trPlain('Reverse', true) + '\tTCGTCGTACTTGACCAGGCTAT',
+      pf: st['ol-pf'] != null ? String(st['ol-pf']) : '0', pr: st['ol-pr'] != null ? String(st['ol-pr']) : '1',
       s: g('ol-s', '100'), w: g('ol-w', '10'), wv: g('ol-wv', '100'),
       rows: DATA.map(r => mk(trPlain(r[0], true), lkNumIn(val(r[1]))))
     };
@@ -127,6 +143,26 @@ export default {
       });
       return out;
     },
+    /* primerpaar: ΔTm, kruisdimeer en annealing-startwaarde, één keer; rijen, meldingen en afdruk lezen hieruit */
+    pair() {
+      const n = this.cards.length, ix = v => { const i = parseInt(v, 10); return i >= 0 && i < n ? i : null; };
+      const f = this.cards[ix(this.pf) ?? 0], r = this.cards[ix(this.pr) ?? 1];
+      if (n < 2 || f === r) return null;
+      const x = dimer(f.seq, r.seq), dt = Math.abs(f.info.tm - r.info.tm);
+      return {f, r, x, dt, ta: Math.min(f.info.tm, r.info.tm) - 5, xBad: dimerBad(x)};
+    },
+    pairRows() {
+      const p = this.pair, g = d => (d.dg < 0 ? F(d.dg, 2) + '&nbsp;kcal/mol' + (d.at3 ? ' (3′)' : '') : '–');
+      return [[this.tHtml('ΔT<sub>m</sub>'), chip(p.dt <= 5, F(p.dt, 1) + '&nbsp;°C')],
+        [this.t('Kruisdimeer'), chip(!p.xBad, g(p.x))],
+        [this.t('Startwaarde annealing'), F(p.ta, 1) + '&nbsp;°C']];
+    },
+    pairNotes() {
+      const p = this.pair, out = [];
+      if (p.dt > 5) out.push(this.tHtml('T<sub>m</sub> van de primers verschilt meer dan 5 °C.'));
+      if (p.xBad) out.push(this.t(p.x.at3 ? 'De primers vormen samen een dimeer aan het 3′-eind.' : 'De primers vormen samen een sterk dimeer.'));
+      return out;
+    },
     formula() {
       return this.tHtml('V<sub>stock</sub> (µL) = nmol / µM × 1000 · werkoplossing: V₁ = C₂V₂ / C₁');
     }
@@ -150,8 +186,17 @@ export default {
         + this.cards.map(c => '<tr><td>' + esc(c.name) + '</td><td class="seq">' + c.seq + '</td><td class="n">'
           + c.info.N + '</td><td class="n">' + F(c.info.gcp, 0) + '%</td><td class="n">' + F(c.info.tm, 1)
           + '</td><td class="n">' + g(c.self) + '</td><td class="n">' + g(c.hair) + '</td></tr>').join('')
-        + '</tbody></table>' + (this.cardNotes.length ? '<ul>' + this.cardNotes.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '')
+        + '</tbody></table>' + this.pairHtml() + (this.cardNotes.length ? '<ul>' + this.cardNotes.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '')
         + '<p class="src">' + T('ΔG in kcal/mol bij 37 °C (nearest-neighbor, SantaLucia 1998; haarspeldlus SantaLucia & Hicks 2004). Grenzen volgens Premier Biosoft.') + '</p>');
+    },
+    pairHtml() {
+      const p = this.pair;
+      if (!p) return '';
+      const T = x => esc(trPlain(x)), g = d => (d.dg < 0 ? F(d.dg, 2) + ' kcal/mol' + (d.at3 ? ' (3′)' : '') : '–');
+      return '<h2 style="font-size:15px;margin:16px 0 6px">' + T('Primerpaar') + '</h2><table><tbody><tr><th>' + T('Primers') + '</th><td>'
+        + esc(p.f.name) + ' + ' + esc(p.r.name) + '</td></tr><tr><th>ΔTm</th><td>' + F(p.dt, 1) + ' °C</td></tr><tr><th>'
+        + T('Kruisdimeer') + '</th><td>' + g(p.x) + '</td></tr><tr><th>' + T('Startwaarde annealing') + '</th><td>'
+        + F(p.ta, 1) + ' °C</td></tr></tbody></table>';
     },
     /* --- haken voor de rest van de app (TBLDEF['ol-tbl'] in web/index.html) --- */
     getRows() { return this.rows.map(r => [r.n, r.a]); },
