@@ -13,6 +13,9 @@
       <button type="button" class="bench-tg" @click="list = !list">{{ list ? t('Kaarten') : t('Lijst') }}</button>
       <button type="button" class="bench-x" :aria-label="t('Sluiten')" @click="close">✕</button>
     </header>
+    <div class="bench-prog" role="progressbar" :aria-valuemin="0" :aria-valuemax="steps.length" :aria-valuenow="nDone">
+      <span>{{ t(nDone + ' van ' + steps.length + ' klaar') }}</span><i><b :style="{width: 100 * nDone / steps.length + '%'}"></b></i>
+    </div>
     <div class="bench-dots" aria-hidden="true">
       <span v-for="(s, k) in steps" :key="k" :class="{done: done[k], cur: k === i}" @click="i = k; list = false"></span>
     </div>
@@ -37,19 +40,25 @@
 <script>
 /* de vinkjes per run, de nieuwste 30 runs: {sleutel: [nummers van de afgevinkte stappen]} */
 const BKEY = 'labkit:v1:bench';
+export const benchGet = key => jget(BKEY, {})[key] || [];
+export const benchPut = (key, ticks) => {
+  const all = jget(BKEY, {}); delete all[key]; all[key] = ticks;
+  const ks = Object.keys(all); ks.slice(0, Math.max(0, ks.length - 30)).forEach(k => delete all[k]);
+  jset(BKEY, all);
+};
 const runKey = (title, S) => { let h = 0; for (const c of title + '' + S.map(s => s.html).join('')) h = (h * 31 + c.codePointAt(0)) | 0; return String(h); };
 
 export default {
   name: 'Bench',
   data() { return {on: false, title: '', steps: [], i: 0, done: [], list: false, wake: false, sx: null}; },
-  computed: { cur() { return this.steps[this.i] || {html: ''}; } },
+  computed: { nDone() { return this.done.filter(Boolean).length; }, cur() { return this.steps[this.i] || {html: ''}; } },
   methods: {
     mmss: s => mmss(s),
     open({title = '', steps = []}) {
       const S = steps.filter(Boolean).map(s => typeof s === 'string' ? {html: s} : s);
       if (!S.length) return;
       this.key_ = runKey(title, S);
-      const got = jget(BKEY, {})[this.key_] || [], done = S.map((s, k) => got.includes(k));
+      const got = benchGet(this.key_), done = S.map((s, k) => got.includes(k));
       Object.assign(this, {on: true, title, steps: S, i: Math.max(0, done.indexOf(false)), done, list: false});
       document.body.style.overflow = 'hidden';
       document.addEventListener('keydown', this.key);
@@ -76,12 +85,7 @@ export default {
     go(d) { this.i = Math.max(0, Math.min(this.steps.length - 1, this.i + d)); },
     tick(k) { this.done.splice(k, 1, !this.done[k]); this.save(); },
     reset() { this.done = this.done.map(() => false); this.i = 0; this.save(); },
-    save() {
-      const all = jget(BKEY, {}); delete all[this.key_];
-      all[this.key_] = this.done.map((d, k) => d ? k : -1).filter(k => k >= 0);
-      const ks = Object.keys(all); ks.slice(0, Math.max(0, ks.length - 30)).forEach(k => delete all[k]);
-      jset(BKEY, all);
-    },
+    save() { benchPut(this.key_, this.done.map((d, k) => d ? k : -1).filter(k => k >= 0)); },
     ok() { if (!this.done[this.i]) this.tick(this.i); this.go(1); },
     swipe(x) { const dx = x - this.sx; this.sx = null; if (Math.abs(dx) > 60) this.go(dx < 0 ? 1 : -1); },
     timer() { const [n, s] = this.cur.timer; addTimer(n, s); tmAct(timers[timers.length - 1].id, 's'); },

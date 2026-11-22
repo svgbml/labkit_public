@@ -22,6 +22,30 @@
       </div>
     </div>
     <div id="w-pld"></div>
+    <div class="pl-fill">
+      <div class="row" style="gap:10px">
+        <button type="button" id="w-fillbtn" @click="toggleFill">{{ fill ? t('Vulmodus sluiten') : t('Vulmodus') }}</button>
+        <template v-if="fill">
+          <span class="pl-prog">{{ t(nFilled + ' van ' + wells.length + ' putjes gevuld') }}<i><b :style="{width: (wells.length ? 100 * nFilled / wells.length : 0) + '%'}"></b></i></span>
+          <button v-if="nFilled" type="button" @click="resetFill">{{ t('Opnieuw') }}</button>
+        </template>
+      </div>
+      <template v-if="fill">
+        <p v-if="!wells.length" style="font-size:13px;color:var(--muted)">{{ t('Geen putjes in gebruik: kleur eerst putjes in de plaat.') }}</p>
+        <div v-else class="pl-grid" :style="'grid-template-columns:22px repeat(' + dims.c + ',1fr)'">
+          <span></span><span v-for="j in dims.c" :key="'h' + j">{{ j }}</span>
+          <template v-for="(L, i) in rowLetters" :key="L">
+            <span>{{ L }}</span>
+            <template v-for="j in dims.c" :key="L + j">
+              <button v-if="grp[L + j]" type="button" :class="{fl: filled[L + j], nx: nextWell === L + j}"
+                :style="{background: grp[L + j]}" :aria-pressed="!!filled[L + j]" :aria-label="L + j" @click="tapWell(L + j)">{{ filled[L + j] ? '✓' : '' }}</button>
+              <button v-else type="button" class="off" disabled :aria-label="L + j"></button>
+            </template>
+          </template>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:0">{{ nextWell ? t('Volgende putje') + ': ' + nextWell : t('Alle putjes zijn gevuld.') }}</p>
+      </template>
+    </div>
     <div class="row" style="margin-top:12px;gap:14px">
       <div class="f"><label for="w-pal">{{ t('Kleurenpalet') }}</label>
         <select id="w-pal" v-model="pal" @change="onPal">
@@ -53,6 +77,7 @@
 </template>
 
 <script>
+import {benchGet, benchPut} from './Bench.vue';
 const PALS_UI = [['std', 'Standaard'], ['okabe', 'Kleurenblind-veilig'], ['pastel', 'Pastel'],
   ['fel', 'Fel'], ['grijs', 'Grijstinten']];
 /* tekst uit de oude opmaak in de taal van de gebruiker (i18nValue deed dit op de velden) */
@@ -69,16 +94,40 @@ export default {
       autolab: stored('w-autolab', true), leg: stored('w-leg', true),
       note: stored('w-note', loc('Standaarden in duplo in kolom 1–2; monsters in drievoud.')),
       msg: 'De tabel plak je direct in Excel, Google Sheets of je labjournaal.',
-      fb: null,
+      fb: null, fill: false, wells: [], grp: {}, dims: {r: 8, c: 12}, filled: {}, fkey: '',
       /* de downloadknop staat verborgen tot index.html showDl() aanroept; was dat al gebeurd,
          dan hoort hij er nu meteen */
       dlOn: STANDALONE || !!dlCap
     };
   },
-  computed: { pals() { return PALS_UI; } },
+  computed: {
+    pals() { return PALS_UI; },
+    rowLetters() { return WRL.slice(0, this.dims.r).split(''); },
+    nFilled() { return this.wells.filter(k => this.filled[k]).length; },
+    nextWell() { return this.wells.find(k => !this.filled[k]) || ''; }
+  },
   mounted() { plaatInit(); this.draw(); },
   methods: {
     draw() { plateImg(); },
+    /* vulmodus (S51): tik putjes af; de vinkjes staan in dezelfde opslag als de bench-modus,
+       met als sleutel de titel en de putjes met hun groep */
+    toggleFill() {
+      this.fill = !this.fill;
+      if (!this.fill) return;
+      const S = wState(), {r, c} = wDims(), grp = {}, wells = [];
+      for (let i = 0; i < r; i++) for (let j = 1; j <= c; j++) {
+        const k = WRL[i] + j, g = S.wells[k];
+        if (g != null && S.groups[g]) { grp[k] = S.groups[g].c; wells.push(k); }
+      }
+      let h = 0; for (const ch of 'plaat' + this.title + wells.map(k => k + S.wells[k]).join()) h = (h * 31 + ch.codePointAt(0)) | 0;
+      this.fkey = 'p' + h;
+      const got = benchGet(this.fkey), f = {};
+      wells.forEach((k, n) => { if (got.includes(n)) f[k] = true; });
+      Object.assign(this, {dims: {r, c}, grp, wells, filled: f});
+    },
+    saveFill() { benchPut(this.fkey, this.wells.map((k, n) => this.filled[k] ? n : -1).filter(n => n >= 0)); },
+    tapWell(k) { this.filled = {...this.filled, [k]: !this.filled[k]}; this.saveFill(); },
+    resetFill() { this.filled = {}; this.saveFill(); },
     onPal(e) { const p = PALS[e.target.value]; if (!p || !wPld) return; wPld.palette(p); plateImg(); },
     onShape(e) { if (wPld) wPld.shape(e.target.value); plateImg(); },
     onAutolab(e) { if (wPld) wPld.autoLabel(e.target.checked); plateImg(); },

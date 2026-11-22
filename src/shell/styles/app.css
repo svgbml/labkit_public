@@ -441,6 +441,18 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 .bench button:focus-visible{outline:3px solid #ffd400;outline-offset:2px}
 .bench-top{display:flex;align-items:center;gap:10px}
 .bench-title{flex:1;min-width:0;font-size:clamp(16px,3.4vw,22px);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bench-prog{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:15px;color:#ffd400;font-weight:700}
+.bench-prog i{flex:1;height:10px;border-radius:5px;background:#444;overflow:hidden}
+.bench-prog b{display:block;height:100%;background:#ffd400}
+.pl-fill{margin-top:12px}.pl-fill .pl-prog{display:flex;align-items:center;gap:10px;font-weight:600}
+.pl-fill .pl-prog i{flex:1;max-width:260px;height:10px;border-radius:5px;background:var(--line,#ddd);overflow:hidden}
+.pl-fill .pl-prog b{display:block;height:100%;background:#15803d}
+.pl-grid{display:grid;gap:4px;margin:10px 0;max-width:720px}
+.pl-grid span{font-size:12px;color:var(--muted);text-align:center;align-self:center}
+.pl-grid button{aspect-ratio:1;min-height:30px;padding:0;border-radius:50%;border:2px solid rgba(0,0,0,.25);font-size:12px;font-weight:700;color:#fff}
+.pl-grid button.off{background:#f4f5f7;border-style:dashed;opacity:.5}
+.pl-grid button.fl{opacity:.35}
+.pl-grid button.nx{outline:3px solid #ffd400;outline-offset:1px}
 .bench-dots{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
 .bench-dots span{flex:1 1 14px;max-width:48px;height:8px;border-radius:4px;background:#444;cursor:pointer}
 .bench-dots span.done{background:#ffd400}

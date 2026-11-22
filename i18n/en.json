@@ -4804,5 +4804,12 @@
 "Laan {#}: pipetteer {*}.": "Lane {#}: pipette {*}.",
 "Zet de spanning op {#} V en laat de gel lopen; reken op {*}.": "Set the voltage to {#} V and run the gel; allow {*}.",
 "Stop wanneer het blauwe front ongeveer {#} cm van de slotjes staat.": "Stop when the blue front is about {#} cm from the wells.",
-"Gel laten lopen": "Run the gel"
+"Gel laten lopen": "Run the gel",
+"Vulmodus": "Fill mode",
+"Vulmodus sluiten": "Close fill mode",
+"Geen putjes in gebruik: kleur eerst putjes in de plaat.": "No wells in use: colour some wells in the plate first.",
+"Volgende putje": "Next well",
+"Alle putjes zijn gevuld.": "All wells are filled.",
+"{#} van {#} klaar": "{#} of {#} done",
+"{#} van {#} putjes gevuld": "{#} of {#} wells filled"
 }
