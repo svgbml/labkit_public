@@ -5010,5 +5010,12 @@
 "SNP-tabel": "SNP table",
 "Waarschuwingen zijn vuistregels om een call na te kijken, geen vaste grenzen.": "Flags are rules of thumb for checking a call, not fixed limits.",
 "Geen heterozygote, gemarkeerde of bewerkte posities.": "No heterozygous, flagged or edited positions.",
-"SNP-tabel als CSV": "SNP table as CSV"
+"SNP-tabel als CSV": "SNP table as CSV",
+"Handmatige calls": "Manual calls",
+"Wijzig call": "Change call",
+"Geen handmatige calls.": "No manual calls.",
+"Sequencer": "Sequencer",
+"Jouw call": "Your call",
+"Ga naar positie {#}": "Go to position {#}",
+"Positie {#} terugzetten": "Reset position {#}"
 }

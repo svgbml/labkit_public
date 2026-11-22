@@ -96,6 +96,24 @@
         <lk-field v-model="hthr" :label="t('Drempel tweede piek')" for-id="sg-het" inputmode="decimal"/>
         <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('Per base de hoogte van de tweede piek gedeeld door die van de hoogste. Vanaf de drempel wordt de base een IUPAC-code (R, Y, S, W, K, M) en krijgt hij een paarse markering.') }}</p>
       </div>
+      <div v-if="read" class="panel" id="sg-ovr">
+        <h3>{{ t('Handmatige calls') }}</h3>
+        <div class="row" style="gap:10px;align-items:flex-end;flex-wrap:wrap">
+          <lk-field v-model="opos" :label="t('Positie')" for-id="sg-ovr-pos" inputmode="numeric"/>
+          <lk-field v-model="obase" :label="t('Base')" for-id="sg-ovr-base"/>
+          <button type="button" id="sg-ovr-set" @click="setOvr">{{ t('Wijzig call') }}</button>
+        </div>
+        <lk-note v-if="!nEd" kind="info">{{ t('Geen handmatige calls.') }}</lk-note>
+        <table v-else id="sg-ovr-tbl" class="tbl" style="margin-top:8px">
+          <thead><tr><th>{{ t('Positie') }}</th><th>{{ t('Sequencer') }}</th><th>{{ t('Automatisch') }}</th><th>{{ t('Jouw call') }}</th><th></th></tr></thead>
+          <tbody><tr v-for="i in edited" :key="i">
+            <td><button type="button" class="mono" :aria-label="t('Ga naar positie ' + (i + 1))" @click="goTo(i)">{{ i + 1 }}</button></td>
+            <td class="mono">{{ read.bases[i] }}</td><td class="mono">{{ auto[i] }}</td><td class="mono">{{ edits[i] }}</td>
+            <td><button type="button" :aria-label="t('Positie ' + (i + 1) + ' terugzetten')" @click="setBase(i, auto[i])">{{ t('Terugzetten') }}</button></td>
+          </tr></tbody>
+        </table>
+        <button v-if="nEd" type="button" style="margin-top:8px" @click="undoAll">{{ t('Alle bewerkingen terugzetten') }}</button>
+      </div>
     </div>
   </div>
 </template>
@@ -137,7 +155,7 @@ export default {
     const saved = jget('sg-read', null);
     return {win: st['sg-win'] != null ? String(st['sg-win']) : '10', qthr: st['sg-q'] != null ? String(st['sg-q']) : '20',
       read: saved ? markRaw(saved) : null, paste: st['sg-paste'] != null ? String(st['sg-paste']) : '', err: '', over: false,
-      edits: saved && saved.edits ? saved.edits : {}, sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1)};
+      edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1)};
   },
   computed: {
     HT() { return HT; },
@@ -146,6 +164,7 @@ export default {
     hasQ() { return this.m.r.qual.length > 0; },
     /* {start, end} (1-gebaseerd, inclusief) of null; bewerkingen veranderen de kwaliteit niet */
     trim() { return this.hasQ ? trimWindow(this.m.r.qual, this.winN, this.qN) : null; },
+    edited() { return Object.keys(this.edits).map(Number).sort((a, b) => a - b); },
     nEd() { return Object.keys(this.edits).length; },
     hN() { const n = Number(String(this.hthr).replace(',', '.')); return n > 0 && n <= 1 ? n : 0.2; },
     /* per base de piekhoogtes, de verhouding en de IUPAC-code boven de drempel (S155); null zonder trace */
@@ -397,11 +416,16 @@ export default {
     /* base i (0-based) een nieuwe letter geven; gelijk aan het origineel haalt de bewerking weg */
     setBase(i, b) {
       b = String(b).toUpperCase();
-      if (!this.read || !this.read.peaks.length || !IUPAC.test(b) || !(i >= 0 && i < this.read.bases.length)) return;
+      if (!this.read || !IUPAC.test(b) || !(i >= 0 && i < this.read.bases.length)) return;
       const e = Object.assign({}, this.edits);
       if (b === this.auto[i]) delete e[i]; else e[i] = b;
       this.edits = e; this.save();
     },
+    setOvr() {
+      const i = intIn(this.opos, 1, this.m.r.bases.length, 0) - 1;
+      if (i >= 0 && IUPAC.test(String(this.obase).toUpperCase())) { this.setBase(i, this.obase); this.opos = this.obase = ''; }
+    },
+    goTo(i) { this.select(i); if (this.read.peaks.length) this.center(this.read.peaks[i]); },
     undoAll() { this.edits = {}; this.save(); },
     save() { jset('sg-read', Object.assign({}, this.read, {edits: this.edits})); },
     onBase(e) { this.setBase(this.sel, e.target.value); e.target.value = this.seq[this.sel]; },
