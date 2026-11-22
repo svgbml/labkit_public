@@ -5,3 +5,4 @@ dist/
 Thumbs.db
 i18n/missing.json
 .lighthouseci/
+__pycache__/

@@ -32,6 +32,7 @@
             <option value="col">{{ t('kolom (A1, B1, …)') }}</option>
           </select></div>
         <lk-field v-model="mar" :label="t('Marge mastermix')" for-id="qp2-mar" unit="%"/>
+        <lk-overage v-model="ov" for-id="qp2-ov" :why="ovWhy"/>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Elk doelgen begint op een nieuwe rij (of kolom), zodat je per gen één mastermix met een multichannelpipet kunt verdelen. De mix zelf reken je uit met het Pipetteerschema (sjabloon qPCR).') }}</p>
       <div class="row" style="margin-top:12px;gap:10px;align-items:flex-end">
@@ -60,13 +61,15 @@
 </template>
 
 <script>
+import {overage} from '../lib/overage.js';
+
 const fnum = x => (typeof x === 'number' ? x : num(x));
 
 export default {
   name: 'Qplate',
   data() {
     return {fmtSel: '96', rep: '3', s: ['Controle 1', 'Controle 2', 'Behandeld 1', 'Behandeld 2'].map(x => trPlain(x)).join(', '), tg: 'GAPDH, IL6',
-      std: '0', ntc: '1', dir: 'row', mar: '10', exp: 'eigen',
+      std: '0', ntc: '1', dir: 'row', mar: '10', exp: 'eigen', ov: 'pct',
       over: false, need: 0, msg: '', tick: 0, gen: false};
   },
   computed: {
@@ -76,6 +79,7 @@ export default {
     /* de plaat zoals de ontwerper hem nu heeft; tick zegt dat hij veranderd is */
     pl() { this.tick; return qpRows(); },
     marg() { return (fnum(this.mar) || 0) / 100; },
+    ovWhy() { return overage(Math.max(0, ...this.cnt), this.ov, fnum(this.mar) || 0).why; },
     cnt() { return this.pl.groups.map((g, i) => this.pl.rows.filter(w => w.ti === i).length); },
     overText() {
       return this.t('De plaat is vol: ' + this.pl.rows.length + ' van de benodigde ' + this.need
@@ -85,7 +89,7 @@ export default {
       const t = this.t, {R, C, rows, groups} = this.pl;
       return [[t('Wells gebruikt'), t(rows.length + ' van ' + R * C)],
         ...groups.map((g, i) => this.cnt[i] ? [t('Mastermix ' + uv(g.n)),
-          t(this.cnt[i] + ' reacties → maak voor ' + fmt(this.cnt[i] * (1 + this.marg), 1))] : null)
+          t(this.cnt[i] + ' reacties → maak voor ' + fmt(overage(this.cnt[i], this.ov, fnum(this.mar) || 0).mult, 1))] : null)
           .filter(Boolean)];
     }
   },

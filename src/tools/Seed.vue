@@ -29,6 +29,7 @@
           <label for="sd-x">{{ t('Extra marge') }}</label>
           <div class="inu"><input id="sd-x" inputmode="decimal" v-model="x"><span class="u">%</span></div>
         </div>
+        <lk-overage data-expert="" v-model="ov" for-id="sd-ov" :why="m.why"/>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('De celconcentratie haal je uit de tool Telkamer. Bij het kiezen van een formaat wordt het gebruikelijke werkvolume ingevuld.') }}</p>
     </div>
@@ -49,13 +50,14 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {overage} from '../lib/overage.js';
 
 const F = (x, d) => lkNumIn(fmt(x, d)), S = (x, d = 3) => lkNumIn(sci(x, d)), V = u => lkNumIn(vol(u));
 
 export default {
   name: 'Seed',
   data() {
-    return {c: '8e5', fmtV: '1.9|0.5', mode: 'well', n: '5e4', v: lkNumIn('0,5'), w: '24', x: '10'};
+    return {c: '8e5', fmtV: '1.9|0.5', mode: 'well', n: '5e4', v: lkNumIn('0,5'), w: '24', x: '10', ov: 'pct'};
   },
   computed: {
     formats() {
@@ -66,10 +68,11 @@ export default {
     m() {
       const C = num(this.c), [area] = this.fmtV.split('|').map(Number), mode = this.mode, d = num(this.n), v = num(this.v),
         n = Math.round(num(this.w)), x = (num(this.x) || 0) / 100;
-      if (!(C > 0) || !(d > 0) || !(v > 0) || !(n > 0)) return {err: 1};
-      const per = mode === 'cm2' ? d * area : d, tot = n * v * (1 + x), cells = per * n * (1 + x), vs = cells / C;
-      if (vs > tot) return {err: 2, vs, tot, cells};
-      return {err: 0, area, n, v, x, per, tot, cells, vs};
+      const {mult, why} = overage(n || 0, this.ov, num(this.x) || 0);
+      if (!(C > 0) || !(d > 0) || !(v > 0) || !(n > 0)) return {err: 1, why};
+      const per = mode === 'cm2' ? d * area : d, tot = v * mult, cells = per * mult, vs = cells / C;
+      if (vs > tot) return {err: 2, vs, tot, cells, why};
+      return {err: 0, area, n, v, x, per, tot, cells, vs, why};
     },
     tooDilute() {
       const m = this.m;
@@ -78,7 +81,8 @@ export default {
     rows() {
       const m = this.m;
       return [[this.t('Medium erbij'), V((m.tot - m.vs) * 1000)],
-        [this.t('Totaal mengsel'), V(m.tot * 1000) + ` (${m.n} × ${V(m.v * 1000)} + ${F(m.x * 100, 0)}%)`],
+        [this.t('Totaal mengsel'), V(m.tot * 1000) + (this.ov === 'plus1' ? ` ((${m.n} + 1) × ${V(m.v * 1000)})`
+          : this.ov === 'none' ? ` (${m.n} × ${V(m.v * 1000)})` : ` (${m.n} × ${V(m.v * 1000)} + ${F(m.x * 100, 0)}%)`)],
         [this.t('Cellen per putje/fles'), S(m.per)],
         [this.t('Dichtheid'), this.tHtml(sci(m.per / m.area, 3) + ' cellen/cm²')],
         [this.t('Concentratie mengsel'), this.tHtml(sci(m.per / m.v, 3) + ' cellen/mL')]];

@@ -37,6 +37,7 @@ function qrMatrix(text,ecl='M'){ const bytes=[...new TextEncoder().encode(String
     const dark=M.reduce((a,r)=>a+r.filter(Boolean).length,0); p+=10*Math.floor(Math.abs(dark*20-n*n*10)/(n*n)); return p; };
   let best=0, bp=Infinity; for(let m=0;m<8;m++){ apply(m); drawFmt(m); const pp=penalty(); if(pp<bp){ bp=pp; best=m; } apply(m); }
   apply(best); drawFmt(best); return M; }
+function qrSvg(text,px){ try{ const M=qrMatrix(text,'M'), n=M.length, q=4, w=n+2*q; let d=''; for(let y=0;y<n;y++) for(let c=0;c<n;c++) if(M[y][c]) d+=`M${c+q} ${y+q}h1v1h-1z`; return `<svg xmlns="http://www.w3.org/2000/svg" width="${px}" height="${px}" viewBox="0 0 ${w} ${w}" shape-rendering="crispEdges"><rect width="${w}" height="${w}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`; }catch(e){ return ''; } }
 function drawQR(x,text,X,Y,size,ecl='M'){ const M=qrMatrix(text,ecl), n=M.length, q=4, s=size/(n+2*q); x.fillStyle='#fff'; x.fillRect(X,Y,size,size); x.fillStyle='#000'; for(let y=0;y<n;y++) for(let c=0;c<n;c++) if(M[y][c]) x.fillRect(X+(c+q)*s,Y+(y+q)*s,s+0.01,s+0.01); return n; }
 
 /* --- gedeelde dialoog --- */
@@ -222,6 +223,7 @@ live({
   qrRS: [() => qrRS, v => { qrRS = v; }],
   qrMatrix: [() => qrMatrix, v => { qrMatrix = v; }],
   drawQR: [() => drawQR, v => { drawQR = v; }],
+  qrSvg: [() => qrSvg, v => { qrSvg = v; }],
   appModal: [() => appModal, v => { appModal = v; }],
   fold: () => fold,
   cmdItems: [() => cmdItems, v => { cmdItems = v; }],

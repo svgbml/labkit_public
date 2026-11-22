@@ -11,7 +11,8 @@
     <div class="panel">
       <div class="fields">
         <lk-field v-model="n" :label="t('Aantal monsters')" for-id="fc-n" inputmode="numeric"/>
-        <lk-field v-model="x" :label="t('Overmaat')" for-id="fc-x" unit="%"/>
+        <lk-field v-model="x" :label="t('Extra marge')" for-id="fc-x" unit="%"/>
+        <lk-overage v-model="ov" for-id="fc-ov" :why="m && m.why"/>
         <lk-field v-model="v" :label="t('Kleuringsvolume per test')" for-id="fc-v" unit="µL"/>
       </div>
       <lk-etable table-id="fc-tbl" :cols="cols" v-model:rows="rows" add-id="fc-tbl-add"/>
@@ -36,7 +37,7 @@
     </div>
     <div class="result"><div id="fc-out">
       <template v-if="m">
-        <lk-big :label="t('Cocktail voor ' + n1 + ' monsters + ' + fmt(m.x * 100, 0) + '%')" :value="L(vol(m.V * m.m))" :sub="t('totaal')"/>
+        <lk-big :label="t(ov === 'plus1' ? 'Cocktail voor ' + n1 + ' monsters + 1 extra' : ov === 'none' ? 'Cocktail voor ' + n1 + ' monsters, geen overmaat' : 'Cocktail voor ' + n1 + ' monsters + ' + fmt(m.x * 100, 0) + '%')" :value="L(vol(m.V * m.m))" :sub="t('totaal')"/>
         <lk-table :cols="mixCols" :rows="mixRows"/>
         <lk-note v-if="m.buf < 0" kind="bad">{{ t('De antilichamen samen zijn meer dan het kleuringsvolume; vergroot het volume of verlaag de hoeveelheden.') }}</lk-note>
         <lk-note v-if="m.fl.length < m.A.length" kind="bad">{{ t('Twee antilichamen hebben hetzelfde fluorochroom; dat is in één buis niet te onderscheiden.') }}</lk-note>
@@ -60,6 +61,7 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {overage} from '../lib/overage.js';
 
 /* een getal dat de component zelf opmaakt (fmt, sig, sci, vol) in de taal van de gebruiker */
 const L = lkNumIn;
@@ -68,7 +70,7 @@ export default {
   name: 'Facs',
   data() {
     return {
-      n: '12', x: '10', v: '50',
+      n: '12', x: '10', ov: 'pct', v: '50',
       rows: [['CD3', 'FITC', '100', 'nee'], ['CD4', 'PE', '200', 'nee'], ['CD8', 'APC', '100', 'nee'],
         ['CD25', 'PE-Cy7', '50', 'ja'], ['CD127', 'BV421', '50', 'ja'], ['Viability', '7-AAD', '100', 'nee']],
       mp: '18500', mn: '210', sd: '95',
@@ -87,8 +89,8 @@ export default {
       const A = this.rows.map(r => ({m: r[0] || '?', f: r[1] || '?', t: num(r[2]), fmo: r[3] === 'ja'})).filter(a => a.t >= 1);
       if (!(n >= 1 && n <= 5000 && V > 0 && A.length)) return null;
       A.forEach(a => { a.v = V / a.t; });
-      const m = n * (1 + x), ab = A.reduce((s, a) => s + a.v, 0);
-      return {n, x, V, A, m, ab, buf: V - ab, fl: [...new Set(A.map(a => a.f))], fmo: A.filter(a => a.fmo)};
+      const {mult: m, why} = overage(n, this.ov, num(this.x) || 0), ab = A.reduce((s, a) => s + a.v, 0);
+      return {why, n, x, V, A, m, ab, buf: V - ab, fl: [...new Set(A.map(a => a.f))], fmo: A.filter(a => a.fmo)};
     },
     n1() { return this.m ? this.m.n : ''; },
     mixCols() {

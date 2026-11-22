@@ -87,5 +87,6 @@
  "inst": "gear",
  "gplan": "comb",
  "phadj": "ph",
- "medium": "cells"
+ "medium": "cells",
+ "plasmid": "plasmid"
 }

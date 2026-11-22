@@ -62,6 +62,9 @@ export default {
     return {v: lkNumIn('500'), base: 'DMEM', fbs: lkNumIn('10'), ps: '1', gln: '2',
       extraName: '', extraFold: lkNumIn('100')};
   },
+  mounted() {
+    matRegister('medium', () => (this.err ? [] : [[this.base, VL(Math.max(0, this.baseML))], ...this.parts.map(p => [p.n, VL(p.mL)])]));
+  },
   computed: {
     bases() { return MDBASE; },
     /* elk supplement als {naam, mL, waarvandaan}; mL gaat over het eindvolume */

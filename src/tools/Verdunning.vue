@@ -6,6 +6,7 @@
      web/index.html staan; de reeksplanner en een paar andere tools gebruiken die ook.
      De id's d-c1, d-c1u, d-c2, d-c2u, d-v1, d-v1u, d-v2, d-v2u en d-out blijven zoals ze waren. -->
 <template>
+  <div class="stack">
   <div class="grid2">
     <div class="panel">
       <div class="fields">
@@ -44,10 +45,46 @@
       </template>
     </div>
   </div>
+  <div class="grid2">
+    <div class="panel">
+      <h3 style="font-size:15px;margin:0 0 10px">{{ t('Antistofverdunning') }}</h3>
+      <div class="fields">
+        <div class="f">
+          <label for="ab-d">{{ t('Verdunning volgens datasheet') }}</label>
+          <div class="inu"><span class="u" style="margin-right:6px">1 :</span><input id="ab-d" inputmode="decimal" v-model="ab.d"></div>
+        </div>
+        <div class="f">
+          <label for="ab-v">{{ t('Volume per blot of putje') }}</label>
+          <div class="inu">
+            <input id="ab-v" inputmode="decimal" v-model="ab.v">
+            <select id="ab-u" v-model="ab.u" :aria-label="t('Eenheid volume')"><option>mL</option><option>µL</option></select>
+          </div>
+        </div>
+        <lk-field v-model="ab.k" :label="t('Aantal blots of putjes')" for-id="ab-k" inputmode="numeric"/>
+        <lk-overage v-model="ab.ov" for-id="ab-ov" :why="abm.why" style="grid-column:span 2"/>
+        <lk-field v-model="ab.x" :label="t('Extra marge')" for-id="ab-x" unit="%"/>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin:8px 0 0">{{ t('Bron: berekening C₁V₁ = C₂V₂ met de verdunning uit het datasheet.') }}</p>
+    </div>
+    <div class="result" id="ab-out">
+      <lk-note v-if="abm.err === 1" kind="info">{{ t('Vul de verdunning, het volume en het aantal in.') }}</lk-note>
+      <lk-note v-else-if="abm.err === 2" kind="bad">{{ t('De verdunning moet minstens 1 : 1 zijn.') }}</lk-note>
+      <template v-else>
+        <lk-big :label="t('Antistof')" :value="lkNumIn(vol(abm.ab))"/>
+        <lk-kv :rows="abRows"/>
+        <lk-note kind="info">{{ t('Verdun in de buffer die het datasheet noemt, bijvoorbeeld 5% BSA of 5% melk in TBS-T. Maak een aliquot van wat je niet gebruikt.') }}</lk-note>
+      </template>
+    </div>
+  </div>
+  </div>
 </template>
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {overage} from '../lib/overage.js';
+
+/* een volume met vijf cijfers als het in mL staat, zodat 21,978 mL niet 21,98 mL wordt */
+const volP = uL => (isFinite(uL) && Math.abs(uL) >= 1000 ? sig(uL / 1000, 5) + ' mL' : vol(uL));
 
 const CU = ['X', 'M', 'mM', 'µM', 'nM', 'g/L', 'mg/mL', 'µg/mL', 'ng/µL', '%', 'U/µL', 'U/mL'];
 const VU = ['µL', 'mL', 'L'];
@@ -61,8 +98,10 @@ export default {
   name: 'Verdunning',
   data() {
     return {v: {'d-c1': '50', 'd-c1u': 'X', 'd-c2': '1', 'd-c2u': 'X',
-      'd-v1': '', 'd-v1u': 'mL', 'd-v2': '500', 'd-v2u': 'mL'}};
+      'd-v1': '', 'd-v1u': 'mL', 'd-v2': '500', 'd-v2u': 'mL'},
+    ab: {d: '1000', v: '10', u: 'mL', k: '2', ov: 'pct', x: '10'}};
   },
+  methods: {lkNumIn, vol},
   watch: {
     /* Een eenheid voor C₁ van een andere soort kiezen trok in de oude versie de eenheid van C₂
        mee, zodat de twee altijd vergelijkbaar bleven. Dat blijft zo; omgekeerd niet, want dan
@@ -72,6 +111,20 @@ export default {
     }
   },
   computed: {
+    /* antistofverdunning: totaal = V × overmaatfactor, antistof = totaal / N, buffer = rest */
+    abm() {
+      const a = this.ab, N = num(a.d), V = num(a.v) * (a.u === 'mL' ? 1000 : 1), k = num(a.k);
+      const {mult, why} = overage(k || 0, a.ov, num(a.x) || 0);
+      if (!(N > 0) || !(V > 0) || !(k > 0)) return {err: 1, why};
+      if (N < 1) return {err: 2, why};
+      const tot = V * mult, ab = tot / N;
+      return {err: 0, why, tot, ab, buf: tot - ab, mult};
+    },
+    abRows() {
+      const t = this.t, m = this.abm;
+      return [[t('Buffer'), lkNumIn(volP(m.buf))], [t('Totaal volume'), lkNumIn(volP(m.tot))],
+        [t('Vermenigvuldigingsfactor'), lkNumIn(fmt(m.mult, 2)) + '×']];
+    },
     conc() { return CONC; },
     vols() { return VOLS; },
     concUnits() { return CU; },

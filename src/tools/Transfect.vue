@@ -34,6 +34,7 @@
           </select></div>
         <lk-field v-model="n" :label="t('Aantal putjes')" for-id="trf-n" inputmode="numeric"/>
         <lk-field v-model="x" :label="t('Extra')" for-id="trf-x" unit="%"/>
+        <lk-overage v-model="ov" for-id="trf-ov" :why="m && m.why"/>
         <lk-field v-model="st" :label="t('Stock DNA')" for-id="trf-st" unit="µg/µL"/>
         <lk-field v-model="sist" :label="t('Stock siRNA')" for-id="trf-sist" unit="µM"/>
       </div>
@@ -58,6 +59,7 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {overage} from '../lib/overage.js';
 
 /* een getal dat de component zelf opmaakt (fmt, sig, sci, vol) in de taal van de gebruiker */
 const L = lkNumIn;
@@ -69,7 +71,7 @@ const TRF_MED = {'0.2': '100 µL', '0.5': '250 µL', '1': '500 µL', '2': '1 mL'
 export default {
   name: 'Transfect',
   data() {
-    return {type: 'dna', fmtSel: '1', dose: 'hi', n: '6', x: '10', st: '1', sist: '10'};
+    return {type: 'dna', fmtSel: '1', dose: 'hi', n: '6', x: '10', ov: 'pct', st: '1', sist: '10'};
   },
   computed: {
     /* formaat, nucleïnezuur, dosis en hoeveelheden; zelfde voorwaarden als de oude calc.transfect() */
@@ -77,10 +79,10 @@ export default {
       const f = num(this.fmtSel), si = this.type === 'si', dose = this.dose, n = Math.round(num(this.n)),
         x = (num(this.x) || 0) / 100, st = num(this.st), sst = num(this.sist);
       if (!(f > 0) || !(n >= 1) || n > 1e4) return null;
-      const mm = n * (1 + x), opti = 25 * f, dna = 0.5 * f, p3 = si ? 0 : 1 * f, pm = 15 * f,
+      const {mult: mm, why} = overage(n, this.ov, num(this.x) || 0), opti = 25 * f, dna = 0.5 * f, p3 = si ? 0 : 1 * f, pm = 15 * f,
         Ls = dose === 'lo' ? [0.75 * f] : dose === 'hi' ? [1.5 * f] : [0.75 * f, 1.5 * f];
       const nuc = si ? (sst > 0 ? pm / sst : NaN) : (st > 0 ? dna / st : NaN);
-      return {f, si, n, x, st, sst, m: mm, opti, dna, p3, pm, L: Ls, nuc};
+      return {why, f, si, n, x, st, sst, m: mm, opti, dna, p3, pm, L: Ls, nuc};
     },
     kvRows() {
       const {si, pm, dna, f, L: Ls, n, x, m} = this.m, t = this.t;
@@ -91,7 +93,7 @@ export default {
         [t('Lipofectamine 3000 per putje'), t(Ls.map(v => vol(v)).join(' en '))],
         [t('Kweekmedium per putje'), TRF_MED[this.fmtSel] ? L(TRF_MED[this.fmtSel]) : '–'],
         [t('Cellen zaaien'), seed ? t(seed + ' per putje') : t('zie protocol van de cellijn')],
-        [t('Mastermix voor'), t(n + ' putjes + ' + fmt(x * 100, 0) + '% = ' + fmt(m, 1))]
+        [t('Mastermix voor'), t(this.ov === 'plus1' ? n + ' putjes + 1 extra = ' + fmt(m, 1) : this.ov === 'none' ? n + ' putjes, geen overmaat = ' + fmt(m, 1) : n + ' putjes + ' + fmt(x * 100, 0) + '% = ' + fmt(m, 1))]
       ];
     },
     colsA() {

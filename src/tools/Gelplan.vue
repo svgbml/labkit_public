@@ -374,7 +374,16 @@ export default {
       if (!L.some(([k]) => k === this.lad)) this.lad = L[0][0];
     }
   },
-  mounted() { this.draw(); },
+  mounted() {
+    this.draw();
+    matRegister('gplan', () => {
+      const L = (this.cast.rows || []).filter(r => r[1] !== '–').map(r => [r[0], r[1]]);
+      const T = this.totals;
+      L.push([trPlain('Ladder'), this.lad]);
+      if (T.dye) L.push([this.dye, lkNumIn(vol(T.dye))]);
+      return L;
+    });
+  },
   updated() { this.draw(); },
   methods: {
     lkNum(v) { return lkNumIn(v); },

@@ -54,6 +54,15 @@ def _(pg):
     vals = pg.evaluate("__mass('#o-tbl tbody tr [data-k=out]')")
     return [('NaCl (g)', vals[0], 8.0, 0.01), ('KCl (g)', vals[1], 0.2, 0.02), ('Na₂HPO₄ (g)', vals[2], 1.44, 0.02), ('KH₂PO₄ (g)', vals[3], 0.24, 0.03)]
 
+@case('Rapport / protocol', 'Materiaallijst van PBS 1X, 1 L', 'Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄): de materiaallijst neemt de massa uit Oplossing & buffer over')
+def _(pg):
+    pg.evaluate("__go('oplossing');__set('o-v','1');__set('o-vu','L');__set('o-preset','pbs')")
+    v = pg.evaluate("matList('oplossing').map(r=>/\\bmg\\b/.test(r[1])?__n(r[1])/1000:__n(r[1]))")
+    ok = pg.evaluate("qrSvg('https://example.org/x', 100).startsWith('<svg')")
+    d = pg.evaluate("(()=>{ const h=rpDoc(['oplossing'], true, true, 't', '', {mat:true, qr:true}); return h.includes('Materiaallijst') && h.includes('<svg'); })()")
+    return [('NaCl (g)', v[0], 8.0, 0.01), ('KCl (g)', v[1], 0.2, 0.02), ('Na₂HPO₄ (g)', v[2], 1.44, 0.02), ('KH₂PO₄ (g)', v[3], 0.24, 0.03),
+            ('qrSvg geeft svg', 1.0 if ok else 0.0, 1.0, 0), ('protocol bevat lijst en QR', 1.0 if d else 0.0, 1.0, 0)]
+
 @case('Oplossing & buffer', 'TBE 10X, 1 L', 'Bio-Rad Bulletin 6205 (108 g Tris, 55 g boorzuur per liter)')
 def _(pg):
     pg.evaluate("__go('oplossing');__set('o-v','1');__set('o-vu','L');__set('o-preset','tbe10')")
@@ -163,6 +172,39 @@ def _(pg):
     pg.evaluate("__go('pcrcyclus');__set('y-f','AGCTGACCTGAAGGCTCTGAAG');__set('y-r','TCGTCGTACTTGACCAGGCTAT');__set('y-na','50');__set('y-mg','1,5');__set('y-dntp','0,8');__set('y-pc','0,2')")
     tms = pg.evaluate("__cells('#y-out tbody tr td:nth-child(4)')")
     return [('Tm forward (°C)', tms[0], 65.22, 0.002), ('Tm reverse (°C)', tms[1], 64.15, 0.002)]
+
+@case('Primers oplossen', 'Primerkaart: zelfdimeer-ΔG van een GAATTC-3′-eind', 'SantaLucia 1998, ΔG°37-tabel: GAATTC/GAATTC = 2 × 0,98 (GC-eind) − 1,30 − 1,00 − 0,88 − 1,00 − 1,30 + 0,43 (symmetrie) = −3,09 kcal/mol')
+def _(pg):
+    pg.evaluate("__go('oligo');__set('ol-seq','test\tTTTTTTTTGAATTC')")
+    g = pg.evaluate("__cells('#ol-cardout tbody tr td:nth-child(5)')")
+    return [('zelfdimeer ΔG (kcal/mol)', g[0], -3.09, 0.03)]
+
+@case('Primers oplossen', 'Primerpaar: kruisdimeer CGTTGA/TCAACG', 'SantaLucia 1998, uitgewerkt voorbeeld: 5′-CGTTGA-3′ met zijn complement, ΔG°37 = −5,35 kcal/mol')
+def _(pg):
+    pg.evaluate("__go('oligo');__set('ol-seq','a\tCGTTGA\\nb\tTCAACG')")
+    pg.wait_for_selector('#ol-pf')  # de keuzelijsten rendert Vue pas bij twee primers
+    pg.evaluate("__set('ol-pf','0');__set('ol-pr','1')")
+    return [('kruisdimeer ΔG (kcal/mol)', pg.evaluate("__kv('#ol-pair','Kruisdimeer')"), -5.35, 0.02)]
+
+def _tpl():
+    """Vast pseudowillekeurig template van 1500 bp met de forward op 100 en de reverse-site op 700."""
+    import random
+    rnd = random.Random(44); t = ''.join(rnd.choice('ACGT') for _ in range(1500))
+    f, r = 'AGCTGACCTGAAGGCTCTGAAG', 'TCGTCGTACTTGACCAGGCTAT'
+    rc = r[::-1].translate(str.maketrans('ACGT', 'TGCA'))
+    t = t[:100] + f + t[122:700] + rc + t[722:]
+    return t, f, r, rc
+
+@case('PCR-cyclus', 'In-silico PCR: productgrootte, lineair en circulair', 'Onafhankelijk berekend: productgrootte = einde reverse-site − begin forward-site (Python str.find op hetzelfde template); circulair met het nulpunt midden in het product')
+def _(pg):
+    t, f, r, rc = _tpl()
+    exp = t.find(rc) + len(rc) - t.find(f)
+    rot = t[400:] + t[:400]  # het nulpunt ligt nu tussen de twee primers
+    pg.evaluate("([f,r,t])=>{__go('pcrcyclus');__set('y-f',f);__set('y-r',r);__set('y-circ',false);__set('y-tpl',t)}", [f, r, t])
+    lin = pg.evaluate("__big('#y-pcr')")
+    pg.evaluate("t=>{__set('y-circ',true);__set('y-tpl',t)}", rot)
+    circ = pg.evaluate("__big('#y-pcr')")
+    return [('product lineair (bp)', lin, exp, 0), ('product circulair over het nulpunt (bp)', circ, exp, 0)]
 
 @case('PCR-cyclus', 'qPCR-efficiëntie uit helling', 'Pearson qPCR-efficiëntie: helling −3,80 → 83,3%; helling −3,3 → 100,9%')
 def _(pg):
@@ -908,6 +950,16 @@ def _(pg):
     pg.evaluate("__set('d-c1u','X');__set('d-c2u','X');__set('d-c1','50');__set('d-c2','1');__set('d-v2','500')")
     return [('V₁ (µL)', v, 1.25, 0.001), ('foutmelding bij C₂ > C₁', 1 if bad else 0, 1, 0)]
 
+@case('Verdunning', 'Antistofverdunning met overmaat', 'Onafhankelijk berekend: 1:1000, 2 blots × 10 mL + 10% = 22 mL → 22 µL antistof en 21,978 mL buffer; met +1 reactie 3 × 10 mL → 30 µL')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('ab-d','1000');__set('ab-u','mL');__set('ab-v','10');__set('ab-k','2');__set('ab-ov','pct');__set('ab-x','10')")
+    pg.wait_for_timeout(100)
+    ab = pg.evaluate("__big('#ab-out')"); buf = pg.evaluate("__kv('#ab-out','Buffer')")
+    pg.evaluate("__set('ab-ov','plus1')"); pg.wait_for_timeout(100)
+    p1 = pg.evaluate("__big('#ab-out')")
+    pg.evaluate("__set('ab-ov','pct')")
+    return [('antistof (µL)', ab, 22, 0.001), ('buffer (mL)', buf, 21.978, 0.001), ('antistof met +1 reactie (µL)', p1, 30, 0.001)]
+
 @case('Telkamer', 'Komma als scheidingsteken', '"12,15,14,18" zijn vier vaktellingen: gemiddeld 14,75 per vak')
 def _(pg):
     pg.evaluate("__go('telkamer');__set('k-ch','0.1');kSq();__set('k-sq','1');__set('k-live','12,15,14,18');__set('k-dead','');__set('k-df','1')")
@@ -936,6 +988,39 @@ def _(pg):
     pg.evaluate(f"__go('enzym');__tbl('k-tbl',{rows},'enzym')")
     r = pg.evaluate("(()=>{ const tr=[...document.querySelectorAll('#k-res table')].pop().querySelectorAll('tbody tr')[2]; return [__n(tr.cells[2].textContent),__n(tr.cells[3].textContent)]; })()")
     return [('helling', r[0], -2, 0.002), ('y-asafsnede', r[1], 100, 0.002)]
+
+@case('Plasmidekaart', 'pFA6a-kanMX6 uit GenBank', 'Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb: 3938 bp circulair, SP6-promotor op 3922..2 over het nulpunt) en Biopython Bio.Restriction (REBASE): 22 van de 50 enzymen knippen één keer, EcoRI op 1517 en BamHI op 44')
+def _(pg):
+    gb = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.gb').read_text(encoding='utf-8')
+    pg.evaluate("gb=>{__go('plasmid');__set('pl-enz','');__set('pl-uniq',true);__set('pl-prim','');__set('pl-seq',gb)}", gb)
+    kv = lambda lab: pg.evaluate("l=>__kv('#pl-out',l)", lab)
+    # de knipplaatsentabel is de tweede tabel in de uitvoer; zoek de rij van een enzym op
+    site = lambda e: pg.evaluate("e=>{const tb=[...document.querySelectorAll('#pl-out table')][1];"
+                                 "const r=[...tb.querySelectorAll('tbody tr')].find(r=>r.cells[0].textContent.trim()===e);"
+                                 "return r?__n(__el(r.cells[1])):NaN}", e)
+    # het kenmerk dat over het nulpunt loopt staat in de eerste tabel
+    sp6 = pg.evaluate("{const tb=document.querySelector('#pl-out table');"
+                      "const r=[...tb.querySelectorAll('tbody tr')].find(r=>/SP6 promoter/.test(r.cells[0].textContent));"
+                      "r?__n(__el(r.cells[2])):NaN}")
+    return [('lengte (bp)', kv('Lengte'), 3938, 0), ('GC (%)', kv('GC'), 47.92, 0.001),
+            ('kenmerken', kv('Kenmerken'), 18, 0), ('enzymen die één keer knippen', kv('Enzymen'), 22, 0),
+            ('EcoRI (positie)', site('EcoRI'), 1517, 0), ('BamHI (positie)', site('BamHI'), 44, 0),
+            ('SP6-promotor over het nulpunt (start)', sp6, 3922, 0)]
+
+@case('Restrictiedigestie', 'In-silico digestie van pFA6a-kanMX6', 'Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa')
+def _(pg):
+    fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')
+    out = []
+    for e1, e2, circ, exp in (('EcoRI', 'HindIII', True, [2441, 983, 514]), ('EcoRI', 'HindIII', False, [2422, 983, 514, 19]),
+                              ('BsaI', 'SfiI', True, [2746, 1169, 23]), ('PstI', 'NotI', True, [2390, 1270, 249, 29])):
+        pg.evaluate("([fa,e1,e2,c])=>{__go('digest');__set('dg-e1',e1);__set('dg-e2',e2);__set('dg-circ',c);__set('dg-seq',fa)}", [fa, e1, e2, circ])
+        # de laatste tabel in #dg-frag is die met de fragmenten (de eerste geeft de knipplaatsen)
+        got = pg.evaluate("[...[...document.querySelectorAll('#dg-frag table')].pop().querySelectorAll('tbody tr td:first-child')].map(e=>__n(__el(e)))")
+        for i, x in enumerate(exp):
+            out.append((f"{e1}+{e2} {'circ' if circ else 'lin'} fragment {i + 1} (bp)", got[i] if i < len(got) else float('nan'), x, 0))
+        out.append((f"{e1}+{e2} aantal fragmenten", len(got), len(exp), 0))
+    pg.evaluate("__set('dg-e1','EcoRI');__set('dg-e2','HindIII');__set('dg-seq','')")
+    return out
 
 @case('Restrictiedigestie', 'Enzymvolume en star-activiteit', '1 µg DNA × 10 U/µg / 20 U/µL = 0,5 µL per enzym; twee enzymen in 50 µL = 2% (glycerol 1%)')
 def _(pg):

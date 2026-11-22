@@ -27,6 +27,16 @@
         <div class="row" style="margin-top:10px"><button type="button" id="tf-add" @click="addRow">{{ t('+ Plaat') }}</button></div>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Platen met dezelfde naam bij Experiment worden samen verwerkt. Heb je de rest geconcentreerd (centrifugeren, pellet in ±200 µL), vul dan het oorspronkelijke volume in dat op die plaat terechtkwam, bijvoorbeeld 930 µL.') }}</p>
       </div>
+      <div class="panel">
+        <h3>{{ t('Transformatiekaart') }}</h3>
+        <div class="fields">
+          <lk-field v-model="cn" :label="t('Aantal transformaties')" for-id="tf-n" inputmode="numeric"/>
+          <lk-field v-model="cells" :label="t('Competente cellen per transformatie')" for-id="tf-cells" unit="µL"/>
+        </div>
+        <lk-steps :steps="cardSteps.map(x => x.html)"/>
+        <div class="row" style="margin-top:10px"><button type="button" id="tf-card" @click="card">{{ t('Transformatiekaart afdrukken') }}</button></div>
+        <p style="font-size:12px;color:var(--muted);margin:8px 0 0">{{ t('NEB, High Efficiency Transformation Protocol (C2987H)') }}</p>
+      </div>
     </div>
     <div class="result" id="tf-out">
       <lk-note v-if="m.empty" kind="info">{{ t('Vul de tellingen per plaat in.') }}</lk-note>
@@ -53,7 +63,7 @@ export default {
   name: 'Transf',
   data() {
     return {
-      lv: '10', vng: '50', used: '1', tot: '1040', range: '30-300',
+      cn: '3', cells: lkNumIn('50'), lv: '10', vng: '50', used: '1', tot: '1040', range: '30-300',
       rows: [[trPlain('Eigen ligatie'), '10', '3', '19'], [trPlain('Eigen ligatie'), '100', '31', '176'],
         [trPlain('Eigen ligatie'), '930', 'TNTC', 'TNTC'], [trPlain('Controle-insert'), '100', '72', '118']]
     };
@@ -118,13 +128,53 @@ export default {
       res.filter(r => r.used > 0 && r.col < 10).forEach(r => w.push(this.tHtml(ud(r.n) + ': minder dan 10 kolonies geteld; de verhouding wit/blauw is dan erg onzeker.')));
       return w;
     },
+    /* de stappen met temperatuur en tijd; html is de tekst op het scherm, al vertaald */
+    cardSteps() {
+      const t = this.t, n = Math.max(1, Math.round(num(this.cn)) || 1), c = num(this.cells) || 0;
+      const st = [
+        [t('Ontdooi de competente cellen op ijs, 10 min.') + ' ' + t('Totaal ' + uv(lkNumIn(vol(n * c))) + ' cellen, verdeeld over ' + n + ' buizen.'), 'ijs', '10 min'],
+        [t('Voeg 1–5 µL DNA (1 pg–100 ng) toe aan de cellen; tik 4–5 keer tegen de buis, niet vortexen.'), 'ijs', '–'],
+        [t('Op ijs, 30 min.'), 'ijs', '30 min'],
+        [t('Hitteschok 42 °C, precies 30 s.'), '42 °C', '30 s'],
+        [t('Op ijs, 5 min.'), 'ijs', '5 min'],
+        [t('Voeg 950 µL SOC van kamertemperatuur toe.') + ' ' + t('Totaal ' + uv(lkNumIn(vol(n * 950))) + ' SOC.'), 'kamertemperatuur', '–'],
+        [t('37 °C, 60 min, schudden op 250 rpm.') + ' ' + t('Warm intussen de selectieplaten voor op 37 °C.'), '37 °C', '60 min'],
+        [t('Plaat 50–100 µL uit (eventueel een verdunning); incubeer de platen overnacht bij 37 °C.'), '37 °C', 'overnacht']];
+      return st.map(([html, temp, time]) => ({html, temp, time}));
+    },
     formula() {
       const {tot, vng, lv, used, ng} = this.m;
       return this.t('transformanten = Σ kolonies / Σ uitgeplaat volume × ' + fmt(tot, 0) + ' µL · vector = ' + fmt(vng, 1) + ' ng / ' + fmt(lv, 1) + ' µL × ' + fmt(used, 2) + ' µL = ' + fmt(ng, 3) + ' ng · frequentie = transformanten / µg vector');
     }
   },
   methods: {
-    addRow() { this.rows = [...this.rows, ['', '100', '', '']]; }
+    /* ---------- de transformatiekaart (S41) ----------
+       NEB High Efficiency Transformation Protocol (C2987H), chemisch competente E. coli. Alleen
+       de totalen volgen uit het aantal transformaties; de stappen zelf staan vast. */
+    addRow() { this.rows = [...this.rows, ['', '100', '', '']]; },
+    /* een A4 om bij de bank te leggen: per stap een hokje, de temperatuur en de tijd */
+    card() {
+      const T = x => esc(trPlain(x)), n = Math.max(1, Math.round(num(this.cn)) || 1);
+      const title = trPlain('Transformatiekaart');
+      rpPrint('<!doctype html><meta charset="utf-8"><title>' + esc(title) + '</title><style>'
+        + '@page{size:A4;margin:16mm}body{margin:0;font:13px system-ui,sans-serif;color:#1f2933}'
+        + 'h1{font-size:20px;margin:0 0 2px}.meta{margin:0 0 12px;color:#5f6b7a;font-size:12px}'
+        + 'table{border-collapse:collapse;width:100%;font-size:13px}'
+        + 'th,td{border:1px solid #c9ced6;padding:6px 8px;text-align:left;vertical-align:top}'
+        + 'th{background:#eef0f3}td.box,th.box{width:24px;text-align:center}'
+        + 'td.box span{display:inline-block;width:12px;height:12px;border:1.4px solid #1f2933}'
+        + '.src{margin:14px 0 0;font-size:11px;color:#5f6b7a}.sign{margin-top:18px;font-size:12px;color:#5f6b7a}'
+        + '</style><h1>' + esc(title) + '</h1>'
+        + '<p class="meta">' + T('Aantal transformaties') + ': <b>' + n + '</b> &nbsp; '
+        + T('Competente cellen per transformatie') + ': <b>' + esc(lkNumIn(vol(num(this.cells) || 0))) + '</b></p>'
+        + '<table><thead><tr><th class="box"></th><th>' + T('Stap') + '</th><th>' + T('Temperatuur') + '</th><th>'
+        + T('Tijd') + '</th></tr></thead><tbody>'
+        + this.cardSteps.map(s => '<tr><td class="box"><span></span></td><td>' + esc(s.html) + '</td><td>'
+          + T(s.temp) + '</td><td>' + T(s.time) + '</td></tr>').join('')
+        + '</tbody></table>'
+        + '<p class="src">' + T('NEB, High Efficiency Transformation Protocol (C2987H)') + '</p>'
+        + '<p class="sign">' + T('Uitgevoerd door') + ': ________________ &nbsp; ' + T('Datum') + ': ________________</p>');
+    }
   }
 };
 </script>

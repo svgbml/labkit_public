@@ -21,6 +21,10 @@
         </div>
         <lk-field v-model="ta" :label="t('Gewenste annealingtemperaturen (optioneel)')" for-id="gr-ta" cls="txt" inputmode="text"/>
       </div>
+      <div class="row" style="margin-top:10px">
+        <button type="button" id="gr-from" @click="from">{{ t('Rond de annealingtemperatuur uit PCR-cyclus') }}</button>
+        <span style="font-size:13px;color:var(--muted)">{{ fromMsg }}</span>
+      </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0" v-html="hint"></p>
     </div>
     <div class="result">
@@ -52,7 +56,7 @@ export default {
     const st = typeof storeGet === 'function' ? storeGet() : {};
     const g = (id, d) => (st[id] != null ? String(st[id]) : d);
     return {lo: g('gr-lo', '52'), hi: g('gr-hi', '66'), n: g('gr-n', '12'), mode: g('gr-m', 'lin'),
-      ta: g('gr-ta', '55 58 61 64')};
+      ta: g('gr-ta', '55 58 61 64'), fromMsg: ''};
   },
   computed: {
     ns() { return ['12', '8', '6', '24']; },
@@ -90,6 +94,16 @@ export default {
   updated() { this.draw(); },
   methods: {
     F,
+    /* S44: een gradiënt van T_a − 6 tot T_a + 6 °C rond de startwaarde van PCR-cyclus
+       (laagste T_m − 5), met T_a en ±3 °C als gewenste temperaturen */
+    from() {
+      const ta = window.__pcrcVm ? window.__pcrcVm.taAuto : NaN;
+      if (!isFinite(ta)) { this.fromMsg = this.t('Vul eerst beide primers in bij PCR-cyclus.'); return; }
+      const c = Math.round(ta), h = x => lkNumIn(fmt(Math.round(x * 2) / 2, 1));
+      this.lo = String(c - 6); this.hi = String(c + 6);
+      this.ta = [ta - 3, ta, ta + 3].map(h).join(' ');
+      this.fromMsg = this.t('Annealingtemperatuur uit PCR-cyclus: ' + F(ta, 1) + ' °C.');
+    },
     draw() {
       const cv = document.getElementById('gr-cv'), m = this.m; if (!cv || !m) return;
       chart(cv, {xmin: 0.5, xmax: m.n + 0.5, ymin: Math.floor(m.lo - 2), ymax: Math.ceil(m.hi + 2),

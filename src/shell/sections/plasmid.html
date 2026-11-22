@@ -1,0 +1,8 @@
+<section class="tool" id="t-plasmid" data-tool="plasmid">
+  <header class="tool-head"><h2>Plasmidekaart</h2>
+  <p>Tekent een ronde kaart van een plasmide: de kenmerken uit een GenBank-bestand als pijlen, de knipplaatsen van de restrictie-enzymen erbuiten en de plaats van je primers erbinnen.</p></header>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Plasmid.vue); de kop en de
+       bronregel blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="pl-app"></div>
+  <p class="src">Het GenBank-formaat (LOCUS, FEATURES met /label, /gene of /product, en ORIGIN) volgens NCBI, GenBank Flat File Release, sectie 3.4 (Feature Location); een plaats als <i>complement(join(…))</i> en een kenmerk dat over het nulpunt van een circulair plasmide loopt worden gelezen. Herkenningsplaatsen en knipposities van de enzymen volgens REBASE, dezelfde tabel als <i>Restrictiedigestie</i>. Primerbindingen worden gezocht zoals in de in-silico PCR van <i>PCR-cyclus</i>: het 3′-eind van de primer moet precies passen. Positie 1 staat bovenaan en de nummering loopt met de klok mee, zoals in de gangbare kaartprogramma's.</p>
+</section>

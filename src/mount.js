@@ -80,6 +80,7 @@ import Kin from './tools/Kin.vue';
 import Hwe from './tools/Hwe.vue';
 import Rmp from './tools/Rmp.vue';
 import Ystr from './tools/Ystr.vue';
+import Plasmid from './tools/Plasmid.vue';
 import Pipetteer from './tools/Pipetteer.vue';
 import PcrProgramma from './tools/PcrProgramma.vue';
 import Verdunningsschema from './tools/Verdunningsschema.vue';
@@ -119,6 +120,8 @@ export function start() {
   calc.pipkeus = () => {};
 
   mountTool('#dg-app', Digest);
+  mountTool('#pl-app', Plasmid);
+  calc.plasmid = () => {};
   calc.digest = () => {};
 
   mountTool('#pa-app', Phadj);

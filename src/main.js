@@ -23,6 +23,7 @@ import './lib/fit.js';
 import './lib/chart.js';
 import './lib/parse.js';
 import './lib/storage.js';
+import './lib/material.js';
 /* de motoren (S268): toestand die buiten Vue blijft en door meerdere tools gebruikt wordt */
 import './engines/timers.js';
 import './engines/gelfoto.js';
