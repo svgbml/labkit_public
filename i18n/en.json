@@ -4984,5 +4984,18 @@
 "De read begint bij het eerste venster en eindigt bij het laatste venster waarvan de gemiddelde Phred-kwaliteit de drempel haalt; de rest staat grijs.": "The read starts at the first window and ends at the last window whose mean Phred quality reaches the threshold; the rest is greyed out.",
 "Geen enkel venster haalt de drempel; er is geen trimvoorstel.": "No window reaches the threshold; there is no trim suggestion.",
 "Trimvoorstel": "Trim suggestion",
-"Na trimmen": "After trimming"
+"Na trimmen": "After trimming",
+"Online opzoeken (NCBI)": "Online lookups (NCBI)",
+"Online opzoeken bij NCBI toestaan": "Allow online lookups at NCBI",
+"Staat dit uit (de standaard), dan maakt LabKit geen enkele verbinding met NCBI. Staat het aan, dan gaat alleen het rs-nummer of accessienummer dat je opzoekt naar NCBI, met de naam LabKit. Niets over je monsters, je uitslagen of jou.": "While this is off (the default), LabKit makes no connection to NCBI at all. While it is on, only the rs number or accession number you look up goes to NCBI, together with the name LabKit. Nothing about your samples, your results or you.",
+"E-mailadres voor NCBI (niet verplicht)": "E-mail address for NCBI (optional)",
+"NCBI vraagt om een adres waarop ze je kunnen bereiken als er iets misgaat. LabKit vult het nooit zelf in en stuurt het alleen mee als je het hier typt.": "NCBI asks for an address where they can reach you if something goes wrong. LabKit never fills it in itself and only sends it if you type it here.",
+"Online opzoeken staat uit. Zet het aan bij Instellingen.": "Online lookups are switched off. Turn them on in Settings.",
+"NCBI antwoordde niet binnen 20 seconden. Probeer het later opnieuw, of plak de sequentie zelf.": "NCBI did not answer within 20 seconds. Try again later, or paste the sequence yourself.",
+"Geen internetverbinding. Plak de sequentie zelf, of probeer het opnieuw zodra je online bent.": "No internet connection. Paste the sequence yourself, or try again once you are online.",
+"NCBI is niet bereikbaar. Sommige browsers laten vanuit een lokaal bestand geen online verzoeken toe: gebruik dan de online versie of het Windows-programma, of plak de sequentie zelf.": "NCBI cannot be reached. Some browsers do not allow online requests from a local file: then use the online version or the Windows app, or paste the sequence yourself.",
+"NCBI is niet bereikbaar: geen verbinding, of de browser, een firewall of een extensie hield het verzoek tegen. Plak de sequentie zelf, of probeer het later opnieuw.": "NCBI cannot be reached: there is no connection, or the browser, a firewall or an extension stopped the request. Paste the sequence yourself, or try again later.",
+"NCBI krijgt te veel verzoeken tegelijk. Wacht even en probeer het opnieuw.": "NCBI is receiving too many requests at once. Wait a moment and try again.",
+"NCBI gaf een fout (HTTP {#}). Probeer het later opnieuw, of plak de sequentie zelf.": "NCBI returned an error (HTTP {#}). Try again later, or paste the sequence yourself.",
+"NCBI stuurde een antwoord dat LabKit niet kan lezen. Probeer het later opnieuw.": "NCBI sent a reply that LabKit cannot read. Try again later."
 }
