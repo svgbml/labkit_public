@@ -43,7 +43,14 @@
             </template>
           </div>
         </div>
-        <pre id="sg-seq" class="mono" v-if="m.ok" style="white-space:pre-wrap;overflow-x:auto;margin-top:12px"><template v-for="(k, i) in seqTokens" :key="i"><mark v-if="k.o" class="sg-ed" :title="t('Origineel') + ': ' + k.o" :style="{background: '#ffe0b2', color: k.g ? 'var(--muted)' : 'inherit'}">{{ k.text }}</mark><span v-else-if="k.g" style="color:var(--muted)">{{ k.text }}</span><template v-else>{{ k.text }}</template></template></pre>
+        <div v-if="m.ok" class="row" style="gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap">
+          <label class="chk" for="sg-rc"><input type="checkbox" id="sg-rc" v-model="rc"> {{ t('Reverse complement') }}</label>
+          <button type="button" id="sg-copy" @click="copy">{{ t('Kopieer als FASTA') }}</button>
+          <span v-if="rng">{{ t('Bereik') }}: {{ rng.a + 1 }}–{{ rng.b + 1 }} ({{ rng.b - rng.a + 1 }} {{ t('basen') }})</span>
+          <span v-if="copied" role="status">{{ copied }}</span>
+        </div>
+        <p v-if="m.ok" style="font-size:13px;color:var(--muted);margin:4px 0 0">{{ t('Klik op een base in het paneel om naar die plek in de trace te gaan; Shift + klik selecteert een bereik, dat Kopieer als FASTA kopieert.') }}</p>
+        <pre id="sg-seq" ref="pre" class="mono" v-if="m.ok" style="white-space:pre-wrap;overflow:auto;max-height:18em;margin-top:8px" @click="panelClick"><template v-for="r in seqRows" :key="r.pos"><span>{{ r.pos }}</span>{{ '  ' }}<template v-for="(g, gi) in r.groups" :key="gi"><template v-if="gi">{{ ' ' }}</template><span v-for="b in g" :key="b.i" :data-i="b.i" :class="{'sg-sel': b.i === sel, 'sg-rng': inRng(b.i)}" :title="b.o ? t('Origineel') + ': ' + b.o : null" :style="{background: b.i === sel ? '#90caf9' : inRng(b.i) ? '#bbdefb' : b.o ? '#ffe0b2' : null, color: b.g ? 'var(--muted)' : null, cursor: 'pointer'}">{{ b.c }}</span></template>{{ '\n' }}</template></pre>
       </div>
     </div>
     <div>
@@ -77,7 +84,7 @@
 import {markRaw} from 'vue';
 import {lkNumIn} from '../lib/bridge.js';
 import {readAbif, abifRead} from '../lib/abif.js';
-import {trimWindow} from '../lib/sangertrim.js';
+import {trimWindow, comp, fasta} from '../lib/sangertrim.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 
 const LB = 18, TH = 190, QB = 28, OV = 40, GAP = 20;   // hoogte trace, kwaliteitsstrook, overzichtsstrook en de strook met posities (CSS-pixels); LB = strook met de baseletters bovenaan
@@ -106,7 +113,7 @@ export default {
     const saved = jget('sg-read', null);
     return {win: st['sg-win'] != null ? String(st['sg-win']) : '10', qthr: st['sg-q'] != null ? String(st['sg-q']) : '20',
       read: saved ? markRaw(saved) : null, paste: st['sg-paste'] != null ? String(st['sg-paste']) : '', err: '', over: false,
-      edits: saved && saved.edits ? saved.edits : {}, sel: null};
+      edits: saved && saved.edits ? saved.edits : {}, sel: null, rng: null, rc: !!st['sg-rc'], copied: ''};
   },
   computed: {
     HT() { return HT; },
@@ -153,26 +160,26 @@ export default {
       }
       return out;
     },
-    /* GenBank-ORIGIN: rijen van 60, groepen van 10, positie van de eerste base ervoor; een bewerkte base is een eigen stuk (o = oorspronkelijk) */
-    seqTokens() {
-      const q = this.seq, w = String(q.length).length, ed = this.edits, tr = this.trim, out = [];
-      let buf = '', g = false;
-      const flush = () => { if (buf) out.push({text: buf, g}); buf = ''; };
-      for (let i = 0; i < q.length; i++) {
-        const gi = !!tr && (i + 1 < tr.start || i + 1 > tr.end);
-        if (gi !== g) { flush(); g = gi; }
-        if (i % 60 === 0) buf += (i ? '\n' : '') + String(i + 1).padStart(w) + '  ';
-        else if (i % 10 === 0) buf += ' ';
-        if (ed[i] != null) { flush(); out.push({text: q[i], o: this.m.r.bases[i], g}); } else buf += q[i];
+    /* GenBank-ORIGIN: rijen van 60, groepen van 10, positie van de eerste base ervoor; per base {i = index in de originele read, c, g = getrimd, o = origineel als bewerkt}.
+       Reverse complement: de rij loopt van het 3'-einde terug en is genummerd 1..n in de getoonde (rc-)volgorde; i wijst naar de originele base. */
+    seqRows() {
+      const q = this.seq, n = q.length, w = String(n).length, ed = this.edits, tr = this.trim, rc = this.rc, rows = [];
+      for (let j = 0; j < n; j++) {
+        const i = rc ? n - 1 - j : j, o = ed[i] != null ? this.m.r.bases[i] : null;
+        if (j % 60 === 0) rows.push({pos: String(j + 1).padStart(w), groups: []});
+        const gs = rows[rows.length - 1].groups;
+        if (j % 10 === 0) gs.push([]);
+        gs[gs.length - 1].push({i, c: rc ? comp(q[i]) : q[i], o: o && (rc ? comp(o) : o), g: !!tr && (i + 1 < tr.start || i + 1 > tr.end)});
       }
-      flush();
-      return out;
+      return rows;
     }
   },
   watch: {
     /* een andere read: begin links, ingezoomd tot ongeveer 1 scanpunt per pixel (±70 basen) */
     'm.r'() { this.view = {x0: 0, spp: 1}; this.$nextTick(this.draw); },
-    sel() { this.draw(); },
+    sel() { this.draw(); this.reveal(); },
+    rng() { this.draw(); },
+    rc() { this.$nextTick(this.reveal); },
     edits() { this.draw(); },
     trim() { this.draw(); },
     qN() { this.draw(); }
@@ -203,7 +210,7 @@ export default {
         if (!p.bases) { this.err = this.t('Geen ABIF-bestand en geen sequentie gevonden.'); return; }
         r = {name: p.name || file.name, meta: null, order: '', traces: null, bases: p.bases, peaks: [], qual: []};
       }
-      this.edits = {}; this.sel = null;
+      this.edits = {}; this.sel = null; this.rng = null;
       this.read = markRaw(r);
       jset('sg-read', r);
     },
@@ -243,6 +250,10 @@ export default {
       if (this.sel != null && this.sel < n) {
         x.fillStyle = 'rgba(21,101,192,.15)';
         x.fillRect((p[this.sel] - v.x0) / v.spp - bw / 2, 0, bw, LB + 4 + TH);
+      }
+      if (this.rng && this.rng.b < n) {
+        x.fillStyle = 'rgba(21,101,192,.15)';
+        x.fillRect((p[this.rng.a] - v.x0) / v.spp - bw / 2, 0, (p[this.rng.b] - p[this.rng.a]) / v.spp + bw, LB + 4 + TH);
       }
       if (bw < 7) return;
       x.font = 'bold 12px system-ui,sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
@@ -323,7 +334,7 @@ export default {
       while (lo < hi) { const mid = (lo + hi) >> 1; if (p[mid] < s) lo = mid + 1; else hi = mid; }
       return n ? (lo > 0 && s - p[lo - 1] < p[lo] - s ? lo - 1 : lo) : null;
     },
-    select(i) { this.sel = i == null || !this.read || !this.read.peaks.length ? null : Math.max(0, Math.min(i, this.read.peaks.length - 1, this.read.bases.length - 1)); },
+    select(i) { this.rng = null; this.sel = i == null || !this.read || !this.read.peaks.length ? null : Math.max(0, Math.min(i, this.read.peaks.length - 1, this.read.bases.length - 1)); },
     /* base i (0-based) een nieuwe letter geven; gelijk aan het origineel haalt de bewerking weg */
     setBase(i, b) {
       b = String(b).toUpperCase();
@@ -335,9 +346,33 @@ export default {
     undoAll() { this.edits = {}; this.save(); },
     save() { jset('sg-read', Object.assign({}, this.read, {edits: this.edits})); },
     onBase(e) { this.setBase(this.sel, e.target.value); e.target.value = this.seq[this.sel]; },
+    inRng(i) { return !!this.rng && i >= this.rng.a && i <= this.rng.b; },
+    /* shift: bereik van sel tot base i (zonder sel wordt i de selectie) */
+    pick1(i, shift) {
+      if (shift && this.sel != null && i !== this.sel) this.rng = {a: Math.min(this.sel, i), b: Math.max(this.sel, i)};
+      else this.select(i);
+    },
+    panelClick(e) {
+      const el = e.target.closest('[data-i]');
+      if (!el) return;
+      const i = +el.dataset.i;
+      this.pick1(i, e.shiftKey);
+      if (this.read && this.read.peaks.length && !e.shiftKey) this.center(this.read.peaks[i]);
+    },
+    /* de geselecteerde base in het paneel in beeld, alleen door het paneel zelf te scrollen */
+    reveal() {
+      const pr = this.$refs.pre, el = pr && this.sel != null && pr.querySelector('[data-i="' + this.sel + '"]');
+      if (!el) return;
+      const a = el.getBoundingClientRect(), b = pr.getBoundingClientRect();
+      if (a.top < b.top) pr.scrollTop -= b.top - a.top; else if (a.bottom > b.bottom) pr.scrollTop += a.bottom - b.bottom;
+    },
+    async copy() {
+      const t = fasta(this.m.r.name, this.seq, this.rng, this.rc);
+      try { await navigator.clipboard.writeText(t); this.copied = this.t('Gekopieerd.'); } catch (e) { this.copied = this.t('Kopiëren geblokkeerd.'); }
+    },
     up(e) {
       const d = this.drag;
-      if (d && !d.ov && e && e.type === 'pointerup' && Math.abs(e.offsetX - d.sx) <= 3 && this.read && this.read.peaks.length) this.select(this.nearest(e.offsetX));
+      if (d && !d.ov && e && e.type === 'pointerup' && Math.abs(e.offsetX - d.sx) <= 3 && this.read && this.read.peaks.length) this.pick1(this.nearest(e.offsetX), e.shiftKey);
       this.drag = null; if (this.$refs.cv) this.$refs.cv.style.cursor = 'grab'; },
     key(e) {
       if (this.sel != null && !e.ctrlKey && !e.metaKey && !e.altKey) {
@@ -357,7 +392,7 @@ export default {
       if (k) { e.preventDefault(); k(); }
     },
     clear() {
-      this.read = null; this.edits = {}; this.sel = null; this.paste = ''; this.err = '';
+      this.read = null; this.edits = {}; this.sel = null; this.rng = null; this.paste = ''; this.err = '';
       jset('sg-read', null);
       const f = document.getElementById('sg-file'); if (f) f.value = '';
     }
