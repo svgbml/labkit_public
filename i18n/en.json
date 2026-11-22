@@ -4817,5 +4817,13 @@
 "Geen lanen met een naam: vul eerst de laantabel in.": "No named lanes: fill in the lane table first.",
 "Volgende laan": "Next lane",
 "Alle lanen zijn geladen.": "All lanes are loaded.",
-"{#} van {#} lanen geladen": "{#} of {#} lanes loaded"
+"{#} van {#} lanen geladen": "{#} of {#} lanes loaded",
+"Notities": "Notes",
+"Notitie bij stap": "Note at step",
+"Foto gekozen": "Photo chosen",
+"Foto toevoegen": "Add photo",
+"Afwijking": "Deviation",
+"Bewaar notitie": "Save note",
+"De notitie is niet bewaard: de opslag van de browser is vol. Verwijder oude notities of laat de foto weg.": "The note was not saved: the browser storage is full. Delete old notes or leave out the photo.",
+"Run-notities en afwijkingen": "Run notes and deviations"
 }

@@ -10,6 +10,7 @@
     <header class="bench-top">
       <span class="bench-title">{{ title }}</span>
       <button v-if="list && done.some(Boolean)" type="button" class="bench-tg" @click="reset">{{ t('Opnieuw') }}</button>
+      <button type="button" class="bench-tg" @click="nOpen = !nOpen">{{ t('Notities') }}<span v-if="notes.length"> ({{ notes.length }})</span></button>
       <button type="button" class="bench-tg" @click="list = !list">{{ list ? t('Kaarten') : t('Lijst') }}</button>
       <button type="button" class="bench-x" :aria-label="t('Sluiten')" @click="close">✕</button>
     </header>
@@ -19,7 +20,23 @@
     <div class="bench-dots" aria-hidden="true">
       <span v-for="(s, k) in steps" :key="k" :class="{done: done[k], cur: k === i}" @click="i = k; list = false"></span>
     </div>
-    <ol v-if="list" class="bench-list">
+    <div v-if="nOpen" class="bench-notes">
+      <textarea v-model="nText" rows="3" :placeholder="t('Notitie bij stap') + ' ' + (i + 1)"></textarea>
+      <div class="bench-nrow">
+        <label class="bench-photo"><input type="file" accept="image/*" capture="environment" @change="photo">{{ nImg ? t('Foto gekozen') : t('Foto toevoegen') }}</label>
+        <label><input type="checkbox" v-model="nDev"> {{ t('Afwijking') }}</label>
+        <button type="button" :disabled="!nText.trim() && !nImg" @click="addNote">{{ t('Bewaar notitie') }}</button>
+      </div>
+      <p v-if="nErr" class="bench-err">{{ nErr }}</p>
+      <ul class="bench-nlist">
+        <li v-for="(n, k) in notes" :key="k" :class="{dev: n.dev}">
+          <b>{{ n.dev ? t('Afwijking') + ' · ' : '' }}{{ t('Stap') }} {{ n.step }} · {{ new Date(n.t).toLocaleString() }}</b>
+          <span>{{ n.text }}</span><img v-if="n.img" :src="n.img" alt="">
+          <button type="button" :aria-label="t('Verwijderen')" @click="delNote(k)">✕</button>
+        </li>
+      </ul>
+    </div>
+    <ol v-else-if="list" class="bench-list">
       <li v-for="(s, k) in steps" :key="k" :class="{done: done[k]}">
         <label><input type="checkbox" :checked="!!done[k]" @change="tick(k)"><span v-html="s.html"></span></label>
       </li>
@@ -46,11 +63,14 @@ export const benchPut = (key, ticks) => {
   const ks = Object.keys(all); ks.slice(0, Math.max(0, ks.length - 30)).forEach(k => delete all[k]);
   jset(BKEY, all);
 };
+/* run-notities en afwijkingen (S53): {sleutel: {title, notes: [{t, step, text, dev, img}]}}, de nieuwste 30 runs;
+   het Rapport leest deze sleutel ook (rpNotes in 62_report.js) */
+const NKEY = 'labkit:v1:benchnotes';
 const runKey = (title, S) => { let h = 0; for (const c of title + '' + S.map(s => s.html).join('')) h = (h * 31 + c.codePointAt(0)) | 0; return String(h); };
 
 export default {
   name: 'Bench',
-  data() { return {on: false, title: '', steps: [], i: 0, done: [], list: false, wake: false, sx: null}; },
+  data() { return {on: false, title: '', steps: [], i: 0, done: [], list: false, wake: false, sx: null, nOpen: false, notes: [], nText: '', nImg: '', nDev: false, nErr: ''}; },
   computed: { nDone() { return this.done.filter(Boolean).length; }, cur() { return this.steps[this.i] || {html: ''}; } },
   methods: {
     mmss: s => mmss(s),
@@ -59,7 +79,7 @@ export default {
       if (!S.length) return;
       this.key_ = runKey(title, S);
       const got = benchGet(this.key_), done = S.map((s, k) => got.includes(k));
-      Object.assign(this, {on: true, title, steps: S, i: Math.max(0, done.indexOf(false)), done, list: false});
+      Object.assign(this, {on: true, title, steps: S, i: Math.max(0, done.indexOf(false)), done, list: false, nOpen: false, nText: '', nImg: '', nDev: false, nErr: '', notes: (jget(NKEY, {})[this.key_] || {}).notes || []});
       document.body.style.overflow = 'hidden';
       document.addEventListener('keydown', this.key);
       document.addEventListener('visibilitychange', this.lock);
@@ -81,6 +101,31 @@ export default {
     async lock() {
       if (!this.on || document.visibilityState !== 'visible') return;
       try { this.wl = await navigator.wakeLock.request('screen'); this.wake = true; } catch (e) { this.wake = false; }
+    },
+    /* foto verkleinen tot een JPEG van hooguit 800 px, zodat localStorage niet volloopt */
+    photo(e) {
+      const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+      const im = new Image(), u = URL.createObjectURL(f);
+      im.onload = () => {
+        const r = Math.min(1, 800 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+        c.width = Math.round(im.width * r); c.height = Math.round(im.height * r);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        this.nImg = c.toDataURL('image/jpeg', 0.6); URL.revokeObjectURL(u);
+      };
+      im.src = u;
+    },
+    addNote() {
+      this.notes.push({t: Date.now(), step: this.i + 1, text: this.nText.trim(), dev: this.nDev, img: this.nImg});
+      if (this.saveNotes()) Object.assign(this, {nText: '', nImg: '', nDev: false});
+      else this.notes.pop();
+    },
+    delNote(k) { this.notes.splice(k, 1); this.saveNotes(); },
+    saveNotes() {
+      const all = jget(NKEY, {}); delete all[this.key_];
+      if (this.notes.length) all[this.key_] = {title: this.title, notes: this.notes};
+      const ks = Object.keys(all); ks.slice(0, Math.max(0, ks.length - 30)).forEach(k => delete all[k]);
+      try { localStorage.setItem(NKEY, JSON.stringify(all)); this.nErr = ''; return true; }
+      catch (e) { this.nErr = this.t('De notitie is niet bewaard: de opslag van de browser is vol. Verwijder oude notities of laat de foto weg.'); return false; }
     },
     go(d) { this.i = Math.max(0, Math.min(this.steps.length - 1, this.i + d)); },
     tick(k) { this.done.splice(k, 1, !this.done[k]); this.save(); },
