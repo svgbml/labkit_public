@@ -57,6 +57,7 @@ def main():
             pg = b.new_page(viewport={'width': W, 'height': H}, device_scale_factor=1)
             pg.add_init_script("try{localStorage.setItem('labkit:v1:lang','"+__import__('os').environ.get('LABKIT_LANG','nl')+"')}catch(e){}")
             pg.add_init_script(PATCH)
+            pg.add_init_script("try{localStorage.setItem('lkGfExpert','true')}catch(e){}")  # gelfoto: alle panelen, niet alleen stap 1 (S69)
             if os.environ.get('LABKIT_FONT'): pg.add_init_script(FONTJS % (os.environ['LABKIT_FONT'], os.environ['LABKIT_FONT']))
             errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
             pg.goto(URL); pg.wait_for_timeout(900)

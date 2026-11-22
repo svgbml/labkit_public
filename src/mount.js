@@ -97,6 +97,7 @@ import Plaatindeling from './tools/Plaatindeling.vue';
 import Stat from './tools/Stat.vue';
 import Gelplan from './tools/Gelplan.vue';
 import {gfRefresh} from './tools/gelfoto/tick.js';
+import GfGuide from './tools/gelfoto/GfGuide.vue';
 import GfImage from './tools/gelfoto/GfImage.vue';
 import GfLibrary from './tools/gelfoto/GfLibrary.vue';
 import GfLanes from './tools/gelfoto/GfLanes.vue';
@@ -480,6 +481,7 @@ export function start() {
      de panelen en de bronregel blijven gewone HTML. window.__gfRefresh laat de motor ze alle
      bijwerken: gf is geen reactief object, dus Vue ziet een verandering erin niet zelf. */
   window.__gfRefresh = gfRefresh;
+  mountTool('#gf-app-guide', GfGuide);
   mountTool('#gf-app-img', GfImage);
   mountTool('#gf-app-lib', GfLibrary);
   mountTool('#gf-app-lanes', GfLanes);

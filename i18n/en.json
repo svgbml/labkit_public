@@ -5051,5 +5051,16 @@
 "Labjournaal": "Lab journal",
 "Verslag": "Report",
 "Publicatie": "Publication",
-"Poster": "Poster"
+"Poster": "Poster",
+"Lanen": "Lanes",
+"Meten": "Measure",
+"Expert: alles tonen": "Expert: show everything",
+"Laad een gelfoto of de demo-gel.": "Load a gel photo or the demo gel.",
+"Snij bij en zet recht als dat nodig is.": "Crop and straighten if needed.",
+"De lanen zijn al gedetecteerd.": "The lanes have already been detected.",
+"Versleep een lane op de foto, of vul het aantal in en detecteer opnieuw.": "Drag a lane on the photo, or enter the number and detect again.",
+"De ladder is al herkend.": "The ladder has already been recognised.",
+"Controleer de bandgroottes in de tabel en versleep een band op de foto als hij niet goed ligt.": "Check the band sizes in the table and drag a band on the photo if it is in the wrong place.",
+"De banden in de andere lanen zijn gemeten.": "The bands in the other lanes have been measured.",
+"Verwijder wat geen echte band is en exporteer de figuur.": "Remove anything that is not a real band and export the figure."
 }

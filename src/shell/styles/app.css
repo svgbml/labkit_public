@@ -158,6 +158,8 @@ canvas{max-width:100%}
 .gfwrap{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}
 .gfwrap .panel{padding:14px}
 .gfwrap .panel h3{margin-bottom:10px}
+/* begeleide modus (S69): alleen de panelen van de actieve stap */
+.gfwrap[data-gstep="1"] [data-gs]:not([data-gs~="1"]),.gfwrap[data-gstep="2"] [data-gs]:not([data-gs~="2"]),.gfwrap[data-gstep="3"] [data-gs]:not([data-gs~="3"]),.gfwrap[data-gstep="4"] [data-gs]:not([data-gs~="4"]){display:none}
 #gf-stage{position:sticky;top:20px}
 #gf-cv{width:100%;height:auto;display:block;background:#fff;border-radius:3px;touch-action:none}
 #gf-view{overflow:auto;border-radius:3px;position:relative}
