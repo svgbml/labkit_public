@@ -4793,5 +4793,16 @@
 "Label {#} buizen en zet in elke buis {#} µL {*}.": "Label {#} tubes and put {#} µL {*} in each tube.",
 "Breng {#} µL over van {*} naar {*}, meng en wissel van tip.": "Transfer {#} µL from {*} to {*}, mix and change tips.",
 "Plaat {#} µL uit van {*}.": "Plate {#} µL from {*}.",
-"Plaat uit van {*}.": "Plate from {*}."
+"Plaat uit van {*}.": "Plate from {*}.",
+"Weeg {*} {*} af.": "Weigh out {*} {*}.",
+"Weeg {*} agarose af.": "Weigh out {*} of agarose.",
+"Meet {*} af en voeg {*} water toe.": "Measure out {*} and add {*} of water.",
+"Smelt de agarose in de magnetron en laat afkoelen tot ongeveer {#} °C.": "Melt the agarose in the microwave and let it cool to about {#} °C.",
+"Voeg {*} toe: {*}.": "Add {*}: {*}.",
+"Giet de gel in de drager, zet de kam erin en laat de gel stollen.": "Pour the gel into the tray, put the comb in and let the gel set.",
+"Laan {#}: pipetteer {#} µL van {*}.": "Lane {#}: pipette {#} µL of {*}.",
+"Laan {#}: pipetteer {*}.": "Lane {#}: pipette {*}.",
+"Zet de spanning op {#} V en laat de gel lopen; reken op {*}.": "Set the voltage to {#} V and run the gel; allow {*}.",
+"Stop wanneer het blauwe front ongeveer {#} cm van de slotjes staat.": "Stop when the blue front is about {#} cm from the wells.",
+"Gel laten lopen": "Run the gel"
 }
