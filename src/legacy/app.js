@@ -179,14 +179,16 @@ function decorateXL(){
 const MAINW=[]; function lkMainWatch(fn,ms){ MAINW.push({fn,ms,t:null}); }
 new MutationObserver(()=>{ for(const w of MAINW){ clearTimeout(w.t); w.t=setTimeout(w.fn,w.ms); } }).observe($('main'),{childList:true,subtree:true});
 lkMainWatch(decorateXL,60);
+/* de bronregel van de tool (p.src) reist mee met een gekopieerde tabel of data */
+function copyRichSrc(H,B,b){ let tsv=toTSV(H,B), html=toHTML(H,B); const s=b.closest('section.tool')?.querySelector('p.src')?.textContent.trim(); if(s){ const l=trPlain('Bron')+': '+s; tsv+='\r\n'+l.replace(/[\t\n]/g,' '); html+=`<p><i>${esc(l)}</i></p>`; } copyRich(tsv,html,b); }
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-xl-table],[data-xl-img],[data-xl-data]'); if(!b) return;
-  if(b.hasAttribute('data-xl-table')){ let n=b.parentNode.nextElementSibling; const t=n&&(n.tagName==='TABLE'?n:n.querySelector('table')); if(!t) return; const {H,B}=tableData(t); copyRich(toTSV(H,B),toHTML(H,B),b); return; }
+  if(b.hasAttribute('data-xl-table')){ let n=b.parentNode.nextElementSibling; const t=n&&(n.tagName==='TABLE'?n:n.querySelector('table')); if(!t) return; const {H,B}=tableData(t); copyRichSrc(H,B,b); return; }
   const cv=b.parentNode.previousElementSibling; if(!cv||cv.tagName!=='CANVAS') return;
   if(b.hasAttribute('data-xl-img')){ const c=document.createElement('canvas'); c.width=cv.width; c.height=cv.height; const x=c.getContext('2d'); x.fillStyle=cv._p?'#fff':(getComputedStyle(document.documentElement).getPropertyValue('--surface').trim()||'#fff'); x.fillRect(0,0,c.width,c.height); x.drawImage(cv,0,0);
     (async()=>{ try{ await navigator.clipboard.write([new ClipboardItem({'image/png':new Promise(r=>c.toBlob(r,'image/png'))})]); flashBtn(b,'Gekopieerd'); }catch(err){ flashBtn(b,'Geblokkeerd'); } })(); return; }
   const D=cv._data; if(!D||!D.rows.length){ flashBtn(b,'Geen data'); return; }
-  const B=D.rows.map(r=>r.map(v=>typeof v==='number'?{n:v}:trPlain(v,true))), Hd=D.head.map(h=>trPlain(h,true)); copyRich(toTSV([Hd],B),toHTML([Hd],B),b);
+  const B=D.rows.map(r=>r.map(v=>typeof v==='number'?{n:v}:trPlain(v,true))), Hd=D.head.map(h=>trPlain(h,true)); copyRichSrc([Hd],B,b);
 });
 
 /* ================= qPCR ΔΔCt ================= */
@@ -552,12 +554,12 @@ Object.keys(TAGS).forEach(id=>{ const h=$(`#t-${id} .tool-head h2`); if(h&&!h.ne
 const navMatch=(el,q)=>{ const id=(el.getAttribute('href')||'').slice(1); return (el.textContent+' '+tagsOf(id).map(t=>t+' '+trPlain(t,true)).join(' ')+' '+((typeof SYN!=='undefined'&&SYN[id])||'')).toLowerCase().includes(q); };
 
 /* ================= STARTPAGINA (BENTO) ================= */
-const RKEY='labkit:v1:recent', FKEY='labkit:v1:fav';
+const RKEY='labkit:v1:recent', FKEY='labkit:v1:fav', UKEY='labkit:v1:usage';
 /* jget() en jset() staan sinds S267 in src/lib/storage.js */
 function toolIndex(){ const out=[]; let grp=''; [...$('#nav').children].forEach(el=>{ if(el.classList.contains('navgroup')) grp=el.textContent; else if(el.tagName==='A'){ const id=el.getAttribute('href').slice(1), sec=$('#t-'+id); if(!sec||id==='start') return; const p=sec.querySelector('.tool-head p'); const name=[...el.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim(); out.push({id,grp,name,tags:tagsOf(id),desc:p?p.textContent.split(/(?<=[.:])\s/)[0].replace(/[.:]$/,''):''}); } }); return out; }
 /* bentoRender() is src/tools/Start.vue geworden (S263); de fase en de werkstroomtegel zitten daar ook in */
-window.addEventListener('hashchange',()=>{ const id=(location.hash||'').slice(1); if(!id||id==='start'||!TOOLS.includes(id)) return; const r=jget(RKEY,[]).filter(x=>x!==id); r.unshift(id); jset(RKEY,r.slice(0,8)); });
-$('#reset-store').addEventListener('click',()=>{ try{ localStorage.removeItem(RKEY); localStorage.removeItem(FKEY); }catch(e){} },true);
+window.addEventListener('hashchange',()=>{ const id=(location.hash||'').slice(1); if(!id||id==='start'||!TOOLS.includes(id)) return; const r=jget(RKEY,[]).filter(x=>x!==id); r.unshift(id); jset(RKEY,r.slice(0,8)); const u=jget(UKEY,{}); u[id]=(u[id]||0)+1; jset(UKEY,u); });
+$('#reset-store').addEventListener('click',()=>{ try{ localStorage.removeItem(RKEY); localStorage.removeItem(FKEY); localStorage.removeItem(UKEY); }catch(e){} },true);
 
 /* ================= CELLEN UITZAAIEN ================= */
 /* De velden en de uitkomst staan in src/tools/Seed.vue. */
@@ -712,5 +714,6 @@ live({
   navMatch: () => navMatch,
   RKEY: () => RKEY,
   FKEY: () => FKEY,
+  UKEY: () => UKEY,
   toolIndex: [() => toolIndex, v => { toolIndex = v; }]
 });

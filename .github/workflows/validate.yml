@@ -27,12 +27,16 @@ jobs:
           python-version: '3.12'
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       # web/index.html is sinds S265 een build-uitvoer: hij moet passen bij src/ en de bundel
       - name: Vue-bundel klopt met src/
         run: npm ci && npx vite build && git diff --exit-code build/app.bundle.js
+      - name: Unit tests (rekenfuncties)
+        run: npm run test:unit
       - name: web/index.html klopt met de bronnen
         run: python tools/build.py --check
+      - name: Elke rekentool heeft één bronregel
+        run: python tests/src_check.py
       - run: pip install playwright==1.48.0 scipy statsmodels scikit-posthocs opencv-python-headless numpy
       - run: python -m playwright install --with-deps chromium
       - name: Alle tools doorrekenen met gepubliceerde ruwe data
@@ -49,8 +53,15 @@ jobs:
         run: python tests/layout_audit.py
         env:
           LABKIT_LANG: en
+      - name: Visuele regressie (schermafbeeldingen)
+        run: python tests/visual_check.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: validatierapport
           path: tests/VALIDATIE.md
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visuele-verschillen
+          path: tests/visual/out
