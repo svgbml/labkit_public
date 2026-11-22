@@ -10,6 +10,7 @@
     "dist": "tauri build",
     "web": "npx --yes serve web",
     "build": "python tools/build_validated.py && vite build && python tools/build.py",
+    "test:unit": "node --no-warnings --import ./tests/unit/setup.mjs --test \"tests/unit/*.test.mjs\"",
     "check": "npm run build:vue && python tools/check.py",
     "check:quick": "npm run build:vue && python tools/check.py --quick",
     "build:vue": "vite build",

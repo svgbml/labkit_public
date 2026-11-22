@@ -31,6 +31,8 @@ jobs:
       # web/index.html is sinds S265 een build-uitvoer: hij moet passen bij src/ en de bundel
       - name: Vue-bundel klopt met src/
         run: npm ci && npx vite build && git diff --exit-code build/app.bundle.js
+      - name: Unit tests (rekenfuncties)
+        run: npm run test:unit
       - name: web/index.html klopt met de bronnen
         run: python tools/build.py --check
       - run: pip install playwright==1.48.0 scipy statsmodels scikit-posthocs opencv-python-headless numpy
