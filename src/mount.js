@@ -105,6 +105,7 @@ import GfDens from './tools/gelfoto/GfDens.vue';
 import GfBands from './tools/gelfoto/GfBands.vue';
 import GfVirtual from './tools/gelfoto/GfVirtual.vue';
 import GfMarks from './tools/gelfoto/GfMarks.vue';
+import GfResult from './tools/gelfoto/GfResult.vue';
 import GfFormat from './tools/gelfoto/GfFormat.vue';
 
 /* start() zet alle componenten op hun host. src/legacy/init.js roept het aan, na alle oude
@@ -487,6 +488,7 @@ export function start() {
   mountTool('#gf-app-dens', GfDens);
   mountTool('#gf-app-bands', GfBands);
   mountTool('#gf-app-marks', GfMarks);
+  mountTool('#gf-app-res', GfResult);
   mountTool('#gf-app-fmt', GfFormat);
   /* calc.gelfoto blijft gfUpdate() in index.html: dat leest de velden en tekent opnieuw. */
 

@@ -288,6 +288,18 @@ def _(pg):
     return [('rechtzethoek (°)', ang, 2.0, 0.125), ('aantal lanen', n, 11, 0), ('ladderlane (index)', lad, 0, 0),
             ('product 650 bp (gem.)', sum(b650) / max(1, len(b650)), 650, 0.02), ('aantal productbanden', len(b650), 7, 0), ('dimeer 60 bp (gem.)', sum(b60) / max(1, len(b60)), 60, 0.05)]
 
+@case('Gelfoto-editor', 'Resultaattabel en figuurlegenda', 'Zelftest: na het meten op de realistische testgel staat er per lane met banden een rij met dezelfde groottes als de metingentabel, en de legenda noemt de ladder en een lanelabel')
+def _(pg):
+    # vervolg op het geval hierboven: de gel staat er met metingen
+    pg.evaluate("gf.lanes[2].label='Monster A'; __set('gf-cond','1% agarose, 100 V'); gfRender(); gfMarksTable()"); pg.wait_for_timeout(300)
+    r = pg.evaluate("""(()=>{ const rows=[...document.querySelectorAll('#gf-app-res tbody tr')];
+      const lanes=new Set(); gf.marks.forEach(m=>{ let li=0,bd=1e9; gf.lanes.forEach((l,j)=>{ const d=Math.abs(l.x-m.x); if(d<bd){bd=d;li=j;} }); lanes.add(li); });
+      const sizes=rows.map(r=>r.children[2].textContent.split('; ').length).reduce((a,b)=>a+b,0);
+      const lg=document.getElementById('gf-legend').textContent;
+      return [rows.length, lanes.size, sizes, gf.marks.length, lg.includes(document.querySelector('#gf-lad option:checked').textContent.trim())?1:0, lg.includes('Monster A')?1:0, lg.includes('1% agarose, 100 V')?1:0]; })()""")
+    return [('rijen = lanes met banden', r[0], r[1], 0), ('bandgroottes in de tabel = metingen', r[2], r[3], 0),
+            ('legenda noemt de ladder', r[4], 1, 0), ('legenda noemt lanelabel', r[5], 1, 0), ('legenda noemt gelcondities', r[6], 1, 0)]
+
 @case('Gelfoto-editor', 'Projectbestand .labkitgel', 'Zelftest: de realistische testgel opslaan, de pagina herladen en het bestand openen geeft dezelfde lanen, banden, metingen en dezelfde export (pixel voor pixel)')
 def _(pg):
     # vervolg op het geval hierboven: de gel staat er, rechtgezet, met banden en metingen
@@ -341,6 +353,49 @@ def _(pg):
     mag = lambda v: 1 if v[0] > 200 and v[1] < 80 and v[2] > 120 else 0
     return [('exact het witte blok (200 px)', r['n'], 200, 0), ('geen uitsnede', r['noCrop'], 1, 0), ('overlay in de editor', mag(r['ed']), 1, 0),
             ('geen overlay in de export', mag(ex), 0, 0), ('waarschuwing getoond', warn, 1, 0)]
+
+@case('Gelfoto-editor', 'Figuurstijl-presets', 'Zelftest: elke stijlknop (Labjournaal, Verslag, Publicatie, Poster) zet de velden op de vaste waarden, markeert zichzelf, en de export (gfRender(true, schaal)) verschilt tussen Labjournaal en Publicatie in afmeting')
+def _(pg):
+    pg.evaluate("__go('gelfoto');gfDemo();")
+    def run(i):
+        pg.evaluate(f"document.getElementById('{i}').click()"); pg.wait_for_timeout(300)
+        return pg.evaluate("""(()=>{ const v=id=>{const e=document.getElementById(id); return e.type==='checkbox'?e.checked:e.value};
+          const c=gfRender(true,+v('gx-scale'));
+          return {fs:v('gf-fs'),mcol:v('gx-mcol'),sc:v('gx-scale'),ti:v('gx-title'),mk:v('gx-marks'),w:c.width,h:c.height}; })()""")
+    j = run('gf-pre-journal'); rp = run('gf-pre-report'); pb = run('gf-pre-pub'); po = run('gf-pre-poster')
+    on = pg.evaluate("document.getElementById('gf-pre-poster').getAttribute('aria-pressed')+document.getElementById('gf-pre-pub').getAttribute('aria-pressed')")
+    pg.evaluate("document.getElementById('gx-pad').click()"); pg.wait_for_timeout(200)
+    off = pg.evaluate("document.querySelectorAll('[id^=gf-pre-][aria-pressed=true]').length")
+    return [('journaal: 18 / oranje / 1× / titel+metingen', int((j['fs'], j['mcol'], j['sc'], j['ti'], j['mk']) == ('18', '#e8a317', '1', True, True)), 1, 0),
+            ('verslag: blauw, 2×, geen metingen', int((rp['mcol'], rp['sc'], rp['mk']) == ('#1d5bc4', '2', False)), 1, 0),
+            ('publicatie: 14 / zwart / 3× / geen titel', int((pb['fs'], pb['mcol'], pb['sc'], pb['ti']) == ('14', '#111111', '3', False)), 1, 0),
+            ('poster: 36 / rood / 3× / titel', int((po['fs'], po['mcol'], po['sc'], po['ti']) == ('36', '#d62828', '3', True)), 1, 0),
+            ('actieve knop gemarkeerd', int(on == 'truefalse'), 1, 0), ('handmatige wijziging wist markering', int(off == 0), 1, 0),
+            ('export verschilt (breedte)', int(j['w'] != pb['w'] and j['h'] != pb['h']), 1, 0)]
+
+@case('Gelfoto-editor', 'Ladderbibliotheek: eigen ladder', 'Zelftest: de 100 bp-ladder (1000–100) als eigen ladder onder een andere naam bewaren en kiezen; detectie en meting op de realistische testgel geven weer 650 bp. Na herladen staat de ladder er nog; een geplakte gedeelde regel voegt een tweede toe')
+def _(pg):
+    pg.evaluate("__go('gelfoto')")
+    pg.set_input_files('#gf-file', str(ROOT / 'tests' / 'fixtures' / 'gel_realistic.png')); pg.wait_for_timeout(700)
+    pg.evaluate("$('#gf-n').value=''; document.getElementById('gf-auto').click()"); pg.wait_for_timeout(1500)
+    pg.evaluate("document.getElementById('gf-ll').open=true"); pg.wait_for_timeout(200)
+    pg.evaluate("__set('gf-ll-name','Mijn ladder'); __set('gf-ll-sizes', LADDERS['100'].join(' ')); document.getElementById('gf-ll-add').click()"); pg.wait_for_timeout(300)
+    key = pg.evaluate("document.getElementById('gf-lad').value")
+    pg.evaluate("document.getElementById('gf-bands').click(); gf.marks=[]; document.getElementById('gf-measall').click();")
+    bp = pg.evaluate("gf.marks.map(m=>m.bp)"); b650 = [v for v in bp if 500 < v < 800]
+    used = pg.evaluate("gf.ladKey")
+    pg.wait_for_timeout(1000)  # Chromium schrijft localStorage met vertraging weg; direct navigeren kan de schrijfactie missen
+    pg.goto('about:blank'); pg.goto(URL + '#gelfoto'); pg.wait_for_timeout(800); pg.evaluate(HELPERS)
+    q = "[...document.querySelectorAll('#gf-lad option')].filter(o=>o.textContent==='Mijn ladder').length"
+    try: pg.wait_for_function(q, timeout=5000)
+    except Exception: pass
+    kept = pg.evaluate(q)
+    pg.evaluate("document.getElementById('gf-ll').open=true"); pg.wait_for_timeout(200)
+    pg.evaluate("__set('gf-ll-imp','Gedeeld: 500; 300 100 bp'); document.getElementById('gf-ll-add').click()"); pg.wait_for_timeout(300)
+    imp = pg.evaluate("JSON.stringify(LADDERS[document.getElementById('gf-lad').value])")
+    pg.evaluate("localStorage.removeItem('lkLadders')")
+    return [('eigen ladder gekozen', int(key.startswith('u')), 1, 0), ('detectie gebruikt eigen ladder', int(used == key), 1, 0),
+            ('product 650 bp (gem.)', sum(b650) / max(1, len(b650)), 650, 0.02), ('ladder na herladen', kept, 1, 0), ('gedeelde regel ingelezen', int(imp == '[500,300,100]'), 1, 0)]
 
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):

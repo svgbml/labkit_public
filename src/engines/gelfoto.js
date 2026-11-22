@@ -268,7 +268,7 @@ function gfFitQ(ys,xs){ const n=ys.length, D=n>=7?4:3, mx=mean(xs), sx=Math.max(
 function gfCorr(a,b){ const n=a.length, ma=mean(a), mb=mean(b); let s=0,sa=0,sb=0; for(let i=0;i<n;i++){ s+=(a[i]-ma)*(b[i]-mb); sa+=(a[i]-ma)**2; sb+=(b[i]-mb)**2; } return sa>0&&sb>0?s/Math.sqrt(sa*sb):0; }
 /* patroonherkenning: per ladder de beste uitlijning; score = kwadratische fit van positie op log(grootte), straf voor ontbrekende/extra banden, bonus als felle banden op de referentiebanden vallen */
 function gfLadMatch(bands){ const ys=bands.map(b=>b.y), vs=bands.map(b=>b.v), n=ys.length, out=[]; if(n<4) return out;
-  Object.keys(LADDERS).filter(k=>!['ppp','prplus'].includes(k)).forEach(k=>{ const S=LADDERS[k], m=S.length, ls=S.map(v=>Math.log10(v)), M=LMASS[k]?stNums(LMASS[k]):null; let best=null;
+  Object.keys(LADDERS).filter(k=>!ladProt(k)).forEach(k=>{ const S=LADDERS[k], m=S.length, ls=S.map(v=>Math.log10(v)), M=LMASS[k]?stNums(LMASS[k]):null; let best=null;
     const tryA=(yy,vv,ll,MM,pen,assign)=>{ const e=gfFitQ(yy,ll); const c=MM&&MM.length===vv.length?gfCorr(vv,MM):null; const sc=1-10*e-pen+(c==null?0:0.15*(c-0.5)); if(!best||sc>best.score) best={key:k,score:sc,assign}; };
     if(n>=m){ for(let st=0;st+m<=n;st++) tryA(ys.slice(st,st+m),vs.slice(st,st+m),ls,M,0.1*(n-m),ys.map((_,i)=>i>=st&&i<st+m?S[i-st]:NaN)); }
     else { for(let st=0;st+n<=m;st++) tryA(ys,vs,ls.slice(st,st+n),M?M.slice(st,st+n):null,0.06*(m-n),ys.map((_,i)=>S[st+i])); }
@@ -515,10 +515,11 @@ function gfLabEdit(i){ const old=$('#gf-labed'); if(old) old.remove(); const l=g
    en de waarden van de velden. De virtuele ladder (een tweede foto) en de zoom gaan niet mee. */
 const GF_PROJ=['rot90','fine','flip','crop','inv','gray','bri','con','lanes','lw','ladder','ladKey','marks','title','fs','ang','angAuto','unit','disp','wells','autoLadder'];
 /* het veld-id's van de tool; de lanelabels staan in gf.lanes, de virtuele ladder gaat niet mee */
-const gfProjFields=()=>[...$$('#t-gelfoto input[id],#t-gelfoto select[id],#t-gelfoto textarea[id]')].filter(el=>el.type!=='file'&&!el.closest('table')&&!/^gf-vl/.test(el.id));
+const gfProjFields=()=>[...$$('#t-gelfoto input[id],#t-gelfoto select[id],#t-gelfoto textarea[id]')].filter(el=>el.type!=='file'&&!el.closest('table')&&!/^gf-(vl|ll)/.test(el.id));
 /* geeft verwijzingen naar gf terug: wie bewaart, kopieert (JSON of IndexedDB doen dat zelf) */
 function gfProjSnap(){ if(!gf.src) return null; const s={}; GF_PROJ.forEach(k=>{ if(gf[k]!==undefined) s[k]=gf[k]; }); const inp={}; gfProjFields().forEach(el=>{ inp[el.id]=el.type==='checkbox'?el.checked:el.value; });
-  return {kind:'labkitgel',v:1,app:APPVER,img:gf.src.toDataURL('image/png'),gf:s,inp}; }
+  const u=ladUser(gf.ladKey); /* een eigen ladder gaat mee, zodat het project ook elders opent (gewone kopie: IndexedDB kloont geen Vue-proxy) */
+  return {kind:'labkitgel',v:1,app:APPVER,img:gf.src.toDataURL('image/png'),gf:s,inp,lad:u?{id:u.id,n:u.n,s:[...u.s],u:u.u}:undefined}; }
 /* NaN (samengevoegde band, geen meting) zou in JSON null worden; dat telt isFinite() als 0 */
 const gfJsonW=(k,v)=>typeof v==='number'&&!isFinite(v)?{$n:String(v)}:v, gfJsonR=(k,v)=>v&&typeof v==='object'&&typeof v.$n==='string'&&Object.keys(v).length===1?Number(v.$n):v;
 function gfProjSave(){ const s=gfProjSnap(); if(!s){ gfStatus('Kies eerst een gelfoto of laad de demo-gel.'); return; }
@@ -528,6 +529,7 @@ function gfProjOpen(f){ if(!f) return; f.text().then(t=>gfProjApply(JSON.parse(t
 /* zet een project terug; gooit bij een ongeldig project (vertrouwensgrens: het bestand komt van buiten) */
 async function gfProjApply(p){
   if(!p||p.kind!=='labkitgel'||typeof p.img!=='string'||!/^data:image\/(png|jpeg|webp);base64,/.test(p.img)||!p.gf||!Array.isArray(p.gf.lanes)) throw new Error('geen gelproject');
+  if(p.lad&&!LADDERS[p.gf.ladKey]) ladAdd(p.lad); /* de eigen ladder van het project in de bibliotheek, vóór de velden */
   const img=new Image(); await new Promise((ok,no)=>{ img.onload=ok; img.onerror=no; img.src=p.img; });
   const c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight; c.getContext('2d').drawImage(img,0,0);
   /* velden eerst, twee keer: de keuze van de ladder zet in een watcher de eenheid en de massa's
