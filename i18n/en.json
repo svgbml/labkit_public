@@ -4644,5 +4644,17 @@
 "Sterke haarspeld.": "Strong hairpin.",
 "GC-gehalte buiten {#}–{#} %.": "GC content outside {#}–{#} %.",
 "Lengte buiten {#}–{#} nt.": "Length outside {#}–{#} nt.",
-"De sequentie bevat andere letters dan A, C, G en T; dimeren en haarspelden zijn niet berekend.": "The sequence contains letters other than A, C, G and T; dimers and hairpins were not calculated."
+"De sequentie bevat andere letters dan A, C, G en T; dimeren en haarspelden zijn niet berekend.": "The sequence contains letters other than A, C, G and T; dimers and hairpins were not calculated.",
+"Kruisdimeer (F × R)": "Cross-dimer (F × R)",
+"Kruisdimeer aan het {#}′-uiteinde: de primers kunnen op elkaar verlengen.": "Cross-dimer at the {#}′ end: the primers can extend on each other.",
+"Sterke kruisdimeer tussen forward en reverse.": "Strong cross-dimer between forward and reverse.",
+"Forward: zelfdimeer aan het {#}′-uiteinde.": "Forward: self-dimer at the {#}′ end.",
+"Reverse: zelfdimeer aan het {#}′-uiteinde.": "Reverse: self-dimer at the {#}′ end.",
+"Forward: sterke zelfdimeer.": "Forward: strong self-dimer.",
+"Reverse: sterke zelfdimeer.": "Reverse: strong self-dimer.",
+"Forward: haarspeld aan het {#}′-uiteinde.": "Forward: hairpin at the {#}′ end.",
+"Reverse: haarspeld aan het {#}′-uiteinde.": "Reverse: hairpin at the {#}′ end.",
+"Forward: sterke haarspeld.": "Forward: strong hairpin.",
+"Reverse: sterke haarspeld.": "Reverse: strong hairpin.",
+"ΔG bij {#} °C (SantaLucia {#}); waarschuwing vanaf −{#} kcal/mol aan het {#}′-uiteinde of −{#} kcal/mol elders voor een dimeer, −{#} of −{#} kcal/mol voor een haarspeld.": "ΔG at 37 °C (SantaLucia 1998); warning from −5 kcal/mol at the 3′ end or −6 kcal/mol elsewhere for a dimer, −2 or −3 kcal/mol for a hairpin."
 }

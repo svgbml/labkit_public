@@ -112,11 +112,14 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {dimer, hairpin, verdict} from './primerCheck.js';
 
 const F = (x, d) => lkNumIn(fmt(x, d)), S = (x, d) => lkNumIn(sci(x, d));
 /* een looptijd: met "min" erin is het een vertaalsleutel ("{#}:{#} min"), anders alleen een getal */
 const mmLoc = s => { const r = mmss2(s); return /min/.test(r) ? trPlain(r) : lkNumIn(r); };
 const chip = (ok, html) => `<span class="chip ${ok ? 'ok' : 'warn'}">${html}</span>`;
+/* een dimeer of haarspeld als tekst met chip: ΔG, en ' · 3′' als het 3'-uiteinde meedoet */
+const dgChip = (x, hp, t) => x ? chip(verdict(x, hp) !== 'warn', F(x.dg, 2) + ' kcal/mol' + (x.three ? ' · 3′' : '')) : t('geen');
 
 export default {
   name: 'Pcrcyclus',
@@ -132,27 +135,33 @@ export default {
     m() {
       const ion = {na: num(this.na) || 0, mg: num(this.mg) || 0, dntp: num(this.dntp) || 0, pc: num(this.pc) || 0.2};
       const F1 = primerInfo(this.fw, ion), R1 = primerInfo(this.rv, ion);
-      return {F: F1, R: R1, ta: F1 && R1 ? Math.min(F1.tm, R1.tm) - 5 : NaN};
+      const sf = F1 && F1.seq, sr = R1 && R1.seq;
+      return {F: F1, R: R1, ta: F1 && R1 ? Math.min(F1.tm, R1.tm) - 5 : NaN,
+        cross: F1 && R1 ? dimer(sf, sr) : null,
+        self: [sf, sr].map(q => q ? dimer(q, q) : null), hp: [sf, sr].map(q => q ? hairpin(q) : null)};
     },
     /* voor het programma-gereedschap (#pg-from): de laatst berekende annealingtemperatuur */
     taAuto() { return this.m.ta; },
     taPlaceholder() { return this.m.F && this.m.R ? F(this.m.ta, 1) + ' (auto)' : this.t('auto'); },
     noteTm() {
-      return this.tHtml('T<sub>m</sub> volgens nearest-neighbor (SantaLucia 1998) met correctie voor zout, Mg²⁺ en dNTP\'s, zoals moderne primerprogramma\'s. dNTP totaal = 4 × de concentratie per dNTP (200 µM elk = 0,8 mM). De eenvoudige GC-formule staat ter vergelijking ernaast.');
+      return this.tHtml('T<sub>m</sub> volgens nearest-neighbor (SantaLucia 1998) met correctie voor zout, Mg²⁺ en dNTP\'s, zoals moderne primerprogramma\'s. dNTP totaal = 4 × de concentratie per dNTP (200 µM elk = 0,8 mM). De eenvoudige GC-formule staat ter vergelijking ernaast.') + ' ' + this.t('ΔG bij 37 °C (SantaLucia 1998); waarschuwing vanaf −5 kcal/mol aan het 3′-uiteinde of −6 kcal/mol elders voor een dimeer, −2 of −3 kcal/mol voor een haarspeld.');
     },
     primerCols() {
       return [{h: ''}, {h: this.t('Lengte'), num: true}, {h: this.t('GC'), num: true},
-        {h: this.tHtml('T<sub>m</sub>'), num: true}, {h: this.t('GC-formule'), num: true}];
+        {h: this.tHtml('T<sub>m</sub>'), num: true}, {h: this.t('GC-formule'), num: true},
+        {h: this.t('Zelfdimeer'), num: true}, {h: this.t('Haarspeld'), num: true}];
     },
     primerRows() {
       const t = this.t;
-      return [[t('Forward'), this.m.F], [t('Reverse'), this.m.R]].map(([name, p]) => [name,
+      return [[t('Forward'), this.m.F], [t('Reverse'), this.m.R]].map(([name, p], i) => [name,
         chip(p.N >= 18 && p.N <= 40, t(p.N + ' nt')), chip(p.gcp >= 40 && p.gcp <= 60, F(p.gcp, 0) + '%'),
-        chip(p.tm > 45, F(p.tm, 1) + ' °C'), `<span style="color:var(--muted)">${F(p.basic, 1)} °C</span>`]);
+        chip(p.tm > 45, F(p.tm, 1) + ' °C'), `<span style="color:var(--muted)">${F(p.basic, 1)} °C</span>`,
+        dgChip(this.m.self[i], false, t), dgChip(this.m.hp[i], true, t)]);
     },
     dTm() { return Math.abs(this.m.F.tm - this.m.R.tm); },
     primerKv() {
       return [[this.tHtml('ΔT<sub>m</sub>'), chip(this.dTm <= 5, F(this.dTm, 1) + ' °C')],
+        [this.t('Kruisdimeer (F × R)'), dgChip(this.m.cross, false, this.t)],
         [this.t('Formule'), this.t(this.m.F.rule)]];
     },
     primerNotes() {
@@ -163,6 +172,13 @@ export default {
         const nm = i ? 'Reverse' : 'Forward';
         if (p.gcp < 40 || p.gcp > 60) out.push(['warn', t(nm + ': GC-gehalte buiten 40–60%.')]);
         if (p.other) out.push(['info', t(nm + ': ' + p.other + ' niet-ACGT-teken(s) genegeerd.')]);
+      });
+      const cr = this.m.cross;
+      if (verdict(cr, false) === 'warn') out.push(['warn', t(cr.three ? 'Kruisdimeer aan het 3′-uiteinde: de primers kunnen op elkaar verlengen.' : 'Sterke kruisdimeer tussen forward en reverse.')]);
+      [f, r].forEach((p, i) => {
+        const nm = i ? 'Reverse' : 'Forward', sd = this.m.self[i], hp = this.m.hp[i];
+        if (verdict(sd, false) === 'warn') out.push(['warn', t(nm + (sd.three ? ': zelfdimeer aan het 3′-uiteinde.' : ': sterke zelfdimeer.'))]);
+        if (verdict(hp, true) === 'warn') out.push(['warn', t(nm + (hp.three ? ': haarspeld aan het 3′-uiteinde.' : ': sterke haarspeld.'))]);
       });
       if (ta >= 65) out.push(['info', t('Annealing ≥ 65 °C: een 2-staps PCR (annealing en extensie samen) is mogelijk.')]);
       return out;

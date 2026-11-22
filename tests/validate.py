@@ -164,6 +164,11 @@ def _(pg):
     tms = pg.evaluate("__cells('#y-out tbody tr td:nth-child(4)')")
     return [('Tm forward (°C)', tms[0], 65.22, 0.002), ('Tm reverse (°C)', tms[1], 64.15, 0.002)]
 
+@case('PCR-cyclus', 'Primerpaar: kruisdimeer ΔG37', 'SantaLucia 1998 tabel 2: 3′-GGATCC/GGATCC-duplex = 1,96 (initiatie) + GG −1,84 + GA −1,30 + AT −0,88 + TC −1,30 + CC −1,84 = −5,20 kcal/mol')
+def _(pg):
+    pg.evaluate("__go('pcrcyclus');__set('y-f','TTTTTTGGATCC');__set('y-r','AAAAAAGGATCC')")
+    return [('ΔG37 kruisdimeer (kcal/mol)', pg.evaluate("__kv('#y-out','Kruisdimeer')"), -5.20, 0.001)]
+
 @case('PCR-cyclus', 'qPCR-efficiëntie uit helling', 'Pearson qPCR-efficiëntie: helling −3,80 → 83,3%; helling −3,3 → 100,9%')
 def _(pg):
     pg.evaluate("__go('pcrcyclus');__set('y-q0','1e6');__set('y-qf','10');__set('y-cq','15 18,8 22,6')")
