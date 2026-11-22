@@ -368,6 +368,9 @@ function gfRender(exportMode,scale=1){
       x.fillStyle='#111'; x.fillText(mText(m),ex+fs*0.8,y); });
   }
   if(edit){
+    /* lanegrenzen (S72): gestippeld over de gel; versleep er een om de lanebreedte te zetten */
+    x.save(); x.strokeStyle='rgba(110,160,240,.5)'; x.lineWidth=Math.max(1,hs/9); x.setLineDash([hs*0.5,hs*0.4]);
+    gf.lanes.forEach(l=>[l.x-gf.lw/2,l.x+gf.lw/2].forEach(bx=>{ x.beginPath(); x.moveTo(Lm+bx,T); x.lineTo(Lm+bx,T+P.h); x.stroke(); })); x.restore();
     const tri=(cx,cy,dir,col)=>{ x.fillStyle=col; x.beginPath(); if(dir==='up'){ x.moveTo(cx,cy); x.lineTo(cx-hs*0.6,cy+hs); x.lineTo(cx+hs*0.6,cy+hs); } else if(dir==='right'){ x.moveTo(cx,cy); x.lineTo(cx-hs,cy-hs*0.6); x.lineTo(cx-hs,cy+hs*0.6); } else { x.moveTo(cx,cy); x.lineTo(cx+hs,cy-hs*0.6); x.lineTo(cx+hs,cy+hs*0.6); } x.closePath(); x.fill(); };
     gf.lanes.forEach((l,i)=>tri(Lm+l.x,T+P.h+2,'up',i===gf.ladder?'#d98a00':l.lad?'#f2c26b':'#1558b0'));
     gf.bands.forEach(b=>tri(Lm-2,T+b.y,'right','#d98a00'));
@@ -407,6 +410,8 @@ function gfFindGel(){ const r=gfRotated(), sc=Math.min(1,260/Math.max(r.width,r.
   const box={x:X[0]/sc,y:Y[0]/sc,w:(X[1]-X[0])/sc,h:(Y[1]-Y[0])/sc}, a=box.w*box.h/(r.width*r.height); if(a<0.03||a>0.93||box.w<24||box.h<24) return null; return {x:Math.max(0,box.x),y:Math.max(0,box.y),w:Math.min(r.width-box.x,box.w),h:Math.min(r.height-box.y,box.h)}; }
 /* zoomen: de weergavebreedte van de canvas schaalt mee; tellingen en metingen blijven in beeldpixels */
 function gfZoom(z,cx,cy){ const v=$('#gf-view'), old=gf.zoom||1; z=Math.max(1,Math.min(8,z)); const rc=v.getBoundingClientRect(), ax=cx==null?rc.width/2:cx-rc.left, ay=cy==null?rc.height/2:cy-rc.top, fx=(v.scrollLeft+ax)/old, fy=(v.scrollTop+ay)/old; gf.zoom=z; v.classList.toggle('zoomed',z>1); gcv.style.maxWidth='none'; gcv.style.width=(z*100)+'%'; v.scrollLeft=fx*z-ax; v.scrollTop=fy*z-ay; $('#gf-zv').textContent=Math.round(z*100)+'%'; }
+/* welke lanegrens ligt onder de muis: alleen op de gel en alleen als de grens dichterbij is dan het midden van de lane */
+function gfLwHit(p,tol){ if(!gf.layout||gf.layout.crop||p.y<0||p.y>gfProc().h) return -1; let li=-1,bd=tol; gf.lanes.forEach((l,i)=>{ const c=Math.abs(p.x-l.x), d=Math.abs(c-gf.lw/2); if(d<bd&&d<c){bd=d;li=i;} }); return li; }
 function cvPt(e){ const r=gcv.getBoundingClientRect(), s=gcv.width/r.width; const lay=gf.layout||{L:0,T:0}; return {x:(e.clientX-r.left)*s-lay.L, y:(e.clientY-r.top)*s-lay.T, s}; }
 gcv.addEventListener('pointerdown',e=>{
   if(!gf.src) return; const p=cvPt(e); const P=gf.mode==='crop'?null:gfProc();
@@ -419,11 +424,14 @@ gcv.addEventListener('pointerdown',e=>{
   if(gf.mode==='measure'&&inside){ let li=0,bd=Infinity; gf.lanes.forEach((l,j)=>{ const d=Math.abs(l.x-p.x); if(d<bd){bd=d;li=j;} }); const lx=gf.lanes.length&&bd<gf.lw?gf.lanes[li].x:p.x; const y=gfPeakNear(lx,p.y); gf.marks.push({x:lx,y,bp:gfEst(y,lx)}); gfMarksTable(); gfRender(); return; }
   const tol=Math.max(8*p.s,(gf.layout.hs||9)); const Ld=gf.lanes[gf.ladder];
   if(p.x<0||(Ld&&Math.abs(p.x-Ld.x)<gf.lw/2)){ let bi=-1,bd=tol; gf.bands.forEach((b,i)=>{ const d=Math.abs(b.y-p.y); if(d<bd){bd=d;bi=i;} }); if(bi>=0){ gf.drag={t:'band',i:bi}; gcv.setPointerCapture(e.pointerId); return; } }
-  let li=-1,ld=tol; gf.lanes.forEach((l,i)=>{ const d=Math.abs(l.x-p.x); if(d<ld){ld=d;li=i;} }); if(li>=0){ gf.drag={t:'lane',i:li}; gcv.setPointerCapture(e.pointerId); }
+  { const bi=gfLwHit(p,tol); if(bi>=0){ gf.drag={t:'lw',i:bi}; gcv.setPointerCapture(e.pointerId); return; } }
+  let li=-1,ld=tol; gf.lanes.forEach((l,i)=>{ const d=Math.abs(l.x-p.x); if(d<ld){ld=d;li=i;} }); if(li>=0){ gf.drag={t:'lane',i:li}; gcv.setPointerCapture(e.pointerId); return; }
+  /* ingezoomd: slepen op een lege plek verschuift de foto */
+  if((gf.zoom||1)>1){ const v=$('#gf-view'); gf.drag={t:'pan',cx:e.clientX,cy:e.clientY,sl:v.scrollLeft,st:v.scrollTop}; gcv.setPointerCapture(e.pointerId); }
 });
 gcv.addEventListener('pointermove',e=>{
   if(!gf.drag&&gf.mode==='crop'&&gf.src){ const h=gfCropHit(cvPt(e)); gcv.style.cursor=!h?'crosshair':h==='m'?'move':({n:'ns-resize',s:'ns-resize',e:'ew-resize',w:'ew-resize',nw:'nwse-resize',se:'nwse-resize',ne:'nesw-resize',sw:'nesw-resize'})[h]; return; }
-  if(!gf.drag){ if(gf.src&&!gf.mode&&gf.layout&&!gf.layout.crop){ const p=cvPt(e); const tol=Math.max(8*p.s,gf.layout.hs||9); const nearL=gf.lanes.some(l=>Math.abs(l.x-p.x)<tol); const nearB=p.x<0&&gf.bands.some(b=>Math.abs(b.y-p.y)<tol); gcv.style.cursor=gfLabHit(p)>=0?'text':nearB?'ns-resize':nearL?'ew-resize':'default'; } return; }
+  if(!gf.drag){ if(gf.src&&!gf.mode&&gf.layout&&!gf.layout.crop){ const p=cvPt(e); const tol=Math.max(8*p.s,gf.layout.hs||9); const nearL=gf.lanes.some(l=>Math.abs(l.x-p.x)<tol); const nearB=p.x<0&&gf.bands.some(b=>Math.abs(b.y-p.y)<tol); gcv.style.cursor=gfLabHit(p)>=0?'text':nearB?'ns-resize':gfLwHit(p,tol)>=0?'col-resize':nearL?'ew-resize':(gf.zoom||1)>1?'grab':'default'; } return; }
   const p=cvPt(e);
   if(gf.drag.t==='pan'){ const v=$('#gf-view'); v.scrollLeft=gf.drag.sl-(e.clientX-gf.drag.cx); v.scrollTop=gf.drag.st-(e.clientY-gf.drag.cy); return; }
   if(gf.drag.t==='cropadj'){ const r=gfRotated(), o=gf.drag.o, h=gf.drag.h, dx=p.x-gf.drag.x0, dy=p.y-gf.drag.y0; let x0=o.x, y0=o.y, x1=o.x+o.w, y1=o.y+o.h;
@@ -432,9 +440,10 @@ gcv.addEventListener('pointermove',e=>{
     gf.pend={x:x0,y:y0,w:x1-x0,h:y1-y0}; gfRender(); return; }
   if(gf.drag.t==='crop'){ const r=gfRotated(); const x0=Math.max(0,Math.min(gf.drag.x0,p.x)), y0=Math.max(0,Math.min(gf.drag.y0,p.y)); gf.pend={x:x0,y:y0,w:Math.min(r.width,Math.max(gf.drag.x0,p.x))-x0,h:Math.min(r.height,Math.max(gf.drag.y0,p.y))-y0}; gfRender(); }
   else if(gf.drag.t==='lane'){ gf.lanes[gf.drag.i].x=Math.max(0,Math.min(gfProc().w,p.x)); gfRender(); }
+  else if(gf.drag.t==='lw'){ gf.lw=Math.max(4,Math.min(200,Math.round(2*Math.abs(p.x-gf.lanes[gf.drag.i].x)))); gfRender(); }
   else if(gf.drag.t==='band'){ gf.bands[gf.drag.i].y=Math.max(0,Math.min(gfProc().h,p.y)); gfRender(); }
 });
-gcv.addEventListener('pointerup',()=>{ if(gf.drag&&gf.drag.t==='band'){ gf.bands.sort((a,b)=>a.y-b.y); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfBandsTable(); gfMarksTable(); } if(gf.drag&&gf.drag.t==='lane'){ const act=gf.lanes[gf.ladder]; gf.lanes.sort((a,b)=>a.x-b.x); gf.ladder=Math.max(0,gf.lanes.indexOf(act)); gfLanesTable(); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); } gf.drag=null; gfRender(); });
+gcv.addEventListener('pointerup',()=>{ if(gf.drag&&gf.drag.t==='lw'){ gf.marks.forEach(m=>m.int=null); gfSetIn('gf-lw',gf.lw); } if(gf.drag&&gf.drag.t==='band'){ gf.bands.sort((a,b)=>a.y-b.y); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfBandsTable(); gfMarksTable(); } if(gf.drag&&gf.drag.t==='lane'){ const act=gf.lanes[gf.ladder]; gf.lanes.sort((a,b)=>a.x-b.x); gf.ladder=Math.max(0,gf.lanes.indexOf(act)); gfLanesTable(); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); } gf.drag=null; gfRender(); });
 
 /* ================= GELFOTO: DENSITOMETRIE EN AUTOMATISCH METEN ================= */
 function gfIntensity(x,y){ const pr=laneProfile(x), h=pr.length, k=Math.max(0,Math.min(h-1,Math.round(y))), pk=pr[k]; if(!(pk>0)) return 0;
@@ -639,6 +648,7 @@ live({
   gfFindGel: [() => gfFindGel, v => { gfFindGel = v; }],
   gfZoom: [() => gfZoom, v => { gfZoom = v; }],
   cvPt: [() => cvPt, v => { cvPt = v; }],
+  gfLwHit: [() => gfLwHit, v => { gfLwHit = v; }],
   gfIntensity: [() => gfIntensity, v => { gfIntensity = v; }],
   gfMarkInt: [() => gfMarkInt, v => { gfMarkInt = v; }],
   gfMeasAll: [() => gfMeasAll, v => { gfMeasAll = v; }],

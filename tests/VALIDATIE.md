@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-22 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 406 van 406 controles binnen tolerantie.**
+**Resultaat: 410 van 410 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -65,9 +65,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9439 | -0.06% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7775 | -0.04% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5573 | +0.32% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9418 | -0.28% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,781 | +0.41% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5537 | -0.34% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -111,6 +111,10 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Gelfoto-editor | Ladderbibliotheek: eigen ladder | product 650 bp (gem.) | 650 | 648,8 | -0.18% | ✅ | Zelftest: de 100 bp-ladder (1000–100) als eigen ladder onder een andere naam bewaren en kiezen; detectie en meting op de realistische testgel geven weer 650 bp. Na herladen staat de ladder er nog; een geplakte gedeelde regel voegt een tweede toe |
 | Gelfoto-editor | Ladderbibliotheek: eigen ladder | ladder na herladen | 1 | 1 | +0.00% | ✅ | Zelftest: de 100 bp-ladder (1000–100) als eigen ladder onder een andere naam bewaren en kiezen; detectie en meting op de realistische testgel geven weer 650 bp. Na herladen staat de ladder er nog; een geplakte gedeelde regel voegt een tweede toe |
 | Gelfoto-editor | Ladderbibliotheek: eigen ladder | gedeelde regel ingelezen | 1 | 1 | +0.00% | ✅ | Zelftest: de 100 bp-ladder (1000–100) als eigen ladder onder een andere naam bewaren en kiezen; detectie en meting op de realistische testgel geven weer 650 bp. Na herladen staat de ladder er nog; een geplakte gedeelde regel voegt een tweede toe |
+| Gelfoto-editor | Lanegrens slepen en verschuiven | lanebreedte na slepen | 76 | 76 | +0.00% | ✅ | Zelftest: de rechtergrens van lane 3 van de demo-gel 10 schermpixels naar rechts slepen maakt de lanebreedte 2 × (halve breedte + 10 × schaal) en zet het veld mee, de lanen blijven staan; ingezoomd (3×) verschuift slepen tussen twee lanen de foto 120 px |
+| Gelfoto-editor | Lanegrens slepen en verschuiven | veld volgt | 76 | 76 | +0.00% | ✅ | Zelftest: de rechtergrens van lane 3 van de demo-gel 10 schermpixels naar rechts slepen maakt de lanebreedte 2 × (halve breedte + 10 × schaal) en zet het veld mee, de lanen blijven staan; ingezoomd (3×) verschuift slepen tussen twee lanen de foto 120 px |
+| Gelfoto-editor | Lanegrens slepen en verschuiven | lanen blijven staan | 1 | 1 | +0.00% | ✅ | Zelftest: de rechtergrens van lane 3 van de demo-gel 10 schermpixels naar rechts slepen maakt de lanebreedte 2 × (halve breedte + 10 × schaal) en zet het veld mee, de lanen blijven staan; ingezoomd (3×) verschuift slepen tussen twee lanen de foto 120 px |
+| Gelfoto-editor | Lanegrens slepen en verschuiven | verschoven (px) | 120 | 120 | +0.00% | ✅ | Zelftest: de rechtergrens van lane 3 van de demo-gel 10 schermpixels naar rechts slepen maakt de lanebreedte 2 × (halve breedte + 10 × schaal) en zet het veld mee, de lanen blijven staan; ingezoomd (3×) verschuift slepen tussen twee lanen de foto 120 px |
 | Centrifuge | rpm → × g | × g | 1957 | 1957 | +0.00% | ✅ | Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g |
 | Centrifuge | × g → rpm | rpm | 5837 | 5837 | +0.00% | ✅ | CASRAI: 4000 × g, r = 10,5 cm → 5837 rpm |
 | Centrifuge | Rotorbalans | n=12 k=5 gebalanceerd | 1 | 1 | +0.00% | ✅ | Som van de plaatsvectoren = 0: opgebouwd uit gelijkmatige p-hoeken met p | n (n = 12, k = 5 → 2 + 3; n = 6, k = 1 en k = 5 kunnen niet) |

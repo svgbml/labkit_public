@@ -397,6 +397,19 @@ def _(pg):
     return [('eigen ladder gekozen', int(key.startswith('u')), 1, 0), ('detectie gebruikt eigen ladder', int(used == key), 1, 0),
             ('product 650 bp (gem.)', sum(b650) / max(1, len(b650)), 650, 0.02), ('ladder na herladen', kept, 1, 0), ('gedeelde regel ingelezen', int(imp == '[500,300,100]'), 1, 0)]
 
+@case('Gelfoto-editor', 'Lanegrens slepen en verschuiven', 'Zelftest: de rechtergrens van lane 3 van de demo-gel 10 schermpixels naar rechts slepen maakt de lanebreedte 2 × (halve breedte + 10 × schaal) en zet het veld mee, de lanen blijven staan; ingezoomd (3×) verschuift slepen tussen twee lanen de foto 120 px')
+def _(pg):
+    pg.evaluate("__go('gelfoto'); gfDemo()"); pg.wait_for_timeout(300)
+    pt = pg.evaluate("""(()=>{ const r=gcv.getBoundingClientRect(), s=gcv.width/r.width, l=gf.lanes[2], L=gf.layout; return {x:r.left+(L.L+l.x+gf.lw/2)/s, y:r.top+(L.T+gfProc().h/2)/s, s, lw:gf.lw, xs:gf.lanes.map(q=>q.x).join()}; })()""")
+    pg.mouse.move(pt['x'], pt['y']); pg.mouse.down(); pg.mouse.move(pt['x'] + 10, pt['y'], steps=2); pg.mouse.up(); pg.wait_for_timeout(200)
+    lw, fld, xs = pg.evaluate("[gf.lw, +document.getElementById('gf-lw').value, gf.lanes.map(q=>q.x).join()]")
+    pg.evaluate("gfSetIn('gf-lw', 30); gfZoom(3)"); pg.wait_for_timeout(200)  # smalle lanen: het midden tussen twee lanen is geen grens
+    q = pg.evaluate("""(()=>{ const v=document.getElementById('gf-view'), vr=v.getBoundingClientRect(), r=gcv.getBoundingClientRect(), s=gcv.width/r.width, L=gf.layout, i=gf.lanes.findIndex(q=>r.left+(L.L+q.x)/s>vr.left+150); return {x:r.left+(L.L+(gf.lanes[i-1].x+gf.lanes[i].x)/2)/s, y:vr.top+200, sl:v.scrollLeft}; })()""")
+    pg.mouse.move(q['x'], q['y']); pg.mouse.down(); pg.mouse.move(q['x'] - 120, q['y'], steps=3); pg.mouse.up()
+    sl = pg.evaluate("document.getElementById('gf-view').scrollLeft"); pg.evaluate("gfZoom(1)")
+    return [('lanebreedte na slepen', lw, round(2 * (pt['lw'] / 2 + 10 * pt['s'])), 0.03), ('veld volgt', fld, lw, 0),
+            ('lanen blijven staan', int(xs == pt['xs']), 1, 0), ('verschoven (px)', sl - q['sl'], 120, 0.05)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")
