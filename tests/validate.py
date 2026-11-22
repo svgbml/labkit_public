@@ -270,6 +270,60 @@ def _(pg):
     return [('rechtzethoek (°)', ang, 2.0, 0.125), ('aantal lanen', n, 11, 0), ('ladderlane (index)', lad, 0, 0),
             ('product 650 bp (gem.)', sum(b650) / max(1, len(b650)), 650, 0.02), ('aantal productbanden', len(b650), 7, 0), ('dimeer 60 bp (gem.)', sum(b60) / max(1, len(b60)), 60, 0.05)]
 
+@case('Gelfoto-editor', 'Projectbestand .labkitgel', 'Zelftest: de realistische testgel opslaan, de pagina herladen en het bestand openen geeft dezelfde lanen, banden, metingen en dezelfde export (pixel voor pixel)')
+def _(pg):
+    # vervolg op het geval hierboven: de gel staat er, rechtgezet, met banden en metingen
+    pg.evaluate("gf.lanes[2].label='Monster A'; __set('gf-title','Projecttest'); __set('gf-con','1.4'); gfRender()")
+    state = "JSON.stringify({l:gf.lanes,m:gf.marks,b:gf.bands,a:gf.ladder,c:gf.crop,f:gf.fine,t:gf.title,k:gf.con})"
+    before = pg.evaluate(state); img0 = pg.evaluate("gfRender(true).toDataURL()")
+    with pg.expect_download() as dl: pg.evaluate("document.getElementById('gf-psave').click()")
+    path = dl.value.path()
+    pg.goto('about:blank'); pg.goto(URL + '#gelfoto'); pg.wait_for_timeout(800); pg.evaluate(HELPERS)
+    pg.set_input_files('#gf-pfile', str(path)); pg.wait_for_timeout(1500)
+    after = pg.evaluate(state); img1 = pg.evaluate("gfRender(true).toDataURL()")
+    return [('toestand gelijk na openen', int(before == after), 1, 0), ('export gelijk na openen', int(img0 == img1), 1, 0)]
+
+@case('Gelfoto-editor', 'Gelbibliotheek', 'Zelftest: de realistische testgel in de bibliotheek (IndexedDB) bewaren, de pagina herladen: het item staat er nog en openen geeft evenveel lanen')
+def _(pg):
+    n0 = pg.evaluate("gf.lanes.length")
+    cnt = "document.querySelectorAll('#gf-lib img').length"
+    pg.evaluate("document.getElementById('gf-libsave').click()"); pg.wait_for_timeout(800)
+    one = pg.evaluate(cnt)
+    pg.evaluate("document.getElementById('gf-libsave').click()"); pg.wait_for_timeout(800)  # zelfde gel: geen dubbel item
+    listed = pg.evaluate(cnt)
+    pg.goto('about:blank'); pg.goto(URL + '#gelfoto'); pg.wait_for_timeout(800); pg.evaluate(HELPERS)
+    kept = pg.evaluate(cnt)
+    pg.evaluate("document.querySelector('#gf-lib .gf-lib-open').click()"); pg.wait_for_timeout(1500)
+    return [('item in lijst', int(one >= 1), 1, 0), ('geen dubbel item bij opnieuw bewaren', listed, one, 0), ('items na herladen', kept, one, 0), ('lanen na openen', pg.evaluate("gf.lanes.length"), n0, 0)]
+
+@case('Gelfoto-editor', 'Lanelabels op de foto typen', 'Zelftest: klik op het label van lane 3 boven de gel, typ, Tab naar lane 4 en plak daar een lijst van drie namen')
+def _(pg):
+    # vervolg op het geval hierboven: de realistische testgel staat er weer
+    r = pg.evaluate("""(()=>{ const r=gcv.getBoundingClientRect(), s=gcv.width/r.width, L=gf.layout, l=gf.lanes[2];
+      gcv.dispatchEvent(new PointerEvent('pointerdown',{clientX:r.left+(L.L+l.x)/s, clientY:r.top+(L.T-L.lab/2)/s, button:0, bubbles:true, cancelable:true}));
+      const a=document.getElementById('gf-labed'); if(!a||document.activeElement!==a) return [0,0,0];
+      a.value='Typ'; a.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true}));
+      const b=document.getElementById('gf-labed'); const onNext=b&&b!==a&&gf.lanes[2].label==='Typ'?1:0;
+      const dt=new DataTransfer(); dt.setData('text/plain','A\\nB\\nC\\n'); b.dispatchEvent(new ClipboardEvent('paste',{clipboardData:dt,bubbles:true,cancelable:true}));
+      return [1, onNext, gf.lanes.slice(3,6).map(l=>l.label).join('')==='ABC'&&!document.getElementById('gf-labed')?1:0]; })()""")
+    return [('invoerveld op het label', r[0], 1, 0), ('Tab: bewaard en volgende lane', r[1], 1, 0), ('geplakte lijst vult 3 lanen', r[2], 1, 0)]
+
+@case('Gelfoto-editor', 'Verzadigingswaarschuwing', 'Zelftest: een blok van 20 × 10 pure witte pixels (255) tussen donkergrijs (30) en lichtgrijs (200) wordt als verzadigd gemarkeerd, met melding, in de editor maar niet in de export')
+def _(pg):
+    r = pg.evaluate("""(()=>{ const c=document.createElement('canvas'); c.width=300; c.height=200; const x=c.getContext('2d');
+      x.fillStyle='rgb(30,30,30)'; x.fillRect(0,0,300,200); x.fillStyle='rgb(200,200,200)'; x.fillRect(50,100,20,10); x.fillStyle='#fff'; x.fillRect(100,50,20,10);
+      gfLoadCanvas(c); const n=gfSat().n, noCrop=gf.crop?0:1;
+      const o=document.getElementById('gf-sat'); if(o&&!o.checked){ o.checked=true; o.dispatchEvent(new Event('input',{bubbles:true})); o.dispatchEvent(new Event('change',{bubbles:true})); }
+      gfRender(); const px=(cv,X,Y)=>Array.from(cv.getContext('2d').getImageData(X,Y,1,1).data).slice(0,3);
+      const L=gf.layout, ed=px(gcv,Math.round(L.L+110),Math.round(L.T+55));
+      return {n,noCrop,ed,L:[L.L,L.T]}; })()""")
+    # de export (gfRender(true) geeft zijn eigen canvas terug) krijgt de markering niet
+    ex = pg.evaluate("(()=>{ const L=gf.layout; return Array.from(gfRender(true).getContext('2d').getImageData(Math.round(L.L+110),Math.round(L.T+55),1,1).data).slice(0,3); })()")
+    warn = pg.evaluate("(()=>{ const n=document.querySelector('#gf-sat'); const p=n&&n.closest('.panel'); return p&&p.querySelector('.note.warn')?1:0; })()")
+    mag = lambda v: 1 if v[0] > 200 and v[1] < 80 and v[2] > 120 else 0
+    return [('exact het witte blok (200 px)', r['n'], 200, 0), ('geen uitsnede', r['noCrop'], 1, 0), ('overlay in de editor', mag(r['ed']), 1, 0),
+            ('geen overlay in de export', mag(ex), 0, 0), ('waarschuwing getoond', warn, 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

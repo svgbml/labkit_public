@@ -160,7 +160,7 @@ canvas{max-width:100%}
 .gfwrap .panel h3{margin-bottom:10px}
 #gf-stage{position:sticky;top:20px}
 #gf-cv{width:100%;height:auto;display:block;background:#fff;border-radius:3px;touch-action:none}
-#gf-view{overflow:auto;border-radius:3px}
+#gf-view{overflow:auto;border-radius:3px;position:relative}
 #gf-view.zoomed{max-height:84vh}
 .rng{display:grid;grid-template-columns:90px 1fr 44px;align-items:center;gap:8px;font-size:13px}
 .rng span:last-child{text-align:right;color:var(--muted)}

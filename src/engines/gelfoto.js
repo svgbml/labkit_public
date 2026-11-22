@@ -6,6 +6,7 @@
    en worden door window.__gfRefresh bijgewerkt. Achter dit rekenwerk staan de validatiegevallen
    van de editor in tests/validate.py: niet herschrijven. */
 import {live} from '../lib/global.js';
+import {libPut} from '../tools/gelfoto/library.js';
 
 /* ================= GELFOTO-EDITOR ================= */
 const gf={unit:'bp',disp:'bp',angAuto:true,src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null};
@@ -21,7 +22,7 @@ function gfSetIn(id,v){ const el=$('#'+id); if(!el) return; el.value=String(v);
      niet meer, dus doen we het hier voordat v-model de waarde overneemt */
   if(LANG==='en'&&typeof i18nValue==='function'){ el.__iv=null; el.__typed=false; i18nValue(el); }
   el.dispatchEvent(new Event('input',{bubbles:true})); }
-function gfLoadCanvas(c){ gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; gfSetIn('gf-rot',0); gfUpdate(true); }
+function gfLoadCanvas(c){ gf.libId=null; gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; gfSetIn('gf-rot',0); gfUpdate(true); }
 function gfFromImage(img){ const M=2400, s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); gfLoadCanvas(c); gf.title=''; gfSetIn('gf-title',''); gf.marks=[]; let auto=false; { const bx=gfFindGel(); if(bx&&bx.w*bx.h<0.8*c.width*c.height){ gf.crop=bx; gf.cache={}; auto=true; } } gfDetectLanes(); if(gf.lanes.length>=2) gfDetectBands(); gfMarksTable(); gfStatus(`Geladen: ${img.naturalWidth} × ${img.naturalHeight} px${s<1?' (verkleind voor bewerking)':''}.`, auto?'Gel automatisch bijgesneden (Herstel toont de hele foto).':'', `${gf.lanes.length} lanen gevonden.`, 'Staat de gel scheef? Gebruik "Automatisch rechtzetten".'); }
 function gfFile(f){ if(!f) return; const url=URL.createObjectURL(f); const img=new Image(); img.onload=()=>{ gfFromImage(img); URL.revokeObjectURL(url); }; img.onerror=()=>gfStatus('Dit bestand kan de browser niet openen (bijvoorbeeld TIFF). Exporteer de foto als PNG of JPG.'); img.src=url; }
 $('#gf-stage').addEventListener('dragover',e=>e.preventDefault());
@@ -65,6 +66,17 @@ function gfProc(){
   const samp=[]; for(let p=0;p<n;p+=29) samp.push(gray[p]); samp.sort((a,b)=>a-b); const med=samp[samp.length>>1];
   const sig=new Float32Array(n); const darkBands=med>0.5; for(let p=0;p<n;p++) sig[p]=darkBands?1-gray[p]:gray[p];
   gf.cache.pk=k; gf.cache.proc={c,w:c.width,h:c.height,sig,darkBands}; return gf.cache.proc;
+}
+/* Verzadigde pixels van de ruwe foto (vóór helderheid/contrast), in dezelfde uitsnede als gfProc().c.
+   Heldere banden: kanaal >= 254; donkere banden: kanaal <= 1. Hoeken die het kantelen bijvult tellen mee. */
+function gfSat(){
+  const k=`${gf.rot90}|${gf.fine}|${gf.flip}|${JSON.stringify(gf.crop)}`; if(gf.cache.sk===k) return gf.cache.sat;
+  const r=gfRotated(), cr=gf.crop||{x:0,y:0,w:r.width,h:r.height}, dark=gfProc().darkBands;
+  const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(cr.w)); c.height=Math.max(1,Math.round(cr.h)); const x=c.getContext('2d'); x.drawImage(r,cr.x,cr.y,cr.w,cr.h,0,0,c.width,c.height);
+  const id=x.getImageData(0,0,c.width,c.height), d=id.data, N=c.width*c.height; let n=0;
+  for(let i=0;i<d.length;i+=4){ const hit=dark?Math.min(d[i],d[i+1],d[i+2])<=1:Math.max(d[i],d[i+1],d[i+2])>=254; if(hit){ d[i]=255; d[i+1]=0; d[i+2]=200; d[i+3]=217; n++; } else d[i+3]=0; }
+  x.putImageData(id,0,0);
+  gf.cache.sk=k; gf.cache.sat={c,n,frac:n/N}; return gf.cache.sat;
 }
 function smooth(a,k){ const h=Math.max(1,Math.round(k)), n=a.length, pre=new Float64Array(n+1); for(let i=0;i<n;i++) pre[i+1]=pre[i]+a[i]; const o=new Float32Array(n); for(let i=0;i<n;i++){ const lo=Math.max(0,i-h), hi=Math.min(n-1,i+h); o[i]=(pre[hi+1]-pre[lo])/(hi-lo+1); } return o; }
 function peaks(a,minDist,minProm){ const idx=[]; for(let i=1;i<a.length-1;i++) if(a[i]>=a[i-1]&&a[i]>a[i+1]) idx.push(i);
@@ -335,9 +347,9 @@ function gfRender(exportMode,scale=1){
   if(lanesOn){ x.font=font; const ext=(cx,t)=>{ const tw=x.measureText(t).width; return angD?cx+fs*0.1*Math.cos(ang)+tw*Math.cos(ang)+fs*0.5*Math.sin(ang):cx+tw/2; }; let mr=0; gf.lanes.forEach(l=>{ mr=Math.max(mr,ext(l.x,uv(l.label||''))-(P.w+gw+Wv)); }); if(vlOn&&vlabT) mr=Math.max(mr,ext(P.w+gw+Wv/2,uv(vlabT))-(P.w+gw+Wv)); R=Math.max(R,Math.ceil(mr+pad+2)); }
   const W=Lm+P.w+gw+Wv+R, H=T+P.h+B;
   c.width=Math.round(W*scale); c.height=Math.round(H*scale); x.setTransform(scale,0,0,scale,0,0);
-  x.fillStyle='#fff'; x.fillRect(0,0,W,H); x.imageSmoothingQuality='high'; x.drawImage(P.c,Lm,T);
+  x.fillStyle='#fff'; x.fillRect(0,0,W,H); x.imageSmoothingQuality='high'; x.drawImage(P.c,Lm,T); { const so=$('#gf-sat'); if(!exportMode&&so&&so.checked) x.drawImage(gfSat().c,Lm,T); }
   if(vlOn){ const wc=gfVlWarp(P.h,Wv); if(wc) x.drawImage(wc,VX,T); const vlab=vlabT; if(vlab&&lanesOn){ x.save(); x.font=font; x.fillStyle='#111'; x.translate(VX+Wv/2,T-fs*0.45); if(gf.angEff){ x.rotate(-gf.angEff*Math.PI/180); x.textAlign='left'; x.textBaseline='middle'; x.fillText(uv(vlab),fs*0.1,0); } else { x.textAlign='center'; x.fillText(uv(vlab),0,0); } x.restore(); } }
-  if(!exportMode) gf.layout={L:Lm,T,s:1,hs};
+  if(!exportMode) gf.layout={L:Lm,T,s:1,hs,lab:lanesOn?labH:0};
   x.fillStyle='#111'; x.textBaseline='alphabetic';
   if(titleOn){ x.font=`700 ${fs*1.25}px Segoe UI, Arial, sans-serif`; x.textAlign='left'; x.fillText(uv(gf.title),Lm,pad+fs*1.25*1.25); }
   if(lanesOn){ x.font=font; gf.lanes.forEach(l=>{ const lx=Lm+l.x, ly=T-fs*0.45; x.save(); x.translate(lx,ly); if(angD){ x.rotate(-ang); x.textAlign='left'; x.textBaseline='middle'; x.fillText(uv(l.label||''),fs*0.1,0); } else { x.textAlign='center'; x.fillText(uv(l.label||''),0,0); } x.restore(); }); }
@@ -401,6 +413,7 @@ gcv.addEventListener('pointerdown',e=>{
   if(e.button===1){ const v=$('#gf-view'); gf.drag={t:'pan',cx:e.clientX,cy:e.clientY,sl:v.scrollLeft,st:v.scrollTop}; gcv.setPointerCapture(e.pointerId); e.preventDefault(); return; }
   if(gf.mode==='crop'){ const h=gfCropHit(p); if(h){ gf.drag={t:'cropadj',h,x0:p.x,y0:p.y,o:{...gf.pend}}; } else { gf.drag={t:'crop',x0:p.x,y0:p.y}; gf.pend={x:p.x,y:p.y,w:0,h:0}; } gcv.setPointerCapture(e.pointerId); return; }
   const inside=p.x>=0&&p.y>=0&&p.x<=P.w&&p.y<=P.h;
+  if(!gf.mode&&gfLabHit(p)>=0){ e.preventDefault(); gfLabEdit(gfLabHit(p)); return; }  /* preventDefault: anders haalt de muisklik de focus meteen weg */
   if(gf.mode==='addlane'&&inside){ const act=gf.lanes[gf.ladder]; gf.lanes.push({x:p.x,label:String(gf.lanes.length+1)}); gf.lanes.sort((a,b)=>a.x-b.x); gf.ladder=Math.max(0,gf.lanes.indexOf(act)); gfLanesTable(); gfRender(); return; }
   if(gf.mode==='addband'&&inside&&gf.lanes[gf.ladder]){ const y=gfPeakNear(gf.lanes[gf.ladder].x,p.y); gf.bands.push({y,bp:NaN}); gf.bands.sort((a,b)=>a.y-b.y); gfBandsTable(); gfRender(); return; }
   if(gf.mode==='measure'&&inside){ let li=0,bd=Infinity; gf.lanes.forEach((l,j)=>{ const d=Math.abs(l.x-p.x); if(d<bd){bd=d;li=j;} }); const lx=gf.lanes.length&&bd<gf.lw?gf.lanes[li].x:p.x; const y=gfPeakNear(lx,p.y); gf.marks.push({x:lx,y,bp:gfEst(y,lx)}); gfMarksTable(); gfRender(); return; }
@@ -410,7 +423,7 @@ gcv.addEventListener('pointerdown',e=>{
 });
 gcv.addEventListener('pointermove',e=>{
   if(!gf.drag&&gf.mode==='crop'&&gf.src){ const h=gfCropHit(cvPt(e)); gcv.style.cursor=!h?'crosshair':h==='m'?'move':({n:'ns-resize',s:'ns-resize',e:'ew-resize',w:'ew-resize',nw:'nwse-resize',se:'nwse-resize',ne:'nesw-resize',sw:'nesw-resize'})[h]; return; }
-  if(!gf.drag){ if(gf.src&&!gf.mode&&gf.layout&&!gf.layout.crop){ const p=cvPt(e); const tol=Math.max(8*p.s,gf.layout.hs||9); const nearL=gf.lanes.some(l=>Math.abs(l.x-p.x)<tol); const nearB=p.x<0&&gf.bands.some(b=>Math.abs(b.y-p.y)<tol); gcv.style.cursor=nearB?'ns-resize':nearL?'ew-resize':'default'; } return; }
+  if(!gf.drag){ if(gf.src&&!gf.mode&&gf.layout&&!gf.layout.crop){ const p=cvPt(e); const tol=Math.max(8*p.s,gf.layout.hs||9); const nearL=gf.lanes.some(l=>Math.abs(l.x-p.x)<tol); const nearB=p.x<0&&gf.bands.some(b=>Math.abs(b.y-p.y)<tol); gcv.style.cursor=gfLabHit(p)>=0?'text':nearB?'ns-resize':nearL?'ew-resize':'default'; } return; }
   const p=cvPt(e);
   if(gf.drag.t==='pan'){ const v=$('#gf-view'); v.scrollLeft=gf.drag.sl-(e.clientX-gf.drag.cx); v.scrollTop=gf.drag.st-(e.clientY-gf.drag.cy); return; }
   if(gf.drag.t==='cropadj'){ const r=gfRotated(), o=gf.drag.o, h=gf.drag.h, dx=p.x-gf.drag.x0, dy=p.y-gf.drag.y0; let x0=o.x, y0=o.y, x1=o.x+o.w, y1=o.y+o.h;
@@ -477,6 +490,69 @@ function gfMassChanged(){ gfMarksTable(); gfRender(); }
 /* ng kan alleen met een DNA-massaladder; GfLadder.vue roept dit aan bij een andere eenheid. */
 function gfUnitMsg(){ if($('#gf-unit').value==='ng'&&gf.unit==='bp'&&!isFinite(gfMassSlope())) gfStatus('Voor ng zijn een DNA-massaladder (ng per band), gemarkeerde ladderbanden en metingen nodig.'); else if($('#gf-unit').value==='ng'&&gf.unit!=='bp') gfStatus('ng werkt alleen met een DNA-ladder met bekende hoeveelheid per band.'); }
 
+/* ================= LANELABELS OP DE FOTO TYPEN (S64) =================
+   Klik op een label boven de gel: er komt een invoerveld over te liggen. Enter of klik ernaast
+   bewaart, Escape annuleert, Tab en Shift+Tab gaan naar de volgende of vorige lane. Plak je een
+   lijst (regels of tabs, bijvoorbeeld een kolom uit Excel), dan vult die deze en de volgende lanen. */
+function gfLabHit(p){ const lay=gf.layout; if(!lay||lay.crop||!lay.lab||!gf.lanes.length||p.y>=0||p.y<-lay.lab-4) return -1;
+  let li=-1,bd=Math.max(gf.lw*0.75,12); gf.lanes.forEach((l,i)=>{ const d=Math.abs(l.x-p.x); if(d<bd){bd=d;li=i;} }); return li; }
+function gfLabEdit(i){ const old=$('#gf-labed'); if(old) old.remove(); const l=gf.lanes[i], lay=gf.layout; if(!l||!lay) return;
+  const s=gcv.width/gcv.getBoundingClientRect().width, n=gf.lanes.length, pitch=n>1?(gf.lanes[n-1].x-gf.lanes[0].x)/(n-1):gf.lw*2, fpx=Math.max(12,gf.fs/s), w=Math.max(64,Math.min(180,pitch/s*0.95));
+  const el=document.createElement('input'); el.id='gf-labed'; el.className='txt'; el.value=l.label||''; el.setAttribute('data-notr',''); el.setAttribute('aria-label',trPlain(`Label van lane ${i+1}`));
+  el.style.cssText=`position:absolute;z-index:3;left:${gcv.offsetLeft+(lay.L+l.x)/s-w/2}px;top:${Math.max(0,gcv.offsetTop+lay.T/s-fpx*2.2)}px;width:${w}px;font-size:${fpx}px;padding:2px 4px;text-align:center`;
+  let done=false; const close=save=>{ if(done) return; done=true; if(save) l.label=el.value; el.remove(); gfLanesTable(); gfRender(); };
+  el.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); close(true); } else if(e.key==='Escape'){ e.preventDefault(); close(false); }
+    else if(e.key==='Tab'){ const j=i+(e.shiftKey?-1:1); close(true); if(gf.lanes[j]){ e.preventDefault(); gfLabEdit(j); } } });
+  el.addEventListener('blur',()=>close(true));
+  el.addEventListener('paste',e=>{ const t=(e.clipboardData&&e.clipboardData.getData('text'))||''; if(!/[\t\n]/.test(t.trim())) return; e.preventDefault();
+    const v=t.replace(/\r/g,'').split(/[\t\n]/).map(q=>q.trim()); while(v.length&&!v[v.length-1]) v.pop();
+    const k=Math.min(v.length,n-i); for(let q=0;q<k;q++) gf.lanes[i+q].label=v[q]; done=true; el.remove(); gfLanesTable(); gfRender();
+    gfStatus(`${k} labels geplakt.`, v.length>k?`${v.length-k} bleven over: er zijn niet genoeg lanen.`:''); });
+  $('#gf-view').appendChild(el); el.focus(); el.select(); }
+
+/* ================= PROJECTBESTAND .labkitgel (S62) =================
+   De foto als PNG plus de toestand van de editor (lanen met hun banden, ladder, metingen, beeldwerk)
+   en de waarden van de velden. De virtuele ladder (een tweede foto) en de zoom gaan niet mee. */
+const GF_PROJ=['rot90','fine','flip','crop','inv','gray','bri','con','lanes','lw','ladder','ladKey','marks','title','fs','ang','angAuto','unit','disp','wells','autoLadder'];
+/* het veld-id's van de tool; de lanelabels staan in gf.lanes, de virtuele ladder gaat niet mee */
+const gfProjFields=()=>[...$$('#t-gelfoto input[id],#t-gelfoto select[id],#t-gelfoto textarea[id]')].filter(el=>el.type!=='file'&&!el.closest('table')&&!/^gf-vl/.test(el.id));
+/* geeft verwijzingen naar gf terug: wie bewaart, kopieert (JSON of IndexedDB doen dat zelf) */
+function gfProjSnap(){ if(!gf.src) return null; const s={}; GF_PROJ.forEach(k=>{ if(gf[k]!==undefined) s[k]=gf[k]; }); const inp={}; gfProjFields().forEach(el=>{ inp[el.id]=el.type==='checkbox'?el.checked:el.value; });
+  return {kind:'labkitgel',v:1,app:APPVER,img:gf.src.toDataURL('image/png'),gf:s,inp}; }
+/* NaN (samengevoegde band, geen meting) zou in JSON null worden; dat telt isFinite() als 0 */
+const gfJsonW=(k,v)=>typeof v==='number'&&!isFinite(v)?{$n:String(v)}:v, gfJsonR=(k,v)=>v&&typeof v==='object'&&typeof v.$n==='string'&&Object.keys(v).length===1?Number(v.$n):v;
+function gfProjSave(){ const s=gfProjSnap(); if(!s){ gfStatus('Kies eerst een gelfoto of laad de demo-gel.'); return; }
+  gfLibSave(true);
+  saveBlob(safeName(gf.title||'gel')+'.labkitgel',new Blob([JSON.stringify(s,gfJsonW)],{type:'application/json'})).then(()=>gfStatus('Project opgeslagen.')).catch(()=>gfStatus('Downloaden lukte niet hier.')); }
+function gfProjOpen(f){ if(!f) return; f.text().then(t=>gfProjApply(JSON.parse(t,gfJsonR))).catch(()=>gfStatus('Dit bestand is geen Labkit-gelproject.')); }
+/* zet een project terug; gooit bij een ongeldig project (vertrouwensgrens: het bestand komt van buiten) */
+async function gfProjApply(p){
+  if(!p||p.kind!=='labkitgel'||typeof p.img!=='string'||!/^data:image\/(png|jpeg|webp);base64,/.test(p.img)||!p.gf||!Array.isArray(p.gf.lanes)) throw new Error('geen gelproject');
+  const img=new Image(); await new Promise((ok,no)=>{ img.onload=ok; img.onerror=no; img.src=p.img; });
+  const c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight; c.getContext('2d').drawImage(img,0,0);
+  /* velden eerst, twee keer: de keuze van de ladder zet in een watcher de eenheid en de massa's
+     en het eigen-ladderveld verschijnt pas daarna; de tweede ronde zet de bewaarde waarden terug */
+  const put=()=>gfProjFields().forEach(el=>{ if(!(el.id in (p.inp||{}))) return; const v=p.inp[el.id]; if(el.type==='checkbox') el.checked=!!v; else el.value=String(v); el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); });
+  put(); await new Promise(r=>setTimeout(r,0)); put(); await new Promise(r=>setTimeout(r,0));
+  gf.libId=null; gf.src=c; gf.cache={}; gf.crop=null; gf.wells=null; gf.vl=null; gf.mode=null; gf.drag=null; gf.pend=null;
+  GF_PROJ.forEach(k=>{ if(k in p.gf) gf[k]=p.gf[k]; });
+  gf.lanes=gf.lanes.filter(l=>l&&isFinite(l.x)).map(l=>({...l,label:String(l.label??'')})); gf.marks=Array.isArray(gf.marks)?gf.marks:[];
+  gf.ladder=Math.max(0,Math.min(gf.lanes.length-1,Math.round(+gf.ladder)||0));
+  gf.bands=gf.lanes[gf.ladder]?(gf.lanes[gf.ladder].bands||(gf.lanes[gf.ladder].bands=[])):[];
+  /* de velden hebben gfUpdate() laten lopen; zonder dit zet de rechtzet-timer de lanen opnieuw */
+  gfFine=gf.fine; clearTimeout(gfFineT);
+  gfLanesTable(); gfBandsTable(); gfMarksTable(); gfRender(); gfStatus('Project geopend.'); }
+
+/* bewaart de gel in de bibliotheek (IndexedDB); dezelfde gel werkt zijn eigen item bij */
+async function gfLibSave(quiet){ const s=gfProjSnap(); if(!s){ gfStatus('Kies eerst een gelfoto of laad de demo-gel.'); return; }
+  const id=gf.libId||(gf.libId='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
+  const r=gfRender(true), k=Math.min(1,160/r.width), t=document.createElement('canvas'); t.width=Math.max(1,Math.round(r.width*k)); t.height=Math.max(1,Math.round(r.height*k));
+  t.getContext('2d').drawImage(r,0,0,t.width,t.height);
+  const ok=await libPut({id,name:gf.title||'Gel',date:Date.now(),thumb:t.toDataURL('image/jpeg',0.7),snap:s});
+  if(!ok) gf.libId=null;
+  if(!ok||!quiet) gfStatus(ok?'Bewaard in de bibliotheek.':'De bibliotheek is niet beschikbaar in deze browser.'); }
+async function gfLibOpen(e){ try{ await gfProjApply(e.snap); gf.libId=e.id; }catch(x){ gfStatus('Dit bestand is geen Labkit-gelproject.'); } }
+
 /* Alles hierboven ook als globale naam, live: een toewijzing (timers = …, gfIntensity = …) in
    deze module of in de oude scripts komt aan beide kanten aan. */
 live({
@@ -490,6 +566,7 @@ live({
   gfDemo: [() => gfDemo, v => { gfDemo = v; }],
   gfRotated: [() => gfRotated, v => { gfRotated = v; }],
   gfProc: [() => gfProc, v => { gfProc = v; }],
+  gfSat: [() => gfSat, v => { gfSat = v; }],
   smooth: [() => smooth, v => { smooth = v; }],
   peaks: [() => peaks, v => { peaks = v; }],
   gfWells: [() => gfWells, v => { gfWells = v; }],
@@ -573,5 +650,13 @@ live({
   LMASS: () => LMASS,
   gfMassSlope: [() => gfMassSlope, v => { gfMassSlope = v; }],
   gfMassChanged: [() => gfMassChanged, v => { gfMassChanged = v; }],
-  gfUnitMsg: [() => gfUnitMsg, v => { gfUnitMsg = v; }]
+  gfUnitMsg: [() => gfUnitMsg, v => { gfUnitMsg = v; }],
+  gfProjSnap: [() => gfProjSnap, v => { gfProjSnap = v; }],
+  gfProjSave: [() => gfProjSave, v => { gfProjSave = v; }],
+  gfProjOpen: [() => gfProjOpen, v => { gfProjOpen = v; }],
+  gfProjApply: [() => gfProjApply, v => { gfProjApply = v; }],
+  gfLibSave: [() => gfLibSave, v => { gfLibSave = v; }],
+  gfLibOpen: [() => gfLibOpen, v => { gfLibOpen = v; }],
+  gfLabHit: [() => gfLabHit, v => { gfLabHit = v; }],
+  gfLabEdit: [() => gfLabEdit, v => { gfLabEdit = v; }]
 });
