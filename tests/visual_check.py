@@ -17,7 +17,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 URL = (ROOT / 'web' / 'index.html').as_uri()
 BASE = ROOT / 'tests' / 'visual' / sys.platform
 OUT = ROOT / 'tests' / 'visual' / 'out'
-CHAN, MAXFRAC = 24, 0.005  # kanaalverschil per pixel; aandeel afwijkende pixels dat nog mag
+CHAN, MAXFRAC, NB = 24, 0.005, 2  # kanaalverschil per pixel; aandeel afwijkende pixels dat nog mag; omgeving ±NB px
 CSS = ("*{animation:none!important;transition:none!important;caret-color:transparent!important}"
        ".lk-valid{visibility:hidden!important}"  # het aantal validatiecontroles groeit met elke batch
        ":root,html[data-theme]{--font-ui:'DejaVu Sans'!important;--font-mono:'DejaVu Sans Mono'!important}"
@@ -37,6 +37,13 @@ def shoot(pg, tool, js):
     pg.wait_for_timeout(500)
     return pg.locator('#t-' + tool).screenshot(animations='disabled')
 
+def changed(a, b):
+    """Pixels van a die buiten het bereik (min..max) van de 5×5-omgeving in b vallen. Zo telt anders
+    gerasterde tekst (andere Chromium-build of FreeType in CI) niet mee, een verschoven of nieuw element wel."""
+    k = np.ones((2 * NB + 1, 2 * NB + 1), np.uint8); a = a.astype(int)
+    lo, hi = cv2.erode(b, k).astype(int), cv2.dilate(b, k).astype(int)
+    return ((a < lo - CHAN) | (a > hi + CHAN)).any(axis=2)
+
 def main():
     args = sys.argv[1:]; upd = '--update' in args
     pref = [a for a in args if not a.startswith('--')]
@@ -55,7 +62,7 @@ def main():
             if old is None or old.shape != new.shape:
                 bad, frac = None, 1.0; why = f'afmeting {None if old is None else old.shape[:2]} -> {new.shape[:2]}'
             else:
-                bad = (np.abs(new.astype(int) - old.astype(int)).max(axis=2) > CHAN); frac = bad.mean(); why = f'{frac:.2%} pixels anders'
+                bad = changed(new, old) | changed(old, new); frac = bad.mean(); why = f'{frac:.2%} pixels anders'
             if frac > MAXFRAC:
                 fails += 1; OUT.mkdir(parents=True, exist_ok=True); (OUT / (name + '.png')).write_bytes(png)
                 if bad is not None:
