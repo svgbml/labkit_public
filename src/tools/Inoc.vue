@@ -31,7 +31,7 @@
       <lk-note v-if="m.err === 1" kind="info">{{ t('Vul gemeten OD, gewenste OD en volume in.') }}</lk-note>
       <lk-note v-else-if="m.err === 2" kind="bad">{{ t('De gewenste OD is hoger dan die van de cultuur; laat de cultuur langer groeien of concentreer de cellen.') }}</lk-note>
       <template v-else>
-        <lk-big :label="t('Pipetteer')" :value="V(m.vc * 1000)" :sub="t('cultuur')"/>
+        <lk-big :label="t('Pipetteer')" :html="V(m.vc * 1000) + pipHtml(m.vc * 1000)" :sub="t('cultuur')"/>
         <lk-kv :rows="rows"/>
         <lk-note v-if="m.od - m.bl > 1" kind="warn">{{ t('De meting ligt boven OD 1; daar is OD niet meer lineair. Meet in een verdunning.') }}</lk-note>
         <lk-formula :html="formula"/>
@@ -41,6 +41,7 @@
 </template>
 
 <script>
+import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 
 const F = (x, d) => lkNumIn(fmt(x, d)), V = u => lkNumIn(vol(u));
@@ -62,7 +63,7 @@ export default {
     },
     rows() {
       const m = this.m;
-      return [[this.t('Medium'), V((m.V - m.vc) * 1000)],
+      return [[this.t('Medium'), V((m.V - m.vc) * 1000) + pipHtml((m.V - m.vc) * 1000)],
         [this.t('OD cultuur (gecorrigeerd)'), F(m.odc, 3)],
         [this.t('Verdunning'), '1 : ' + lkNumIn(sig(m.odc / m.to, 4))],
         [this.t('Cellen/mL bij start (schatting)'), isFinite(m.fac) ? lkNumIn(sci(m.to * m.fac, 2)) : '–']];
@@ -72,6 +73,6 @@ export default {
       return this.tHtml('V<sub>cultuur</sub> = ' + F(m.to, 3) + ' × ' + F(m.V, 1) + ' mL / ' + F(m.odc, 3));
     }
   },
-  methods: {V}
+  methods: {V, pipHtml}
 };
 </script>

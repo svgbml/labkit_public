@@ -80,6 +80,7 @@
 </template>
 
 <script>
+import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 /* tekst uit een sjabloon in de taal van de gebruiker; de oude versie deed dit met i18nValue()
    op de invoervelden, wat binnen een Vue-boom niet meer gebeurt */
@@ -111,7 +112,7 @@ export default {
     },
     rows() {
       const {c0, cu, f, n, tr, dv} = this.m, t = this.t;
-      return [[t('Overdracht per stap'), lkNumIn(vol(tr))], [t('Verdunningsmiddel per buis'), lkNumIn(vol(dv))],
+      return [[t('Overdracht per stap'), lkNumIn(vol(tr)) + pipHtml(tr)], [t('Verdunningsmiddel per buis'), lkNumIn(vol(dv)) + pipHtml(dv)],
         [t('Laatste buis'), `1 : ${lkNumIn(pNum(f ** n).replace(/ /g, ''))}${isFinite(c0) ? ' → ' + lkNumIn(sig(c0 * f ** -n, 3)) + ' ' + esc(cu) : ''}`],
         [t('Totaal verdunningsmiddel'), lkNumIn(vol(dv * n))]];
     }

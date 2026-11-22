@@ -60,6 +60,7 @@
 </template>
 
 <script>
+import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 import {overage} from '../lib/overage.js';
 
@@ -100,8 +101,8 @@ export default {
     },
     mixRows() {
       const {A, m, buf, V} = this.m, t = this.t;
-      return [...A.map(a => [ud(a.m) + ' ' + ud(a.f), '1:' + L(fmt(a.t, 0)), L(vol(a.v)), L(vol(a.v * m))]),
-        [t('FACS-buffer'), '', L(vol(buf)), L(vol(buf * m))],
+      return [...A.map(a => [ud(a.m) + ' ' + ud(a.f), '1:' + L(fmt(a.t, 0)), L(vol(a.v)), L(vol(a.v * m)) + pipHtml(a.v * m)]),
+        [t('FACS-buffer'), '', L(vol(buf)), L(vol(buf * m)) + pipHtml(buf * m)],
         {cells: [t('Totaal'), '', L(vol(V)), L(vol(V * m))], cls: 'hl'}];
     },
     ctrlCols() {

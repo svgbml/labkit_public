@@ -39,6 +39,7 @@
 </template>
 
 <script>
+import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 
 const F = (x, d) => lkNumIn(fmt(x, d));
@@ -78,8 +79,8 @@ export default {
       const {rows, ug, vb, room, V} = this.m, t = this.t;
       return rows.map(r => {
         const vs = ug / r.c, w = room - vs;
-        return [esc(r.n === 'monster' ? t('monster') : r.n), F(vs, 2), F(vb, 2),
-          w >= 0 ? F(w, 2) : '<span class="chip bad">' + esc(t('past niet')) + '</span>', F(V, 1)];
+        return [esc(r.n === 'monster' ? t('monster') : r.n), F(vs, 2) + pipHtml(vs), F(vb, 2) + pipHtml(vb),
+          w >= 0 ? F(w, 2) + pipHtml(w) : '<span class="chip bad">' + esc(t('past niet')) + '</span>', F(V, 1)];
       });
     },
     badNote() {

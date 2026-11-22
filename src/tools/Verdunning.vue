@@ -70,7 +70,7 @@
       <lk-note v-if="abm.err === 1" kind="info">{{ t('Vul de verdunning, het volume en het aantal in.') }}</lk-note>
       <lk-note v-else-if="abm.err === 2" kind="bad">{{ t('De verdunning moet minstens 1 : 1 zijn.') }}</lk-note>
       <template v-else>
-        <lk-big :label="t('Antistof')" :value="lkNumIn(vol(abm.ab))"/>
+        <lk-big :label="t('Antistof')" :html="abBig"/>
         <lk-kv :rows="abRows"/>
         <lk-note kind="info">{{ t('Verdun in de buffer die het datasheet noemt, bijvoorbeeld 5% BSA of 5% melk in TBS-T. Maak een aliquot van wat je niet gebruikt.') }}</lk-note>
       </template>
@@ -80,6 +80,7 @@
 </template>
 
 <script>
+import {pipHtml as pipTag} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 import {overage} from '../lib/overage.js';
 
@@ -122,10 +123,11 @@ export default {
     },
     abRows() {
       const t = this.t, m = this.abm;
-      return [[t('Buffer'), lkNumIn(volP(m.buf))], [t('Totaal volume'), lkNumIn(volP(m.tot))],
+      return [[t('Buffer'), lkNumIn(volP(m.buf)) + pipTag(m.buf)], [t('Totaal volume'), lkNumIn(volP(m.tot))],
         [t('Vermenigvuldigingsfactor'), lkNumIn(fmt(m.mult, 2)) + '×']];
     },
     conc() { return CONC; },
+    abBig() { return lkNumIn(vol(this.abm.ab)) + pipTag(this.abm.ab); },
     vols() { return VOLS; },
     concUnits() { return CU; },
     volUnits() { return VU; },
@@ -188,7 +190,7 @@ export default {
     },
     rows() {
       const t = this.t, {b1, b2, v1, v2} = this.solve;
-      return [[t('Stock'), lkNumIn(vol(v1))], [t('Oplosmiddel'), lkNumIn(vol(v2 - v1))],
+      return [[t('Stock'), lkNumIn(vol(v1)) + pipTag(v1)], [t('Oplosmiddel'), lkNumIn(vol(v2 - v1)) + pipTag(v2 - v1)],
         [t('Totaal'), lkNumIn(vol(v2))], [t('Verdunning'), '1 : ' + lkNumIn(sig(b1 / b2, 4))]];
     },
     /* het advies als het stockvolume onder een microliter komt */

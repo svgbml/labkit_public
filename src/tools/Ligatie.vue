@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 
 /* getallen uit fmt(), sig() en vol() staan in het Nederlands; in de Engelse weergave moeten ze
@@ -54,8 +55,8 @@ export default {
       const vpm = vng * 1000 / (vbp * 660), ipm = ing * 1000 / (ibp * 660);
       const t = this.t;
       const rows = [[t('Vector'), N(sig(vpm * 1000, 3) + ' fmol')], [t('Insert'), N(sig(ipm * 1000, 3) + ' fmol')]];
-      if (isFinite(vc) && vc > 0) rows.push([t('Pipetteer vector'), N(vol(vng / vc))]);
-      if (isFinite(ic) && ic > 0) rows.push([t('Pipetteer insert'), N(vol(ing / ic))]);
+      if (isFinite(vc) && vc > 0) rows.push([t('Pipetteer vector'), N(vol(vng / vc)) + pipHtml(vng / vc)]);
+      if (isFinite(ic) && ic > 0) rows.push([t('Pipetteer insert'), N(vol(ing / ic)) + pipHtml(ing / ic)]);
       let rows2 = null, warnConc = false, noRoom = false;
       if (isFinite(rv) && rv > 0) {
         const tot = (vng + ing) / rv, rest = rv - (vc > 0 ? vng / vc : 0) - (ic > 0 ? ing / ic : 0);

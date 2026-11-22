@@ -38,7 +38,7 @@
         <lk-note v-if="m.err === 1" kind="info">{{ t('Vul celconcentratie, dichtheid, volume en aantal in.') }}</lk-note>
         <lk-note v-else-if="m.err === 2" kind="bad" :html="tooDilute"/>
         <template v-else>
-          <lk-big :label="t('Celsuspensie')" :value="V(m.vs * 1000)"/>
+          <lk-big :label="t('Celsuspensie')" :html="V(m.vs * 1000) + pipHtml(m.vs * 1000)"/>
           <lk-kv :rows="rows"/>
           <lk-steps :steps="steps"/>
           <lk-formula :html="tHtml('V&lt;sub&gt;suspensie&lt;/sub&gt; = cellen per putje × aantal × (1 + marge) / celconcentratie')"/>
@@ -49,6 +49,7 @@
 </template>
 
 <script>
+import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 import {overage} from '../lib/overage.js';
 
@@ -80,7 +81,7 @@ export default {
     },
     rows() {
       const m = this.m;
-      return [[this.t('Medium erbij'), V((m.tot - m.vs) * 1000)],
+      return [[this.t('Medium erbij'), V((m.tot - m.vs) * 1000) + pipHtml((m.tot - m.vs) * 1000)],
         [this.t('Totaal mengsel'), V(m.tot * 1000) + (this.ov === 'plus1' ? ` ((${m.n} + 1) × ${V(m.v * 1000)})`
           : this.ov === 'none' ? ` (${m.n} × ${V(m.v * 1000)})` : ` (${m.n} × ${V(m.v * 1000)} + ${F(m.x * 100, 0)}%)`)],
         [this.t('Cellen per putje/fles'), S(m.per)],
@@ -94,7 +95,7 @@ export default {
     }
   },
   methods: {
-    V,
+    V, pipHtml,
     /* alleen als de gebruiker een formaat kiest komt het gebruikelijke werkvolume erin */
     onFmt(e) { this.v = e.target.value.split('|')[1].replace('.', ','); }
   }
