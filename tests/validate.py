@@ -283,6 +283,19 @@ def _(pg):
     after = pg.evaluate(state); img1 = pg.evaluate("gfRender(true).toDataURL()")
     return [('toestand gelijk na openen', int(before == after), 1, 0), ('export gelijk na openen', int(img0 == img1), 1, 0)]
 
+@case('Gelfoto-editor', 'Gelbibliotheek', 'Zelftest: de realistische testgel in de bibliotheek (IndexedDB) bewaren, de pagina herladen: het item staat er nog en openen geeft evenveel lanen')
+def _(pg):
+    n0 = pg.evaluate("gf.lanes.length")
+    cnt = "document.querySelectorAll('#gf-lib img').length"
+    pg.evaluate("document.getElementById('gf-libsave').click()"); pg.wait_for_timeout(800)
+    one = pg.evaluate(cnt)
+    pg.evaluate("document.getElementById('gf-libsave').click()"); pg.wait_for_timeout(800)  # zelfde gel: geen dubbel item
+    listed = pg.evaluate(cnt)
+    pg.goto('about:blank'); pg.goto(URL + '#gelfoto'); pg.wait_for_timeout(800); pg.evaluate(HELPERS)
+    kept = pg.evaluate(cnt)
+    pg.evaluate("document.querySelector('#gf-lib .gf-lib-open').click()"); pg.wait_for_timeout(1500)
+    return [('item in lijst', int(one >= 1), 1, 0), ('geen dubbel item bij opnieuw bewaren', listed, one, 0), ('items na herladen', kept, one, 0), ('lanen na openen', pg.evaluate("gf.lanes.length"), n0, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

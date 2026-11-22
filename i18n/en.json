@@ -4851,5 +4851,11 @@
 "Project geopend.": "Project opened.",
 "Kies eerst een gelfoto of laad de demo-gel.": "Choose a gel photo or load the demo gel first.",
 "Dit bestand is geen Labkit-gelproject.": "This file is not a Labkit gel project.",
-"Foto, lanen, ladder, labels en instellingen in één bestand": "Photo, lanes, ladder, labels and settings in one file"
+"Foto, lanen, ladder, labels en instellingen in één bestand": "Photo, lanes, ladder, labels and settings in one file",
+"Recente gels": "Recent gels",
+"Bewaar in bibliotheek": "Save to library",
+"Nog geen gels bewaard.": "No gels saved yet.",
+"De bibliotheek is niet beschikbaar in deze browser.": "The library is not available in this browser.",
+"Bewaard in de bibliotheek.": "Saved to the library.",
+"Openen": "Open"
 }

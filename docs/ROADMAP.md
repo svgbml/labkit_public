@@ -295,7 +295,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | Step | Ideas | What | Done when | Model |
 |---|---|---|---|---|
 | S62 | 97 | Project files `.labkitgel` (photo, lanes, ladder, labels, settings) save/open | ✅ Paneel 1 van de *Gelfoto-editor* heeft *Project opslaan* en *Project openen*: één JSON-bestand met de foto als PNG, de lanen met hun banden, de ladder, de metingen, het beeldwerk en alle velden (`gfProjSnap`/`gfProjApply` in `src/engines/gelfoto.js`). `tests/validate.py` slaat de realistische testgel op, herlaadt de pagina en opent hem: toestand en export zijn gelijk. De virtuele ladder (tweede foto) en de zoom gaan niet mee | — |
-| S63 | 98 | Gel library with thumbnails (IndexedDB) | Recent gels listed | Sonnet |
+| S63 | 98 | Gel library with thumbnails (IndexedDB) | ✅ Paneel *Recente gels* (`GfLibrary.vue`, opslag in `src/tools/gelfoto/library.js`: IndexedDB `labkit-gels`, hoogstens 30): *Bewaar in bibliotheek* en *Project opslaan* bewaren de gel met een miniatuur; dezelfde gel werkt zijn eigen item bij (`gf.libId`). Elk item heeft *Openen* en ✕. Zonder IndexedDB staat er een melding. `tests/validate.py` bewaart, herlaadt en opent. Verwijderen vraagt geen bevestiging | — |
 | S64 | 95 | Type lane labels on the image; Tab to next lane; paste a list | Labels editable in place | Opus 5 |
 | S65 | 110 | Saturation warning overlay | Clipped pixels highlighted | Sonnet |
 | S66 | 117, 118 | Auto figure legend and result table per lane (Excel copy) | Legend + table | Sonnet |

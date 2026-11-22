@@ -95,6 +95,7 @@ import Stat from './tools/Stat.vue';
 import Gelplan from './tools/Gelplan.vue';
 import {gfRefresh} from './tools/gelfoto/tick.js';
 import GfImage from './tools/gelfoto/GfImage.vue';
+import GfLibrary from './tools/gelfoto/GfLibrary.vue';
 import GfLanes from './tools/gelfoto/GfLanes.vue';
 import GfLadder from './tools/gelfoto/GfLadder.vue';
 import GfDens from './tools/gelfoto/GfDens.vue';
@@ -469,6 +470,7 @@ export function start() {
      bijwerken: gf is geen reactief object, dus Vue ziet een verandering erin niet zelf. */
   window.__gfRefresh = gfRefresh;
   mountTool('#gf-app-img', GfImage);
+  mountTool('#gf-app-lib', GfLibrary);
   mountTool('#gf-app-lanes', GfLanes);
   mountTool('#gf-app-lad', GfLadder);
   mountTool('#gf-app-virt', GfVirtual);

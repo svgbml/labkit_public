@@ -6,6 +6,7 @@
    en worden door window.__gfRefresh bijgewerkt. Achter dit rekenwerk staan de validatiegevallen
    van de editor in tests/validate.py: niet herschrijven. */
 import {live} from '../lib/global.js';
+import {libPut} from '../tools/gelfoto/library.js';
 
 /* ================= GELFOTO-EDITOR ================= */
 const gf={unit:'bp',disp:'bp',angAuto:true,src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null};
@@ -21,7 +22,7 @@ function gfSetIn(id,v){ const el=$('#'+id); if(!el) return; el.value=String(v);
      niet meer, dus doen we het hier voordat v-model de waarde overneemt */
   if(LANG==='en'&&typeof i18nValue==='function'){ el.__iv=null; el.__typed=false; i18nValue(el); }
   el.dispatchEvent(new Event('input',{bubbles:true})); }
-function gfLoadCanvas(c){ gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; gfSetIn('gf-rot',0); gfUpdate(true); }
+function gfLoadCanvas(c){ gf.libId=null; gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; gfSetIn('gf-rot',0); gfUpdate(true); }
 function gfFromImage(img){ const M=2400, s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); gfLoadCanvas(c); gf.title=''; gfSetIn('gf-title',''); gf.marks=[]; let auto=false; { const bx=gfFindGel(); if(bx&&bx.w*bx.h<0.8*c.width*c.height){ gf.crop=bx; gf.cache={}; auto=true; } } gfDetectLanes(); if(gf.lanes.length>=2) gfDetectBands(); gfMarksTable(); gfStatus(`Geladen: ${img.naturalWidth} × ${img.naturalHeight} px${s<1?' (verkleind voor bewerking)':''}.`, auto?'Gel automatisch bijgesneden (Herstel toont de hele foto).':'', `${gf.lanes.length} lanen gevonden.`, 'Staat de gel scheef? Gebruik "Automatisch rechtzetten".'); }
 function gfFile(f){ if(!f) return; const url=URL.createObjectURL(f); const img=new Image(); img.onload=()=>{ gfFromImage(img); URL.revokeObjectURL(url); }; img.onerror=()=>gfStatus('Dit bestand kan de browser niet openen (bijvoorbeeld TIFF). Exporteer de foto als PNG of JPG.'); img.src=url; }
 $('#gf-stage').addEventListener('dragover',e=>e.preventDefault());
@@ -489,6 +490,7 @@ function gfProjSnap(){ if(!gf.src) return null; const s={}; GF_PROJ.forEach(k=>{
 /* NaN (samengevoegde band, geen meting) zou in JSON null worden; dat telt isFinite() als 0 */
 const gfJsonW=(k,v)=>typeof v==='number'&&!isFinite(v)?{$n:String(v)}:v, gfJsonR=(k,v)=>v&&typeof v==='object'&&typeof v.$n==='string'&&Object.keys(v).length===1?Number(v.$n):v;
 function gfProjSave(){ const s=gfProjSnap(); if(!s){ gfStatus('Kies eerst een gelfoto of laad de demo-gel.'); return; }
+  gfLibSave(true);
   saveBlob(safeName(gf.title||'gel')+'.labkitgel',new Blob([JSON.stringify(s,gfJsonW)],{type:'application/json'})).then(()=>gfStatus('Project opgeslagen.')).catch(()=>gfStatus('Downloaden lukte niet hier.')); }
 function gfProjOpen(f){ if(!f) return; f.text().then(t=>gfProjApply(JSON.parse(t,gfJsonR))).catch(()=>gfStatus('Dit bestand is geen Labkit-gelproject.')); }
 /* zet een project terug; gooit bij een ongeldig project (vertrouwensgrens: het bestand komt van buiten) */
@@ -500,7 +502,7 @@ async function gfProjApply(p){
      en het eigen-ladderveld verschijnt pas daarna; de tweede ronde zet de bewaarde waarden terug */
   const put=()=>gfProjFields().forEach(el=>{ if(!(el.id in (p.inp||{}))) return; const v=p.inp[el.id]; if(el.type==='checkbox') el.checked=!!v; else el.value=String(v); el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); });
   put(); await new Promise(r=>setTimeout(r,0)); put(); await new Promise(r=>setTimeout(r,0));
-  gf.src=c; gf.cache={}; gf.crop=null; gf.wells=null; gf.vl=null; gf.mode=null; gf.drag=null; gf.pend=null;
+  gf.libId=null; gf.src=c; gf.cache={}; gf.crop=null; gf.wells=null; gf.vl=null; gf.mode=null; gf.drag=null; gf.pend=null;
   GF_PROJ.forEach(k=>{ if(k in p.gf) gf[k]=p.gf[k]; });
   gf.lanes=gf.lanes.filter(l=>l&&isFinite(l.x)).map(l=>({...l,label:String(l.label??'')})); gf.marks=Array.isArray(gf.marks)?gf.marks:[];
   gf.ladder=Math.max(0,Math.min(gf.lanes.length-1,Math.round(+gf.ladder)||0));
@@ -508,6 +510,16 @@ async function gfProjApply(p){
   /* de velden hebben gfUpdate() laten lopen; zonder dit zet de rechtzet-timer de lanen opnieuw */
   gfFine=gf.fine; clearTimeout(gfFineT);
   gfLanesTable(); gfBandsTable(); gfMarksTable(); gfRender(); gfStatus('Project geopend.'); }
+
+/* bewaart de gel in de bibliotheek (IndexedDB); dezelfde gel werkt zijn eigen item bij */
+async function gfLibSave(quiet){ const s=gfProjSnap(); if(!s){ gfStatus('Kies eerst een gelfoto of laad de demo-gel.'); return; }
+  const id=gf.libId||(gf.libId='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
+  const r=gfRender(true), k=Math.min(1,160/r.width), t=document.createElement('canvas'); t.width=Math.max(1,Math.round(r.width*k)); t.height=Math.max(1,Math.round(r.height*k));
+  t.getContext('2d').drawImage(r,0,0,t.width,t.height);
+  const ok=await libPut({id,name:gf.title||'Gel',date:Date.now(),thumb:t.toDataURL('image/jpeg',0.7),snap:s});
+  if(!ok) gf.libId=null;
+  if(!ok||!quiet) gfStatus(ok?'Bewaard in de bibliotheek.':'De bibliotheek is niet beschikbaar in deze browser.'); }
+async function gfLibOpen(e){ try{ await gfProjApply(e.snap); gf.libId=e.id; }catch(x){ gfStatus('Dit bestand is geen Labkit-gelproject.'); } }
 
 /* Alles hierboven ook als globale naam, live: een toewijzing (timers = …, gfIntensity = …) in
    deze module of in de oude scripts komt aan beide kanten aan. */
@@ -609,5 +621,7 @@ live({
   gfProjSnap: [() => gfProjSnap, v => { gfProjSnap = v; }],
   gfProjSave: [() => gfProjSave, v => { gfProjSave = v; }],
   gfProjOpen: [() => gfProjOpen, v => { gfProjOpen = v; }],
-  gfProjApply: [() => gfProjApply, v => { gfProjApply = v; }]
+  gfProjApply: [() => gfProjApply, v => { gfProjApply = v; }],
+  gfLibSave: [() => gfLibSave, v => { gfLibSave = v; }],
+  gfLibOpen: [() => gfLibOpen, v => { gfLibOpen = v; }]
 });
