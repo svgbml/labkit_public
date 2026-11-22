@@ -280,6 +280,12 @@ def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','10,5');__set('z-g','4000')")
     return [('rpm', pg.evaluate("__big('#z-out')"), 5837, 0.001)]
 
+@case('Centrifuge', 'Rotorbalans', 'Som van de plaatsvectoren = 0: opgebouwd uit gelijkmatige p-hoeken met p | n (n = 12, k = 5 → 2 + 3; n = 6, k = 1 en k = 5 kunnen niet)')
+def _(pg):
+    f = lambda n, k: pg.evaluate(f"(()=>{{const s=balanceSet({n},{k});if(!s)return 0;const x=s.reduce((a,i)=>a+Math.cos(2*Math.PI*i/{n}),0),y=s.reduce((a,i)=>a+Math.sin(2*Math.PI*i/{n}),0);return s.length=={k}&&Math.hypot(x,y)<1e-9?1:-1}})()")
+    return [('n=12 k=5 gebalanceerd', f(12, 5), 1, 0), ('n=6 k=1 niet', f(6, 1), 0, 0), ('n=6 k=5 niet', f(6, 5), 0, 0),
+            ('n=6 k=4 gebalanceerd', f(6, 4), 1, 0), ('n=24 k=7 gebalanceerd', f(24, 7), 1, 0)]
+
 
 # ---------------- Transformatie ----------------
 def _tf(pg, lv, vng, used, tot, rows):

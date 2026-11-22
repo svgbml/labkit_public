@@ -4826,5 +4826,18 @@
 "Bewaar notitie": "Save note",
 "De notitie is niet bewaard: de opslag van de browser is vol. Verwijder oude notities of laat de foto weg.": "The note was not saved: the browser storage is full. Delete old notes or leave out the photo.",
 "Run-notities en afwijkingen": "Run notes and deviations",
-"Pipet die bij dit volume past": "Pipette that suits this volume"
+"Pipet die bij dit volume past": "Pipette that suits this volume",
+"Opgeslagen rotors": "Saved rotors",
+"— kies —": "— choose —",
+"Naam van de rotor": "Rotor name",
+"Aantal posities": "Number of positions",
+"Bewaar rotor": "Save rotor",
+"Verwijder rotor": "Delete rotor",
+"Aantal buizen": "Number of tubes",
+"Vul het aantal posities en buizen in.": "Enter the number of positions and tubes.",
+"Balansdiagram van de rotor, gezien van boven": "Balance diagram of the rotor, seen from above",
+"Gebalanceerd: zet de buizen in positie": "Balanced: put the tubes in position",
+"Met deze aantallen is geen gebalanceerde opstelling mogelijk.": "No balanced arrangement is possible with these numbers.",
+"Voeg een blanco buis (water) toe: met": "Add a blank tube (water): with",
+"buizen kan het wel.": "tubes it works."
 }
