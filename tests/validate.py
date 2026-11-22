@@ -1135,6 +1135,14 @@ def _(pg):
     return [('reverse complement gelijk', int(rc == 'NBDHVKMWSRYGCAT'), 1, 0),
             ('multi-FASTA per record', int(multi == '>a_rc\nACGT\n>b_rc\nTCC'), 1, 0)]
 
+@case('Sequentie', 'M13 forward (−20): GC en molmassa', 'Thermo Fisher, DNA and RNA Molecular Weights and Conversions: ssDNA = A×313,21 + T×304,2 + C×289,18 + G×329,21 − 61,96 (5′-OH); voor GTAAAACGACGGCCAGT 5228,47 g/mol. Onafhankelijk nagerekend met Biopython: molecular_weight (5′-fosfaat) − HPO₃ (79,98) = 5228,42; gc_fraction = 52,94%; dubbelstrengs 10380,76')
+def _(pg):
+    pg.evaluate("__go('seq');__set('sq-type','dna');__set('sq-in','GTAAAACGACGGCCAGT')")
+    kv = lambda k: pg.evaluate("k=>__kv('#sq-facts',k)", k)
+    return [('lengte (nt)', kv('Lengte'), 17, 0), ('GC (%)', kv('GC'), 52.94, 0.001),
+            ('molmassa ssDNA (g/mol)', kv('Molmassa ssDNA'), 5228.42, 0.0005),
+            ('molmassa dsDNA (g/mol)', kv('Molmassa dsDNA'), 10380.76, 0.0005)]
+
 
 if __name__ == '__main__':
     main()

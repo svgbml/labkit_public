@@ -32,3 +32,29 @@ export function parseSeqs(text) {
 export const complement = s => s.split('').map(b => IUC[b]).join('');
 export const reverse = s => s.split('').reverse().join('');
 export const OPS = {rc: rcIupac, r: reverse, c: complement, n: s => s};
+
+/* ---------- uitvoer (S192) ---------- */
+export function formatSeq(s, o) {
+  if (o.rna) s = s.replace(/T/g, 'U');
+  if (o.lower) s = s.toLowerCase();
+  return o.width > 0 ? s.match(new RegExp('.{1,' + o.width + '}', 'g')).join('\n') : s;
+}
+
+/* ---------- feiten (S192) ----------
+   Molmassa volgens Thermo Fisher (DNA and RNA Molecular Weights and Conversions), zoals OligoCalc:
+   ssDNA = A×313,21 + T×304,2 + C×289,18 + G×329,21 − 61,96 (5′-OH, geen fosfaat);
+   ssRNA = A×329,21 + U×306,17 + C×305,18 + G×345,21 + 159,0 (5′-trifosfaat, transcript);
+   dsDNA = beide strengen zo opgeteld. Een ambigue base telt het gemiddelde van zijn basen.
+   GC% = (G + C + S) / (A + T + G + C + S + W), zoals Biopython gc_fraction: een base die
+   zowel sterk als zwak kan zijn (N, R, …) telt niet mee. */
+const EXP = {A: 'A', C: 'C', G: 'G', T: 'T', R: 'AG', Y: 'CT', S: 'CG', W: 'AT', K: 'GT', M: 'AC',
+  B: 'CGT', D: 'AGT', H: 'ACT', V: 'ACG', N: 'ACGT'};
+const WD = {A: 313.21, C: 289.18, G: 329.21, T: 304.2}, WR = {A: 329.21, C: 305.18, G: 345.21, T: 306.17};
+const mw = (s, w, end) => (s.length ? [...s].reduce((a, b) => a + [...EXP[b]].reduce((x, y) => x + w[y], 0) / EXP[b].length, 0) + end : 0);
+export function facts(seq, rna) {
+  const n = {};
+  for (const b of seq) n[b] = (n[b] || 0) + 1;
+  const c = b => n[b] || 0, strong = c('G') + c('C') + c('S'), known = strong + c('A') + c('T') + c('W');
+  return {L: seq.length, n, gc: known ? strong / known * 100 : NaN, amb: seq.length - c('A') - c('C') - c('G') - c('T'),
+    ss: rna ? mw(seq, WR, 159.0) : mw(seq, WD, -61.96), ds: rna ? NaN : mw(seq, WD, -61.96) + mw(rcIupac(seq), WD, -61.96)};
+}
