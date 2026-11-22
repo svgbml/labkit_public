@@ -5006,5 +5006,11 @@
 "Doelwaarde bereikt bij": "Target value reached at",
 "Nog te gaan": "Remaining",
 "Verwacht om": "Expected at",
-"doelwaarde": "target value"
+"doelwaarde": "target value",
+"Tellen uit een foto": "Count from a photo",
+"Foto van één vak": "Photo of one square",
+"Drempel (hoger = alleen duidelijke cellen)": "Threshold (higher = only clear cells)",
+"Dood (blauw)": "Dead (blue)",
+"Invullen als één vak": "Fill in as one square",
+"Groen = levend, rood omlijnd = dood (blauw gekleurd). Tik op een cel om hem dood te maken, nog eens om hem weg te halen; tik naast een cel om er een toe te voegen. Klonten tellen op oppervlak (het getal erbij); kijk ze na. De lijnen van de telkamer worden genegeerd.": "Green = live, red outline = dead (stained blue). Tap a cell to mark it dead, tap again to remove it; tap next to a cell to add one. Clumps are counted by area (the number next to them); check them. The lines of the counting chamber are ignored."
 }
