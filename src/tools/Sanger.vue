@@ -24,12 +24,25 @@
             <button type="button" id="sg-zall" @click="whole">{{ t('Hele read') }}</button>
             <span style="margin-left:auto;font-weight:600;letter-spacing:6px"><span v-for="b in 'ACGT'" :key="b" :style="{color: dye[b]}">{{ b }}</span></span>
           </div>
-          <canvas id="sg-cv" ref="cv" tabindex="0" style="width:100%;height:250px;display:block;cursor:grab;touch-action:none"
+          <canvas id="sg-cv" ref="cv" tabindex="0" style="width:100%;display:block;cursor:grab;touch-action:none" :style="{height: HT + 'px'}"
                   :aria-label="t('Trace van de vier kanalen; slepen schuift, scrollen zoomt, de strook onderaan toont de hele read')"
                   @wheel.prevent="wheel" @pointerdown="down" @pointermove="move" @pointerup="up" @pointercancel="up" @keydown="key"></canvas>
           <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Slepen schuift, scrollen zoomt (Shift + scrollen schuift); klik in de strook onderaan om naar die plek te gaan.') }}</p>
+          <p style="font-size:13px;color:var(--muted);margin:4px 0 0">{{ t('Klik op een base om hem te selecteren en typ een letter om hem te wijzigen; de oorspronkelijke call blijft bewaard.') }}</p>
+          <div v-if="sel != null || nEd" class="row" style="gap:10px;margin-top:8px;align-items:center;flex-wrap:wrap">
+            <template v-if="sel != null">
+              <b>{{ t('Base ' + (sel + 1)) }}</b>
+              <span>{{ t('Origineel') }}: {{ read.bases[sel] }}</span>
+              <input id="sg-base" class="mono" maxlength="1" :value="seq[sel]" :aria-label="t('Base')" style="width:3em;text-align:center;text-transform:uppercase" @input="onBase">
+              <button type="button" id="sg-undo-base" :disabled="edits[sel] == null" @click="setBase(sel, read.bases[sel])">{{ t('Origineel terugzetten') }}</button>
+            </template>
+            <template v-if="nEd">
+              <span>{{ t(nEd + ' bewerkt') }}</span>
+              <button type="button" id="sg-undo-all" @click="undoAll">{{ t('Alle bewerkingen terugzetten') }}</button>
+            </template>
+          </div>
         </div>
-        <pre id="sg-seq" class="mono" v-if="m.ok" style="white-space:pre-wrap;overflow-x:auto;margin-top:12px">{{ seqText }}</pre>
+        <pre id="sg-seq" class="mono" v-if="m.ok" style="white-space:pre-wrap;overflow-x:auto;margin-top:12px"><template v-for="(k, i) in seqTokens" :key="i"><mark v-if="k.o" class="sg-ed" :title="t('Origineel') + ': ' + k.o" style="background:#ffe0b2;color:inherit">{{ k.text }}</mark><template v-else>{{ k.text }}</template></template></pre>
       </div>
     </div>
     <div>
@@ -57,7 +70,10 @@ import {lkNumIn} from '../lib/bridge.js';
 import {readAbif, abifRead} from '../lib/abif.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 
-const TH = 190, OV = 40, GAP = 20;   // hoogte trace, overzichtsstrook en de strook met posities (CSS-pixels)
+const LB = 18, TH = 190, OV = 40, GAP = 20;   // hoogte trace, overzichtsstrook en de strook met posities (CSS-pixels); LB = strook met de baseletters bovenaan
+const HT = LB + TH + GAP + OV + 8;
+const IUPAC = /^[ACGTRYSWKMBDHVN]$/;
+const GREY = '#8a94a3';
 
 const NL = (x, d) => lkNumIn(fmt(x, d));
 
@@ -74,9 +90,20 @@ export default {
   data() {
     const st = typeof storeGet === 'function' ? storeGet() : {};
     const saved = jget('sg-read', null);
-    return {read: saved ? markRaw(saved) : null, paste: st['sg-paste'] != null ? String(st['sg-paste']) : '', err: '', over: false};
+    return {read: saved ? markRaw(saved) : null, paste: st['sg-paste'] != null ? String(st['sg-paste']) : '', err: '', over: false,
+      edits: saved && saved.edits ? saved.edits : {}, sel: null};
   },
   computed: {
+    HT() { return HT; },
+    nEd() { return Object.keys(this.edits).length; },
+    /* de sequentie met de bewerkingen erin; read.bases houdt de oorspronkelijke calls */
+    seq() {
+      const b = this.m.r.bases;
+      if (!this.nEd || !this.read) return b;
+      const a = b.split('');
+      for (const i in this.edits) if (i < a.length) a[i] = this.edits[i];
+      return a.join('');
+    },
     /* de read die alles toont: het geladen bestand, anders de geplakte tekst */
     m() {
       let r = this.read;
@@ -91,7 +118,7 @@ export default {
       const add = (l, v) => { if (v) out.push([t(l), esc(String(v))]); };
       add('Bestand', r.name); add('Monster', me.sample); add('Well', me.well); add('Instrument', me.instrument);
       add('Model', me.model); add('Dye set', me.dyeSet); add('Start run', me.start); add('Einde run', me.end);
-      out.push([t('Leeslengte'), NL(r.bases.length, 0) + ' ' + t('basen')]);
+      out.push([t('Leeslengte'), NL(this.seq.length, 0) + ' ' + t('basen')]);
       add('Kanaalvolgorde', r.order);
       if (r.qual.length) {
         const q20 = r.qual.filter(q => q >= 20).length;
@@ -100,17 +127,25 @@ export default {
       }
       return out;
     },
-    /* GenBank-ORIGIN: rijen van 60, groepen van 10, positie van de eerste base ervoor */
-    seqText() {
-      const s = this.m.r.bases, w = String(s.length).length, out = [];
-      for (let i = 0; i < s.length; i += 60)
-        out.push(String(i + 1).padStart(w) + '  ' + s.slice(i, i + 60).match(/.{1,10}/g).join(' '));
-      return out.join('\n');
+    /* GenBank-ORIGIN: rijen van 60, groepen van 10, positie van de eerste base ervoor; een bewerkte base is een eigen stuk (o = oorspronkelijk) */
+    seqTokens() {
+      const q = this.seq, w = String(q.length).length, ed = this.edits, out = [];
+      let buf = '';
+      const flush = () => { if (buf) out.push({text: buf}); buf = ''; };
+      for (let i = 0; i < q.length; i++) {
+        if (i % 60 === 0) buf += (i ? '\n' : '') + String(i + 1).padStart(w) + '  ';
+        else if (i % 10 === 0) buf += ' ';
+        if (ed[i] != null) { flush(); out.push({text: q[i], o: this.m.r.bases[i]}); } else buf += q[i];
+      }
+      flush();
+      return out;
     }
   },
   watch: {
     /* een andere read: begin links, ingezoomd tot ongeveer 1 scanpunt per pixel (±70 basen) */
-    'm.r'() { this.view = {x0: 0, spp: 1}; this.$nextTick(this.draw); }
+    'm.r'() { this.view = {x0: 0, spp: 1}; this.$nextTick(this.draw); },
+    sel() { this.draw(); },
+    edits() { this.draw(); }
   },
   created() { this.dye = DYE; this.view = {x0: 0, spp: 1}; this.drag = null; },
   mounted() {
@@ -138,6 +173,7 @@ export default {
         if (!p.bases) { this.err = this.t('Geen ABIF-bestand en geen sequentie gevonden.'); return; }
         r = {name: p.name || file.name, meta: null, order: '', traces: null, bases: p.bases, peaks: [], qual: []};
       }
+      this.edits = {}; this.sel = null;
       this.read = markRaw(r);
       jset('sg-read', r);
     },
@@ -147,25 +183,45 @@ export default {
       this.raf = requestAnimationFrame(() => { this.raf = 0; this.paint(); });
     },
     paint() {
-      const cv = this.$refs.cv, r = this.m.r;
+      const cv = this.$refs.cv, r = this.m.r, q = this.seq;
       if (!cv || !r.traces || !cv.clientWidth) return;
-      const W = cv.clientWidth, H = TH + GAP + OV + 8, s = window.devicePixelRatio || 1;
+      const W = cv.clientWidth, H = HT, s = window.devicePixelRatio || 1;
       if (cv.width !== Math.round(W * s) || cv.height !== Math.round(H * s)) { cv.width = Math.round(W * s); cv.height = Math.round(H * s); }
       const x = cv.getContext('2d');
       x.setTransform(s, 0, 0, s, 0, 0);
       x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
       const scans = this.scans();
       const v = this.view = clampView(this.view, scans, W);
-      drawTraces(x, r.traces, v, {x: 0, y: 4, w: W, h: TH});
+      drawTraces(x, r.traces, v, {x: 0, y: LB + 4, w: W, h: TH});
+      this.labels(x, q, v, W);
       /* basenummers onder de trace, elke 10e base op zijn piek */
       x.fillStyle = '#5f6b7a'; x.font = '11px system-ui,sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
       const step = v.spp > 4 ? (v.spp > 10 ? 100 : 50) : 10;
       for (let i = step - 1; i < r.peaks.length; i += step) {
         const px = (r.peaks[i] - v.x0) / v.spp;
-        if (px >= -20 && px <= W + 20) x.fillText(String(i + 1), px, TH + 4 + GAP / 2);
+        if (px >= -20 && px <= W + 20) x.fillText(String(i + 1), px, LB + TH + 4 + GAP / 2);
       }
-      drawOverview(x, r.traces, scans, v, W, {x: 0, y: TH + GAP + 4, w: W, h: OV});
+      drawOverview(x, r.traces, scans, v, W, {x: 0, y: LB + TH + GAP + 4, w: W, h: OV});
       this.drawn = (this.drawn || 0) + 1;   // telt de getekende frames (voor de test)
+    },
+    /* de baseletters in de strook bovenaan, zodra de basen minstens 7 px uit elkaar staan */
+    sp() { const p = this.m.r.peaks, n = p.length; return n > 1 ? (p[n - 1] - p[0]) / (n - 1) : 0; },
+    labels(x, q, v, W) {
+      const p = this.m.r.peaks, n = Math.min(p.length, q.length), bw = this.sp() / v.spp;
+      if (this.sel != null && this.sel < n) {
+        x.fillStyle = 'rgba(21,101,192,.15)';
+        x.fillRect((p[this.sel] - v.x0) / v.spp - bw / 2, 0, bw, LB + 4 + TH);
+      }
+      if (bw < 7) return;
+      x.font = 'bold 12px system-ui,sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+      for (let i = 0; i < n; i++) {
+        const px = (p[i] - v.x0) / v.spp;
+        if (px < -10) continue;
+        if (px > W + 10) break;
+        if (this.edits[i] != null) { x.fillStyle = '#ffe0b2'; x.beginPath(); (x.roundRect || x.rect).call(x, px - 6.5, 1, 13, LB - 2, 3); x.fill(); }
+        x.fillStyle = DYE[q[i]] || GREY;
+        x.fillText(q[i], px, LB / 2 + 1);
+      }
     },
     scans() { return Math.max(1, ...Object.values(this.m.r.traces).map(t => t.length)); },
     set(v) { this.view = v; this.draw(); },
@@ -184,26 +240,59 @@ export default {
       if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(d)) this.pan(e.shiftKey ? d : e.deltaX);
       else this.zoom(Math.exp(d / 400), e.offsetX);
     },
-    onOverview(e) { return e.offsetY > TH + GAP; },
+    onOverview(e) { return e.offsetY > LB + TH + GAP; },
     down(e) {
       this.$refs.cv.setPointerCapture(e.pointerId);
       if (this.onOverview(e)) { this.drag = {ov: true}; this.center(e.offsetX / this.$refs.cv.clientWidth * this.scans()); }
-      else { this.drag = {x: e.offsetX}; this.$refs.cv.style.cursor = 'grabbing'; }
+      else { this.drag = {x: e.offsetX, sx: e.offsetX}; this.$refs.cv.style.cursor = 'grabbing'; }
     },
     move(e) {
       if (!this.drag) return;
       if (this.drag.ov) this.center(e.offsetX / this.$refs.cv.clientWidth * this.scans());
       else { this.pan(this.drag.x - e.offsetX); this.drag.x = e.offsetX; }
     },
-    up() { this.drag = null; if (this.$refs.cv) this.$refs.cv.style.cursor = 'grab'; },
+    /* base waarvan de piek het dichtst bij pixel px ligt */
+    nearest(px) {
+      const p = this.m.r.peaks, n = Math.min(p.length, this.m.r.bases.length), s = this.view.x0 + px * this.view.spp;
+      let lo = 0, hi = n - 1;
+      while (lo < hi) { const mid = (lo + hi) >> 1; if (p[mid] < s) lo = mid + 1; else hi = mid; }
+      return n ? (lo > 0 && s - p[lo - 1] < p[lo] - s ? lo - 1 : lo) : null;
+    },
+    select(i) { this.sel = i == null || !this.read || !this.read.peaks.length ? null : Math.max(0, Math.min(i, this.read.peaks.length - 1, this.read.bases.length - 1)); },
+    /* base i (0-based) een nieuwe letter geven; gelijk aan het origineel haalt de bewerking weg */
+    setBase(i, b) {
+      b = String(b).toUpperCase();
+      if (!this.read || !this.read.peaks.length || !IUPAC.test(b) || !(i >= 0 && i < this.read.bases.length)) return;
+      const e = Object.assign({}, this.edits);
+      if (b === this.read.bases[i]) delete e[i]; else e[i] = b;
+      this.edits = e; this.save();
+    },
+    undoAll() { this.edits = {}; this.save(); },
+    save() { jset('sg-read', Object.assign({}, this.read, {edits: this.edits})); },
+    onBase(e) { this.setBase(this.sel, e.target.value); e.target.value = this.seq[this.sel]; },
+    up(e) {
+      const d = this.drag;
+      if (d && !d.ov && e && e.type === 'pointerup' && Math.abs(e.offsetX - d.sx) <= 3 && this.read && this.read.peaks.length) this.select(this.nearest(e.offsetX));
+      this.drag = null; if (this.$refs.cv) this.$refs.cv.style.cursor = 'grab'; },
     key(e) {
+      if (this.sel != null && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const W = this.$refs.cv.clientWidth, i = this.sel, go = d => {
+          this.select(i + d);
+          const px = (this.read.peaks[this.sel] - this.view.x0) / this.view.spp;
+          if (px < 10 || px > W - 10) this.center(this.read.peaks[this.sel]);
+        };
+        if (/^[a-z]$/i.test(e.key)) { e.preventDefault(); this.setBase(i, e.key); return; }
+        const a = {Backspace: () => this.setBase(i, this.read.bases[i]), Delete: () => this.setBase(i, this.read.bases[i]),
+          Escape: () => this.select(null), ArrowLeft: () => go(-1), ArrowRight: () => go(1)}[e.key];
+        if (a) { e.preventDefault(); a(); return; }
+      }
       const W = this.$refs.cv.clientWidth, k = {ArrowLeft: () => this.pan(-W / 4), ArrowRight: () => this.pan(W / 4),
         '+': () => this.zoom(1 / 1.5), '=': () => this.zoom(1 / 1.5), '-': () => this.zoom(1.5), Home: () => this.set({x0: 0, spp: this.view.spp}),
         End: () => this.set({x0: 1e9, spp: this.view.spp})}[e.key];
       if (k) { e.preventDefault(); k(); }
     },
     clear() {
-      this.read = null; this.paste = ''; this.err = '';
+      this.read = null; this.edits = {}; this.sel = null; this.paste = ''; this.err = '';
       jset('sg-read', null);
       const f = document.getElementById('sg-file'); if (f) f.value = '';
     }
