@@ -4879,5 +4879,22 @@
 "Molmassa dsDNA": "Molecular weight dsDNA",
 "T<sub>m</sub> (nearest-neighbor, als primer)": "T<sub>m</sub> (nearest-neighbor, as a primer)",
 "T<sub>m</sub> ({#},{#} + {#}·(GC − {#},{#})/N)": "T<sub>m</sub> ({#}.{#} + {#}·(GC − {#}.{#})/N)",
-"Ambigue basen tellen in de molmassa met het gemiddelde van hun mogelijke basen en niet mee in het GC-gehalte.": "Ambiguous bases count in the molecular weight as the mean of their possible bases and are left out of the GC content."
+"Ambigue basen tellen in de molmassa met het gemiddelde van hun mogelijke basen en niet mee in het GC-gehalte.": "Ambiguous bases count in the molecular weight as the mean of their possible bases and are left out of the GC content.",
+"Tot": "To",
+"Leesraam": "Frame",
+"Lengte (aa)": "Length (aa)",
+"Lengte (nt)": "Length (nt)",
+"Genetische code": "Genetic code",
+"Vertaling in zes leesramen": "Translation in six frames",
+"Minimale ORF-lengte": "Minimum ORF length",
+"Een ORF loopt van een startcodon (M) tot en met het eerste stopcodon in hetzelfde leesraam. Posities gelden op de bovenste streng; op de − streng loopt een ORF van rechts naar links. Stopcodons staan als * in rood, ORF’s gemarkeerd.": "An ORF runs from a start codon (M) up to and including the first stop codon in the same frame. Positions are on the top strand; on the − strand an ORF runs from right to left. Stop codons show as a red *, ORFs are highlighted.",
+"Open leesramen (ORF’s)": "Open reading frames (ORFs)",
+"van ten minste {#} aa": "of at least {#} aa",
+"Geen ORF van deze lengte gevonden.": "No ORF of this length found.",
+"Standaard ({#}; ook bacterieel, {#})": "Standard ({#}; also bacterial, {#})",
+"Mitochondriaal, gewervelden ({#})": "Vertebrate mitochondrial ({#})",
+"Mitochondriaal, gist ({#})": "Yeast mitochondrial ({#})",
+"Mitochondriaal, schimmels; Mycoplasma ({#})": "Mold mitochondrial; Mycoplasma ({#})",
+"Mitochondriaal, ongewervelden ({#})": "Invertebrate mitochondrial ({#})",
+"Ciliaten ({#})": "Ciliate ({#})"
 }

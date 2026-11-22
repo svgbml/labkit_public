@@ -58,3 +58,52 @@ export function facts(seq, rna) {
   return {L: seq.length, n, gc: known ? strong / known * 100 : NaN, amb: seq.length - c('A') - c('C') - c('G') - c('T'),
     ss: rna ? mw(seq, WR, 159.0) : mw(seq, WD, -61.96), ds: rna ? NaN : mw(seq, WD, -61.96) + mw(rcIupac(seq), WD, -61.96)};
 }
+
+/* ---------- vertaling in zes leesramen (S193) ----------
+   Codetabellen van NCBI (The Genetic Codes, translation tables 1–6), codons in de volgorde
+   TTT, TTC, TTA, TTG, TCT, … (eerste, tweede, derde base door T, C, A, G). Tabel 11
+   (bacterieel) heeft dezelfde aminozuren als tabel 1. Een codon met een ambigue base wordt X. */
+export const CODES = {
+  1: ['Standaard (1; ook bacterieel, 11)', 'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG'],
+  2: ['Mitochondriaal, gewervelden (2)', 'FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNKKSS**VVVVAAAADDEEGGGG'],
+  3: ['Mitochondriaal, gist (3)', 'FFLLSSSSYY**CCWWTTTTPPPPHHQQRRRRIIMMTTTTNNKKSSRRVVVVAAAADDEEGGGG'],
+  4: ['Mitochondriaal, schimmels; Mycoplasma (4)', 'FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG'],
+  5: ['Mitochondriaal, ongewervelden (5)', 'FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNKKSSSSVVVVAAAADDEEGGGG'],
+  6: ['Ciliaten (6)', 'FFLLSSSSYYQQCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG']
+};
+const BI = {T: 0, C: 1, A: 2, G: 3};
+export function translate(s, aa) {
+  let p = '';
+  for (let i = 0; i + 3 <= s.length; i += 3) {
+    const a = BI[s[i]], b = BI[s[i + 1]], c = BI[s[i + 2]];
+    p += a == null || b == null || c == null ? 'X' : aa[a * 16 + b * 4 + c];
+  }
+  return p;
+}
+/* frame +1..+3 op de bovenste streng, −1..−3 op het reverse complement */
+export function frames(seq, aa) {
+  const rc = rcIupac(seq);
+  return [1, 2, 3, -1, -2, -3].map(f => ({f, p: translate((f > 0 ? seq : rc).slice(Math.abs(f) - 1), aa)}));
+}
+/* ORF: van de eerste M na een stop (of na het begin) tot en met de volgende stop, minstens minAa
+   aminozuren. from/to zijn 1-based op de bovenste streng, stop inbegrepen; op − loopt from > to.
+   a/b: het stuk in de eiwitregel van dat leesraam (b = de stop).
+   shortcut: alleen M (ATG, en ATA/ATT waar die M coderen) als start; alternatieve starts zoals
+   TTG/GTG in bacteriën tellen niet. Een ORF zonder stop aan het eind wordt niet gemeld. */
+export function orfs(seq, fr, minAa) {
+  const L = seq.length, out = [];
+  fr.forEach(({f, p}) => {
+    const off = Math.abs(f) - 1;
+    let a = -1;
+    for (let i = 0; i < p.length; i++) {
+      if (a < 0 && p[i] === 'M') a = i;
+      if (p[i] !== '*') continue;
+      if (a >= 0 && i - a >= minAa) {
+        const s = off + 3 * a, e = off + 3 * i + 2; /* 0-based in de streng van dit leesraam */
+        out.push({f, a, b: i, aa: i - a, from: f > 0 ? s + 1 : L - s, to: f > 0 ? e + 1 : L - e});
+      }
+      a = -1;
+    }
+  });
+  return out.sort((x, y) => y.aa - x.aa);
+}

@@ -1143,6 +1143,14 @@ def _(pg):
             ('molmassa ssDNA (g/mol)', kv('Molmassa ssDNA'), 5228.42, 0.0005),
             ('molmassa dsDNA (g/mol)', kv('Molmassa dsDNA'), 10380.76, 0.0005)]
 
+@case('Sequentie', 'ORF van kanR in pFA6a-kanMX6', 'Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb): CDS KanR, aph(3′)-Ia, op 459..1268 (+ streng), 810 nt inclusief stop = 269 aa; codetabel 1 van NCBI (The Genetic Codes), alle zes tabellen gelijk aan Biopython Bio.Data.CodonTable')
+def _(pg):
+    fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')
+    pg.evaluate("fa=>{__go('seq');__set('sq-code','1');__set('sq-min','200');__set('sq-in',fa)}", fa)
+    rows = pg.evaluate("[...document.querySelectorAll('#sq-orf tbody tr')].map(r=>[r.cells[0].textContent.trim(),...[...r.cells].slice(1).map(c=>__n(c.textContent))])")
+    k = next((r for r in rows if r[0] == '+3' and r[1] == 459), [None, float('nan')] * 3)
+    return [('ORF +3 begin', k[1], 459, 0), ('ORF +3 einde (met stop)', k[2], 1268, 0), ('lengte (aa)', k[3], 269, 0)]
+
 
 if __name__ == '__main__':
     main()
