@@ -329,3 +329,12 @@ export function alnIdentity(a, ref) {
     return both ? same / both : 0;
   });
 }
+
+/* ---------- Verschilweergave (S176) ----------
+   s tegen referentie r (even lang): een punt waar beide dezelfde letter hebben (hoofd/klein gelijk),
+   anders de eigen letter; een gat blijft een gat */
+export function alnDiff(s, r) {
+  let o = '';
+  for (let c = 0; c < s.length; c++) o += s[c] !== '-' && s[c].toUpperCase() === (r[c] || '').toUpperCase() ? '.' : s[c];
+  return o;
+}

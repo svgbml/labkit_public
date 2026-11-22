@@ -1,6 +1,6 @@
 <!-- ================= ALIGNMENT BEKIJKEN =================
      Leest een meervoudige uitlijning (Clustal .aln, uitgelijnde FASTA, PHYLIP, NEXUS, MSF, PIR)
-     in één model; het inlezen staat in src/lib/alignment.js. De id's al-in, al-file, al-col, al-cbs, al-out en al-view
+     in één model; het inlezen staat in src/lib/alignment.js. De id's al-in, al-file, al-col, al-cbs, al-out, al-view en al-ref
      blijven zoals ze zijn: delen, ongedaan maken, de invoeropslag en tests/validate.py werken
      daarop.
      De viewer (S171) tekent alleen de cellen die in beeld zijn: een laag met position:sticky
@@ -34,6 +34,11 @@
             <option value="name">{{ t('Op naam') }}</option>
             <option value="ident">{{ t('Op identiteit met de eerste sequentie') }}</option>
             <option value="hand">{{ t('Met de hand (pijltjes in de tabel)') }}</option>
+          </select></div>
+        <div class="f"><label for="al-ref">{{ t('Verschil met') }}</label>
+          <select id="al-ref" v-model="ref">
+            <option value="">{{ t('Uit') }}</option>
+            <option v-for="(n, i) in m.names" :key="i" :value="String(i)">{{ n }}</option>
           </select></div>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Een motief is letters, [..] voor één van een paar letters en X of . voor elke letter; bij DNA ook IUPAC-codes zoals N, R en Y. Gaten worden overgeslagen.') }}</p>
@@ -89,7 +94,7 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
-import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile, alnConsensus, alnMotif, alnIdentity} from '../lib/alignment.js';
+import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile, alnConsensus, alnMotif, alnIdentity, alnDiff} from '../lib/alignment.js';
 
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
@@ -101,7 +106,7 @@ export default {
     const st = typeof storeGet === 'function' ? storeGet() : {};
     return {txt: st['al-in'] != null ? String(st['al-in']) : '', col: st['al-col'] != null ? String(st['al-col']) : 'auto',
       cbs: !!st['al-cbs'], sel: null, hand: null,
-      motif: st['al-motif'] != null ? String(st['al-motif']) : '', ord: st['al-ord'] != null ? String(st['al-ord']) : 'file', thr: st['al-thr'] != null ? String(st['al-thr']) : '50', RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
+      motif: st['al-motif'] != null ? String(st['al-motif']) : '', ord: st['al-ord'] != null ? String(st['al-ord']) : 'file', ref: st['al-ref'] != null ? String(st['al-ref']) : '', thr: st['al-thr'] != null ? String(st['al-thr']) : '50', RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
   },
   computed: {
     m() { return parseAlignment(this.txt); },
@@ -121,6 +126,11 @@ export default {
       if (this.ord === 'ident') return ix.sort((a, b) => this.ident[b] - this.ident[a] || a - b);
       return ix;
     },
+    /* S176: wat elke rij toont; met een referentie een punt waar de letter gelijk is */
+    disp() {
+      const s = this.m.seqs, r = this.ref === '' ? -1 : +this.ref;
+      return r < 0 || r >= s.length ? s : s.map((x, i) => i === r ? x : alnDiff(x, s[r]));
+    },
     consensus() { const v = num(this.thr); return alnConsensus(this.m, this.prof, isFinite(v) ? v : 50); },
     /* de volle maat van het raster */
     g() {
@@ -135,7 +145,7 @@ export default {
       const n = m.names.length, r0 = Math.max(0, Math.floor(this.sy / CH)), r1 = Math.min(n + 2, Math.ceil((this.sy + this.vh - RH) / CH) + 1);
       const rows = [], extra = [[this.t('Conservering'), this.cons], [this.t('Consensus'), this.consensus]];
       for (let i = r0; i < r1; i++) {
-        const x = i >= n, k = x ? i : this.order[i], [name, s] = x ? extra[i - n] : [m.names[k], m.seqs[k]];
+        const x = i >= n, k = x ? i : this.order[i], [name, s] = x ? extra[i - n] : [m.names[k], this.disp[k]];
         rows.push({i: k, x, name, top: RH + i * CH - this.sy, txt: s.slice(c0, c1)});
       }
       const pt = RH + (n + 2) * CH - this.sy, plot = pt < this.vh && pt + PH > RH ? pt : null;
@@ -194,7 +204,7 @@ export default {
   beforeUnmount() { if (this.ro) this.ro.disconnect(); if (this.mo) this.mo.disconnect(); },
   watch: {
     /* een nieuwe uitlijning begint linksboven */
-    m() { const v = this.$refs.view; if (v) { v.scrollLeft = 0; v.scrollTop = 0; } this.sx = this.sy = 0; this.sel = null; this.hand = null; },
+    m() { const v = this.$refs.view; if (v) { v.scrollLeft = 0; v.scrollTop = 0; } this.sx = this.sy = 0; this.sel = null; this.hand = null; if (+this.ref >= this.m.names.length) this.ref = ''; },
     /* na de render: dan staat de klasse aln-cbs al op het venster */
     vis: {handler() { this.paint(); }, flush: 'post'},
     tab: {handler() { this.paint(); }, flush: 'post'},
@@ -236,7 +246,7 @@ export default {
         x.strokeStyle = this.shade('bar'); x.lineWidth = 2;
         x.strokeRect(v.left + (this.sel - v.c0) * cw + 1, RH + 1, cw - 2, this.vh - RH - 2);
       }
-      const tab = this.tab, seqs = this.m.seqs, sh = {};  /* buiten de lus: elke reactieve lees kost tijd */
+      const tab = this.tab, seqs = this.disp, sh = {};  /* buiten de lus: elke reactieve lees kost tijd */
       for (const r of tab === undefined ? [] : v.rows) {
         if (r.x) continue;
         const s = seqs[r.i];

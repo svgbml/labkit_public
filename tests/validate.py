@@ -1216,6 +1216,30 @@ def _(pg):
     pg.evaluate("()=>__set('al-ord','file')")
     return out
 
+@case('Alignment bekijken', 'Verschilweergave tegen een referentie', 'tests/fixtures/aln/hedgehog.aln (Biopython-testsuite); verwacht in Python berekend: een punt waar een letter gelijk is aan die van de referentie, de referentie zelf ongewijzigd, en uit/aan/uit geeft weer precies de oorspronkelijke rijen')
+def _(pg):
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'hedgehog.aln'
+    seqs = {}
+    for ln in f.read_text(encoding='utf-8').splitlines()[1:]:
+        if ln.strip() and not ln[0].isspace():
+            name, chunk = ln.split()[:2]; seqs[name] = seqs.get(name, '') + chunk
+    rows = list(seqs.values())
+    diff = lambda s, r: ''.join('.' if a != '-' and a.upper() == b.upper() else a for a, b in zip(s, r))
+    shown = "__alnVm.vis.rows.filter(r=>!r.x).map(r=>[r.i,r.txt])"
+    c0 = "__alnVm.vis.c0"
+    pg.evaluate("__go('aln')")
+    pg.evaluate("t=>{__set('al-in',t);__set('al-ord','file');__set('al-motif','');__set('al-ref','')}", f.read_text(encoding='utf-8')); pg.wait_for_timeout(150)
+    def same(ref):
+        a, k = pg.evaluate(shown), pg.evaluate(c0)
+        exp = [r if ref is None or i == ref else diff(r, rows[ref]) for i, r in enumerate(rows)]
+        return sum(t == exp[i][k:k + len(t)] for i, t in a), len(a)
+    out = []
+    for step, ref in (('uit', None), ('referentie 1', 0), ('uit', None), ('referentie 3', 2), ('weer uit', None)):
+        pg.evaluate("v=>__set('al-ref',v)", '' if ref is None else str(ref)); pg.wait_for_timeout(120)
+        ok, n = same(ref)
+        out.append((step + ': rijen zoals verwacht', ok, n, 0))
+    return out
+
 @case('Chromatogram', 'ABIF-bestand 3730.ab1 inlezen', 'Biopython 1.84, Tests/test_SeqIO_AbiIO.py (data_3730) en het bestand zelf (tests/fixtures/3730.ab1, Applied Biosystems 3730): monster 226032_C-ME-18_pCAGseqF, 1165 basen, eerste 12 basen GGGCGAGCKYYA; ABIF-indeling volgens de Applied Biosystems ABIF File Format Specification (2009)')
 def _(pg):
     pg.evaluate("__go('sanger')")
