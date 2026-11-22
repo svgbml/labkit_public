@@ -12,6 +12,7 @@ Laadt de app in het Nederlands en het Engels en controleert:
 - de JS-heap na het openen van alle tools en de gel-editor met de testgel blijft onder LABKIT_HEAP_MB (standaard 40);
 - de gel-editor verwerkt de realistische testgel (rechtzetten, lanen, banden, meten) binnen GEL_MS (standaard 1000 ms) (S135);
 - typen in de zwaarste tools geeft binnen INP_MS (standaard 100 ms) een nieuw beeld (Event Timing, zoals INP) (S135);
+- in GitHub Actions komt een tabel met alle metingen in de samenvatting van de run (GITHUB_STEP_SUMMARY) (S136);
 - geen scriptfouten.
 Gebruik: python tests/perf_budget.py            (exitcode 1 bij problemen)
          python tests/perf_budget.py --baseline legt de huidige groottes vast als nieuwe basis (na een bewuste groei)
@@ -22,6 +23,7 @@ from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 URL = (ROOT / 'web' / 'index.html').as_uri()
 BUDGET = int(os.environ.get('LABKIT_BUDGET_MS', '2500'))
+ROWS = []  # (meting, waarde, budget) voor de CI-samenvatting
 
 def run(lang):
     with sync_playwright() as p:
@@ -44,6 +46,7 @@ def run(lang):
     if pending: issues.append(f'{len(pending)} toolkoppen niet vertaald: ' + ', '.join(pending[:5]))
     issues += ['scriptfout: ' + e for e in errs]
     print(f'[{lang}] DOMContentLoaded {best} ms (budget {BUDGET} ms)' + ('' if issues else ', in orde'))
+    ROWS.append((f'Opstarttijd (DOMContentLoaded, {lang})', f'{best} ms', f'{BUDGET} ms'))
     return issues
 
 ALN_FRAME_MS = float(os.environ.get('ALN_FRAME_MS', '16'))
@@ -72,6 +75,7 @@ def aln():
     if r['p95'] > ALN_FRAME_MS: issues.append(f"alignmentviewer: scrollstap {r['p95']:.1f} ms > {ALN_FRAME_MS} ms")
     issues += ['scriptfout: ' + e for e in errs]
     print(f"[aln] 60 x 5000 kolommen: {r['rows']} rijen in de DOM, scrollstap p95 {r['p95']:.1f} ms" + ('' if issues else ', in orde'))
+    ROWS.append(('Alignmentviewer scrollstap p95', f"{r['p95']:.1f} ms", f'{ALN_FRAME_MS:g} ms'))
     return issues
 
 SIZES = ['web/index.html', 'web/i18n-en.js']
@@ -86,6 +90,7 @@ def size():
     for f in SIZES:
         g = now[f] / base[f] - 1
         print(f'[size] {f}: {now[f] / 1024:.0f} kB ({g:+.1%} t.o.v. basis)')
+        ROWS.append((f'Grootte {f}', f'{now[f] / 1024:.0f} kB ({g:+.1%})', f"{base[f] * 1.05 / 1024:.0f} kB"))
         if g > 0.05: issues.append(f'{f} is {g:.1%} groter dan de basis (max 5%); bewust? python tests/perf_budget.py --baseline')
     return issues
 
@@ -110,6 +115,7 @@ def heap():
     if not lanes: issues.append('heap: de gel-editor vond geen lanen in de testgel; de meting telt dan niet')
     issues += ['scriptfout: ' + e for e in errs]
     print(f'[heap] alle tools + gel-editor: {mb:.1f} MB (limiet {HEAP_MB:.0f} MB)' + ('' if issues else ', in orde'))
+    ROWS.append(('JS-heap na alle tools + gel-editor', f'{mb:.1f} MB', f'{HEAP_MB:.0f} MB'))
     return issues
 
 GEL_MS = float(os.environ.get('GEL_MS', '1000'))
@@ -154,6 +160,8 @@ def gel_inp():
     print(f"[gel] testgel: {gms:.0f} ms (rechtzetten {g['T'][0]:.0f}, lanen {g['T'][1]:.0f}, banden {g['T'][2]:.0f}, meten {g['T'][3]:.0f}; budget {GEL_MS:.0f} ms)"
           + ('' if gms <= GEL_MS else ' TE TRAAG'))
     print(f'[inp] typen in {len(slow)} tools: traagste {worst[1]} {worst[0]:.0f} ms (budget {INP_MS:.0f} ms)' + ('' if worst[0] <= INP_MS else ' TE TRAAG'))
+    ROWS.append(('Gel-editor testgel', f'{gms:.0f} ms', f'{GEL_MS:.0f} ms'))
+    ROWS.append((f'Typen (traagste: {worst[1]})', f'{worst[0]:.0f} ms', f'{INP_MS:.0f} ms'))
     return issues
 
 def main():
@@ -163,6 +171,12 @@ def main():
     issues += aln()
     issues += heap()
     issues += gel_inp()
+    out = os.environ.get('GITHUB_STEP_SUMMARY')
+    if out:
+        with open(out, 'a', encoding='utf8') as fh:
+            fh.write('## Prestaties\n\n| Meting | Waarde | Budget |\n|---|---|---|\n')
+            fh.writelines(f'| {m} | {w} | {b} |\n' for m, w, b in ROWS)
+            fh.write('\n' + ('**Problemen:**\n\n' + ''.join(f'- {i}\n' for i in issues) if issues else 'Alles binnen het budget.\n'))
     for i in issues: print('  ' + i)
     sys.exit(1 if issues else 0)
 
