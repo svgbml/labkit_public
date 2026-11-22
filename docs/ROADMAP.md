@@ -35,7 +35,7 @@ over:
 - **S91:** *Standaardcurve* reads a pasted plate grid, but not per instrument.
 - **S93:** *qPCR-analyse* reads a pasted Ct table by its header, but not per instrument.
 
-At the last full `python tools/check.py` (2026-11-22, after S41–S47, end of phase 4): **295 of 295 validation checks**, 0 layout problems in Dutch and 2 in English (the known label overflow in *PCR-mastermix*: *Reaction volume* and *Template per reaction*), 0 untranslated texts, 0 robustness problems and start-up 573/603 ms. `tests/robust_audit.py` did finish this time on this machine (239 s); the memory problem of 2026-11-21 did not come back.
+At the last full `python tools/check.py` (2026-11-22, after S41–S47, end of phase 4): **295 of 295 validation checks**, **0 layout problems in Dutch and in English**, 0 untranslated texts, 0 robustness problems and start-up 573/603 ms. The two English label overflows in *PCR-mastermix* that stood here since 2026-11-21 are gone: the inline `flex:1` on the field block overrode `.row>.fields{flex:1 1 280px}`, so on a phone the wider English recipe names squeezed the block to 3 px. `tests/robust_audit.py` did finish this time on this machine (239 s); the memory problem of 2026-11-21 did not come back.
 
 ### Vue migration: how far it is
 

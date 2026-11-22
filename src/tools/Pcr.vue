@@ -12,7 +12,10 @@
 <template>
   <div class="panel">
     <div class="row" style="justify-content:space-between">
-      <div class="fields" style="flex:1;max-width:760px">
+      <!-- geen inline flex:1 : dan geldt .row>.fields{flex:1 1 280px} uit de opmaak, zodat het
+           veldblok op een smal scherm onder de receptkeuze springt in plaats van samen te vallen
+           (de Engelse receptnamen zijn breder dan de Nederlandse) -->
+      <div class="fields" style="max-width:760px">
         <lk-field v-model="ns" :label="t('Monsters')" for-id="q-n" inputmode="numeric"/>
         <lk-field v-model="nc" :label="t('Controles (NTC, positief)')" for-id="q-ctrl" inputmode="numeric"/>
         <lk-field data-expert="" v-model="extra" :label="t('Extra marge')" for-id="q-extra" unit="%"/>
