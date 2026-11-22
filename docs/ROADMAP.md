@@ -143,7 +143,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | F1b | Opus 5 | S122–S124, S128 | F1a | — |
 | F1c | Opus 5.5 | S129–S133 (S130, S131 are Opus 5) | F1b | — |
 | **Any time (after K3): new tools, built in Vue** | | | | |
-| SQ1 | Sonnet | S191–S193 sequence toolbox; S194 after S45 | K3 | anything |
+| SQ1 ✅ | Sonnet | S191–S193 sequence toolbox; S194 after S45 | K3 | anything |
 | SQ2 | Opus 5 | S195, S198, then S196, S197 (Sonnet): NCBI switch, cache, lookups | SQ1 | anything |
 | SA1a | Opus 5 | S147–S152 chromatogram reader (S149, S151, S152 by Sonnet) | K3 | anything |
 | SA1b | Opus 5 | S153–S157 (S153, S154, S156, S157 by Sonnet) | SA1a | anything |
