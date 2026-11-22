@@ -120,7 +120,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | E2 ✅ | Sonnet | S51–S55, S58 | E1 | P1, G1a, G1b |
 | E3 | Opus 5 | S56, S57, S60 | E1 | anything except E4, R1, R2a, R3 |
 | E4 | Opus 5.5 | S59 colony counting, S61 multi-device sync | E1; S104 for the CFU link | anything except E3, R1 |
-| G1a | Opus 5 | S62–S65 (S63, S65 by Sonnet) | K3 | anything except Q2 |
+| G1a ✅ | Opus 5 | S62–S65 (S63, S65 by Sonnet) | K3 | anything except Q2 |
 | G1b | Opus 5 | S66–S68 (S66, S68 by Sonnet) | G1a | anything except Q2 |
 | G2 | Opus 5.5 | S69–S74 (S71, S72 are Opus 5): guided mode, canvas-first layout, direct manipulation, undo | G1b | anything except Q2 |
 | G3 | Opus 5.5 | S75–S79 (S75, S78 are Opus 5) | G2 | anything except Q2, C2 |
@@ -297,7 +297,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S62 | 97 | Project files `.labkitgel` (photo, lanes, ladder, labels, settings) save/open | ✅ Paneel 1 van de *Gelfoto-editor* heeft *Project opslaan* en *Project openen*: één JSON-bestand met de foto als PNG, de lanen met hun banden, de ladder, de metingen, het beeldwerk en alle velden (`gfProjSnap`/`gfProjApply` in `src/engines/gelfoto.js`). `tests/validate.py` slaat de realistische testgel op, herlaadt de pagina en opent hem: toestand en export zijn gelijk. De virtuele ladder (tweede foto) en de zoom gaan niet mee | — |
 | S63 | 98 | Gel library with thumbnails (IndexedDB) | ✅ Paneel *Recente gels* (`GfLibrary.vue`, opslag in `src/tools/gelfoto/library.js`: IndexedDB `labkit-gels`, hoogstens 30): *Bewaar in bibliotheek* en *Project opslaan* bewaren de gel met een miniatuur; dezelfde gel werkt zijn eigen item bij (`gf.libId`). Elk item heeft *Openen* en ✕. Zonder IndexedDB staat er een melding. `tests/validate.py` bewaart, herlaadt en opent. Verwijderen vraagt geen bevestiging | — |
 | S64 | 95 | Type lane labels on the image; Tab to next lane; paste a list | ✅ Klik op een lanelabel boven de gel: er komt een invoerveld over het label (`gfLabEdit` in `src/engines/gelfoto.js`, tekstcursor boven de labelstrook). Enter of ernaast klikken bewaart, Escape annuleert, Tab/Shift+Tab gaat naar de volgende/vorige lane; een geplakte lijst (regels of tabs) vult deze en de volgende lanen, met een melding als er namen overblijven. Alleen als de lanelabels in beeld staan (*Lanelabels* aan bij exporteren). Getest in `tests/validate.py` | — |
-| S65 | 110 | Saturation warning overlay | Clipped pixels highlighted | Sonnet |
+| S65 | 110 | Saturation warning overlay | ✅ Vinkje *Verzadigde pixels markeren* (paneel 2, standaard aan): `gfSat()` zoekt in de ruwe foto (vóór helderheid/contrast) pixels met een kanaal ≥ 254, of ≤ 1 bij donkere banden, en kleurt ze magenta over de gel, alleen in de editor, niet in de export. Paneel 2 meldt welk deel van de foto overbelicht is en dat de densitometrie daar te laag uitvalt. De hoeken die fijn rechtzetten bijvult tellen mee (bij een heldere rand kunnen die gemarkeerd worden). Getest in `tests/validate.py` | — |
 | S66 | 117, 118 | Auto figure legend and result table per lane (Excel copy) | Legend + table | Sonnet |
 | S67 | 119 | Ladder library editor: add/share custom ladders | Custom ladder used by detection | Opus 5 |
 | S68 | 96 | Figure style presets (journal, report, publication, poster) | One click restyles the export | Sonnet |

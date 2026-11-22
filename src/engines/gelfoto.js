@@ -67,6 +67,17 @@ function gfProc(){
   const sig=new Float32Array(n); const darkBands=med>0.5; for(let p=0;p<n;p++) sig[p]=darkBands?1-gray[p]:gray[p];
   gf.cache.pk=k; gf.cache.proc={c,w:c.width,h:c.height,sig,darkBands}; return gf.cache.proc;
 }
+/* Verzadigde pixels van de ruwe foto (vóór helderheid/contrast), in dezelfde uitsnede als gfProc().c.
+   Heldere banden: kanaal >= 254; donkere banden: kanaal <= 1. Hoeken die het kantelen bijvult tellen mee. */
+function gfSat(){
+  const k=`${gf.rot90}|${gf.fine}|${gf.flip}|${JSON.stringify(gf.crop)}`; if(gf.cache.sk===k) return gf.cache.sat;
+  const r=gfRotated(), cr=gf.crop||{x:0,y:0,w:r.width,h:r.height}, dark=gfProc().darkBands;
+  const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(cr.w)); c.height=Math.max(1,Math.round(cr.h)); const x=c.getContext('2d'); x.drawImage(r,cr.x,cr.y,cr.w,cr.h,0,0,c.width,c.height);
+  const id=x.getImageData(0,0,c.width,c.height), d=id.data, N=c.width*c.height; let n=0;
+  for(let i=0;i<d.length;i+=4){ const hit=dark?Math.min(d[i],d[i+1],d[i+2])<=1:Math.max(d[i],d[i+1],d[i+2])>=254; if(hit){ d[i]=255; d[i+1]=0; d[i+2]=200; d[i+3]=217; n++; } else d[i+3]=0; }
+  x.putImageData(id,0,0);
+  gf.cache.sk=k; gf.cache.sat={c,n,frac:n/N}; return gf.cache.sat;
+}
 function smooth(a,k){ const h=Math.max(1,Math.round(k)), n=a.length, pre=new Float64Array(n+1); for(let i=0;i<n;i++) pre[i+1]=pre[i]+a[i]; const o=new Float32Array(n); for(let i=0;i<n;i++){ const lo=Math.max(0,i-h), hi=Math.min(n-1,i+h); o[i]=(pre[hi+1]-pre[lo])/(hi-lo+1); } return o; }
 function peaks(a,minDist,minProm){ const idx=[]; for(let i=1;i<a.length-1;i++) if(a[i]>=a[i-1]&&a[i]>a[i+1]) idx.push(i);
   const prom=i=>{ let l=i,lm=a[i]; while(l>0&&a[l]<=a[i]){ l--; lm=Math.min(lm,a[l]); if(i-l>minDist*3) break; } let r=i,rm=a[i]; while(r<a.length-1&&a[r]<=a[i]){ r++; rm=Math.min(rm,a[r]); if(r-i>minDist*3) break; } return a[i]-Math.max(lm,rm); };
@@ -336,7 +347,7 @@ function gfRender(exportMode,scale=1){
   if(lanesOn){ x.font=font; const ext=(cx,t)=>{ const tw=x.measureText(t).width; return angD?cx+fs*0.1*Math.cos(ang)+tw*Math.cos(ang)+fs*0.5*Math.sin(ang):cx+tw/2; }; let mr=0; gf.lanes.forEach(l=>{ mr=Math.max(mr,ext(l.x,uv(l.label||''))-(P.w+gw+Wv)); }); if(vlOn&&vlabT) mr=Math.max(mr,ext(P.w+gw+Wv/2,uv(vlabT))-(P.w+gw+Wv)); R=Math.max(R,Math.ceil(mr+pad+2)); }
   const W=Lm+P.w+gw+Wv+R, H=T+P.h+B;
   c.width=Math.round(W*scale); c.height=Math.round(H*scale); x.setTransform(scale,0,0,scale,0,0);
-  x.fillStyle='#fff'; x.fillRect(0,0,W,H); x.imageSmoothingQuality='high'; x.drawImage(P.c,Lm,T);
+  x.fillStyle='#fff'; x.fillRect(0,0,W,H); x.imageSmoothingQuality='high'; x.drawImage(P.c,Lm,T); { const so=$('#gf-sat'); if(!exportMode&&so&&so.checked) x.drawImage(gfSat().c,Lm,T); }
   if(vlOn){ const wc=gfVlWarp(P.h,Wv); if(wc) x.drawImage(wc,VX,T); const vlab=vlabT; if(vlab&&lanesOn){ x.save(); x.font=font; x.fillStyle='#111'; x.translate(VX+Wv/2,T-fs*0.45); if(gf.angEff){ x.rotate(-gf.angEff*Math.PI/180); x.textAlign='left'; x.textBaseline='middle'; x.fillText(uv(vlab),fs*0.1,0); } else { x.textAlign='center'; x.fillText(uv(vlab),0,0); } x.restore(); } }
   if(!exportMode) gf.layout={L:Lm,T,s:1,hs,lab:lanesOn?labH:0};
   x.fillStyle='#111'; x.textBaseline='alphabetic';
@@ -555,6 +566,7 @@ live({
   gfDemo: [() => gfDemo, v => { gfDemo = v; }],
   gfRotated: [() => gfRotated, v => { gfRotated = v; }],
   gfProc: [() => gfProc, v => { gfProc = v; }],
+  gfSat: [() => gfSat, v => { gfSat = v; }],
   smooth: [() => smooth, v => { smooth = v; }],
   peaks: [() => peaks, v => { peaks = v; }],
   gfWells: [() => gfWells, v => { gfWells = v; }],

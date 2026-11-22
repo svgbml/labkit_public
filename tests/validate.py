@@ -308,6 +308,22 @@ def _(pg):
       return [1, onNext, gf.lanes.slice(3,6).map(l=>l.label).join('')==='ABC'&&!document.getElementById('gf-labed')?1:0]; })()""")
     return [('invoerveld op het label', r[0], 1, 0), ('Tab: bewaard en volgende lane', r[1], 1, 0), ('geplakte lijst vult 3 lanen', r[2], 1, 0)]
 
+@case('Gelfoto-editor', 'Verzadigingswaarschuwing', 'Zelftest: een blok van 20 × 10 pure witte pixels (255) tussen donkergrijs (30) en lichtgrijs (200) wordt als verzadigd gemarkeerd, met melding, in de editor maar niet in de export')
+def _(pg):
+    r = pg.evaluate("""(()=>{ const c=document.createElement('canvas'); c.width=300; c.height=200; const x=c.getContext('2d');
+      x.fillStyle='rgb(30,30,30)'; x.fillRect(0,0,300,200); x.fillStyle='rgb(200,200,200)'; x.fillRect(50,100,20,10); x.fillStyle='#fff'; x.fillRect(100,50,20,10);
+      gfLoadCanvas(c); const n=gfSat().n, noCrop=gf.crop?0:1;
+      const o=document.getElementById('gf-sat'); if(o&&!o.checked){ o.checked=true; o.dispatchEvent(new Event('input',{bubbles:true})); o.dispatchEvent(new Event('change',{bubbles:true})); }
+      gfRender(); const px=(cv,X,Y)=>Array.from(cv.getContext('2d').getImageData(X,Y,1,1).data).slice(0,3);
+      const L=gf.layout, ed=px(gcv,Math.round(L.L+110),Math.round(L.T+55));
+      return {n,noCrop,ed,L:[L.L,L.T]}; })()""")
+    # de export (gfRender(true) geeft zijn eigen canvas terug) krijgt de markering niet
+    ex = pg.evaluate("(()=>{ const L=gf.layout; return Array.from(gfRender(true).getContext('2d').getImageData(Math.round(L.L+110),Math.round(L.T+55),1,1).data).slice(0,3); })()")
+    warn = pg.evaluate("(()=>{ const n=document.querySelector('#gf-sat'); const p=n&&n.closest('.panel'); return p&&p.querySelector('.note.warn')?1:0; })()")
+    mag = lambda v: 1 if v[0] > 200 and v[1] < 80 and v[2] > 120 else 0
+    return [('exact het witte blok (200 px)', r['n'], 200, 0), ('geen uitsnede', r['noCrop'], 1, 0), ('overlay in de editor', mag(r['ed']), 1, 0),
+            ('geen overlay in de export', mag(ex), 0, 0), ('waarschuwing getoond', warn, 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

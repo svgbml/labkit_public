@@ -29,7 +29,9 @@
       <div class="row" style="gap:14px">
         <label class="chk"><input type="checkbox" id="gf-inv" v-model="f.inv"> {{ t('Inverteren') }}</label>
         <label class="chk"><input type="checkbox" id="gf-gray" v-model="f.gray"> {{ t('Grijswaarden') }}</label>
+        <label class="chk"><input type="checkbox" id="gf-sat" v-model="f.sat"> {{ t('Verzadigde pixels markeren') }}</label>
       </div>
+      <lk-note v-if="satPct" kind="warn">{{ t('Verzadigde pixels: ' + satPct + ' % van de foto is overbelicht.') }} {{ t('De densitometrie van deze banden valt te laag uit; neem de foto korter belicht opnieuw.') }}</lk-note>
       <div class="rng" style="margin-top:10px">
         <label for="gf-bri">{{ t('Helderheid') }}</label>
         <input type="range" id="gf-bri" min="-60" max="60" v-model="f.bri" @change="sync">
@@ -73,9 +75,10 @@ export default {
   name: 'GfImage',
   mixins: [gfMix],
   data() {
-    return {f: {inv: false, gray: true, bri: '0', con: '1', rot: '0'}};
+    return {f: {inv: false, gray: true, sat: true, bri: '0', con: '1', rot: '0'}};
   },
   computed: {
+    satPct() { this.tick; if (!gf.src) return ''; const q = gfSat(); if (!q.n) return ''; const p = q.frac * 100; return lkNumIn(p < 0.1 ? '0.1' : fmt(p, 1)); },
     briTxt() { return lkNumIn(String(Math.round(+this.f.bri) || 0)); },
     conTxt() { return lkNumIn(fmt(+this.f.con, 2)); },
     rotTxt() { return lkNumIn(fmt(+this.f.rot, 2)) + '°'; }

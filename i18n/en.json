@@ -4862,5 +4862,8 @@
 "{#} labels geplakt.": "{#} labels pasted.",
 "{#} bleven over: er zijn niet genoeg lanen.": "{#} left over: there are not enough lanes.",
 "Klik op een label boven de gel om het daar te typen; Tab gaat naar de volgende lane.": "Click a label above the gel to type it there; Tab moves to the next lane.",
-"Plak je een lijst (bijvoorbeeld een kolom uit Excel), dan vult die de volgende lanen.": "Paste a list (for example a column from Excel) and it fills the next lanes."
+"Plak je een lijst (bijvoorbeeld een kolom uit Excel), dan vult die de volgende lanen.": "Paste a list (for example a column from Excel) and it fills the next lanes.",
+"Verzadigde pixels markeren": "Mark saturated pixels",
+"Verzadigde pixels: {#} % van de foto is overbelicht.": "Saturated pixels: {#} % of the photo is overexposed.",
+"De densitometrie van deze banden valt te laag uit; neem de foto korter belicht opnieuw.": "Densitometry of these bands comes out too low; retake the photo with a shorter exposure."
 }
