@@ -4,8 +4,9 @@
      levende cel erbij. "Invullen als één vak" zet de aantallen achter de tellingen van de
      Telkamer (event `fill`). Id's: k-photo, k-thr, k-pcv, k-pfill. -->
 <template>
-  <details class="f" style="margin-top:12px">
+  <details style="margin-top:12px" @toggle="open = $event.target.open">
     <summary>{{ t('Tellen uit een foto') }}</summary>
+    <template v-if="open">
     <div class="fields" style="margin-top:8px">
       <div class="f">
         <label for="k-photo">{{ t('Foto van één vak') }}</label>
@@ -24,6 +25,7 @@
       </div>
     </template>
     <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('Groen = levend, rood omlijnd = dood (blauw gekleurd). Tik op een cel om hem dood te maken, nog eens om hem weg te halen; tik naast een cel om er een toe te voegen. Klonten tellen op oppervlak (het getal erbij); kijk ze na. De lijnen van de telkamer worden genegeerd.') }}</p>
+    </template>
   </details>
 </template>
 
@@ -33,7 +35,7 @@ import {countCells} from '../lib/cellcount.js';
 export default {
   name: 'TelFoto',
   emits: ['fill'],
-  data() { return {thr: '6', cells: null}; },
+  data() { return {thr: '6', cells: null, open: false}; },
   computed: {
     n() {
       const s = (d) => this.cells.filter(c => c.dead === d).reduce((a, c) => a + c.n, 0);

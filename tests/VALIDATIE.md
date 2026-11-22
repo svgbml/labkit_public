@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-22 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 384 van 384 controles binnen tolerantie.**
+**Resultaat: 389 van 389 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -38,6 +38,11 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Groeicurve | Kiemgetallen E. coli | verdubbelingstijd (min) | 26,96 | 27 | +0.15% | ✅ | Microbial growth study material (KVV): log KVE 6,0–8,7 over 2–6 h, generatietijd ≈ 26 min; regressie: 26,96 min |
 | Groeicurve | OD₆₀₀, twee punten in log-fase | verdubbelingstijd (min) | 30 | 30 | +0.00% | ✅ | Science Insights rekenvoorbeeld: OD 0,05 → 0,8 in 2 h, µ = 1,39 h⁻¹, t_d = 30 min |
 | Groeicurve | OD₆₀₀, twee punten in log-fase | µ (h⁻¹) | 1,386 | 1,386 | +0.00% | ✅ | Science Insights rekenvoorbeeld: OD 0,05 → 0,8 in 2 h, µ = 1,39 h⁻¹, t_d = 30 min |
+| Groeicurve | Voorspelling doel-OD | doel bereikt (h) | 3,585 | 3,58 | -0.14% | ✅ | Exponentiële groei y = y₀·e^(µt), dus t = t₀ + ln(y_doel/y₀)/µ (Madigan e.a., Brock Biology of Microorganisms, 16e ed., hfst. 5): OD 0,05 → 0,2 in 2 h (t_d = 1 h), doel 0,6 → t = 2 + log₂ 3 = 3,585 h |
+| Telkamer | Tellen uit een foto (trypaanblauw) | cells_trypan.png levend | 45 | 44 | -2.22% | ✅ | Testfoto's met bekend aantal (tests/fixtures/make_cells.py, vaste seed): levende cellen met heldere kern en donkere rand, dode egaal blauw, met kamerlijnen (ook driedubbel), verloop, ruis en onscherpte. 45 levend/12 dood en 80/30 (dichter, kleiner); tolerantie 10% |
+| Telkamer | Tellen uit een foto (trypaanblauw) | cells_trypan.png dood | 12 | 11 | -8.33% | ✅ | Testfoto's met bekend aantal (tests/fixtures/make_cells.py, vaste seed): levende cellen met heldere kern en donkere rand, dode egaal blauw, met kamerlijnen (ook driedubbel), verloop, ruis en onscherpte. 45 levend/12 dood en 80/30 (dichter, kleiner); tolerantie 10% |
+| Telkamer | Tellen uit een foto (trypaanblauw) | cells_dense.png levend | 80 | 78 | -2.50% | ✅ | Testfoto's met bekend aantal (tests/fixtures/make_cells.py, vaste seed): levende cellen met heldere kern en donkere rand, dode egaal blauw, met kamerlijnen (ook driedubbel), verloop, ruis en onscherpte. 45 levend/12 dood en 80/30 (dichter, kleiner); tolerantie 10% |
+| Telkamer | Tellen uit een foto (trypaanblauw) | cells_dense.png dood | 30 | 30 | +0.00% | ✅ | Testfoto's met bekend aantal (tests/fixtures/make_cells.py, vaste seed): levende cellen met heldere kern en donkere rand, dode egaal blauw, met kamerlijnen (ook driedubbel), verloop, ruis en onscherpte. 45 levend/12 dood en 80/30 (dichter, kleiner); tolerantie 10% |
 | Telkamer | Neubauer, erytrocyten | cellen/mL | 5,2800e+09 | 5,2800e+09 | +0.00% | ✅ | ProSciTech: 528 cellen in 5 groepsvakken (0,2 mm²), 1:200 → 5,28 × 10⁶/µL |
 | Telkamer | Neubauer, leukocyten | cellen/mL | 7,8000e+06 | 7,8000e+06 | +0.00% | ✅ | ProSciTech: 156 cellen in 4 grote vakken, 1:20 → 7800/µL |
 | DNA-kwantificatie | A₂₆₀ → concentratie | ng/µL | 425 | 425 | +0.00% | ✅ | Pearson rekenvoorbeeld: A₂₆₀ 0,85 bij 1:10, dsDNA → 425 ng/µL |
@@ -60,9 +65,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9467 | +0.24% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7786 | +0.11% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,558 | +0.44% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9483 | +0.40% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7811 | +0.42% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5602 | +0.83% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |

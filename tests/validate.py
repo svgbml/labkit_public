@@ -148,7 +148,7 @@ def _(pg):
 def _(pg):
     out = []
     for f, live, dead in (('cells_trypan.png', 45, 12), ('cells_dense.png', 80, 30)):
-        pg.evaluate("__go('telkamer');__set('k-live','');__set('k-dead','');document.querySelector('#t-telkamer details').open=true")
+        pg.evaluate("__go('telkamer');__set('k-live','');__set('k-dead','');document.querySelector('#t-telkamer details').open=true"); pg.wait_for_selector('#k-photo', state='attached')
         pg.set_input_files('#k-photo', str(ROOT / 'tests' / 'fixtures' / f))
         pg.wait_for_selector('#k-pfill'); pg.evaluate("document.getElementById('k-pfill').click()"); pg.wait_for_timeout(100)
         out += [(f + ' levend', pg.evaluate("__n(document.getElementById('k-live').value)"), live, 0.1),
