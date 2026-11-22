@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-22 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 329 van 329 controles binnen tolerantie.**
+**Resultaat: 343 van 343 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -60,9 +60,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9447 | +0.02% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7805 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5611 | +0.99% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9446 | +0.02% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7783 | +0.07% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,557 | +0.26% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -75,6 +75,20 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Gelfoto-editor | Realistische testgel (scheef, smeer, lege lanen) | product 650 bp (gem.) | 650 | 648,8 | -0.18% | ✅ | tests/make_test_gel.py: 11 lanen, 2,0° scheef, ladder in lane 1, producten 650 bp, dimeren 60 bp |
 | Gelfoto-editor | Realistische testgel (scheef, smeer, lege lanen) | aantal productbanden | 7 | 7 | +0.00% | ✅ | tests/make_test_gel.py: 11 lanen, 2,0° scheef, ladder in lane 1, producten 650 bp, dimeren 60 bp |
 | Gelfoto-editor | Realistische testgel (scheef, smeer, lege lanen) | dimeer 60 bp (gem.) | 60 | 60,26 | +0.43% | ✅ | tests/make_test_gel.py: 11 lanen, 2,0° scheef, ladder in lane 1, producten 650 bp, dimeren 60 bp |
+| Gelfoto-editor | Projectbestand .labkitgel | toestand gelijk na openen | 1 | 1 | +0.00% | ✅ | Zelftest: de realistische testgel opslaan, de pagina herladen en het bestand openen geeft dezelfde lanen, banden, metingen en dezelfde export (pixel voor pixel) |
+| Gelfoto-editor | Projectbestand .labkitgel | export gelijk na openen | 1 | 1 | +0.00% | ✅ | Zelftest: de realistische testgel opslaan, de pagina herladen en het bestand openen geeft dezelfde lanen, banden, metingen en dezelfde export (pixel voor pixel) |
+| Gelfoto-editor | Gelbibliotheek | item in lijst | 1 | 1 | +0.00% | ✅ | Zelftest: de realistische testgel in de bibliotheek (IndexedDB) bewaren, de pagina herladen: het item staat er nog en openen geeft evenveel lanen |
+| Gelfoto-editor | Gelbibliotheek | geen dubbel item bij opnieuw bewaren | 2 | 2 | +0.00% | ✅ | Zelftest: de realistische testgel in de bibliotheek (IndexedDB) bewaren, de pagina herladen: het item staat er nog en openen geeft evenveel lanen |
+| Gelfoto-editor | Gelbibliotheek | items na herladen | 2 | 2 | +0.00% | ✅ | Zelftest: de realistische testgel in de bibliotheek (IndexedDB) bewaren, de pagina herladen: het item staat er nog en openen geeft evenveel lanen |
+| Gelfoto-editor | Gelbibliotheek | lanen na openen | 11 | 11 | +0.00% | ✅ | Zelftest: de realistische testgel in de bibliotheek (IndexedDB) bewaren, de pagina herladen: het item staat er nog en openen geeft evenveel lanen |
+| Gelfoto-editor | Lanelabels op de foto typen | invoerveld op het label | 1 | 1 | +0.00% | ✅ | Zelftest: klik op het label van lane 3 boven de gel, typ, Tab naar lane 4 en plak daar een lijst van drie namen |
+| Gelfoto-editor | Lanelabels op de foto typen | Tab: bewaard en volgende lane | 1 | 1 | +0.00% | ✅ | Zelftest: klik op het label van lane 3 boven de gel, typ, Tab naar lane 4 en plak daar een lijst van drie namen |
+| Gelfoto-editor | Lanelabels op de foto typen | geplakte lijst vult 3 lanen | 1 | 1 | +0.00% | ✅ | Zelftest: klik op het label van lane 3 boven de gel, typ, Tab naar lane 4 en plak daar een lijst van drie namen |
+| Gelfoto-editor | Verzadigingswaarschuwing | exact het witte blok (200 px) | 200 | 200 | +0.00% | ✅ | Zelftest: een blok van 20 × 10 pure witte pixels (255) tussen donkergrijs (30) en lichtgrijs (200) wordt als verzadigd gemarkeerd, met melding, in de editor maar niet in de export |
+| Gelfoto-editor | Verzadigingswaarschuwing | geen uitsnede | 1 | 1 | +0.00% | ✅ | Zelftest: een blok van 20 × 10 pure witte pixels (255) tussen donkergrijs (30) en lichtgrijs (200) wordt als verzadigd gemarkeerd, met melding, in de editor maar niet in de export |
+| Gelfoto-editor | Verzadigingswaarschuwing | overlay in de editor | 1 | 1 | +0.00% | ✅ | Zelftest: een blok van 20 × 10 pure witte pixels (255) tussen donkergrijs (30) en lichtgrijs (200) wordt als verzadigd gemarkeerd, met melding, in de editor maar niet in de export |
+| Gelfoto-editor | Verzadigingswaarschuwing | geen overlay in de export | 0 | 0 | +0.00% | ✅ | Zelftest: een blok van 20 × 10 pure witte pixels (255) tussen donkergrijs (30) en lichtgrijs (200) wordt als verzadigd gemarkeerd, met melding, in de editor maar niet in de export |
+| Gelfoto-editor | Verzadigingswaarschuwing | waarschuwing getoond | 1 | 1 | +0.00% | ✅ | Zelftest: een blok van 20 × 10 pure witte pixels (255) tussen donkergrijs (30) en lichtgrijs (200) wordt als verzadigd gemarkeerd, met melding, in de editor maar niet in de export |
 | Centrifuge | rpm → × g | × g | 1957 | 1957 | +0.00% | ✅ | Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g |
 | Centrifuge | × g → rpm | rpm | 5837 | 5837 | +0.00% | ✅ | CASRAI: 4000 × g, r = 10,5 cm → 5837 rpm |
 | Centrifuge | Rotorbalans | n=12 k=5 gebalanceerd | 1 | 1 | +0.00% | ✅ | Som van de plaatsvectoren = 0: opgebouwd uit gelijkmatige p-hoeken met p | n (n = 12, k = 5 → 2 + 3; n = 6, k = 1 en k = 5 kunnen niet) |
