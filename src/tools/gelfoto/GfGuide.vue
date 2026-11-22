@@ -46,12 +46,18 @@ const HINTS = [
 
 export default {
   data() { return {expert: !!jget('lkGfExpert', false), step: 1, tool: 'all', steps: STEPS, tools: TOOLS, hints: HINTS}; },
-  mounted() { this.apply(); },
+  mounted() {
+    this.apply();
+    /* telefoon: de greep van het onderblad (S71) */
+    const h = document.getElementById('gf-sheet');
+    h.addEventListener('click', () => h.setAttribute('aria-expanded', h.parentElement.classList.toggle('open')));
+  },
   watch: { expert(v) { jset('lkGfExpert', v); this.apply(); } },
   methods: {
     apply() {
       const w = document.querySelector('#t-gelfoto .gfwrap'), v = this.expert ? (this.tool === 'all' ? '' : this.tool) : 's' + this.step;
       if (v) w.setAttribute('data-gv', v); else w.removeAttribute('data-gv');
+      document.querySelector('#t-gelfoto .gf-ctx').scrollTop = 0;   /* het onderblad begint bovenaan de nieuwe panelen */
       document.getElementById('gf-ghint').style.display = this.expert ? 'none' : '';   /* geen lege rij boven de panelen */
     },
     pick(k) { this.tool = k; this.apply(); },
