@@ -1,9 +1,14 @@
 <!-- ================= ALIGNMENT BEKIJKEN =================
      Leest een meervoudige uitlijning (Clustal .aln, uitgelijnde FASTA, PHYLIP, NEXUS, MSF, PIR)
-     in één model; het inlezen staat in src/lib/alignment.js. De id's al-in, al-file en al-out
+     in één model; het inlezen staat in src/lib/alignment.js. De id's al-in, al-file, al-out en al-view
      blijven zoals ze zijn: delen, ongedaan maken, de invoeropslag en tests/validate.py werken
-     daarop. -->
+     daarop.
+     De viewer (S171) tekent alleen de cellen die in beeld zijn: een laag met position:sticky
+     blijft in het venster staan terwijl een lege 'sizer' de schuifbalken de volle maat geeft, en
+     bij elk scrollen worden de zichtbare rijen opnieuw uitgesneden (één tekstregel per rij). Zo
+     blijft een uitlijning van duizenden kolommen vloeiend. -->
 <template>
+  <div>
   <div class="grid2">
     <div class="panel">
       <div class="f"><label for="al-in">{{ t('Uitlijning (Clustal, FASTA, PHYLIP, NEXUS, MSF of PIR)') }}</label>
@@ -26,6 +31,22 @@
       </div>
     </div>
   </div>
+  <div v-show="m.names.length" id="al-view" ref="view" class="aln-view" :style="{height: viewH + 'px'}" @scroll="onScroll">
+    <span ref="probe" class="aln-mono aln-probe" aria-hidden="true">{{ 'M'.repeat(50) }}</span>
+    <div class="aln-sizer" :style="{width: g.W + 'px', height: g.H + 'px'}">
+      <div class="aln-pin" :style="{width: vw + 'px', height: vh + 'px'}">
+        <div v-for="r in vis.rows" :key="r.i" class="aln-mono aln-seq" :style="{top: r.top + 'px', left: vis.left + 'px'}">{{ r.txt }}</div>
+        <div class="aln-names" :style="{width: g.nameW + 'px'}">
+          <div v-for="r in vis.rows" :key="r.i" class="aln-mono aln-name" :style="{top: r.top + 'px'}" :title="m.names[r.i]">{{ m.names[r.i] }}</div>
+        </div>
+        <div class="aln-ruler" :style="{height: RH + 'px'}">
+          <span v-for="k in vis.ticks" :key="k.c" :style="{left: k.x + 'px'}">{{ k.c }}</span>
+        </div>
+        <div class="aln-corner" :style="{width: g.nameW + 'px', height: RH + 'px'}">{{ t('Positie') }}</div>
+      </div>
+    </div>
+  </div>
+  </div>
 </template>
 
 <script>
@@ -34,15 +55,34 @@ import {parseAlignment, alnType} from '../lib/alignment.js';
 
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0));
+const CH = 18, RH = 22, MAXNAME = 24; /* rijhoogte, hoogte van de liniaal, naamkolom in tekens */
 
 export default {
   name: 'Aln',
   data() {
     const st = typeof storeGet === 'function' ? storeGet() : {};
-    return {txt: st['al-in'] != null ? String(st['al-in']) : ''};
+    return {txt: st['al-in'] != null ? String(st['al-in']) : '', RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
   },
   computed: {
     m() { return parseAlignment(this.txt); },
+    /* de volle maat van het raster */
+    g() {
+      const m = this.m, nameW = Math.ceil(Math.min(MAXNAME, Math.max(6, ...m.names.map(n => n.length))) * this.cw) + 14;
+      return {nameW, W: nameW + m.len * this.cw, H: RH + m.names.length * CH};
+    },
+    viewH() { return Math.min(this.g.H + 18, 540); },
+    /* alleen wat in beeld is: rijen r0..r1, kolommen c0..c1 (0-based, c1 exclusief) */
+    vis() {
+      const m = this.m, g = this.g, cw = this.cw;
+      const c0 = Math.max(0, Math.floor(this.sx / cw)), c1 = Math.min(m.len, Math.ceil((this.sx + this.vw - g.nameW) / cw) + 1);
+      const r0 = Math.max(0, Math.floor(this.sy / CH)), r1 = Math.min(m.names.length, Math.ceil((this.sy + this.vh - RH) / CH) + 1);
+      const rows = [];
+      for (let i = r0; i < r1; i++) rows.push({i, top: RH + i * CH - this.sy, txt: m.seqs[i].slice(c0, c1)});
+      /* een getal boven elke tiende kolom, in het midden van die kolom */
+      const ticks = [];
+      for (let c = Math.ceil((c0 + 1) / 10) * 10; c <= c1; c += 10) ticks.push({c, x: g.nameW + (c - 0.5) * cw - this.sx});
+      return {rows, ticks, left: g.nameW + c0 * cw - this.sx};
+    },
     rows() {
       const m = this.m, t = this.t, ty = alnType(m);
       return [[t('Formaat'), FMT[m.format]], [t('Sequenties'), N(m.names.length)],
@@ -57,7 +97,26 @@ export default {
       });
     }
   },
+  mounted() {
+    /* de sectie is verborgen tot de tool opent; meet pas als het venster een maat heeft */
+    this.ro = new ResizeObserver(() => this.measure());
+    this.ro.observe(this.$refs.view);
+  },
+  beforeUnmount() { if (this.ro) this.ro.disconnect(); },
+  watch: {
+    /* een nieuwe uitlijning begint linksboven */
+    m() { const v = this.$refs.view; if (v) { v.scrollLeft = 0; v.scrollTop = 0; } this.sx = this.sy = 0; }
+  },
   methods: {
+    measure() {
+      const v = this.$refs.view, p = this.$refs.probe;
+      if (!v || !v.clientWidth) return;
+      const w = p.getBoundingClientRect().width / 50;
+      if (w > 0) this.cw = w;
+      this.vw = v.clientWidth; this.vh = v.clientHeight;
+    },
+    /* synchroon: Vue rendert in een microtaak, dus nog vóór het scherm wordt getekend */
+    onScroll(e) { this.sx = e.target.scrollLeft; this.sy = e.target.scrollTop; },
     onFile(e) {
       const f = e.target.files[0];
       if (f) f.text().then(x => { this.txt = x; });

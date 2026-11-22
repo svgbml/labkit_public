@@ -502,3 +502,17 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 /* donkere kamer: rood op zwart (spaart het nachtzicht); komt na de thema's en wint daarvan */
 html.darkroom{--bg:#000;--surface:#0b0000;--ink:#e8392b;--muted:#a52a1f;--line:#4a120d;--accent:#ff4a3a;--accent-soft:#240504;--ok:#e8392b;--ok-soft:#1a0302;--warn:#ff6a55;--warn-soft:#2a0806;--bad:#ff7a66;--bad-soft:#2f0a07;--stv:#e8392b;--stv-soft:#1a0302;--stu:#ff6a55;--stu-soft:#2a0806;--sta:#c4372a;--sta-soft:#240504;--bn-fg:#e8392b;--bn-hi:#ff6a55;--bn-bg:#000;--bn-dim:#3a0c08;--bn-mid:#6a1a12;--bn-gray:#a52a1f;--bn-dark:#120100;--bn-err:#ff7a66;color-scheme:dark}
 html.darkroom img,html.darkroom canvas{filter:grayscale(1) sepia(1) hue-rotate(-50deg) saturate(6) brightness(.75)}
+/* Alignment bekijken (S171): alleen de zichtbare cellen staan in de DOM, in een laag die met
+   position:sticky in het venster blijft; de sizer geeft de schuifbalken de volle maat */
+.aln-view{position:relative;overflow:auto;margin-top:16px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.aln-sizer{position:relative}
+.aln-pin{position:sticky;top:0;left:0;overflow:hidden}
+.aln-mono{font-family:var(--font-mono);font-size:13px;line-height:18px;white-space:pre}
+.aln-probe{position:absolute;visibility:hidden;pointer-events:none}
+.aln-seq{position:absolute}
+.aln-names{position:absolute;top:0;left:0;bottom:0;z-index:1;background:var(--surface);border-right:1px solid var(--line)}
+.aln-name{position:absolute;left:0;right:0;padding:0 8px 0 6px;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.aln-ruler{position:absolute;top:0;left:0;right:0;z-index:1;background:var(--surface);border-bottom:1px solid var(--line);font-size:11px;color:var(--muted)}
+.aln-ruler span{position:absolute;top:1px;transform:translateX(-50%)}
+.aln-ruler span::after{content:"";position:absolute;left:50%;bottom:-5px;height:4px;border-left:1px solid var(--muted)}
+.aln-corner{position:absolute;top:0;left:0;z-index:2;padding:2px 6px;font-size:11px;color:var(--muted);background:var(--surface);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
