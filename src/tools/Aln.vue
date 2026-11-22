@@ -27,7 +27,16 @@
           </select></div>
         <label class="chk" for="al-cbs"><input type="checkbox" id="al-cbs" v-model="cbs"> {{ t('Kleurenblind-veilig') }}</label>
         <lk-field v-model="thr" :label="t('Drempel consensus')" for-id="al-thr" unit="%" inputmode="numeric"/>
+        <lk-field v-model="motif" :label="t('Motief zoeken')" for-id="al-motif" cls="mono"/>
+        <div class="f"><label for="al-ord">{{ t('Volgorde') }}</label>
+          <select id="al-ord" v-model="ord">
+            <option value="file">{{ t('Zoals in het bestand') }}</option>
+            <option value="name">{{ t('Op naam') }}</option>
+            <option value="ident">{{ t('Op identiteit met de eerste sequentie') }}</option>
+            <option value="hand">{{ t('Met de hand (pijltjes in de tabel)') }}</option>
+          </select></div>
       </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Een motief is letters, [..] voor één van een paar letters en X of . voor elke letter; bij DNA ook IUPAC-codes zoals N, R en Y. Gaten worden overgeslagen.') }}</p>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Het formaat wordt aan de eerste regel herkend. Uitlijnen doe je met Clustal Omega bij EBI; download daar de uitkomst als .aln en open die hier.') }}</p>
     </div>
     <div class="result">
@@ -38,10 +47,15 @@
         <template v-else>
           <lk-kv :rows="rows"/>
           <lk-note v-for="(w, i) in m.warn" :key="i" kind="warn">{{ t(w) }}</lk-note>
-          <lk-table :cols="cols" :rows="seqRows"/>
+          <lk-note v-if="motif.trim() && !mot" kind="bad">{{ t('Dit motief is niet geldig: gebruik letters, [..], X of .') }}</lk-note>
+          <lk-note v-else-if="mot && mot.capped" kind="warn">{{ t('Meer dan 20.000 treffers: alleen de eerste worden getoond.') }}</lk-note>
         </template>
       </div>
     </div>
+  </div>
+  <!-- de sequenties over de volle breedte: met identiteit, motief en pijltjes is hij te breed voor het resultaatvak -->
+  <div v-if="m.format && m.names.length" id="al-seqs" class="result" style="margin-top:16px" @click="onMove">
+    <lk-table :cols="cols" :rows="seqRows"/>
   </div>
   <!-- overzicht van de hele uitlijning: aandeel gaten per stukje, het kader is wat in beeld is; klikken springt erheen (S174) -->
   <canvas v-show="m.names.length" id="al-ovw" ref="ov" class="aln-ovw" data-xl="1" :title="t('Gaten over de hele uitlijning; klik om erheen te gaan')" @click="onOv"></canvas>
@@ -75,7 +89,7 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
-import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile, alnConsensus} from '../lib/alignment.js';
+import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile, alnConsensus, alnMotif, alnIdentity} from '../lib/alignment.js';
 
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
@@ -86,7 +100,8 @@ export default {
   data() {
     const st = typeof storeGet === 'function' ? storeGet() : {};
     return {txt: st['al-in'] != null ? String(st['al-in']) : '', col: st['al-col'] != null ? String(st['al-col']) : 'auto',
-      cbs: !!st['al-cbs'], sel: null, thr: st['al-thr'] != null ? String(st['al-thr']) : '50', RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
+      cbs: !!st['al-cbs'], sel: null, hand: null,
+      motif: st['al-motif'] != null ? String(st['al-motif']) : '', ord: st['al-ord'] != null ? String(st['al-ord']) : 'file', thr: st['al-thr'] != null ? String(st['al-thr']) : '50', RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
   },
   computed: {
     m() { return parseAlignment(this.txt); },
@@ -96,6 +111,16 @@ export default {
     /* onder de sequenties: de * : . -regel, de consensus en een plot van het aandeel van de meest voorkomende letter (S173) */
     prof() { return alnProfile(this.m); },
     cons() { return alnConservation(this.m); },
+    /* S175: treffers van het motief per sequentie, en de volgorde van de rijen (indexen in m) */
+    mot() { return this.motif.trim() ? alnMotif(this.m, this.motif, alnType(this.m) === 'nt') : null; },
+    ident() { return this.m.seqs.length ? alnIdentity(this.m, 0) : []; },
+    order() {
+      const m = this.m, ix = m.names.map((_, i) => i);
+      if (this.ord === 'hand' && this.hand && this.hand.length === ix.length) return this.hand;
+      if (this.ord === 'name') return ix.sort((a, b) => m.names[a].localeCompare(m.names[b], undefined, {numeric: true}));
+      if (this.ord === 'ident') return ix.sort((a, b) => this.ident[b] - this.ident[a] || a - b);
+      return ix;
+    },
     consensus() { const v = num(this.thr); return alnConsensus(this.m, this.prof, isFinite(v) ? v : 50); },
     /* de volle maat van het raster */
     g() {
@@ -110,8 +135,8 @@ export default {
       const n = m.names.length, r0 = Math.max(0, Math.floor(this.sy / CH)), r1 = Math.min(n + 2, Math.ceil((this.sy + this.vh - RH) / CH) + 1);
       const rows = [], extra = [[this.t('Conservering'), this.cons], [this.t('Consensus'), this.consensus]];
       for (let i = r0; i < r1; i++) {
-        const x = i >= n, [name, s] = x ? extra[i - n] : [m.names[i], m.seqs[i]];
-        rows.push({i, x, name, top: RH + i * CH - this.sy, txt: s.slice(c0, c1)});
+        const x = i >= n, k = x ? i : this.order[i], [name, s] = x ? extra[i - n] : [m.names[k], m.seqs[k]];
+        rows.push({i: k, x, name, top: RH + i * CH - this.sy, txt: s.slice(c0, c1)});
       }
       const pt = RH + (n + 2) * CH - this.sy, plot = pt < this.vh && pt + PH > RH ? pt : null;
       /* een getal boven elke tiende kolom, in het midden van die kolom */
@@ -124,14 +149,24 @@ export default {
       return [[t('Formaat'), FMT[m.format]], [t('Sequenties'), N(m.names.length)],
         [t('Lengte'), N(m.len) + ' ' + t('kolommen')],
         [t('Kolommen met gaten'), N(this.prof.gaps.filter(Boolean).length) + ' ' + t('kolommen')],
+        this.mot && [t('Motief gevonden in'), this.t(this.mot.hits.filter(h => h.length).length + ' van ' + m.names.length + ' sequenties')],
         [t('Volledig geconserveerd (*)'), N(this.cons.split('*').length - 1) + ' ' + t('kolommen')],
         [t('Type'), ty === 'nt' ? t('DNA/RNA') : ty === 'aa' ? t('eiwit') : '–']];
     },
-    cols() { return [{h: this.t('Naam')}, {h: this.t('Zonder gaten'), num: true}, {h: this.t('Gaten'), num: true}, {h: this.t('Gaten (%)'), num: true}]; },
+    cols() {
+      const t = this.t;
+      return [{h: t('Naam')}, {h: t('Zonder gaten'), num: true}, {h: t('Gaten'), num: true},
+        {h: t('Identiteit met de eerste'), num: true}, this.mot && {h: t('Motief'), num: true}, {h: ''}].filter(Boolean);
+    },
     seqRows() {
-      return this.m.seqs.map((s, i) => {
-        const g = s.split('-').length - 1;
-        return [esc(this.m.names[i]), N(s.length - g), N(g), P(g / s.length)];
+      const up = esc(trPlain('Omhoog')), dn = esc(trPlain('Omlaag')), last = this.order.length - 1;
+      return this.order.map((i, p) => {
+        const s = this.m.seqs[i], g = s.split('-').length - 1, h = this.mot && this.mot.hits[i];
+        /* de pijltjes verschuiven de rij; onMove vangt de klik op */
+        const mv = '<span class="aln-mvs">' + (p ? '<button type="button" class="aln-mv" data-mv="-1" data-p="' + p + '" title="' + up + '" aria-label="' + up + '">▲</button>' : '')
+          + (p < last ? '<button type="button" class="aln-mv" data-mv="1" data-p="' + p + '" title="' + dn + '" aria-label="' + dn + '">▼</button>' : '') + '</span>';
+        return [esc(this.m.names[i]), N(s.length - g), N(g) + ' (' + P(g / s.length) + ')', P(this.ident[i]),
+          h && (h.length ? this.t(h.length + ' (kolom ' + (h[0][0] + 1) + ')') : '0'), mv].filter(x => x !== null && x !== undefined);
       });
     },
     /* de aangeklikte kolom: welke letters hoe vaak */
@@ -159,12 +194,13 @@ export default {
   beforeUnmount() { if (this.ro) this.ro.disconnect(); if (this.mo) this.mo.disconnect(); },
   watch: {
     /* een nieuwe uitlijning begint linksboven */
-    m() { const v = this.$refs.view; if (v) { v.scrollLeft = 0; v.scrollTop = 0; } this.sx = this.sy = 0; this.sel = null; },
+    m() { const v = this.$refs.view; if (v) { v.scrollLeft = 0; v.scrollTop = 0; } this.sx = this.sy = 0; this.sel = null; this.hand = null; },
     /* na de render: dan staat de klasse aln-cbs al op het venster */
     vis: {handler() { this.paint(); }, flush: 'post'},
     tab: {handler() { this.paint(); }, flush: 'post'},
     cbs: {handler() { this.paint(); }, flush: 'post'},
-    sel: {handler() { this.paint(); }, flush: 'post'}
+    sel: {handler() { this.paint(); }, flush: 'post'},
+    mot: {handler() { this.paint(); }, flush: 'post'}
   },
   methods: {
     measure() {
@@ -201,8 +237,7 @@ export default {
         x.strokeRect(v.left + (this.sel - v.c0) * cw + 1, RH + 1, cw - 2, this.vh - RH - 2);
       }
       const tab = this.tab, seqs = this.m.seqs, sh = {};  /* buiten de lus: elke reactieve lees kost tijd */
-      if (tab === undefined) return;
-      for (const r of v.rows) {
+      for (const r of tab === undefined ? [] : v.rows) {
         if (r.x) continue;
         const s = seqs[r.i];
         let c = v.c0;
@@ -212,6 +247,14 @@ export default {
           if (k) { x.fillStyle = sh[k] || (sh[k] = this.shade(k)); x.fillRect(v.left + (c - v.c0) * cw, r.top, (e - c) * cw, CH); }
           c = e;
         }
+      }
+      /* motieftreffers: een kader om de kolommen van elke treffer */
+      const mot = this.mot;
+      if (!mot) return;
+      x.strokeStyle = this.shade('hit'); x.lineWidth = 2;
+      for (const r of v.rows) {
+        if (r.x) continue;
+        for (const [a, b] of mot.hits[r.i]) if (b >= v.c0 && a < v.c1) x.strokeRect(v.left + (a - v.c0) * cw + 1, r.top + 1, (b - a + 1) * cw - 2, CH - 2);
       }
     },
     /* overzichtsstrook: per pixel het gemiddelde aandeel gaten, en een kader om wat in beeld is */
@@ -244,6 +287,14 @@ export default {
       const v = this.$refs.view, r = e.currentTarget.getBoundingClientRect();
       const c = (e.clientX - r.left) / r.width * this.m.len;
       v.scrollLeft = Math.max(0, c * this.cw - (this.vw - this.g.nameW) / 2);
+    },
+    /* ▲/▼ in de tabel: de rij een plek op of neer, en de volgorde wordt 'met de hand' */
+    onMove(e) {
+      const b = e.target.closest('[data-mv]');
+      if (!b) return;
+      const o = this.order.slice(), p = +b.dataset.p, q = p + +b.dataset.mv;
+      [o[p], o[q]] = [o[q], o[p]];
+      this.hand = o; this.ord = 'hand';
     },
     /* klik in het raster: welke kolom (niet in de naamkolom of de liniaal) */
     onCell(e) {

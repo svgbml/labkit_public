@@ -1080,7 +1080,7 @@ def _(pg):
             pg.set_input_files('#al-file', str(D / f)); pg.wait_for_timeout(300)
         else:
             pg.evaluate("t=>__set('al-in',t)", (D / f).read_text(encoding='utf-8'))
-        names = pg.evaluate("[...document.querySelectorAll('#al-out tbody tr')].map(r=>r.cells[0].textContent.trim())")
+        names = pg.evaluate("[...document.querySelectorAll('#al-seqs tbody tr')].map(r=>r.cells[0].textContent.trim())")
         out += [(f + ': sequenties', pg.evaluate("__kv('#al-out','Sequenties')"), r['n'], 0),
                 (f + ': lengte', pg.evaluate("__kv('#al-out','Lengte')"), r['len'], 0),
                 (f + ': namen gelijk', sum(a == b for a, b in zip(names, r['names'])), r['n'], 0)]
@@ -1153,7 +1153,7 @@ def _(pg):
             name, chunk = ln.split()[:2]; seqs[name] = seqs.get(name, '') + chunk
     rows = list(seqs.values())
     pg.evaluate("__go('aln')"); pg.evaluate("t=>__set('al-in',t)", f.read_text(encoding='utf-8')); pg.wait_for_timeout(200)
-    gaps = pg.evaluate("[...document.querySelectorAll('#al-out tbody tr')].map(r=>__n(r.cells[2].textContent))")
+    gaps = pg.evaluate("[...document.querySelectorAll('#al-seqs tbody tr')].map(r=>__n(r.cells[2].textContent))")
     out = [('gaten per sequentie gelijk', sum(a == r.count('-') for a, r in zip(gaps, rows)), len(rows), 0),
            ('kolommen met gaten', pg.evaluate("__kv('#al-out','Kolommen met gaten')"), sum('-' in col for col in zip(*rows)), 0)]
     pg.evaluate("typeof tourStop==='function'&&tourStop()")  # de rondleiding bij het eerste bezoek ligt anders over het raster
@@ -1168,6 +1168,52 @@ def _(pg):
         exp = {k: col.count(k) for k in set(col) if k != '-'}
         out += [(f'kolom {c}: tellingen per letter', 1 if got == exp else 0, 1, 0),
                 (f'kolom {c}: gaten', pg.evaluate("__kv('#al-coldet','Gaten')"), col.count('-'), 0)]
+    return out
+
+@case('Alignment bekijken', 'Motief zoeken en volgorde', 'tests/fixtures/aln/hedgehog.aln (eiwit) en opuntia.aln (DNA) uit de Biopython-testsuite. Verwacht in Python berekend: treffers met re op de sequenties zonder gaten (motief G[IV][HF]WY, het geconserveerde stuk bij kolom 416 van hedgehog; TATACATTRAAG met IUPAC R = A/G in opuntia), de kolom van de eerste letter, de volgorde op naam (natuurlijke sortering) en op identiteit met de eerste sequentie (gelijke letters / kolommen waar beide een letter hebben)')
+def _(pg):
+    import re
+    D = ROOT / 'tests' / 'fixtures' / 'aln'
+    def clustal(f):
+        seqs = {}
+        for ln in (D / f).read_text(encoding='utf-8').splitlines()[1:]:
+            if ln.strip() and not ln[0].isspace():
+                name, chunk = ln.split()[:2]; seqs[name] = seqs.get(name, '') + chunk
+        return seqs
+    def first_cols(seqs, pat):
+        out = []
+        for s in seqs.values():
+            cols = [i for i, ch in enumerate(s) if ch != '-']
+            m = re.search(pat, s.replace('-', '').upper())
+            out.append(cols[m.start()] + 1 if m else 0)
+        return out
+    pg.evaluate("__go('aln')")
+    seqcol = "()=>{const h=[...document.querySelectorAll('#al-seqs thead th')].map(t=>t.textContent.trim()), k=h.indexOf('Motief');" \
+             "return [...document.querySelectorAll('#al-seqs tbody tr')].map(r=>{const m=r.cells[k].textContent.match(/kolom (\\d+)/); return m?+m[1]:0})}"
+    names = "[...document.querySelectorAll('#al-seqs tbody tr')].map(r=>r.cells[0].textContent.trim())"
+    view = "__alnVm.vis.rows.filter(r=>!r.x).map(r=>r.name)"
+    out = []
+    for f, motif, pat in (('hedgehog.aln', 'G[IV][HF]WY', 'G[IV][HF]WY'), ('opuntia.aln', 'TATACATTRAAG', 'TATACATT[AG]AAG')):
+        seqs = clustal(f); exp = first_cols(seqs, pat)
+        pg.evaluate("([t,m])=>{__set('al-in',t);__set('al-ord','file');__set('al-motif',m)}", [(D / f).read_text(encoding='utf-8'), motif]); pg.wait_for_timeout(150)
+        out += [(f + ': sequenties met het motief', pg.evaluate("__kv('#al-out','Motief gevonden in')"), sum(1 for c in exp if c), 0),
+                (f + ': kolom van de treffer gelijk', sum(a == b for a, b in zip(pg.evaluate(seqcol), exp)), len(exp), 0)]
+    seqs = clustal('hedgehog.aln'); ns = list(seqs)
+    pg.evaluate("t=>{__set('al-in',t);__set('al-motif','');__set('al-ord','name')}", (D / 'hedgehog.aln').read_text(encoding='utf-8')); pg.wait_for_timeout(150)
+    nat = lambda x: [int(p) if p.isdigit() else p.lower() for p in re.split(r'(\d+)', x)]
+    out.append(('volgorde op naam', 1 if pg.evaluate(names) == sorted(ns, key=nat) else 0, 1, 0))
+    r0 = seqs[ns[0]].upper()
+    def ident(s):
+        both = [(a, b) for a, b in zip(s.upper(), r0) if a != '-' and b != '-']
+        return sum(a == b for a, b in both) / len(both)
+    pg.evaluate("()=>__set('al-ord','ident')"); pg.wait_for_timeout(150)
+    by_id = sorted(ns, key=lambda n: (-ident(seqs[n]), ns.index(n)))
+    out.append(('volgorde op identiteit', 1 if pg.evaluate(names) == by_id and pg.evaluate(view) == by_id else 0, 1, 0))
+    pg.click('#al-seqs tbody tr:nth-child(1) [data-mv="1"]'); pg.wait_for_timeout(150)  # eerste rij een plek omlaag
+    hand = [by_id[1], by_id[0]] + by_id[2:]
+    out.append(('met de hand: ▼ wisselt rij 1 en 2 (tabel en raster)', 1 if pg.evaluate(names) == hand and pg.evaluate(view) == hand
+                and pg.evaluate("document.getElementById('al-ord').value") == 'hand' else 0, 1, 0))
+    pg.evaluate("()=>__set('al-ord','file')")
     return out
 
 @case('Chromatogram', 'ABIF-bestand 3730.ab1 inlezen', 'Biopython 1.84, Tests/test_SeqIO_AbiIO.py (data_3730) en het bestand zelf (tests/fixtures/3730.ab1, Applied Biosystems 3730): monster 226032_C-ME-18_pCAGseqF, 1165 basen, eerste 12 basen GGGCGAGCKYYA; ABIF-indeling volgens de Applied Biosystems ABIF File Format Specification (2009)')

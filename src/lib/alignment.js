@@ -289,3 +289,43 @@ export function alnConsensus(a, p, thr) {
   const no = alnType(a) === 'nt' ? 'n' : 'x';
   return p.top.map((t, c) => t === '-' ? '-' : p.frac[c] * 100 >= thr ? t : no).join('');
 }
+
+/* ---------- Motief zoeken (S175) ----------
+   Een motief is letters, [..] voor één van een paar letters en X of . voor elke letter; bij DNA/RNA
+   ook de IUPAC-codes (N, R, Y, …) en T = U. Gezocht wordt in de sequentie zonder gaten, zodat een
+   motief over een gat heen loopt; elke treffer komt terug als [eerste, laatste] kolom (0-based).
+   Overlappende treffers tellen mee. Geeft null bij een ongeldig motief. */
+const IUPAC = {R: 'AG', Y: 'CTU', S: 'CG', W: 'ATU', K: 'GTU', M: 'AC', B: 'CGTU', D: 'AGTU', H: 'ACTU', V: 'ACG', N: 'ACGTU', T: 'TU', U: 'TU'};
+const MAXHITS = 20000;  /* shortcut: een motief als 'X' raakt elke letter; daarboven stoppen, tot iemand meer nodig heeft */
+export function alnMotif(a, pat, nt) {
+  const p = String(pat || '').toUpperCase().replace(/\s+/g, '');
+  if (!/^(?:[A-Z.*]|\[[A-Z*]+\])+$/.test(p)) return null;
+  const one = c => c === '.' || (!nt && c === 'X') ? '[^-]' : nt && IUPAC[c] ? '[' + IUPAC[c] + ']' : c === '*' ? '\\*' : c;
+  const src = p.replace(/\[([A-Z*]+)\]|./g, (m, g) => g ? '[' + [...g].map(c => (nt && IUPAC[c] || c).replace('*', '\\*')).join('') + ']' : one(m));
+  const re = new RegExp('(?=(' + src + '))', 'g');
+  let total = 0;
+  const hits = a.seqs.map(s => {
+    const col = [], out = [];
+    let u = '';
+    for (let c = 0; c < s.length; c++) if (s[c] !== '-') { col.push(c); u += s[c].toUpperCase(); }
+    for (const m of u.matchAll(re)) {
+      if (total >= MAXHITS || !m[1]) break;
+      out.push([col[m.index], col[m.index + m[1].length - 1]]); total++;
+    }
+    return out;
+  });
+  return {hits, total, capped: total >= MAXHITS};
+}
+
+/* identiteit van elke sequentie met sequentie ref: gelijke letters / kolommen waar beide een letter hebben */
+export function alnIdentity(a, ref) {
+  const r = a.seqs[ref].toUpperCase();
+  return a.seqs.map(s => {
+    let same = 0, both = 0;
+    for (let c = 0; c < s.length; c++) {
+      const x = s[c].toUpperCase();
+      if (x !== '-' && r[c] !== '-') { both++; if (x === r[c]) same++; }
+    }
+    return both ? same / both : 0;
+  });
+}
