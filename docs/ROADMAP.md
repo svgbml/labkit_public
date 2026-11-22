@@ -463,7 +463,7 @@ Ideas #334–#368. Clustal Omega itself stays at EBI: it is a compiled program w
 
 | Step | Ideas | What | Done when | Model |
 |---|---|---|---|---|
-| S170 | 334, 335 | Parsers for Clustal `.aln`, aligned FASTA, PHYLIP, NEXUS, MSF and PIR into one alignment model | A real `.aln` opens with the right names and length | Opus 5 |
+| S170 | 334, 335 | Parsers for Clustal `.aln`, aligned FASTA, PHYLIP, NEXUS, MSF and PIR into one alignment model | ✅ `src/lib/alignment.js` reads all six into `{format, names, seqs, len, cons, warn}`; new tool *Alignment bekijken* (`aln`) with paste box, file picker, format, count, length and a name table. Validation case: six files from the Biopython test suite (`tests/fixtures/aln/`) give the same count, length and names as `Bio.AlignIO`, and the Clustal `* : .` line is kept | Opus 5 |
 | S171 | 336, 366 | Alignment viewer: grid, sticky name column, position ruler, virtual rendering of visible cells only | Smooth on a 5000-column alignment | Opus 5.5 |
 | S172 | 337 | Colour schemes: ClustalX groups, nucleotides, identity shading, colourblind-safe variant | All four work in all five themes | Sonnet |
 | S173 | 338, 339 | Conservation row and plot per column, consensus with an adjustable threshold | Recomputed row matches the file's own `* : .` line | Sonnet |

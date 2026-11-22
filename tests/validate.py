@@ -1013,6 +1013,25 @@ def _(pg):
             ('EcoRI (positie)', site('EcoRI'), 1517, 0), ('BamHI (positie)', site('BamHI'), 44, 0),
             ('SP6-promotor over het nulpunt (start)', sp6, 3922, 0)]
 
+@case('Alignment bekijken', 'Zes formaten tegen Biopython', 'Bestanden uit de testsuite van Biopython (tests/fixtures/aln: Clustal opuntia.aln, dezelfde als FASTA, PHYLIP one.phy, NEXUS test_Nexus_input.nex met geneste commentaren en een naam met _ en met aanhalingstekens, GCG MSF W_prot.msf, PIR clustalw.pir) en hun lezing door Biopython Bio.AlignIO (biopython.json): aantal sequenties, lengte en namen')
+def _(pg):
+    import json
+    D = ROOT / 'tests' / 'fixtures' / 'aln'
+    ref = json.loads((D / 'biopython.json').read_text(encoding='utf-8'))
+    pg.evaluate("__go('aln')")
+    out = []
+    for f, r in ref.items():
+        if f.startswith('_'): continue
+        if f == 'opuntia.aln':  # één bestand via de bestandskiezer, zoals een gebruiker het opent
+            pg.set_input_files('#al-file', str(D / f)); pg.wait_for_timeout(300)
+        else:
+            pg.evaluate("t=>__set('al-in',t)", (D / f).read_text(encoding='utf-8'))
+        names = pg.evaluate("[...document.querySelectorAll('#al-out tbody tr')].map(r=>r.cells[0].textContent.trim())")
+        out += [(f + ': sequenties', pg.evaluate("__kv('#al-out','Sequenties')"), r['n'], 0),
+                (f + ': lengte', pg.evaluate("__kv('#al-out','Lengte')"), r['len'], 0),
+                (f + ': namen gelijk', sum(a == b for a, b in zip(names, r['names'])), r['n'], 0)]
+    return out
+
 @case('Restrictiedigestie', 'In-silico digestie van pFA6a-kanMX6', 'Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa')
 def _(pg):
     fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')
