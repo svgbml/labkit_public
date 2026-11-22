@@ -79,14 +79,14 @@ import {overage} from '../lib/overage.js';
 const dec = x => (isFinite(x) ? lkNumIn(String(x).replace('.', ',')) : '');
 
 /* [naam, stock, eind, eenheid]; de namen staan in het Nederlands, de weergave vertaalt ze */
-const QPRE = {
+export const QPRE = {
   taq: [['10X reactiebuffer', 10, 1, 'X'], ['dNTP-mix', 10, 0.2, 'mM'], ['Primer F', 10, 0.2, 'µM'],
     ['Primer R', 10, 0.2, 'µM'], ['Taq-polymerase', 5, 1.25, 'U/50 µL']],
   taqmg: [['10X buffer (Mg-vrij)', 10, 1, 'X'], ['MgCl₂', 25, 1.5, 'mM'], ['dNTP-mix', 10, 0.2, 'mM'],
     ['Primer F', 10, 0.2, 'µM'], ['Primer R', 10, 0.2, 'µM'], ['Taq-polymerase', 5, 1.25, 'U/50 µL']],
   mm2x: [['2X mastermix', 2, 1, 'X'], ['Primer F', 10, 0.2, 'µM'], ['Primer R', 10, 0.2, 'µM']]
 };
-const PRESETS = [{v: 'taq', n: 'Taq, losse componenten'}, {v: 'taqmg', n: 'Taq, Mg-vrije buffer + MgCl₂'},
+export const PRESETS = [{v: 'taq', n: 'Taq, losse componenten'}, {v: 'taqmg', n: 'Taq, Mg-vrije buffer + MgCl₂'},
   {v: 'mm2x', n: '2X kant-en-klare mastermix'}];
 const UNITS = ['X', 'mM', 'µM', 'U/50 µL', 'µL'];
 

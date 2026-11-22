@@ -5061,5 +5061,21 @@
 "Toevallige fout.": "Random error.",
 "Vier opeenvolgende metingen liggen meer dan {#}s van het gemiddelde, aan dezelfde kant.": "Four consecutive measurements lie more than {#}s from the mean, on the same side.",
 "Tien opeenvolgende metingen liggen aan dezelfde kant van het gemiddelde.": "Ten consecutive measurements lie on the same side of the mean.",
-"Afkeuring": "Rejection"
+"Afkeuring": "Rejection",
+"Aandeel van elke bron in de gecombineerde variantie": "Share of each source in the combined variance",
+"Analist": "Analyst",
+"Validatierapport afdrukken": "Print validation report",
+"Validatierapport": "Validation report",
+"Parameter": "Parameter",
+"Criterium": "Criterion",
+"Conclusie": "Conclusion",
+"alle criteria zijn voldaan.": "all criteria are met.",
+"niet alle criteria zijn voldaan.": "not all criteria are met.",
+"Opgesteld door": "Prepared by",
+"Gecontroleerd door": "Checked by",
+"PCR-mastermix (kits)": "PCR master mix (kits)",
+"Volgorde": "Order",
+"Sleep om de volgorde te wijzigen": "Drag to change the order",
+"Omhoog": "Up",
+"Omlaag": "Down"
 }

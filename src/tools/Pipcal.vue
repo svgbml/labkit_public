@@ -92,7 +92,7 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 
-const todayISO = () => new Date().toISOString().slice(0, 10);
+const todayISO = () => new Date().toLocaleDateString('sv');  // lokale datum als JJJJ-MM-DD (toISOString is UTC)
 const F = (x, d) => lkNumIn(fmt(x, d));
 
 export default {

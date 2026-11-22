@@ -356,7 +356,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S113 | 213, 215, 216 | Statistics "which test?" wizard, inline assumption checks, long-format paste | Opus 5 |
 | S114 | 214, 217, 218, 219, 220 | APA sentence; Bland-Altman bias; ROC cut-off; Kaplan-Meier risk table; sig-fig practice | Opus 5 |
 | S115 | 221, 222 | Pipette profiles + certificate; Westgard violations on the chart ✅ profiles (`pipettes`) live in localStorage only, not in shared links; history chart spaces entries evenly, not by date | Sonnet |
-| S116 | 223, 224, 226 | Uncertainty pie chart; validation report template; pipetting scheme drag rows + kit templates | Sonnet |
+| S116 | 223, 224, 226 | Uncertainty pie chart; validation report template; pipetting scheme drag rows + kit templates ✅ kit templates read `QPRE`/`PRESETS` exported from `Pcr.vue`, so the S109 kits show up by themselves; rows move by drag or ↑/↓ buttons (no Alt+arrow keys) | Sonnet |
 
 ## Phase 9: structure and workflows (5 steps)
 | Step | Ideas | What | Model |

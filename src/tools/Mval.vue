@@ -31,6 +31,16 @@
         <lk-field v-model="r2" :label="t('Min. R²')" for-id="mv-r2"/>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Acceptatiecriteria verschillen per methode en concentratieniveau; neem ze over uit je validatieplan. Voorbeelddata zijn verzonnen.') }}</p>
+      <div class="fields" style="margin-top:14px">
+        <lk-field v-model="vTitle" :label="t('Titel')" for-id="mv-vtitle" inputmode="text" cls="txt" :span="2"/>
+        <lk-field v-model="vMethod" :label="t('Methode')" for-id="mv-vmethod" inputmode="text" cls="txt"/>
+        <lk-field v-model="vAnalyte" :label="t('Analyt')" for-id="mv-vanalyte" inputmode="text" cls="txt"/>
+        <lk-field v-model="vDate" :label="t('Datum')" for-id="mv-vdate" inputmode="text" cls="txt"/>
+        <lk-field v-model="vWho" :label="t('Analist')" for-id="mv-vwho" inputmode="text" cls="txt"/>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button type="button" id="mv-print" :disabled="!R" @click="report">{{ t('Validatierapport afdrukken') }}</button>
+      </div>
     </div>
     <div class="result">
       <canvas id="mv-cv" v-show="!!(R && R.fit)"></canvas>
@@ -48,6 +58,7 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 
+const todayISO = () => new Date().toLocaleDateString('sv');  // lokale datum als JJJJ-MM-DD (toISOString is UTC)
 const F = (x, d) => lkNumIn(fmt(x, d)), G = (x, d) => lkNumIn(sig(x, d));
 
 export default {
@@ -57,7 +68,8 @@ export default {
       rep: lkNumIn('10,2 10,05 9,98 10,11 10,24 9,92'),
       b: lkNumIn('10,08'), sp: lkNumIn('14,86'), add: '5',
       x: '0 2 4 6 8 10 12', y: lkNumIn('0,012 0,214 0,405 0,61 0,797 1,012 1,19'),
-      cvmax: '5', rlo: '90', rhi: '110', r2: lkNumIn('0,995')
+      cvmax: '5', rlo: '90', rhi: '110', r2: lkNumIn('0,995'),
+      vTitle: '', vMethod: '', vAnalyte: '', vDate: todayISO(), vWho: ''
     };
   },
   computed: {
@@ -84,6 +96,31 @@ export default {
   mounted() { this.draw(); },
   updated() { this.draw(); },
   methods: {
+    /* een A4-validatierapport via dezelfde afdrukroute als het pipetcertificaat (rpPrint) */
+    report() {
+      const R = this.R; if (!R) return;
+      const T = x => esc(trPlain(x)), {rep, rec, fit} = R, rows = [];
+      const res = (ok, on) => on ? T(ok ? 'voldoet' : 'voldoet niet') : '–';
+      if (rep) rows.push([T('Herhaalbaarheid (CV)'), esc(fmt(rep.c, 2)) + '% (n = ' + rep.n + ')', rep.chip ? '≤ ' + esc(this.cvmax) + '%' : '–', res(rep.ok, rep.chip), rep.ok || !rep.chip]);
+      if (rec) rows.push([T('Terugvinding'), esc(fmt(rec.r, 1)) + '%', rec.chip ? esc(this.rlo) + ' – ' + esc(this.rhi) + '%' : '–', res(rec.ok, rec.chip), rec.ok || !rec.chip]);
+      if (fit) rows.push([T('Lineariteit R²'), esc(fmt(fit.r2, 5)), fit.chip ? '≥ ' + esc(this.r2) : '–', res(fit.ok, fit.chip), fit.ok || !fit.chip],
+        [T('Helling / intercept'), esc(sig(fit.b, 4) + ' / ' + sig(fit.a, 3)), '–', '–', true],
+        [T('LOD (3,3·σ/S)'), esc(sig(fit.lod, 3)), '–', '–', true], [T('LOQ (10·σ/S)'), esc(sig(fit.loq, 3)), '–', '–', true]);
+      const all = R.pass === R.tot, title = trPlain('Validatierapport');
+      const row = (k, v) => '<tr><th>' + T(k) + '</th><td>' + esc(v) + '</td></tr>';
+      rpPrint('<!doctype html><meta charset="utf-8"><title>' + esc(title) + '</title><style>'
+        + '@page{size:A4;margin:16mm}body{margin:0;font:13px system-ui,sans-serif;color:#1f2933}'
+        + 'h1{font-size:22px;margin:0 0 12px}table{border-collapse:collapse;width:100%;font-size:13px;margin-bottom:14px}'
+        + 'th,td{border:1px solid #c9ced6;padding:6px 8px;text-align:left;vertical-align:top}th{background:#eef0f3}'
+        + '.hd th{width:30%}.ok{color:#1a7f37}.bad{color:#c62828;font-weight:700}.concl{font-size:15px;font-weight:700;margin:16px 0}'
+        + '.sign{margin-top:40px;font-size:12px;color:#5f6b7a;line-height:3}'
+        + '</style><h1>' + esc(this.vTitle.trim() || title) + '</h1><table class="hd">'
+        + row('Methode', this.vMethod) + row('Analyt', this.vAnalyte) + row('Datum', this.vDate) + row('Analist', this.vWho) + '</table>'
+        + '<table><tr><th>' + T('Parameter') + '</th><th>' + T('Waarde') + '</th><th>' + T('Criterium') + '</th><th>' + T('Resultaat') + '</th></tr>'
+        + rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td class="' + (r[3] === '–' ? '' : r[4] ? 'ok' : 'bad') + '">' + r[3] + '</td></tr>').join('')
+        + '</table><p class="concl ' + (all ? 'ok' : 'bad') + '">' + T('Conclusie') + ': ' + T(all ? 'alle criteria zijn voldaan.' : 'niet alle criteria zijn voldaan.') + '</p>'
+        + '<p class="sign">' + T('Opgesteld door') + ': ________________ &nbsp; ' + T('Gecontroleerd door') + ': ________________ &nbsp; ' + T('Datum') + ': ________________</p>');
+    },
     /* de tekening wordt na elke render bijgewerkt; dat houdt canvas en uitkomst bij elkaar */
     draw() {
       const cv = document.getElementById('mv-cv'), fit = this.fit; if (!cv || !fit) return;
