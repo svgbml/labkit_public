@@ -136,7 +136,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | R3 | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 |
 | W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — |
 | **Wave 6: performance and quality** | | | | |
-| Q1a | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything |
+| Q1a ✅ | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything |
 | Q1b | Sonnet | S138, S139, S141 | K3 (then *any time*) | anything |
 | Q2 | Opus 5 | S140, S142 | K3 | anything except G1a–G3 |
 | F1a | Opus 5.5 | **Re-plan phase 10 first** (lazy init and DOM templates may be largely solved by mounting a component only when its tool opens, which phase 16 makes possible), then S125–S127 | K3 | — |
@@ -386,10 +386,10 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 ## Phase 11: quality, tests and dev (9 steps)
 | Step | Ideas | What | Model |
 |---|---|---|---|
-| S134 | 269, 273 | Bundle size budget and memory check in `perf_budget.py` | Sonnet |
-| S135 | 270, 271, 274 | Gel editor benchmark, mobile Lighthouse, typing-latency (INP) test | Sonnet |
-| S136 | 275 | Performance summary in the CI run | Haiku |
-| S137 | 284, 285, 289 | Copy error report, feedback link per tool, export/import everything | Sonnet |
+| S134 | 269, 273 | Bundle size budget and memory check in `perf_budget.py` | ✅ `tests/perf_budget.py` vergelijkt `web/index.html` en `web/i18n-en.js` met `tests/perf_baseline.json` en faalt bij meer dan 5% groei (`--baseline` legt na bewuste groei een nieuwe basis vast); daarna elke tool openen, de testgel in de gel-editor automatisch laten verwerken en de JS-heap na garbage collection meten (CDP), limiet `LABKIT_HEAP_MB` (standaard 40; nu ± 13–15 MB) | Sonnet |
+| S135 | 270, 271, 274 | Gel editor benchmark, mobile Lighthouse, typing-latency (INP) test | ✅ `tests/perf_budget.py` meet de gel-editor op de realistische testgel (rechtzetten, lanen, banden, meten; beste van drie, `GEL_MS` standaard 1000, nu ± 100 ms) en de reactietijd bij typen (Event Timing, zoals INP; beste van twee rondes) in tien zware tools, `INP_MS` standaard 100. Lighthouse draait als matrix desktop + mobiel (`lighthouserc.json` is nu mobiel, desktop krijgt `--collect.settings.preset=desktop`); mobiel haalt prestaties ± 0,35 (waarschuwing, geen fout). De test vond dat typen in *qPCR-plaatindeling* tot 150 ms kostte: `fitText()` in `src/engines/plate.js` leest en schrijft nu per ronde in plaats van per putje (± 30 ms) | Sonnet |
+| S136 | 275 | Performance summary in the CI run | ✅ `tests/perf_budget.py` schrijft in GitHub Actions een tabel *Prestaties* (meting, waarde, budget: grootte, opstarttijd nl/en, alignmentviewer, heap, gel-editor, typen) en de problemen naar `GITHUB_STEP_SUMMARY`; het verloop over de tijd staat in de opeenvolgende runs, er is geen eigen opslag | Haiku |
+| S137 | 284, 285, 289 | Copy error report, feedback link per tool, export/import everything | ✅ Elke tool (behalve start) heeft in de kop *Foutrapport kopiëren* (versie, tool, taal, browser, de laatste tien scriptfouten en de ingevulde velden; zonder klembord een venster met de tekst) en *Feedback*, dat een GitHub-issue opent met hetzelfde rapport al ingevuld (`src/legacy/nt/99z_ux.js`). *Instellingen → Gegevens verhuizen* exporteert en importeert alles als één bestand: hetzelfde bestand als *Sessie opslaan/openen*, nu ook met `sg-read` en de gelbibliotheek uit IndexedDB (`allExport`/`allImport` in `src/legacy/app.js`). Fouten van vóór `99z_ux.js` worden niet opgevangen | Sonnet |
 | S138 | 278 | Unit tests for pure calculation functions | Sonnet |
 | S139 | 279 | Visual regression screenshots for key tools and the gel editor | Sonnet |
 | S140 | 280, 281, 282, 283 | Screen-reader results, keyboard gel editor/plate designer, theme contrast check, reduced motion | Opus 5 |

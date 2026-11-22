@@ -48,6 +48,33 @@ if(typeof VALIDATED!=='undefined') Object.entries(VALIDATED).forEach(([id,[n,ok]
   let tg=h.nextElementSibling; if(!tg||!tg.classList.contains('tags')){ h.insertAdjacentHTML('afterend','<div class="tags"></div>'); tg=h.nextElementSibling; }
   tg.insertAdjacentHTML('beforeend',`<a class="tag lk-valid" href="https://github.com/svgbml/labkit_public/blob/main/tests/VALIDATIE.md" target="_blank" rel="noopener" title="Uitkomsten vergeleken met gepubliceerde referentiedata">✓ Gevalideerd (${n} ${n===1?'controle':'controles'})</a>`); });
 
+/* ---------- S137: foutrapport kopiëren en feedback per tool, zonder server ----------
+   De laatste scriptfouten worden onthouden; het rapport heeft versie, tool, taal, browser,
+   die fouten en de invoer van de tool, zodat een GitHub-issue meteen te reproduceren is.
+   shortcut: fouten van vóór dit bestand (laden van eerdere modules) mist het; vang ze dan eerder op. */
+const LKERR=[];
+const lkErr=t=>{ LKERR.push(new Date().toISOString().slice(11,19)+' '+String(t).slice(0,400)); if(LKERR.length>10) LKERR.shift(); };
+window.addEventListener('error',e=>lkErr((e.message||'fout')+(e.filename?` (${e.filename.split('/').pop()}:${e.lineno}:${e.colno})`:'')));
+window.addEventListener('unhandledrejection',e=>lkErr('promise: '+((e.reason&&(e.reason.stack||e.reason.message))||e.reason)));
+function lkReport(id){ const sec=$('#t-'+id), inp={};
+  if(sec) sec.querySelectorAll('input,select,textarea').forEach(el=>{ if(!el.id||el.type==='file'||el.type==='button') return;
+    const v=el.type==='checkbox'?el.checked:el.value; if(v!==''&&v!=null) inp[el.id]=typeof v==='string'&&v.length>500?v.slice(0,500)+'…':v; });
+  const h=sec&&sec.querySelector('.tool-head h2');
+  return [`Labkit BML ${APPVER}`, `Tool: ${id}${h?' ('+h.textContent.trim()+')':''}`, `Taal: ${LANG}`, `Browser: ${navigator.userAgent}`,
+    'Fouten:', ...(LKERR.length?LKERR:['geen']), 'Invoer:', JSON.stringify(inp,null,1)].join('\n'); }
+async function lkReportCopy(id){ const r=lkReport(id);
+  try{ await navigator.clipboard.writeText(r); lkToast(trPlain('Foutrapport gekopieerd. Plak het in een GitHub-issue.')); }
+  catch(e){ const m=appModal('<h3>Foutrapport</h3><p>Kopieer deze tekst en plak hem in een GitHub-issue.</p><textarea readonly rows="12" style="width:100%;font-family:monospace;font-size:12px" data-notr=""></textarea>'); const ta=m.box.querySelector('textarea'); ta.value=r; ta.select(); } }
+function lkToast(t){ const n=document.createElement('div'); n.className='note ok'; n.setAttribute('role','status'); n.style.cssText='position:fixed;left:16px;bottom:16px;z-index:50;max-width:320px'; n.textContent=t; document.body.appendChild(n); setTimeout(()=>n.remove(),3500); }
+const lkIssueUrl=id=>`https://github.com/${REPO}/issues/new?title=${encodeURIComponent('['+id+'] ')}&body=${encodeURIComponent(('Wat ging er mis, en wat verwachtte je?\n\n\n---\n'+lkReport(id)).slice(0,6000))}`;
+$$('section.tool').forEach(sec=>{ const id=sec.id.slice(2), h=sec.querySelector('.tool-head h2'); if(!h||id==='start') return;
+  let tg=h.nextElementSibling; if(!tg||!tg.classList.contains('tags')){ h.insertAdjacentHTML('afterend','<div class="tags"></div>'); tg=h.nextElementSibling; }
+  tg.insertAdjacentHTML('beforeend','<a class="tag lk-fb" role="button" tabindex="0" data-lk-rep="" title="Kopieert versie, tool, taal, browser, recente fouten en je invoer in deze tool">Foutrapport kopiëren</a>'
+    +'<a class="tag lk-fb" data-lk-fb="" target="_blank" rel="noopener" href="#" title="Opent een GitHub-issue met versie, tool en invoer al ingevuld">Feedback</a>');
+  tg.querySelector('[data-lk-rep]').addEventListener('click',()=>lkReportCopy(id));
+  tg.querySelector('[data-lk-rep]').addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); lkReportCopy(id); } });
+  tg.querySelector('[data-lk-fb]').addEventListener('click',e=>{ e.currentTarget.href=lkIssueUrl(id); }); });
+
 /* ---------- ongeldige uitkomst: geen NaN/Infinity tonen, maar een streepje en een duidelijke melding ---------- */
 function nanCheck(){ const sec=$('#t-'+current); if(!sec||current==='start') return;
   sec.querySelectorAll('.result').forEach(r=>{ const w=document.createTreeWalker(r,NodeFilter.SHOW_TEXT), hits=[];
@@ -338,6 +365,12 @@ smpUse('qplate',names=>{ const el=$('#qp2-s'); if(!el||!names.length) return;
 
 /* alles hierboven ook als globale naam, live (zie src/lib/global.js) */
 live({
+  LKERR: () => LKERR,
+  lkErr: () => lkErr,
+  lkReport: [() => lkReport, v => { lkReport = v; }],
+  lkReportCopy: [() => lkReportCopy, v => { lkReportCopy = v; }],
+  lkToast: [() => lkToast, v => { lkToast = v; }],
+  lkIssueUrl: () => lkIssueUrl,
   NCKEY: () => NCKEY,
   navColApply: [() => navColApply, v => { navColApply = v; }],
   navColToggle: [() => navColToggle, v => { navColToggle = v; }],

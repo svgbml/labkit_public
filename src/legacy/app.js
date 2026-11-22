@@ -4,6 +4,7 @@
    instellingen, updates, tags en wat er van de oudere tools nog over is. Zelfde afspraken als
    src/legacy/core.js. */
 import {live} from '../lib/global.js';
+import {libList, libPut} from '../tools/gelfoto/library.js';
 
 /* nums, mean, sd, linreg, lmfit, chart en inp staan sinds S267 in src/lib/fit.js en src/lib/chart.js */
 
@@ -200,12 +201,23 @@ calc.groei=function(){};
 /* FORENSISCHE KWANTIFICATIE (fq-*) zit sinds S228 in src/tools/Dna.vue */
 
 /* ================= SESSIE OPSLAAN / OPENEN ================= */
-$('#sess-save').addEventListener('click',()=>{ try{ localStorage.setItem(TBLKEY,JSON.stringify(tblSnap())); }catch(e){}
-  const data={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('labkit:')) data[k]=localStorage.getItem(k); } }catch(e){}
+/* S137: het bestand bevat alles van dit apparaat (alle labkit:-sleutels, het chromatogram en de
+   gelbibliotheek uit IndexedDB), zodat het ook dient om naar een nieuw apparaat te verhuizen */
+const XKEYS=k=>k&&(k.startsWith('labkit:')||k==='sg-read');
+async function allExport(){ try{ localStorage.setItem(TBLKEY,JSON.stringify(tblSnap())); }catch(e){}
+  const data={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(XKEYS(k)) data[k]=localStorage.getItem(k); } }catch(e){}
+  const gels=await libList()||[];
   const d=new Date(), stamp=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  const pn=($('#sess-name').value||'').trim(); saveBlob(`${pn?safeName(pn):'labkit-sessie'}-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',project:pn,versie:APPVER,opgeslagen:d.toISOString(),data},null,1)],{type:'application/json'})).catch(()=>{}); });
+  const pn=($('#sess-name').value||'').trim(); await saveBlob(`${pn?safeName(pn):'labkit-sessie'}-${stamp}.json`,new Blob([JSON.stringify({app:'Labkit BML',project:pn,versie:APPVER,opgeslagen:d.toISOString(),data,gels},null,1)],{type:'application/json'})).catch(()=>{}); }
+async function allImport(f){ if(!f) return;
+  try{ const j=JSON.parse(await f.text()); if(!j||j.app!=='Labkit BML'||typeof j.data!=='object') throw 0;
+    Object.entries(j.data).forEach(([k,v])=>{ if(XKEYS(k)&&typeof v==='string') localStorage.setItem(k,v); });
+    for(const g of Array.isArray(j.gels)?j.gels:[]) if(g&&g.id&&g.snap) await libPut(g);
+    location.reload(); }
+  catch(e){ alertBox(trPlain('Dit bestand is geen Labkit-sessie.')); } }
+$('#sess-save').addEventListener('click',()=>allExport());
 $('#sess-open').addEventListener('click',()=>$('#sess-file').click());
-$('#sess-file').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const j=JSON.parse(t); if(!j||j.app!=='Labkit BML'||typeof j.data!=='object') throw 0; Object.entries(j.data).forEach(([k,v])=>{ if(k.startsWith('labkit:')) localStorage.setItem(k,v); }); location.reload(); }).catch(()=>alertBox('Dit bestand is geen Labkit-sessie.')); });
+$('#sess-file').addEventListener('change',e=>{ allImport(e.target.files[0]); e.target.value=''; });
 function alertBox(t){ const n=document.createElement('div'); n.className='note bad'; n.style.cssText='position:fixed;left:16px;bottom:16px;z-index:50;max-width:320px'; n.textContent=t; document.body.appendChild(n); setTimeout(()=>n.remove(),4000); }
 
 /* ================= TABELLEN, PLAAT EN REEKS BEWAREN ================= */
@@ -681,6 +693,9 @@ live({
   darkMQ: () => darkMQ,
   applyUI: [() => applyUI, v => { applyUI = v; }],
   REPO: () => REPO,
+  XKEYS: () => XKEYS,
+  allExport: [() => allExport, v => { allExport = v; }],
+  allImport: [() => allImport, v => { allImport = v; }],
   UPDKEY: () => UPDKEY,
   cmpVer: () => cmpVer,
   openExt: [() => openExt, v => { openExt = v; }],

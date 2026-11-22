@@ -71,6 +71,10 @@
       <div class="panel"><h3>{{ t('Rondleiding') }}</h3>
         <p style="margin:0 0 10px;color:var(--muted);font-size:13px">{{ t('Vier korte stappen door het zoeken, de fasen, de werkstromen en deze instellingen.') }}</p>
         <div class="row"><button type="button" data-tour-start="">{{ t('Rondleiding opnieuw starten') }}</button></div></div>
+      <div class="panel"><h3>{{ t('Gegevens verhuizen') }}</h3>
+        <p style="margin:0 0 10px;color:var(--muted);font-size:13px">{{ t('Eén bestand met alles van dit apparaat: invoer, instellingen, geschiedenis, tabellen, protocollen en de gelbibliotheek. Open het op een ander apparaat om verder te werken.') }}</p>
+        <div class="row"><button type="button" id="all-export" @click="exportAll">{{ t('Alles exporteren') }}</button>
+          <button type="button" id="all-import" @click="importAll">{{ t('Alles importeren') }}</button></div></div>
       <div class="panel"><h3>{{ t('Herstellen') }}</h3>
         <div class="row"><button type="button" id="ui-reset" @click="reset">{{ t('Uiterlijk terug naar standaard') }}</button></div></div>
     </div>
@@ -100,6 +104,9 @@ export default {
     apply() { this.$nextTick(() => { if (typeof applyUI === 'function') applyUI(); }); },
     setLang() { try { localStorage.setItem(LKEY, this.lang); } catch (e) {} location.reload(); },
     check() { if (typeof checkUpdate === 'function') checkUpdate(true); },
+    /* hetzelfde bestand als "Sessie opslaan/openen" onderaan de navigatie (src/legacy/app.js) */
+    exportAll() { allExport(); },
+    importAll() { document.getElementById('sess-file').click(); },
     reset() {
       Object.assign(this, DEF);
       /* de invoeropslag luistert naar input/change op de velden zelf, dus die krijgen ze na de render */

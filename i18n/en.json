@@ -4984,5 +4984,17 @@
 "De read begint bij het eerste venster en eindigt bij het laatste venster waarvan de gemiddelde Phred-kwaliteit de drempel haalt; de rest staat grijs.": "The read starts at the first window and ends at the last window whose mean Phred quality reaches the threshold; the rest is greyed out.",
 "Geen enkel venster haalt de drempel; er is geen trimvoorstel.": "No window reaches the threshold; there is no trim suggestion.",
 "Trimvoorstel": "Trim suggestion",
-"Na trimmen": "After trimming"
+"Na trimmen": "After trimming",
+"Foutrapport kopiëren": "Copy error report",
+"Feedback": "Feedback",
+"Kopieert versie, tool, taal, browser, recente fouten en je invoer in deze tool": "Copies the version, tool, language, browser, recent errors and your input in this tool",
+"Opent een GitHub-issue met versie, tool en invoer al ingevuld": "Opens a GitHub issue with the version, tool and input already filled in",
+"Foutrapport gekopieerd. Plak het in een GitHub-issue.": "Error report copied. Paste it into a GitHub issue.",
+"Foutrapport": "Error report",
+"Kopieer deze tekst en plak hem in een GitHub-issue.": "Copy this text and paste it into a GitHub issue.",
+"Gegevens verhuizen": "Move your data",
+"Eén bestand met alles van dit apparaat: invoer, instellingen, geschiedenis, tabellen, protocollen en de gelbibliotheek. Open het op een ander apparaat om verder te werken.": "One file with everything on this device: inputs, settings, history, tables, protocols and the gel library. Open it on another device to carry on there.",
+"Alles exporteren": "Export everything",
+"Alles importeren": "Import everything",
+"Dit bestand is geen Labkit-sessie.": "This file is not a Labkit session."
 }

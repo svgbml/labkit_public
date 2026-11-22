@@ -8,15 +8,22 @@ Laadt de app in het Nederlands en het Engels en controleert:
   (sinds S271 in één vertaalronde bij het opstarten, zonder observer of luie modus);
 - de alignmentviewer (S171) houdt bij 60 x 5000 kolommen alleen de zichtbare rijen in de DOM en
   tekent een scrollstap binnen één frame (ALN_FRAME_MS, standaard 16 ms);
+- web/index.html en web/i18n-en.js groeien niet meer dan 5% boven tests/perf_baseline.json (S134);
+- de JS-heap na het openen van alle tools en de gel-editor met de testgel blijft onder LABKIT_HEAP_MB (standaard 40);
+- de gel-editor verwerkt de realistische testgel (rechtzetten, lanen, banden, meten) binnen GEL_MS (standaard 1000 ms) (S135);
+- typen in de zwaarste tools geeft binnen INP_MS (standaard 100 ms) een nieuw beeld (Event Timing, zoals INP) (S135);
+- in GitHub Actions komt een tabel met alle metingen in de samenvatting van de run (GITHUB_STEP_SUMMARY) (S136);
 - geen scriptfouten.
-Gebruik: python tests/perf_budget.py   (exitcode 1 bij problemen)
+Gebruik: python tests/perf_budget.py            (exitcode 1 bij problemen)
+         python tests/perf_budget.py --baseline legt de huidige groottes vast als nieuwe basis (na een bewuste groei)
 """
-import os, pathlib, sys
+import json, os, pathlib, sys
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 URL = (ROOT / 'web' / 'index.html').as_uri()
 BUDGET = int(os.environ.get('LABKIT_BUDGET_MS', '2500'))
+ROWS = []  # (meting, waarde, budget) voor de CI-samenvatting
 
 def run(lang):
     with sync_playwright() as p:
@@ -39,6 +46,7 @@ def run(lang):
     if pending: issues.append(f'{len(pending)} toolkoppen niet vertaald: ' + ', '.join(pending[:5]))
     issues += ['scriptfout: ' + e for e in errs]
     print(f'[{lang}] DOMContentLoaded {best} ms (budget {BUDGET} ms)' + ('' if issues else ', in orde'))
+    ROWS.append((f'Opstarttijd (DOMContentLoaded, {lang})', f'{best} ms', f'{BUDGET} ms'))
     return issues
 
 ALN_FRAME_MS = float(os.environ.get('ALN_FRAME_MS', '16'))
@@ -67,13 +75,108 @@ def aln():
     if r['p95'] > ALN_FRAME_MS: issues.append(f"alignmentviewer: scrollstap {r['p95']:.1f} ms > {ALN_FRAME_MS} ms")
     issues += ['scriptfout: ' + e for e in errs]
     print(f"[aln] 60 x 5000 kolommen: {r['rows']} rijen in de DOM, scrollstap p95 {r['p95']:.1f} ms" + ('' if issues else ', in orde'))
+    ROWS.append(('Alignmentviewer scrollstap p95', f"{r['p95']:.1f} ms", f'{ALN_FRAME_MS:g} ms'))
+    return issues
+
+SIZES = ['web/index.html', 'web/i18n-en.js']
+BASE = ROOT / 'tests' / 'perf_baseline.json'
+
+def size():
+    """Groei van de gebouwde bestanden ten opzichte van de vastgelegde basis; meer dan 5% is een fout."""
+    now = {f: (ROOT / f).stat().st_size for f in SIZES}
+    if '--baseline' in sys.argv: BASE.write_text(json.dumps(now, indent=1) + '\n')
+    base = json.loads(BASE.read_text())
+    issues = []
+    for f in SIZES:
+        g = now[f] / base[f] - 1
+        print(f'[size] {f}: {now[f] / 1024:.0f} kB ({g:+.1%} t.o.v. basis)')
+        ROWS.append((f'Grootte {f}', f'{now[f] / 1024:.0f} kB ({g:+.1%})', f"{base[f] * 1.05 / 1024:.0f} kB"))
+        if g > 0.05: issues.append(f'{f} is {g:.1%} groter dan de basis (max 5%); bewust? python tests/perf_budget.py --baseline')
+    return issues
+
+HEAP_MB = float(os.environ.get('LABKIT_HEAP_MB', '40'))
+
+def heap():
+    """JS-heap na garbage collection, nadat elke tool open is geweest en de gel-editor de testgel heeft verwerkt."""
+    with sync_playwright() as p:
+        b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1400, 'height': 900})
+        pg.add_init_script("try{localStorage.setItem('labkit:v1:lang','nl')}catch(e){}")
+        errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
+        cdp = pg.context.new_cdp_session(pg)
+        pg.goto(URL); pg.wait_for_load_state('load')
+        pg.evaluate("async()=>{ for(const t of TOOLS){ location.hash=t; await new Promise(r=>setTimeout(r,30)); } location.hash='gelfoto'; }")
+        pg.set_input_files('#gf-file', str(ROOT / 'tests' / 'fixtures' / 'gel_realistic.png')); pg.wait_for_timeout(700)
+        pg.evaluate("$('#gf-n').value=''; document.getElementById('gf-auto').click()"); pg.wait_for_timeout(1500)
+        lanes = pg.evaluate("gf.lanes.length")
+        cdp.send('HeapProfiler.collectGarbage')
+        mb = cdp.send('Runtime.getHeapUsage')['usedSize'] / 2**20
+        b.close()
+    issues = [f'JS-heap {mb:.1f} MB > {HEAP_MB:.0f} MB'] if mb > HEAP_MB else []
+    if not lanes: issues.append('heap: de gel-editor vond geen lanen in de testgel; de meting telt dan niet')
+    issues += ['scriptfout: ' + e for e in errs]
+    print(f'[heap] alle tools + gel-editor: {mb:.1f} MB (limiet {HEAP_MB:.0f} MB)' + ('' if issues else ', in orde'))
+    ROWS.append(('JS-heap na alle tools + gel-editor', f'{mb:.1f} MB', f'{HEAP_MB:.0f} MB'))
+    return issues
+
+GEL_MS = float(os.environ.get('GEL_MS', '1000'))
+INP_MS = float(os.environ.get('INP_MS', '100'))
+# zwaarste tools bij typen (S135: alle tools gemeten, deze zaten bovenaan) plus de grote dataplakvelden
+INP_TOOLS = ['qplate', 'km', 'oplossing', 'curve', 'qpcr', 'pcr', 'reeks', 'stat', 'elisa', 'seq']
+
+def gel_inp():
+    """Gel-editorbenchmark (beste van drie) en de reactietijd bij typen in INP_TOOLS."""
+    with sync_playwright() as p:
+        b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1400, 'height': 900})
+        pg.add_init_script("try{localStorage.setItem('labkit:v1:lang','nl')}catch(e){}"
+                           "window.__ev=[]; new PerformanceObserver(l=>{ for(const e of l.getEntries()) __ev.push([e.name,e.duration]); }).observe({type:'event',durationThreshold:16,buffered:true});")
+        errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
+        pg.goto(URL); pg.wait_for_load_state('load'); pg.evaluate("location.hash='gelfoto'")
+        pg.set_input_files('#gf-file', str(ROOT / 'tests' / 'fixtures' / 'gel_realistic.png')); pg.wait_for_timeout(700)
+        runs = [pg.evaluate("""()=>{ const T=[]; let t=performance.now(); const lap=()=>{ const n=performance.now(); T.push(n-t); t=n; };
+          gfAutoStraighten(); lap(); gfDetectLanes(); lap(); gfDetectBands(); lap(); gf.marks=[]; document.getElementById('gf-measall').click(); lap();
+          return {T, lanes:gf.lanes.length, marks:gf.marks.length}; }""") for _ in range(3)]
+        g = min(runs, key=lambda r: sum(r['T']))
+        pg.wait_for_timeout(600)  # rechtzetten start na 350 ms nog een lanedetectie (gfUpdate); niet meetellen bij het typen
+        slow = []
+        for t in INP_TOOLS:
+            pg.evaluate(f"location.hash='{t}'"); pg.wait_for_timeout(50)
+            box = pg.locator(f'#t-{t} textarea:visible')
+            if not box.count(): box = pg.locator(f'#t-{t} input:not([type]):visible, #t-{t} input[type=text]:visible, #t-{t} input[inputmode]:visible')
+            box.first.focus(); pg.keyboard.press('End'); ms = []
+            for _ in range(2):  # beste van twee rondes: één hapering van de CI-machine is geen trage tool
+                pg.evaluate("__ev=[]")
+                for _ in range(4): pg.keyboard.type('1', delay=20); pg.keyboard.press('Backspace', delay=20)  # 3 -> 31 -> 3: echte waarden, geen onzin
+                pg.wait_for_timeout(150)
+                ms.append(pg.evaluate("Math.max(0,...__ev.map(e=>e[1]))"))
+            slow.append((min(ms), t))
+        b.close()
+    issues = []
+    gms = sum(g['T'])
+    if gms > GEL_MS: issues.append(f'gel-editor: testgel verwerken {gms:.0f} ms > {GEL_MS:.0f} ms')
+    if g['lanes'] != 11 or not g['marks']: issues.append(f"gel-editor: {g['lanes']} lanen en {g['marks']} metingen (verwacht 11 lanen en metingen)")
+    worst = max(slow)
+    issues += [f'typen in {t}: {ms:.0f} ms > {INP_MS:.0f} ms' for ms, t in slow if ms > INP_MS]
+    issues += ['scriptfout: ' + e for e in errs]
+    print(f"[gel] testgel: {gms:.0f} ms (rechtzetten {g['T'][0]:.0f}, lanen {g['T'][1]:.0f}, banden {g['T'][2]:.0f}, meten {g['T'][3]:.0f}; budget {GEL_MS:.0f} ms)"
+          + ('' if gms <= GEL_MS else ' TE TRAAG'))
+    print(f'[inp] typen in {len(slow)} tools: traagste {worst[1]} {worst[0]:.0f} ms (budget {INP_MS:.0f} ms)' + ('' if worst[0] <= INP_MS else ' TE TRAAG'))
+    ROWS.append(('Gel-editor testgel', f'{gms:.0f} ms', f'{GEL_MS:.0f} ms'))
+    ROWS.append((f'Typen (traagste: {worst[1]})', f'{worst[0]:.0f} ms', f'{INP_MS:.0f} ms'))
     return issues
 
 def main():
-    issues = []
+    issues = size()
     for lang in ('nl', 'en'):
         issues += [f'[{lang}] {i}' for i in run(lang)]
     issues += aln()
+    issues += heap()
+    issues += gel_inp()
+    out = os.environ.get('GITHUB_STEP_SUMMARY')
+    if out:
+        with open(out, 'a', encoding='utf8') as fh:
+            fh.write('## Prestaties\n\n| Meting | Waarde | Budget |\n|---|---|---|\n')
+            fh.writelines(f'| {m} | {w} | {b} |\n' for m, w, b in ROWS)
+            fh.write('\n' + ('**Problemen:**\n\n' + ''.join(f'- {i}\n' for i in issues) if issues else 'Alles binnen het budget.\n'))
     for i in issues: print('  ' + i)
     sys.exit(1 if issues else 0)
 

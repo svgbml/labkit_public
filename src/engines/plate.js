@@ -308,11 +308,13 @@ function plateDesigner(host, opts) {
 
   /* eigen tekst kan langer zijn dan een putje breed is: de letters krimpen tot het past */
   function fitText(sz) {
-    host.querySelectorAll('.well.wtxt').forEach(el => {
-      let fs = Math.min(11, sz * 0.3); el.style.fontSize = fs + 'px';
-      for (let i = 0; i < 12 && (el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1) && fs > 5.5; i++) {
-        fs -= 0.5; el.style.fontSize = fs + 'px'; }
-    });
+    // eerst alle putjes lezen, dan alle schrijven: één lay-out per ronde in plaats van per putje (S135, typen bleef >100 ms)
+    let fs = Math.min(11, sz * 0.3), todo = [...host.querySelectorAll('.well.wtxt')];
+    todo.forEach(el => { el.style.fontSize = fs + 'px'; });
+    for (let i = 0; i < 12 && fs > 5.5 && todo.length; i++) {
+      todo = todo.filter(el => el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1);
+      fs -= 0.5; todo.forEach(el => { el.style.fontSize = fs + 'px'; });
+    }
   }
 
   const paint = k => { if (erase) { delete S.wells[k]; delete S.vals[k]; } else S.wells[k] = sel; };

@@ -353,6 +353,7 @@ nav.side > a.active[data-st]{background:var(--stc-soft);border-left-color:var(--
 .lk-rbar i{font-style:normal;color:var(--accent);font-weight:700}
 /* validatiebadge en ongeldige uitkomst */
 .tag.lk-valid{background:var(--ok-soft);color:var(--ok)}
+.tag.lk-fb{background:transparent;color:var(--muted);border-color:var(--line);cursor:pointer}.tag.lk-fb:hover{color:var(--accent);border-color:var(--accent)}
 [data-lk-nan]{color:var(--muted)}
 /* werkstromen */
 .lk-wf{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:10px 14px;margin:0 0 16px}
