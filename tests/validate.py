@@ -952,6 +952,22 @@ def _(pg):
     pg.evaluate("__go('digest');__set('dg-c','250');__set('dg-ng','1000');__set('dg-v','50');__set('dg-u1','20');__set('dg-u2','20');__set('dg-upg','10');__set('dg-e2','HindIII')")
     return [('enzymvolume (µL)', pg.evaluate("__kv('#dg-out','Enzymvolume')"), 1.0, 0.001), ('glycerol (%)', pg.evaluate("__kv('#dg-out','Glycerol')"), 1.0, 0.001)]
 
+@case('Restrictiedigestie', 'In-silico digestie van pUC19', 'pUC19 (GenBank L09137.2, 2686 bp, circulair): EcoRI knipt eenmaal (positie 397), HindIII eenmaal (448); samen 2635 + 51 bp. PvuII knipt tweemaal (309, 631) en geeft 2364 + 322 bp (NEB/REBASE-herkenningsplaatsen)')
+def _(pg):
+    pg.evaluate("__go('digest');document.getElementById('dg-ex').click()")
+    pg.evaluate("__set('dg-e1','EcoRI');__set('dg-e2','HindIII')")
+    ab = pg.evaluate("__cells('#dg-frag tbody tr td:first-child')")
+    pg.evaluate("__set('dg-e1','PvuII');__set('dg-e2','')")
+    cd = pg.evaluate("__cells('#dg-frag tbody tr td:first-child')")
+    return [('EcoRI+HindIII groot (bp)', ab[0], 2635, 0.0001), ('EcoRI+HindIII klein (bp)', ab[1], 51, 0.0001),
+            ('PvuII groot (bp)', cd[0], 2364, 0.0001), ('PvuII klein (bp)', cd[1], 322, 0.0001)]
+
+@case('PCR-cyclus', 'In-silico PCR op pUC19', 'pUC19 met de M13/pUC-primers GTAAAACGACGGCCAGT (voorwaarts) en CAGGAAACAGCTATGAC (achterwaarts): product van 103 bp over de polylinker (NEB, M13/pUC sequencing primers)')
+def _(pg):
+    pg.evaluate("__go('pcrcyclus');__set('y-f','GTAAAACGACGGCCAGT');__set('y-r','CAGGAAACAGCTATGAC');document.getElementById('y-tex').click()")
+    return [('product (bp)', pg.evaluate("__big('#y-pcr')"), 103, 0.0001),
+            ('aantal producten', pg.evaluate("document.querySelectorAll('#y-pcr tbody tr').length"), 1, 0.0001)]
+
 @case('Eiwitzuiveringstabel', 'Zuiveringsfactor en ammoniumsulfaat', 'SA stap 4 / SA stap 1 = (480/0,9)/(40/12,5) = 166,7; opbrengst 4800/8000 = 60%; 0 → 40% bij 0 °C: 515,35 × 0,4/(1 − 0,2722 × 0,4) = 231,3 g/L (Wingfield 2016)')
 def _(pg):
     pg.evaluate("__go('purif');__tbl('pf-tbl',[['a',200,12.5,40],['b',10,0.9,480]],'purif');__set('pf-s1','0');__set('pf-s2','40');__set('pf-t','0');__set('pf-v','50')")

@@ -107,12 +107,40 @@
         <lk-note v-if="!amp && !qpcr" kind="info">{{ t('Vul startkopieën en cycli in.') }}</lk-note>
       </div>
     </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>{{ t('In-silico PCR') }}</h3>
+        <div class="f">
+          <label for="y-tpl">{{ t('Template (DNA of FASTA)') }}</label>
+          <textarea id="y-tpl" v-model="tpl" rows="5" class="mono" spellcheck="false" style="width:100%"></textarea>
+        </div>
+        <label class="chk" for="y-tcirc"><input type="checkbox" id="y-tcirc" v-model="tcirc"> {{ t('Circulair (plasmide)') }}</label>
+        <div class="row" style="margin-top:8px"><button type="button" id="y-tex" @click="tpl = PUC19; tcirc = true">{{ t('Voorbeeld: pUC19') }}</button></div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Een primer bindt waar zijn laatste 15 basen precies passen; een 5′-staart (bijvoorbeeld met een knipplaats) mag afwijken en telt als mismatch. Secundaire structuur van het template telt niet mee.') }}</p>
+      </div>
+      <div class="result" id="y-pcr">
+        <lk-note v-if="!pcr" kind="info">{{ t('Plak een template om het product en de bindplaatsen te zien.') }}</lk-note>
+        <template v-else>
+          <lk-big v-if="pcr.prods.length" :label="t('Verwacht product')" :value="F(pcr.prods[0].size, 0)" sub="bp"/>
+          <lk-note v-else kind="warn">{{ t('Geen product: de primers binden niet naar elkaar toe op dit template.') }}</lk-note>
+          <lk-table v-if="pcr.prods.length" :cols="pcrCols" :rows="pcrRows"/>
+          <lk-kv :rows="pcrKv"/>
+          <lk-note v-if="pcr.prods.length > 1" kind="warn">{{ t('Meer dan één product: de primers binden op meerdere plaatsen.') }}</lk-note>
+          <div class="row" v-if="pcr.prods.length" style="margin-top:10px">
+            <button type="button" id="y-togel" @click="toGel">{{ t('Naar de Gelplanner') }}</button>
+            <button type="button" id="y-tobp" @click="bp = String(pcr.prods[0].size)">{{ t('Als ampliconlengte gebruiken') }}</button>
+          </div>
+        </template>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 import {dimer, hairpin, verdict} from './primerCheck.js';
+import {insilicoPcr, cleanSeq} from './seqTools.js';
+import {PUC19} from './puc19.js';
 
 const F = (x, d) => lkNumIn(fmt(x, d)), S = (x, d) => lkNumIn(sci(x, d));
 /* een looptijd: met "min" erin is het een vertaalsleutel ("{#}:{#} min"), anders alleen een getal */
@@ -124,11 +152,12 @@ const dgChip = (x, hp, t) => x ? chip(verdict(x, hp) !== 'warn', F(x.dg, 2) + ' 
 export default {
   name: 'Pcrcyclus',
   data() {
+    this.PUC19 = PUC19; /* niet reactief: alleen voor de voorbeeldknop */
     return {fw: 'AGCTGACCTGAAGGCTCTGAAG', rv: 'TCGTCGTACTTGACCAGGCTAT',
       na: lkNumIn('50'), mg: lkNumIn('1,5'), dntp: lkNumIn('0,8'), pc: lkNumIn('0,2'),
       type: 'std', bp: '650', n: '30', dt: '95', ds: '30', ta: '', an: '30', et: '68', es: '',
       ramp: '3', n0: '300', eff: '95', cyc: '30', goal: '1e10', q0: '1e6', qf: '10',
-      cq: lkNumIn('15,12 18,41 21,80 25,08 28,51'), copied: ''};
+      cq: lkNumIn('15,12 18,41 21,80 25,08 28,51'), copied: '', tpl: '', tcirc: true};
   },
   computed: {
     /* de primers met hun Tm, en de annealingtemperatuur die daaruit volgt */
@@ -139,6 +168,27 @@ export default {
       return {F: F1, R: R1, ta: F1 && R1 ? Math.min(F1.tm, R1.tm) - 5 : NaN,
         cross: F1 && R1 ? dimer(sf, sr) : null,
         self: [sf, sr].map(q => q ? dimer(q, q) : null), hp: [sf, sr].map(q => q ? hairpin(q) : null)};
+    },
+    /* in-silico PCR op het geplakte template (S44) */
+    pcr() {
+      if (!this.tpl.trim() || !this.m.F || !this.m.R) return null;
+      return insilicoPcr(this.tpl, this.m.F.seq, this.m.R.seq, this.tcirc);
+    },
+    pcrCols() {
+      const t = this.t;
+      return [{h: t('Product (bp)'), num: true}, {h: t('Van'), num: true}, {h: t('Tot'), num: true},
+        {h: t('Primers')}, {h: t('Mismatches in de staart'), num: true}];
+    },
+    pcrRows() {
+      const n = this.pcr.n;
+      return this.pcr.prods.slice(0, 8).map(p => [F(p.size, 0), F((p.from % n) + 1, 0),
+        F(((p.to - 1) % n) + 1, 0), p.a + ' → ' + p.b, String(p.mm)]);
+    },
+    pcrKv() {
+      const t = this.t, s = this.pcr.sites;
+      return [[t('Lengte template'), F(this.pcr.n, 0) + ' bp'],
+        [t('Bindplaatsen forward'), String(s.filter(b => b.p === 'F' && b.dir === 1).length + s.filter(b => b.p === 'F' && b.dir === -1).length)],
+        [t('Bindplaatsen reverse'), String(s.filter(b => b.p === 'R').length)]];
     },
     /* voor het programma-gereedschap (#pg-from): de laatst berekende annealingtemperatuur */
     taAuto() { return this.m.ta; },
@@ -251,6 +301,11 @@ export default {
   mounted() { window.__pcrcVm = this; this.draw(); },
   updated() { this.draw(); },
   methods: {
+    /* het verwachte product als laan naar de Gelplanner */
+    toGel() {
+      addRow('gp-tbl', [trPlain('PCR-product'), '10', this.pcr.prods.slice(0, 4).map(p => p.size).join(' '), '#1558b0'], 'gplan');
+      location.hash = '#gplan';
+    },
     F, S, mm: mmLoc,
     async copy() {
       try { await navigator.clipboard.writeText(i18nTSV(this.progText)); this.copied = this.t('Gekopieerd.'); }

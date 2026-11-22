@@ -6,8 +6,13 @@
      door t().
 
      De id's dg-c, dg-ng, dg-v, dg-e1, dg-u1, dg-e2, dg-u2, dg-upg, dg-n, dg-x, dg-bsa en
-     dg-out blijven zoals ze waren. -->
+     dg-out blijven zoals ze waren.
+
+     S45: de enzymlijst komt uit ENZ in seqTools.js (ruim 50 enzymen met herkenningsplaats en
+     knipposities). Met een geplakte sequentie knipt het blok eronder in silico (enzym 1 en
+     eventueel enzym 2) en stuurt de fragmenten als laan naar de Gelplanner. -->
 <template>
+  <div class="stack">
   <div class="grid2">
     <div class="panel">
       <div class="fields">
@@ -54,27 +59,69 @@
       </div>
     </div>
   </div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>{{ t('In-silico digestie') }}</h3>
+      <div class="f">
+        <label for="dg-seq">{{ t('Sequentie (DNA of FASTA)') }}</label>
+        <textarea id="dg-seq" v-model="seq" rows="5" class="mono" spellcheck="false" style="width:100%"></textarea>
+      </div>
+      <label class="chk" for="dg-circ"><input type="checkbox" id="dg-circ" v-model="circ"> {{ t('Circulair (plasmide)') }}</label>
+      <div class="row" style="margin-top:8px"><button type="button" id="dg-ex" @click="seq = PUC19; circ = true">{{ t('Voorbeeld: pUC19') }}</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Knipt met enzym 1 en, bij een dubbele digestie, ook met enzym 2. Herkenningsplaatsen en knipposities volgens NEB en REBASE; methylering (Dam, Dcm) is niet meegenomen.') }}</p>
+    </div>
+    <div class="result" id="dg-frag">
+      <lk-note v-if="!dd" kind="info">{{ t(dd === false ? 'Kies een enzym uit de lijst voor de in-silico digestie.' : 'Plak een sequentie om de fragmenten te zien.') }}</lk-note>
+      <template v-else>
+        <lk-big :label="t('Fragmenten')" :value="String(dd.frags.length)" :sub="F(dd.n, 0) + ' bp'"/>
+        <lk-kv :rows="cutRows"/>
+        <lk-table :cols="fragCols" :rows="fragRows"/>
+        <lk-note v-for="e in noCut" :key="e" kind="warn">{{ t(uv(e) + ' knipt niet in deze sequentie.') }}</lk-note>
+        <div class="row" style="margin-top:10px"><button type="button" id="dg-gel" @click="toGel">{{ t('Naar de Gelplanner') }}</button></div>
+      </template>
+    </div>
+  </div>
+  </div>
 </template>
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {ENZ, enzEnd, enzTemp, digest} from './seqTools.js';
+import {PUC19} from './puc19.js';
 
-/* type uiteinde en optimale temperatuur per enzym (NEB-productinformatie) */
-const DGE = {
-  BamHI: ['5′-overhang', 37], EcoRI: ['5′-overhang', 37], HindIII: ['5′-overhang', 37],
-  PstI: ['3′-overhang', 37], NdeI: ['5′-overhang', 37], XhoI: ['5′-overhang', 37],
-  NotI: ['5′-overhang', 37], SmaI: ['stomp (blunt)', 25], 'ander enzym': ['zie productinformatie', 37]
-};
+/* type uiteinde en optimale temperatuur per enzym (NEB-productinformatie); een enzym buiten de
+   lijst ('ander enzym') valt terug op de productinformatie en 37 °C */
+const DGE = new Proxy({}, {get: (_, e) => (ENZ[e] ? [enzEnd(e), enzTemp(e)] : ['zie productinformatie', 37])});
 const F = (a, d) => lkNumIn(fmt(a, d)), VL = a => lkNumIn(vol(a));
 
 export default {
   name: 'Digest',
   data() {
+    this.PUC19 = PUC19; /* niet reactief: alleen voor de voorbeeldknop */
     return {c: lkNumIn('250'), ng: lkNumIn('1000'), v: lkNumIn('50'), e1: 'EcoRI', u1: lkNumIn('20'),
-      e2: 'HindIII', u2: lkNumIn('20'), upg: lkNumIn('10'), n: '4', x: lkNumIn('10'), bsa: false};
+      e2: 'HindIII', u2: lkNumIn('20'), upg: lkNumIn('10'), n: '4', x: lkNumIn('10'), bsa: false,
+      seq: '', circ: true};
   },
   computed: {
-    enzymes() { return Object.keys(DGE); },
+    enzymes() { return [...Object.keys(ENZ), 'ander enzym']; },
+    /* de in-silico digestie: null zonder sequentie, false zonder enzym uit de lijst */
+    dd() {
+      if (!this.seq.trim()) return null;
+      const es = [this.e1, this.e2].filter(e => ENZ[e]);
+      return es.length ? digest(this.seq, [...new Set(es)], this.circ) : false;
+    },
+    cutRows() {
+      return Object.keys(this.dd.per).map(e => {
+        const c = this.dd.per[e];
+        return [this.t('Knipplaatsen') + ' ' + e, c.length ? c.length + ' · ' + c.slice(0, 8).map(x => F(x, 0)).join(', ') + (c.length > 8 ? ' …' : '') : '0'];
+      });
+    },
+    noCut() { return Object.keys(this.dd.per).filter(e => !this.dd.per[e].length); },
+    fragCols() { return [{h: this.t('Fragment (bp)'), num: true}, {h: this.t('Van'), num: true}, {h: this.t('Tot'), num: true}]; },
+    fragRows() {
+      const n = this.dd.n;
+      return this.dd.frags.map(f => [F(f.size, 0), F(f.from + 1, 0), F(((f.to - 1) % n) + 1, 0)]);
+    },
     /* alle afgeleide maten op een plek, zodat elke regel hieronder er alleen uit leest */
     m() {
       const c = num(this.c), ng = num(this.ng), V = num(this.v);
@@ -140,6 +187,15 @@ export default {
       return [t('Maak de mastermix op ijs; voeg het enzym als laatste toe en meng door pipetteren (niet vortexen).'),
         t('Verdeel de mix (' + uv(VL(m.V - m.vd)) + ') per buis en voeg het DNA (' + uv(VL(m.vd)) + ') toe.'),
         t('Incubeer en stop de reactie met laadbuffer of door hitte-inactivatie volgens de productinformatie.')];
+    }
+  },
+  methods: {
+    F,
+    /* de fragmenten als nieuwe laan in de Gelplanner, en daarheen */
+    toGel() {
+      const name = [this.e1, this.e2].filter(e => ENZ[e]).join(' + ');
+      addRow('gp-tbl', [name, '10', this.dd.frags.map(f => f.size).join(' '), '#1558b0'], 'gplan');
+      location.hash = '#gplan';
     }
   }
 };
