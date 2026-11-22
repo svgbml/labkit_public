@@ -83,6 +83,7 @@
 </template>
 
 <script>
+import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 import {overage} from '../lib/overage.js';
 import {ENZ, enzInfo, cuts, digest} from '../lib/digest.js';
@@ -201,8 +202,8 @@ export default {
         [`${this.e1} (${F(m.u1, 0)} U/µL)`, m.v1, 1],
         ...(this.e2 ? [[`${this.e2} (${F(m.u2, 0)} U/µL)`, m.v2, 1]] : []),
         [t('DNA (apart per buis)'), m.vd, 0]];
-      return [...L.map(l => [l[0], VL(l[1]), l[2] ? VL(l[1] * m.mult) : '–']),
-        {cls: 'hl', cells: [t('Mastermix per buis'), VL(m.V - m.vd), VL((m.V - m.vd) * m.mult)]}];
+      return [...L.map(l => [l[0], l[2] ? VL(l[1]) : VL(l[1]) + pipHtml(l[1]), l[2] ? VL(l[1] * m.mult) + pipHtml(l[1] * m.mult) : '–']),
+        {cls: 'hl', cells: [t('Mastermix per buis'), VL(m.V - m.vd), VL((m.V - m.vd) * m.mult) + pipHtml((m.V - m.vd) * m.mult)]}];
     },
     warnStar() {
       const m = this.m; if (m.enz / m.V <= 0.1) return '';

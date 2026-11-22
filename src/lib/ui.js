@@ -1,4 +1,5 @@
 import {h, onMounted, onUnmounted, watch} from 'vue';
+import {pipHtml} from './pip.js';
 
 /* ================= GEDEELDE VUE-COMPONENTEN =================
    De eerste omgezette tools bouwden hun uitkomst nog als een string HTML en zetten die met
@@ -44,6 +45,14 @@ LKUI.kv = {
       h('dt', {innerHTML: String(k)}),
       h('dd', {innerHTML: v == null ? '–' : String(v)})
     ]));
+  }
+};
+
+/* pipetadvies naast een volume in µL: <lk-pip :v="2.5"/> geeft "P10", onder 1 µL ook de waarschuwing */
+LKUI.pip = {
+  props: {v: [Number, String]},
+  setup(props) {
+    return () => h('span', {innerHTML: pipHtml(parseFloat(props.v))});
   }
 };
 
@@ -289,6 +298,7 @@ export function lkUiInstall(app) {
   app.component('lk-note', LKUI.note);
   app.component('lk-kv', LKUI.kv);
   app.component('lk-big', LKUI.big);
+  app.component('lk-pip', LKUI.pip);
   app.component('lk-field', LKUI.field);
   app.component('lk-table', LKUI.table);
   app.component('lk-overage', LKUI.overage);

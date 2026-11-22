@@ -51,7 +51,7 @@
       <div class="result" id="m-out">
         <lk-note v-if="!nm" kind="info">{{ t('Vul concentratie, gewenste input en volume in.') }}</lk-note>
         <template v-else>
-          <lk-big :label="t('Pipetteer')" :value="t(nm.vd)" :sub="t('DNA')"/>
+          <lk-big :label="t('Pipetteer')" :html="t(nm.vd) + nm.vdPip" :sub="t('DNA')"/>
           <lk-kv :rows="nm.rows"/>
           <lk-note v-for="(x, i) in nm.notes" :key="i" :kind="x[0]">{{ t(x[1]) }}</lk-note>
         </template>
@@ -106,6 +106,7 @@
 </template>
 
 <script>
+import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 
 /* getallen uit fmt/sig/sci in de taal van de gebruiker; tekst met een eenheid gaat door t() */
@@ -162,8 +163,8 @@ export default {
         notes.push(['warn', `Minder dan 1 µL is onnauwkeurig. Verdun het extract eerst 1:${sub} (${sig(mc / sub, 3)} ng/µL); pipetteer dan ${vol(vd * sub)}.`]);
       }
       if (ng < 0.1) notes.push(['warn', 'Onder ca. 100 pg nemen stochastische effecten toe (allel-drop-out, onbalans).']);
-      return {vd: vol(vd), notes, rows: [
-        [t('Water / TE'), w >= 0 ? t(vol(w)) : '–'], [t('Totaal'), t(vol(mv))],
+      return {vd: vol(vd), vdPip: pipHtml(vd), notes, rows: [
+        [t('Water / TE'), w >= 0 ? t(vol(w)) + pipHtml(w) : '–'], [t('Totaal'), t(vol(mv))],
         [t('Eindconcentratie'), t(sig(ng / mv, 3) + ' ng/µL')],
         [t('≈ diploïde genomen'), F(ng * 1000 / 6.6, 0)],
         [t('≈ kopieën per autosomaal locus'), F(ng * 1000 / 6.6 * 2, 0)]]};

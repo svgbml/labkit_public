@@ -43,17 +43,17 @@
             <td :title="r.title"><input data-k="f" inputmode="decimal" v-model="r.row.f" style="text-align:right;width:80px"></td>
             <td><select data-k="u" v-model="r.row.u"><option v-for="u in units" :key="u">{{ u }}</option></select></td>
             <td class="num" data-k="pr">{{ r.pr }}</td>
-            <td class="num" data-k="mx"><b v-if="r.mx">{{ r.mx }}</b><template v-else>–</template></td>
+            <td class="num" data-k="mx"><template v-if="r.mx"><b>{{ r.mx }}</b><lk-pip :v="r.mxv"/></template><template v-else>–</template></td>
             <td><button type="button" class="ghost" data-del :aria-label="t('Verwijder rij')" @click="del(i)">✕</button></td>
           </tr>
         </tbody>
         <tfoot>
           <tr><td>{{ t('Nucleasevrij water') }}</td><td></td><td></td><td></td>
-            <td class="num">{{ m.waterTxt }}</td><td class="num"><b>{{ m.waterMix }}</b></td><td></td></tr>
+            <td class="num">{{ m.waterTxt }}</td><td class="num"><b>{{ m.waterMix }}</b><lk-pip :v="m.water * m.N"/></td><td></td></tr>
           <tr><td><b>{{ t('Mix totaal') }}</b></td><td></td><td></td><td></td>
             <td class="num">{{ m.totTxt }}</td><td class="num"><b>{{ m.totMix }}</b></td><td></td></tr>
           <tr class="dim"><td>{{ t('Template (apart per buis)') }}</td><td></td><td></td><td></td>
-            <td class="num">{{ m.tTxt }}</td><td class="num">{{ m.tMix }}</td><td></td></tr>
+            <td class="num">{{ m.tTxt }}<lk-pip :v="m.T"/></td><td class="num">{{ m.tMix }}</td><td></td></tr>
         </tfoot>
       </table>
     </div>
@@ -143,7 +143,7 @@ export default {
       const {per, N} = this.m, t = this.t;
       return this.rows.map((row, i) => {
         const pr = per[i], ok = isFinite(pr);
-        return {row, pr: ok ? vol(pr) : '–', mx: ok ? vol(pr * N) : '',
+        return {row, pr: ok ? vol(pr) : '–', mx: ok ? vol(pr * N) : '', mxv: ok ? pr * N : NaN,
           title: row.u === 'U/50 µL' ? t('Units per 50 µL reactie (schaalt mee met het reactievolume)')
             : row.u === 'µL' ? t('µL per reactie') : ''};
       });

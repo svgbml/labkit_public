@@ -100,6 +100,7 @@
                 <input data-f="v" :data-r="i" :data-c="j" inputmode="decimal" v-model="r.v[j]"
                        style="text-align:right;width:96px"
                        :placeholder="r.mode === 'fill' ? t('auto') : r.mode === 'conc' ? t('eind') : null">
+                <div style="text-align:right"><lk-pip :v="m.V[i][j] * (unit === 'mL' ? 1000 : 1)"/></div>
               </td>
               <td>
                 <select data-f="mm" :data-r="i" :value="r.mm ? '1' : '0'" @change="r.mm = $event.target.value === '1'">

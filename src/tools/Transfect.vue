@@ -58,6 +58,7 @@
 </template>
 
 <script>
+import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 import {overage} from '../lib/overage.js';
 
@@ -103,9 +104,9 @@ export default {
     rowsA() {
       const {opti, si, sst, st, nuc, p3, m} = this.m, t = this.t;
       return [
-        [t('Opti-MEM'), L(vol(opti)), L(vol(opti * m))],
-        [si ? t('siRNA (' + fmt(sst, 1) + ' µM)') : t('DNA (' + fmt(st, 2) + ' µg/µL)'), L(vol(nuc)), L(vol(nuc * m))],
-        si ? null : [t('P3000'), L(vol(p3)), L(vol(p3 * m))]
+        [t('Opti-MEM'), L(vol(opti)), L(vol(opti * m)) + pipHtml(opti * m)],
+        [si ? t('siRNA (' + fmt(sst, 1) + ' µM)') : t('DNA (' + fmt(st, 2) + ' µg/µL)'), L(vol(nuc)), L(vol(nuc * m)) + pipHtml(nuc * m)],
+        si ? null : [t('P3000'), L(vol(p3)), L(vol(p3 * m)) + pipHtml(p3 * m)]
       ];
     },
     steps() {
@@ -126,8 +127,8 @@ export default {
     },
     rowsB(l) {
       const {opti, m} = this.m;
-      return [[this.t('Opti-MEM'), L(vol(opti)), L(vol(opti * m))],
-        [this.t('Lipofectamine 3000'), L(vol(l)), L(vol(l * m))]];
+      return [[this.t('Opti-MEM'), L(vol(opti)), L(vol(opti * m)) + pipHtml(opti * m)],
+        [this.t('Lipofectamine 3000'), L(vol(l)), L(vol(l * m)) + pipHtml(l * m)]];
     }
   }
 };

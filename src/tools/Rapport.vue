@@ -14,6 +14,7 @@
         <label class="chk" for="rp-src"><input type="checkbox" id="rp-src" v-model="withSrc"> {{ t('Bronnen opnemen') }}</label>
         <label class="chk" for="rp-in"><input type="checkbox" id="rp-in" v-model="withIn"> {{ t('Invoer opnemen') }}</label>
         <label class="chk" for="rp-mat"><input type="checkbox" id="rp-mat" v-model="withMat"> {{ t('Materiaallijst opnemen') }}</label>
+        <label class="chk" for="rp-notes"><input type="checkbox" id="rp-notes" v-model="withNotes"> {{ t('Run-notities en afwijkingen') }}</label>
         <label class="chk" for="rp-qr"><input type="checkbox" id="rp-qr" v-model="withQr"> {{ t('QR-code per tool') }}</label>
       </div>
       <div class="row" style="margin-top:10px;gap:8px">
@@ -52,7 +53,7 @@ export default {
   data() {
     return {
       title: stored('rp-title', 'Labjournaal'), who: stored('rp-who', ''),
-      withSrc: !!stored('rp-src', true), withIn: !!stored('rp-in', true), withMat: !!stored('rp-mat', true), withQr: !!stored('rp-qr', true),
+      withSrc: !!stored('rp-src', true), withIn: !!stored('rp-in', true), withMat: !!stored('rp-mat', true), withQr: !!stored('rp-qr', true), withNotes: !!stored('rp-notes', true),
       tools: rpTools(), sel: jget(RKEY, []).slice(0, 4)
     };
   },
@@ -68,7 +69,7 @@ export default {
       const used = all.filter(id => r.includes(id));
       this.sel = used.length ? used : all;
     },
-    html() { return rpDoc(this.ids, this.withIn, this.withSrc, this.title, this.who, {mat: this.withMat, qr: this.withQr}); },
+    html() { return rpDoc(this.ids, this.withIn, this.withSrc, this.title, this.who, {mat: this.withMat, qr: this.withQr, notes: this.withNotes}); },
     print() { rpPrint(this.html()); },
     dl() {
       const b = new Blob([this.html()], {type: 'text/html'}), a = document.createElement('a');

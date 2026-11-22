@@ -13,7 +13,7 @@
           <tr v-for="(r, i) in lines" :key="r.row.k">
             <td><input class="txt" data-n v-model="r.row.n" style="width:140px"></td>
             <td><input data-a inputmode="decimal" v-model="r.row.a" style="text-align:right;width:90px"></td>
-            <td class="num" data-o><b v-if="r.buf">{{ r.buf }}</b><template v-else>–</template></td>
+            <td class="num" data-o><template v-if="r.buf"><b>{{ r.buf }}</b><lk-pip :v="r.bufv"/></template><template v-else>–</template></td>
             <td><button type="button" class="ghost" data-del :aria-label="t('Verwijder')" @click="del(i)">✕</button></td>
           </tr>
         </tbody>
@@ -73,6 +73,7 @@
 </template>
 
 <script>
+import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 import {parsePrimers, analyse, dimer, dimerBad, hairBad} from '../lib/primer.js';
 
@@ -106,14 +107,14 @@ export default {
       if (!(S > 0) || !(W > 0) || !(WV > 0)) return {S, err: {kind: 'info', text: 'Vul stock- en werkconcentratie in.'}};
       if (W > S) return {S, err: {kind: 'bad', text: 'De werkoplossing kan niet geconcentreerder zijn dan de stock.'}};
       const v1 = W * WV / S;
-      return {S, W, v1: lkNumIn(vol(v1)), rows: [[this.t('Water of TE'), lkNumIn(vol(WV - v1))],
+      return {S, W, v1: lkNumIn(vol(v1)) + pipHtml(v1), rows: [[this.t('Water of TE'), lkNumIn(vol(WV - v1)) + pipHtml(WV - v1)],
         [this.t('Totaal'), lkNumIn(vol(WV))], [this.t('Verdunning'), '1 : ' + lkNumIn(sig(S / W, 4))]]};
     },
     lines() {
       const S = num(this.s);
       return this.rows.map(row => {
         const a = num(row.a);
-        return {row, buf: a > 0 && S > 0 ? lkNumIn(vol(a / S * 1000)) : ''};
+        return {row, buf: a > 0 && S > 0 ? lkNumIn(vol(a / S * 1000)) : '', bufv: a / S * 1000};
       });
     },
     /* primerkaart: één keer analyseren, de tabel, de waarschuwingen en de afdruk lezen hieruit */

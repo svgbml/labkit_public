@@ -42,6 +42,7 @@
 </template>
 
 <script>
+import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 import {overage} from '../lib/overage.js';
 
@@ -77,7 +78,7 @@ export default {
         if (!(s.c > 0)) return [esc(s.n), '–', '–'];
         if (!ok) warn.push(this.tHtml(ud(s.n) + ': te verdund; maximaal ' + fmt(s.c * vr, 0) + ' ng in ' + fmt(vr, 1) + ' µL.'));
         if (v < 0.5 && ok) warn.push(this.tHtml(ud(s.n) + ': minder dan 0,5 µL RNA; verdun het RNA eerst voor nauwkeurig pipetteren.'));
-        return [esc(s.n), ok ? F(v, 2) : this.t('te verdund'), ok ? F(vr - v, 2) : '–'];
+        return [esc(s.n), ok ? F(v, 2) + pipHtml(v) : this.t('te verdund'), ok ? F(vr - v, 2) + pipHtml(vr - v) : '–'];
       });
       const pct = num(this.mar) || 0, {mult: N} = overage(S.length + nrt, this.ov, pct),
         Nrt = overage(nrt, this.ov, pct).mult;
@@ -91,7 +92,7 @@ export default {
     },
     mixRows() {
       const {M, N} = this.m, t = this.t;
-      return [...M.map(c => [t(c[0]), F(c[1], 1), F(c[1] * N, 1)]),
+      return [...M.map(c => [t(c[0]), F(c[1], 1), F(c[1] * N, 1) + pipHtml(c[1] * N)]),
         ['<b>' + esc(t('Totaal')) + '</b>', '<b>10</b>', '<b>' + F(10 * N, 1) + '</b>']];
     },
     sampCols() {

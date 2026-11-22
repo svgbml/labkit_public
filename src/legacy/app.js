@@ -466,6 +466,7 @@ const UIDEF={'ui-theme':'auto','ui-dens':'ruim','ui-fs':'14','ui-accent':'#1558b
 const darkMQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
 function applyUI(){ const R=document.documentElement, sel=$('#ui-theme').value||'auto', th=sel==='auto'?(darkMQ&&darkMQ.matches?'donker':'licht'):sel;
   if(th==='licht') R.removeAttribute('data-theme'); else R.setAttribute('data-theme',th);
+  { const dr=$('#ui-darkroom'), on=!!(dr&&dr.checked), b=$('#darkroom-btn'); R.classList.toggle('darkroom',on); if(b) b.setAttribute('aria-pressed',on); }
   if($('#ui-dens').value==='compact') R.setAttribute('data-dens','compact'); else R.removeAttribute('data-dens');
   document.body.style.fontSize=(num($('#ui-fs').value)||14)+'px';
   R.style.removeProperty('--accent'); R.style.removeProperty('--accent-soft');
@@ -476,6 +477,8 @@ function applyUI(){ const R=document.documentElement, sel=$('#ui-theme').value||
   const m=document.querySelector('meta[name=theme-color]'); if(m) m.content=getComputedStyle(R).getPropertyValue('--accent').trim();
   try{ if(calc[current]&&current!=='inst') calc[current](); }catch(e){} }
 if(darkMQ) darkMQ.addEventListener('change',()=>{ if(($('#ui-theme').value||'auto')==='auto') applyUI(); });
+$('#darkroom-btn').addEventListener('click',()=>{ const c=$('#ui-darkroom'); if(!c) return; c.checked=!c.checked; c.dispatchEvent(new Event('change',{bubbles:true})); applyUI(); });
+{ const ob=$('#offline-badge'), upd=()=>{ ob.hidden=navigator.onLine!==false; }; addEventListener('online',upd); addEventListener('offline',upd); upd(); }
 calc.inst=()=>{};
 
 /* ================= UPDATES ================= */

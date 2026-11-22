@@ -111,6 +111,22 @@
           <button type="button" id="gp-tbl-add" @click="addLane">{{ t('+ Laan') }}</button>
           <button type="button" data-smp="gplan">{{ t('Monsters…') }}</button>
           <button type="button" id="gp-bench" @click="bench">{{ t('Bench-modus') }}</button>
+          <button type="button" id="gp-loadbtn" @click="toggleLoad">{{ load ? t('Laadmodus sluiten') : t('Laadmodus') }}</button>
+        </div>
+        <div v-if="load" class="pl-fill">
+          <div class="row" style="gap:10px">
+            <span class="pl-prog">{{ t(nLoaded + ' van ' + loadLanes.length + ' lanen geladen') }}<i><b :style="{width: (loadLanes.length ? 100 * nLoaded / loadLanes.length : 0) + '%'}"></b></i></span>
+            <button v-if="nLoaded" type="button" @click="resetLoad">{{ t('Opnieuw') }}</button>
+          </div>
+          <p v-if="!loadLanes.length" style="font-size:13px;color:var(--muted)">{{ t('Geen lanen met een naam: vul eerst de laantabel in.') }}</p>
+          <div v-else class="gp-lanes">
+            <button v-for="(l, n) in loadLanes" :key="l.lane" type="button" :class="{fl: loaded[n], nx: nextLane === n}"
+              :aria-pressed="!!loaded[n]" @click="tapLane(n)">
+              <b :style="{background: l.color}">{{ loaded[n] ? '✓' : l.lane }}</b>
+              <span>{{ l.name }}</span><em>{{ l.vol }}</em>
+            </button>
+          </div>
+          <p v-if="loadLanes.length" style="font-size:13px;color:var(--muted);margin:0">{{ nextLane >= 0 ? t('Volgende laan') + ': ' + loadLanes[nextLane].lane : t('Alle lanen zijn geladen.') }}</p>
         </div>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0" v-html="tHtml(hint)"></p>
       </div>
@@ -133,6 +149,7 @@
 
 <script>
 import {lkNumIn, lkPicBar} from '../lib/bridge.js';
+import {benchGet, benchPut} from './Bench.vue';
 
 /* een voorbeeldwaarde in een veld: V() voor tekst, lkNumIn() voor getallen. Dat deed
    i18nValue() eerder zelf; binnen een Vue-boom komt die laag niet. */
@@ -155,7 +172,7 @@ export default {
       title: V('1% agarosegel, 1× TAE, 100 V'), type: 'dna', lad: '100', tray: '7x10',
       comb: '10', ladlane: '1', pct: '1', volt: '100', elec: '15', buf: '50', stain: 'g10k',
       dyex: '6', tooth: lkNumIn('5,5'), thick: lkNumIn('1,5'), gelmm: '6',
-      dye: V('6× loading dye'), note: '', auto: true,
+      dye: V('6× loading dye'), note: '', auto: true, load: false, loaded: {}, lkey: '',
       lanes: [[V('Ladder'), '5', '', '#c2410c'], [V('Monster 1'), '10', '500', '#1558b0'],
         [V('Monster 2'), '10', '1500 700', '#1558b0'], [V('Negatieve controle'), '10', '', '#5f6b7a']]
     };
@@ -198,6 +215,17 @@ export default {
       const vols = this.used.map(r => num(r[1])).filter(v => isFinite(v) && v > 0);
       return {tot: vols.map(v => v + add(v)), dye: vols.reduce((a, v) => a + add(v), 0)};
     },
+    /* laadmodus (S52): de lanen met een naam, met het laadvolume zoals de tabel hierboven het rekent */
+    loadLanes() {
+      const x = this.dyeX;
+      return this.lanes.slice(0, this.teeth).map((l, i) => {
+        const name = String(l[0] || '').trim(), v = num(l[1]);
+        return name && {lane: i + 1, name, color: l[3] || '#1558b0',
+          vol: v > 0 ? lkNumIn(NL(v + (x ? v / (x - 1) : 0), 1)) + ' µL' : ''};
+      }).filter(Boolean);
+    },
+    nLoaded() { return this.loadLanes.filter((l, n) => this.loaded[n]).length; },
+    nextLane() { return this.loadLanes.findIndex((l, n) => !this.loaded[n]); },
     rows() {
       const t = this.t, T = this.totals, cap = this.cap, bb = this.bands;
       const N = (v, d) => lkNumIn(NL(v, d));
@@ -390,6 +418,20 @@ export default {
   methods: {
     lkNum(v) { return lkNumIn(v); },
     addLane() { this.lanes = [...this.lanes, ['', '10', '', '#1558b0']]; },
+    /* laadmodus (S52): tik elke laan af zodra hij geladen is; de vinkjes staan in dezelfde opslag
+       als de bench-modus, met als sleutel de titel en de lanen met hun volume */
+    toggleLoad() {
+      this.load = !this.load;
+      if (!this.load) return;
+      let h = 0; for (const ch of 'gel' + this.title + this.loadLanes.map(l => l.lane + l.name + l.vol).join()) h = (h * 31 + ch.codePointAt(0)) | 0;
+      this.lkey = 'g' + h;
+      const got = benchGet(this.lkey), f = {};
+      this.loadLanes.forEach((l, n) => { if (got.includes(n)) f[n] = true; });
+      this.loaded = f;
+    },
+    saveLoad() { benchPut(this.lkey, this.loadLanes.map((l, n) => this.loaded[n] ? n : -1).filter(n => n >= 0)); },
+    tapLane(n) { this.loaded = {...this.loaded, [n]: !this.loaded[n]}; this.saveLoad(); },
+    resetLoad() { this.loaded = {}; this.saveLoad(); },
     /* bench-modus: gieten (alleen agarose), elke laan laden, lopen met een timer */
     bench() {
       const t = this.t, c = this.cast, r = this.run, steps = [];
