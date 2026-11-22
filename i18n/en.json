@@ -4984,5 +4984,15 @@
 "De read begint bij het eerste venster en eindigt bij het laatste venster waarvan de gemiddelde Phred-kwaliteit de drempel haalt; de rest staat grijs.": "The read starts at the first window and ends at the last window whose mean Phred quality reaches the threshold; the rest is greyed out.",
 "Geen enkel venster haalt de drempel; er is geen trimvoorstel.": "No window reaches the threshold; there is no trim suggestion.",
 "Trimvoorstel": "Trim suggestion",
-"Na trimmen": "After trimming"
+"Na trimmen": "After trimming",
+"Herinneringen": "Reminders",
+"Herinneringen gezet: {#}. Ze gaan af aan het eind van elke wachtstap, zolang Labkit open is (ook in een andere tool); je ziet ze bij Timers.": "Reminders set: {#}. They go off at the end of each waiting step while Labkit is open (also in another tool); you can see them under Timers.",
+"Geen wachtstap eindigt in de toekomst; kijk naar datum en starttijd.": "No waiting step ends in the future; check the date and start time.",
+"Passagekalender": "Passage calendar",
+"Splitratio ervoor": "Split ratio before",
+"weekend": "weekend",
+"Passeren": "Passage",
+"Herinnering bij de volgende passage": "Reminder at the next passage",
+"Herinnering gezet; hij gaat af zolang Labkit open is (ook in een andere tool). Je ziet hem bij Timers.": "Reminder set; it goes off while Labkit is open (also in another tool). You can see it under Timers.",
+"De volgende passage is nu al; er is niets te herinneren.": "The next passage is now; there is nothing to remind you of."
 }
