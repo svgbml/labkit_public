@@ -12,7 +12,10 @@
 <template>
   <div class="panel">
     <div class="row" style="justify-content:space-between">
-      <div class="fields" style="flex:1;max-width:760px">
+      <!-- geen inline flex:1 : dan geldt .row>.fields{flex:1 1 280px} uit de opmaak, zodat het
+           veldblok op een smal scherm onder de receptkeuze springt in plaats van samen te vallen
+           (de Engelse receptnamen zijn breder dan de Nederlandse) -->
+      <div class="fields" style="max-width:760px">
         <lk-field v-model="ns" :label="t('Monsters')" for-id="q-n" inputmode="numeric"/>
         <lk-field v-model="nc" :label="t('Controles (NTC, positief)')" for-id="q-ctrl" inputmode="numeric"/>
         <lk-field data-expert="" v-model="extra" :label="t('Extra marge')" for-id="q-extra" unit="%"/>
@@ -56,6 +59,7 @@
     </div>
     <div class="row" style="margin-top:10px">
       <button type="button" id="q-add" @click="addRow">{{ t('+ Component') }}</button>
+      <button type="button" id="q-bench" @click="bench">{{ t('Bench-modus') }}</button>
       <button type="button" id="q-copy" @click="copy">{{ t('Kopieer tabel') }}</button>
       <button type="button" id="q-csv" class="dl-only" style="display:none" @click="csv">{{ t('Download CSV') }}</button>
       <span id="q-copied" style="font-size:13px;color:var(--muted)">{{ copied }}</span>
@@ -182,6 +186,16 @@ export default {
       this.rows = P.map(([n, s, f, u]) => mk(trPlain(n, true), dec(s), dec(f), u));
     },
     onPreset(k) { this.loadPreset(k); },
+    /* de checklist: water eerst, dan de componenten in de volgorde van de tabel (polymerase staat
+       in elk recept onderaan), dan verdelen en de template */
+    bench() {
+      const {per, N, n, T, V} = this.m, t = this.t, b = (nm, v) => esc(nm) + ': <b>' + v + '</b>';
+      openBench({title: t('PCR-mastermix'), steps: [esc(t('Mastermix voor ' + fmt(N, 1) + ' reacties, op ijs.')),
+        b(t('Nucleasevrij water'), this.m.waterMix),
+        ...this.rows.map((r, i) => isFinite(per[i]) ? b(r.n, vol(per[i] * N)) : ''),
+        esc(t('Meng en verdeel ' + vol(V - T) + ' mix over ' + n + ' buizen.')),
+        T > 0 ? esc(t('Voeg per buis ' + vol(T) + ' template toe; de NTC krijgt water.')) : '']});
+    },
     addRow() { this.rows.push(mk(trPlain('Component', true), '', '', 'µL')); },
     del(i) { this.rows.splice(i, 1); },
     /* --- haken voor de rest van de app (TBLDEF['q-tbl'] in web/index.html) --- */

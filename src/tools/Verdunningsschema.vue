@@ -16,7 +16,10 @@
         </div>
         <div id="pv-out">
           <lk-note v-if="m.bad" kind="bad">{{ t('Factor moet groter dan 1 zijn en het volume groter dan 0.') }}</lk-note>
-          <lk-kv v-else :rows="rows"/>
+          <template v-else>
+            <lk-kv :rows="rows"/>
+            <button type="button" id="pv-bench" @click="bench">{{ t('Bench-modus') }}</button>
+          </template>
         </div>
       </div>
     </div>
@@ -116,13 +119,25 @@ export default {
   mounted() { this.draw(); },
   updated() { this.draw(); },
   methods: {
+    label(i) {
+      const own = this.labels.split(',').map(t => t.trim()), {f, lab} = this.m;
+      return own[i] ? own[i] : i === 0 ? 'stock' : lab === 'exp' && f === 10 ? '10' + supNum(-i) : lab === 'num' ? String(i) : '1 : ' + pNum(f ** i).replace(/ /g, '');
+    },
+    /* de checklist: buizen klaarzetten, elke overdracht een stap, dan uitplaten */
+    bench() {
+      const {n, dil, np, pvol, tr, dv, title} = this.m, t = this.t, L = i => uv(this.label(i)), S = [];
+      S.push(t('Label ' + n + ' buizen en zet in elke buis ' + vol(dv) + ' ' + uv(dil) + '.'));
+      for (let i = 1; i <= n; i++) S.push(t('Breng ' + vol(tr) + ' over van ' + L(i - 1) + ' naar ' + L(i) + ', meng en wissel van tip.'));
+      for (let i = n - np + 1; i <= n && np; i++) S.push(isFinite(pvol) ? t('Plaat ' + vol(pvol) + ' uit van ' + L(i) + '.') : t('Plaat uit van ' + L(i) + '.'));
+      openBench({title: title || t('Verdunningsschema'), steps: S.map(esc)});
+    },
     /* de tekening op #pv-cv; elke render en elke invoer-event roept dit aan */
     draw() {
       const cv = document.getElementById('pv-cv'); if (!cv) return;
       const m = this.m; if (m.bad) return;
       const {c0, cu, f, n, dil, np, pvol, lab, title, tr, dv} = m;
       const step = 118, W = Math.max(520, 70 + (n + 1) * step), NL_ = pNotes('pv', W), AU = pAuto('pv'), NH = NL_.length ? NL_.length * 17 + 10 : 0, H = (title ? 40 : 0) + (np ? 405 : 300) - (AU ? 0 : 20) + NH;
-      const own = this.labels.split(',').map(t => t.trim()); const label = i => own[i] ? own[i] : i === 0 ? 'stock' : lab === 'exp' && f === 10 ? '10' + supNum(-i) : lab === 'num' ? String(i) : '1 : ' + pNum(f ** i).replace(/ /g, '');
+      const label = this.label;
       const colv = this.col, col = /^#[0-9a-f]{6}$/i.test(colv) ? colv : PCOL.liquid;
       pShow(cv, W, H, (x) => { const t0 = pTitle(x, title, W), top = t0 + 70, th = 110, tw = 40;
         for (let i = 0; i <= n; i++) { const cx = 50 + i * step + 20; const fillA = Math.max(0.06, 0.55 * Math.pow(1 / f, i * 0.45));

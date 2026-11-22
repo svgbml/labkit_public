@@ -76,6 +76,7 @@
       <span id="o-prog" style="font-size:13px;color:var(--muted)">{{ warn || progress }}</span>
       <button type="button" id="o-untick" @click="untick">{{ t('Vinkjes wissen') }}</button>
       <button type="button" class="primary" id="o-card" @click="card">{{ t('Receptkaart afdrukken') }}</button>
+      <button type="button" id="o-bench" @click="bench">{{ t('Bench-modus') }}</button>
     </div>
 
     <lk-steps :steps="steps" id="o-steps"/>
@@ -245,6 +246,15 @@ export default {
         + (src ? '<p class="src">' + esc(src) + '</p>' : '')
         + '<p class="sign">' + T('Bereid door') + ': ________________ &nbsp; ' + T('Datum')
         + ': ________________ &nbsp; ' + T('Houdbaar tot') + ': ________________</p>');
+    },
+    /* bench-modus: dezelfde inhoud als de receptkaart, per component een stap, dan de werkwijze */
+    bench() {
+      if (!this.filled.length) { this.warn = this.t('Vul eerst een recept en een volume in.'); return; }
+      this.warn = '';
+      const weigh = this.filled.map(i => this.t('Weeg ' + uv(lkNumIn(mass(this.masses[i]))) + ' '
+        + uv(esc(trPlain(this.rows[i].n || 'component', true))) + ' af.'));
+      openBench({title: ($('#o-btitle') && $('#o-btitle').value) || trPlain('Receptkaart'),
+        steps: [...weigh, ...this.steps]});
     },
     /* het stappenschema op het canvas tekent bufImg(), die de tabel uitleest; na elke render
        dus opnieuw, net als bij de andere tool met een tekening */

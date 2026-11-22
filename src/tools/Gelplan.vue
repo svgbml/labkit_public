@@ -110,6 +110,7 @@
         <div class="row" style="margin-top:8px">
           <button type="button" id="gp-tbl-add" @click="addLane">{{ t('+ Laan') }}</button>
           <button type="button" data-smp="gplan">{{ t('Monsters…') }}</button>
+          <button type="button" id="gp-bench" @click="bench">{{ t('Bench-modus') }}</button>
         </div>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0" v-html="tHtml(hint)"></p>
       </div>
@@ -355,6 +356,7 @@ export default {
         }
       }
       return {
+        ti: isFinite(ti) ? ti : null, target, volt: V,
         rows: [[t('Veldsterkte'), t(NL(Number(E.toFixed(2)), 2) + ' V/cm')],
           [t('Snelheid van het blauwe front'),
             isFinite(v) ? t(NL(Number(v.toFixed(2)), 2) + ' cm/min') : '–'],
@@ -388,6 +390,31 @@ export default {
   methods: {
     lkNum(v) { return lkNumIn(v); },
     addLane() { this.lanes = [...this.lanes, ['', '10', '', '#1558b0']]; },
+    /* bench-modus: gieten (alleen agarose), elke laan laden, lopen met een timer */
+    bench() {
+      const t = this.t, c = this.cast, r = this.run, steps = [];
+      if (c.rows && c.rows[1][1] !== '–') {
+        steps.push(t('Weeg ' + uv(c.rows[1][1]) + ' agarose af.'),
+          t('Meet ' + uv(c.rows[2][1]) + ' af en voeg ' + uv(c.rows[3][1]) + ' water toe.'),
+          t('Smelt de agarose in de magnetron en laat afkoelen tot ongeveer 60 °C.'));
+        if (c.rows[4]) steps.push(t('Voeg ' + uv(c.rows[4][0]) + ' toe: ' + uv(c.rows[4][1]) + '.'));
+        steps.push(t('Giet de gel in de drager, zet de kam erin en laat de gel stollen.'));
+      }
+      this.lanes.slice(0, this.teeth).forEach((l, i) => {
+        const name = String(l[0] || '').trim(), v = num(l[1]);
+        if (!name) return;
+        steps.push(v > 0
+          ? t('Laan ' + (i + 1) + ': pipetteer ' + lkNumIn(NL(v, 1)) + ' µL van ' + uv(esc(name)) + '.')
+          : t('Laan ' + (i + 1) + ': pipetteer ' + uv(esc(name)) + '.'));
+      });
+      if (r.ti) {
+        steps.push({html: t('Zet de spanning op ' + lkNumIn(NL(r.volt, 1)) + ' V en laat de gel lopen; reken op '
+          + uv(r.rows[2][1]) + '.') + ' ' + t('Stop wanneer het blauwe front ongeveer '
+          + lkNumIn(NL(Number(r.target.toFixed(1)), 1)) + ' cm van de slotjes staat.'),
+          timer: [t('Gel laten lopen'), Math.round(r.ti * 60)]});
+      }
+      if (steps.length) openBench({title: this.title.trim() || t('Gelplanner'), steps});
+    },
     /* de twee tekeningen; de tekst eromheen rendert Vue zelf */
     draw() {
       try { gpDrawTop(); } catch (e) {}
