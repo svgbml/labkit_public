@@ -5,7 +5,7 @@ const CORE = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './i18n-en.js?h=b49e33ccb8',
+  './i18n-en.js?h=50b58fbed5',
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png'

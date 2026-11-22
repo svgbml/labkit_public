@@ -4988,5 +4988,9 @@
 "Reverse complement": "Reverse complement",
 "Kopieer als FASTA": "Copy as FASTA",
 "Bereik": "Range",
-"Klik op een base in het paneel om naar die plek in de trace te gaan; Shift + klik selecteert een bereik, dat Kopieer als FASTA kopieert.": "Click a base in the panel to go to that spot in the trace; Shift + click selects a range, which Copy as FASTA copies."
+"Klik op een base in het paneel om naar die plek in de trace te gaan; Shift + klik selecteert een bereik, dat Kopieer als FASTA kopieert.": "Click a base in the panel to go to that spot in the trace; Shift + click selects a range, which Copy as FASTA copies.",
+"FASTA van de getrimde read": "FASTA of the trimmed read",
+"PNG van het venster": "PNG of the window",
+"SVG van het venster": "SVG of the window",
+"Afdrukken in rijen van {#}": "Print in rows of {#}"
 }

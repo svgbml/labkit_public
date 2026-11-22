@@ -46,6 +46,12 @@
         <div v-if="m.ok" class="row" style="gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap">
           <label class="chk" for="sg-rc"><input type="checkbox" id="sg-rc" v-model="rc"> {{ t('Reverse complement') }}</label>
           <button type="button" id="sg-copy" @click="copy">{{ t('Kopieer als FASTA') }}</button>
+          <button type="button" id="sg-fasta" @click="saveFasta">{{ t('FASTA van de getrimde read') }}</button>
+          <template v-if="m.r.traces">
+            <button type="button" id="sg-png" @click="savePng">{{ t('PNG van het venster') }}</button>
+            <button type="button" id="sg-svg" @click="saveSvg">{{ t('SVG van het venster') }}</button>
+            <button type="button" id="sg-print" @click="print">{{ t('Afdrukken in rijen van 60') }}</button>
+          </template>
           <span v-if="rng">{{ t('Bereik') }}: {{ rng.a + 1 }}–{{ rng.b + 1 }} ({{ rng.b - rng.a + 1 }} {{ t('basen') }})</span>
           <span v-if="copied" role="status">{{ copied }}</span>
         </div>
@@ -85,6 +91,7 @@ import {markRaw} from 'vue';
 import {lkNumIn} from '../lib/bridge.js';
 import {readAbif, abifRead} from '../lib/abif.js';
 import {trimWindow, comp, fasta} from '../lib/sangertrim.js';
+import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 
 const LB = 18, TH = 190, QB = 28, OV = 40, GAP = 20;   // hoogte trace, kwaliteitsstrook, overzichtsstrook en de strook met posities (CSS-pixels); LB = strook met de baseletters bovenaan
@@ -370,6 +377,33 @@ export default {
       const t = fasta(this.m.r.name, this.seq, this.rng, this.rc);
       try { await navigator.clipboard.writeText(t); this.copied = this.t('Gekopieerd.'); } catch (e) { this.copied = this.t('Kopiëren geblokkeerd.'); }
     },
+    base() { return safeName(String(this.m.r.name || 'chromatogram').replace(/\.[A-Za-z0-9]{1,4}$/, '')); },
+    /* PNG: het canvas zoals het nu is, overzichtsstrook en trimschaduw inbegrepen */
+    savePng() { this.$refs.cv.toBlob(b => { if (b) saveBlob(this.base() + '.png', b).catch(() => {}); }, 'image/png'); },
+    /* de vier kanalen, baseletters en nummers van het zichtbare venster; zonder overzicht of kwaliteit */
+    saveSvg() {
+      const r = this.m.r, W = Math.round(this.$refs.cv.clientWidth);
+      saveBlob(this.base() + '.svg', new Blob([traceSvg({traces: r.traces, peaks: r.peaks, seq: this.seq, view: this.view, w: W, th: TH, keep: this.trim})], {type: 'image/svg+xml'})).catch(() => {});
+    },
+    /* de getrimde read (hele read zonder trimvoorstel), met bewerkingen en rc-schakelaar */
+    saveFasta() {
+      const t = this.trim, txt = fasta(this.m.r.name, this.seq, t ? {a: t.start - 1, b: t.end - 1} : null, this.rc);
+      saveBlob(this.base() + '.fasta', new Blob([txt], {type: 'text/plain'})).catch(() => {});
+    },
+    /* afdruk: de hele read in rijen van 60 basen, elke rij op zijn eigen hoogteschaal; getrimde einden grijs */
+    printHtml() {
+      const r = this.m.r, me = r.meta || {}, t = this.t, sp = this.sp(), n = Math.min(r.peaks.length, this.seq.length), w = 720, rows = [];
+      for (let a = 0; a < n; a += 60) {
+        const b = Math.min(n, a + 60), view = {x0: r.peaks[a] - sp / 2, spp: sp * 60 / w};
+        rows.push('<div class="r">' + traceSvg({traces: r.traces, peaks: r.peaks, seq: this.seq, view, w, th: 60, keep: this.trim}) + '</div>');
+      }
+      const tr = this.trim, info = [[t('Bestand'), r.name], [t('Monster'), me.sample], [t('Well'), me.well], [t('Instrument'), me.instrument],
+        [t('Start run'), me.start], [t('Leeslengte'), n + ' ' + t('basen')], [t('Trimvoorstel'), tr ? tr.start + '–' + tr.end : '']].filter(x => x[1]);
+      return '<!doctype html><meta charset="utf-8"><title>' + esc(r.name) + '</title><style>@page{size:A4;margin:12mm}body{font:12px system-ui,Arial,sans-serif;margin:0}'
+        + 'h1{font-size:16px;margin:0 0 4px}.i{margin:0 0 8px;color:#333}.r{break-inside:avoid;page-break-inside:avoid;margin:0 0 6px}svg{width:100%;height:auto;display:block}</style>'
+        + '<h1>' + esc(t('Chromatogram')) + '</h1><p class="i">' + info.map(x => '<b>' + esc(x[0]) + ':</b> ' + esc(String(x[1]))).join(' &nbsp; ') + '</p>' + rows.join('');
+    },
+    print() { rpPrint(this.printHtml()); },
     up(e) {
       const d = this.drag;
       if (d && !d.ov && e && e.type === 'pointerup' && Math.abs(e.offsetX - d.sx) <= 3 && this.read && this.read.peaks.length) this.pick1(this.nearest(e.offsetX), e.shiftKey);
