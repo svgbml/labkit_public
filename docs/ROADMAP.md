@@ -387,7 +387,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | Step | Ideas | What | Model |
 |---|---|---|---|
 | S134 | 269, 273 | Bundle size budget and memory check in `perf_budget.py` | ✅ `tests/perf_budget.py` vergelijkt `web/index.html` en `web/i18n-en.js` met `tests/perf_baseline.json` en faalt bij meer dan 5% groei (`--baseline` legt na bewuste groei een nieuwe basis vast); daarna elke tool openen, de testgel in de gel-editor automatisch laten verwerken en de JS-heap na garbage collection meten (CDP), limiet `LABKIT_HEAP_MB` (standaard 40; nu ± 13–15 MB) | Sonnet |
-| S135 | 270, 271, 274 | Gel editor benchmark, mobile Lighthouse, typing-latency (INP) test | Sonnet |
+| S135 | 270, 271, 274 | Gel editor benchmark, mobile Lighthouse, typing-latency (INP) test | ✅ `tests/perf_budget.py` meet de gel-editor op de realistische testgel (rechtzetten, lanen, banden, meten; beste van drie, `GEL_MS` standaard 1000, nu ± 100 ms) en de reactietijd bij typen (Event Timing, zoals INP; beste van twee rondes) in tien zware tools, `INP_MS` standaard 100. Lighthouse draait als matrix desktop + mobiel (`lighthouserc.json` is nu mobiel, desktop krijgt `--collect.settings.preset=desktop`); mobiel haalt prestaties ± 0,35 (waarschuwing, geen fout). De test vond dat typen in *qPCR-plaatindeling* tot 150 ms kostte: `fitText()` in `src/engines/plate.js` leest en schrijft nu per ronde in plaats van per putje (± 30 ms) | Sonnet |
 | S136 | 275 | Performance summary in the CI run | Haiku |
 | S137 | 284, 285, 289 | Copy error report, feedback link per tool, export/import everything | Sonnet |
 | S138 | 278 | Unit tests for pure calculation functions | Sonnet |

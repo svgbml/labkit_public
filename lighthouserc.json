@@ -5,7 +5,6 @@
       "url": ["http://localhost/index.html", "http://localhost/index.html#pipcal"],
       "numberOfRuns": 3,
       "settings": {
-        "preset": "desktop",
         "skipAudits": ["uses-http2", "is-on-https", "redirects-http"]
       }
     },
