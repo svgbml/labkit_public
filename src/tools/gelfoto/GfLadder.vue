@@ -33,8 +33,10 @@
       <input id="gf-ladc" class="mono" v-model="f.ladc" @change="syncLadc">
     </div>
     <!-- de ladderbibliotheek (S67); de velden heten gf-ll-…, dan slaat een project ze niet op -->
-    <details id="gf-ll" style="margin-top:8px">
+    <details id="gf-ll" style="margin-top:8px" @toggle="llOpen = $event.target.open">
       <summary>{{ t('Eigen ladders beheren') }}</summary>
+      <!-- pas renderen als het open is: Chromium legt de inhoud van een dichte details wel op -->
+      <template v-if="llOpen">
       <ul v-if="lib.length" id="gf-ll-list" style="list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px">
         <li v-for="l in lib" :key="l.id" style="display:flex;gap:8px;align-items:center;min-width:0">
           <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
@@ -66,6 +68,7 @@
         <button type="button" id="gf-ll-add" @click="add">{{ t('Toevoegen aan bibliotheek') }}</button>
       </div>
       <lk-note v-if="msg" :kind="msgKind">{{ msg }}</lk-note>
+      </template>
     </details>
     <div class="row" style="margin-top:8px">
       <button type="button" id="gf-addband" @click="addBand">{{ t('+ Ladderband (klik)') }}</button>
@@ -84,7 +87,7 @@ export default {
   name: 'GfLadder',
   mixins: [gfMix],
   data() {
-    return {f: {lad: '100', unit: 'bp', ladc: '250 150 100 75 50 37 25 20 15 10'}, nw: {n: '', s: '', u: 'bp'}, imp: '', msg: '', msgKind: 'ok'};
+    return {f: {lad: '100', unit: 'bp', ladc: '250 150 100 75 50 37 25 20 15 10'}, nw: {n: '', s: '', u: 'bp'}, imp: '', msg: '', msgKind: 'ok', llOpen: false};
   },
   computed: {
     lib() { return userLads; },

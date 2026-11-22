@@ -360,13 +360,18 @@ def _(pg):
     pg.evaluate("__go('gelfoto')")
     pg.set_input_files('#gf-file', str(ROOT / 'tests' / 'fixtures' / 'gel_realistic.png')); pg.wait_for_timeout(700)
     pg.evaluate("$('#gf-n').value=''; document.getElementById('gf-auto').click()"); pg.wait_for_timeout(1500)
+    pg.evaluate("document.getElementById('gf-ll').open=true"); pg.wait_for_timeout(200)
     pg.evaluate("__set('gf-ll-name','Mijn ladder'); __set('gf-ll-sizes', LADDERS['100'].join(' ')); document.getElementById('gf-ll-add').click()"); pg.wait_for_timeout(300)
     key = pg.evaluate("document.getElementById('gf-lad').value")
     pg.evaluate("document.getElementById('gf-bands').click(); gf.marks=[]; document.getElementById('gf-measall').click();")
     bp = pg.evaluate("gf.marks.map(m=>m.bp)"); b650 = [v for v in bp if 500 < v < 800]
     used = pg.evaluate("gf.ladKey")
     pg.goto('about:blank'); pg.goto(URL + '#gelfoto'); pg.wait_for_timeout(800); pg.evaluate(HELPERS)
-    kept = pg.evaluate("[...document.querySelectorAll('#gf-lad option')].filter(o=>o.textContent==='Mijn ladder').length")
+    q = "[...document.querySelectorAll('#gf-lad option')].filter(o=>o.textContent==='Mijn ladder').length"
+    try: pg.wait_for_function(q, timeout=5000)
+    except Exception: pass
+    kept = pg.evaluate(q)
+    pg.evaluate("document.getElementById('gf-ll').open=true"); pg.wait_for_timeout(200)
     pg.evaluate("__set('gf-ll-imp','Gedeeld: 500; 300 100 bp'); document.getElementById('gf-ll-add').click()"); pg.wait_for_timeout(300)
     imp = pg.evaluate("JSON.stringify(LADDERS[document.getElementById('gf-lad').value])")
     pg.evaluate("localStorage.removeItem('lkLadders')")
