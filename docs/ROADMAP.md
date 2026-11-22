@@ -386,7 +386,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 ## Phase 11: quality, tests and dev (9 steps)
 | Step | Ideas | What | Model |
 |---|---|---|---|
-| S134 | 269, 273 | Bundle size budget and memory check in `perf_budget.py` | Sonnet |
+| S134 | 269, 273 | Bundle size budget and memory check in `perf_budget.py` | ✅ `tests/perf_budget.py` vergelijkt `web/index.html` en `web/i18n-en.js` met `tests/perf_baseline.json` en faalt bij meer dan 5% groei (`--baseline` legt na bewuste groei een nieuwe basis vast); daarna elke tool openen, de testgel in de gel-editor automatisch laten verwerken en de JS-heap na garbage collection meten (CDP), limiet `LABKIT_HEAP_MB` (standaard 40; nu ± 13–15 MB) | Sonnet |
 | S135 | 270, 271, 274 | Gel editor benchmark, mobile Lighthouse, typing-latency (INP) test | Sonnet |
 | S136 | 275 | Performance summary in the CI run | Haiku |
 | S137 | 284, 285, 289 | Copy error report, feedback link per tool, export/import everything | Sonnet |

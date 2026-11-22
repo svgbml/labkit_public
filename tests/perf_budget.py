@@ -8,10 +8,13 @@ Laadt de app in het Nederlands en het Engels en controleert:
   (sinds S271 in één vertaalronde bij het opstarten, zonder observer of luie modus);
 - de alignmentviewer (S171) houdt bij 60 x 5000 kolommen alleen de zichtbare rijen in de DOM en
   tekent een scrollstap binnen één frame (ALN_FRAME_MS, standaard 16 ms);
+- web/index.html en web/i18n-en.js groeien niet meer dan 5% boven tests/perf_baseline.json (S134);
+- de JS-heap na het openen van alle tools en de gel-editor met de testgel blijft onder LABKIT_HEAP_MB (standaard 40);
 - geen scriptfouten.
-Gebruik: python tests/perf_budget.py   (exitcode 1 bij problemen)
+Gebruik: python tests/perf_budget.py            (exitcode 1 bij problemen)
+         python tests/perf_budget.py --baseline legt de huidige groottes vast als nieuwe basis (na een bewuste groei)
 """
-import os, pathlib, sys
+import json, os, pathlib, sys
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -69,11 +72,50 @@ def aln():
     print(f"[aln] 60 x 5000 kolommen: {r['rows']} rijen in de DOM, scrollstap p95 {r['p95']:.1f} ms" + ('' if issues else ', in orde'))
     return issues
 
-def main():
+SIZES = ['web/index.html', 'web/i18n-en.js']
+BASE = ROOT / 'tests' / 'perf_baseline.json'
+
+def size():
+    """Groei van de gebouwde bestanden ten opzichte van de vastgelegde basis; meer dan 5% is een fout."""
+    now = {f: (ROOT / f).stat().st_size for f in SIZES}
+    if '--baseline' in sys.argv: BASE.write_text(json.dumps(now, indent=1) + '\n')
+    base = json.loads(BASE.read_text())
     issues = []
+    for f in SIZES:
+        g = now[f] / base[f] - 1
+        print(f'[size] {f}: {now[f] / 1024:.0f} kB ({g:+.1%} t.o.v. basis)')
+        if g > 0.05: issues.append(f'{f} is {g:.1%} groter dan de basis (max 5%); bewust? python tests/perf_budget.py --baseline')
+    return issues
+
+HEAP_MB = float(os.environ.get('LABKIT_HEAP_MB', '40'))
+
+def heap():
+    """JS-heap na garbage collection, nadat elke tool open is geweest en de gel-editor de testgel heeft verwerkt."""
+    with sync_playwright() as p:
+        b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1400, 'height': 900})
+        pg.add_init_script("try{localStorage.setItem('labkit:v1:lang','nl')}catch(e){}")
+        errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
+        cdp = pg.context.new_cdp_session(pg)
+        pg.goto(URL); pg.wait_for_load_state('load')
+        pg.evaluate("async()=>{ for(const t of TOOLS){ location.hash=t; await new Promise(r=>setTimeout(r,30)); } location.hash='gelfoto'; }")
+        pg.set_input_files('#gf-file', str(ROOT / 'tests' / 'fixtures' / 'gel_realistic.png')); pg.wait_for_timeout(700)
+        pg.evaluate("$('#gf-n').value=''; document.getElementById('gf-auto').click()"); pg.wait_for_timeout(1500)
+        lanes = pg.evaluate("gf.lanes.length")
+        cdp.send('HeapProfiler.collectGarbage')
+        mb = cdp.send('Runtime.getHeapUsage')['usedSize'] / 2**20
+        b.close()
+    issues = [f'JS-heap {mb:.1f} MB > {HEAP_MB:.0f} MB'] if mb > HEAP_MB else []
+    if not lanes: issues.append('heap: de gel-editor vond geen lanen in de testgel; de meting telt dan niet')
+    issues += ['scriptfout: ' + e for e in errs]
+    print(f'[heap] alle tools + gel-editor: {mb:.1f} MB (limiet {HEAP_MB:.0f} MB)' + ('' if issues else ', in orde'))
+    return issues
+
+def main():
+    issues = size()
     for lang in ('nl', 'en'):
         issues += [f'[{lang}] {i}' for i in run(lang)]
     issues += aln()
+    issues += heap()
     for i in issues: print('  ' + i)
     sys.exit(1 if issues else 0)
 
