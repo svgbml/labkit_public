@@ -1013,6 +1013,16 @@ def _(pg):
             ('EcoRI (positie)', site('EcoRI'), 1517, 0), ('BamHI (positie)', site('BamHI'), 44, 0),
             ('SP6-promotor over het nulpunt (start)', sp6, 3922, 0)]
 
+@case('Chromatogram', 'ABIF-bestand 3730.ab1 inlezen', 'Biopython 1.84, Tests/test_SeqIO_AbiIO.py (data_3730) en het bestand zelf (tests/fixtures/3730.ab1, Applied Biosystems 3730): monster 226032_C-ME-18_pCAGseqF, 1165 basen, eerste 12 basen GGGCGAGCKYYA; ABIF-indeling volgens de Applied Biosystems ABIF File Format Specification (2009)')
+def _(pg):
+    pg.evaluate("__go('sanger')")
+    pg.set_input_files('#sg-file', str(ROOT / 'tests' / 'fixtures' / '3730.ab1')); pg.wait_for_timeout(800)
+    name = pg.evaluate("[...document.querySelectorAll('#sg-out dt')].find(d=>d.textContent.trim().startsWith('Monster')).nextElementSibling.textContent.trim()")
+    first = pg.evaluate("__sgVm.read.bases.slice(0,12)")
+    return [('leeslengte (basen)', pg.evaluate("__kv('#sg-out','Leeslengte')"), 1165, 0),
+            ('monsternaam', 1 if name == '226032_C-ME-18_pCAGseqF' else 0, 1, 0),
+            ('eerste 12 basen', 1 if first == 'GGGCGAGCKYYA' else 0, 1, 0)]
+
 @case('Restrictiedigestie', 'In-silico digestie van pFA6a-kanMX6', 'Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa')
 def _(pg):
     fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')

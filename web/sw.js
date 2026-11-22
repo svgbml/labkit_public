@@ -8,15 +8,15 @@ const CORE = [
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
-  './i18n-en.js?h=709b084a27',
+  './i18n-en.js?h=04f32d34dc',
 =======
-  './i18n-en.js?h=709b084a27',
+  './i18n-en.js?h=04f32d34dc',
 >>>>>>> 0c71626 (S48: bench-modus (stapkaarten op volledig scherm, vegen, Wake Lock, hoog contrast))
 =======
-  './i18n-en.js?h=709b084a27',
+  './i18n-en.js?h=04f32d34dc',
 >>>>>>> bec740a (S49: checklists uit pipetteerschema, PCR-mastermix en verdunningsschema, vinkjes bewaard per run)
 =======
-  './i18n-en.js?h=709b084a27',
+  './i18n-en.js?h=04f32d34dc',
 >>>>>>> ceec2a2 (S50: checklists voor de receptkaart (Oplossing & buffer) en de Gelplanner in bench-modus)
   './icons/icon.svg',
   './icons/icon-192.png',

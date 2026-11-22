@@ -81,6 +81,7 @@ import Hwe from './tools/Hwe.vue';
 import Rmp from './tools/Rmp.vue';
 import Ystr from './tools/Ystr.vue';
 import Plasmid from './tools/Plasmid.vue';
+import Sanger from './tools/Sanger.vue';
 import Pipetteer from './tools/Pipetteer.vue';
 import PcrProgramma from './tools/PcrProgramma.vue';
 import Verdunningsschema from './tools/Verdunningsschema.vue';
@@ -123,6 +124,8 @@ export function start() {
   mountTool('#dg-app', Digest);
   mountTool('#pl-app', Plasmid);
   calc.plasmid = () => {};
+  mountTool('#sg-app', Sanger);
+  calc.sanger = () => {};
   calc.digest = () => {};
 
   mountTool('#pa-app', Phadj);

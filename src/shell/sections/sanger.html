@@ -1,0 +1,7 @@
+<section class="tool" id="t-sanger" data-tool="sanger">
+  <header class="tool-head"><h2>Chromatogram</h2>
+  <p>Opent een Sanger-sequentiebestand (.ab1) en toont de gegevens van de run en de sequentie; een FASTA of geplakte tekst kan ook.</p></header>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Sanger.vue). -->
+  <div id="sg-app"></div>
+  <p class="src">Het ABIF-formaat volgens Applied Biosystems, "ABIF File Format Specification and Sample File Schema" (2009). De basecalls, piekposities en kwaliteitswaarden zijn die van de sequencer zelf (PBAS2, PLOC2, PCON2); LabKit bepaalt de basen niet opnieuw. Phred-kwaliteit volgens Ewing &amp; Green, Genome Res 8:186–194 (1998).</p>
+</section>
