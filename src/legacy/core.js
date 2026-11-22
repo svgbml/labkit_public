@@ -8,7 +8,7 @@ import {live} from '../lib/global.js';
 const APPVER='1.18.1';
 
 /* ---------- routing ---------- */
-const TOOLS=['start','seed','oligo','sds','micro','verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','transf','stat','molm','hh','rmp','inst','spec','units','inoc','mic','gcomp','wb','melt','pverd','ppip','pprog','centrifuge','timers','plaat','strchk','bpa','pmi','ystr','kin','pipcal','westgard','munc','mval','mpn','ic50','steril','passage','stain','cdna','qplate','rnaq','osmo','titr','kjel','plan','report','widmark','stature','ento','glass','hwe','chrom','istd','edta','bufcap','ksp','zprime','transfect','viab','desinf','bland','roc','km','sigfig','pipkeus','digest','plasmid','aln','purif','gradient','elisa','facs','mix','gplan','phadj','medium'];
+const TOOLS=['start','seed','oligo','sds','micro','verdunning','oplossing','curve','enzym','reeks','groei','telkamer','teller','dna','pcr','pcrcyclus','qpcr','gel','gelfoto','ligatie','transf','stat','molm','hh','rmp','inst','spec','units','inoc','mic','gcomp','wb','melt','pverd','ppip','pprog','centrifuge','timers','plaat','strchk','bpa','pmi','ystr','kin','pipcal','westgard','munc','mval','mpn','ic50','steril','passage','stain','cdna','qplate','rnaq','osmo','titr','kjel','plan','report','widmark','stature','ento','glass','hwe','chrom','istd','edta','bufcap','ksp','zprime','transfect','viab','desinf','bland','roc','km','sigfig','pipkeus','digest','plasmid','aln','purif','gradient','elisa','facs','mix','gplan','phadj','medium','seq'];
 let current='start';
 const GONE={plaad:'gplan'};   /* tools die zijn opgegaan in een andere tool */
 function route(){

@@ -1144,5 +1144,48 @@ def _(pg):
             ('totaal (mL)', rows[4], 500, 0.001)]
 
 
+# ---------------- Sequentie (S191–S194) ----------------
+@case('Sequentie', 'Reverse complement met ambigue basen', 'IUPAC-complementen volgens NC-IUB (Cornish-Bowden, Nucleic Acids Res 13:3021–3030, 1985); onafhankelijk nagerekend met Biopython Seq.reverse_complement(): ATGCRYSWKMBDHVN → NBDHVKMWSRYGCAT')
+def _(pg):
+    pg.evaluate("__go('seq');__set('sq-op','rc');__set('sq-in','>t\\n1 ATGC RYSW\\n9 KMBD HVN')")
+    rc = pg.evaluate("document.getElementById('sq-out').value")
+    pg.evaluate("__set('sq-in','>a\\nACGU\\n>b\\nGGA')")
+    multi = pg.evaluate("document.getElementById('sq-out').value")
+    return [('reverse complement gelijk', int(rc == 'NBDHVKMWSRYGCAT'), 1, 0),
+            ('multi-FASTA per record', int(multi == '>a_rc\nACGT\n>b_rc\nTCC'), 1, 0)]
+
+@case('Sequentie', 'M13 forward (−20): GC en molmassa', 'Thermo Fisher, DNA and RNA Molecular Weights and Conversions: ssDNA = A×313,21 + T×304,2 + C×289,18 + G×329,21 − 61,96 (5′-OH); voor GTAAAACGACGGCCAGT 5228,47 g/mol. Onafhankelijk nagerekend met Biopython: molecular_weight (5′-fosfaat) − HPO₃ (79,98) = 5228,42; gc_fraction = 52,94%; dubbelstrengs 10380,76')
+def _(pg):
+    pg.evaluate("__go('seq');__set('sq-type','dna');__set('sq-in','GTAAAACGACGGCCAGT')")
+    kv = lambda k: pg.evaluate("k=>__kv('#sq-facts',k)", k)
+    return [('lengte (nt)', kv('Lengte'), 17, 0), ('GC (%)', kv('GC'), 52.94, 0.001),
+            ('molmassa ssDNA (g/mol)', kv('Molmassa ssDNA'), 5228.42, 0.0005),
+            ('molmassa dsDNA (g/mol)', kv('Molmassa dsDNA'), 10380.76, 0.0005)]
+
+@case('Sequentie', 'ORF van kanR in pFA6a-kanMX6', 'Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb): CDS KanR, aph(3′)-Ia, op 459..1268 (+ streng), 810 nt inclusief stop = 269 aa; codetabel 1 van NCBI (The Genetic Codes), alle zes tabellen gelijk aan Biopython Bio.Data.CodonTable')
+def _(pg):
+    fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')
+    pg.evaluate("fa=>{__go('seq');__set('sq-code','1');__set('sq-min','200');__set('sq-in',fa)}", fa)
+    rows = pg.evaluate("[...document.querySelectorAll('#sq-orf tbody tr')].map(r=>[r.cells[0].textContent.trim(),...[...r.cells].slice(1).map(c=>__n(c.textContent))])")
+    k = next((r for r in rows if r[0] == '+3' and r[1] == 459), [None, float('nan')] * 3)
+    return [('ORF +3 begin', k[1], 459, 0), ('ORF +3 einde (met stop)', k[2], 1268, 0), ('lengte (aa)', k[3], 269, 0)]
+
+@case('Sequentie', 'Knipplaatsen en doorsturen, pFA6a-kanMX6', 'Biopython Bio.Restriction (REBASE) op pFA6a-kanMX6 (Addgene 39296, 3938 bp circulair), dezelfde referentie als de Plasmidekaart: 22 van de 50 enzymen knippen één keer, EcoRI op 1517 en BamHI op 44. Doorsturen: het reverse complement komt als FASTA in de in-silico digestie (3938 bp) en "Naar Sequentie" zet een selectie terug')
+def _(pg):
+    fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')
+    pg.evaluate("fa=>{__go('seq');__set('sq-op','rc');__set('sq-enz','');__set('sq-uniq',true);__set('sq-circ',true);__set('sq-in',fa)}", fa)
+    site = lambda e: pg.evaluate("e=>{const r=[...document.querySelectorAll('#sq-re tbody tr')].find(r=>r.cells[0].textContent.trim()===e);return r?__n(r.cells[2].textContent):NaN}", e)
+    out = [('enzymen die één keer knippen', pg.evaluate("__big('#sq-re')"), 22, 0),
+           ('EcoRI (positie)', site('EcoRI'), 1517, 0), ('BamHI (positie)', site('BamHI'), 44, 0)]
+    pg.evaluate("__set('sq-op','rc');[...document.querySelectorAll('#sq-send button')].find(b=>b.textContent.includes('Restrictiedigestie')).click()")
+    dg = pg.evaluate("const v=document.getElementById('dg-seq').value;[v.startsWith('>pFA6a-kanMX6_rc\\n')?1:0,v.split('\\n')[1].length]")
+    out += [('FASTA-kop in de digestie', dg[0], 1, 0), ('lengte in de digestie (bp)', dg[1], 3938, 0)]
+    back = pg.evaluate("""(()=>{const t=document.getElementById('dg-seq');t.value='>x\\nGAATTCAAAA';t.dispatchEvent(new Event('input',{bubbles:true}));
+        t.setSelectionRange(3,9);document.querySelector('[data-to-seq=dg-seq]').click();return document.getElementById('sq-in').value})()""")
+    out.append(('selectie terug in Sequentie', int(back == 'GAATTC'), 1, 0))
+    pg.evaluate("__set('dg-seq','');__set('sq-in','')")
+    return out
+
+
 if __name__ == '__main__':
     main()

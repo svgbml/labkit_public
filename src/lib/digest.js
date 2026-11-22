@@ -33,8 +33,8 @@ export function enzInfo(name) {
 
 const IUPAC = {A: 'A', C: 'C', G: 'G', T: 'T', R: '[AG]', Y: '[CT]', S: '[CG]', W: '[AT]', K: '[GT]', M: '[AC]',
   B: '[CGT]', D: '[AGT]', H: '[ACT]', V: '[ACG]', N: '[ACGT]'};
-const IUC = {A: 'T', C: 'G', G: 'C', T: 'A', R: 'Y', Y: 'R', S: 'S', W: 'W', K: 'M', M: 'K', B: 'V', V: 'B', D: 'H', H: 'D', N: 'N'};
-const rcIupac = s => s.split('').reverse().map(b => IUC[b]).join('');
+export const IUC = {A: 'T', C: 'G', G: 'C', T: 'A', R: 'Y', Y: 'R', S: 'S', W: 'W', K: 'M', M: 'K', B: 'V', V: 'B', D: 'H', H: 'D', N: 'N'};
+export const rcIupac = s => s.split('').reverse().map(b => IUC[b]).join('');
 
 /* Knipplaatsen op de bovenste streng (0-based: er wordt geknipt vóór deze base). */
 export function cuts(seq, name, circular) {
@@ -71,4 +71,16 @@ export function digest(seq, names, circular) {
     out.push({size: q - p, from: p + 1, to: q, left: p ? at.get(p) : null, right: q < L ? at.get(q) : null});
   });
   return out;
+}
+
+/* Begin (0-based) van elke herkenningsplaats op een lineaire sequentie, op beide strengen; om de
+   plaatsen in een sequentie te markeren (Sequentie, S194). */
+export function siteStarts(seq, name) {
+  const e = ENZ[name]; if (!e) return [];
+  const out = new Set();
+  [e[0], rcIupac(e[0])].forEach(pat => {
+    const re = new RegExp('(?=' + pat.split('').map(b => IUPAC[b]).join('') + ')', 'g');
+    for (let m; (m = re.exec(seq)); re.lastIndex = m.index + 1) out.add(m.index);
+  });
+  return [...out];
 }

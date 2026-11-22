@@ -89,5 +89,6 @@
  "phadj": "ph",
  "medium": "cells",
  "plasmid": "plasmid",
- "aln": "alignment"
+ "aln": "alignment",
+ "seq": "strands"
 }

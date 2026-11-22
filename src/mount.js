@@ -82,6 +82,7 @@ import Rmp from './tools/Rmp.vue';
 import Ystr from './tools/Ystr.vue';
 import Plasmid from './tools/Plasmid.vue';
 import Aln from './tools/Aln.vue';
+import Seq from './tools/Seq.vue';
 import Pipetteer from './tools/Pipetteer.vue';
 import PcrProgramma from './tools/PcrProgramma.vue';
 import Verdunningsschema from './tools/Verdunningsschema.vue';
@@ -127,6 +128,9 @@ export function start() {
   mountTool('#al-app', Aln);
   calc.aln = () => {};
   calc.digest = () => {};
+
+  mountTool('#sq-app', Seq);
+  calc.seq = () => {};
 
   mountTool('#pa-app', Phadj);
   calc.phadj = () => {};

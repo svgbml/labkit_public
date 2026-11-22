@@ -5,19 +5,7 @@ const CORE = [
   './',
   './index.html',
   './manifest.webmanifest',
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-  './i18n-en.js?h=a3449c1718',
-=======
-  './i18n-en.js?h=a3449c1718',
->>>>>>> 0c71626 (S48: bench-modus (stapkaarten op volledig scherm, vegen, Wake Lock, hoog contrast))
-=======
-  './i18n-en.js?h=a3449c1718',
->>>>>>> bec740a (S49: checklists uit pipetteerschema, PCR-mastermix en verdunningsschema, vinkjes bewaard per run)
-=======
-  './i18n-en.js?h=a3449c1718',
->>>>>>> ceec2a2 (S50: checklists voor de receptkaart (Oplossing & buffer) en de Gelplanner in bench-modus)
+  './i18n-en.js?h=3d6acfade6',
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png'

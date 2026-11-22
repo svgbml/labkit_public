@@ -63,6 +63,7 @@
       <h3>{{ t('In-silico digestie') }}</h3>
       <div class="f"><label for="dg-seq">{{ t('Sequentie (of FASTA)') }}</label>
         <textarea id="dg-seq" class="mono" rows="5" v-model="seq" spellcheck="false"></textarea></div>
+        <div class="row" style="margin-top:6px"><button type="button" class="ghost" data-to-seq="dg-seq">{{ t('Naar Sequentie') }}</button></div>
       <label class="chk" for="dg-circ" style="margin-top:8px">
         <input type="checkbox" id="dg-circ" v-model="circ"> {{ t('Circulair (plasmide)') }}</label>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Knipt met de enzymen die hierboven gekozen zijn. Herkenningsplaatsen en knipposities volgens REBASE, zoals NEBcutter; methylering (Dam/Dcm) blokkeert sommige plaatsen en wordt niet meegerekend.') }}</p>
