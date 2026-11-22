@@ -4984,5 +4984,10 @@
 "De read begint bij het eerste venster en eindigt bij het laatste venster waarvan de gemiddelde Phred-kwaliteit de drempel haalt; de rest staat grijs.": "The read starts at the first window and ends at the last window whose mean Phred quality reaches the threshold; the rest is greyed out.",
 "Geen enkel venster haalt de drempel; er is geen trimvoorstel.": "No window reaches the threshold; there is no trim suggestion.",
 "Trimvoorstel": "Trim suggestion",
-"Na trimmen": "After trimming"
+"Na trimmen": "After trimming",
+"Kleuren": "Colours",
+"ClustalX (eiwit)": "ClustalX (protein)",
+"Nucleotiden": "Nucleotides",
+"Identiteit": "Identity",
+"Geen": "None"
 }

@@ -213,3 +213,44 @@ export function alnType(a) {
   }
   return !n ? '' : nt / n >= 0.9 ? 'nt' : 'aa';
 }
+
+/* ---------- Kleuren (S172) ----------
+   Per kolom een tabel residu (hoofdletter) → klassenaam, zodat de viewer alleen hoeft op te zoeken.
+   ClustalX: de regels uit colprot.par van Clustal X (Larkin e.a. 2007), zoals Jalview ze documenteert
+   ("Clustal X colours"): een residu krijgt zijn kleur alleen als de kolom aan een drempel voldoet.
+   Percentages over alle sequenties van de kolom (gaten tellen mee in de noemer, zoals Jalview).
+   Nucleotiden: vaste kleur per base. Identiteit: de meest voorkomende letter van de kolom, in drie
+   tinten bij > 80, > 60 en > 40% (Jalview "Percentage identity"). */
+const HYD = 'WLVIMAFCHP';
+function clustalxCol(cnt, n) {
+  const p = s => { let k = 0; for (const c of s) k += cnt[c] || 0; return k * 100 / n; };
+  const any = (s, t) => [...s].some(c => (cnt[c] || 0) * 100 / n > t);
+  const hyd = p(HYD) > 60, kr = p('KR') > 60, qe = p('QE') > 50, ed = p('ED') > 50, out = {G: 'co', P: 'cy'};
+  if (hyd) for (const c of 'AILMFWV') out[c] = 'cb';
+  out.C = any('C', 85) ? 'cp' : hyd ? 'cb' : '';
+  if (kr || any('KRQ', 80)) out.K = out.R = 'cr';
+  if (kr || qe || ed || any('EQD', 85)) out.E = 'cm';
+  if (kr || ed || any('KRQ', 85)) out.D = 'cm';
+  if (any('N', 50) || any('NY', 85)) out.N = 'cg';
+  if (kr || qe || any('QEKR', 85)) out.Q = 'cg';
+  if (hyd || p('TS') > 50 || any('ST', 85)) out.S = out.T = 'cg';
+  if (hyd || any('WYACPQFHILMV', 85)) out.H = out.Y = 'cc';
+  return out;
+}
+const NUC = {A: 'na', C: 'nc', G: 'ng', T: 'nt', U: 'nt'};
+export function alnColours(a, scheme) {
+  if (scheme === 'nt') return null;  /* vaste kleur per base: geen kolomtabel nodig */
+  const n = a.seqs.length, cols = [];
+  for (let c = 0; c < a.len; c++) {
+    const cnt = {};
+    for (const s of a.seqs) { const r = s[c].toUpperCase(); if (r !== '-') cnt[r] = (cnt[r] || 0) + 1; }
+    if (scheme === 'clustalx') { cols.push(clustalxCol(cnt, n)); continue; }
+    let top = '', k = 0;
+    for (const r in cnt) if (cnt[r] > k) { top = r; k = cnt[r]; }
+    const f = k * 100 / n;
+    cols.push(f > 80 ? {[top]: 'i3'} : f > 60 ? {[top]: 'i2'} : f > 40 ? {[top]: 'i1'} : {});
+  }
+  return cols;
+}
+/* klasse van residu r in kolom c (of '') bij een tabel van alnColours */
+export const alnCls = (tab, c, r) => (tab ? tab[c][r.toUpperCase()] : NUC[r.toUpperCase()]) || '';

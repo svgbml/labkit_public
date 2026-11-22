@@ -1086,6 +1086,48 @@ def _(pg):
                 (f + ': namen gelijk', sum(a == b for a, b in zip(names, r['names'])), r['n'], 0)]
     return out
 
+@case('Alignment bekijken', 'Kleurschema\'s in alle vijf thema\'s', 'ClustalX-regels uit colprot.par van Clustal X (Larkin e.a., Bioinformatics 23:2947, 2007) zoals Jalview ze documenteert (Jalview-help "Clustal X colours": G altijd oranje, P altijd geel; Waterhouse e.a., Bioinformatics 25:1189, 2009); nucleotidekleuren en procentuele identiteit volgens dezelfde Jalview-help; tekstcontrast minstens 4,5:1 volgens WCAG 2.1, criterium 1.4.3; kleurenblind-veilig palet van Okabe & Ito (2008, Color Universal Design)')
+def _(pg):
+    D = ROOT / 'tests' / 'fixtures' / 'aln'
+    pg.evaluate("__go('aln')")
+    # per klasse welke letters erin staan, het laagste tekstcontrast en het kleinste verschil met de achtergrond van het venster
+    js = r"""()=>{ const P=c=>{const f=c.startsWith('color(')?1:255; return c.match(/[\d.]+/g).map(Number).slice(0,3).map(v=>v*255/f)};
+      const L=c=>{const m=P(c).map(v=>{v/=255; return v<=.03928?v/12.92:((v+.055)/1.055)**2.4}); return .2126*m[0]+.7152*m[1]+.0722*m[2]};
+      const C=(a,b)=>(Math.max(a,b)+.05)/(Math.min(a,b)+.05), vm=__alnVm, v=vm.vis, view=document.getElementById('al-view');
+      const sf=L(getComputedStyle(view).backgroundColor), ink=L(getComputedStyle(view.querySelector('.aln-seq')).color);
+      const r={chars:{}, txt:99, bg:99, all:'', px:0};
+      for(const row of v.rows) for(let c=v.c0;c<v.c1;c++){ const ch=vm.m.seqs[row.i][c], k=vm.cellCls(row.i,c); r.all+=ch;
+        if(!k) continue; r.chars[k]=(r.chars[k]||'')+ch; const b=L(vm.shade(k)); r.txt=Math.min(r.txt,C(b,ink)); r.bg=Math.min(r.bg,C(b,sf)); }
+      /* steekproef: het midden van de eerste gekleurde cel op het canvas heeft die tint */
+      const row=v.rows[0], c=[...Array(v.c1-v.c0).keys()].map(d=>v.c0+d).find(c=>vm.cellCls(row.i,c)), cv=vm.$refs.cv, d=devicePixelRatio||1;
+      if(c!=null){ const p=cv.getContext('2d').getImageData(Math.round((v.left+(c-v.c0+.5)*vm.cw)*d),Math.round((row.top+9)*d),1,1).data, e=P(vm.shade(vm.cellCls(row.i,c)));
+        r.px=e.every((x,j)=>Math.abs(x-p[j])<=2)?1:0; }
+      return r; }"""
+    prot, nt = (D / 'W_prot.msf').read_text(encoding='utf-8'), (D / 'opuntia.aln').read_text(encoding='utf-8')
+    worst_txt, worst_bg, ok_rules, px = 99, 99, 0, 0
+    for th in ('licht', 'donker', 'papier', 'contrast', 'leisteen'):
+        pg.evaluate("t=>t==='licht'?document.documentElement.removeAttribute('data-theme'):document.documentElement.setAttribute('data-theme',t)", th)
+        for txt, sch in ((prot, 'clustalx'), (nt, 'nt'), (prot, 'ident')):
+            pg.evaluate("t=>__set('al-in',t)", txt)
+            for cb in (0, 1):
+                pg.evaluate("([s,c])=>{__set('al-col',s);__set('al-cbs',c)}", [sch, cb]); pg.wait_for_timeout(80)
+                r = pg.evaluate(js)
+                worst_txt, worst_bg = min(worst_txt, r['txt']), min(worst_bg, r['bg'])
+                ch = r['chars']
+                if sch == 'clustalx':  # elke G oranje, elke P geel, en die klassen bevatten niets anders
+                    ok_rules += (set(ch.get('co', '')) == {'G'} and len(ch['co']) == r['all'].count('G')
+                                 and set(ch.get('cy', '')) == {'P'} and len(ch['cy']) == r['all'].count('P'))
+                elif sch == 'nt':  # elke A, C, G, T in zijn eigen kleur
+                    ok_rules += all(len(ch.get('n' + k.lower(), '')) == r['all'].upper().count(k) and set(ch.get('n' + k.lower(), '').upper()) == {k} for k in 'ACGT')
+                else:  # identiteit: alleen de drie tinten
+                    ok_rules += bool(ch) and set(ch) <= {'i1', 'i2', 'i3'}
+                px += r['px']
+    pg.evaluate("()=>{document.documentElement.removeAttribute('data-theme');__set('al-col','auto');__set('al-cbs',0)}")
+    return [('schema\'s × thema\'s × kleurenblind die de regels volgen', ok_rules, 30, 0),
+            ('laagste tekstcontrast ≥ 4,5:1', 1 if worst_txt >= 4.5 else 0, 1, 0),
+            ('elke tint zichtbaar tegen de achtergrond (≥ 1,1:1)', 1 if worst_bg >= 1.1 else 0, 1, 0),
+            ('canvas toont de tint van de cel', px, 30, 0)]
+
 @case('Chromatogram', 'ABIF-bestand 3730.ab1 inlezen', 'Biopython 1.84, Tests/test_SeqIO_AbiIO.py (data_3730) en het bestand zelf (tests/fixtures/3730.ab1, Applied Biosystems 3730): monster 226032_C-ME-18_pCAGseqF, 1165 basen, eerste 12 basen GGGCGAGCKYYA; ABIF-indeling volgens de Applied Biosystems ABIF File Format Specification (2009)')
 def _(pg):
     pg.evaluate("__go('sanger')")

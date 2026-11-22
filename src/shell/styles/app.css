@@ -516,3 +516,13 @@ html.darkroom img,html.darkroom canvas{filter:grayscale(1) sepia(1) hue-rotate(-
 .aln-ruler span{position:absolute;top:1px;transform:translateX(-50%)}
 .aln-ruler span::after{content:"";position:absolute;left:50%;bottom:-5px;height:4px;border-left:1px solid var(--muted)}
 .aln-corner{position:absolute;top:0;left:0;z-index:2;padding:2px 6px;font-size:11px;color:var(--muted);background:var(--surface);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+/* S172 kleuren: tint gemengd met --surface, zodat --ink in alle thema's leesbaar blijft; .aln-cbs = Okabe-Ito.
+   De viewer leest de kleur van .aln-sw en tekent die op het canvas .aln-bg. */
+.aln-bg{position:absolute;top:0;left:0}
+.aln-sw{position:absolute;visibility:hidden;background:color-mix(in srgb,var(--c) calc(var(--mix,40%) * var(--dim,1)),var(--surface))}
+html[data-theme=donker] .aln-view{--dim:.75}
+.k-cb{--c:#80a0f0}.k-cr{--c:#f01505}.k-cm{--c:#c048c0}.k-cg{--c:#15c015}.k-cp{--c:#f08080}.k-co{--c:#f09048}.k-cy{--c:#c0c000}.k-cc{--c:#15a4a4}
+.k-na{--c:#64f73f}.k-nc{--c:#ffb340}.k-ng{--c:#eb413c}.k-nt{--c:#3c88ee}
+.k-i1{--c:var(--accent);--mix:18%}.k-i2{--c:var(--accent);--mix:32%}.k-i3{--c:var(--accent);--mix:48%}
+.aln-cbs .k-cb{--c:#0072b2}.aln-cbs .k-cr{--c:#d55e00}.aln-cbs .k-cm{--c:#cc79a7}.aln-cbs .k-cg{--c:#009e73}.aln-cbs .k-cp{--c:#999999}.aln-cbs .k-co{--c:#e69f00}.aln-cbs .k-cy{--c:#f0e442}.aln-cbs .k-cc{--c:#56b4e9}
+.aln-cbs .k-na{--c:#009e73}.aln-cbs .k-nc{--c:#0072b2}.aln-cbs .k-ng{--c:#e69f00}.aln-cbs .k-nt{--c:#d55e00}
