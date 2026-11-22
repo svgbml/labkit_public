@@ -136,7 +136,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | R3 | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 |
 | W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — |
 | **Wave 6: performance and quality** | | | | |
-| Q1a | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything |
+| Q1a ✅ | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything |
 | Q1b | Sonnet | S138, S139, S141 | K3 (then *any time*) | anything |
 | Q2 | Opus 5 | S140, S142 | K3 | anything except G1a–G3 |
 | F1a | Opus 5.5 | **Re-plan phase 10 first** (lazy init and DOM templates may be largely solved by mounting a component only when its tool opens, which phase 16 makes possible), then S125–S127 | K3 | — |
