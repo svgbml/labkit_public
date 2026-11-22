@@ -4984,5 +4984,15 @@
 "De read begint bij het eerste venster en eindigt bij het laatste venster waarvan de gemiddelde Phred-kwaliteit de drempel haalt; de rest staat grijs.": "The read starts at the first window and ends at the last window whose mean Phred quality reaches the threshold; the rest is greyed out.",
 "Geen enkel venster haalt de drempel; er is geen trimvoorstel.": "No window reaches the threshold; there is no trim suggestion.",
 "Trimvoorstel": "Trim suggestion",
-"Na trimmen": "After trimming"
+"Na trimmen": "After trimming",
+"Resultaat per lane en figuurlegenda": "Result per lane and figure legend",
+"Meet eerst banden (paneel {#}); dan verschijnt hier de tabel per lane.": "Measure bands first (panel {#}); the table per lane appears here.",
+"Kopieer tabel (Excel)": "Copy table (Excel)",
+"Gelcondities": "Gel conditions",
+"{#}% agarose, {#} V, {#} min": "{#}% agarose, {#} V, {#} min",
+"Kopieer legenda": "Copy legend",
+"Gel: {*}.": "Gel: {*}.",
+"Ladder: {*}.": "Ladder: {*}.",
+"Lane {#}: {*}.": "Lane {#}: {*}.",
+"Banden in lane {#} ({*}): {*}.": "Bands in lane {#} ({*}): {*}."
 }

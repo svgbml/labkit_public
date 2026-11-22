@@ -270,6 +270,18 @@ def _(pg):
     return [('rechtzethoek (°)', ang, 2.0, 0.125), ('aantal lanen', n, 11, 0), ('ladderlane (index)', lad, 0, 0),
             ('product 650 bp (gem.)', sum(b650) / max(1, len(b650)), 650, 0.02), ('aantal productbanden', len(b650), 7, 0), ('dimeer 60 bp (gem.)', sum(b60) / max(1, len(b60)), 60, 0.05)]
 
+@case('Gelfoto-editor', 'Resultaattabel en figuurlegenda', 'Zelftest: na het meten op de realistische testgel staat er per lane met banden een rij met dezelfde groottes als de metingentabel, en de legenda noemt de ladder en een lanelabel')
+def _(pg):
+    # vervolg op het geval hierboven: de gel staat er met metingen
+    pg.evaluate("gf.lanes[2].label='Monster A'; __set('gf-cond','1% agarose, 100 V'); gfRender(); gfMarksTable()"); pg.wait_for_timeout(300)
+    r = pg.evaluate("""(()=>{ const rows=[...document.querySelectorAll('#gf-app-res tbody tr')];
+      const lanes=new Set(); gf.marks.forEach(m=>{ let li=0,bd=1e9; gf.lanes.forEach((l,j)=>{ const d=Math.abs(l.x-m.x); if(d<bd){bd=d;li=j;} }); lanes.add(li); });
+      const sizes=rows.map(r=>r.children[2].textContent.split('; ').length).reduce((a,b)=>a+b,0);
+      const lg=document.getElementById('gf-legend').textContent;
+      return [rows.length, lanes.size, sizes, gf.marks.length, lg.includes(document.querySelector('#gf-lad option:checked').textContent.trim())?1:0, lg.includes('Monster A')?1:0, lg.includes('1% agarose, 100 V')?1:0]; })()""")
+    return [('rijen = lanes met banden', r[0], r[1], 0), ('bandgroottes in de tabel = metingen', r[2], r[3], 0),
+            ('legenda noemt de ladder', r[4], 1, 0), ('legenda noemt lanelabel', r[5], 1, 0), ('legenda noemt gelcondities', r[6], 1, 0)]
+
 @case('Gelfoto-editor', 'Projectbestand .labkitgel', 'Zelftest: de realistische testgel opslaan, de pagina herladen en het bestand openen geeft dezelfde lanen, banden, metingen en dezelfde export (pixel voor pixel)')
 def _(pg):
     # vervolg op het geval hierboven: de gel staat er, rechtgezet, met banden en metingen

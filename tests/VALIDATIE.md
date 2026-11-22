@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-22 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 384 van 384 controles binnen tolerantie.**
+**Resultaat: 389 van 389 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -60,9 +60,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9467 | +0.24% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7786 | +0.11% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,558 | +0.44% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9367 | -0.82% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7808 | +0.39% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5522 | -0.60% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -75,6 +75,11 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Gelfoto-editor | Realistische testgel (scheef, smeer, lege lanen) | product 650 bp (gem.) | 650 | 648,8 | -0.18% | ✅ | tests/make_test_gel.py: 11 lanen, 2,0° scheef, ladder in lane 1, producten 650 bp, dimeren 60 bp |
 | Gelfoto-editor | Realistische testgel (scheef, smeer, lege lanen) | aantal productbanden | 7 | 7 | +0.00% | ✅ | tests/make_test_gel.py: 11 lanen, 2,0° scheef, ladder in lane 1, producten 650 bp, dimeren 60 bp |
 | Gelfoto-editor | Realistische testgel (scheef, smeer, lege lanen) | dimeer 60 bp (gem.) | 60 | 60,26 | +0.43% | ✅ | tests/make_test_gel.py: 11 lanen, 2,0° scheef, ladder in lane 1, producten 650 bp, dimeren 60 bp |
+| Gelfoto-editor | Resultaattabel en figuurlegenda | rijen = lanes met banden | 8 | 8 | +0.00% | ✅ | Zelftest: na het meten op de realistische testgel staat er per lane met banden een rij met dezelfde groottes als de metingentabel, en de legenda noemt de ladder en een lanelabel |
+| Gelfoto-editor | Resultaattabel en figuurlegenda | bandgroottes in de tabel = metingen | 15 | 15 | +0.00% | ✅ | Zelftest: na het meten op de realistische testgel staat er per lane met banden een rij met dezelfde groottes als de metingentabel, en de legenda noemt de ladder en een lanelabel |
+| Gelfoto-editor | Resultaattabel en figuurlegenda | legenda noemt de ladder | 1 | 1 | +0.00% | ✅ | Zelftest: na het meten op de realistische testgel staat er per lane met banden een rij met dezelfde groottes als de metingentabel, en de legenda noemt de ladder en een lanelabel |
+| Gelfoto-editor | Resultaattabel en figuurlegenda | legenda noemt lanelabel | 1 | 1 | +0.00% | ✅ | Zelftest: na het meten op de realistische testgel staat er per lane met banden een rij met dezelfde groottes als de metingentabel, en de legenda noemt de ladder en een lanelabel |
+| Gelfoto-editor | Resultaattabel en figuurlegenda | legenda noemt gelcondities | 1 | 1 | +0.00% | ✅ | Zelftest: na het meten op de realistische testgel staat er per lane met banden een rij met dezelfde groottes als de metingentabel, en de legenda noemt de ladder en een lanelabel |
 | Gelfoto-editor | Projectbestand .labkitgel | toestand gelijk na openen | 1 | 1 | +0.00% | ✅ | Zelftest: de realistische testgel opslaan, de pagina herladen en het bestand openen geeft dezelfde lanen, banden, metingen en dezelfde export (pixel voor pixel) |
 | Gelfoto-editor | Projectbestand .labkitgel | export gelijk na openen | 1 | 1 | +0.00% | ✅ | Zelftest: de realistische testgel opslaan, de pagina herladen en het bestand openen geeft dezelfde lanen, banden, metingen en dezelfde export (pixel voor pixel) |
 | Gelfoto-editor | Gelbibliotheek | item in lijst | 1 | 1 | +0.00% | ✅ | Zelftest: de realistische testgel in de bibliotheek (IndexedDB) bewaren, de pagina herladen: het item staat er nog en openen geeft evenveel lanen |
