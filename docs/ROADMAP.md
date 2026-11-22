@@ -150,7 +150,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | SA2 | Opus 5.5 | S158–S161 (S159, S161 are Opus 5): alignment to the reference, assay format | SA1b | anything |
 | SA3 | Sonnet | S162, S164–S168 (S166 by Haiku): batch and HIrisPlex-S sheet | SA2 | anything |
 | SA4 | Opus 5 | S163, S169, then S199 and S200–S201 (Sonnet) | SA3, SQ2 | anything |
-| AL1 | Opus 5.5 | S170–S171 alignment parsers and viewer | K3 | anything |
+| AL1 ✅ | Opus 5.5 | S170–S171 alignment parsers and viewer | K3 | anything |
 | AL2a | Sonnet | S172–S176 (S176 by Haiku) | AL1 | anything |
 | AL2b | Sonnet | S177–S179, S181 (S179 after S42) | AL2a | anything |
 | AL2c | Sonnet | S186–S189 | AL2b | anything |
@@ -463,8 +463,8 @@ Ideas #334–#368. Clustal Omega itself stays at EBI: it is a compiled program w
 
 | Step | Ideas | What | Done when | Model |
 |---|---|---|---|---|
-| S170 | 334, 335 | Parsers for Clustal `.aln`, aligned FASTA, PHYLIP, NEXUS, MSF and PIR into one alignment model | A real `.aln` opens with the right names and length | Opus 5 |
-| S171 | 336, 366 | Alignment viewer: grid, sticky name column, position ruler, virtual rendering of visible cells only | Smooth on a 5000-column alignment | Opus 5.5 |
+| S170 | 334, 335 | Parsers for Clustal `.aln`, aligned FASTA, PHYLIP, NEXUS, MSF and PIR into one alignment model | ✅ `src/lib/alignment.js` reads all six into `{format, names, seqs, len, cons, warn}`; new tool *Alignment bekijken* (`aln`) with paste box, file picker, format, count, length and a name table. Validation case: six files from the Biopython test suite (`tests/fixtures/aln/`) give the same count, length and names as `Bio.AlignIO`, and the Clustal `* : .` line is kept | Opus 5 |
+| S171 | 336, 366 | Alignment viewer: grid, sticky name column, position ruler, virtual rendering of visible cells only | ✅ *Alignment bekijken* has a scrolling grid (`#al-view`): a `position:sticky` layer holds the name column, a ruler with a number every 10 columns and only the visible rows, cut to the visible columns; a sizer gives the scrollbars the full size. `tests/perf_budget.py` checks 60 × 5000 columns: about 30 rows in the DOM, ruler ends at 5000, a scroll step well under one frame (p95 ≈ 3 ms here). No colours yet (S172) | Opus 5.5 |
 | S172 | 337 | Colour schemes: ClustalX groups, nucleotides, identity shading, colourblind-safe variant | All four work in all five themes | Sonnet |
 | S173 | 338, 339 | Conservation row and plot per column, consensus with an adjustable threshold | Recomputed row matches the file's own `* : .` line | Sonnet |
 | S174 | 340, 341, 342 | Gap statistics per sequence and column, overview strip, column details on click | Clicking a column shows the counts | Sonnet |

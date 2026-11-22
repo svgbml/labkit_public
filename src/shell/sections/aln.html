@@ -1,0 +1,8 @@
+<section class="tool" id="t-aln" data-tool="aln">
+  <header class="tool-head"><h2>Alignment bekijken</h2>
+  <p>Opent een meervoudige uitlijning uit Clustal Omega of een ander programma: Clustal (.aln), uitgelijnde FASTA, PHYLIP, NEXUS, MSF of PIR. Het uitlijnen zelf doe je bij Clustal Omega (EBI); LabKit leest en toont de uitkomst.</p></header>
+  <!-- Het bewerkbare deel is een Vue-component (zie src/tools/Aln.vue); de kop en de bronregel
+       blijven gewone HTML, zodat hun vertaalsleutels blijven gelden. -->
+  <div id="al-app"></div>
+  <p class="src">Formaten volgens de Clustal W/X-documentatie (Thompson, Higgins &amp; Gibson 1994; Larkin e.a. 2007), PHYLIP 3.6 (Felsenstein, <i>Molecular sequence data</i>; strikte namen van 10 tekens en ruime namen tot de eerste spatie, sequentieel en interleaved), NEXUS (Maddison, Swofford &amp; Maddison 1997, <i>Syst. Biol.</i> 46:590; DATA- of CHARACTERS-blok, matchchar en geneste commentaren), GCG MSF (Wisconsin Package) en PIR/NBRF. In MSF staan <i>.</i> en <i>~</i> voor een gat; LabKit toont elk gat als <i>-</i>.</p>
+</section>

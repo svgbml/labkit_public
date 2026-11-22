@@ -1,0 +1,89 @@
+{
+ "opuntia.aln": {
+  "format": "clustal",
+  "n": 7,
+  "len": 156,
+  "names": [
+   "gi|6273285|gb|AF191659.1|AF191",
+   "gi|6273284|gb|AF191658.1|AF191",
+   "gi|6273287|gb|AF191661.1|AF191",
+   "gi|6273286|gb|AF191660.1|AF191",
+   "gi|6273290|gb|AF191664.1|AF191",
+   "gi|6273289|gb|AF191663.1|AF191",
+   "gi|6273291|gb|AF191665.1|AF191"
+  ]
+ },
+ "opuntia.fasta": {
+  "format": "fasta",
+  "n": 7,
+  "len": 156,
+  "names": [
+   "gi|6273285|gb|AF191659.1|AF191",
+   "gi|6273284|gb|AF191658.1|AF191",
+   "gi|6273287|gb|AF191661.1|AF191",
+   "gi|6273286|gb|AF191660.1|AF191",
+   "gi|6273290|gb|AF191664.1|AF191",
+   "gi|6273289|gb|AF191663.1|AF191",
+   "gi|6273291|gb|AF191665.1|AF191"
+  ]
+ },
+ "one.phy": {
+  "format": "phylip",
+  "n": 8,
+  "len": 286,
+  "names": [
+   "V_Harveyi_",
+   "B_subtilis",
+   "B_subtilis",
+   "YA80_HAEIN",
+   "FLIY_ECOLI",
+   "E_coli_Gln",
+   "Deinococcu",
+   "HISJ_E_COL"
+  ]
+ },
+ "test_Nexus_input.nex": {
+  "format": "nexus",
+  "n": 9,
+  "len": 48,
+  "names": [
+   "t1",
+   "t2 the name",
+   "isn'that [a] strange name?",
+   "one should be punished, for (that)!",
+   "t5",
+   "t6",
+   "t7",
+   "t8",
+   "t9"
+  ]
+ },
+ "W_prot.msf": {
+  "format": "msf",
+  "n": 11,
+  "len": 99,
+  "names": [
+   "W*01:01:01:01",
+   "W*01:01:01:02",
+   "W*01:01:01:03",
+   "W*01:01:01:04",
+   "W*01:01:01:05",
+   "W*01:01:01:06",
+   "W*02:01",
+   "W*03:01:01:01",
+   "W*03:01:01:02",
+   "W*04:01",
+   "W*05:01"
+  ]
+ },
+ "clustalw.pir": {
+  "format": "pir",
+  "n": 2,
+  "len": 2527,
+  "names": [
+   "804Angiostrongylus_cantonensis",
+   "815Parelaphostrongylus_odocoil"
+  ]
+ },
+ "_bron": "Biopython 1.88 Bio.AlignIO; bestanden uit Biopython Tests/ (Clustalw, Phylip, Nexus, msf, NBRF), opuntia.fasta met AlignIO.convert gemaakt"
+}
