@@ -1,9 +1,9 @@
 # Validatie Labkit BML
 
-Automatisch gegenereerd op 2026-11-21 door `tests/validate.py`.
+Automatisch gegenereerd op 2026-11-22 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 286 van 286 controles binnen tolerantie.**
+**Resultaat: 288 van 288 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -50,9 +50,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9386 | -0.62% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7803 | +0.32% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5478 | -1.39% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9403 | -0.44% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7801 | +0.30% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5644 | +1.59% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -178,6 +178,8 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Cellen uitzaaien | 24-wellsplaat | mL suspensie | 1,65 | 1,65 | +0.00% | ✅ | Rekentest: 5 × 10⁴ cellen × 24 putjes × 1,1 = 1,32 × 10⁶ cellen; bij 8 × 10⁵ cellen/mL → 1,65 mL suspensie in 13,2 mL totaal |
 | Primers oplossen | Stock 100 µM | µL buffer | 284 | 284 | +0.00% | ✅ | IDT: V (µL) = nmol / µM × 1000 → 28,4 nmol in 284 µL; werkoplossing 10 µM, 100 µL → 10 µL stock |
 | Primers oplossen | Stock 100 µM | µL stock | 10 | 10 | +0.00% | ✅ | IDT: V (µL) = nmol / µM × 1000 → 28,4 nmol in 284 µL; werkoplossing 10 µM, 100 µL → 10 µL stock |
+| Primers oplossen | Primerkaart: zelfdimeer en haarspeld | zelfdimeer (kcal/mol) | -7,2 | -7,2 | -0.00% | ✅ | SantaLucia 1998 (tabel 2, ΔG37 per stapel, initiatie +1,96) en SantaLucia & Hicks 2004 (haarspeldlus van 4 nt +3,5): ACGGAATTCCTA dimeer GGAATTCC = 1,96 − 9,16 = −7,20 kcal/mol; GCGCAAAAGCGC haarspeld GCGC-stam = −6,65 + 3,5 = −3,15 kcal/mol |
+| Primers oplossen | Primerkaart: zelfdimeer en haarspeld | haarspeld (kcal/mol) | -3,15 | -3,15 | -0.00% | ✅ | SantaLucia 1998 (tabel 2, ΔG37 per stapel, initiatie +1,96) en SantaLucia & Hicks 2004 (haarspeldlus van 4 nt +3,5): ACGGAATTCCTA dimeer GGAATTCC = 1,96 − 9,16 = −7,20 kcal/mol; GCGCAAAAGCGC haarspeld GCGC-stam = −6,65 + 3,5 = −3,15 kcal/mol |
 | SDS-PAGE monsters | Laadschema | monster | 8,33 | 8,33 | +0.00% | ✅ | Rekentest: 20 µg van 2,4 µg/µL = 8,33 µL; 4× buffer in 20 µL = 5 µL; water 6,67 µL |
 | SDS-PAGE monsters | Laadschema | buffer | 5 | 5 | +0.00% | ✅ | Rekentest: 20 µg van 2,4 µg/µL = 8,33 µL; 4× buffer in 20 µL = 5 µL; water 6,67 µL |
 | SDS-PAGE monsters | Laadschema | water | 6,67 | 6,67 | +0.00% | ✅ | Rekentest: 20 µg van 2,4 µg/µL = 8,33 µL; 4× buffer in 20 µL = 5 µL; water 6,67 µL |

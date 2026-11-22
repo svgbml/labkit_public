@@ -604,6 +604,11 @@ def _(pg):
     pg.evaluate("__go('oligo');__tbl('ol-tbl',[['F',28.4]],'oligo');__set('ol-s','100');__set('ol-w','10');__set('ol-wv','100')")
     return [('µL buffer', pg.evaluate("__n(document.querySelector('#ol-tbl [data-o]').textContent)"), 284, 0.001), ('µL stock', pg.evaluate("__big('#ol-out')"), 10, 0.001)]
 
+@case('Primers oplossen', 'Primerkaart: zelfdimeer en haarspeld', 'SantaLucia 1998 (tabel 2, ΔG37 per stapel, initiatie +1,96) en SantaLucia & Hicks 2004 (haarspeldlus van 4 nt +3,5): ACGGAATTCCTA dimeer GGAATTCC = 1,96 − 9,16 = −7,20 kcal/mol; GCGCAAAAGCGC haarspeld GCGC-stam = −6,65 + 3,5 = −3,15 kcal/mol')
+def _(pg):
+    pg.evaluate("__go('oligo');__tbl('ol-tbl',[['P1',10,'ACGGAATTCCTA'],['P2',10,'GCGCAAAAGCGC']],'oligo')")
+    return [('zelfdimeer (kcal/mol)', pg.evaluate("__kv('#ol-card-0','Zelfdimeer')"), -7.20, 0.001), ('haarspeld (kcal/mol)', pg.evaluate("__kv('#ol-card-1','Haarspeld')"), -3.15, 0.001)]
+
 @case('SDS-PAGE monsters', 'Laadschema', 'Rekentest: 20 µg van 2,4 µg/µL = 8,33 µL; 4× buffer in 20 µL = 5 µL; water 6,67 µL')
 def _(pg):
     pg.evaluate("__go('sds');__tbl('ss-tbl',[['A',2.4]],'sds');__set('ss-ug','20');__set('ss-x','4');__set('ss-v','20')")

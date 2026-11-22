@@ -4628,5 +4628,21 @@
 "De banden zijn opnieuw gedetecteerd.": "The bands have been detected again.",
 "Je hebt minstens twee ladderbanden met bp-waarde nodig om te meten.": "You need at least two ladder bands with a bp value to measure.",
 "Bijgesneden; lanen en ladder zijn opnieuw gedetecteerd.": "Cropped; lanes and ladder have been detected again.",
-"Detecteer of vul eerst minstens twee ladderbanden in.": "Detect or enter at least two ladder bands first."
-}
+"Detecteer of vul eerst minstens twee ladderbanden in.": "Detect or enter at least two ladder bands first.",
+"Sequentie ({#}′→{#}′)": "Sequence ({#}′→{#}′)",
+"Tm met nearest-neighbor (SantaLucia {#}) bij {#} mM Na⁺, {#} mM Mg²⁺, {#} mM dNTP en {#} µM primer.": "Tm by nearest-neighbor (SantaLucia {#}) at {#} mM Na⁺, {#} mM Mg²⁺, {#} mM dNTP and {#} µM primer.",
+"ΔG bij {#} °C; een waarschuwing vanaf −{#} kcal/mol ({#}′-uiteinde) of −{#} kcal/mol voor een dimeer, en vanaf −{#} of −{#} kcal/mol voor een haarspeld.": "ΔG at {#} °C; a warning from −{#} kcal/mol ({#}′ end) or −{#} kcal/mol for a dimer, and from −{#} or −{#} kcal/mol for a hairpin.",
+"Primerkaart afdrukken": "Print primer card",
+"Primerkaart": "Primer card",
+"GC-gehalte": "GC content",
+"Zelfdimeer": "Self-dimer",
+"Haarspeld": "Hairpin",
+"{#}′-GC-klem": "{#}′ GC clamp",
+"Zelfdimeer aan het {#}′-uiteinde: de primer kan op zichzelf verlengen.": "Self-dimer at the {#}′ end: the primer can extend on itself.",
+"Sterke zelfdimeer.": "Strong self-dimer.",
+"Haarspeld aan het {#}′-uiteinde.": "Hairpin at the {#}′ end.",
+"Sterke haarspeld.": "Strong hairpin.",
+"GC-gehalte buiten {#}–{#} %.": "GC content outside {#}–{#} %.",
+"Lengte buiten {#}–{#} nt.": "Length outside {#}–{#} nt.",
+"De sequentie bevat andere letters dan A, C, G en T; dimeren en haarspelden zijn niet berekend.": "The sequence contains letters other than A, C, G and T; dimers and hairpins were not calculated."
+}

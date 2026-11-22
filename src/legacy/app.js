@@ -224,7 +224,7 @@ const TBLDEF={
     get:()=>{ const m=window.__wbVm; return m?m.getRows():[]; }, blank:()=>['','','','0'], inputCols:[0,1,2]},
   'ol-tbl':{row:r=>'',num:[1],set:v=>{ const m=window.__olVm; if(m) m.setRows(v); },
     push:r=>{ const m=window.__olVm; if(m) m.pushRow(r); },
-    get:()=>{ const m=window.__olVm; return m?m.getRows():[]; }, blank:()=>['',''], inputCols:[0,1]}
+    get:()=>{ const m=window.__olVm; return m?m.getRows():[]; }, blank:()=>['','',''], inputCols:[0,1,2]}
 };
 function tblSnap(){ const out={}; Object.keys(TBLDEF).forEach(id=>{ out[id]=[...document.querySelectorAll('#'+id+' tbody tr')].map(tr=>[...tr.querySelectorAll('input:not([type=radio]):not([type=checkbox]),select')].map(e=>e.value)); });
   out.reeks=reeksCounts; out.plate=Object.assign(wState(),{title:($('#w-title')||{}).value}); out.curve={model:$('#s-model').value,unit:$('#s-unit').value,blank:$('#s-blank').checked,logx:$('#s-logx').checked}; return out; }

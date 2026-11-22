@@ -7,10 +7,10 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Model** (last column) is the cheapest model that can do the step well, so the shared usage limit lasts longer. Done steps show "—".
 - **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (3 open steps).
 - **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (76 open steps).
-- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (54 open steps).
+- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (53 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (24 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **113 done, 157 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **114 done, 156 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-21)
 
@@ -20,7 +20,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 1 navigation and app shell | S1–S12 | ✅ done |
 | Phase 2 preparation, gels | S13–S20 | ✅ done |
 | Phase 3 picture tools and plates | S21–S36 | ✅ done |
-| Phase 4 recipes and sequences | S37–S47 | **part done:** S37–S40 ✅, S41–S47 open |
+| Phase 4 recipes and sequences | S37–S47 | **part done:** S37–S40 and S42 ✅, S41 and S43–S47 open |
 | Phases 5–11 | S48–S146 | ⏳ not started (S45, S54, S82, S91, S93 partly there) |
 | Phases 12–14 Sanger, alignment, sequence toolbox | S147–S201 | ⏳ not started |
 | Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | ✅ done (batches V1a–V7 merged on 2026-11-21, S263 the same day) |
@@ -263,7 +263,7 @@ safety nets), then the rest wave by wave.
 | S39 | 43, 45, 154 | Hydrate options, autoclave/filter advice, weighing order tips | ✅ Hydraatkeuze bestond al (`HYD`); de bibliotheek vult hem nu aan met soda (Na₂CO₃ watervrij / ·H₂O / ·10H₂O) via `RECHYD`. `RECSTER` geeft per recept steriliteitsadvies met een reden: autoclaveerbaar of juist niet (Tween en SDS breken af, methanol is brandbaar, carbonaat verliest CO₂), antibiotica onder 50 °C en glucose in SOC apart steriel gefiltreerd. Balansadvies per component uit het 2s-criterium (USP <41>): onder 20 mg geen 1% op een 0,1 mg-balans, dus stock maken; tot 2 g analytische balans; daarboven is een precisiebalans genoeg. Daaronder de weegorde: eerst het kleine werk op de analytische balans | — |
 | S40 | 44, 53 | pH adjustment helper and cell culture media prep | ✅ Twee nieuwe tools, de eerste die als Vue-component zijn gebouwd in plaats van omgezet. *pH bijstellen*: hoeveel sterk zuur of sterke base een buffer nodig heeft om op de doel-pH te komen, uit f(zuur) = 1/(1+10^(pH−pKₐ)), met 8 buffersystemen, beide richtingen (vanaf de vrije base of het vrije zuur) en een waarschuwing als de doel-pH meer dan 1 eenheid van de pKₐ ligt. Gevalideerd tegen de Tris-Cl-tabel van Sambrook & Russell (70/60/42 mL geconcentreerd HCl → 68/61/44, binnen 3–5%, wat klopt voor een schatting zonder activiteitscoëfficiënten) en tegen het halfequivalentiepunt van acetaat. *Celkweekmedium klaarmaken*: basismedium, FBS, pen/strep, glutamine en een eigen supplement voor elk eindvolume, met percentages over het eindvolume | — |
 | S41 | 51, 52, 54 | Overage switch on all master mixes, antibody dilution planner, transformation prep card | 3 features | Sonnet |
-| S42 | 46 | Primer card (Tm, GC%, length, self-dimer, hairpin) in *Primers oplossen* | Card export | Opus 5 |
+| S42 | 46 | Primer card (Tm, GC%, length, self-dimer, hairpin) in *Primers oplossen* | ✅ Optionele kolom *Sequentie* in de tabel; per primer een kaart met lengte, GC%, Tm (`primerInfo`, 50 mM Na⁺/1,5 mM Mg²⁺/0,8 mM dNTP/0,2 µM), 3′-GC-klem, zelfdimeer en haarspeld (ΔG37 in `src/tools/primerCheck.js`, SantaLucia 1998 en SantaLucia & Hicks 2004, grenzen van Premier Biosoft) en de knop *Primerkaart afdrukken*. `dimer(a, b)` werkt ook voor twee primers (voor S43). Validatie: zelfdimeer −7,20 en haarspeld −3,15 kcal/mol | — |
 | S43 | 47 | Primer pair checker (Tm difference, cross-dimers) | Warnings shown | Sonnet |
 | S44 | 48, 193, 194 | In-silico PCR on a pasted template; annealing temperature into PCR cycle and gradient PCR | Product size + binding sites | Opus 5 |
 | S45 | 49, 207 | In-silico digest with an enzyme list (~40 enzymes), double-digest buffer check, send fragments to the predicted gel *(partly there: the buffer check for a double digest exists in Restrictiedigestie)* | Fragments match NEBcutter for a test plasmid | Opus 5 |

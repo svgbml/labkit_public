@@ -432,3 +432,7 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 .grp .gdel{border:0;background:none;padding:0 2px;color:var(--muted);font-size:12px}
 .grp.addg{border-style:dashed;color:var(--accent);font-weight:600;font-size:13px;padding:4px 10px}
 @media (max-width:620px){.tile.wide{grid-column:span 1}}
+/* Primers oplossen: primerkaart (S42) */
+.ol-card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:12px 0 0}
+.ol-card h3{font-size:15px;margin:0 0 2px}
+.ol-seq{font-family:var(--mono, monospace);font-size:13px;margin:0 0 6px;word-break:break-all}
