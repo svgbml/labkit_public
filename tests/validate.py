@@ -366,6 +366,7 @@ def _(pg):
     pg.evaluate("document.getElementById('gf-bands').click(); gf.marks=[]; document.getElementById('gf-measall').click();")
     bp = pg.evaluate("gf.marks.map(m=>m.bp)"); b650 = [v for v in bp if 500 < v < 800]
     used = pg.evaluate("gf.ladKey")
+    pg.wait_for_timeout(1000)  # Chromium schrijft localStorage met vertraging weg; direct navigeren kan de schrijfactie missen
     pg.goto('about:blank'); pg.goto(URL + '#gelfoto'); pg.wait_for_timeout(800); pg.evaluate(HELPERS)
     q = "[...document.querySelectorAll('#gf-lad option')].filter(o=>o.textContent==='Mijn ladder').length"
     try: pg.wait_for_function(q, timeout=5000)

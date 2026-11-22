@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-22 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 389 van 389 controles binnen tolerantie.**
+**Resultaat: 401 van 401 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -60,9 +60,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9367 | -0.82% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7808 | +0.39% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5522 | -0.60% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9472 | +0.29% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7714 | -0.82% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5527 | -0.52% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -94,6 +94,18 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Gelfoto-editor | Verzadigingswaarschuwing | overlay in de editor | 1 | 1 | +0.00% | ✅ | Zelftest: een blok van 20 × 10 pure witte pixels (255) tussen donkergrijs (30) en lichtgrijs (200) wordt als verzadigd gemarkeerd, met melding, in de editor maar niet in de export |
 | Gelfoto-editor | Verzadigingswaarschuwing | geen overlay in de export | 0 | 0 | +0.00% | ✅ | Zelftest: een blok van 20 × 10 pure witte pixels (255) tussen donkergrijs (30) en lichtgrijs (200) wordt als verzadigd gemarkeerd, met melding, in de editor maar niet in de export |
 | Gelfoto-editor | Verzadigingswaarschuwing | waarschuwing getoond | 1 | 1 | +0.00% | ✅ | Zelftest: een blok van 20 × 10 pure witte pixels (255) tussen donkergrijs (30) en lichtgrijs (200) wordt als verzadigd gemarkeerd, met melding, in de editor maar niet in de export |
+| Gelfoto-editor | Figuurstijl-presets | journaal: 18 / oranje / 1× / titel+metingen | 1 | 1 | +0.00% | ✅ | Zelftest: elke stijlknop (Labjournaal, Verslag, Publicatie, Poster) zet de velden op de vaste waarden, markeert zichzelf, en de export (gfRender(true, schaal)) verschilt tussen Labjournaal en Publicatie in afmeting |
+| Gelfoto-editor | Figuurstijl-presets | verslag: blauw, 2×, geen metingen | 1 | 1 | +0.00% | ✅ | Zelftest: elke stijlknop (Labjournaal, Verslag, Publicatie, Poster) zet de velden op de vaste waarden, markeert zichzelf, en de export (gfRender(true, schaal)) verschilt tussen Labjournaal en Publicatie in afmeting |
+| Gelfoto-editor | Figuurstijl-presets | publicatie: 14 / zwart / 3× / geen titel | 1 | 1 | +0.00% | ✅ | Zelftest: elke stijlknop (Labjournaal, Verslag, Publicatie, Poster) zet de velden op de vaste waarden, markeert zichzelf, en de export (gfRender(true, schaal)) verschilt tussen Labjournaal en Publicatie in afmeting |
+| Gelfoto-editor | Figuurstijl-presets | poster: 36 / rood / 3× / titel | 1 | 1 | +0.00% | ✅ | Zelftest: elke stijlknop (Labjournaal, Verslag, Publicatie, Poster) zet de velden op de vaste waarden, markeert zichzelf, en de export (gfRender(true, schaal)) verschilt tussen Labjournaal en Publicatie in afmeting |
+| Gelfoto-editor | Figuurstijl-presets | actieve knop gemarkeerd | 1 | 1 | +0.00% | ✅ | Zelftest: elke stijlknop (Labjournaal, Verslag, Publicatie, Poster) zet de velden op de vaste waarden, markeert zichzelf, en de export (gfRender(true, schaal)) verschilt tussen Labjournaal en Publicatie in afmeting |
+| Gelfoto-editor | Figuurstijl-presets | handmatige wijziging wist markering | 1 | 1 | +0.00% | ✅ | Zelftest: elke stijlknop (Labjournaal, Verslag, Publicatie, Poster) zet de velden op de vaste waarden, markeert zichzelf, en de export (gfRender(true, schaal)) verschilt tussen Labjournaal en Publicatie in afmeting |
+| Gelfoto-editor | Figuurstijl-presets | export verschilt (breedte) | 1 | 1 | +0.00% | ✅ | Zelftest: elke stijlknop (Labjournaal, Verslag, Publicatie, Poster) zet de velden op de vaste waarden, markeert zichzelf, en de export (gfRender(true, schaal)) verschilt tussen Labjournaal en Publicatie in afmeting |
+| Gelfoto-editor | Ladderbibliotheek: eigen ladder | eigen ladder gekozen | 1 | 1 | +0.00% | ✅ | Zelftest: de 100 bp-ladder (1000–100) als eigen ladder onder een andere naam bewaren en kiezen; detectie en meting op de realistische testgel geven weer 650 bp. Na herladen staat de ladder er nog; een geplakte gedeelde regel voegt een tweede toe |
+| Gelfoto-editor | Ladderbibliotheek: eigen ladder | detectie gebruikt eigen ladder | 1 | 1 | +0.00% | ✅ | Zelftest: de 100 bp-ladder (1000–100) als eigen ladder onder een andere naam bewaren en kiezen; detectie en meting op de realistische testgel geven weer 650 bp. Na herladen staat de ladder er nog; een geplakte gedeelde regel voegt een tweede toe |
+| Gelfoto-editor | Ladderbibliotheek: eigen ladder | product 650 bp (gem.) | 650 | 648,8 | -0.18% | ✅ | Zelftest: de 100 bp-ladder (1000–100) als eigen ladder onder een andere naam bewaren en kiezen; detectie en meting op de realistische testgel geven weer 650 bp. Na herladen staat de ladder er nog; een geplakte gedeelde regel voegt een tweede toe |
+| Gelfoto-editor | Ladderbibliotheek: eigen ladder | ladder na herladen | 1 | 1 | +0.00% | ✅ | Zelftest: de 100 bp-ladder (1000–100) als eigen ladder onder een andere naam bewaren en kiezen; detectie en meting op de realistische testgel geven weer 650 bp. Na herladen staat de ladder er nog; een geplakte gedeelde regel voegt een tweede toe |
+| Gelfoto-editor | Ladderbibliotheek: eigen ladder | gedeelde regel ingelezen | 1 | 1 | +0.00% | ✅ | Zelftest: de 100 bp-ladder (1000–100) als eigen ladder onder een andere naam bewaren en kiezen; detectie en meting op de realistische testgel geven weer 650 bp. Na herladen staat de ladder er nog; een geplakte gedeelde regel voegt een tweede toe |
 | Centrifuge | rpm → × g | × g | 1957 | 1957 | +0.00% | ✅ | Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g |
 | Centrifuge | × g → rpm | rpm | 5837 | 5837 | +0.00% | ✅ | CASRAI: 4000 × g, r = 10,5 cm → 5837 rpm |
 | Centrifuge | Rotorbalans | n=12 k=5 gebalanceerd | 1 | 1 | +0.00% | ✅ | Som van de plaatsvectoren = 0: opgebouwd uit gelijkmatige p-hoeken met p | n (n = 12, k = 5 → 2 + 3; n = 6, k = 1 en k = 5 kunnen niet) |
