@@ -391,7 +391,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S136 | 275 | Performance summary in the CI run | Haiku |
 | S137 | 284, 285, 289 | Copy error report, feedback link per tool, export/import everything | Sonnet |
 | S138 ✅ | 278 | Unit tests for pure calculation functions (`npm run test:unit`; primer Tm/dimer/hairpin left out: they need `NN` from `src/legacy/app.js`, which needs a DOM) | Sonnet |
-| S139 | 279 | Visual regression screenshots for key tools and the gel editor | Sonnet |
+| S139 ✅ | 279 | Visual regression screenshots for key tools and the gel editor (`tests/visual_check.py`; `win32/` baselines are made on the first local Windows run) | Sonnet |
 | S140 | 280, 281, 282, 283 | Screen-reader results, keyboard gel editor/plate designer, theme contrast check, reduced motion | Opus 5 |
 | S141 | 288, 294 | Consistent source citation per result; local "most used tools" overview | Sonnet |
 | S142 | 292 | Desktop auto-update via the Tauri updater | Opus 5 |

@@ -6,3 +6,4 @@ Thumbs.db
 i18n/missing.json
 .lighthouseci/
 __pycache__/
+tests/visual/out/

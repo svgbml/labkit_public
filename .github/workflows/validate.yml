@@ -51,8 +51,15 @@ jobs:
         run: python tests/layout_audit.py
         env:
           LABKIT_LANG: en
+      - name: Visuele regressie (schermafbeeldingen)
+        run: python tests/visual_check.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: validatierapport
           path: tests/VALIDATIE.md
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visuele-verschillen
+          path: tests/visual/out
