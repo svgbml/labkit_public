@@ -1144,6 +1144,32 @@ def _(pg):
     pg.evaluate("()=>__set('al-thr','50')")
     return out
 
+@case('Alignment bekijken', 'Gaten en kolomdetails na een klik', 'tests/fixtures/aln/hedgehog.aln (Biopython-testsuite, Clustal 2.0.9, 5 eiwitsequenties van 447 kolommen); verwachte tellingen in Python rechtstreeks uit het bestand geteld (naam + stuk sequentie per regel, blokken aan elkaar)')
+def _(pg):
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'hedgehog.aln'
+    seqs = {}
+    for ln in f.read_text(encoding='utf-8').splitlines()[1:]:
+        if ln.strip() and not ln[0].isspace():
+            name, chunk = ln.split()[:2]; seqs[name] = seqs.get(name, '') + chunk
+    rows = list(seqs.values())
+    pg.evaluate("__go('aln')"); pg.evaluate("t=>__set('al-in',t)", f.read_text(encoding='utf-8')); pg.wait_for_timeout(200)
+    gaps = pg.evaluate("[...document.querySelectorAll('#al-out tbody tr')].map(r=>__n(r.cells[2].textContent))")
+    out = [('gaten per sequentie gelijk', sum(a == r.count('-') for a, r in zip(gaps, rows)), len(rows), 0),
+           ('kolommen met gaten', pg.evaluate("__kv('#al-out','Kolommen met gaten')"), sum('-' in col for col in zip(*rows)), 0)]
+    pg.evaluate("typeof tourStop==='function'&&tourStop()")  # de rondleiding bij het eerste bezoek ligt anders over het raster
+    for c in (1, 46, 300, 447):  # 1-based; de kolom in beeld schuiven en er echt op klikken
+        pg.evaluate("c=>{const v=document.getElementById('al-view'); v.scrollIntoView({block:'center',behavior:'instant'}); v.scrollLeft=Math.max(0,(c-5)*__alnVm.cw); v.dispatchEvent(new Event('scroll'))}", c)
+        pg.wait_for_timeout(100)
+        x, y = pg.evaluate("c=>{const vm=__alnVm, v=document.getElementById('al-view'), r=v.getBoundingClientRect();"
+                           "return [r.left+v.clientLeft+vm.g.nameW+(c-0.5)*vm.cw-vm.sx, r.top+v.clientTop+40]}", c)
+        pg.mouse.click(x, y); pg.wait_for_timeout(150)
+        got = pg.evaluate("Object.fromEntries([...document.querySelectorAll('#al-coldet tbody tr')].map(r=>[r.cells[0].textContent.trim(),__n(r.cells[1].textContent)]))")
+        col = [r[c - 1].upper() for r in rows]
+        exp = {k: col.count(k) for k in set(col) if k != '-'}
+        out += [(f'kolom {c}: tellingen per letter', 1 if got == exp else 0, 1, 0),
+                (f'kolom {c}: gaten', pg.evaluate("__kv('#al-coldet','Gaten')"), col.count('-'), 0)]
+    return out
+
 @case('Chromatogram', 'ABIF-bestand 3730.ab1 inlezen', 'Biopython 1.84, Tests/test_SeqIO_AbiIO.py (data_3730) en het bestand zelf (tests/fixtures/3730.ab1, Applied Biosystems 3730): monster 226032_C-ME-18_pCAGseqF, 1165 basen, eerste 12 basen GGGCGAGCKYYA; ABIF-indeling volgens de Applied Biosystems ABIF File Format Specification (2009)')
 def _(pg):
     pg.evaluate("__go('sanger')")

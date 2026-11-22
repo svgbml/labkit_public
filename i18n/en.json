@@ -4994,5 +4994,9 @@
 "Conservering (%)": "Conservation (%)",
 "Conservering": "Conservation",
 "Consensus": "Consensus",
-"Volledig geconserveerd (*)": "Fully conserved (*)"
+"Volledig geconserveerd (*)": "Fully conserved (*)",
+"Gaten (%)": "Gaps (%)",
+"Letter": "Letter",
+"Kolommen met gaten": "Columns with gaps",
+"Gaten over de hele uitlijning; klik om erheen te gaan": "Gaps across the whole alignment; click to go there"
 }

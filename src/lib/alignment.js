@@ -271,18 +271,19 @@ export function alnConservation(a) {
   }
   return out;
 }
-/* per kolom de meest voorkomende letter (geen gat) en zijn aandeel over alle sequenties (0–1);
+/* per kolom de meest voorkomende letter (geen gat), zijn aandeel over alle sequenties (0–1) en
+   het aantal gaten (S174);
    de consensus is die letter als het aandeel de drempel haalt, anders x (eiwit) of n (DNA/RNA),
    zoals EMBOSS cons */
 export function alnProfile(a) {
-  const n = a.seqs.length, top = [], frac = [];
+  const n = a.seqs.length, top = [], frac = [], gaps = [];
   for (let c = 0; c < a.len; c++) {
     const cnt = {};
-    let t = '-', k = 0;
-    for (const s of a.seqs) { const r = s[c].toUpperCase(); if (r !== '-' && (cnt[r] = (cnt[r] || 0) + 1) > k) { t = r; k = cnt[r]; } }
-    top.push(t); frac.push(n ? k / n : 0);
+    let t = '-', k = 0, g = 0;
+    for (const s of a.seqs) { const r = s[c].toUpperCase(); if (r === '-') g++; else if ((cnt[r] = (cnt[r] || 0) + 1) > k) { t = r; k = cnt[r]; } }
+    top.push(t); frac.push(n ? k / n : 0); gaps.push(g);
   }
-  return {top, frac};
+  return {top, frac, gaps};
 }
 export function alnConsensus(a, p, thr) {
   const no = alnType(a) === 'nt' ? 'n' : 'x';
