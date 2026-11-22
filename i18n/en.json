@@ -4746,5 +4746,13 @@
 "Start timer": "Start timer",
 "Het scherm blijft aan.": "The screen stays on.",
 "Deze browser kan het scherm niet aan houden.": "This browser cannot keep the screen on.",
-"Bench-modus": "Bench mode"
+"Bench-modus": "Bench mode",
+"Opnieuw": "Reset",
+"Mastermix voor {#} reacties, op ijs.": "Master mix for {#} reactions, on ice.",
+"Meng en verdeel {#} µL mix over {#} buizen.": "Mix and divide {#} µL of mix over {#} tubes.",
+"Voeg per buis {#} µL template toe; de NTC krijgt water.": "Add {#} µL template to each tube; the NTC gets water.",
+"Label {#} buizen en zet in elke buis {#} µL {*}.": "Label {#} tubes and put {#} µL {*} in each tube.",
+"Breng {#} µL over van {*} naar {*}, meng en wissel van tip.": "Transfer {#} µL from {*} to {*}, mix and change tips.",
+"Plaat {#} µL uit van {*}.": "Plate {#} µL from {*}.",
+"Plaat uit van {*}.": "Plate from {*}."
 }
