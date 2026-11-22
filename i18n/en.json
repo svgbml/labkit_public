@@ -4708,5 +4708,6 @@
 "Beste kolommen: {*}.": "Best columns: {*}.",
 "Voorbeeld: pUC19": "Example: pUC19",
 "Plasmidekaart": "Plasmid map",
-"Een cirkelvormige kaart van een plasmide uit een GenBank-bestand of een geplakte sequentie, met de kenmerken, de knipplaatsen van enzymen die zelden knippen en de plaats waar je primers binden.": "A circular map of a plasmid from a GenBank file or a pasted sequence, showing the features, the cut sites of enzymes that cut rarely, and where your primers bind."
+"Een cirkelvormige kaart van een plasmide uit een GenBank-bestand of een geplakte sequentie, met de kenmerken, de knipplaatsen van enzymen die zelden knippen en de plaats waar je primers binden.": "A circular map of a plasmid from a GenBank file or a pasted sequence, showing the features, the cut sites of enzymes that cut rarely, and where your primers bind.",
+"+ {#} meer in de tabel": "+ {#} more in the table"
 }

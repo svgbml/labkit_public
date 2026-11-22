@@ -28,6 +28,7 @@ import Mic from './tools/Mic.vue';
 import Groei from './tools/Groei.vue';
 import Cdna from './tools/Cdna.vue';
 import Gradient from './tools/Gradient.vue';
+import Pmap from './tools/Pmap.vue';
 import Pcr from './tools/Pcr.vue';
 import Rnaq from './tools/Rnaq.vue';
 import Melt from './tools/Melt.vue';
@@ -172,6 +173,10 @@ export function start() {
 
   mountTool('#cd-app', Cdna, {pip: 'cdna'});
   calc.cdna = () => {};
+
+  /* Plasmidekaart: tekent op een canvas, dus calc.pmap() laat de component opnieuw tekenen. */
+  const pmp = mountTool('#pl-app', Pmap);
+  calc.pmap = () => { if (pmp && pmp.vm) pmp.vm.draw(); };
 
   const grd = mountTool('#gr-app', Gradient);
   calc.gradient = () => { if (grd && grd.vm) grd.vm.draw(); };

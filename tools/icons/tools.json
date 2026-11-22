@@ -52,6 +52,7 @@
  "qplate": "plate-grid-sel",
  "rnaq": "rna-quality",
  "digest": "scissors",
+ "pmap": "helix",
  "gradient": "gradient-block",
  "rmp": "fingerprint",
  "strchk": "str-peaks",
