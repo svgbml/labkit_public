@@ -296,6 +296,18 @@ def _(pg):
     pg.evaluate("document.querySelector('#gf-lib .gf-lib-open').click()"); pg.wait_for_timeout(1500)
     return [('item in lijst', int(one >= 1), 1, 0), ('geen dubbel item bij opnieuw bewaren', listed, one, 0), ('items na herladen', kept, one, 0), ('lanen na openen', pg.evaluate("gf.lanes.length"), n0, 0)]
 
+@case('Gelfoto-editor', 'Lanelabels op de foto typen', 'Zelftest: klik op het label van lane 3 boven de gel, typ, Tab naar lane 4 en plak daar een lijst van drie namen')
+def _(pg):
+    # vervolg op het geval hierboven: de realistische testgel staat er weer
+    r = pg.evaluate("""(()=>{ const r=gcv.getBoundingClientRect(), s=gcv.width/r.width, L=gf.layout, l=gf.lanes[2];
+      gcv.dispatchEvent(new PointerEvent('pointerdown',{clientX:r.left+(L.L+l.x)/s, clientY:r.top+(L.T-L.lab/2)/s, button:0, bubbles:true, cancelable:true}));
+      const a=document.getElementById('gf-labed'); if(!a||document.activeElement!==a) return [0,0,0];
+      a.value='Typ'; a.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true}));
+      const b=document.getElementById('gf-labed'); const onNext=b&&b!==a&&gf.lanes[2].label==='Typ'?1:0;
+      const dt=new DataTransfer(); dt.setData('text/plain','A\\nB\\nC\\n'); b.dispatchEvent(new ClipboardEvent('paste',{clipboardData:dt,bubbles:true,cancelable:true}));
+      return [1, onNext, gf.lanes.slice(3,6).map(l=>l.label).join('')==='ABC'&&!document.getElementById('gf-labed')?1:0]; })()""")
+    return [('invoerveld op het label', r[0], 1, 0), ('Tab: bewaard en volgende lane', r[1], 1, 0), ('geplakte lijst vult 3 lanen', r[2], 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

@@ -4857,5 +4857,10 @@
 "Nog geen gels bewaard.": "No gels saved yet.",
 "De bibliotheek is niet beschikbaar in deze browser.": "The library is not available in this browser.",
 "Bewaard in de bibliotheek.": "Saved to the library.",
-"Openen": "Open"
+"Openen": "Open",
+"Label van lane {#}": "Label of lane {#}",
+"{#} labels geplakt.": "{#} labels pasted.",
+"{#} bleven over: er zijn niet genoeg lanen.": "{#} left over: there are not enough lanes.",
+"Klik op een label boven de gel om het daar te typen; Tab gaat naar de volgende lane.": "Click a label above the gel to type it there; Tab moves to the next lane.",
+"Plak je een lijst (bijvoorbeeld een kolom uit Excel), dan vult die de volgende lanen.": "Paste a list (for example a column from Excel) and it fills the next lanes."
 }

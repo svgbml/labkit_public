@@ -53,6 +53,10 @@
     <p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">
       {{ t('Sleep de blauwe driehoekjes onder de gel om een lane te verschuiven; de oranje driehoekjes links zijn de ladderbanden.') }}
     </p>
+    <p style="font-size:12.5px;color:var(--muted);margin:6px 0 0">
+      {{ t('Klik op een label boven de gel om het daar te typen; Tab gaat naar de volgende lane.') }}
+      {{ t('Plak je een lijst (bijvoorbeeld een kolom uit Excel), dan vult die de volgende lanen.') }}
+    </p>
   </div>
 </template>
 
