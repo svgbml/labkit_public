@@ -33,8 +33,8 @@ export function enzInfo(name) {
 
 const IUPAC = {A: 'A', C: 'C', G: 'G', T: 'T', R: '[AG]', Y: '[CT]', S: '[CG]', W: '[AT]', K: '[GT]', M: '[AC]',
   B: '[CGT]', D: '[AGT]', H: '[ACT]', V: '[ACG]', N: '[ACGT]'};
-const IUC = {A: 'T', C: 'G', G: 'C', T: 'A', R: 'Y', Y: 'R', S: 'S', W: 'W', K: 'M', M: 'K', B: 'V', V: 'B', D: 'H', H: 'D', N: 'N'};
-const rcIupac = s => s.split('').reverse().map(b => IUC[b]).join('');
+export const IUC = {A: 'T', C: 'G', G: 'C', T: 'A', R: 'Y', Y: 'R', S: 'S', W: 'W', K: 'M', M: 'K', B: 'V', V: 'B', D: 'H', H: 'D', N: 'N'};
+export const rcIupac = s => s.split('').reverse().map(b => IUC[b]).join('');
 
 /* Knipplaatsen op de bovenste streng (0-based: er wordt geknipt vóór deze base). */
 export function cuts(seq, name, circular) {

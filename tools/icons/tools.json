@@ -88,5 +88,6 @@
  "gplan": "comb",
  "phadj": "ph",
  "medium": "cells",
- "plasmid": "plasmid"
+ "plasmid": "plasmid",
+ "seq": "strands"
 }

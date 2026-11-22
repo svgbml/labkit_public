@@ -4844,5 +4844,22 @@
 "Geen internetverbinding: Labkit werkt gewoon door": "No internet connection: Labkit keeps working",
 "Donkere kamer": "Dark room",
 "Donkere kamer: rood op zwart, spaart je nachtzicht": "Dark room: red on black, keeps your night vision",
-"Donkere kamer (rood op zwart, spaart je nachtzicht)": "Dark room (red on black, keeps your night vision)"
+"Donkere kamer (rood op zwart, spaart je nachtzicht)": "Dark room (red on black, keeps your night vision)",
+"Sequentie of (multi-)FASTA": "Sequence or (multi-)FASTA",
+"Bewerking": "Operation",
+"Reverse complement": "Reverse complement",
+"Omgekeerd (reverse)": "Reverse",
+"Complement": "Complement",
+"Alleen opschonen": "Clean up only",
+"Opgeschoond": "Cleaned up",
+"Cijfers, spaties en regeleinden gaan eruit; een FASTA-kopregel begint een nieuw record. Ambigue basen (R, Y, S, W, K, M, B, D, H, V, N) krijgen hun IUPAC-complement.": "Numbers, spaces and line breaks are removed; a FASTA header line begins a new record. Ambiguous bases (R, Y, S, W, K, M, B, D, H, V, N) get their IUPAC complement.",
+"Plak een sequentie of een FASTA-bestand.": "Paste a sequence or a FASTA file.",
+"De invoer bevatte U: gelezen als RNA en gerekend als T.": "The input contained U: read as RNA and treated as T.",
+"{#} teken(s) weggelaten die geen IUPAC-base zijn.": "{#} character(s) left out that are not IUPAC bases.",
+"nt in {#} records": "nt in {#} records",
+"Sequentie": "Sequence",
+"Een geplakte DNA- of RNA-sequentie opschonen, omkeren en complementeren, ook met ambigue basen en meerdere FASTA-records tegelijk.": "Clean up, reverse and complement a pasted DNA or RNA sequence, including ambiguous bases and several FASTA records at once.",
+"IUPAC-codes en hun complementen volgens de NC-IUB-aanbevelingen (Cornish-Bowden, Nucleic Acids Res {#}:{#}–{#}, {#}).": "IUPAC codes and their complements according to the NC-IUB recommendations (Cornish-Bowden, Nucleic Acids Res {#}:{#}–{#}, {#}).",
+"<span class=\"k\">{#}′→{#}′</span>Sequentie": "<span class=\"k\">{#}′→{#}′</span>Sequence",
+"nt": "nt"
 }

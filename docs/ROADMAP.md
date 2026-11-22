@@ -505,7 +505,7 @@ Ideas #369–#390. **S191 is cheap and independent**, so it is a good one to pul
 
 | Step | Ideas | What | Done when | Model |
 |---|---|---|---|---|
-| S191 | 369, 370 | New *Sequentie* tool: reverse, complement, reverse complement with full IUPAC handling; paste clean-up of numbers, spaces and FASTA headers, multi-FASTA record by record | Reverse complement of an ambiguous test sequence is correct | Sonnet |
+| S191 | 369, 370 | New *Sequentie* tool: reverse, complement, reverse complement with full IUPAC handling; paste clean-up of numbers, spaces and FASTA headers, multi-FASTA record by record | ✅ Nieuwe tool *Sequentie* (`src/tools/Seq.vue`, rekenwerk in `src/lib/seq.js`): reverse complement, reverse, complement of alleen opschonen, met de IUPAC-complementen uit `src/lib/digest.js`. Plakken haalt cijfers, spaties en regeleinden weg, telt andere tekens, leest U als RNA, neemt een GenBank-bestand als één record en doet een multi-FASTA record voor record. Validatie: ATGCRYSWKMBDHVN → NBDHVKMWSRYGCAT (Biopython) en een multi-FASTA | Sonnet |
 | S192 | 371, 372 | Output options (DNA/RNA, case, line width, plain or FASTA) and the facts panel (length, GC%, counts, MW, Tm) | GC% and MW match a validation case | Sonnet |
 | S193 | 373 | Six-frame translation with a genetic code choice, ORFs and stop codons marked | Known ORF found in a test sequence | Sonnet |
 | S194 | 374, 375, 376 | Restriction sites from the digest enzyme list (needs S45), send-to buttons, and receiving a selection from other tools | Sequence travels to the alignment tool | Sonnet |

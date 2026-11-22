@@ -162,7 +162,7 @@ const NEXT={
   facs:['plaat','viab'],dna:['oligo','pcr','gel'],oligo:['pcr','pcrcyclus'],pcr:['pcrcyclus','ppip','gplan'],pcrcyclus:['gradient','pprog','pcr'],
   gradient:['pcrcyclus','gel'],qpcr:['melt','stat'],melt:['qpcr','gel'],gel:['gplan','gelfoto','digest'],gelfoto:['gel','wb'],
   sds:['wb','purif'],wb:['curve','stat'],ligatie:['transf','digest'],transf:['ligatie','reeks'],cdna:['qplate','qpcr'],
-  qplate:['qpcr','ppip'],rnaq:['cdna','dna'],digest:['gel','ligatie'],rmp:['hwe','mix','kin'],strchk:['mix','rmp'],
+  qplate:['qpcr','ppip'],rnaq:['cdna','dna'],digest:['gel','ligatie'],seq:['digest','oligo','plasmid'],rmp:['hwe','mix','kin'],strchk:['mix','rmp'],
   bpa:['report','stat'],pmi:['ento','report'],ystr:['rmp','hwe'],kin:['rmp','hwe'],widmark:['report','sigfig'],
   stature:['report','stat'],ento:['pmi','report'],glass:['stat','munc'],hwe:['rmp','ystr'],mix:['rmp','strchk'],
   stat:['sigfig','bland','report'],bland:['mval','munc'],roc:['stat','elisa'],km:['stat','report'],sigfig:['munc','stat'],

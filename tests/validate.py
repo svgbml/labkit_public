@@ -1125,5 +1125,16 @@ def _(pg):
             ('totaal (mL)', rows[4], 500, 0.001)]
 
 
+# ---------------- Sequentie (S191–S194) ----------------
+@case('Sequentie', 'Reverse complement met ambigue basen', 'IUPAC-complementen volgens NC-IUB (Cornish-Bowden, Nucleic Acids Res 13:3021–3030, 1985); onafhankelijk nagerekend met Biopython Seq.reverse_complement(): ATGCRYSWKMBDHVN → NBDHVKMWSRYGCAT')
+def _(pg):
+    pg.evaluate("__go('seq');__set('sq-op','rc');__set('sq-in','>t\\n1 ATGC RYSW\\n9 KMBD HVN')")
+    rc = pg.evaluate("document.getElementById('sq-out').value")
+    pg.evaluate("__set('sq-in','>a\\nACGU\\n>b\\nGGA')")
+    multi = pg.evaluate("document.getElementById('sq-out').value")
+    return [('reverse complement gelijk', int(rc == 'NBDHVKMWSRYGCAT'), 1, 0),
+            ('multi-FASTA per record', int(multi == '>a_rc\nACGT\n>b_rc\nTCC'), 1, 0)]
+
+
 if __name__ == '__main__':
     main()
