@@ -519,6 +519,8 @@ html.darkroom img,html.darkroom canvas{filter:grayscale(1) sepia(1) hue-rotate(-
 /* S172 kleuren: tint gemengd met --surface, zodat --ink in alle thema's leesbaar blijft; .aln-cbs = Okabe-Ito.
    De viewer leest de kleur van .aln-sw en tekent die op het canvas .aln-bg. */
 .aln-bg{position:absolute;top:0;left:0}
+.k-bar{--c:var(--accent);--mix:100%}
+.aln-extra{font-weight:400;font-style:italic;color:var(--muted)}
 .aln-sw{position:absolute;visibility:hidden;background:color-mix(in srgb,var(--c) calc(var(--mix,40%) * var(--dim,1)),var(--surface))}
 html[data-theme=donker] .aln-view{--dim:.75}
 .k-cb{--c:#80a0f0}.k-cr{--c:#f01505}.k-cm{--c:#c048c0}.k-cg{--c:#15c015}.k-cp{--c:#f08080}.k-co{--c:#f09048}.k-cy{--c:#c0c000}.k-cc{--c:#15a4a4}

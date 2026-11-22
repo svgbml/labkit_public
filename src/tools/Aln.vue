@@ -26,6 +26,7 @@
             <option value="none">{{ t('Geen') }}</option>
           </select></div>
         <label class="chk" for="al-cbs"><input type="checkbox" id="al-cbs" v-model="cbs"> {{ t('Kleurenblind-veilig') }}</label>
+        <lk-field v-model="thr" :label="t('Drempel consensus')" for-id="al-thr" unit="%" inputmode="numeric"/>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Het formaat wordt aan de eerste regel herkend. Uitlijnen doe je met Clustal Omega bij EBI; download daar de uitkomst als .aln en open die hier.') }}</p>
     </div>
@@ -52,7 +53,8 @@
         <canvas ref="cv" class="aln-bg" :style="{width: vw + 'px', height: vh + 'px'}"></canvas>
         <div v-for="r in vis.rows" :key="r.i" class="aln-mono aln-seq" :style="{top: r.top + 'px', left: vis.left + 'px'}">{{ r.txt }}</div>
         <div class="aln-names" :style="{width: g.nameW + 'px'}">
-          <div v-for="r in vis.rows" :key="r.i" class="aln-mono aln-name" :style="{top: r.top + 'px'}" :title="m.names[r.i]">{{ m.names[r.i] }}</div>
+          <div v-for="r in vis.rows" :key="r.i" :class="['aln-mono', 'aln-name', {'aln-extra': r.x}]" :style="{top: r.top + 'px'}" :title="r.name">{{ r.name }}</div>
+          <div v-if="vis.plot != null" class="aln-mono aln-name aln-extra" :style="{top: vis.plot + 'px'}">{{ t('Conservering (%)') }}</div>
         </div>
         <div class="aln-ruler" :style="{height: RH + 'px'}">
           <span v-for="k in vis.ticks" :key="k.c" :style="{left: k.x + 'px'}">{{ k.c }}</span>
@@ -66,46 +68,55 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
-import {parseAlignment, alnType, alnColours, alnCls} from '../lib/alignment.js';
+import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile, alnConsensus} from '../lib/alignment.js';
 
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0));
-const CH = 18, RH = 22, MAXNAME = 24; /* rijhoogte, hoogte van de liniaal, naamkolom in tekens */
+const CH = 18, RH = 22, PH = 32, MAXNAME = 24; /* rijhoogte, hoogte van de liniaal en van de plot, naamkolom in tekens */
 
 export default {
   name: 'Aln',
   data() {
     const st = typeof storeGet === 'function' ? storeGet() : {};
     return {txt: st['al-in'] != null ? String(st['al-in']) : '', col: st['al-col'] != null ? String(st['al-col']) : 'auto',
-      cbs: !!st['al-cbs'], RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
+      cbs: !!st['al-cbs'], thr: st['al-thr'] != null ? String(st['al-thr']) : '50', RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
   },
   computed: {
     m() { return parseAlignment(this.txt); },
     /* het gekozen schema (Automatisch: nucleotiden of ClustalX naar het type) en zijn kolomtabel */
     sch() { return this.col === 'auto' ? (alnType(this.m) === 'nt' ? 'nt' : 'clustalx') : this.col; },
     tab() { return this.sch === 'none' ? undefined : alnColours(this.m, this.sch); },
+    /* onder de sequenties: de * : . -regel, de consensus en een plot van het aandeel van de meest voorkomende letter (S173) */
+    prof() { return alnProfile(this.m); },
+    cons() { return alnConservation(this.m); },
+    consensus() { const v = num(this.thr); return alnConsensus(this.m, this.prof, isFinite(v) ? v : 50); },
     /* de volle maat van het raster */
     g() {
       const m = this.m, nameW = Math.ceil(Math.min(MAXNAME, Math.max(6, ...m.names.map(n => n.length))) * this.cw) + 14;
-      return {nameW, W: nameW + m.len * this.cw, H: RH + m.names.length * CH};
+      return {nameW, W: nameW + m.len * this.cw, H: RH + (m.names.length + 2) * CH + PH};
     },
     viewH() { return Math.min(this.g.H + 18, 540); },
     /* alleen wat in beeld is: rijen r0..r1, kolommen c0..c1 (0-based, c1 exclusief) */
     vis() {
       const m = this.m, g = this.g, cw = this.cw;
       const c0 = Math.max(0, Math.floor(this.sx / cw)), c1 = Math.min(m.len, Math.ceil((this.sx + this.vw - g.nameW) / cw) + 1);
-      const r0 = Math.max(0, Math.floor(this.sy / CH)), r1 = Math.min(m.names.length, Math.ceil((this.sy + this.vh - RH) / CH) + 1);
-      const rows = [];
-      for (let i = r0; i < r1; i++) rows.push({i, top: RH + i * CH - this.sy, txt: m.seqs[i].slice(c0, c1)});
+      const n = m.names.length, r0 = Math.max(0, Math.floor(this.sy / CH)), r1 = Math.min(n + 2, Math.ceil((this.sy + this.vh - RH) / CH) + 1);
+      const rows = [], extra = [[this.t('Conservering'), this.cons], [this.t('Consensus'), this.consensus]];
+      for (let i = r0; i < r1; i++) {
+        const x = i >= n, [name, s] = x ? extra[i - n] : [m.names[i], m.seqs[i]];
+        rows.push({i, x, name, top: RH + i * CH - this.sy, txt: s.slice(c0, c1)});
+      }
+      const pt = RH + (n + 2) * CH - this.sy, plot = pt < this.vh && pt + PH > RH ? pt : null;
       /* een getal boven elke tiende kolom, in het midden van die kolom */
       const ticks = [];
       for (let c = Math.ceil((c0 + 1) / 10) * 10; c <= c1; c += 10) ticks.push({c, x: g.nameW + (c - 0.5) * cw - this.sx});
-      return {rows, ticks, c0, c1, left: g.nameW + c0 * cw - this.sx};
+      return {rows, ticks, plot, c0, c1, left: g.nameW + c0 * cw - this.sx};
     },
     rows() {
       const m = this.m, t = this.t, ty = alnType(m);
       return [[t('Formaat'), FMT[m.format]], [t('Sequenties'), N(m.names.length)],
         [t('Lengte'), N(m.len) + ' ' + t('kolommen')],
+        [t('Volledig geconserveerd (*)'), N(this.cons.split('*').length - 1) + ' ' + t('kolommen')],
         [t('Type'), ty === 'nt' ? t('DNA/RNA') : ty === 'aa' ? t('eiwit') : '–']];
     },
     cols() { return [{h: this.t('Naam')}, {h: this.t('Zonder gaten'), num: true}, {h: this.t('Gaten'), num: true}]; },
@@ -159,8 +170,13 @@ export default {
       if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
       const x = cv.getContext('2d'), v = this.vis, cw = this.cw;
       x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, this.vw, this.vh);
+      if (v.plot != null) {
+        x.fillStyle = this.shade('bar');
+        for (let c = v.c0; c < v.c1; c++) { const h = this.prof.frac[c] * (PH - 6); x.fillRect(v.left + (c - v.c0) * cw + 1, v.plot + PH - 3 - h, Math.max(1, cw - 2), h); }
+      }
       if (this.tab === undefined) return;
       for (const r of v.rows) {
+        if (r.x) continue;
         let c = v.c0;
         while (c < v.c1) {
           const k = this.cellCls(r.i, c); let e = c + 1;

@@ -1096,7 +1096,7 @@ def _(pg):
       const C=(a,b)=>(Math.max(a,b)+.05)/(Math.min(a,b)+.05), vm=__alnVm, v=vm.vis, view=document.getElementById('al-view');
       const sf=L(getComputedStyle(view).backgroundColor), ink=L(getComputedStyle(view.querySelector('.aln-seq')).color);
       const r={chars:{}, txt:99, bg:99, all:'', px:0};
-      for(const row of v.rows) for(let c=v.c0;c<v.c1;c++){ const ch=vm.m.seqs[row.i][c], k=vm.cellCls(row.i,c); r.all+=ch;
+      for(const row of v.rows.filter(r=>!r.x)) for(let c=v.c0;c<v.c1;c++){ const ch=vm.m.seqs[row.i][c], k=vm.cellCls(row.i,c); r.all+=ch;
         if(!k) continue; r.chars[k]=(r.chars[k]||'')+ch; const b=L(vm.shade(k)); r.txt=Math.min(r.txt,C(b,ink)); r.bg=Math.min(r.bg,C(b,sf)); }
       /* steekproef: het midden van de eerste gekleurde cel op het canvas heeft die tint */
       const row=v.rows[0], c=[...Array(v.c1-v.c0).keys()].map(d=>v.c0+d).find(c=>vm.cellCls(row.i,c)), cv=vm.$refs.cv, d=devicePixelRatio||1;
@@ -1127,6 +1127,22 @@ def _(pg):
             ('laagste tekstcontrast ≥ 4,5:1', 1 if worst_txt >= 4.5 else 0, 1, 0),
             ('elke tint zichtbaar tegen de achtergrond (≥ 1,1:1)', 1 if worst_bg >= 1.1 else 0, 1, 0),
             ('canvas toont de tint van de cel', px, 30, 0)]
+
+@case('Alignment bekijken', 'Conservering tegen de * : . -regel van Clustal', 'Clustal-uitvoer uit de testsuite van Biopython (tests/fixtures/aln: opuntia.aln, DNA uit Clustal W 1.81; hedgehog.aln, eiwit uit Clustal 2.0.9; clustalw.aln, eiwit uit Clustal W 1.81) met de * : . -regel die Clustal zelf schreef; groepen volgens Clustal W/X (Thompson, Higgins & Gibson 1994; Larkin e.a. 2007). Consensus bij een drempel van 100%: precies de kolommen met *')
+def _(pg):
+    D = ROOT / 'tests' / 'fixtures' / 'aln'
+    pg.evaluate("__go('aln')")
+    out = []
+    for f in ('opuntia.aln', 'hedgehog.aln', 'clustalw.aln'):
+        pg.evaluate("t=>{__set('al-in',t);__set('al-thr','100')}", (D / f).read_text(encoding='utf-8')); pg.wait_for_timeout(150)
+        r = pg.evaluate("()=>{const m=__alnVm.m, c=m.cons.padEnd(m.len,' '), k=__alnVm.cons;"
+                        "return {len:m.len, same:[...k].filter((x,i)=>x===c[i]).length, star:c.split('*').length-1,"
+                        "cons100:[...__alnVm.consensus].filter(x=>!'xn-'.includes(x)).length}}")
+        out += [(f + ': kolommen gelijk aan Clustal', r['same'], r['len'], 0),
+                (f + ': volledig geconserveerd (*)', pg.evaluate("__kv('#al-out','Volledig geconserveerd')"), r['star'], 0),
+                (f + ': consensus bij 100%', r['cons100'], r['star'], 0)]
+    pg.evaluate("()=>__set('al-thr','50')")
+    return out
 
 @case('Chromatogram', 'ABIF-bestand 3730.ab1 inlezen', 'Biopython 1.84, Tests/test_SeqIO_AbiIO.py (data_3730) en het bestand zelf (tests/fixtures/3730.ab1, Applied Biosystems 3730): monster 226032_C-ME-18_pCAGseqF, 1165 basen, eerste 12 basen GGGCGAGCKYYA; ABIF-indeling volgens de Applied Biosystems ABIF File Format Specification (2009)')
 def _(pg):

@@ -254,3 +254,37 @@ export function alnColours(a, scheme) {
 }
 /* klasse van residu r in kolom c (of '') bij een tabel van alnColours */
 export const alnCls = (tab, c, r) => (tab ? tab[c][r.toUpperCase()] : NUC[r.toUpperCase()]) || '';
+
+/* ---------- Conservering en consensus (S173) ----------
+   De * : . -regel zoals Clustal W/X hem schrijft (Thompson e.a. 1994; Larkin e.a. 2007): '*' als de
+   kolom overal dezelfde letter heeft, ':' als alle letters in één 'sterke' groep vallen, '.' bij
+   één 'zwakke' groep, anders een spatie. Een gat in de kolom geeft altijd een spatie. Bij DNA/RNA
+   schrijft Clustal alleen '*'. */
+const STRONG = ['STA', 'NEQK', 'NHQK', 'NDEQ', 'QHRK', 'MILV', 'MILF', 'HY', 'FYW'];
+const WEAK = ['CSA', 'ATV', 'SAG', 'STNK', 'STPA', 'SGND', 'SNDEQK', 'NDEQHK', 'NEQHRK', 'FVLIM', 'HFY'];
+export function alnConservation(a) {
+  const nt = alnType(a) === 'nt', in1 = (set, gs) => gs.some(g => [...set].every(c => g.includes(c)));
+  let out = '';
+  for (let c = 0; c < a.len; c++) {
+    const set = new Set(a.seqs.map(s => s[c].toUpperCase()));
+    out += set.has('-') || !set.size ? ' ' : set.size === 1 ? '*' : nt ? ' ' : in1(set, STRONG) ? ':' : in1(set, WEAK) ? '.' : ' ';
+  }
+  return out;
+}
+/* per kolom de meest voorkomende letter (geen gat) en zijn aandeel over alle sequenties (0–1);
+   de consensus is die letter als het aandeel de drempel haalt, anders x (eiwit) of n (DNA/RNA),
+   zoals EMBOSS cons */
+export function alnProfile(a) {
+  const n = a.seqs.length, top = [], frac = [];
+  for (let c = 0; c < a.len; c++) {
+    const cnt = {};
+    let t = '-', k = 0;
+    for (const s of a.seqs) { const r = s[c].toUpperCase(); if (r !== '-' && (cnt[r] = (cnt[r] || 0) + 1) > k) { t = r; k = cnt[r]; } }
+    top.push(t); frac.push(n ? k / n : 0);
+  }
+  return {top, frac};
+}
+export function alnConsensus(a, p, thr) {
+  const no = alnType(a) === 'nt' ? 'n' : 'x';
+  return p.top.map((t, c) => t === '-' ? '-' : p.frac[c] * 100 >= thr ? t : no).join('');
+}

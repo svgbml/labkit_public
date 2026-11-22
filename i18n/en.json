@@ -4989,5 +4989,10 @@
 "ClustalX (eiwit)": "ClustalX (protein)",
 "Nucleotiden": "Nucleotides",
 "Identiteit": "Identity",
-"Geen": "None"
+"Geen": "None",
+"Drempel consensus": "Consensus threshold",
+"Conservering (%)": "Conservation (%)",
+"Conservering": "Conservation",
+"Consensus": "Consensus",
+"Volledig geconserveerd (*)": "Fully conserved (*)"
 }
