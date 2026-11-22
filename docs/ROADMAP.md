@@ -10,7 +10,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 - **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (53 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (24 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **114 done, 156 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **120 done, 150 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-21)
 
@@ -20,7 +20,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 1 navigation and app shell | S1–S12 | ✅ done |
 | Phase 2 preparation, gels | S13–S20 | ✅ done |
 | Phase 3 picture tools and plates | S21–S36 | ✅ done |
-| Phase 4 recipes and sequences | S37–S47 | **part done:** S37–S40 and S42 ✅, S41 and S43–S47 open |
+| Phase 4 recipes and sequences | S37–S47 | ✅ done (S41–S47, 2026-11-22) |
 | Phases 5–11 | S48–S146 | ⏳ not started (S45, S54, S82, S91, S93 partly there) |
 | Phases 12–14 Sanger, alignment, sequence toolbox | S147–S201 | ⏳ not started |
 | Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | ✅ done (batches V1a–V7 merged on 2026-11-21, S263 the same day) |
@@ -31,13 +31,11 @@ in the history has its ✅. Nothing is ticked that wasn't done, and nothing done
 Releases 1.4–1.18 were built before this roadmap, so a few open steps are already partly covered.
 Those rows now say so in *(partly there: …)*, so a session can build on that instead of starting
 over:
-- **S45:** the buffer check for a double digest exists in *Restrictiedigestie*. Cutting a pasted sequence does not.
-- **S54:** the pipette limit already shows in *PCR-mastermix*, *Ligatie*, *SDS-PAGE monsters*, *cDNA-synthese*, *Primers oplossen* and *Verdunning*.
 - **S82:** the canvas-to-SVG recorder from S21 exists, but only 14 of the 47 canvases have the export bar.
 - **S91:** *Standaardcurve* reads a pasted plate grid, but not per instrument.
 - **S93:** *qPCR-analyse* reads a pasted Ct table by its header, but not per instrument.
 
-At the last full `python tools/check.py` (2026-11-21, after S272, end of phase 16): **286 of 286 validation checks**, 0 layout problems in Dutch and 2 in English (the known label overflow in *PCR-mastermix*), 0 untranslated texts (including the new leftover-Dutch check), start-up 413/459 ms. `tests/robust_audit.py` could not finish on this machine: the browser runs out of memory while loading a page (see *Known bugs*). By the owner's decision (2026-11-21) that failure is **not blocking** on this machine and the test is not rerun here; it still runs in CI on GitHub.
+At the last full `python tools/check.py` (2026-11-22, after S41–S47, end of phase 4): **295 of 295 validation checks**, 0 layout problems in Dutch and 2 in English (the known label overflow in *PCR-mastermix*: *Reaction volume* and *Template per reaction*), 0 untranslated texts, 0 robustness problems and start-up 573/603 ms. `tests/robust_audit.py` did finish this time on this machine (239 s); the memory problem of 2026-11-21 did not come back.
 
 ### Vue migration: how far it is
 
@@ -111,9 +109,9 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | K2 ✅ | Opus 5.5 | S267 (Opus 5) shared helpers, S268 engines, S269 (Sonnet) `tools/nt/` into `src/` and `insert_tools.py` retired | K1 | — |
 | K3 ✅ | Opus 5.5 | S270 (Opus 5) static text through `t()`, S271 DOM translation layer removed, S272 (Sonnet) rules and docs | K2 | — |
 | **Wave 3: finish phase 4** | | | | |
-| P1 | Opus 5 | S42, S43 (Sonnet), S44, S45: primers, in-silico PCR and digest | K3 | E2, *any time* batches |
-| P2 | Sonnet | S41, S47: overage switch, material list and protocol export | K3 | P1 |
-| P3 | Opus 5.5 | S46 plasmid map (new tool, Vue) | S45 | — |
+| P1 ✅ | Opus 5 | S42, S43 (Sonnet), S44, S45: primers, in-silico PCR and digest | K3 | E2, *any time* batches |
+| P2 ✅ | Sonnet | S41, S47: overage switch, material list and protocol export | K3 | P1 |
+| P3 ✅ | Opus 5.5 | S46 plasmid map (new tool, Vue) | S45 | — |
 | **Wave 4: execution and gel editor** | | | | |
 | E1 | Opus 5.5 | S48 bench shell, S49 (Opus 5), S50 (Sonnet) | K3 | G1a |
 | E2 | Sonnet | S51–S55, S58 | E1 | P1, G1a, G1b |
@@ -262,13 +260,13 @@ safety nets), then the rest wave by wave.
 | S38 | 40, 153 | Recipe library UI in *Oplossing & buffer*: scale to volume, tick-off per component, printable card | ✅ Zes knoppen voor een snel eindvolume (50–500 mL, 1 en 2 L); de massa schaalt lineair mee omdat een recept op concentratie staat. Een vinkje per component met voortgang ("2 van de 4 afgewogen") en een gedimde rij als hij af is; de vinkjes gaan uit zodra het recept of het volume verandert. "Receptkaart afdrukken" geeft een A4-kaart met het volume, een tabel met concentratie, massa en een leeg afvinkvakje, de werkwijze, de bron en een regel voor bereider, datum en houdbaarheid | — |
 | S39 | 43, 45, 154 | Hydrate options, autoclave/filter advice, weighing order tips | ✅ Hydraatkeuze bestond al (`HYD`); de bibliotheek vult hem nu aan met soda (Na₂CO₃ watervrij / ·H₂O / ·10H₂O) via `RECHYD`. `RECSTER` geeft per recept steriliteitsadvies met een reden: autoclaveerbaar of juist niet (Tween en SDS breken af, methanol is brandbaar, carbonaat verliest CO₂), antibiotica onder 50 °C en glucose in SOC apart steriel gefiltreerd. Balansadvies per component uit het 2s-criterium (USP <41>): onder 20 mg geen 1% op een 0,1 mg-balans, dus stock maken; tot 2 g analytische balans; daarboven is een precisiebalans genoeg. Daaronder de weegorde: eerst het kleine werk op de analytische balans | — |
 | S40 | 44, 53 | pH adjustment helper and cell culture media prep | ✅ Twee nieuwe tools, de eerste die als Vue-component zijn gebouwd in plaats van omgezet. *pH bijstellen*: hoeveel sterk zuur of sterke base een buffer nodig heeft om op de doel-pH te komen, uit f(zuur) = 1/(1+10^(pH−pKₐ)), met 8 buffersystemen, beide richtingen (vanaf de vrije base of het vrije zuur) en een waarschuwing als de doel-pH meer dan 1 eenheid van de pKₐ ligt. Gevalideerd tegen de Tris-Cl-tabel van Sambrook & Russell (70/60/42 mL geconcentreerd HCl → 68/61/44, binnen 3–5%, wat klopt voor een schatting zonder activiteitscoëfficiënten) en tegen het halfequivalentiepunt van acetaat. *Celkweekmedium klaarmaken*: basismedium, FBS, pen/strep, glutamine en een eigen supplement voor elk eindvolume, met percentages over het eindvolume | — |
-| S41 | 51, 52, 54 | Overage switch on all master mixes, antibody dilution planner, transformation prep card | 3 features | Sonnet |
+| S41 | 51, 52, 54 | Overage switch on all master mixes, antibody dilution planner, transformation prep card | ✅ Keuze "%" of "+ reacties/putjes" naast de marge in *PCR-mastermix*, *FACS-kleuring* en *Cellen uitzaaien* (standaard %, dus bestaande uitkomsten blijven gelijk), met de redenering eronder. *Western blot* kreeg een antilichaamverdunning (datasheetverdunning, aantal blots, volume, marge) en *Transformatie* een voorbereidingskaart met tijden en temperaturen (Hanahan 1983 / NEB C2987) | — |
 | S42 | 46 | Primer card (Tm, GC%, length, self-dimer, hairpin) in *Primers oplossen* | ✅ Optionele kolom *Sequentie* in de tabel; per primer een kaart met lengte, GC%, Tm (`primerInfo`, 50 mM Na⁺/1,5 mM Mg²⁺/0,8 mM dNTP/0,2 µM), 3′-GC-klem, zelfdimeer en haarspeld (ΔG37 in `src/tools/primerCheck.js`, SantaLucia 1998 en SantaLucia & Hicks 2004, grenzen van Premier Biosoft) en de knop *Primerkaart afdrukken*. `dimer(a, b)` werkt ook voor twee primers (voor S43). Validatie: zelfdimeer −7,20 en haarspeld −3,15 kcal/mol | — |
-| S43 | 47 | Primer pair checker (Tm difference, cross-dimers) | Warnings shown | Sonnet |
-| S44 | 48, 193, 194 | In-silico PCR on a pasted template; annealing temperature into PCR cycle and gradient PCR | Product size + binding sites | Opus 5 |
-| S45 | 49, 207 | In-silico digest with an enzyme list (~40 enzymes), double-digest buffer check, send fragments to the predicted gel *(partly there: the buffer check for a double digest exists in Restrictiedigestie)* | Fragments match NEBcutter for a test plasmid | Opus 5 |
-| S46 | 50 | Plasmid map (circular drawing, features, sites, primers) from sequence or GenBank | Map export | Opus 5.5 |
-| S47 | 56, 58, 59 | Material list, protocol export of preparation outputs, QR code on printed protocols | One printable protocol | Sonnet |
+| S43 | 47 | Primer pair checker (Tm difference, cross-dimers) | ✅ *PCR-cyclus* toont per primer zelfdimeer en haarspeld en daarnaast de kruisdimeer F × R (ΔG37 uit `primerCheck.js`), met een waarschuwing per geval; ΔTm stond er al. Validatie: kruisdimeer −5,20 kcal/mol | — |
+| S44 | 48, 193, 194 | In-silico PCR on a pasted template; annealing temperature into PCR cycle and gradient PCR | ✅ *PCR-cyclus* heeft een blok in-silico PCR (`seqTools.js`: binding op het 3′-anker van 15 basen, staart telt als mismatch): bindplaatsen, producten, als ampliconlengte overnemen en naar de Gelplanner. *Gradiënt-PCR* neemt bereik, Tm en lengte over uit PCR-cyclus en tekent een schematische gel per kolom. Validatie: M13/pUC op pUC19 geeft 103 bp, één product | — |
+| S45 | 49, 207 | In-silico digest with an enzyme list (~40 enzymes), double-digest buffer check, send fragments to the predicted gel | ✅ *Restrictiedigestie* knipt een geplakte sequentie (lineair of circulair) met 55 enzymen uit `ENZ` in `seqTools.js`, toont de knipplaatsen en de fragmenten en stuurt ze als laan naar de Gelplanner; pUC19 zit als voorbeeld in de app. Validatie tegen pUC19 (GenBank L09137.2): EcoRI+HindIII 2635 + 51 bp, PvuII 2364 + 322 bp | — |
+| S46 | 50 | Plasmid map (circular drawing, features, sites, primers) from sequence or GenBank | ✅ Nieuwe tool *Plasmidekaart* (`Pmap.vue`, `plasmid.js`): cirkel met schaalstreepjes, kenmerken uit een GenBank-bestand als pijlen, knipplaatsen van enzymen die hoogstens n keer knippen (labels links en rechts uit elkaar geduwd) en de bindplaatsen van je primers. Export via de gewone knoppenbalk (PNG, SVG, kopiëren, afdrukken) | — |
+| S47 | 56, 58, 59 | Material list, protocol export of preparation outputs, QR code on printed protocols | ✅ *Rapport* heeft twee vinkjes erbij: een materiaallijst vooraan (uit de uitkomst- en componenttabellen van de gekozen tools, met aanvinkvakjes, zonder monsternamen en totalen) en een QR-code onder elke tool die dezelfde invoer weer opent (`calcLink` + de bestaande `drawQR`). Het protocol zelf (`rpDoc`) bestond al | — |
 
 ## Phase 5: execution (13 steps)
 | Step | Ideas | What | Done when | Model |
