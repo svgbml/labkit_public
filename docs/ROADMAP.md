@@ -118,10 +118,10 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | **Wave 4: execution and gel editor** | | | | |
 | E1 ✅ | Opus 5.5 | S48 bench shell, S49 (Opus 5), S50 (Sonnet) | K3 | G1a |
 | E2 ✅ | Sonnet | S51–S55, S58 | E1 | P1, G1a, G1b |
-| E3 | Opus 5 | S56, S57, S60 | E1 | anything except E4, R1, R2a, R3 |
+| E3 ✅ | Opus 5 | S56, S57, S60 | E1 | anything except E4, R1, R2a, R3 |
 | E4 | Opus 5.5 | S59 colony counting, S61 multi-device sync | E1; S104 for the CFU link | anything except E3, R1 |
 | G1a ✅ | Opus 5 | S62–S65 (S63, S65 by Sonnet) | K3 | anything except Q2 |
-| G1b | Opus 5 | S66–S68 (S66, S68 by Sonnet) | G1a | anything except Q2 |
+| G1b ✅ | Opus 5 | S66–S68 (S66, S68 by Sonnet) | G1a | anything except Q2 |
 | G2 | Opus 5.5 | S69–S74 (S71, S72 are Opus 5): guided mode, canvas-first layout, direct manipulation, undo | G1b | anything except Q2 |
 | G3 | Opus 5.5 | S75–S79 (S75, S78 are Opus 5) | G2 | anything except Q2, C2 |
 | **Wave 5: charts, data, rework, workflows** | | | | |
