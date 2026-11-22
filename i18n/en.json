@@ -4994,5 +4994,17 @@
 "Passeren": "Passage",
 "Herinnering bij de volgende passage": "Reminder at the next passage",
 "Herinnering gezet; hij gaat af zolang Labkit open is (ook in een andere tool). Je ziet hem bij Timers.": "Reminder set; it goes off while Labkit is open (also in another tool). You can see it under Timers.",
-"De volgende passage is nu al; er is niets te herinneren.": "The next passage is now; there is nothing to remind you of."
+"De volgende passage is nu al; er is niets te herinneren.": "The next passage is now; there is nothing to remind you of.",
+"Doelwaarde (voorspelling)": "Target value (prediction)",
+"+ Meting nu": "+ Reading now",
+"Live stoppen": "Stop live",
+"Live: \"+ Meting nu\" zet een meetpunt op de verstreken tijd sinds de start (de eerste keer telt de klok door vanaf het laatste meetpunt) en de voorspelling wordt bij elke meting opnieuw berekend.": "Live: \"+ Reading now\" adds a point at the time elapsed since the start (the first time, the clock continues from the last point) and the prediction is recalculated with every reading.",
+"De doelwaarde is bereikt.": "The target value has been reached.",
+"De laatste meting ligt na de exponentiële fase; de voorspelling gaat uit van verdere exponentiële groei en is daar te vroeg.": "The last reading lies after the exponential phase; the prediction assumes continued exponential growth and is too early there.",
+"Herinnering bij de doelwaarde": "Reminder at the target value",
+"Herinnering gezet; je ziet hem bij Timers.": "Reminder set; you can see it under Timers.",
+"Doelwaarde bereikt bij": "Target value reached at",
+"Nog te gaan": "Remaining",
+"Verwacht om": "Expected at",
+"doelwaarde": "target value"
 }
