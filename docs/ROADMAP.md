@@ -21,7 +21,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 2 preparation, gels | S13–S20 | ✅ done |
 | Phase 3 picture tools and plates | S21–S36 | ✅ done |
 | Phase 4 recipes and sequences | S37–S47 | **part done:** S37–S40 ✅, S41–S47 open |
-| Phases 5–11 | S48–S146 | ⏳ S48–S50 done (batch E1, 2026-11-22); the rest not started (S54, S82, S91, S93 partly there) |
+| Phases 5–11 | S48–S146 | ⏳ S48–S55 and S58 done (batches E1 and E2, 2026-11-22); the rest not started (S82, S91, S93 partly there) |
 | Phases 12–14 Sanger, alignment, sequence toolbox | S147–S201 | ⏳ not started |
 | Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | ✅ done (batches V1a–V7 merged on 2026-11-21, S263 the same day) |
 | Phase 16 one source, one translation path | S264–S272 | ✅ done (batches K1–K3, 2026-11-21; replaces S143–S146) |
@@ -37,7 +37,7 @@ over:
 - **S91:** *Standaardcurve* reads a pasted plate grid, but not per instrument.
 - **S93:** *qPCR-analyse* reads a pasted Ct table by its header, but not per instrument.
 
-At the last full `python tools/check.py` (2026-11-22, after batch E1, S48–S50): **324 of 324 validation checks**, **0 layout problems in Dutch and in English**, 0 untranslated texts and 0 robustness problems; `tests/robust_audit.py` finished on this machine. The two English label overflows in *PCR-mastermix* are gone: the inline `flex:1` on the field block overrode `.row>.fields{flex:1 1 280px}`, so on a phone the wider English recipe names squeezed the block to 3 px.
+At the last full `python tools/check.py` (2026-11-22, after batch E2, S51–S55 and S58): **329 of 329 validation checks**, **0 layout problems in Dutch and in English**, 0 untranslated texts and 0 robustness problems; `tests/robust_audit.py` finished on this machine. The two English label overflows in *PCR-mastermix* are gone: the inline `flex:1` on the field block overrode `.row>.fields{flex:1 1 280px}`, so on a phone the wider English recipe names squeezed the block to 3 px.
 
 ### Vue migration: how far it is
 
@@ -72,12 +72,13 @@ following `CLAUDE.md`."* The session:
 - stops at the end of the batch, or earlier if something it needs isn't done.
 
 **Running them side by side.** Every session appends to `i18n/en.json`, rebuilds
-`web/index.html` and `build/app.bundle.js`, and ticks off rows in this file, so two sessions
+`web/index.html` and `build/app.bundle.js`, and ticks off rows in this file, so parallel sessions
 always meet in those files. Those conflicts are easy to resolve (regenerate, keep both rows), but
 resolving them costs usage, and with one shared usage limit parallel sessions only spend it
 faster. So:
-- Run **one session at a time, at most two**, and two only when the column *Parallel with* allows it.
-- Merge one before starting the next.
+- Run **at most four sessions at a time**, and only batches that may all run together: the column *Parallel with* must allow every pair in the group. *Anything* covers every batch except the ones named after *except*, and a pair is ruled out when either batch names the other. Those exceptions are batches that change the same tool or engine, such as the bench, the gel editor or the statistics tool. A batch whose column says "—" changes something every tool uses (the chart helper, data flow between tools, start-up and loading), so it always runs alone. *Needs* still decides when a batch can start.
+- Give each session its own worktree or cloud session.
+- Merge them one at a time. Before the next one merges, it takes in what was merged and regenerates `build/app.bundle.js`, `web/index.html` and `web/i18n-en.js`.
 
 **Size.** A batch is **at most 6 steps** (about 1.5–2 hours). Usage per step rises as a session
 gets longer, because every turn resends the whole context, so two short sessions cost less than
@@ -116,45 +117,45 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | P3 ✅ | Opus 5.5 | S46 plasmid map (new tool, Vue) | S45 | — |
 | **Wave 4: execution and gel editor** | | | | |
 | E1 ✅ | Opus 5.5 | S48 bench shell, S49 (Opus 5), S50 (Sonnet) | K3 | G1a |
-| E2 | Sonnet | S51–S55, S58 | E1 | P1, G1a, G1b |
-| E3 | Opus 5 | S56, S57, S60 | E1 | G1a, G1b |
-| E4 | Opus 5.5 | S59 colony counting, S61 multi-device sync | E1; S104 for the CFU link | — |
-| G1a | Opus 5 | S62–S65 (S63, S65 by Sonnet) | K3 | E1–E3 |
-| G1b | Opus 5 | S66–S68 (S66, S68 by Sonnet) | G1a | E2, E3 |
-| G2 | Opus 5.5 | S69–S74 (S71, S72 are Opus 5): guided mode, canvas-first layout, direct manipulation, undo | G1b | — |
-| G3 | Opus 5.5 | S75–S79 (S75, S78 are Opus 5) | G2 | — |
+| E2 ✅ | Sonnet | S51–S55, S58 | E1 | P1, G1a, G1b |
+| E3 | Opus 5 | S56, S57, S60 | E1 | anything except E4, R1, R2a, R3 |
+| E4 | Opus 5.5 | S59 colony counting, S61 multi-device sync | E1; S104 for the CFU link | anything except E3, R1 |
+| G1a | Opus 5 | S62–S65 (S63, S65 by Sonnet) | K3 | anything except Q2 |
+| G1b | Opus 5 | S66–S68 (S66, S68 by Sonnet) | G1a | anything except Q2 |
+| G2 | Opus 5.5 | S69–S74 (S71, S72 are Opus 5): guided mode, canvas-first layout, direct manipulation, undo | G1b | anything except Q2 |
+| G3 | Opus 5.5 | S75–S79 (S75, S78 are Opus 5) | G2 | anything except Q2, C2 |
 | **Wave 5: charts, data, rework, workflows** | | | | |
 | C1a | Opus 5.5 | S80 chart style system, then S81–S84 (Opus 5 / Sonnet) | K3 | — |
-| C1b | Opus 5 | S85–S88 | C1a | R1, R2a |
-| C2 | Opus 5.5 | S89–S90 figure maker (new tool, Vue) | C1b | R1, R2a, R2b |
-| C3 | Opus 5 | S91–S93, S96: imports and core-calculator extras | C1b | R1 |
-| C4 | Sonnet | S94, S95 | C3 | R1, R2a, R2b |
-| R1 | Sonnet | S97, S98, S101–S104 | K3 | C1b–C4 |
-| R2a | Sonnet | S106–S110 | K3 | C1b, C2, C4 |
-| R2b | Sonnet | S111, S112, S115, S116 | K3 | C2, C4 |
-| R3 | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | — |
+| C1b | Opus 5 | S85–S88 | C1a | anything except R3 |
+| C2 | Opus 5.5 | S89–S90 figure maker (new tool, Vue) | C1b | anything except G3 |
+| C3 | Opus 5 | S91–S93, S96: imports and core-calculator extras | C1b | anything except R3 |
+| C4 | Sonnet | S94, S95 | C3 | anything |
+| R1 | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 |
+| R2a | Sonnet | S106–S110 | K3 | anything except E3 |
+| R2b | Sonnet | S111, S112, S115, S116 | K3 | anything |
+| R3 | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 |
 | W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — |
 | **Wave 6: performance and quality** | | | | |
 | Q1a | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything |
 | Q1b | Sonnet | S138, S139, S141 | K3 (then *any time*) | anything |
-| Q2 | Opus 5 | S140, S142 | K3 | — |
+| Q2 | Opus 5 | S140, S142 | K3 | anything except G1a–G3 |
 | F1a | Opus 5.5 | **Re-plan phase 10 first** (lazy init and DOM templates may be largely solved by mounting a component only when its tool opens, which phase 16 makes possible), then S125–S127 | K3 | — |
 | F1b | Opus 5 | S122–S124, S128 | F1a | — |
 | F1c | Opus 5.5 | S129–S133 (S130, S131 are Opus 5) | F1b | — |
 | **Any time (after K3): new tools, built in Vue** | | | | |
 | SQ1 | Sonnet | S191–S193 sequence toolbox; S194 after S45 | K3 | anything |
-| SQ2 | Opus 5 | S195, S198, then S196, S197 (Sonnet): NCBI switch, cache, lookups | SQ1 | SA1a, AL1 |
-| SA1a | Opus 5 | S147–S152 chromatogram reader (S149, S151, S152 by Sonnet) | K3 | SQ1, AL1 |
-| SA1b | Opus 5 | S153–S157 (S153, S154, S156, S157 by Sonnet) | SA1a | SQ1, AL1 |
-| SA2 | Opus 5.5 | S158–S161 (S159, S161 are Opus 5): alignment to the reference, assay format | SA1b | — |
-| SA3 | Sonnet | S162, S164–S168 (S166 by Haiku): batch and HIrisPlex-S sheet | SA2 | AL2a–AL2c |
-| SA4 | Opus 5 | S163, S169, then S199 and S200–S201 (Sonnet) | SA3, SQ2 | — |
-| AL1 | Opus 5.5 | S170–S171 alignment parsers and viewer | K3 | SQ1, SA1a |
-| AL2a | Sonnet | S172–S176 (S176 by Haiku) | AL1 | SA3 |
-| AL2b | Sonnet | S177–S179, S181 (S179 after S42) | AL2a | SA3 |
-| AL2c | Sonnet | S186–S189 | AL2b | SA3 |
-| AL3 | Opus 5 | S180 (after S158), S182–S184, S190 | AL2c | — |
-| AL4 | Opus 5.5 | S185 small progressive alignment | AL3 | — |
+| SQ2 | Opus 5 | S195, S198, then S196, S197 (Sonnet): NCBI switch, cache, lookups | SQ1 | anything |
+| SA1a | Opus 5 | S147–S152 chromatogram reader (S149, S151, S152 by Sonnet) | K3 | anything |
+| SA1b | Opus 5 | S153–S157 (S153, S154, S156, S157 by Sonnet) | SA1a | anything |
+| SA2 | Opus 5.5 | S158–S161 (S159, S161 are Opus 5): alignment to the reference, assay format | SA1b | anything |
+| SA3 | Sonnet | S162, S164–S168 (S166 by Haiku): batch and HIrisPlex-S sheet | SA2 | anything |
+| SA4 | Opus 5 | S163, S169, then S199 and S200–S201 (Sonnet) | SA3, SQ2 | anything |
+| AL1 | Opus 5.5 | S170–S171 alignment parsers and viewer | K3 | anything |
+| AL2a | Sonnet | S172–S176 (S176 by Haiku) | AL1 | anything |
+| AL2b | Sonnet | S177–S179, S181 (S179 after S42) | AL2a | anything |
+| AL2c | Sonnet | S186–S189 | AL2b | anything |
+| AL3 | Opus 5 | S180 (after S158), S182–S184, S190 | AL2c | anything |
+| AL4 | Opus 5.5 | S185 small progressive alignment | AL3 | anything |
 
 **Route through the usage limit:** K1–K3 (phase 16) are done. Next Q1a–Q1b on Sonnet (cheap
 safety nets), then the rest wave by wave.
