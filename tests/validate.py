@@ -336,6 +336,24 @@ def _(pg):
     return [('exact het witte blok (200 px)', r['n'], 200, 0), ('geen uitsnede', r['noCrop'], 1, 0), ('overlay in de editor', mag(r['ed']), 1, 0),
             ('geen overlay in de export', mag(ex), 0, 0), ('waarschuwing getoond', warn, 1, 0)]
 
+@case('Gelfoto-editor', 'Ladderbibliotheek: eigen ladder', 'Zelftest: de 100 bp-ladder (1000–100) als eigen ladder onder een andere naam bewaren en kiezen; detectie en meting op de realistische testgel geven weer 650 bp. Na herladen staat de ladder er nog; een geplakte gedeelde regel voegt een tweede toe')
+def _(pg):
+    pg.evaluate("__go('gelfoto')")
+    pg.set_input_files('#gf-file', str(ROOT / 'tests' / 'fixtures' / 'gel_realistic.png')); pg.wait_for_timeout(700)
+    pg.evaluate("$('#gf-n').value=''; document.getElementById('gf-auto').click()"); pg.wait_for_timeout(1500)
+    pg.evaluate("__set('gf-ll-name','Mijn ladder'); __set('gf-ll-sizes', LADDERS['100'].join(' ')); document.getElementById('gf-ll-add').click()"); pg.wait_for_timeout(300)
+    key = pg.evaluate("document.getElementById('gf-lad').value")
+    pg.evaluate("document.getElementById('gf-bands').click(); gf.marks=[]; document.getElementById('gf-measall').click();")
+    bp = pg.evaluate("gf.marks.map(m=>m.bp)"); b650 = [v for v in bp if 500 < v < 800]
+    used = pg.evaluate("gf.ladKey")
+    pg.goto('about:blank'); pg.goto(URL + '#gelfoto'); pg.wait_for_timeout(800); pg.evaluate(HELPERS)
+    kept = pg.evaluate("[...document.querySelectorAll('#gf-lad option')].filter(o=>o.textContent==='Mijn ladder').length")
+    pg.evaluate("__set('gf-ll-imp','Gedeeld: 500; 300 100 bp'); document.getElementById('gf-ll-add').click()"); pg.wait_for_timeout(300)
+    imp = pg.evaluate("JSON.stringify(LADDERS[document.getElementById('gf-lad').value])")
+    pg.evaluate("localStorage.removeItem('lkLadders')")
+    return [('eigen ladder gekozen', int(key.startswith('u')), 1, 0), ('detectie gebruikt eigen ladder', int(used == key), 1, 0),
+            ('product 650 bp (gem.)', sum(b650) / max(1, len(b650)), 650, 0.02), ('ladder na herladen', kept, 1, 0), ('gedeelde regel ingelezen', int(imp == '[500,300,100]'), 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

@@ -4994,5 +4994,12 @@
 "Gel: {*}.": "Gel: {*}.",
 "Ladder: {*}.": "Ladder: {*}.",
 "Lane {#}: {*}.": "Lane {#}: {*}.",
-"Banden in lane {#} ({*}): {*}.": "Bands in lane {#} ({*}): {*}."
+"Banden in lane {#} ({*}): {*}.": "Bands in lane {#} ({*}): {*}.",
+"Eigen ladders beheren": "Manage your own ladders",
+"Nog geen eigen ladders.": "No ladders of your own yet.",
+"Bandgroottes, grootste eerst (spaties of ;)": "Band sizes, largest first (spaces or ;)",
+"Of plak gedeelde ladders (één per regel, „Naam: {#} {#} {#} bp”)": "Or paste shared ladders (one per line, “Name: {#} {#} {#} bp”)",
+"Toevoegen aan bibliotheek": "Add to library",
+"Geef een naam en minstens twee bandgroottes.": "Enter a name and at least two band sizes.",
+"{#} ladder(s) toegevoegd.": "{#} ladder(s) added."
 }
