@@ -4811,5 +4811,11 @@
 "Volgende putje": "Next well",
 "Alle putjes zijn gevuld.": "All wells are filled.",
 "{#} van {#} klaar": "{#} of {#} done",
-"{#} van {#} putjes gevuld": "{#} of {#} wells filled"
+"{#} van {#} putjes gevuld": "{#} of {#} wells filled",
+"Laadmodus": "Loading mode",
+"Laadmodus sluiten": "Close loading mode",
+"Geen lanen met een naam: vul eerst de laantabel in.": "No named lanes: fill in the lane table first.",
+"Volgende laan": "Next lane",
+"Alle lanen zijn geladen.": "All lanes are loaded.",
+"{#} van {#} lanen geladen": "{#} of {#} lanes loaded"
 }

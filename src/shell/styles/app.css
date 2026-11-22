@@ -447,6 +447,13 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 .pl-fill{margin-top:12px}.pl-fill .pl-prog{display:flex;align-items:center;gap:10px;font-weight:600}
 .pl-fill .pl-prog i{flex:1;max-width:260px;height:10px;border-radius:5px;background:var(--line,#ddd);overflow:hidden}
 .pl-fill .pl-prog b{display:block;height:100%;background:#15803d}
+.gp-lanes{display:flex;flex-direction:column;gap:6px;margin:10px 0;max-width:520px}
+.gp-lanes button{display:flex;align-items:center;gap:10px;text-align:left;padding:8px 10px}
+.gp-lanes b{flex:none;width:28px;height:28px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px}
+.gp-lanes span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gp-lanes em{font-style:normal;font-weight:600}
+.gp-lanes button.fl{opacity:.4}
+.gp-lanes button.nx{outline:3px solid #ffd400;outline-offset:1px}
 .pl-grid{display:grid;gap:4px;margin:10px 0;max-width:720px}
 .pl-grid span{font-size:12px;color:var(--muted);text-align:center;align-self:center}
 .pl-grid button{aspect-ratio:1;min-height:30px;padding:0;border-radius:50%;border:2px solid rgba(0,0,0,.25);font-size:12px;font-weight:700;color:#fff}
