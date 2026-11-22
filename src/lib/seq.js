@@ -4,6 +4,7 @@
    zichzelf. Die tabel staat al in src/lib/digest.js (IUC, rcIupac). */
 import {IUC, rcIupac} from './digest.js';
 import {parseGenBank} from './genbank.js';
+import {expose} from './global.js';
 
 /* Plakken: posities, spaties en regeleinden weg; een FASTA-kop begint een nieuw record; U wordt
    T (rna onthoudt dat er U in stond); elk ander teken wordt geteld en weggelaten. Een
@@ -107,3 +108,41 @@ export function orfs(seq, fr, minAa) {
   });
   return out.sort((x, y) => y.aa - x.aa);
 }
+
+/* ---------- doorsturen en ontvangen (S194) ----------
+   SEQ_TO: de velden in andere tools die een sequentie aannemen. Een knop verschijnt alleen als
+   het veld in de pagina staat. Een nieuwe tool (uitlijning, chromatogram) meldt zich met
+   SEQ_TO.push({label, tool, id}); add: true voegt een regel "naam<tab>sequentie" toe in plaats
+   van het veld te vervangen. */
+export const SEQ_TO = [
+  {label: 'Restrictiedigestie', tool: 'digest', id: 'dg-seq'},
+  {label: 'Plasmidekaart', tool: 'plasmid', id: 'pl-seq'},
+  {label: 'In-silico PCR', tool: 'pcrcyclus', id: 'y-tpl'},
+  {label: 'Primerkaart', tool: 'oligo', id: 'ol-seq', add: true}
+];
+/* zoals setV() in src/legacy/nt/99_app.js: waarde zetten en input/change sturen, zodat v-model,
+   de invoeropslag en ongedaan maken het zien */
+function put(id, v) {
+  const el = document.getElementById(id); if (!el) return false;
+  el.value = v;
+  el.dispatchEvent(new Event('input', {bubbles: true}));
+  el.dispatchEvent(new Event('change', {bubbles: true}));
+  return true;
+}
+export function seqSend(t, name, seq) {
+  const el = document.getElementById(t.id); if (!el) return;
+  put(t.id, t.add ? (el.value.trim() ? el.value.replace(/\s*$/, '\n') : '') + name + '\t' + seq : '>' + name + '\n' + seq);
+  location.hash = t.tool;
+}
+/* een sequentie (of FASTA) uit een andere tool in Sequentie zetten */
+export function seqReceive(text) {
+  if (!String(text || '').trim() || !put('sq-in', String(text))) return;
+  location.hash = 'seq';
+}
+/* een knop met data-to-seq="<id van een tekstveld>" stuurt de selectie in dat veld, of alles */
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-to-seq]'); if (!b) return;
+  const el = document.getElementById(b.dataset.toSeq);
+  if (el) seqReceive(el.value.slice(el.selectionStart, el.selectionEnd) || el.value);
+});
+expose({SEQ_TO, seqReceive});

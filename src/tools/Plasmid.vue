@@ -30,6 +30,7 @@
       <div class="panel">
         <div class="f"><label for="pl-seq">{{ t('Sequentie, FASTA of GenBank') }}</label>
           <textarea id="pl-seq" class="mono" rows="7" v-model="seq" spellcheck="false"></textarea></div>
+        <div class="row" style="margin-top:6px"><button type="button" class="ghost" data-to-seq="pl-seq">{{ t('Naar Sequentie') }}</button></div>
         <div class="fields" style="margin-top:12px">
           <lk-field v-model="name" :label="t('Naam op de kaart')" for-id="pl-name" cls="txt" inputmode="text"/>
         </div>

@@ -72,3 +72,15 @@ export function digest(seq, names, circular) {
   });
   return out;
 }
+
+/* Begin (0-based) van elke herkenningsplaats op een lineaire sequentie, op beide strengen; om de
+   plaatsen in een sequentie te markeren (Sequentie, S194). */
+export function siteStarts(seq, name) {
+  const e = ENZ[name]; if (!e) return [];
+  const out = new Set();
+  [e[0], rcIupac(e[0])].forEach(pat => {
+    const re = new RegExp('(?=' + pat.split('').map(b => IUPAC[b]).join('') + ')', 'g');
+    for (let m; (m = re.exec(seq)); re.lastIndex = m.index + 1) out.add(m.index);
+  });
+  return [...out];
+}

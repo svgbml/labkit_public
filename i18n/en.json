@@ -4896,5 +4896,11 @@
 "Mitochondriaal, gist ({#})": "Yeast mitochondrial ({#})",
 "Mitochondriaal, schimmels; Mycoplasma ({#})": "Mold mitochondrial; Mycoplasma ({#})",
 "Mitochondriaal, ongewervelden ({#})": "Invertebrate mitochondrial ({#})",
-"Ciliaten ({#})": "Ciliate ({#})"
+"Ciliaten ({#})": "Ciliate ({#})",
+"Naar Sequentie": "To Sequence",
+"Enzymen die knippen": "Enzymes that cut",
+"Knippositie": "Cut position",
+"Plaatsen": "Sites",
+"Herkenningsplaatsen en knipposities volgens REBASE, dezelfde {#} enzymen als de in-silico digestie. De knippositie is de eerste base na de knip op de bovenste streng, zoals in de Plasmidekaart. Een plaats over het nulpunt van een circulaire sequentie telt mee in de tabel maar wordt niet gemarkeerd.": "Recognition sites and cut positions from REBASE, the same {#} enzymes as the in-silico digest. The cut position is the first base after the cut on the top strand, as in the plasmid map. A site across the origin of a circular sequence counts in the table but is not highlighted.",
+"De sequentie is na {#} nt afgekapt in de weergave.": "The display stops after {#} nt."
 }

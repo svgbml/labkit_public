@@ -41,6 +41,7 @@
       <h3 v-html="tHtml('Primerkaart <span class=&quot;example&quot;>voorbeeld</span>')"></h3>
       <div class="f"><label for="ol-seq">{{ t('Primers, één per regel: naam en sequentie (5′→3′)') }}</label>
         <textarea id="ol-seq" class="mono" rows="4" v-model="seqs" spellcheck="false"></textarea></div>
+        <div class="row" style="margin-top:6px"><button type="button" class="ghost" data-to-seq="ol-seq">{{ t('Naar Sequentie') }}</button></div>
       <div class="fields" v-if="cards.length >= 2" style="margin-top:12px">
         <div class="f"><label for="ol-pf">{{ t('Forward primer') }}</label>
           <select id="ol-pf" v-model="pf"><option v-for="(c, i) in cards" :key="i" :value="String(i)">{{ c.name }}</option></select></div>

@@ -42,6 +42,7 @@
         <h3>{{ t('In-silico PCR') }}</h3>
         <div class="f"><label for="y-tpl">{{ t('Template (sequentie of FASTA)') }}</label>
           <textarea id="y-tpl" class="mono" rows="5" v-model="tpl" spellcheck="false"></textarea></div>
+        <div class="row" style="margin-top:6px"><button type="button" class="ghost" data-to-seq="y-tpl">{{ t('Naar Sequentie') }}</button></div>
         <label class="chk" for="y-circ" style="margin-top:8px">
           <input type="checkbox" id="y-circ" v-model="circ"> {{ t('Circulair template (plasmide)') }}</label>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Een primer bindt waar zijn laatste 15 basen aan het 3′-eind precies passen; afwijkingen aan de 5′-kant (zoals een staart met een knipplaats) worden geteld en zitten in het product. Producten tot 10 kb.') }}</p>
