@@ -18,7 +18,7 @@
           </select>
         </div>
         <div class="f" style="grid-column:1/-1">
-          <label for="pc-m">{{ tHtml('Wegingen (mg) <span class="example">voorbeeld</span>') }}</label>
+          <label for="pc-m" v-html="tHtml('Wegingen (mg) <span class=&quot;example&quot;>voorbeeld</span>')"></label>
           <textarea id="pc-m" rows="4" v-model="m"></textarea>
         </div>
       </div>

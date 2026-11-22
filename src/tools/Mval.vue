@@ -11,7 +11,7 @@
     <div class="panel">
       <div class="fields">
         <div class="f" style="grid-column:1/-1">
-          <label for="mv-rep">{{ tHtml('Herhaalde metingen van één monster <span class="example">voorbeeld</span>') }}</label>
+          <label for="mv-rep" v-html="tHtml('Herhaalde metingen van één monster <span class=&quot;example&quot;>voorbeeld</span>')"></label>
           <textarea id="mv-rep" rows="2" v-model="rep"></textarea>
         </div>
         <lk-field v-model="b" :label="t('Gemeten zonder spike')" for-id="mv-b"/>

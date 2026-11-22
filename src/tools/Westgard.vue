@@ -12,7 +12,7 @@
         <lk-field v-model="m" :label="t('Streefwaarde (gemiddelde)')" for-id="wg-m"/>
         <lk-field v-model="s" :label="t('Standaardafwijking')" for-id="wg-s"/>
         <div class="f" style="grid-column:1/-1">
-          <label for="wg-x">{{ tHtml('Controlemetingen in volgorde <span class="example">voorbeeld</span>') }}</label>
+          <label for="wg-x" v-html="tHtml('Controlemetingen in volgorde <span class=&quot;example&quot;>voorbeeld</span>')"></label>
           <textarea id="wg-x" rows="5" v-model="x"></textarea>
         </div>
         <label class="chk" for="wg-est" style="grid-column:1/-1">
