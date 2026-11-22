@@ -113,7 +113,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | P2 ✅ | Sonnet | S41, S47: overage switch, material list and protocol export | K3 | P1 |
 | P3 ✅ | Opus 5.5 | S46 plasmid map (new tool, Vue) | S45 | — |
 | **Wave 4: execution and gel editor** | | | | |
-| E1 | Opus 5.5 | S48 bench shell, S49 (Opus 5), S50 (Sonnet) | K3 | G1a |
+| E1 ✅ | Opus 5.5 | S48 bench shell, S49 (Opus 5), S50 (Sonnet) | K3 | G1a |
 | E2 | Sonnet | S51–S55, S58 | E1 | P1, G1a, G1b |
 | E3 | Opus 5 | S56, S57, S60 | E1 | G1a, G1b |
 | E4 | Opus 5.5 | S59 colony counting, S61 multi-device sync | E1; S104 for the CFU link | — |
