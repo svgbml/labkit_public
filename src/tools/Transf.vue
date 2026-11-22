@@ -8,6 +8,8 @@
     <div class="stack">
       <div class="panel">
         <h3>{{ t('Transformatie') }}</h3>
+        <div class="row"><label><input type="checkbox" id="tf-card" v-model="card"> {{ t('Toon voorbereidingskaart') }}</label></div>
+        <lk-steps v-if="card" :steps="cardSteps"/>
         <div class="fields">
           <lk-field v-model="lv" :label="t('Ligatievolume')" for-id="tf-lv" unit="µL"/>
           <lk-field v-model="vng" :label="t('Vector in ligatie')" for-id="tf-vng" unit="ng"/>
@@ -53,7 +55,7 @@ export default {
   name: 'Transf',
   data() {
     return {
-      lv: '10', vng: '50', used: '1', tot: '1040', range: '30-300',
+      lv: '10', vng: '50', used: '1', tot: '1040', range: '30-300', card: true,
       rows: [[trPlain('Eigen ligatie'), '10', '3', '19'], [trPlain('Eigen ligatie'), '100', '31', '176'],
         [trPlain('Eigen ligatie'), '930', 'TNTC', 'TNTC'], [trPlain('Controle-insert'), '100', '72', '118']]
     };
@@ -63,6 +65,17 @@ export default {
       const t = this.t;
       return [{h: t('Experiment'), t: 'txt', w: 140}, {h: t('Uitgeplaat (µL)'), t: 'num', w: 80},
         {h: t('Blauw'), t: 'num', w: 70}, {h: t('Wit'), t: 'num', w: 70}];
+    },
+    /* standaard heat-shock-protocol: tijden en temperaturen als waarden */
+    cardSteps() {
+      const t = this.t;
+      return [t('Ontdooi competente cellen ' + 10 + ' min op ijs.'),
+        t('Voeg het DNA toe, meng voorzichtig en zet ' + 30 + ' min op ijs.'),
+        t('Hitteschok: ' + 45 + ' s bij ' + 42 + ' °C.'),
+        t('Zet ' + 2 + ' min terug op ijs.'),
+        t('Voeg ' + 950 + ' µL SOC toe.'),
+        t('Laat ' + 1 + ' uur bij ' + 37 + ' °C schudden.'),
+        t('Plaat ' + 50 + '–' + 100 + ' µL uit.')];
     },
     /* alle metingen en resultaten per experiment; de rest leest hier alleen uit */
     m() {

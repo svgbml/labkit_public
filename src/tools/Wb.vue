@@ -32,6 +32,20 @@
           <lk-formula :html="formula"/>
         </template>
       </div>
+      <div class="panel" style="margin-top:14px">
+        <h3>{{ t('Antilichaamverdunning') }}</h3>
+        <div class="fields">
+          <lk-field v-model="abDil" :label="t('Verdunning volgens datasheet 1:')" for-id="wb-ab-dil"/>
+          <lk-field v-model="abN" :label="t('Aantal blots')" for-id="wb-ab-n" inputmode="numeric"/>
+          <lk-field v-model="abV" :label="t('Volume per blot')" for-id="wb-ab-v" unit="mL"/>
+          <lk-field v-model="abX" :label="t('Extra marge')" for-id="wb-ab-x" unit="%"/>
+        </div>
+        <template v-if="ab">
+          <lk-kv :rows="[[t('Totaal volume'), F(ab.tot, 2) + ' mL'], [t('Antilichaam'), F(ab.ab, 2) + ' µL'], [t('Buffer'), F(ab.buf, 2) + ' mL']]"/>
+          <lk-note v-if="ab.ab < 0.5" kind="warn">{{ t('Minder dan 0,5 µL antilichaam: maak eerst een tussenverdunning.') }}</lk-note>
+        </template>
+        <lk-formula :html="tHtml('V&lt;sub&gt;antilichaam&lt;/sub&gt; = V&lt;sub&gt;totaal&lt;/sub&gt; / verdunning × 1000 · V&lt;sub&gt;totaal&lt;/sub&gt; = blots × volume × (1 + marge)')"/>
+      </div>
     </div>
   </div>
 </template>
@@ -52,7 +66,8 @@ const DATA = [['Controle', 15200, 30100, true], ['Controle', 14800, 29500, true]
 export default {
   name: 'Wb',
   data() {
-    return {rows: DATA.map(r => mk(trPlain(r[0], true), lkNumIn(val(r[1])), lkNumIn(val(r[2])), flag(r[3])))};
+    return {rows: DATA.map(r => mk(trPlain(r[0], true), lkNumIn(val(r[1])), lkNumIn(val(r[2])), flag(r[3]))),
+      abDil: '1000', abN: '2', abV: '5', abX: '10'};
   },
   computed: {
     /* het rekenwerk van de oude calc.wb(), één keer */
@@ -69,6 +84,13 @@ export default {
       const ms = names.map(n => mean(G[n])), sds = names.map(n => (G[n].length > 1 ? sd(G[n]) : 0));
       return {cr, lcv, G, names, ms, sds};
     },
+    /* antilichaamverdunning: totaal volume, antilichaam (µL) en buffer */
+    ab() {
+      const x = num(this.abDil), n = num(this.abN), v = num(this.abV), e = num(this.abX) || 0;
+      if (!(x > 0 && n > 0 && v > 0)) return null;
+      const tot = n * v * (1 + e / 100);
+      return {tot, ab: tot / x * 1000, buf: tot - tot / x};
+    },
     resCols() {
       return [{h: this.t('Monster')}, {h: 'n', num: true}, {h: this.t('Relatief (gem.)'), num: true}, {h: this.t('SD'), num: true}];
     },
@@ -83,7 +105,7 @@ export default {
   mounted() { this.draw(); },
   updated() { this.draw(); },
   methods: {
-    fmt,
+    fmt, F,
     draw() {
       const m = this.m, cv = document.getElementById('wb-cv');
       if (!cv || m.err) return;

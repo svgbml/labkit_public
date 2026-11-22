@@ -29,6 +29,12 @@
           <label for="sd-x">{{ t('Extra marge') }}</label>
           <div class="inu"><input id="sd-x" inputmode="decimal" v-model="x"><span class="u">%</span></div>
         </div>
+        <div class="f" data-expert="">
+          <label for="sd-xmode">&nbsp;</label>
+          <select id="sd-xmode" :aria-label="t('Extra marge')" v-model="xmode">
+            <option value="pct">{{ t('%') }}</option><option value="rx">{{ t('+ putjes') }}</option>
+          </select>
+        </div>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('De celconcentratie haal je uit de tool Telkamer. Bij het kiezen van een formaat wordt het gebruikelijke werkvolume ingevuld.') }}</p>
     </div>
@@ -39,6 +45,7 @@
         <template v-else>
           <lk-big :label="t('Celsuspensie')" :value="V(m.vs * 1000)"/>
           <lk-kv :rows="rows"/>
+          <lk-note kind="info">{{ t('Mix voor ' + F(m.n * m.mult, 1) + ' putjes: ' + m.n + ' + ' + F(m.n * (m.mult - 1), 1) + ' extra.') }}</lk-note>
           <lk-steps :steps="steps"/>
           <lk-formula :html="tHtml('V&lt;sub&gt;suspensie&lt;/sub&gt; = cellen per putje × aantal × (1 + marge) / celconcentratie')"/>
         </template>
@@ -55,7 +62,7 @@ const F = (x, d) => lkNumIn(fmt(x, d)), S = (x, d = 3) => lkNumIn(sci(x, d)), V 
 export default {
   name: 'Seed',
   data() {
-    return {c: '8e5', fmtV: '1.9|0.5', mode: 'well', n: '5e4', v: lkNumIn('0,5'), w: '24', x: '10'};
+    return {c: '8e5', fmtV: '1.9|0.5', mode: 'well', n: '5e4', v: lkNumIn('0,5'), w: '24', x: '10', xmode: 'pct'};
   },
   computed: {
     formats() {
@@ -65,11 +72,11 @@ export default {
     /* het rekenwerk van calc.seed, ongewijzigd */
     m() {
       const C = num(this.c), [area] = this.fmtV.split('|').map(Number), mode = this.mode, d = num(this.n), v = num(this.v),
-        n = Math.round(num(this.w)), x = (num(this.x) || 0) / 100;
+        n = Math.round(num(this.w)), xr = num(this.x) || 0, x = xr / 100, rx = this.xmode === 'rx';
       if (!(C > 0) || !(d > 0) || !(v > 0) || !(n > 0)) return {err: 1};
-      const per = mode === 'cm2' ? d * area : d, tot = n * v * (1 + x), cells = per * n * (1 + x), vs = cells / C;
+      const per = mode === 'cm2' ? d * area : d, mult = rx && n > 0 ? (n + xr) / n : 1 + x, tot = n * v * mult, cells = per * n * mult, vs = cells / C;
       if (vs > tot) return {err: 2, vs, tot, cells};
-      return {err: 0, area, n, v, x, per, tot, cells, vs};
+      return {err: 0, area, n, v, x, xr, rx, mult, per, tot, cells, vs};
     },
     tooDilute() {
       const m = this.m;
@@ -78,7 +85,7 @@ export default {
     rows() {
       const m = this.m;
       return [[this.t('Medium erbij'), V((m.tot - m.vs) * 1000)],
-        [this.t('Totaal mengsel'), V(m.tot * 1000) + ` (${m.n} × ${V(m.v * 1000)} + ${F(m.x * 100, 0)}%)`],
+        [this.t('Totaal mengsel'), V(m.tot * 1000) + (m.rx ? ` ((${m.n} + ${F(m.xr, 0)}) × ${V(m.v * 1000)})` : ` (${m.n} × ${V(m.v * 1000)} + ${F(m.x * 100, 0)}%)`)],
         [this.t('Cellen per putje/fles'), S(m.per)],
         [this.t('Dichtheid'), this.tHtml(sci(m.per / m.area, 3) + ' cellen/cm²')],
         [this.t('Concentratie mengsel'), this.tHtml(sci(m.per / m.v, 3) + ' cellen/mL')]];
@@ -90,7 +97,7 @@ export default {
     }
   },
   methods: {
-    V,
+    V, F,
     /* alleen als de gebruiker een formaat kiest komt het gebruikelijke werkvolume erin */
     onFmt(e) { this.v = e.target.value.split('|')[1].replace('.', ','); }
   }

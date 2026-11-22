@@ -12,6 +12,12 @@
       <div class="fields">
         <lk-field v-model="n" :label="t('Aantal monsters')" for-id="fc-n" inputmode="numeric"/>
         <lk-field v-model="x" :label="t('Overmaat')" for-id="fc-x" unit="%"/>
+        <div class="f">
+          <label for="fc-xmode">&nbsp;</label>
+          <select id="fc-xmode" :aria-label="t('Overmaat')" v-model="xmode">
+            <option value="pct">{{ t('%') }}</option><option value="rx">{{ t('+ reacties') }}</option>
+          </select>
+        </div>
         <lk-field v-model="v" :label="t('Kleuringsvolume per test')" for-id="fc-v" unit="µL"/>
       </div>
       <lk-etable table-id="fc-tbl" :cols="cols" v-model:rows="rows" add-id="fc-tbl-add"/>
@@ -36,7 +42,8 @@
     </div>
     <div class="result"><div id="fc-out">
       <template v-if="m">
-        <lk-big :label="t('Cocktail voor ' + n1 + ' monsters + ' + fmt(m.x * 100, 0) + '%')" :value="L(vol(m.V * m.m))" :sub="t('totaal')"/>
+        <lk-big :label="m.rx ? t('Cocktail voor ' + n1 + ' monsters + ' + fmt(m.xr, 0) + ' extra') : t('Cocktail voor ' + n1 + ' monsters + ' + fmt(m.x * 100, 0) + '%')" :value="L(vol(m.V * m.m))" :sub="t('totaal')"/>
+        <lk-note kind="info">{{ t('Mix voor ' + fmt(m.m, 1) + ' reacties: ' + m.n + ' + ' + fmt(m.m - m.n, 1) + ' extra.') }}</lk-note>
         <lk-table :cols="mixCols" :rows="mixRows"/>
         <lk-note v-if="m.buf < 0" kind="bad">{{ t('De antilichamen samen zijn meer dan het kleuringsvolume; vergroot het volume of verlaag de hoeveelheden.') }}</lk-note>
         <lk-note v-if="m.fl.length < m.A.length" kind="bad">{{ t('Twee antilichamen hebben hetzelfde fluorochroom; dat is in één buis niet te onderscheiden.') }}</lk-note>
@@ -68,7 +75,7 @@ export default {
   name: 'Facs',
   data() {
     return {
-      n: '12', x: '10', v: '50',
+      n: '12', x: '10', xmode: 'pct', v: '50',
       rows: [['CD3', 'FITC', '100', 'nee'], ['CD4', 'PE', '200', 'nee'], ['CD8', 'APC', '100', 'nee'],
         ['CD25', 'PE-Cy7', '50', 'ja'], ['CD127', 'BV421', '50', 'ja'], ['Viability', '7-AAD', '100', 'nee']],
       mp: '18500', mn: '210', sd: '95',
@@ -83,12 +90,12 @@ export default {
     },
     /* aantal monsters, overmaat en de antilichamen; zelfde voorwaarden als de oude calc.facs() */
     m() {
-      const n = Math.round(num(this.n)), x = (num(this.x) || 0) / 100, V = num(this.v);
+      const n = Math.round(num(this.n)), xr = num(this.x) || 0, x = xr / 100, V = num(this.v), rx = this.xmode === 'rx';
       const A = this.rows.map(r => ({m: r[0] || '?', f: r[1] || '?', t: num(r[2]), fmo: r[3] === 'ja'})).filter(a => a.t >= 1);
       if (!(n >= 1 && n <= 5000 && V > 0 && A.length)) return null;
       A.forEach(a => { a.v = V / a.t; });
-      const m = n * (1 + x), ab = A.reduce((s, a) => s + a.v, 0);
-      return {n, x, V, A, m, ab, buf: V - ab, fl: [...new Set(A.map(a => a.f))], fmo: A.filter(a => a.fmo)};
+      const m = rx ? n + xr : n * (1 + x), ab = A.reduce((s, a) => s + a.v, 0);
+      return {n, x, xr, rx, V, A, m, ab, buf: V - ab, fl: [...new Set(A.map(a => a.f))], fmo: A.filter(a => a.fmo)};
     },
     n1() { return this.m ? this.m.n : ''; },
     mixCols() {

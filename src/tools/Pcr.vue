@@ -16,6 +16,12 @@
         <lk-field v-model="ns" :label="t('Monsters')" for-id="q-n" inputmode="numeric"/>
         <lk-field v-model="nc" :label="t('Controles (NTC, positief)')" for-id="q-ctrl" inputmode="numeric"/>
         <lk-field data-expert="" v-model="extra" :label="t('Extra marge')" for-id="q-extra" unit="%"/>
+        <div class="f" data-expert="">
+          <label for="q-xmode">&nbsp;</label>
+          <select id="q-xmode" :aria-label="t('Extra marge')" v-model="xmode">
+            <option value="pct">{{ t('%') }}</option><option value="rx">{{ t('+ reacties') }}</option>
+          </select>
+        </div>
         <lk-field v-model="rv" :label="t('Reactievolume')" for-id="q-v" unit="µL"/>
         <lk-field v-model="tv" :label="t('Template per reactie')" for-id="q-t" unit="µL"/>
       </div>
@@ -61,7 +67,7 @@
     </div>
     <div id="q-msg">
       <lk-note v-if="m.water < 0" kind="bad">{{ t('De componenten passen niet in ' + vol(m.V) + ': ' + vol(-m.water) + ' te veel. Verlaag het templatevolume of gebruik geconcentreerdere stocks.') }}</lk-note>
-      <lk-note kind="info">{{ t('Mix voor ' + fmt(m.N, 1) + ' reacties (' + m.n + ' buizen + ' + fmt(m.extra, 0) + '%). Verdeel ' + vol(m.V - m.T) + ' mix per buis en voeg ' + vol(m.T) + ' template toe; NTC krijgt ' + vol(m.T) + ' water. Polymerase als laatste toevoegen, alles op ijs.') }}</lk-note>
+      <lk-note kind="info">{{ m.rx ? t('Mix voor ' + fmt(m.N, 1) + ' reacties (' + m.n + ' buizen + ' + fmt(m.extra, 0) + ' extra). Verdeel ' + vol(m.V - m.T) + ' mix per buis en voeg ' + vol(m.T) + ' template toe; NTC krijgt ' + vol(m.T) + ' water. Polymerase als laatste toevoegen, alles op ijs.') : t('Mix voor ' + fmt(m.N, 1) + ' reacties (' + m.n + ' buizen + ' + fmt(m.extra, 0) + '%). Verdeel ' + vol(m.V - m.T) + ' mix per buis en voeg ' + vol(m.T) + ' template toe; NTC krijgt ' + vol(m.T) + ' water. Polymerase als laatste toevoegen, alles op ijs.') }}</lk-note>
     </div>
     <lk-formula :html="formula"/>
   </div>
@@ -98,7 +104,7 @@ export default {
     const g = (id, d) => (st[id] != null ? String(st[id]) : d);
     return {
       ns: g('q-n', lkNumIn('8')), nc: g('q-ctrl', lkNumIn('2')), extra: g('q-extra', lkNumIn('10')),
-      rv: g('q-v', lkNumIn('25')), tv: g('q-t', lkNumIn('2')),
+      rv: g('q-v', lkNumIn('25')), tv: g('q-t', lkNumIn('2')), xmode: g('q-xmode', 'pct'),
       preset: 'taq', rows: [], copied: ''
     };
   },
@@ -112,7 +118,8 @@ export default {
     /* het rekenwerk van de oude calc.pcr(), één keer */
     m() {
       const n = (num(this.ns) || 0) + (num(this.nc) || 0), extra = num(this.extra) || 0;
-      const V = num(this.rv), T = num(this.tv) || 0, N = n * (1 + extra / 100);
+      const V = num(this.rv), T = num(this.tv) || 0, rx = this.xmode === 'rx';
+      const N = n * (rx ? (n > 0 ? (n + extra) / n : 1) : 1 + extra / 100);
       let sum = 0;
       const per = [];
       this.rows.forEach(r => {
@@ -123,7 +130,7 @@ export default {
         per.push(pr);
       });
       const water = V - sum - T;
-      return {n, extra, V, T, N, per, water, sum,
+      return {n, extra, rx, V, T, N, per, water, sum,
         waterTxt: vol(water), waterMix: vol(water * N), totTxt: vol(V - T), totMix: vol((V - T) * N),
         tTxt: vol(T), tMix: vol(T * n)};
     },
