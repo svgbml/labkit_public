@@ -4839,5 +4839,10 @@
 "Gebalanceerd: zet de buizen in positie": "Balanced: put the tubes in position",
 "Met deze aantallen is geen gebalanceerde opstelling mogelijk.": "No balanced arrangement is possible with these numbers.",
 "Voeg een blanco buis (water) toe: met": "Add a blank tube (water): with",
-"buizen kan het wel.": "tubes it works."
+"buizen kan het wel.": "tubes it works.",
+"Werkt offline": "Works offline",
+"Geen internetverbinding: Labkit werkt gewoon door": "No internet connection: Labkit keeps working",
+"Donkere kamer": "Dark room",
+"Donkere kamer: rood op zwart, spaart je nachtzicht": "Dark room: red on black, keeps your night vision",
+"Donkere kamer (rood op zwart, spaart je nachtzicht)": "Dark room (red on black, keeps your night vision)"
 }

@@ -37,6 +37,7 @@
               <input type="color" id="ui-accent" v-model="accent" style="width:52px;height:32px;padding:2px" @input="apply">
               <label class="chk" for="ui-accon"><input type="checkbox" id="ui-accon" v-model="accon" @change="apply"> {{ t('eigen kleur gebruiken') }}</label>
             </div></div>
+          <div class="f"><label class="chk" for="ui-darkroom"><input type="checkbox" id="ui-darkroom" v-model="darkroom" @change="apply"> {{ t('Donkere kamer (rood op zwart, spaart je nachtzicht)') }}</label></div>
         </div>
       </div>
       <div class="panel">
@@ -78,7 +79,7 @@
 
 <script>
 /* standaardwaarden: dezelfde als UIDEF in web/index.html */
-const DEF = {theme: 'auto', dens: 'ruim', fs: '14', accent: '#1558b0', accon: false, pal: 'std', schema: '#1558b0'};
+const DEF = {theme: 'auto', dens: 'ruim', fs: '14', accent: '#1558b0', accon: false, darkroom: false, pal: 'std', schema: '#1558b0'};
 
 export default {
   name: 'Settings',
@@ -103,7 +104,7 @@ export default {
       Object.assign(this, DEF);
       /* de invoeropslag luistert naar input/change op de velden zelf, dus die krijgen ze na de render */
       this.$nextTick(() => {
-        ['ui-theme', 'ui-dens', 'ui-fs', 'ui-accent', 'ui-accon', 'ui-pal', 'ui-schema'].forEach(id => {
+        ['ui-theme', 'ui-dens', 'ui-fs', 'ui-accent', 'ui-accon', 'ui-darkroom', 'ui-pal', 'ui-schema'].forEach(id => {
           const el = document.getElementById(id); if (el) el.dispatchEvent(new Event('change', {bubbles: true}));
         });
         if (typeof applyUI === 'function') applyUI();

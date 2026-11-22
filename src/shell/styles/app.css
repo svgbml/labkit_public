@@ -392,6 +392,12 @@ html[data-theme=papier]{--bg:#f4efe4;--surface:#fffdf7;--ink:#2a2520;--muted:#6b
 html[data-theme=papier] .tool-head h2,html[data-theme=papier] .logo b{font-family:Georgia,"Times New Roman",serif}
 html[data-theme=contrast]{--bg:#ffffff;--surface:#ffffff;--ink:#000000;--muted:#222222;--line:#000000;--accent:#0033cc;--accent-soft:#dfe7ff;--ok:#005a2b;--warn:#6b3d00;--bad:#a30000}
 html[data-theme=contrast] .panel,html[data-theme=contrast] .result{box-shadow:none;border-width:1.5px}
+/* offline-badge en knop voor de donkere kamer (kop) */
+.sidetools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sidetools button{font-size:12px;padding:2px 8px}
+.sidetools button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.offb{font-size:12px;font-weight:600;border:1px solid var(--line);border-radius:10px;padding:1px 8px;color:var(--muted)}
+.offb[hidden]{display:none}
 html[data-theme=leisteen]{--bg:#e9edf1;--surface:#f8fafb;--ink:#17212b;--muted:#51606f;--line:#c5cfd9;--accent:#0f6b7a;--accent-soft:#dcf0f3}
 html[data-dens=compact] main{padding:14px clamp(10px,1.6vw,22px) 40px}
 html[data-dens=compact] .panel,html[data-dens=compact] .result{padding:10px}
@@ -435,15 +441,15 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 /* ================= BENCH-MODUS (S48) =================
    Altijd hoog contrast, los van het thema: zwart, wit en geel lezen het best met een bril op en
    onder tl-licht. Grote knoppen voor handschoenen. */
-.bench{position:fixed;inset:0;z-index:9000;display:flex;flex-direction:column;background:#000;color:#fff;padding:12px 16px calc(12px + env(safe-area-inset-bottom));font-size:clamp(20px,4.6vw,34px);line-height:1.35;outline:none;touch-action:pan-y}
-.bench button{font-size:clamp(17px,3.6vw,24px);min-height:48px;padding:8px 16px;border-radius:12px;border:2px solid #fff;background:#000;color:#fff;cursor:pointer}
+.bench{position:fixed;inset:0;z-index:9000;display:flex;flex-direction:column;background:var(--bn-bg,#000);color:var(--bn-fg,#fff);padding:12px 16px calc(12px + env(safe-area-inset-bottom));font-size:clamp(20px,4.6vw,34px);line-height:1.35;outline:none;touch-action:pan-y}
+.bench button{font-size:clamp(17px,3.6vw,24px);min-height:48px;padding:8px 16px;border-radius:12px;border:2px solid var(--bn-fg,#fff);background:var(--bn-bg,#000);color:var(--bn-fg,#fff);cursor:pointer}
 .bench button:disabled{opacity:.35}
-.bench button:focus-visible{outline:3px solid #ffd400;outline-offset:2px}
+.bench button:focus-visible{outline:3px solid var(--bn-hi,#ffd400);outline-offset:2px}
 .bench-top{display:flex;align-items:center;gap:10px}
 .bench-title{flex:1;min-width:0;font-size:clamp(16px,3.4vw,22px);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bench-prog{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:15px;color:#ffd400;font-weight:700}
-.bench-prog i{flex:1;height:10px;border-radius:5px;background:#444;overflow:hidden}
-.bench-prog b{display:block;height:100%;background:#ffd400}
+.bench-prog{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:15px;color:var(--bn-hi,#ffd400);font-weight:700}
+.bench-prog i{flex:1;height:10px;border-radius:5px;background:var(--bn-dim,#444);overflow:hidden}
+.bench-prog b{display:block;height:100%;background:var(--bn-hi,#ffd400)}
 .pl-fill{margin-top:12px}.pl-fill .pl-prog{display:flex;align-items:center;gap:10px;font-weight:600}
 .pl-fill .pl-prog i{flex:1;max-width:260px;height:10px;border-radius:5px;background:var(--line,#ddd);overflow:hidden}
 .pl-fill .pl-prog b{display:block;height:100%;background:#15803d}
@@ -461,35 +467,38 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 .pl-grid button.fl{opacity:.35}
 .pl-grid button.nx{outline:3px solid #ffd400;outline-offset:1px}
 .bench-dots{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
-.bench-dots span{flex:1 1 14px;max-width:48px;height:8px;border-radius:4px;background:#444;cursor:pointer}
-.bench-dots span.done{background:#ffd400}
-.bench-dots span.cur{outline:2px solid #fff;outline-offset:2px}
-.bench-card{flex:1;overflow:auto;display:flex;flex-direction:column;justify-content:center;gap:18px;border:3px solid #fff;border-radius:18px;padding:20px;user-select:none}
-.bench-card.done{border-color:#ffd400}
-.bench-n{font-size:clamp(15px,3vw,20px);color:#ffd400;font-weight:700}
+.bench-dots span{flex:1 1 14px;max-width:48px;height:8px;border-radius:4px;background:var(--bn-dim,#444);cursor:pointer}
+.bench-dots span.done{background:var(--bn-hi,#ffd400)}
+.bench-dots span.cur{outline:2px solid var(--bn-fg,#fff);outline-offset:2px}
+.bench-card{flex:1;overflow:auto;display:flex;flex-direction:column;justify-content:center;gap:18px;border:3px solid var(--bn-fg,#fff);border-radius:18px;padding:20px;user-select:none}
+.bench-card.done{border-color:var(--bn-hi,#ffd400)}
+.bench-n{font-size:clamp(15px,3vw,20px);color:var(--bn-hi,#ffd400);font-weight:700}
 .bench-text ul{margin:.4em 0 0;padding-left:1.2em}
 .bench-text li{margin:.15em 0}
-.bench .bench-timer{align-self:flex-start;border-color:#ffd400;color:#ffd400}
+.bench .bench-timer{align-self:flex-start;border-color:var(--bn-hi,#ffd400);color:var(--bn-hi,#ffd400)}
 .bench-list{flex:1;overflow:auto;margin:0;padding:0 0 0 1.4em;font-size:clamp(17px,3.6vw,24px)}
 .bench-list li{margin:0 0 12px}
-.bench-list li.done{color:#999;text-decoration:line-through}
+.bench-list li.done{color:var(--bn-gray,#999);text-decoration:line-through}
 .bench-list label{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
-.bench-list input{width:28px;height:28px;flex:none;margin-top:2px;accent-color:#ffd400}
+.bench-list input{width:28px;height:28px;flex:none;margin-top:2px;accent-color:var(--bn-hi,#ffd400)}
 .bench-list ul{margin:.2em 0 0;padding-left:1.1em}
 .bench-nav{display:flex;gap:12px;margin-top:12px}
 .bench-nav button{flex:1;min-height:64px}
-.bench .bench-ok{flex:2;background:#ffd400;color:#000;border-color:#ffd400;font-weight:700}
+.bench .bench-ok{flex:2;background:var(--bn-hi,#ffd400);color:var(--bn-bg,#000);border-color:var(--bn-hi,#ffd400);font-weight:700}
 .bench-notes{flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px;font-size:clamp(16px,3.4vw,22px);margin-top:12px}
-.bench-notes textarea{width:100%;box-sizing:border-box;font:inherit;background:#111;color:#fff;border:2px solid #fff;border-radius:12px;padding:10px}
+.bench-notes textarea{width:100%;box-sizing:border-box;font:inherit;background:var(--bn-dark,#111);color:var(--bn-fg,#fff);border:2px solid var(--bn-fg,#fff);border-radius:12px;padding:10px}
 .bench-nrow{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-.bench-nrow input[type=checkbox]{width:24px;height:24px;accent-color:#ffd400;vertical-align:middle}
-.bench-photo{border:2px solid #fff;border-radius:12px;padding:8px 16px;cursor:pointer}
+.bench-nrow input[type=checkbox]{width:24px;height:24px;accent-color:var(--bn-hi,#ffd400);vertical-align:middle}
+.bench-photo{border:2px solid var(--bn-fg,#fff);border-radius:12px;padding:8px 16px;cursor:pointer}
 .bench-photo input{display:none}
-.bench-err{color:#ff8a80;margin:0}
+.bench-err{color:var(--bn-err,#ff8a80);margin:0}
 .bench-nlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-.bench-nlist li{border:2px solid #666;border-radius:12px;padding:8px 12px;display:flex;flex-direction:column;gap:4px;position:relative}
-.bench-nlist li.dev{border-color:#ffd400}
-.bench-nlist b{font-size:.75em;color:#ffd400}
+.bench-nlist li{border:2px solid var(--bn-mid,#666);border-radius:12px;padding:8px 12px;display:flex;flex-direction:column;gap:4px;position:relative}
+.bench-nlist li.dev{border-color:var(--bn-hi,#ffd400)}
+.bench-nlist b{font-size:.75em;color:var(--bn-hi,#ffd400)}
 .bench-nlist img{max-width:200px;border-radius:8px}
 .bench .bench-nlist button{position:absolute;top:4px;right:4px;min-height:36px;padding:2px 10px}
-.bench-wake{margin:8px 0 0;font-size:13px;color:#aaa;text-align:center}
+.bench-wake{margin:8px 0 0;font-size:13px;color:var(--bn-gray,#aaa);text-align:center}
+/* donkere kamer: rood op zwart (spaart het nachtzicht); komt na de thema's en wint daarvan */
+html.darkroom{--bg:#000;--surface:#0b0000;--ink:#e8392b;--muted:#a52a1f;--line:#4a120d;--accent:#ff4a3a;--accent-soft:#240504;--ok:#e8392b;--ok-soft:#1a0302;--warn:#ff6a55;--warn-soft:#2a0806;--bad:#ff7a66;--bad-soft:#2f0a07;--stv:#e8392b;--stv-soft:#1a0302;--stu:#ff6a55;--stu-soft:#2a0806;--sta:#c4372a;--sta-soft:#240504;--bn-fg:#e8392b;--bn-hi:#ff6a55;--bn-bg:#000;--bn-dim:#3a0c08;--bn-mid:#6a1a12;--bn-gray:#a52a1f;--bn-dark:#120100;--bn-err:#ff7a66;color-scheme:dark}
+html.darkroom img,html.darkroom canvas{filter:grayscale(1) sepia(1) hue-rotate(-50deg) saturate(6) brightness(.75)}
