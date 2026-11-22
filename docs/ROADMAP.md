@@ -273,7 +273,7 @@ safety nets), then the rest wave by wave.
 ## Phase 5: execution (13 steps)
 | Step | Ideas | What | Done when | Model |
 |---|---|---|---|---|
-| S48 | 61 | Bench mode shell: full-screen step cards, swipe/tap, Wake Lock, high contrast | Works on phone | Opus 5.5 |
+| S48 | 61 | Bench mode shell: full-screen step cards, swipe/tap, Wake Lock, high contrast | ✅ `Bench.vue` is een laag over de hele app (`openBench({title, steps})`): één stap per kaart in zwart/wit/geel, vegen of de grote knop, een lijstweergave met vinkjes, Escape/pijltjes, Wake Lock (met melding als de browser die niet geeft). Eerste bron: *Experimentplanner*, waar een wachtstap een knop krijgt die zijn timer start | — |
 | S49 | 62 | Step checklists generated from pipetting scheme, master mix and dilution scheme | Tick-off persists per run | Opus 5 |
 | S50 | 62, 61 | Checklists for recipe cards and the Gelplanner; open them in bench mode | 5 tools feed bench mode | Sonnet |
 | S51 | 71, 72 | Master mix progress and plate filling assistant (tap wells as filled) | Progress shown *(needs S28)* | Sonnet |
