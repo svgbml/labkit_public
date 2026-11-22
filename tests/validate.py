@@ -270,6 +270,19 @@ def _(pg):
     return [('rechtzethoek (°)', ang, 2.0, 0.125), ('aantal lanen', n, 11, 0), ('ladderlane (index)', lad, 0, 0),
             ('product 650 bp (gem.)', sum(b650) / max(1, len(b650)), 650, 0.02), ('aantal productbanden', len(b650), 7, 0), ('dimeer 60 bp (gem.)', sum(b60) / max(1, len(b60)), 60, 0.05)]
 
+@case('Gelfoto-editor', 'Projectbestand .labkitgel', 'Zelftest: de realistische testgel opslaan, de pagina herladen en het bestand openen geeft dezelfde lanen, banden, metingen en dezelfde export (pixel voor pixel)')
+def _(pg):
+    # vervolg op het geval hierboven: de gel staat er, rechtgezet, met banden en metingen
+    pg.evaluate("gf.lanes[2].label='Monster A'; __set('gf-title','Projecttest'); __set('gf-con','1.4'); gfRender()")
+    state = "JSON.stringify({l:gf.lanes,m:gf.marks,b:gf.bands,a:gf.ladder,c:gf.crop,f:gf.fine,t:gf.title,k:gf.con})"
+    before = pg.evaluate(state); img0 = pg.evaluate("gfRender(true).toDataURL()")
+    with pg.expect_download() as dl: pg.evaluate("document.getElementById('gf-psave').click()")
+    path = dl.value.path()
+    pg.goto('about:blank'); pg.goto(URL + '#gelfoto'); pg.wait_for_timeout(800); pg.evaluate(HELPERS)
+    pg.set_input_files('#gf-pfile', str(path)); pg.wait_for_timeout(1500)
+    after = pg.evaluate(state); img1 = pg.evaluate("gfRender(true).toDataURL()")
+    return [('toestand gelijk na openen', int(before == after), 1, 0), ('export gelijk na openen', int(img0 == img1), 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

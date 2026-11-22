@@ -4844,5 +4844,12 @@
 "Geen internetverbinding: Labkit werkt gewoon door": "No internet connection: Labkit keeps working",
 "Donkere kamer": "Dark room",
 "Donkere kamer: rood op zwart, spaart je nachtzicht": "Dark room: red on black, keeps your night vision",
-"Donkere kamer (rood op zwart, spaart je nachtzicht)": "Dark room (red on black, keeps your night vision)"
+"Donkere kamer (rood op zwart, spaart je nachtzicht)": "Dark room (red on black, keeps your night vision)",
+"Project opslaan": "Save project",
+"Project openen": "Open project",
+"Project opgeslagen.": "Project saved.",
+"Project geopend.": "Project opened.",
+"Kies eerst een gelfoto of laad de demo-gel.": "Choose a gel photo or load the demo gel first.",
+"Dit bestand is geen Labkit-gelproject.": "This file is not a Labkit gel project.",
+"Foto, lanen, ladder, labels en instellingen in één bestand": "Photo, lanes, ladder, labels and settings in one file"
 }

@@ -477,6 +477,38 @@ function gfMassChanged(){ gfMarksTable(); gfRender(); }
 /* ng kan alleen met een DNA-massaladder; GfLadder.vue roept dit aan bij een andere eenheid. */
 function gfUnitMsg(){ if($('#gf-unit').value==='ng'&&gf.unit==='bp'&&!isFinite(gfMassSlope())) gfStatus('Voor ng zijn een DNA-massaladder (ng per band), gemarkeerde ladderbanden en metingen nodig.'); else if($('#gf-unit').value==='ng'&&gf.unit!=='bp') gfStatus('ng werkt alleen met een DNA-ladder met bekende hoeveelheid per band.'); }
 
+/* ================= PROJECTBESTAND .labkitgel (S62) =================
+   De foto als PNG plus de toestand van de editor (lanen met hun banden, ladder, metingen, beeldwerk)
+   en de waarden van de velden. De virtuele ladder (een tweede foto) en de zoom gaan niet mee. */
+const GF_PROJ=['rot90','fine','flip','crop','inv','gray','bri','con','lanes','lw','ladder','ladKey','marks','title','fs','ang','angAuto','unit','disp','wells','autoLadder'];
+/* het veld-id's van de tool; de lanelabels staan in gf.lanes, de virtuele ladder gaat niet mee */
+const gfProjFields=()=>[...$$('#t-gelfoto input[id],#t-gelfoto select[id],#t-gelfoto textarea[id]')].filter(el=>el.type!=='file'&&!el.closest('table')&&!/^gf-vl/.test(el.id));
+/* geeft verwijzingen naar gf terug: wie bewaart, kopieert (JSON of IndexedDB doen dat zelf) */
+function gfProjSnap(){ if(!gf.src) return null; const s={}; GF_PROJ.forEach(k=>{ if(gf[k]!==undefined) s[k]=gf[k]; }); const inp={}; gfProjFields().forEach(el=>{ inp[el.id]=el.type==='checkbox'?el.checked:el.value; });
+  return {kind:'labkitgel',v:1,app:APPVER,img:gf.src.toDataURL('image/png'),gf:s,inp}; }
+/* NaN (samengevoegde band, geen meting) zou in JSON null worden; dat telt isFinite() als 0 */
+const gfJsonW=(k,v)=>typeof v==='number'&&!isFinite(v)?{$n:String(v)}:v, gfJsonR=(k,v)=>v&&typeof v==='object'&&typeof v.$n==='string'&&Object.keys(v).length===1?Number(v.$n):v;
+function gfProjSave(){ const s=gfProjSnap(); if(!s){ gfStatus('Kies eerst een gelfoto of laad de demo-gel.'); return; }
+  saveBlob(safeName(gf.title||'gel')+'.labkitgel',new Blob([JSON.stringify(s,gfJsonW)],{type:'application/json'})).then(()=>gfStatus('Project opgeslagen.')).catch(()=>gfStatus('Downloaden lukte niet hier.')); }
+function gfProjOpen(f){ if(!f) return; f.text().then(t=>gfProjApply(JSON.parse(t,gfJsonR))).catch(()=>gfStatus('Dit bestand is geen Labkit-gelproject.')); }
+/* zet een project terug; gooit bij een ongeldig project (vertrouwensgrens: het bestand komt van buiten) */
+async function gfProjApply(p){
+  if(!p||p.kind!=='labkitgel'||typeof p.img!=='string'||!/^data:image\/(png|jpeg|webp);base64,/.test(p.img)||!p.gf||!Array.isArray(p.gf.lanes)) throw new Error('geen gelproject');
+  const img=new Image(); await new Promise((ok,no)=>{ img.onload=ok; img.onerror=no; img.src=p.img; });
+  const c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight; c.getContext('2d').drawImage(img,0,0);
+  /* velden eerst, twee keer: de keuze van de ladder zet in een watcher de eenheid en de massa's
+     en het eigen-ladderveld verschijnt pas daarna; de tweede ronde zet de bewaarde waarden terug */
+  const put=()=>gfProjFields().forEach(el=>{ if(!(el.id in (p.inp||{}))) return; const v=p.inp[el.id]; if(el.type==='checkbox') el.checked=!!v; else el.value=String(v); el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); });
+  put(); await new Promise(r=>setTimeout(r,0)); put(); await new Promise(r=>setTimeout(r,0));
+  gf.src=c; gf.cache={}; gf.crop=null; gf.wells=null; gf.vl=null; gf.mode=null; gf.drag=null; gf.pend=null;
+  GF_PROJ.forEach(k=>{ if(k in p.gf) gf[k]=p.gf[k]; });
+  gf.lanes=gf.lanes.filter(l=>l&&isFinite(l.x)).map(l=>({...l,label:String(l.label??'')})); gf.marks=Array.isArray(gf.marks)?gf.marks:[];
+  gf.ladder=Math.max(0,Math.min(gf.lanes.length-1,Math.round(+gf.ladder)||0));
+  gf.bands=gf.lanes[gf.ladder]?(gf.lanes[gf.ladder].bands||(gf.lanes[gf.ladder].bands=[])):[];
+  /* de velden hebben gfUpdate() laten lopen; zonder dit zet de rechtzet-timer de lanen opnieuw */
+  gfFine=gf.fine; clearTimeout(gfFineT);
+  gfLanesTable(); gfBandsTable(); gfMarksTable(); gfRender(); gfStatus('Project geopend.'); }
+
 /* Alles hierboven ook als globale naam, live: een toewijzing (timers = …, gfIntensity = …) in
    deze module of in de oude scripts komt aan beide kanten aan. */
 live({
@@ -573,5 +605,9 @@ live({
   LMASS: () => LMASS,
   gfMassSlope: [() => gfMassSlope, v => { gfMassSlope = v; }],
   gfMassChanged: [() => gfMassChanged, v => { gfMassChanged = v; }],
-  gfUnitMsg: [() => gfUnitMsg, v => { gfUnitMsg = v; }]
+  gfUnitMsg: [() => gfUnitMsg, v => { gfUnitMsg = v; }],
+  gfProjSnap: [() => gfProjSnap, v => { gfProjSnap = v; }],
+  gfProjSave: [() => gfProjSave, v => { gfProjSave = v; }],
+  gfProjOpen: [() => gfProjOpen, v => { gfProjOpen = v; }],
+  gfProjApply: [() => gfProjApply, v => { gfProjApply = v; }]
 });

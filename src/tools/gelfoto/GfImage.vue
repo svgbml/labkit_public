@@ -15,6 +15,10 @@
              @change="pick">
       <div class="row" style="margin-top:8px">
         <button type="button" id="gf-demo" @click="demo">{{ t('Demo-gel laden') }}</button>
+        <button type="button" id="gf-psave" :title="t('Foto, lanen, ladder, labels en instellingen in één bestand')"
+                @click="projSave">{{ t('Project opslaan') }}</button>
+        <button type="button" id="gf-popen" @click="$refs.pf.click()">{{ t('Project openen') }}</button>
+        <input type="file" id="gf-pfile" ref="pf" accept=".labkitgel,application/json" hidden @change="projOpen">
       </div>
       <p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">
         {{ t('PNG of JPG; je kunt ook een bestand op de afbeelding slepen. TIFF opent niet in de browser.') }}
@@ -84,6 +88,8 @@ export default {
     sync(e) { const k = e.target.id.slice(3); if (k in this.f) this.f[k] = e.target.value; },
     pick(e) { gfFile(e.target.files[0]); },
     demo() { gfDemo(); },
+    projSave() { gfProjSave(); },
+    projOpen(e) { gfProjOpen(e.target.files[0]); e.target.value = ''; },
     straighten() { gfAutoStraighten(); },
     r90() { gfR90(); },
     flip() { gfFlip(); },
