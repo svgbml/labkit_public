@@ -170,6 +170,77 @@ with sync_playwright() as p:
     ck('parseSnp: onbekend', N.get('notFound') is True and N.get('ok') is False, N)
     ck('rsId', pg.evaluate("[rsId('rs12'),rsId('RS12'),rsId(' 12 '),rsId('x12'),rsId('')]") == ['12', '12', '12', None, None])
 
+    # S197: sequentie ophalen op accessienummer, en de regio rond een SNP
+    nm_sum = (FX / 'esummary_nuccore_NM_002386.4.json').read_text(encoding='utf8')
+    nm_nf = (FX / 'esummary_nuccore_notfound.json').read_text(encoding='utf8')
+    nm_fa = (FX / 'efetch_NM_002386.4.fasta').read_text(encoding='utf8')
+    nc_fa = (FX / 'efetch_NC_000016.10_89919609-89919809.fasta').read_text(encoding='utf8')
+    nc_sum = json.dumps({'result': {'uids': ['1'], '1': {'uid': '1', 'slen': 90338345, 'title': 'Homo sapiens chromosome 16', 'accessionversion': 'NC_000016.10'}}})
+    big_sum = json.dumps({'result': {'uids': ['2'], '2': {'uid': '2', 'slen': 2000000, 'title': 'groot', 'accessionversion': 'U99999.1'}}})
+    pg.evaluate("ncbiCacheClear(); __calls=[]")
+    pg.evaluate("""(a)=>{ __fx={'esummary.fcgi?db=nuccore&id=NM_002386.4':a[0], 'esummary.fcgi?db=nuccore&id=NM_999999999.1':a[1],
+      'efetch.fcgi?db=nuccore&id=NM_002386.4':a[2], 'seq_start=89919609&seq_stop=89919809':a[3],
+      'esummary.fcgi?db=nuccore&id=NC_000016.10':a[4], 'esummary.fcgi?db=nuccore&id=U99999.1':a[5],
+      'id=1805007':a[6]}; }""", [nm_sum, nm_nf, nm_fa, nc_fa, nc_sum, big_sum, snp_json])
+    fetch_note = lambda: pg.inner_text('#sq-fetch') if pg.locator('#sq-fetch').count() else ''
+    # (c) ongeldig: geen verzoek
+    pg.fill('#sq-acc', 'NM 12 x')
+    pg.click('#sq-acc-go')
+    ck('ongeldig accessienummer: melding, geen verzoek', pg.locator('#sq-fetch.bad').count() == 1 and pg.evaluate('__calls.length') == 0, fetch_note())
+    pg.fill('#sq-acc', 'NM_002386.4')
+    for va, vb in [('0', '10'), ('20', '10'), ('5', ''), ('x', '9'), ('1.5', '9')]:
+        pg.fill('#sq-from', va); pg.fill('#sq-to', vb)
+        pg.click('#sq-acc-go')
+        ck(f'ongeldige regio {va!r}-{vb!r}: geen verzoek', pg.locator('#sq-fetch.bad').count() == 1 and pg.evaluate('__calls.length') == 0, fetch_note())
+    pg.fill('#sq-from', ''); pg.fill('#sq-to', '')
+    # (d) niet gevonden
+    pg.fill('#sq-acc', 'NM_999999999.1')
+    pg.click('#sq-acc-go')
+    pg.wait_for_function("document.querySelector('#sq-fetch.bad')&&!/…/.test(document.querySelector('#sq-fetch').innerText)")
+    ck('onbekend accessienummer: niet gevonden', 'niet gevonden' in fetch_note() or 'not found' in fetch_note(), fetch_note())
+    ck('onbekend: alleen esummary', pg.evaluate('__calls.length') == 1)
+    # te groot zonder regio
+    pg.evaluate("__calls=[]")
+    pg.fill('#sq-acc', 'U99999.1')
+    pg.click('#sq-acc-go')
+    pg.wait_for_function("document.querySelector('#sq-fetch.bad')&&!/…/.test(document.querySelector('#sq-fetch').innerText)")
+    ck('te groot zonder regio: geen efetch', pg.evaluate('__calls.length') == 1 and 'efetch' not in pg.evaluate('__calls[0]'), pg.evaluate('__calls'))
+    # (a) NM_002386.4
+    pg.evaluate("__calls=[]")
+    pg.fill('#sq-acc', ' nm_002386.4 ')
+    pg.click('#sq-acc-go')
+    pg.wait_for_function("document.querySelector('#sq-fetch.ok')")
+    ck('NM_ in #sq-in als FASTA', pg.input_value('#sq-in').startswith('>NM_002386.4'), pg.input_value('#sq-in')[:60])
+    big_txt = pg.inner_text('#sq-res .big').replace('.', '').replace(',', '').replace('\u202f', '').replace(' ', '')
+    ck('grote getal 2111 nt', '2111' in big_txt, big_txt)
+    ck('ok-melding', 'NM_002386.4' in fetch_note() and '2111' in fetch_note().replace('.', '').replace(',', ''), fetch_note())
+    cl = pg.evaluate('__calls')
+    ck('esummary dan efetch', len(cl) == 2 and 'esummary' in cl[0] and 'efetch' in cl[1] and 'rettype=fasta' in cl[1] and 'seq_start' not in cl[1], cl)
+    ck('(b) alleen tool=labkit plus zelf ingestelde email/api_key', all('tool=labkit' in u for u in cl) and all(('email=iemand%40voorbeeld.nl' in u and 'api_key=abc123' in u) for u in cl), cl)
+    # (f) tweede keer: cache
+    pg.click('#sq-acc-go')
+    pg.wait_for_timeout(400)
+    ck('tweede ophaling: geen nieuw verzoek', pg.evaluate('__calls.length') == 2, pg.evaluate('__calls'))
+    # (e) regio rond rs1805007
+    pg.evaluate("__calls=[]")
+    pg.fill('#sq-rs', 'rs1805007')
+    pg.click('#sq-rs-go')
+    pg.wait_for_selector('#sq-rs-region')
+    ck('flank standaard 100', pg.input_value('#sq-flank') == '100')
+    pg.click('#sq-rs-region')
+    pg.wait_for_function("document.querySelector('#sq-fetch.ok')&&/89919609/.test(document.querySelector('#sq-in').value)")
+    cl = pg.evaluate('__calls')
+    ck('regio: seq_start/seq_stop', any('seq_start=89919609&seq_stop=89919809' in u for u in cl), cl)
+    ck('regio: velden ingevuld', pg.input_value('#sq-acc') == 'NC_000016.10' and pg.input_value('#sq-from') == '89919609' and pg.input_value('#sq-to') == '89919809')
+    body = ''.join(l for l in pg.input_value('#sq-in').splitlines() if not l.startswith('>')).strip()
+    ck('regio: 201 bp met C op positie 101', len(body) == 201 and body[100] == 'C', (len(body), body[95:106]))
+    pg.fill('#sq-flank', '9999')
+    pg.click('#sq-rs-region')
+    ck('flank te groot: melding', pg.locator('#sq-fetch.bad').count() == 1)
+    pg.fill('#sq-flank', '100')
+    ck('parseSnp/accOk/regionOk', pg.evaluate("[accOk('NM_002386.4'),accOk('U12345.1'),accOk('NC_000016.10'),accOk('x'),accOk('NM_')]") == [True, True, True, False, False]
+       and pg.evaluate("[regionOk('',''),regionOk('1','5'),regionOk('5','1'),regionOk('0','5')].map(r=>r.ok)") == [True, True, False, False])
+
     ck('geen paginafouten', not errs, errs)
     b.close()
 

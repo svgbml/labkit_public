@@ -114,6 +114,7 @@ export function orfs(seq, fr, minAa) {
    het veld in de pagina staat. Een nieuwe tool (uitlijning, chromatogram) meldt zich met
    SEQ_TO.push({label, tool, id}); add: true voegt een regel "naam<tab>sequentie" toe in plaats
    van het veld te vervangen. */
+/* Een referentieveld (chromatogram, uitlijning) hoeft zich alleen hier te melden met SEQ_TO.push({label, tool, id}); de opgehaalde NCBI-sequentie staat in sq-in. */
 export const SEQ_TO = [
   {label: 'Restrictiedigestie', tool: 'digest', id: 'dg-seq'},
   {label: 'Plasmidekaart', tool: 'plasmid', id: 'pl-seq'},

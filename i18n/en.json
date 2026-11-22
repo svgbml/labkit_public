@@ -5020,5 +5020,21 @@
 "Klinische betekenis": "Clinical significance",
 "Dit is geen rs-nummer. Typ bijvoorbeeld rs{#}.": "That is not an rs number. Type for example rs{#}.",
 "Bron: dbSNP bij NCBI. Posities gelden voor GRCh{#}.": "Source: dbSNP at NCBI. Positions are for GRCh{#}.",
-"Positie (GRCh{#})": "Position (GRCh{#})"
+"Positie (GRCh{#})": "Position (GRCh{#})",
+"Sequentie ophalen": "Fetch a sequence",
+"Accessienummer": "Accession number",
+"Ophalen": "Fetch",
+"Laat Van en Tot leeg voor de hele sequentie. De sequentie komt als FASTA in het invoerveld bovenaan; van daaruit kun je hem doorsturen.": "Leave From and To empty for the whole sequence. The sequence goes into the input field at the top as FASTA; from there you can send it on.",
+"Flank": "Flank",
+"Regio rond deze SNP ophalen": "Fetch the region around this SNP",
+"Dit is geen accessienummer. Typ bijvoorbeeld NM_002386.4.": "That is not an accession number. Type for example NM_002386.4.",
+"Van en Tot moeten allebei leeg zijn, of allebei hele getallen met Van vanaf 1 en niet groter dan Tot.": "From and To must both be empty, or both whole numbers with From at least 1 and not greater than To.",
+"Bezig met ophalen bij NCBI…": "Fetching from NCBI…",
+"Dit accessienummer is niet gevonden bij NCBI.": "This accession number was not found at NCBI.",
+"Deze sequentie is {#} bp lang. Vul Van en Tot in om een stuk van hoogstens 1 miljoen bp op te halen.": "This sequence is {#} bp long. Fill in From and To to fetch a piece of at most 1 million bp.",
+"Van ligt voorbij het einde van de sequentie ({#} bp).": "From lies beyond the end of the sequence ({#} bp).",
+"Dit stuk is langer dan 1 miljoen bp. Kies een kleiner stuk.": "This piece is longer than 1 million bp. Choose a smaller piece.",
+"NCBI stuurde geen sequentie terug. Probeer het later opnieuw.": "NCBI did not return a sequence. Try again later.",
+"Opgehaald: {*}, {#} bp. Staat nu in het invoerveld bovenaan.": "Fetched: {*}, {#} bp. Now in the input field at the top.",
+"Flank moet een geheel getal van {#} tot {#} zijn.": "Flank must be a whole number from {#} to {#}."
 }

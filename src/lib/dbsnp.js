@@ -38,4 +38,15 @@ export function parseSnp(json, id) {
   };
 }
 
-expose({parseSnp, rsId});
+/* accessienummer: NM_002386.4, NC_000016.10, U12345.1 */
+export const accOk = s => /^[A-Z]{1,2}_?\d+(\.\d+)?$/i.test(String(s == null ? '' : s).trim());
+
+/* Van/Tot (1-gebaseerd, inclusief): beide leeg of beide gehele getallen met 1 <= van <= tot */
+export function regionOk(from, to) {
+  const a = String(from == null ? '' : from).trim(), b = String(to == null ? '' : to).trim();
+  if (!a && !b) return {ok: true, none: true};
+  if (!/^\d+$/.test(a) || !/^\d+$/.test(b) || +a < 1 || +a > +b) return {ok: false};
+  return {ok: true, none: false, from: +a, to: +b};
+}
+
+expose({parseSnp, rsId, accOk, regionOk});
