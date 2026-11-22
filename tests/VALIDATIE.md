@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-22 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 288 van 288 controles binnen tolerantie.**
+**Resultaat: 295 van 295 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -43,6 +43,7 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | PCR-mastermix | NEB Taq, 25 en 50 µL | Taq 50 µL (µL) | 0,25 | 0,25 | +0.00% | ✅ | NEB-protocol M0273: 2,5 / 0,5 / 0,5 / 0,5 / 0,125 µL per 25 µL; Taq 0,25 µL per 50 µL |
 | PCR-cyclus | Primer-Tm (nearest-neighbor) | Tm forward (°C) | 65,22 | 65,2 | -0.03% | ✅ | Biopython Tm_NN (SantaLucia 1998, 50 mM Na⁺, 1,5 mM Mg²⁺, 0,8 mM dNTP, 0,2 µM primer) |
 | PCR-cyclus | Primer-Tm (nearest-neighbor) | Tm reverse (°C) | 64,15 | 64,1 | -0.08% | ✅ | Biopython Tm_NN (SantaLucia 1998, 50 mM Na⁺, 1,5 mM Mg²⁺, 0,8 mM dNTP, 0,2 µM primer) |
+| PCR-cyclus | Primerpaar: kruisdimeer ΔG37 | ΔG37 kruisdimeer (kcal/mol) | -5,2 | -5,2 | -0.00% | ✅ | SantaLucia 1998 tabel 2: 3′-GGATCC/GGATCC-duplex = 1,96 (initiatie) + GG −1,84 + GA −1,30 + AT −0,88 + TC −1,30 + CC −1,84 = −5,20 kcal/mol |
 | PCR-cyclus | qPCR-efficiëntie uit helling | efficiëntie bij −3,80 (%) | 83,3 | 83,3 | +0.00% | ✅ | Pearson qPCR-efficiëntie: helling −3,80 → 83,3%; helling −3,3 → 100,9% |
 | PCR-cyclus | qPCR-efficiëntie uit helling | efficiëntie bij −3,3 (%) | 100,9 | 100,9 | +0.00% | ✅ | Pearson qPCR-efficiëntie: helling −3,80 → 83,3%; helling −3,3 → 100,9% |
 | PCR-cyclus | Amplificatie | kopieën | 4,0960e+08 | 4,1000e+08 | +0.10% | ✅ | KVV-studiemateriaal: 10⁵ × 2¹² = 4,1 × 10⁸ |
@@ -50,9 +51,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
-| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9403 | -0.44% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7801 | +0.30% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
-| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5644 | +1.59% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9415 | -0.31% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 2 / lane 3 | 0,7778 | 0,7889 | +1.44% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
+| Gelfoto-editor | Densitometrie demo-gel | lane 5 / lane 3 | 0,5556 | 0,5566 | +0.19% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Densitometrie demo-gel | bandgrootte (bp) | 650 | 652,3 | +0.35% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
 | Gelfoto-editor | Demo-gel: lanen en ladder | aantal lanen | 9 | 9 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
 | Gelfoto-editor | Demo-gel: lanen en ladder | lanemidden binnen 5 px | 1 | 1 | +0.00% | ✅ | Rekentest: getekende gel met 9 lanen op 77,5 px afstand (lanemidden moet binnen 5 px liggen), 100 bp-ladder, banden van 650, 350 en 58 bp |
@@ -275,6 +276,12 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Enzymkinetiek | Eadie-Hofstee | y-asafsnede | 100 | 100 | +0.00% | ✅ | Exacte Michaelis-Menten-data (V_max 100, K_m 2): v tegen v/[S] heeft helling −K_m en y-asafsnede V_max |
 | Restrictiedigestie | Enzymvolume en star-activiteit | enzymvolume (µL) | 1 | 1 | +0.00% | ✅ | 1 µg DNA × 10 U/µg / 20 U/µL = 0,5 µL per enzym; twee enzymen in 50 µL = 2% (glycerol 1%) |
 | Restrictiedigestie | Enzymvolume en star-activiteit | glycerol (%) | 1 | 1 | +0.00% | ✅ | 1 µg DNA × 10 U/µg / 20 U/µL = 0,5 µL per enzym; twee enzymen in 50 µL = 2% (glycerol 1%) |
+| Restrictiedigestie | In-silico digestie van pUC19 | EcoRI+HindIII groot (bp) | 2635 | 2635 | +0.00% | ✅ | pUC19 (GenBank L09137.2, 2686 bp, circulair): EcoRI knipt eenmaal (positie 397), HindIII eenmaal (448); samen 2635 + 51 bp. PvuII knipt tweemaal (309, 631) en geeft 2364 + 322 bp (NEB/REBASE-herkenningsplaatsen) |
+| Restrictiedigestie | In-silico digestie van pUC19 | EcoRI+HindIII klein (bp) | 51 | 51 | +0.00% | ✅ | pUC19 (GenBank L09137.2, 2686 bp, circulair): EcoRI knipt eenmaal (positie 397), HindIII eenmaal (448); samen 2635 + 51 bp. PvuII knipt tweemaal (309, 631) en geeft 2364 + 322 bp (NEB/REBASE-herkenningsplaatsen) |
+| Restrictiedigestie | In-silico digestie van pUC19 | PvuII groot (bp) | 2364 | 2364 | +0.00% | ✅ | pUC19 (GenBank L09137.2, 2686 bp, circulair): EcoRI knipt eenmaal (positie 397), HindIII eenmaal (448); samen 2635 + 51 bp. PvuII knipt tweemaal (309, 631) en geeft 2364 + 322 bp (NEB/REBASE-herkenningsplaatsen) |
+| Restrictiedigestie | In-silico digestie van pUC19 | PvuII klein (bp) | 322 | 322 | +0.00% | ✅ | pUC19 (GenBank L09137.2, 2686 bp, circulair): EcoRI knipt eenmaal (positie 397), HindIII eenmaal (448); samen 2635 + 51 bp. PvuII knipt tweemaal (309, 631) en geeft 2364 + 322 bp (NEB/REBASE-herkenningsplaatsen) |
+| PCR-cyclus | In-silico PCR op pUC19 | product (bp) | 103 | 103 | +0.00% | ✅ | pUC19 met de M13/pUC-primers GTAAAACGACGGCCAGT (voorwaarts) en CAGGAAACAGCTATGAC (achterwaarts): product van 103 bp over de polylinker (NEB, M13/pUC sequencing primers) |
+| PCR-cyclus | In-silico PCR op pUC19 | aantal producten | 1 | 1 | +0.00% | ✅ | pUC19 met de M13/pUC-primers GTAAAACGACGGCCAGT (voorwaarts) en CAGGAAACAGCTATGAC (achterwaarts): product van 103 bp over de polylinker (NEB, M13/pUC sequencing primers) |
 | Eiwitzuiveringstabel | Zuiveringsfactor en ammoniumsulfaat | zuiveringsfactor | 166,7 | 167 | +0.20% | ✅ | SA stap 4 / SA stap 1 = (480/0,9)/(40/12,5) = 166,7; opbrengst 4800/8000 = 60%; 0 → 40% bij 0 °C: 515,35 × 0,4/(1 − 0,2722 × 0,4) = 231,3 g/L (Wingfield 2016) |
 | Eiwitzuiveringstabel | Zuiveringsfactor en ammoniumsulfaat | g (NH₄)₂SO₄ per L | 231,3 | 231,3 | -0.01% | ✅ | SA stap 4 / SA stap 1 = (480/0,9)/(40/12,5) = 166,7; opbrengst 4800/8000 = 60%; 0 → 40% bij 0 °C: 515,35 × 0,4/(1 − 0,2722 × 0,4) = 231,3 g/L (Wingfield 2016) |
 | Gradiënt-PCR | Lineaire gradiënt | kolom 6 (°C) | 58,36 | 58,4 | +0.06% | ✅ | T₆ = 52 + 5 × (66 − 52)/11 = 58,36 °C |
