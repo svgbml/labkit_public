@@ -14,6 +14,10 @@ function beep(n=3,freq=880){ try{ if(!actx) return; let t=actx.currentTime; for(
 let timers=[], tid=0;
 const TPRE=[['Centrifugeren',1,0],['Lysis 56 °C',10,0],['Gel draaien',30,0],['Incubatie 37 °C',60,0],['5 min',5,0]];
 function addTimer(name,secs){ timers.push({id:++tid,name,total:secs,rem:secs,run:false,end:0,done:false}); renderTimers(); }
+/* een herinnering (S56): een timer die al loopt en afgaat op kloktijd `at` (ms); loopt door na herladen
+   zoals elke timer. shortcut: alleen terwijl Labkit open is (geen push-server), een agenda-export voor langer */
+function addReminder(name,at){ const s=(at-Date.now())/1000; if(!(s>0)) return false; unlockAudio(); askNotify();
+  timers.push({id:++tid,name,total:s,rem:s,run:true,end:at,done:false}); renderTimers(); return true; }
 const mmss=s=>{ s=Math.max(0,Math.ceil(s)); const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60; return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0'); };
 /* De weergave is de Vue-component Timers (src/tools/Timers.vue): die leest `timers` bij elke
    tik van `tick`. renderTimers() blijft bestaan als "de lijst is veranderd"; wie de lijst wijzigt
@@ -65,6 +69,7 @@ live({
   tid: [() => tid, v => { tid = v; }],
   TPRE: () => TPRE,
   addTimer: [() => addTimer, v => { addTimer = v; }],
+  addReminder: [() => addReminder, v => { addReminder = v; }],
   mmss: () => mmss,
   renderTimers: [() => renderTimers, v => { renderTimers = v; }],
   tmAct: [() => tmAct, v => { tmAct = v; }],

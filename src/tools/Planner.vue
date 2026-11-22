@@ -20,7 +20,9 @@
         <button type="button" id="xp-tim" @click="timers">{{ t('Wachtstappen als timers') }}</button>
         <button type="button" id="xp-ics" @click="ics">{{ t('Naar agenda (.ics)') }}</button>
         <button type="button" id="xp-bench" @click="bench">{{ t('Bench-modus') }}</button>
+        <button type="button" id="xp-rem" @click="remind">{{ t('Herinneringen') }}</button>
       </div>
+      <lk-note v-if="remN != null" :kind="remN ? 'ok' : 'warn'">{{ remN ? t('Herinneringen gezet: ' + remN + '. Ze gaan af aan het eind van elke wachtstap, zolang Labkit open is (ook in een andere tool); je ziet ze bij Timers.') : t('Geen wachtstap eindigt in de toekomst; kijk naar datum en starttijd.') }}</lk-note>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Duur in minuten. "Wachten" zijn incubaties of looptijden waarin je iets anders kunt doen; die worden timers. Het .ics-bestand opent in Outlook, Google Agenda en Apple Agenda; elke stap wordt een afspraak in lokale tijd. Voorbeeld: transformatie volgens de Avans DNA-toolbox. Voorbeeldtijden zijn indicatief.') }}</p>
     </div>
     <div class="result">
@@ -64,7 +66,7 @@ export default {
     return {
       title: stored('xp-title', loc('Transformatie en uitplaten')), date: stored('xp-date', ''),
       start: stored('xp-start', '09:00'), end: stored('xp-end', '17:00'),
-      rows: DEF.map(r => [loc(r[0]), r[1], r[2]])
+      rows: DEF.map(r => [loc(r[0]), r[1], r[2]]), remN: null
     };
   },
   computed: {
@@ -106,6 +108,17 @@ export default {
       openBench({title: this.title, steps: this.steps().map(s => ({html: esc(s.n) + ' · ' + lkNumIn(s.d) + ' min',
         timer: s.w && s.d > 0 ? [s.n, s.d * 60] : null}))});
     },
+    /* middernacht van de gekozen datum (dd-mm-jjjj), anders van vandaag */
+    day() {
+      const dm = String(this.date).trim().match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/), base = dm ? new Date(+dm[3], +dm[2] - 1, +dm[1]) : new Date(); base.setHours(0, 0, 0, 0);
+      return base;
+    },
+    /* een herinnering aan het eind van elke wachtstap (incubator, waterbad), op de klok van de tijdlijn */
+    remind() {
+      const m = this.m; if (!m) return;
+      const b = this.day().getTime();
+      this.remN = m.S.filter(s => s.w && s.d > 0 && addReminder('⏰ ' + s.n, b + s.b * 60000)).length;
+    },
     timers() {
       const S = this.rows.filter(r => r[0].trim() && r[2] === 'wachten' && num(r[1]) > 0);
       S.forEach(r => addTimer(r[0], num(r[1]) * 60)); if (S.length) location.hash = '#timers';
@@ -123,7 +136,7 @@ export default {
     /* agendabestand: elke stap een afspraak in lokale tijd */
     ics() {
       const S = this.steps(), t0 = hm2m(this.start); if (!S.length || !isFinite(t0)) return;
-      const dm = String(this.date).trim().match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/), base = dm ? new Date(+dm[3], +dm[2] - 1, +dm[1]) : new Date(); base.setHours(0, 0, 0, 0);
+      const base = this.day();
       const p2 = v => String(v).padStart(2, '0'), ts = m => { const d = new Date(base.getTime() + m * 60000); return `${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}T${p2(d.getHours())}${p2(d.getMinutes())}00`; }, now = new Date(), stamp = `${now.getUTCFullYear()}${p2(now.getUTCMonth() + 1)}${p2(now.getUTCDate())}T${p2(now.getUTCHours())}${p2(now.getUTCMinutes())}${p2(now.getUTCSeconds())}Z`, escI = s => String(s).replace(/\\/g, '\\\\').replace(/[,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
       const title = this.title || 'Experiment'; let t = t0; const ev = S.map((s, i) => { const a = t, b = t + Math.max(s.d, 1); t += s.d; return ['BEGIN:VEVENT', `UID:labkit-${stamp}-${i}@labkit-bml`, `DTSTAMP:${stamp}`, `DTSTART:${ts(a)}`, `DTEND:${ts(b)}`, `SUMMARY:${escI(title + ': ' + s.n)}`, `DESCRIPTION:${escI((s.w ? 'wachten' : 'handwerk') + ', ' + s.d + ' min')}`, `TRANSP:${s.w ? 'TRANSPARENT' : 'OPAQUE'}`, 'END:VEVENT'].join('\r\n'); });
       const body = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Labkit BML//Experimentplanner//NL', 'CALSCALE:GREGORIAN', ...ev, 'END:VCALENDAR'].join('\r\n') + '\r\n';

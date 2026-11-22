@@ -138,6 +138,24 @@ def _(pg):
       __tbl('gc-tbl',[[1,0.05],[2,0.2],[3,0.8]],'groei');""")
     return [('verdubbelingstijd (min)', pg.evaluate("__big('#gc-res')"), 30.0, 0.005), ('µ (h⁻¹)', pg.evaluate("__kv('#gc-res','Specifieke')"), 1.386, 0.005)]
 
+@case('Groeicurve', 'Voorspelling doel-OD', 'Exponentiële groei y = y₀·e^(µt), dus t = t₀ + ln(y_doel/y₀)/µ (Madigan e.a., Brock Biology of Microorganisms, 16e ed., hfst. 5): OD 0,05 → 0,2 in 2 h (t_d = 1 h), doel 0,6 → t = 2 + log₂ 3 = 3,585 h')
+def _(pg):
+    pg.evaluate("""__go('groei');__set('g2-tu','h');__set('g2-type','od');__set('g2-blank','0');__set('g2-win','man');__set('g2-from','1');__set('g2-to','3');__set('g2-target','0.6');
+      __tbl('gc-tbl',[[0,0.05],[1,0.1],[2,0.2]],'groei');""")
+    return [('doel bereikt (h)', pg.evaluate("__kv('#gc-res','Doelwaarde bereikt')"), 3.585, 0.005)]
+
+@case('Telkamer', 'Tellen uit een foto (trypaanblauw)', 'Testfoto\'s met bekend aantal (tests/fixtures/make_cells.py, vaste seed): levende cellen met heldere kern en donkere rand, dode egaal blauw, met kamerlijnen (ook driedubbel), verloop, ruis en onscherpte. 45 levend/12 dood en 80/30 (dichter, kleiner); tolerantie 10%')
+def _(pg):
+    out = []
+    for f, live, dead in (('cells_trypan.png', 45, 12), ('cells_dense.png', 80, 30)):
+        pg.evaluate("__go('telkamer');__set('k-live','');__set('k-dead','');document.querySelector('#t-telkamer details').open=true"); pg.wait_for_selector('#k-photo', state='attached')
+        pg.set_input_files('#k-photo', str(ROOT / 'tests' / 'fixtures' / f))
+        pg.wait_for_selector('#k-pfill'); pg.evaluate("document.getElementById('k-pfill').click()"); pg.wait_for_timeout(100)
+        out += [(f + ' levend', pg.evaluate("__n(document.getElementById('k-live').value)"), live, 0.1),
+                (f + ' dood', pg.evaluate("__n(document.getElementById('k-dead').value)"), dead, 0.1)]
+    pg.evaluate("__go('telkamer');__set('k-live','52 47 55 49');__set('k-dead','4 6 3 5')")
+    return out
+
 @case('Telkamer', 'Neubauer, erytrocyten', 'ProSciTech: 528 cellen in 5 groepsvakken (0,2 mm²), 1:200 → 5,28 × 10⁶/µL')
 def _(pg):
     pg.evaluate("__go('telkamer');__set('k-ch','0.1n');kSq();__set('k-sq','0.04');__set('k-live','105,106,105,106,106');__set('k-dead','');__set('k-df','200')")

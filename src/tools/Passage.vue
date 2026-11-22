@@ -32,6 +32,12 @@
           <lk-table :cols="cols" :rows="tableRows"/>
           <lk-note v-if="m.now > 100" kind="warn">{{ t('Meer cellen dan bij volledige confluentie: controleer het aantal of de confluente dichtheid.') }}</lk-note>
           <lk-formula :html="tHtml('t = t<sub>lag</sub> + t<sub>d</sub> · log₂(n)')"/>
+          <h3 style="margin-top:14px">{{ t('Passagekalender') }}</h3>
+          <lk-table :cols="calCols" :rows="calRows"/>
+          <div class="row" style="margin-top:8px">
+            <button type="button" id="ps-rem" @click="remind">{{ t('Herinnering bij de volgende passage') }}</button>
+          </div>
+          <lk-note v-if="remOk != null" :kind="remOk ? 'ok' : 'warn'">{{ remOk ? t('Herinnering gezet; hij gaat af zolang Labkit open is (ook in een andere tool). Je ziet hem bij Timers.') : t('De volgende passage is nu al; er is niets te herinneren.') }}</lk-note>
         </template>
       </div>
     </div>
@@ -48,9 +54,12 @@ const dd = h => { const d = Math.floor(h / 24), hh = Math.round(h - d * 24); ret
 export default {
   name: 'Passage',
   data() {
-    return {fmtV: '75', n: '2e6', td: '24', cd: '1e5', pct: '80', lag: '12', want: '3'};
+    return {fmtV: '75', n: '2e6', td: '24', cd: '1e5', pct: '80', lag: '12', want: '3', remOk: null};
   },
-  methods: {fmt: (x, d) => fmt(x, d)},
+  methods: {
+    fmt: (x, d) => fmt(x, d),
+    remind() { const c = this.cal[0]; this.remOk = addReminder('⏰ ' + this.t('Passeren'), c.at); }
+  },
   computed: {
     formats() {
       return [['25', 'T25-fles (25 cm²)'], ['75', 'T75-fles (75 cm²)'], ['175', 'T175-fles (175 cm²)'],
@@ -65,6 +74,22 @@ export default {
       const R = [2, 3, 4, 5, 6, 8, 10, 15, 20].map(n => ({n, t: lag + td * Math.log2(n)}));
       return {A, N, td, pc, lag, want, target, now, hrs, R};
     },
+    /* de splitratio die het best past bij "volgende passage over"; null zonder die wens */
+    best() {
+      const {want, R} = this.m;
+      return isFinite(want) && want > 0 ? R.reduce((a, b) => Math.abs(b.t - want * 24) < Math.abs(a.t - want * 24) ? b : a) : null;
+    },
+    /* de verwachte passages: eerst bij confluentie, daarna steeds na de tijd van de best passende splitratio */
+    cal() {
+      const t0 = Date.now(), first = t0 + this.m.hrs * 3600e3, b = this.best;
+      return Array.from({length: b ? 6 : 1}, (_, i) => ({at: first + i * (b ? b.t : 0) * 3600e3, r: i ? '1:' + b.n : '—'}));
+    },
+    calCols() { return [{h: '#', num: true}, {h: this.t('Datum')}, {h: this.t('Splitratio ervoor')}, {h: ''}]; },
+    calRows() {
+      const loc = LANG === 'en' ? 'en-GB' : 'nl-NL';
+      return this.cal.map((c, i) => { const d = new Date(c.at), we = d.getDay() % 6 === 0;
+        return {cells: [i + 1, d.toLocaleString(loc, {weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}), c.r, we ? this.t('weekend') : ''], cls: we ? 'hl' : ''}; });
+    },
     bigText() { return this.m.N >= this.m.target ? this.t('nu') : this.t(dd(this.m.hrs)); },
     rows() {
       const t = this.t, {pc, target, N, A, now} = this.m;
@@ -73,9 +98,8 @@ export default {
         [t('Celdichtheid nu'), this.tHtml(sci(N / A, 3) + ' cellen/cm²')]];
     },
     advice() {
-      const {want, R, target} = this.m;
-      if (!(isFinite(want) && want > 0)) return '';
-      const best = R.reduce((a, b) => Math.abs(b.t - want * 24) < Math.abs(a.t - want * 24) ? b : a);
+      const {want, target} = this.m, best = this.best;
+      if (!best) return '';
       return this.tHtml(`Voor een volgende passage over ${fmt(want, 1)} dagen past splitratio 1:${best.n} (klaar na ${dd(best.t)}); zaai dan ${sci(target / best.n, 3)} cellen in.`);
     },
     cols() {

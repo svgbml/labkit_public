@@ -35,6 +35,7 @@
         <label for="k-dead">{{ t('Dode cellen (blauw, trypaanblauw) per vak, optioneel') }}</label>
         <textarea id="k-dead" rows="2" v-model="deadTxt"></textarea>
       </div>
+      <tel-foto @fill="fill"/>
       <div class="fields" style="margin-top:12px">
         <lk-field v-model="df" :label="t('Verdunningsfactor')" for-id="k-df"/>
         <div class="f" data-expert="">
@@ -77,11 +78,13 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import TelFoto from './TelFoto.vue';
 
 const F = (x, d) => lkNumIn(fmt(x, d)), C = (x, d) => lkNumIn(sci(x, d));
 
 export default {
   name: 'Telkamer',
+  components: {TelFoto},
   data() {
     return {ch: '0.1', sq: '1', liveTxt: '52 47 55 49', deadTxt: '4 6 3 5', df: '2', sv: '10', need: '1e5'};
   },
@@ -98,7 +101,12 @@ export default {
   methods: {
     fmt: (x, d) => fmt(x, d),
     /* tekst van de gebruiker blijft letterlijk staan in de vertaling */
-    list: l => l.map(uv).join(', ')
+    list: l => l.map(uv).join(', '),
+    /* een fototelling (S60) komt als één vak achter de tellingen */
+    fill(n) {
+      const add = (s, v) => (s.trim() ? s.trim() + ' ' : '') + v;
+      this.liveTxt = add(this.liveTxt, n.live); this.deadTxt = add(this.deadTxt, n.dead);
+    }
   },
   computed: {
     send() { return typeof SEND !== 'undefined' && SEND.telkamer ? SEND.telkamer.to : []; },

@@ -52,13 +52,17 @@
               style="border-radius:0 4px 4px 0;border-left:0">
           </div>
         </div>
+        <lk-field v-model="target" :label="t('Doelwaarde (voorspelling)')" for-id="g2-target"/>
       </div>
       <h3 style="margin-top:16px"
         v-html="tHtml('Metingen &lt;span class=&quot;example&quot;&gt;voorbeeld&lt;/span&gt;')"></h3>
       <lk-etable table-id="gc-tbl" :cols="cols" v-model:rows="rows" add-id="gc-add" numbered/>
       <div class="row" style="margin-top:10px">
         <button type="button" id="gc-add" @click="addRow">{{ t('+ Meetpunt') }}</button>
+        <button type="button" id="gc-now" @click="readNow">{{ t('+ Meting nu') }}</button>
+        <button type="button" id="gc-stop" v-if="t0" @click="t0 = null">{{ t('Live stoppen') }}</button>
       </div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Live: "+ Meting nu" zet een meetpunt op de verstreken tijd sinds de start (de eerste keer telt de klok door vanaf het laatste meetpunt) en de voorspelling wordt bij elke meting opnieuw berekend.') }}</p>
     </div>
     <div class="result">
       <canvas id="gc-cv" v-show="has"></canvas>
@@ -71,6 +75,17 @@
           <lk-kv :rows="kvRows"/>
           <lk-note v-if="m.odHigh" kind="warn">{{ t('Het venster loopt boven OD 1,0; daar is OD niet meer evenredig met het celaantal. Verdun of kies een eerder venster.') }}</lk-note>
           <lk-note v-if="m.three" kind="info">{{ t('Het venster bevat maar 3 punten; meet vaker in de exponentiële fase.') }}</lk-note>
+          <template v-if="pred">
+            <lk-note v-if="pred.done" kind="ok">{{ t('De doelwaarde is bereikt.') }}</lk-note>
+            <template v-else>
+              <lk-kv :rows="predRows"/>
+              <lk-note v-if="pred.past" kind="warn">{{ t('De laatste meting ligt na de exponentiële fase; de voorspelling gaat uit van verdere exponentiële groei en is daar te vroeg.') }}</lk-note>
+              <div class="row" v-if="pred.at" style="margin-top:8px">
+                <button type="button" id="gc-rem" @click="remOk = addReminder('⏰ ' + target, pred.at)">{{ t('Herinnering bij de doelwaarde') }}</button>
+              </div>
+              <lk-note v-if="remOk" kind="ok">{{ t('Herinnering gezet; je ziet hem bij Timers.') }}</lk-note>
+            </template>
+          </template>
           <lk-formula :html="formula"/>
         </template>
       </div>
@@ -81,7 +96,7 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 
-const L = lkNumIn;
+const L = lkNumIn, LIVE = 'labkit:v1:groeilive';
 
 /* de voorbeeldmetingen van de oude GCDATA, als tekst met een komma zoals de invoer ze toont */
 const GCDATA = [['0', '0,05'], ['0,5', '0,052'], ['1', '0,058'], ['1,5', '0,075'], ['2', '0,11'],
@@ -103,7 +118,8 @@ export default {
   name: 'Groei',
   data() {
     return {
-      tu: 'h', type: 'od', blank: '0', fac: '8e8', win: 'auto', from: '4', to: '9',
+      tu: 'h', type: 'od', blank: '0', fac: '8e8', win: 'auto', from: '4', to: '9', target: '', remOk: false,
+      t0: jget(LIVE, null),
       rows: GCDATA.map(r => r.map(v => L(v)))
     };
   },
@@ -145,6 +161,22 @@ export default {
       return {w, mu, td, lag, tconv: v => tu === 'min' ? v * 60 : v,
         odHigh: this.type === 'od' && ok[w.j].v > 1.0, three: w.j - w.i + 1 < 4};
     },
+    /* voorspelling vanaf het laatste meetpunt met de µ van het venster: t = t_laatst + ln(doel/y_laatst)/µ (uur) */
+    pred() {
+      const m = this.m, blank = this.type === 'od' ? (num(this.blank) || 0) : 0, goal = num(this.target) - blank;
+      if (!this.has || !(goal > 0)) return null;
+      const last = this.ok.length - 1, v = this.ok[last].v;
+      if (v >= goal) return {done: true};
+      const th = this.th[last] + Math.log(goal / v) / m.mu, dh = th - this.th[last];
+      const at = this.t0 ? this.t0 + th * 3600e3 : null;
+      return {th, dh, at, past: last > m.w.j};
+    },
+    predRows() {
+      const p = this.pred, t = this.t, e = this.tu === 'min' ? ' min' : ' u', u = this.m.tconv;
+      const rows = [[t('Doelwaarde bereikt bij'), t(L(fmt(u(p.th), 2)) + e)], [t('Nog te gaan'), t(L(fmt(u(p.dh), 2)) + e)]];
+      if (p.at) rows.push([t('Verwacht om'), new Date(p.at).toLocaleTimeString(LANG === 'en' ? 'en-GB' : 'nl-NL', {hour: '2-digit', minute: '2-digit'})]);
+      return rows;
+    },
     kvRows() {
       const m = this.m, t = this.t, {ok, tu, type} = this, w = m.w;
       const eenheid = tu === 'min' ? ' min' : ' u';
@@ -169,6 +201,7 @@ export default {
     }
   },
   watch: {
+    t0(v) { jset(LIVE, v); this.remOk = false; },
     /* bij het omschakelen naar "zelf kiezen" worden de velden het gevonden venster; sync, zodat
        een waarde die direct daarna wordt ingevuld niet wordt overschreven */
     win: {
@@ -182,21 +215,34 @@ export default {
   updated() { this.draw(); },
   methods: {
     fmt(x, d) { return fmt(x, d); },
+    addReminder: (n, at) => addReminder(n, at),
+    /* live: een meetpunt op de verstreken tijd sinds t0; zonder t0 telt de klok door vanaf het laatste meetpunt */
+    readNow() {
+      const ms = this.tu === 'min' ? 60e3 : 3600e3;
+      if (!this.t0) { const ts = this.rows.map(r => num(r[0])).filter(isFinite); this.t0 = Date.now() - (ts.length ? Math.max(...ts) : 0) * ms; }
+      this.rows = [...this.rows, [L(fmt((Date.now() - this.t0) / ms, 2)), '']];
+      this.$nextTick(() => { const r = document.querySelectorAll('#gc-tbl tbody tr'), i = r.length && r[r.length - 1].querySelectorAll('input'); if (i && i.length) i[i.length - 1].focus(); });
+    },
     addRow() { this.rows = [...this.rows, ['', '']]; },
     draw() {
       const cv = document.getElementById('gc-cv'), m = this.m;
       if (!cv || !this.has) return;
       const {ok, tu, type} = this, w = m.w, mu = m.mu;
       const inW = i => i >= w.i && i <= w.j;
-      const ymin = Math.min(...ok.map(p => p.v)) / 1.6, ymax = Math.max(...ok.map(p => p.v)) * 1.6;
-      chart(cv, {xmin: Math.min(...ok.map(p => p.t)), xmax: Math.max(...ok.map(p => p.t)), ymin, ymax, logy: true,
+      /* de voorspelling (S57): doellijn en de fit doorgetrokken tot het voorspelde tijdstip, hoogstens anderhalf keer de meetduur */
+      const pr = this.pred, goal = pr ? num(this.target) - (type === 'od' ? (num(this.blank) || 0) : 0) : NaN,
+        x0 = Math.min(...ok.map(p => p.t)), xl = Math.max(...ok.map(p => p.t)),
+        xp = pr && !pr.done && m.tconv(pr.th) <= xl + (xl - x0) / 2 ? m.tconv(pr.th) : null;
+      const ymin = Math.min(...ok.map(p => p.v)) / 1.6, ymax = Math.max(...ok.map(p => p.v), pr ? goal : 0) * 1.6;
+      const extra = pr ? [{fn: () => goal, x0, x1: xp || xl, color: '--warn', dash: [2, 3], name: 'doelwaarde'}] : [];
+      chart(cv, {xmin: x0, xmax: xp || xl, ymin, ymax, logy: true,
         xlabel: `tijd (${tu === 'min' ? 'min' : 'uur'})`,
         ylabel: type === 'od' ? 'OD₆₀₀ (log-schaal)' : 'KVE/mL (log-schaal)',
         series: [{pts: ok.filter((p, i) => !inW(i)).map(p => [p.t, p.v]), color: '--muted', name: 'meting'},
           {pts: ok.filter((p, i) => inW(i)).map(p => [p.t, p.v]), color: '--accent', r: 4.5, name: 'exponentiële fase'},
           {fn: t => Math.exp(w.r.a + mu * (tu === 'min' ? t / 60 : t)), x0: ok[Math.max(0, w.i - 1)].t,
-            x1: ok[Math.min(ok.length - 1, w.j + 1)].t, color: '--bad', dash: [5, 4], name: 'exponentiële fit'}],
-        legend: [['exponentiële fase', '--accent'], ['fit', '--bad']], legendPos: 'br'});
+            x1: xp || ok[Math.min(ok.length - 1, w.j + 1)].t, color: '--bad', dash: [5, 4], name: 'exponentiële fit'}, ...extra],
+        legend: [['exponentiële fase', '--accent'], ['fit', '--bad'], ...(pr ? [['doelwaarde', '--warn']] : [])], legendPos: 'br'});
     }
   }
 };
