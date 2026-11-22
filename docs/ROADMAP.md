@@ -419,7 +419,7 @@ New block from ideas #296–#333. Needs nothing from the other phases, so it can
 
 | Step | Ideas | What | Done when | Model |
 |---|---|---|---|---|
-| S147 | 296 | ABIF parser as a lib module: big-endian header, tag directory, typed values; metadata out (sample, date, instrument, dye set) | A test `.ab1` gives the right sample name and read length | Opus 5 |
+| S147 | 296 | ABIF parser as a lib module: big-endian header, tag directory, typed values; metadata out (sample, date, instrument, dye set) | ✅ `src/lib/abif.js`: `readAbif(bytes)` leest de kop, de tagdirectory en de waarden per elementtype (char, pString, cString, byte, word, short, long, float, double, datum, tijd; data van 4 bytes of minder staat in het offsetveld) en geeft `meta` (monster, well, start en einde van de run, instrument, model, dye set, leeslengte). Testbestand `tests/fixtures/3730.ab1` uit de Biopython-tests (licentie in `licenses/`): monster 226032_C-ME-18_pCAGseqF, 1165 basen, gelijk aan Biopython; ook 310, 3100 en de lege en kapotte testbestanden gecontroleerd. Het validatiegeval komt in S149, zodra de tool het bestand kan openen | Opus 5 |
 | S148 | 296 | Read the data tags: channel order from `FWO_`, traces `DATA.9–12`, basecalls `PBAS.2`, peak positions `PLOC.2`, quality `PCON.2` | One object with 4 traces and n bases = n positions | Opus 5 |
 | S149 | 296, 303 | New *Chromatogram* tool: drop/choose a file, metadata card, sequence panel; FASTA and pasted text as fallback | File opens, sequence readable | Sonnet |
 | S150 | 297, 332 | Canvas trace rendering: 4 channels, zoom, pan, overview strip, decimation to ~2 points per pixel | Smooth over a 900-base read | Opus 5 |
