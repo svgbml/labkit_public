@@ -4998,5 +4998,17 @@
 "Drempel tweede piek": "Secondary peak threshold",
 "Per base de hoogte van de tweede piek gedeeld door die van de hoogste. Vanaf de drempel wordt de base een IUPAC-code (R, Y, S, W, K, M) en krijgt hij een paarse markering.": "For each base, the height of the second peak divided by that of the highest. From the threshold up, the base becomes an IUPAC code (R, Y, S, W, K, M) and gets a purple mark.",
 "Heterozygote posities": "Heterozygous positions",
-"drempel": "threshold"
+"drempel": "threshold",
+"Zwak signaal": "Weak signal",
+"Verzadigd": "Saturated",
+"Brede piek": "Broad peak",
+"Kleurstofblob": "Dye blob",
+"N-call": "N call",
+"Mogelijke slippage": "Possible slippage",
+"Genotype": "Genotype",
+"Waarschuwingen": "Flags",
+"SNP-tabel": "SNP table",
+"Waarschuwingen zijn vuistregels om een call na te kijken, geen vaste grenzen.": "Flags are rules of thumb for checking a call, not fixed limits.",
+"Geen heterozygote, gemarkeerde of bewerkte posities.": "No heterozygous, flagged or edited positions.",
+"SNP-tabel als CSV": "SNP table as CSV"
 }

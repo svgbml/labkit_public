@@ -58,6 +58,14 @@
         </div>
         <p v-if="m.ok" style="font-size:13px;color:var(--muted);margin:4px 0 0">{{ t('Klik op een base in het paneel om naar die plek in de trace te gaan; Shift + klik selecteert een bereik, dat Kopieer als FASTA kopieert.') }}</p>
         <pre id="sg-seq" ref="pre" class="mono" v-if="m.ok" style="white-space:pre-wrap;overflow:auto;max-height:18em;margin-top:8px" @click="panelClick"><template v-for="r in seqRows" :key="r.pos"><span>{{ r.pos }}</span>{{ '  ' }}<template v-for="(g, gi) in r.groups" :key="gi"><template v-if="gi">{{ ' ' }}</template><span v-for="b in g" :key="b.i" :data-i="b.i" :class="{'sg-sel': b.i === sel, 'sg-rng': inRng(b.i)}" :title="b.o ? t('Origineel') + ': ' + b.o : null" :style="{background: b.i === sel ? '#90caf9' : inRng(b.i) ? '#bbdefb' : b.o ? '#ffe0b2' : b.hz ? HETBG : null, color: b.g ? 'var(--muted)' : null, cursor: 'pointer'}">{{ b.c }}</span></template>{{ '\n' }}</template></pre>
+        <div v-if="m.ok && het" id="sg-snp" style="margin-top:12px">
+          <h3>{{ t('SNP-tabel') }}</h3>
+          <p v-if="snpCounts" style="font-size:13px;margin:4px 0">{{ snpCounts }}</p>
+          <p v-if="snp.rows.length" style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Waarschuwingen zijn vuistregels om een call na te kijken, geen vaste grenzen.') }}</p>
+          <lk-note v-else kind="info">{{ t('Geen heterozygote, gemarkeerde of bewerkte posities.') }}</lk-note>
+          <div v-if="snp.rows.length" style="max-height:24em;overflow:auto"><lk-table table-id="sg-snp-tbl" :cols="snpCols" :rows="snp.rows"/></div>
+          <button v-if="snp.rows.length" type="button" id="sg-snp-csv" style="margin-top:8px" @click="saveSnp">{{ t('SNP-tabel als CSV') }}</button>
+        </div>
       </div>
     </div>
     <div>
@@ -97,7 +105,7 @@ import {markRaw} from 'vue';
 import {lkNumIn} from '../lib/bridge.js';
 import {readAbif, abifRead} from '../lib/abif.js';
 import {trimWindow, comp, fasta} from '../lib/sangertrim.js';
-import {hetCalls} from '../lib/sangerhet.js';
+import {hetCalls, flags} from '../lib/sangerhet.js';
 import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 
@@ -111,6 +119,7 @@ const GREY = '#8a94a3';
 const MIX = 'RYSWKM', HETBG = '#e1bee7', HETC = '#8e24aa';   // gemengde calls van twee basen; paars = heterozygoot
 
 const intIn = (v, lo, hi, d) => { const n = Number(String(v).replace(',', '.')); return Number.isInteger(n) && n >= lo && n <= hi ? n : d; };
+const FLN = {weak: 'Zwak signaal', sat: 'Verzadigd', broad: 'Brede piek', blob: 'Kleurstofblob', N: 'N-call', slip: 'Mogelijke slippage'};
 const NL = (x, d) => lkNumIn(fmt(x, d));
 
 /* FASTA of kale basen: een regel met > geeft de naam, de rest houdt alleen IUPAC-letters */
@@ -148,6 +157,23 @@ export default {
       if (!h) return b;
       return b.split('').map((c, i) => !h[i] ? c : h[i].code || (MIX.includes(c) ? h[i].top : c)).join('');
     },
+    /* waarschuwingen per base (S156) */
+    flg() { const r = this.m.r; return this.het ? flags(r.traces, r.peaks, this.seq, this.het) : null; },
+    /* de SNP-tabel: elke heterozygote, gemarkeerde of bewerkte positie; counts = aantal basen per waarschuwing */
+    snp() {
+      const h = this.het, f = this.flg, q = this.m.r.qual, t = this.t, rows = [], counts = {};
+      if (!h) return {rows, counts};
+      for (let i = 0; i < f.length; i++) {
+        for (const c of f[i]) counts[c] = (counts[c] || 0) + 1;
+        const ed = this.edits[i] != null;
+        if (!h[i].code && !f[i].length && !ed) continue;
+        const g = this.seq[i] + (h[i].code && !ed ? ' (' + [h[i].top, h[i].sec].sort().join('/') + ')' : '');
+        rows.push([i + 1, g, h[i].h.A, h[i].h.C, h[i].h.G, h[i].h.T, this.fmtR(h[i].ratio), q[i] != null ? q[i] : '–', f[i].map(c => t(FLN[c])).join(', ') || '–']);
+      }
+      return {rows, counts};
+    },
+    snpCols() { const t = this.t; return [{h: t('Positie'), num: true}, {h: t('Genotype')}, {h: 'A', num: true}, {h: 'C', num: true}, {h: 'G', num: true}, {h: 'T', num: true}, {h: t('Verhouding'), num: true}, {h: 'Q', num: true}, {h: t('Waarschuwingen')}]; },
+    snpCounts() { const c = this.snp.counts; return Object.keys(FLN).filter(k => c[k]).map(k => this.t(FLN[k]) + ': ' + NL(c[k], 0)).join(' · '); },
     nHet() { return this.het ? this.het.filter(x => x.code).length : 0; },
     /* de sequentie met de bewerkingen erin; read.bases houdt de oorspronkelijke calls, auto de calls na de piekverhouding */
     seq() {
@@ -406,6 +432,10 @@ export default {
     },
     base() { return safeName(String(this.m.r.name || 'chromatogram').replace(/\.[A-Za-z0-9]{1,4}$/, '')); },
     /* PNG: het canvas zoals het nu is, overzichtsstrook en trimschaduw inbegrepen */
+    saveSnp() {
+      const tsv = [this.snpCols.map(c => c.h)].concat(this.snp.rows).map(r => r.join('\t')).join('\n');
+      saveBlob(this.base() + '-snp.csv', csvBlob(tsv)).catch(() => {});
+    },
     savePng() { this.$refs.cv.toBlob(b => { if (b) saveBlob(this.base() + '.png', b).catch(() => {}); }, 'image/png'); },
     /* de vier kanalen, baseletters en nummers van het zichtbare venster; zonder overzicht of kwaliteit */
     saveSvg() {
