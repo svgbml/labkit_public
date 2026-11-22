@@ -6,7 +6,7 @@
 
      Wat in web/index.html en de modules blijft: toolIndex() (leest de navigatie), TAGS/
      tagList()/curTag(), de fasen (stageCur, stageHas), de werkstromen (WF, wfCur, WFKEY) en de
-     sleutels FKEY/RKEY met jget/jset. Het klikken op een werkstroomkaart (data-wf-start) en op
+     sleutels FKEY/RKEY/UKEY met jget/jset. Het klikken op een werkstroomkaart (data-wf-start) en op
      het kruimelpad (zoekt '#bento-rest > .tile') blijft daar ook; daarom houdt deze component de
      structuur #bento > .hero + #bento-rest > .tile aan, en de id bento-q voor de rondleiding.
 
@@ -91,6 +91,9 @@ export default {
         {key: 'fav', title: t('Favorieten'), list: this.fav.map(by).filter(Boolean), empty: t('Klik op de ster bij een tool om hem hier vast te zetten.')},
         {key: 'rec', title: t('Laatst gebruikt'), list: rec, empty: t('Nog niets geopend.')},
       ];
+      /* meest gebruikt: de top 6 uit de lokale teller (UKEY); gelijke stand houdt de volgorde van de tools */
+      const U = jget(UKEY, {}), top = T.filter(x => U[x.id] > 0).sort((a, b) => U[b.id] - U[a.id]).slice(0, 6).map(x => ({...x, desc: U[x.id] + '×'}));
+      out.push({key: 'use', title: t('Meest gebruikt'), list: top, desc: true, empty: t('Nog niets geteld. De teller blijft op dit apparaat; er gaat niets naar buiten.')});
       if (this.wf.length) out.push({key: 'wf', cls: 'wide lk-wf-tile', wf: true});
       [...new Set(T.map(x => x.grp))].forEach(g => {
         const L = T.filter(x => x.grp === g), w = L.length > 6;

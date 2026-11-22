@@ -137,7 +137,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — |
 | **Wave 6: performance and quality** | | | | |
 | Q1a | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything |
-| Q1b | Sonnet | S138, S139, S141 | K3 (then *any time*) | anything |
+| Q1b ✅ | Sonnet | S138, S139, S141 | K3 (then *any time*) | anything |
 | Q2 | Opus 5 | S140, S142 | K3 | anything except G1a–G3 |
 | F1a | Opus 5.5 | **Re-plan phase 10 first** (lazy init and DOM templates may be largely solved by mounting a component only when its tool opens, which phase 16 makes possible), then S125–S127 | K3 | — |
 | F1b | Opus 5 | S122–S124, S128 | F1a | — |
@@ -393,7 +393,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S138 ✅ | 278 | Unit tests for pure calculation functions (`npm run test:unit`; primer Tm/dimer/hairpin left out: they need `NN` from `src/legacy/app.js`, which needs a DOM) | Sonnet |
 | S139 ✅ | 279 | Visual regression screenshots for key tools and the gel editor (`tests/visual_check.py`; `win32/` baselines are made on the first local Windows run) | Sonnet |
 | S140 | 280, 281, 282, 283 | Screen-reader results, keyboard gel editor/plate designer, theme contrast check, reduced motion | Opus 5 |
-| S141 | 288, 294 | Consistent source citation per result; local "most used tools" overview | Sonnet |
+| S141 ✅ | 288, 294 | Consistent source citation per result; local "most used tools" overview (`tests/src_check.py`; copied tables and chart data carry a *Bron:* line; *Meest gebruikt* tile on the start page) | Sonnet |
 | S142 | 292 | Desktop auto-update via the Tauri updater | Opus 5 |
 | S143–S146 | 276, 277 | ✖ Split source from build and move all in-place tools into modules: **moved forward and replaced by phase 16 (S264–S272)**, because after the Vue migration it blocks every feature step instead of waiting until the end | — |
 

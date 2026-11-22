@@ -4984,5 +4984,10 @@
 "De read begint bij het eerste venster en eindigt bij het laatste venster waarvan de gemiddelde Phred-kwaliteit de drempel haalt; de rest staat grijs.": "The read starts at the first window and ends at the last window whose mean Phred quality reaches the threshold; the rest is greyed out.",
 "Geen enkel venster haalt de drempel; er is geen trimvoorstel.": "No window reaches the threshold; there is no trim suggestion.",
 "Trimvoorstel": "Trim suggestion",
-"Na trimmen": "After trimming"
+"Na trimmen": "After trimming",
+"C₁·V₁ = C₂·V₂, met omrekening tussen eenheden van dezelfde soort (Harris, Quantitative Chemical Analysis, hfst. {#}).": "C₁·V₁ = C₂·V₂, with conversion between units of the same kind (Harris, Quantitative Chemical Analysis, ch. {#}).",
+"Concentratie na stap n = C₀ / f<sup>n</sup>, met f de verdunningsfactor per stap; overdrachtsvolume = buisvolume / f (Harris, Quantitative Chemical Analysis, hfst. {#}).": "Concentration after step n = C₀ / f<sup>n</sup>, with f the dilution factor per step; transfer volume = tube volume / f (Harris, Quantitative Chemical Analysis, ch. {#}).",
+"Volume per component = C<sub>eind</sub> · V<sub>totaal</sub> / C<sub>stock</sub> (C₁V₁ = C₂V₂, Harris, Quantitative Chemical Analysis, hfst. {#}); mastermix = volume per buis × (aantal buizen + marge).": "Volume per component = C<sub>final</sub> · V<sub>total</sub> / C<sub>stock</sub> (C₁V₁ = C₂V₂, Harris, Quantitative Chemical Analysis, ch. {#}); master mix = volume per tube × (number of tubes + margin).",
+"Meest gebruikt": "Most used",
+"Nog niets geteld. De teller blijft op dit apparaat; er gaat niets naar buiten.": "Nothing counted yet. The count stays on this device; nothing is sent anywhere."
 }
