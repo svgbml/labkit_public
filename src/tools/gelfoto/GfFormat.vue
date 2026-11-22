@@ -8,7 +8,7 @@
      zelf uit de opslag. -->
 <template>
   <div class="stack" style="gap:12px">
-    <div class="panel">
+    <div class="panel" data-gs="labels s4">
       <h3>{{ t('5 · Opmaak') }}</h3>
       <div class="row" style="gap:6px;margin-bottom:10px;align-items:center">
         <span style="font-size:12.5px;color:var(--muted)">{{ t('Stijl') }}</span>
@@ -48,7 +48,7 @@
         <input type="checkbox" id="gf-help" v-model="f.help"> {{ t('Lane- en bandmarkeringen in de marge tonen') }}
       </label>
     </div>
-    <div class="panel">
+    <div class="panel" data-gs="export s4">
       <h3>{{ t('6 · Exporteren') }}</h3>
       <div style="font-size:12.5px;color:var(--muted);margin-bottom:6px">
         {{ t('Wat komt er in de afbeelding? De voorbeeldweergave volgt deze keuzes.') }}

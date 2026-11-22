@@ -1,27 +1,32 @@
 <section class="tool" id="t-gelfoto" data-tool="gelfoto">
   <header class="tool-head"><h2>Gelfoto-editor</h2>
   <p>Laad een gelfoto, stel contrast bij, laat de lanen automatisch detecteren, zet labels en ladderwaarden erbij en meet onbekende banden. De foto blijft in je browser.</p></header>
+  <!-- canvas eerst (S70): links de gereedschapsbalk, midden de foto, rechts de panelen van het
+       actieve gereedschap of de actieve stap. data-gs zegt bij welke weergaven een host hoort
+       (crop lanes ladder bands labels export = gereedschap, s1–s4 = stap); GfGuide.vue zet de
+       weergave als data-gv op .gfwrap, zonder data-gv is alles zichtbaar. -->
   <div class="gfwrap">
-    <div class="stack" style="gap:12px">
-      <div id="gf-app-guide"></div>
-      <div id="gf-app-img" data-gs="1"></div>
-      <div id="gf-app-lib" data-gs="1"></div>
-      <div id="gf-app-lanes" data-gs="2"></div>
-      <div class="panel" data-gs="3 4">
-        <h3>4 · Ladder &amp; banden meten</h3>
-        <div id="gf-app-lad" data-gs="3"></div>
-        <div id="gf-app-virt" data-gs="3"></div>
-        <div id="gf-app-dens" data-gs="4"></div>
-        <div id="gf-app-bands" data-gs="3"></div>
-        <div id="gf-app-marks" data-gs="4"></div>
-      </div>
-      <div id="gf-app-res" data-gs="4"></div>
-      <div id="gf-app-fmt" data-gs="4"></div>
-    </div>
+    <div id="gf-app-guide"></div>
     <div class="panel" id="gf-stage">
       <div class="row" id="gf-zoombar" style="gap:6px;margin-bottom:8px;align-items:center"><button type="button" id="gf-zout" aria-label="Uitzoomen" title="Uitzoomen">−</button><button type="button" id="gf-zfit" title="Hele foto tonen">Passend</button><button type="button" id="gf-zin" aria-label="Inzoomen" title="Inzoomen">+</button><span id="gf-zv" style="font-size:13px;color:var(--muted);min-width:44px">100%</span><span style="font-size:12.5px;color:var(--muted)">Ctrl + scrollen zoomt op de muis; ingezoomd verschuif je met de schuifbalken of door te slepen met de middelste muisknop.</span></div>
       <div id="gf-view"><canvas id="gf-cv" width="800" height="560"></canvas></div>
       <p id="gf-status" style="font-size:13px;color:var(--muted);margin:10px 0 0"></p>
+    </div>
+    <div class="stack gf-ctx" style="gap:12px">
+      <div id="gf-ghint" data-notr></div>
+      <div id="gf-app-img" data-gs="crop s1"></div>
+      <div id="gf-app-lib" data-gs="crop s1"></div>
+      <div id="gf-app-lanes" data-gs="lanes labels s2"></div>
+      <div class="panel" data-gs="ladder bands s3 s4">
+        <h3>4 · Ladder &amp; banden meten</h3>
+        <div id="gf-app-lad" data-gs="ladder s3"></div>
+        <div id="gf-app-virt" data-gs="ladder s3"></div>
+        <div id="gf-app-dens" data-gs="bands s4"></div>
+        <div id="gf-app-bands" data-gs="ladder s3"></div>
+        <div id="gf-app-marks" data-gs="bands s4"></div>
+      </div>
+      <div id="gf-app-res" data-gs="export s4"></div>
+      <div id="gf-app-fmt" data-gs="labels export s4"></div>
     </div>
   </div>
   <p class="src">Bandgrootte: semi-logaritmische interpolatie (log₁₀ bp tegen migratieafstand) tussen de twee dichtstbijzijnde ladderbanden. De demo-gel is getekend, geen echte meting.</p>

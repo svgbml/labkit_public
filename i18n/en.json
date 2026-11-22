@@ -5062,5 +5062,12 @@
 "De ladder is al herkend.": "The ladder has already been recognised.",
 "Controleer de bandgroottes in de tabel en versleep een band op de foto als hij niet goed ligt.": "Check the band sizes in the table and drag a band on the photo if it is in the wrong place.",
 "De banden in de andere lanen zijn gemeten.": "The bands in the other lanes have been measured.",
-"Verwijder wat geen echte band is en exporteer de figuur.": "Remove anything that is not a real band and export the figure."
+"Verwijder wat geen echte band is en exporteer de figuur.": "Remove anything that is not a real band and export the figure.",
+"Gereedschap": "Tools",
+"Banden": "Bands",
+"Labels": "Labels",
+"Exporteren": "Export",
+"Alles": "All",
+"Expert": "Expert",
+"Alle gereedschappen vrij kiezen in plaats van de vier stappen": "Choose any tool freely instead of following the four steps"
 }
