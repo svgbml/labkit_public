@@ -274,7 +274,7 @@ safety nets), then the rest wave by wave.
 | Step | Ideas | What | Done when | Model |
 |---|---|---|---|---|
 | S48 | 61 | Bench mode shell: full-screen step cards, swipe/tap, Wake Lock, high contrast | ✅ `Bench.vue` is een laag over de hele app (`openBench({title, steps})`): één stap per kaart in zwart/wit/geel, vegen of de grote knop, een lijstweergave met vinkjes, Escape/pijltjes, Wake Lock (met melding als de browser die niet geeft). Eerste bron: *Experimentplanner*, waar een wachtstap een knop krijgt die zijn timer start | — |
-| S49 | 62 | Step checklists generated from pipetting scheme, master mix and dilution scheme | Tick-off persists per run | Opus 5 |
+| S49 | 62 | Step checklists generated from pipetting scheme, master mix and dilution scheme | ✅ *Pipetteerschema* (zijn werkwijze), *PCR-mastermix* (water, elke component met het mixvolume, verdelen, template) en *Verdunningsschema* (buizen klaarzetten, elke overdracht, uitplaten) hebben een knop *Bench-modus*. De vinkjes blijven per run bewaard (`labkit:v1:bench`, sleutel = titel + stappen, nieuwste 30), en de bench-modus opent op de eerste open stap; *Opnieuw* wist ze | — |
 | S50 | 62, 61 | Checklists for recipe cards and the Gelplanner; open them in bench mode | 5 tools feed bench mode | Sonnet |
 | S51 | 71, 72 | Master mix progress and plate filling assistant (tap wells as filled) | Progress shown *(needs S28)* | Sonnet |
 | S52 | 73 | Gel loading assistant in the Gelplanner | *(needs S13)* | Sonnet |

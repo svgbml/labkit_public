@@ -27,6 +27,7 @@
         <div id="pp-out">
           <lk-note v-for="(w, i) in m.warn" :key="i" kind="warn">{{ w }}</lk-note>
           <lk-steps :steps="m.steps"/>
+          <button v-if="m.steps.length" type="button" id="pp-bench" @click="bench">{{ t('Bench-modus') }}</button>
           <lk-formula v-if="m.anyC" :html="formula"/>
         </div>
       </div>
@@ -219,6 +220,7 @@ export default {
       if (hasEnz) steps.push(e('Enzym als laatste toevoegen en op ijs werken.'));
       return steps;
     },
+    bench() { openBench({title: this.title.trim() || this.t('Pipetteerschema'), steps: this.m.steps}); },
     onMode(r) { if (r.mode === 'fill') r.v = r.v.map(() => ''); },
     addRow() { this.S.rows.push(blankRow(this.S.cols.length)); },
     addCol() {

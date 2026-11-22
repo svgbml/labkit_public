@@ -6,10 +6,14 @@ const CORE = [
   './index.html',
   './manifest.webmanifest',
 <<<<<<< HEAD
-  './i18n-en.js?h=15b8100d2a',
+<<<<<<< HEAD
+  './i18n-en.js?h=18ddc3aa43',
 =======
-  './i18n-en.js?h=15b8100d2a',
+  './i18n-en.js?h=18ddc3aa43',
 >>>>>>> 0c71626 (S48: bench-modus (stapkaarten op volledig scherm, vegen, Wake Lock, hoog contrast))
+=======
+  './i18n-en.js?h=18ddc3aa43',
+>>>>>>> bec740a (S49: checklists uit pipetteerschema, PCR-mastermix en verdunningsschema, vinkjes bewaard per run)
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png'

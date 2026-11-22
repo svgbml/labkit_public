@@ -3,11 +3,13 @@
      Geen tool met een eigen sectie maar een laag over de hele app: een tool opent hem met
      openBench({title, steps}). Een stap is HTML die de tool zelf al vertaald en ge-escaped heeft
      (dezelfde afspraak als <lk-steps>), of {html, timer: [naam, seconden]} voor een wachtstap.
-     Vegen of de grote knop gaat naar de volgende stap; het scherm blijft aan via de Wake Lock. -->
+     Vegen of de grote knop gaat naar de volgende stap; het scherm blijft aan via de Wake Lock.
+     De vinkjes blijven bewaard per run: dezelfde titel met dezelfde stappen (S49). -->
 <template>
   <div v-if="on" class="bench" role="dialog" aria-modal="true" :aria-label="title" ref="root" tabindex="-1">
     <header class="bench-top">
       <span class="bench-title">{{ title }}</span>
+      <button v-if="list && done.some(Boolean)" type="button" class="bench-tg" @click="reset">{{ t('Opnieuw') }}</button>
       <button type="button" class="bench-tg" @click="list = !list">{{ list ? t('Kaarten') : t('Lijst') }}</button>
       <button type="button" class="bench-x" :aria-label="t('Sluiten')" @click="close">✕</button>
     </header>
@@ -33,6 +35,10 @@
 </template>
 
 <script>
+/* de vinkjes per run, de nieuwste 30 runs: {sleutel: [nummers van de afgevinkte stappen]} */
+const BKEY = 'labkit:v1:bench';
+const runKey = (title, S) => { let h = 0; for (const c of title + '' + S.map(s => s.html).join('')) h = (h * 31 + c.codePointAt(0)) | 0; return String(h); };
+
 export default {
   name: 'Bench',
   data() { return {on: false, title: '', steps: [], i: 0, done: [], list: false, wake: false, sx: null}; },
@@ -42,7 +48,9 @@ export default {
     open({title = '', steps = []}) {
       const S = steps.filter(Boolean).map(s => typeof s === 'string' ? {html: s} : s);
       if (!S.length) return;
-      Object.assign(this, {on: true, title, steps: S, i: 0, done: S.map(() => false), list: false});
+      this.key_ = runKey(title, S);
+      const got = jget(BKEY, {})[this.key_] || [], done = S.map((s, k) => got.includes(k));
+      Object.assign(this, {on: true, title, steps: S, i: Math.max(0, done.indexOf(false)), done, list: false});
       document.body.style.overflow = 'hidden';
       document.addEventListener('keydown', this.key);
       document.addEventListener('visibilitychange', this.lock);
@@ -66,7 +74,14 @@ export default {
       try { this.wl = await navigator.wakeLock.request('screen'); this.wake = true; } catch (e) { this.wake = false; }
     },
     go(d) { this.i = Math.max(0, Math.min(this.steps.length - 1, this.i + d)); },
-    tick(k) { this.done.splice(k, 1, !this.done[k]); },
+    tick(k) { this.done.splice(k, 1, !this.done[k]); this.save(); },
+    reset() { this.done = this.done.map(() => false); this.i = 0; this.save(); },
+    save() {
+      const all = jget(BKEY, {}); delete all[this.key_];
+      all[this.key_] = this.done.map((d, k) => d ? k : -1).filter(k => k >= 0);
+      const ks = Object.keys(all); ks.slice(0, Math.max(0, ks.length - 30)).forEach(k => delete all[k]);
+      jset(BKEY, all);
+    },
     ok() { if (!this.done[this.i]) this.tick(this.i); this.go(1); },
     swipe(x) { const dx = x - this.sx; this.sx = null; if (Math.abs(dx) > 60) this.go(dx < 0 ? 1 : -1); },
     timer() { const [n, s] = this.cur.timer; addTimer(n, s); tmAct(timers[timers.length - 1].id, 's'); },
