@@ -21,7 +21,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 2 preparation, gels | S13–S20 | ✅ done |
 | Phase 3 picture tools and plates | S21–S36 | ✅ done |
 | Phase 4 recipes and sequences | S37–S47 | **part done:** S37–S40 ✅, S41–S47 open |
-| Phases 5–11 | S48–S146 | ⏳ not started (S45, S54, S82, S91, S93 partly there) |
+| Phases 5–11 | S48–S146 | ⏳ S48–S50 done (batch E1, 2026-11-22); the rest not started (S54, S82, S91, S93 partly there) |
 | Phases 12–14 Sanger, alignment, sequence toolbox | S147–S201 | ⏳ not started |
 | Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | ✅ done (batches V1a–V7 merged on 2026-11-21, S263 the same day) |
 | Phase 16 one source, one translation path | S264–S272 | ✅ done (batches K1–K3, 2026-11-21; replaces S143–S146) |
@@ -37,7 +37,7 @@ over:
 - **S91:** *Standaardcurve* reads a pasted plate grid, but not per instrument.
 - **S93:** *qPCR-analyse* reads a pasted Ct table by its header, but not per instrument.
 
-At the last full `python tools/check.py` (2026-11-21, after S272, end of phase 16): **286 of 286 validation checks**, 0 layout problems in Dutch and 2 in English (the known label overflow in *PCR-mastermix*), 0 untranslated texts (including the new leftover-Dutch check), start-up 413/459 ms. `tests/robust_audit.py` could not finish on this machine: the browser runs out of memory while loading a page (see *Known bugs*). By the owner's decision (2026-11-21) that failure is **not blocking** on this machine and the test is not rerun here; it still runs in CI on GitHub.
+At the last full `python tools/check.py` (2026-11-22, after batch E1, S48–S50): **324 of 324 validation checks**, **0 layout problems in Dutch and in English**, 0 untranslated texts and 0 robustness problems; `tests/robust_audit.py` finished on this machine. The two English label overflows in *PCR-mastermix* are gone: the inline `flex:1` on the field block overrode `.row>.fields{flex:1 1 280px}`, so on a phone the wider English recipe names squeezed the block to 3 px.
 
 ### Vue migration: how far it is
 
@@ -115,7 +115,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | P2 ✅ | Sonnet | S41, S47: overage switch, material list and protocol export | K3 | P1 |
 | P3 ✅ | Opus 5.5 | S46 plasmid map (new tool, Vue) | S45 | — |
 | **Wave 4: execution and gel editor** | | | | |
-| E1 | Opus 5.5 | S48 bench shell, S49 (Opus 5), S50 (Sonnet) | K3 | G1a |
+| E1 ✅ | Opus 5.5 | S48 bench shell, S49 (Opus 5), S50 (Sonnet) | K3 | G1a |
 | E2 | Sonnet | S51–S55, S58 | E1 | P1, G1a, G1b |
 | E3 | Opus 5 | S56, S57, S60 | E1 | G1a, G1b |
 | E4 | Opus 5.5 | S59 colony counting, S61 multi-device sync | E1; S104 for the CFU link | — |
