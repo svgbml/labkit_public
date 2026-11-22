@@ -1023,6 +1023,19 @@ def _(pg):
             ('monsternaam', 1 if name == '226032_C-ME-18_pCAGseqF' else 0, 1, 0),
             ('eerste 12 basen', 1 if first == 'GGGCGAGCKYYA' else 0, 1, 0)]
 
+@case('Chromatogram', 'Trimvoorstel met een schuivend venster op 3730.ab1', 'Kwaliteitswaarden PCON2 van tests/fixtures/3730.ab1 zoals Biopython 1.84 ze leest (phred_quality); regel: het eerste en laatste venster waarvan de gemiddelde Phred-kwaliteit de drempel haalt (schuivend venster zoals in Trimmomatic SLIDINGWINDOW, Bolger, Lohse & Usadel, Bioinformatics 30:2114–2120, 2014); verwachte grenzen onafhankelijk in Python berekend')
+def _(pg):
+    pg.evaluate("__go('sanger')")
+    pg.set_input_files('#sg-file', str(ROOT / 'tests' / 'fixtures' / '3730.ab1')); pg.wait_for_timeout(800)
+    out = []
+    for win, q, a, b in ((10, 20, 13, 1093), (10, 30, 23, 1037)):
+        pg.evaluate("([w,q])=>{__set('sg-win',w);__set('sg-q',q)}", [win, q]); pg.wait_for_timeout(200)
+        t = pg.evaluate("__sgVm.trim")
+        out += [(f'venster {win} Q{q} start', t['start'], a, 0), (f'venster {win} Q{q} einde', t['end'], b, 0)]
+    pg.evaluate("()=>{__set('sg-win',10);__set('sg-q',20)}"); pg.wait_for_timeout(200)
+    out.append(('na trimmen (basen)', pg.evaluate("__kv('#sg-out','Na trimmen')"), 1081, 0))
+    return out
+
 @case('Restrictiedigestie', 'In-silico digestie van pFA6a-kanMX6', 'Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa')
 def _(pg):
     fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')
