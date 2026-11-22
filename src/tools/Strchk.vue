@@ -27,6 +27,19 @@
         <lk-big :label="t('Minimaal aantal bijdragers')" :value="m.nc"/>
         <lk-kv :rows="kvRows"/>
         <lk-table :cols="outCols" :rows="outRows"/>
+        <div class="sc-eg" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin:10px 0">
+          <svg v-for="p in eg.panels" :key="p.l" viewBox="0 0 150 80" width="100%" role="img" :aria-label="t('Elektroferogram van') + ' ' + p.l" style="background:var(--surface);border:1px solid var(--line);border-radius:6px">
+            <text x="4" y="10" font-size="8" font-weight="700" fill="var(--text)">{{ p.l }}</text>
+            <line x1="6" y1="60" x2="144" y2="60" stroke="var(--line)"/>
+            <line v-if="eg.yAT >= 0" x1="6" x2="144" :y1="eg.yAT" :y2="eg.yAT" stroke="var(--muted)" stroke-dasharray="3 2"/>
+            <line v-if="eg.yST >= 0" x1="6" x2="144" :y1="eg.yST" :y2="eg.yST" stroke="var(--warn)" stroke-dasharray="3 2"/>
+            <template v-for="k in p.peaks" :key="k.a">
+              <path :d="k.d" :fill="k.c" fill-opacity=".75" :stroke="k.c"/>
+              <text :x="k.x" y="70" text-anchor="middle" font-size="7" fill="var(--muted)">{{ k.lab }}</text>
+            </template>
+          </svg>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin:0">{{ t('Elektroferogram-weergave: gestippeld grijs = analytische drempel, gestippeld oranje = stochastische drempel; blauw = allel, grijs = onder AT of stutter, oranje = allel onder ST.') }}</p>
         <lk-note v-if="m.mix" kind="info">{{ t('Bij een mengprofiel zijn PHR- en drop-outregels per bijdrager niet direct toepasbaar; gebruik de mengprofielrichtlijnen van je lab of probabilistische software.') }}</lk-note>
       </template>
     </div>
@@ -87,6 +100,24 @@ export default {
       });
       return {loci, res, maxA, nc: Math.max(1, Math.ceil(maxA / 2)), mix: maxA > 2,
         low: res.filter(r => r.flags.some(f => f[0] !== 'info')).length};
+    },
+    /* elektroferogram per locus; de klasse per piek volgt uit m (zelfde AT/stutter-uitkomst), niets herberekend */
+    eg() {
+      const m = this.m, AT = num(this.at) || 0, ST = num(this.st) || 0;
+      const rows = this.rows.map(r => ({l: String(r[0] || '').trim(), a: num(r[1]), h: num(r[2])}))
+        .filter(r => r.l && isFinite(r.a) && isFinite(r.h));
+      const top = Math.max(1, ST, AT, ...rows.map(r => r.h)) * 1.1, Y = h => 60 - 46 * h / top;
+      const panels = m.res.map(r => {
+        const P = rows.filter(q => q.l === r.l).sort((a, b) => a.a - b.a);
+        const lo = P[0].a - 1.5, hi = P[P.length - 1].a + 1.5, X = a => 6 + (a - lo) / (hi - lo) * 138;
+        const w = Math.min(4, 138 / (hi - lo) * 0.25);
+        return {l: r.l, peaks: P.map(p => {
+          const isAl = r.al.some(q => q.a === p.a && q.h === p.h);
+          const c = isAl ? (p.h < ST ? 'var(--warn)' : 'var(--accent)') : 'var(--muted)', x = X(p.a), y = Y(p.h);
+          return {a: p.a, x, c, lab: fmt(p.a, 1), d: `M${x - w} 60L${x} ${y}L${x + w} 60Z`};
+        })};
+      });
+      return {panels, yAT: AT > 0 ? Y(AT) : -1, yST: ST > 0 ? Y(ST) : -1};
     },
     kvRows() {
       const t = this.t, {loci, maxA, low, mix} = this.m;

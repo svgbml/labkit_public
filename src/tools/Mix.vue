@@ -16,6 +16,7 @@
       <div class="row" style="margin-top:8px">
         <button type="button" id="mx-tbl-add" @click="addRow">{{ t('+ Locus') }}</button>
       </div>
+      <allele-freq :fill="fillFreq"/>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Per locus de allelen van het mengprofiel met in dezelfde volgorde de piekhoogtes en de allelfrequenties, en de genotypen van slachtoffer (bekende bijdrager) en verdachte. Scheid waarden met spaties. Neem frequenties uit de populatiedatabase van je opdracht. Voorbeelddata en frequenties zijn verzonnen.') }}</p>
     </div>
     <div class="result">
@@ -39,11 +40,14 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import AlleleFreq from './AlleleFreq.vue';
+import {afAllele, afLookup} from '../lib/afreq.js';
 
 const F = (x, d) => lkNumIn(fmt(x, d));
 
 export default {
   name: 'Mix',
+  components: {AlleleFreq},
   data() {
     return {
       thv: lkNumIn('0,01'),
@@ -125,6 +129,19 @@ export default {
   },
   methods: {
     fmt,
+    /* frequenties (kolom 4) per allel van het mengprofiel (kolom 2); alles of niets per locus */
+    fillFreq(map) {
+      const miss = [], next = this.rows.map(r => r.slice());
+      next.forEach(r => {
+        const l = r[0].trim(), E = mxTok(r[1]);
+        if (!l || !E.length) return;
+        const f = E.map(a => afLookup(map, l, a));
+        E.forEach((a, i) => { if (f[i] == null) miss.push(l + ' ' + afAllele(a)); });
+        if (f.every(x => x != null)) r[3] = lkNumIn(f.join(' ').replace(/\./g, ','));
+      });
+      this.rows = next;
+      return miss;
+    },
     addRow() { this.rows = [...this.rows, ['', '', '', '', '', '']]; }
   }
 };
