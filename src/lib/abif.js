@@ -51,3 +51,23 @@ export function readAbif(buf) {
     instrument: txt('MCHN'), model: txt('MODL'), dyeSet: txt('DySN'), readLength: bases.length};
   return {version: dv.getInt16(4), tags, get, bytes, meta};
 }
+
+/* De gegevens van de read (S148): de vier geanalyseerde kanalen DATA9–12 in de volgorde van FWO_
+   (meestal GATC), de basecalls PBAS2, hun piekposities PLOC2 (scanpunt in de trace) en de
+   kwaliteit PCON2 (Phred, één byte per base). Valt terug op de ruwe kanalen DATA1–4 en op de
+   door de gebruiker onbewerkte versies PBAS1/PLOC1/PCON1 als de bewerkte ontbreken. */
+export function abifRead(ab) {
+  const order = String(ab.get('FWO_') || 'GATC').slice(0, 4).toUpperCase();
+  const list = (x) => (x == null ? [] : [].concat(x));
+  const nrs = ab.tags.has('DATA9') ? [9, 10, 11, 12] : [1, 2, 3, 4];
+  const traces = {};
+  nrs.forEach((k, i) => { traces[order[i]] = list(ab.get('DATA', k)); });
+  const bases = String(ab.get('PBAS', 2) || ab.get('PBAS', 1) || '').toUpperCase();
+  const peaks = list(ab.get('PLOC', 2) ?? ab.get('PLOC', 1));
+  const q = ab.bytes('PCON', 2) || ab.bytes('PCON', 1);
+  const qual = q ? Array.from(q) : [];
+  const n = Math.min(bases.length, peaks.length);
+  return {order, traces, scans: Math.max(0, ...Object.values(traces).map(t => t.length)),
+    bases: bases.slice(0, n), peaks: peaks.slice(0, n), qual: qual.length >= n ? qual.slice(0, n) : [],
+    mismatch: bases.length !== peaks.length};
+}
