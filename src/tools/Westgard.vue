@@ -103,10 +103,15 @@ export default {
       xs.forEach((x, i) => { i ? ctx.lineTo(C.X(i + 1), C.Y(x)) : ctx.moveTo(C.X(i + 1), C.Y(x)); }); ctx.stroke();
       /* de regelnamen boven het punt (eronder als het punt bovenaan de kaart zit) */
       ctx.font = '10px ' + getComputedStyle(document.documentElement).getPropertyValue('--font-ui'); ctx.textAlign = 'center';
+      const used = [];  // al getekende labels [x0, x1, y0, y1]; buurpunten met een label schuiven een regel op
       xs.forEach((x, i) => {
         const V = this.W.V[i]; if (!V.length) return;
-        const y = C.Y(x), up = y > 30; ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(rej[i] ? '--bad' : '--warn');
-        ctx.textBaseline = up ? 'bottom' : 'top'; ctx.fillText(V.join(' '), C.X(i + 1), up ? y - 8 : y + 8);
+        const s = V.join(' '), w = ctx.measureText(s).width, cx = C.X(i + 1), y = C.Y(x), up = y > 30;
+        let ty = up ? y - 18 : y + 8;  // bovenkant van het label
+        while (used.some(r => cx - w / 2 < r[1] && cx + w / 2 > r[0] && ty < r[3] && ty + 10 > r[2])) ty += up ? -11 : 11;
+        used.push([cx - w / 2, cx + w / 2, ty, ty + 10]);
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(rej[i] ? '--bad' : '--warn');
+        ctx.textBaseline = 'top'; ctx.fillText(s, cx, ty);
       });
     }
   }
