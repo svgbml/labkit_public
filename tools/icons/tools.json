@@ -90,5 +90,6 @@
  "medium": "cells",
  "plasmid": "plasmid",
  "aln": "alignment",
- "seq": "strands"
+ "seq": "strands",
+ "sanger": "chromatogram"
 }

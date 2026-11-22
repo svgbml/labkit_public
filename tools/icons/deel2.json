@@ -1,6 +1,6 @@
 {
  "sigmoid": "<path d=\"M4 4v16h16\"/><path d=\"M6 17h2c3 0 3-10 6-10h4\"/><circle cx=\"11\" cy=\"12\" r=\"1\" fill=\"currentColor\"/>",
- "chromatogram": "<path d=\"M3 19h3l2-8 2 8 2-13 2 13h7\"/>",
+ "chromatogram": "<path d=\"M3 20h18\"/><path d=\"M3 20C5 20 6 5 8 5s3 15 5 15\"/><path d=\"M7 20c2 0 3-11 5-11s3 11 5 11\"/><path d=\"M11 20c2 0 3-8 5-8s3 8 5 8\"/>",
  "istd": "<path d=\"M3 19h3l2-9 2 9 2-6 2 6h7\"/><path d=\"M8 4v3.5\"/>",
  "two-dist": "<path d=\"M3 19h18\"/><path d=\"M3 19c3 0 3-11 7-11s4 11 7 11\"/><path d=\"M7 19c3 0 3-11 7-11s4 11 7 11\"/>",
  "column": "<rect x=\"9\" y=\"2.5\" width=\"6\" height=\"13\" rx=\"1\"/><path d=\"M9 9h6\"/><path d=\"M12 17.5l-1.8 3a2.1 2.1 0 0 0 3.6 0z\"/>",
