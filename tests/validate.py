@@ -336,6 +336,25 @@ def _(pg):
     return [('exact het witte blok (200 px)', r['n'], 200, 0), ('geen uitsnede', r['noCrop'], 1, 0), ('overlay in de editor', mag(r['ed']), 1, 0),
             ('geen overlay in de export', mag(ex), 0, 0), ('waarschuwing getoond', warn, 1, 0)]
 
+@case('Gelfoto-editor', 'Figuurstijl-presets', 'Zelftest: elke stijlknop (Labjournaal, Verslag, Publicatie, Poster) zet de velden op de vaste waarden, markeert zichzelf, en de export (gfRender(true, schaal)) verschilt tussen Labjournaal en Publicatie in afmeting')
+def _(pg):
+    pg.evaluate("__go('gelfoto');gfDemo();")
+    def run(i):
+        pg.evaluate(f"document.getElementById('{i}').click()"); pg.wait_for_timeout(300)
+        return pg.evaluate("""(()=>{ const v=id=>{const e=document.getElementById(id); return e.type==='checkbox'?e.checked:e.value};
+          const c=gfRender(true,+v('gx-scale'));
+          return {fs:v('gf-fs'),mcol:v('gx-mcol'),sc:v('gx-scale'),ti:v('gx-title'),mk:v('gx-marks'),w:c.width,h:c.height}; })()""")
+    j = run('gf-pre-journal'); rp = run('gf-pre-report'); pb = run('gf-pre-pub'); po = run('gf-pre-poster')
+    on = pg.evaluate("document.getElementById('gf-pre-poster').getAttribute('aria-pressed')+document.getElementById('gf-pre-pub').getAttribute('aria-pressed')")
+    pg.evaluate("document.getElementById('gx-pad').click()"); pg.wait_for_timeout(200)
+    off = pg.evaluate("document.querySelectorAll('[id^=gf-pre-][aria-pressed=true]').length")
+    return [('journaal: 18 / oranje / 1× / titel+metingen', int((j['fs'], j['mcol'], j['sc'], j['ti'], j['mk']) == ('18', '#e8a317', '1', True, True)), 1, 0),
+            ('verslag: blauw, 2×, geen metingen', int((rp['mcol'], rp['sc'], rp['mk']) == ('#1d5bc4', '2', False)), 1, 0),
+            ('publicatie: 14 / zwart / 3× / geen titel', int((pb['fs'], pb['mcol'], pb['sc'], pb['ti']) == ('14', '#111111', '3', False)), 1, 0),
+            ('poster: 36 / rood / 3× / titel', int((po['fs'], po['mcol'], po['sc'], po['ti']) == ('36', '#d62828', '3', True)), 1, 0),
+            ('actieve knop gemarkeerd', int(on == 'truefalse'), 1, 0), ('handmatige wijziging wist markering', int(off == 0), 1, 0),
+            ('export verschilt (breedte)', int(j['w'] != pb['w'] and j['h'] != pb['h']), 1, 0)]
+
 @case('Gelfoto-editor', 'Ladderbibliotheek: eigen ladder', 'Zelftest: de 100 bp-ladder (1000–100) als eigen ladder onder een andere naam bewaren en kiezen; detectie en meting op de realistische testgel geven weer 650 bp. Na herladen staat de ladder er nog; een geplakte gedeelde regel voegt een tweede toe')
 def _(pg):
     pg.evaluate("__go('gelfoto')")

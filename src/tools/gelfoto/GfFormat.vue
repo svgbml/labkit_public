@@ -10,6 +10,11 @@
   <div class="stack" style="gap:12px">
     <div class="panel">
       <h3>{{ t('5 · Opmaak') }}</h3>
+      <div class="row" style="gap:6px;margin-bottom:10px;align-items:center">
+        <span style="font-size:12.5px;color:var(--muted)">{{ t('Stijl') }}</span>
+        <button v-for="p in presets" :key="p.id" type="button" :id="p.id" :class="{primary: active === p.id}"
+                :aria-pressed="active === p.id ? 'true' : 'false'" @click="apply(p)">{{ t(p.n) }}</button>
+      </div>
       <div class="f">
         <label for="gf-title">{{ t('Titel') }}</label>
         <input id="gf-title" class="txt" v-model="f.title" @change="sync">
@@ -99,6 +104,24 @@ const BOXES = [
   {id: 'gx-pad', n: 'Witte rand'}
 ];
 
+/* Stijlpresets: alleen waarden voor bestaande velden; gxOpts() en gfUpdate() tekenen ze.
+   Alles aan behalve wat de preset zelf anders zet. De afbeeldingsvelden (gf-inv, gf-gray) blijven
+   buiten de presets: wat goed is hangt van de foto af. */
+const ALL = {fs: '18', ang: 'auto', mcol: '#e8a317', help: true, 'gx-fmt': 'png', 'gx-scale': '1'};
+BOXES.forEach(o => { ALL[o.id] = true; });
+const PRESETS = [
+  /* Labjournaal: alles zichtbaar op schermresolutie, zoals je het in je labboek plakt */
+  {id: 'gf-pre-journal', n: 'Labjournaal', v: {...ALL}},
+  /* Verslag: zonder metingen en marge-markeringen, 2× scherp in Word */
+  {id: 'gf-pre-report', n: 'Verslag', v: {...ALL, mcol: '#1d5bc4', help: false, 'gx-marks': false, 'gx-scale': '2'}},
+  /* Publicatie: zwart-wit, geen titel (het onderschrift staat in de tekst), kleinere letter, 3× voor druk */
+  {id: 'gf-pre-pub', n: 'Publicatie', v: {...ALL, fs: '14', mcol: '#111111', help: false, 'gx-title': false, 'gx-marks': false, 'gx-scale': '3'}},
+  /* Poster: grote letters en titel, rode metingen die op afstand leesbaar zijn, 3× voor groot formaat */
+  {id: 'gf-pre-poster', n: 'Poster', v: {...ALL, fs: '36', mcol: '#d62828', help: false, 'gx-scale': '3'}}
+];
+/* veldnaam in f -> element-id (de gx-velden heten in f al zo) */
+const FIELD_ID = {fs: 'gf-fs', ang: 'gf-ang', help: 'gf-help', mcol: 'gx-mcol'};
+
 export default {
   name: 'GfFormat',
   mixins: [gfMix],
@@ -117,12 +140,24 @@ export default {
   },
   computed: {
     boxes() { return BOXES; },
+    presets() { return PRESETS; },
+    /* de preset waarvan alle velden nog gelden; wie een veld aanpast, wist de markering */
+    active() { const p = PRESETS.find(p => Object.keys(p.v).every(k => String(this.f[k]) === String(p.v[k]))); return p && p.id; },
     fsTxt() { return lkNumIn(String(Math.round(+this.f.fs) || 0)); },
     /* De downloadknop verschijnt pas als opslaan kan (buiten de app van Claude altijd, daar
        zodra de downloadcapability er is). showDl() in index.html tikt de componenten op. */
     dlOn() { this.tick; return typeof dlShown !== 'undefined' && dlShown; }
   },
   methods: {
+    apply(p) {
+      Object.assign(this.f, p.v);
+      /* na het tekenen van Vue: een change per veld bewaart het (persistSave); dan tekent
+         gfUpdate() voorbeeld en export opnieuw */
+      this.$nextTick(() => {
+        Object.keys(p.v).forEach(k => { const el = document.getElementById(FIELD_ID[k] || k); if (el) el.dispatchEvent(new Event('change', {bubbles: true})); });
+        gfUpdate();
+      });
+    },
     /* de motor zet gf-title bij een nieuwe foto of de demo-gel, en delen en ongedaan maken
        sturen alleen een change-event */
     sync(e) {

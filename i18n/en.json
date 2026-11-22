@@ -5001,5 +5001,10 @@
 "Of plak gedeelde ladders (één per regel, „Naam: {#} {#} {#} bp”)": "Or paste shared ladders (one per line, “Name: {#} {#} {#} bp”)",
 "Toevoegen aan bibliotheek": "Add to library",
 "Geef een naam en minstens twee bandgroottes.": "Enter a name and at least two band sizes.",
-"{#} ladder(s) toegevoegd.": "{#} ladder(s) added."
+"{#} ladder(s) toegevoegd.": "{#} ladder(s) added.",
+"Stijl": "Style",
+"Labjournaal": "Lab journal",
+"Verslag": "Report",
+"Publicatie": "Publication",
+"Poster": "Poster"
 }
