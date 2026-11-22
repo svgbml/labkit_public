@@ -34,8 +34,9 @@
             <template v-if="sel != null">
               <b>{{ t('Base ' + (sel + 1)) }}</b>
               <span>{{ t('Origineel') }}: {{ read.bases[sel] }}</span>
+              <span v-if="het && het[sel]">{{ t('Automatisch') }}: {{ auto[sel] }} ({{ t('verhouding') }} {{ fmtR(het[sel].ratio) }})</span>
               <input id="sg-base" class="mono" maxlength="1" :value="seq[sel]" :aria-label="t('Base')" style="width:3em;text-align:center;text-transform:uppercase" @input="onBase">
-              <button type="button" id="sg-undo-base" :disabled="edits[sel] == null" @click="setBase(sel, read.bases[sel])">{{ t('Origineel terugzetten') }}</button>
+              <button type="button" id="sg-undo-base" :disabled="edits[sel] == null" @click="setBase(sel, auto[sel])">{{ t('Origineel terugzetten') }}</button>
             </template>
             <template v-if="nEd">
               <span>{{ t(nEd + ' bewerkt') }}</span>
@@ -56,7 +57,7 @@
           <span v-if="copied" role="status">{{ copied }}</span>
         </div>
         <p v-if="m.ok" style="font-size:13px;color:var(--muted);margin:4px 0 0">{{ t('Klik op een base in het paneel om naar die plek in de trace te gaan; Shift + klik selecteert een bereik, dat Kopieer als FASTA kopieert.') }}</p>
-        <pre id="sg-seq" ref="pre" class="mono" v-if="m.ok" style="white-space:pre-wrap;overflow:auto;max-height:18em;margin-top:8px" @click="panelClick"><template v-for="r in seqRows" :key="r.pos"><span>{{ r.pos }}</span>{{ '  ' }}<template v-for="(g, gi) in r.groups" :key="gi"><template v-if="gi">{{ ' ' }}</template><span v-for="b in g" :key="b.i" :data-i="b.i" :class="{'sg-sel': b.i === sel, 'sg-rng': inRng(b.i)}" :title="b.o ? t('Origineel') + ': ' + b.o : null" :style="{background: b.i === sel ? '#90caf9' : inRng(b.i) ? '#bbdefb' : b.o ? '#ffe0b2' : null, color: b.g ? 'var(--muted)' : null, cursor: 'pointer'}">{{ b.c }}</span></template>{{ '\n' }}</template></pre>
+        <pre id="sg-seq" ref="pre" class="mono" v-if="m.ok" style="white-space:pre-wrap;overflow:auto;max-height:18em;margin-top:8px" @click="panelClick"><template v-for="r in seqRows" :key="r.pos"><span>{{ r.pos }}</span>{{ '  ' }}<template v-for="(g, gi) in r.groups" :key="gi"><template v-if="gi">{{ ' ' }}</template><span v-for="b in g" :key="b.i" :data-i="b.i" :class="{'sg-sel': b.i === sel, 'sg-rng': inRng(b.i)}" :title="b.o ? t('Origineel') + ': ' + b.o : null" :style="{background: b.i === sel ? '#90caf9' : inRng(b.i) ? '#bbdefb' : b.o ? '#ffe0b2' : b.hz ? HETBG : null, color: b.g ? 'var(--muted)' : null, cursor: 'pointer'}">{{ b.c }}</span></template>{{ '\n' }}</template></pre>
       </div>
     </div>
     <div>
@@ -82,6 +83,11 @@
         </div>
         <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('De read begint bij het eerste venster en eindigt bij het laatste venster waarvan de gemiddelde Phred-kwaliteit de drempel haalt; de rest staat grijs.') }}</p>
       </div>
+      <div class="panel">
+        <h3>{{ t('Heterozygoten') }}</h3>
+        <lk-field v-model="hthr" :label="t('Drempel tweede piek')" for-id="sg-het" inputmode="decimal"/>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('Per base de hoogte van de tweede piek gedeeld door die van de hoogste. Vanaf de drempel wordt de base een IUPAC-code (R, Y, S, W, K, M) en krijgt hij een paarse markering.') }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -91,6 +97,7 @@ import {markRaw} from 'vue';
 import {lkNumIn} from '../lib/bridge.js';
 import {readAbif, abifRead} from '../lib/abif.js';
 import {trimWindow, comp, fasta} from '../lib/sangertrim.js';
+import {hetCalls} from '../lib/sangerhet.js';
 import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 
@@ -101,6 +108,7 @@ const SHADE = 'rgba(95,107,122,.18)';
 const qcol = q => q < 20 ? '#d7301f' : q < 30 ? '#f0a020' : '#1a9641';
 const IUPAC = /^[ACGTRYSWKMBDHVN]$/;
 const GREY = '#8a94a3';
+const MIX = 'RYSWKM', HETBG = '#e1bee7', HETC = '#8e24aa';   // gemengde calls van twee basen; paars = heterozygoot
 
 const intIn = (v, lo, hi, d) => { const n = Number(String(v).replace(',', '.')); return Number.isInteger(n) && n >= lo && n <= hi ? n : d; };
 const NL = (x, d) => lkNumIn(fmt(x, d));
@@ -120,7 +128,7 @@ export default {
     const saved = jget('sg-read', null);
     return {win: st['sg-win'] != null ? String(st['sg-win']) : '10', qthr: st['sg-q'] != null ? String(st['sg-q']) : '20',
       read: saved ? markRaw(saved) : null, paste: st['sg-paste'] != null ? String(st['sg-paste']) : '', err: '', over: false,
-      edits: saved && saved.edits ? saved.edits : {}, sel: null, rng: null, rc: !!st['sg-rc'], copied: ''};
+      edits: saved && saved.edits ? saved.edits : {}, sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1)};
   },
   computed: {
     HT() { return HT; },
@@ -130,9 +138,20 @@ export default {
     /* {start, end} (1-gebaseerd, inclusief) of null; bewerkingen veranderen de kwaliteit niet */
     trim() { return this.hasQ ? trimWindow(this.m.r.qual, this.winN, this.qN) : null; },
     nEd() { return Object.keys(this.edits).length; },
-    /* de sequentie met de bewerkingen erin; read.bases houdt de oorspronkelijke calls */
+    hN() { const n = Number(String(this.hthr).replace(',', '.')); return n > 0 && n <= 1 ? n : 0.2; },
+    /* per base de piekhoogtes, de verhouding en de IUPAC-code boven de drempel (S155); null zonder trace */
+    het() { const r = this.m.r; return r.traces ? hetCalls(r.traces, r.peaks, Math.min(r.peaks.length, r.bases.length), this.hN) : null; },
+    /* de automatische call: boven de drempel de IUPAC-code; eronder de call van de sequencer, maar een gemengde call van twee basen
+       (R, Y, …) wordt dan de hoogste piek, zodat de drempel in beide richtingen werkt */
+    auto() {
+      const b = this.m.r.bases, h = this.het;
+      if (!h) return b;
+      return b.split('').map((c, i) => !h[i] ? c : h[i].code || (MIX.includes(c) ? h[i].top : c)).join('');
+    },
+    nHet() { return this.het ? this.het.filter(x => x.code).length : 0; },
+    /* de sequentie met de bewerkingen erin; read.bases houdt de oorspronkelijke calls, auto de calls na de piekverhouding */
     seq() {
-      const b = this.m.r.bases;
+      const b = this.auto;
       if (!this.nEd || !this.read) return b;
       const a = b.split('');
       for (const i in this.edits) if (i < a.length) a[i] = this.edits[i];
@@ -157,6 +176,7 @@ export default {
       if (r.qual.length) {
         const q20 = r.qual.filter(q => q >= 20).length;
         out.push([t('Gemiddelde kwaliteit'), NL(r.qual.reduce((a, b) => a + b, 0) / r.qual.length, 1) + ' (Phred)']);
+        if (this.het) out.push([t('Heterozygote posities'), NL(this.nHet, 0) + ' (' + t('drempel') + ' ' + this.fmtR(this.hN) + ')']);
         out.push([t('Q20 of hoger'), NL(q20, 0) + ' (' + NL(q20 / r.qual.length * 100, 1) + '%)']);
         const tr = this.trim;
         if (tr) {
@@ -172,11 +192,11 @@ export default {
     seqRows() {
       const q = this.seq, n = q.length, w = String(n).length, ed = this.edits, tr = this.trim, rc = this.rc, rows = [];
       for (let j = 0; j < n; j++) {
-        const i = rc ? n - 1 - j : j, o = ed[i] != null ? this.m.r.bases[i] : null;
+        const i = rc ? n - 1 - j : j, o = ed[i] != null ? this.auto[i] : null, hz = !!this.het && !!this.het[i] && !!this.het[i].code;
         if (j % 60 === 0) rows.push({pos: String(j + 1).padStart(w), groups: []});
         const gs = rows[rows.length - 1].groups;
         if (j % 10 === 0) gs.push([]);
-        gs[gs.length - 1].push({i, c: rc ? comp(q[i]) : q[i], o: o && (rc ? comp(o) : o), g: !!tr && (i + 1 < tr.start || i + 1 > tr.end)});
+        gs[gs.length - 1].push({i, c: rc ? comp(q[i]) : q[i], o: o && (rc ? comp(o) : o), g: !!tr && (i + 1 < tr.start || i + 1 > tr.end), hz});
       }
       return rows;
     }
@@ -188,6 +208,7 @@ export default {
     rng() { this.draw(); },
     rc() { this.$nextTick(this.reveal); },
     edits() { this.draw(); },
+    het() { this.draw(); },
     trim() { this.draw(); },
     qN() { this.draw(); }
   },
@@ -262,12 +283,17 @@ export default {
         x.fillStyle = 'rgba(21,101,192,.15)';
         x.fillRect((p[this.rng.a] - v.x0) / v.spp - bw / 2, 0, (p[this.rng.b] - p[this.rng.a]) / v.spp + bw, LB + 4 + TH);
       }
-      if (bw < 7) return;
+      const h = this.het;
+      if (bw < 7) {   // te krap voor letters: een paars streepje per heterozygote positie
+        if (h) { x.fillStyle = HETC; for (let i = 0; i < n; i++) if (h[i] && h[i].code) { const px = (p[i] - v.x0) / v.spp; if (px >= 0 && px <= W) x.fillRect(px - 1, 2, 2, LB - 4); } }
+        return;
+      }
       x.font = 'bold 12px system-ui,sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
       for (let i = 0; i < n; i++) {
         const px = (p[i] - v.x0) / v.spp;
         if (px < -10) continue;
         if (px > W + 10) break;
+        if (this.edits[i] == null && h && h[i] && h[i].code) { x.fillStyle = HETBG; x.beginPath(); (x.roundRect || x.rect).call(x, px - 6.5, 1, 13, LB - 2, 3); x.fill(); }
         if (this.edits[i] != null) { x.fillStyle = '#ffe0b2'; x.beginPath(); (x.roundRect || x.rect).call(x, px - 6.5, 1, 13, LB - 2, 3); x.fill(); }
         x.fillStyle = DYE[q[i]] || GREY;
         x.fillText(q[i], px, LB / 2 + 1);
@@ -347,12 +373,13 @@ export default {
       b = String(b).toUpperCase();
       if (!this.read || !this.read.peaks.length || !IUPAC.test(b) || !(i >= 0 && i < this.read.bases.length)) return;
       const e = Object.assign({}, this.edits);
-      if (b === this.read.bases[i]) delete e[i]; else e[i] = b;
+      if (b === this.auto[i]) delete e[i]; else e[i] = b;
       this.edits = e; this.save();
     },
     undoAll() { this.edits = {}; this.save(); },
     save() { jset('sg-read', Object.assign({}, this.read, {edits: this.edits})); },
     onBase(e) { this.setBase(this.sel, e.target.value); e.target.value = this.seq[this.sel]; },
+    fmtR(r) { return NL(r, 2); },
     inRng(i) { return !!this.rng && i >= this.rng.a && i <= this.rng.b; },
     /* shift: bereik van sel tot base i (zonder sel wordt i de selectie) */
     pick1(i, shift) {
@@ -416,7 +443,7 @@ export default {
           if (px < 10 || px > W - 10) this.center(this.read.peaks[this.sel]);
         };
         if (/^[a-z]$/i.test(e.key)) { e.preventDefault(); this.setBase(i, e.key); return; }
-        const a = {Backspace: () => this.setBase(i, this.read.bases[i]), Delete: () => this.setBase(i, this.read.bases[i]),
+        const a = {Backspace: () => this.setBase(i, this.auto[i]), Delete: () => this.setBase(i, this.auto[i]),
           Escape: () => this.select(null), ArrowLeft: () => go(-1), ArrowRight: () => go(1)}[e.key];
         if (a) { e.preventDefault(); a(); return; }
       }

@@ -1109,6 +1109,16 @@ def _(pg):
     out.append(('na trimmen (basen)', pg.evaluate("__kv('#sg-out','Na trimmen')"), 1081, 0))
     return out
 
+@case('Chromatogram', 'Heterozygoten als IUPAC-code uit de piekverhouding op 3730.ab1', 'De gemengde calls die de KB-basecaller van de Applied Biosystems 3730 zelf in tests/fixtures/3730.ab1 zette (PBAS2, zoals Biopython 1.84 ze leest): K op 9, Y op 10, 11 en 13, R op 1091 en 1109, Y op 1155; methode: verhouding tweede/hoogste piek per base (Nickerson, Tobe & Taylor, PolyPhred, Nucleic Acids Res 25:2745–2751, 1997; Rausch e.a., Tracy, BMC Genomics 21:230, 2020), drempel 0,2')
+def _(pg):
+    pg.evaluate("__go('sanger')")
+    pg.set_input_files('#sg-file', str(ROOT / 'tests' / 'fixtures' / '3730.ab1')); pg.wait_for_timeout(800)
+    pg.evaluate("__set('sg-het','0.2')"); pg.wait_for_timeout(200)
+    pos, exp = (9, 10, 11, 13, 1091, 1109, 1155), 'KYYYRRY'
+    got = pg.evaluate("p=>p.map(i=>__sgVm.seq[i-1]).join('')", list(pos))
+    out = [(f'positie {p} ({e})', 1 if g == e else 0, 1, 0) for p, e, g in zip(pos, exp, got)]
+    return out
+
 @case('Restrictiedigestie', 'In-silico digestie van pFA6a-kanMX6', 'Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa')
 def _(pg):
     fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')
