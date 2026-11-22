@@ -4997,5 +4997,9 @@
 "NCBI is niet bereikbaar: geen verbinding, of de browser, een firewall of een extensie hield het verzoek tegen. Plak de sequentie zelf, of probeer het later opnieuw.": "NCBI cannot be reached: there is no connection, or the browser, a firewall or an extension stopped the request. Paste the sequence yourself, or try again later.",
 "NCBI krijgt te veel verzoeken tegelijk. Wacht even en probeer het opnieuw.": "NCBI is receiving too many requests at once. Wait a moment and try again.",
 "NCBI gaf een fout (HTTP {#}). Probeer het later opnieuw, of plak de sequentie zelf.": "NCBI returned an error (HTTP {#}). Try again later, or paste the sequence yourself.",
-"NCBI stuurde een antwoord dat LabKit niet kan lezen. Probeer het later opnieuw.": "NCBI sent a reply that LabKit cannot read. Try again later."
+"NCBI stuurde een antwoord dat LabKit niet kan lezen. Probeer het later opnieuw.": "NCBI sent a reply that LabKit cannot read. Try again later.",
+"API-sleutel van NCBI (niet verplicht)": "NCBI API key (optional)",
+"Zonder sleutel stuurt LabKit hoogstens {#} verzoeken per seconde, met een eigen sleutel {#}. De sleutel blijft op deze computer.": "Without a key LabKit sends at most {#} requests per second, with your own key {#}. The key stays on this computer.",
+"{#} antwoorden bewaard op deze computer": "{#} answers stored on this computer",
+"Bewaarde antwoorden wissen": "Clear stored answers"
 }

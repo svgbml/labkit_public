@@ -1,6 +1,7 @@
 """Online opzoeken bij NCBI (S195–S198) zonder internet: fetch wordt in de pagina vervangen.
 Controleert dat de schakelaar uit echt geen verzoek geeft, dat alleen tool=labkit (en een
-zelf getypt e-mailadres) meegaat en dat elke fout een leesbare melding is."""
+zelf getypt e-mailadres) meegaat, dat elke fout een leesbare melding is, dat een tweede
+vraag uit de cache komt en dat de wachtrij 3 (met sleutel 10) verzoeken per seconde houdt."""
 import pathlib
 import sys
 
@@ -15,8 +16,8 @@ def ck(n, c, e=''):
         fails.append(n)
 
 # fetch vervangen: window.__calls telt de verzoeken, window.__reply bepaalt het antwoord
-MOCK = """()=>{ window.__calls=[]; window.__reply={status:200, body:'{"ok":1}'};
-  window.fetch=async (url,o)=>{ window.__calls.push(String(url)); const r=window.__reply;
+MOCK = """()=>{ window.__calls=[]; window.__times=[]; window.__reply={status:200, body:'{"ok":1}'};
+  window.fetch=async (url,o)=>{ window.__calls.push(String(url)); window.__times.push(performance.now()); const r=window.__reply;
     if(r.throw) throw new TypeError('Failed to fetch');
     return new Response(r.body,{status:r.status}); }; }"""
 GET = """async (a)=>{ try{ const v=await ncbiGet(a[0],a[1]); return {ok:true,v}; }
@@ -70,6 +71,30 @@ with sync_playwright() as p:
     pg.evaluate("__reply={status:200,body:'<html>'}")
     r = pg.evaluate(GET, ['esummary', {'db': 'snp', 'id': '1', 'retmode': 'json'}])
     ck('onleesbaar antwoord', r.get('kind') == 'down', r)
+
+    # S198: cache en wachtrij
+    pg.evaluate("ncbiCacheClear(); __reply={status:200, body:'{\"r\":7}'}; __calls=[]; __times=[]")
+    a = pg.evaluate(GET, ['esummary', {'db': 'snp', 'id': '1805007', 'retmode': 'json'}])
+    b2 = pg.evaluate(GET, ['esummary', {'db': 'snp', 'id': '1805007', 'retmode': 'json'}])
+    ck('tweede vraag: geen verzoek', pg.evaluate('__calls.length') == 1 and a == b2 and a.get('ok'), [a, b2])
+    ck('teller in Instellingen', '1 ' in pg.inner_text('#inst-ncbi'), pg.inner_text('#inst-ncbi')[-200:])
+    box.uncheck()
+    r = pg.evaluate(GET, ['esummary', {'db': 'snp', 'id': '1805007', 'retmode': 'json'}])
+    ck('uit: bewaard antwoord blijft werken', r.get('ok') and pg.evaluate('__calls.length') == 1, r)
+    box.check()
+    BURST = """async (n)=>{ __times=[]; const t0=Date.now();
+      await Promise.all([...Array(n)].map((_,i)=>ncbiGet('esummary',{db:'snp',id:String(t0+i),retmode:'json'})));
+      const d=__times.slice(1).map((t,i)=>t-__times[i]); return Math.min(...d); }"""
+    gap = pg.evaluate(BURST, 7)
+    ck('zonder sleutel ≥ 1/3 s tussen verzoeken', gap >= 320, gap)
+    pg.fill('#inst-ncbi input[type=password]', 'abc123')
+    pg.dispatch_event('#inst-ncbi input[type=password]', 'change')
+    gap = pg.evaluate(BURST, 7)
+    ck('met sleutel ≥ 1/10 s, < 1/3 s', 90 <= gap < 320, gap)
+    ck('sleutel gaat mee als api_key', 'api_key=abc123' in pg.evaluate('__calls.at(-1)'))
+    ck('sleutel niet in de cachesleutel', 'abc123' not in pg.evaluate('JSON.stringify(Object.keys(ncbiCache()))'))
+    pg.click('#inst-ncbi button')
+    ck('wissen leegt de cache', pg.evaluate('Object.keys(ncbiCache()).length') == 0)
 
     ck('geen paginafouten', not errs, errs)
     b.close()

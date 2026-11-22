@@ -9,16 +9,25 @@
     <div v-if="full" class="f" style="margin-top:10px"><label>{{ t('E-mailadres voor NCBI (niet verplicht)') }}
       <input type="email" class="txt" v-model="s.email" autocomplete="off" spellcheck="false" style="width:100%" @change="save"></label></div>
     <p v-if="full" style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('NCBI vraagt om een adres waarop ze je kunnen bereiken als er iets misgaat. LabKit vult het nooit zelf in en stuurt het alleen mee als je het hier typt.') }}</p>
+    <template v-if="full">
+      <div class="f" style="margin-top:10px"><label>{{ t('API-sleutel van NCBI (niet verplicht)') }}
+        <input type="password" class="txt" v-model="s.key" autocomplete="off" spellcheck="false" style="width:100%" @change="save"></label></div>
+      <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Zonder sleutel stuurt LabKit hoogstens 3 verzoeken per seconde, met een eigen sleutel 10. De sleutel blijft op deze computer.') }}</p>
+      <div class="row" style="margin-top:10px">
+        <span style="font-size:13px">{{ t(n + ' antwoorden bewaard op deze computer') }}</span>
+        <button type="button" :disabled="!n" @click="clear">{{ t('Bewaarde antwoorden wissen') }}</button></div>
+    </template>
   </div>
 </template>
 
 <script>
-import {ncbi, ncbiSave} from '../../lib/ncbi.js';
+import {ncbi, ncbiSave, ncbiStat, ncbiCacheClear} from '../../lib/ncbi.js';
 
 export default {
   name: 'NcbiSwitch',
   props: {full: Boolean},   /* full: ook het e-mailveld (Instellingen); anders alleen de schakelaar */
-  data() { return {s: ncbi}; },
-  methods: {save: ncbiSave},
+  data() { return {s: ncbi, st: ncbiStat}; },
+  computed: {n() { return this.st.n; }},
+  methods: {save: ncbiSave, clear: ncbiCacheClear},
 };
 </script>
