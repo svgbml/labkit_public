@@ -1,8 +1,10 @@
 <!-- ================= CHROMATOGRAM (S149) =================
      Opent een ABIF-bestand (.ab1) van een Sanger-sequencer: een kaart met de gegevens van de run
      en de sequentie in blokken van 10. Een FASTA of geplakte tekst werkt als terugval (zonder trace).
-     Het inlezen staat in src/lib/abif.js; S150 zet het tracecanvas #sg-cv boven het sequentiepaneel.
-     De id's sg-file, sg-paste, sg-clear, sg-out en sg-seq blijven zoals ze zijn. -->
+     Het inlezen staat in src/lib/abif.js, het tekenen van de trace in src/lib/tracedraw.js (S150).
+     De read is markRaw: 4 × 16 000 scanpunten hoeven niet reactief te zijn, het venster (view)
+     wordt buiten Vue bijgehouden en elke wijziging tekent het canvas één keer per frame.
+     De id's sg-file, sg-paste, sg-clear, sg-out, sg-cv en sg-seq blijven zoals ze zijn. -->
 <template>
   <div class="picwrap">
     <div class="pic-prev">
@@ -15,7 +17,18 @@
             <lk-note v-if="m.mismatch" kind="warn">{{ t('Het aantal basen en het aantal piekposities in dit bestand verschilt; de overtollige basen zijn weggelaten.') }}</lk-note>
           </template>
         </div>
-        <!-- hier komt in S150 het tracecanvas #sg-cv -->
+        <div v-if="m.r.traces" class="sg-trace" style="margin-top:12px">
+          <div class="row" style="gap:6px;margin-bottom:6px">
+            <button type="button" id="sg-zin" @click="zoom(1 / 1.5)" :aria-label="t('Inzoomen')">+</button>
+            <button type="button" id="sg-zout" @click="zoom(1.5)" :aria-label="t('Uitzoomen')">−</button>
+            <button type="button" id="sg-zall" @click="whole">{{ t('Hele read') }}</button>
+            <span style="margin-left:auto;font-weight:600;letter-spacing:6px"><span v-for="b in 'ACGT'" :key="b" :style="{color: dye[b]}">{{ b }}</span></span>
+          </div>
+          <canvas id="sg-cv" ref="cv" tabindex="0" style="width:100%;height:250px;display:block;cursor:grab;touch-action:none"
+                  :aria-label="t('Trace van de vier kanalen; slepen schuift, scrollen zoomt, de strook onderaan toont de hele read')"
+                  @wheel.prevent="wheel" @pointerdown="down" @pointermove="move" @pointerup="up" @pointercancel="up" @keydown="key"></canvas>
+          <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Slepen schuift, scrollen zoomt (Shift + scrollen schuift); klik in de strook onderaan om naar die plek te gaan.') }}</p>
+        </div>
         <pre id="sg-seq" class="mono" v-if="m.ok" style="white-space:pre-wrap;overflow-x:auto;margin-top:12px">{{ seqText }}</pre>
       </div>
     </div>
@@ -39,8 +52,12 @@
 </template>
 
 <script>
+import {markRaw} from 'vue';
 import {lkNumIn} from '../lib/bridge.js';
 import {readAbif, abifRead} from '../lib/abif.js';
+import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
+
+const TH = 190, OV = 40, GAP = 20;   // hoogte trace, overzichtsstrook en de strook met posities (CSS-pixels)
 
 const NL = (x, d) => lkNumIn(fmt(x, d));
 
@@ -56,7 +73,8 @@ export default {
   name: 'Sanger',
   data() {
     const st = typeof storeGet === 'function' ? storeGet() : {};
-    return {read: jget('sg-read', null), paste: st['sg-paste'] != null ? String(st['sg-paste']) : '', err: '', over: false};
+    const saved = jget('sg-read', null);
+    return {read: saved ? markRaw(saved) : null, paste: st['sg-paste'] != null ? String(st['sg-paste']) : '', err: '', over: false};
   },
   computed: {
     /* de read die alles toont: het geladen bestand, anders de geplakte tekst */
@@ -90,7 +108,18 @@ export default {
       return out.join('\n');
     }
   },
-  mounted() { window.__sgVm = this; },
+  watch: {
+    /* een andere read: begin links, ingezoomd tot ongeveer 1 scanpunt per pixel (±70 basen) */
+    'm.r'() { this.view = {x0: 0, spp: 1}; this.$nextTick(this.draw); }
+  },
+  created() { this.dye = DYE; this.view = {x0: 0, spp: 1}; this.drag = null; },
+  mounted() {
+    window.__sgVm = this;
+    this.ro = new ResizeObserver(() => this.draw());
+    this.ro.observe(this.$el);
+    this.$nextTick(this.draw);
+  },
+  beforeUnmount() { this.ro && this.ro.disconnect(); },
   methods: {
     pick(e) { this.load(e.target.files[0]); },
     drop(e) { this.over = false; this.load(e.dataTransfer.files[0]); },
@@ -109,8 +138,69 @@ export default {
         if (!p.bases) { this.err = this.t('Geen ABIF-bestand en geen sequentie gevonden.'); return; }
         r = {name: p.name || file.name, meta: null, order: '', traces: null, bases: p.bases, peaks: [], qual: []};
       }
-      this.read = r;
+      this.read = markRaw(r);
       jset('sg-read', r);
+    },
+    /* tekenen gebundeld per frame; W = breedte in CSS-pixels */
+    draw() {
+      if (this.raf) return;
+      this.raf = requestAnimationFrame(() => { this.raf = 0; this.paint(); });
+    },
+    paint() {
+      const cv = this.$refs.cv, r = this.m.r;
+      if (!cv || !r.traces || !cv.clientWidth) return;
+      const W = cv.clientWidth, H = TH + GAP + OV + 8, s = window.devicePixelRatio || 1;
+      if (cv.width !== Math.round(W * s) || cv.height !== Math.round(H * s)) { cv.width = Math.round(W * s); cv.height = Math.round(H * s); }
+      const x = cv.getContext('2d');
+      x.setTransform(s, 0, 0, s, 0, 0);
+      x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+      const scans = this.scans();
+      const v = this.view = clampView(this.view, scans, W);
+      drawTraces(x, r.traces, v, {x: 0, y: 4, w: W, h: TH});
+      /* basenummers onder de trace, elke 10e base op zijn piek */
+      x.fillStyle = '#5f6b7a'; x.font = '11px system-ui,sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+      const step = v.spp > 4 ? (v.spp > 10 ? 100 : 50) : 10;
+      for (let i = step - 1; i < r.peaks.length; i += step) {
+        const px = (r.peaks[i] - v.x0) / v.spp;
+        if (px >= -20 && px <= W + 20) x.fillText(String(i + 1), px, TH + 4 + GAP / 2);
+      }
+      drawOverview(x, r.traces, scans, v, W, {x: 0, y: TH + GAP + 4, w: W, h: OV});
+      this.drawn = (this.drawn || 0) + 1;   // telt de getekende frames (voor de test)
+    },
+    scans() { return Math.max(1, ...Object.values(this.m.r.traces).map(t => t.length)); },
+    set(v) { this.view = v; this.draw(); },
+    /* zoom met factor f (>1 = uit) rond pixel px (standaard het midden) */
+    zoom(f, px) {
+      const W = this.$refs.cv ? this.$refs.cv.clientWidth : 800, c = px == null ? W / 2 : px;
+      const at = this.view.x0 + c * this.view.spp, spp = clampView({x0: 0, spp: this.view.spp * f}, this.scans(), W).spp;
+      this.set({x0: at - c * spp, spp});
+    },
+    whole() { this.set({x0: 0, spp: 1e9}); },
+    pan(dpx) { this.set({x0: this.view.x0 + dpx * this.view.spp, spp: this.view.spp}); },
+    /* naar scanpunt s in het midden */
+    center(s) { const W = this.$refs.cv.clientWidth; this.set({x0: s - W / 2 * this.view.spp, spp: this.view.spp}); },
+    wheel(e) {
+      const d = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+      if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(d)) this.pan(e.shiftKey ? d : e.deltaX);
+      else this.zoom(Math.exp(d / 400), e.offsetX);
+    },
+    onOverview(e) { return e.offsetY > TH + GAP; },
+    down(e) {
+      this.$refs.cv.setPointerCapture(e.pointerId);
+      if (this.onOverview(e)) { this.drag = {ov: true}; this.center(e.offsetX / this.$refs.cv.clientWidth * this.scans()); }
+      else { this.drag = {x: e.offsetX}; this.$refs.cv.style.cursor = 'grabbing'; }
+    },
+    move(e) {
+      if (!this.drag) return;
+      if (this.drag.ov) this.center(e.offsetX / this.$refs.cv.clientWidth * this.scans());
+      else { this.pan(this.drag.x - e.offsetX); this.drag.x = e.offsetX; }
+    },
+    up() { this.drag = null; if (this.$refs.cv) this.$refs.cv.style.cursor = 'grab'; },
+    key(e) {
+      const W = this.$refs.cv.clientWidth, k = {ArrowLeft: () => this.pan(-W / 4), ArrowRight: () => this.pan(W / 4),
+        '+': () => this.zoom(1 / 1.5), '=': () => this.zoom(1 / 1.5), '-': () => this.zoom(1.5), Home: () => this.set({x0: 0, spp: this.view.spp}),
+        End: () => this.set({x0: 1e9, spp: this.view.spp})}[e.key];
+      if (k) { e.preventDefault(); k(); }
     },
     clear() {
       this.read = null; this.paste = ''; this.err = '';

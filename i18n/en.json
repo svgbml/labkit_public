@@ -4868,5 +4868,8 @@
 "basen": "bases",
 "Kanaalvolgorde": "Channel order",
 "Gemiddelde kwaliteit": "Mean quality",
-"Q{#} of hoger": "Q{#} or higher"
+"Q{#} of hoger": "Q{#} or higher",
+"Hele read": "Whole read",
+"Trace van de vier kanalen; slepen schuift, scrollen zoomt, de strook onderaan toont de hele read": "Trace of the four channels; drag to pan, scroll to zoom, the strip at the bottom shows the whole read",
+"Slepen schuift, scrollen zoomt (Shift + scrollen schuift); klik in de strook onderaan om naar die plek te gaan.": "Drag to pan, scroll to zoom (Shift + scroll pans); click in the strip at the bottom to jump there."
 }
