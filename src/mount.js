@@ -86,6 +86,7 @@ import PcrProgramma from './tools/PcrProgramma.vue';
 import Verdunningsschema from './tools/Verdunningsschema.vue';
 import Kleuringsschema from './tools/Kleuringsschema.vue';
 import Planner from './tools/Planner.vue';
+import Bench from './tools/Bench.vue';
 import Rapport from './tools/Rapport.vue';
 import Centrifuge from './tools/Centrifuge.vue';
 import Timers from './tools/Timers.vue';
@@ -486,4 +487,9 @@ export function start() {
   calc.start = () => { if (sp && sp.vm) sp.vm.refresh(); };
   mountTool('#inst-app', Settings);
   calc.inst = () => {};
+
+  /* Bench-modus (S48): geen tool maar een laag over de app; een tool opent hem met
+     openBench({title, steps}), zie src/tools/Bench.vue. */
+  const bn = mountTool('#bench-app', Bench);
+  window.openBench = spec => { if (bn && bn.vm) bn.vm.open(spec); };
 }

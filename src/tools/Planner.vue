@@ -19,6 +19,7 @@
         <button type="button" id="xp-tbl-add" @click="addRow">{{ t('+ Stap') }}</button>
         <button type="button" id="xp-tim" @click="timers">{{ t('Wachtstappen als timers') }}</button>
         <button type="button" id="xp-ics" @click="ics">{{ t('Naar agenda (.ics)') }}</button>
+        <button type="button" id="xp-bench" @click="bench">{{ t('Bench-modus') }}</button>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Duur in minuten. "Wachten" zijn incubaties of looptijden waarin je iets anders kunt doen; die worden timers. Het .ics-bestand opent in Outlook, Google Agenda en Apple Agenda; elke stap wordt een afspraak in lokale tijd. Voorbeeld: transformatie volgens de Avans DNA-toolbox. Voorbeeldtijden zijn indicatief.') }}</p>
     </div>
@@ -100,6 +101,11 @@ export default {
     hm(x) { const s = m2hm(x); return s.includes('(+') ? this.t(s) : lkNumIn(s); },
     addRow() { this.rows = [...this.rows, ['', '', 'handwerk']]; },
     steps() { return this.rows.filter(r => r[0].trim()).map(r => ({n: r[0], d: Math.min(Math.max(num(r[1]) || 0, 0), 1e5), w: r[2] === 'wachten'})); },
+    /* elke stap een kaart; een wachtstap krijgt een knop die zijn timer start */
+    bench() {
+      openBench({title: this.title, steps: this.steps().map(s => ({html: esc(s.n) + ' · ' + lkNumIn(s.d) + ' min',
+        timer: s.w && s.d > 0 ? [s.n, s.d * 60] : null}))});
+    },
     timers() {
       const S = this.rows.filter(r => r[0].trim() && r[2] === 'wachten' && num(r[1]) > 0);
       S.forEach(r => addTimer(r[0], num(r[1]) * 60)); if (S.length) location.hash = '#timers';

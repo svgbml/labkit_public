@@ -4644,7 +4644,8 @@
 "Sterke haarspeld.": "Strong hairpin.",
 "GC-gehalte buiten {#}–{#} %.": "GC content outside {#}–{#} %.",
 "Lengte buiten {#}–{#} nt.": "Length outside {#}–{#} nt.",
-"De sequentie bevat andere letters dan A, C, G en T; dimeren en haarspelden zijn niet berekend.": "The sequence contains letters other than A, C, G and T; dimers and hairpins were not calculated.",
+"De sequentie bevat andere letters dan A, C, G en T; dimeren en haarspelden zijn niet berekend.": "The sequence contains letters other than A, C, G and T; dimers and hairpins were not calculated."
+,
 "Kruisdimeer (F × R)": "Cross-dimer (F × R)",
 "Kruisdimeer aan het {#}′-uiteinde: de primers kunnen op elkaar verlengen.": "Cross-dimer at the {#}′ end: the primers can extend on each other.",
 "Sterke kruisdimeer tussen forward en reverse.": "Strong cross-dimer between forward and reverse.",
@@ -4738,5 +4739,12 @@
 "Scan om deze invoer te openen.": "Scan to open these inputs.",
 "Transformatie-efficiëntie = kolonies / µg DNA / fractie uitgeplaat (NEB FAQ C{#}; iGEM Troubleshooting Transformations: {#} kolonies, {#} van {#} µL, {#} ng → {#} × {#}⁷ kve/µg). Wit = lacZα onderbroken door een insert; niet elke witte kolonie bevat het juiste insert en een blauwe kolonie kan soms toch een insert hebben (Promega pGEM-T Easy FAQ, TM{#}). Voorbereidingskaart: hitteschokprotocol naar Hanahan {#} en het NEB-protocol voor hoogefficiënte transformatie (C{#}). Werkwijze en {#} ng vector per µL ligatie: Avans DNA toolbox, Lab {#}–{#} (electroporatie en blauw-witscreening).": "Transformation efficiency = colonies / µg DNA / fraction plated (NEB FAQ C{#}; iGEM Troubleshooting Transformations: {#} colonies, {#} of {#} µL, {#} ng → {#} × {#}⁷ cfu/µg). White = lacZα interrupted by an insert; not every white colony contains the right insert and a blue colony can sometimes still have an insert (Promega pGEM-T Easy FAQ, TM{#}). Preparation card: heat-shock protocol after Hanahan {#} and the NEB high-efficiency transformation protocol (C{#}). Procedure and {#} ng vector per µL ligation: Avans DNA toolbox, Lab {#}–{#} (electroporation and blue-white screening).",
 "<span class=\"k\">∞</span>Plasmidekaart": "<span class=\"k\">∞</span>Plasmid map",
-"Herkenningsplaatsen en knipposities: NEB-productinformatie en REBASE (Roberts e.a., Nucleic Acids Research). Het GenBank-formaat volgt de NCBI-specificatie (GenBank Flat File Format); een kenmerk dat over de oorsprong heen loopt en een samengestelde locatie worden overgeslagen. Voorbeeld: pUC{#} (GenBank L{#}). Methylering (Dam, Dcm) is niet meegenomen.": "Recognition sites and cut positions: NEB product information and REBASE (Roberts et al., Nucleic Acids Research). The GenBank format follows the NCBI specification (GenBank Flat File Format); a feature that runs across the origin and a compound location are skipped. Example: pUC{#} (GenBank L{#}). Methylation (Dam, Dcm) is not taken into account."
+"Herkenningsplaatsen en knipposities: NEB-productinformatie en REBASE (Roberts e.a., Nucleic Acids Research). Het GenBank-formaat volgt de NCBI-specificatie (GenBank Flat File Format); een kenmerk dat over de oorsprong heen loopt en een samengestelde locatie worden overgeslagen. Voorbeeld: pUC{#} (GenBank L{#}). Methylering (Dam, Dcm) is niet meegenomen.": "Recognition sites and cut positions: NEB product information and REBASE (Roberts et al., Nucleic Acids Research). The GenBank format follows the NCBI specification (GenBank Flat File Format); a feature that runs across the origin and a compound location are skipped. Example: pUC{#} (GenBank L{#}). Methylation (Dam, Dcm) is not taken into account.",
+"Kaarten": "Cards",
+"Lijst": "List",
+"Stap {#} van {#}": "Step {#} of {#}",
+"Start timer": "Start timer",
+"Het scherm blijft aan.": "The screen stays on.",
+"Deze browser kan het scherm niet aan houden.": "This browser cannot keep the screen on.",
+"Bench-modus": "Bench mode"
 }
