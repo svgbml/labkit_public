@@ -150,7 +150,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | SA2 | Opus 5.5 | S158–S161 (S159, S161 are Opus 5): alignment to the reference, assay format | SA1b | anything |
 | SA3 | Sonnet | S162, S164–S168 (S166 by Haiku): batch and HIrisPlex-S sheet | SA2 | anything |
 | SA4 | Opus 5 | S163, S169, then S199 and S200–S201 (Sonnet) | SA3, SQ2 | anything |
-| AL1 | Opus 5.5 | S170–S171 alignment parsers and viewer | K3 | anything |
+| AL1 ✅ | Opus 5.5 | S170–S171 alignment parsers and viewer | K3 | anything |
 | AL2a | Sonnet | S172–S176 (S176 by Haiku) | AL1 | anything |
 | AL2b | Sonnet | S177–S179, S181 (S179 after S42) | AL2a | anything |
 | AL2c | Sonnet | S186–S189 | AL2b | anything |
