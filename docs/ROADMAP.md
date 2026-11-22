@@ -351,7 +351,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S108 | 188, 189, 190 | DNA quant batch + purity badge + "make it X ng/µL"; read primer synthesis report | Sonnet |
 | S109 | 191, 200 | PCR mastermix and cDNA kit presets | Sonnet |
 | S110 | 196, 197, 198 | qPCR efficiency from standard curve; fold-change chart; melt curve overlay | Sonnet |
-| S111 | 201, 205, 206 | Virtual electropherogram; ligation ratio picture; transformation plate tap-count | Sonnet |
+| S111 | 201, 205, 206 | Virtual electropherogram; ligation ratio picture; transformation plate tap-count ✅ RIN-like estimate is a rough heuristic from 28S:18S; dish taps are not kept in links/undo | Sonnet |
 | S112 | 208, 209, 210 | STR electropherogram view; shared allele frequency table; bloodstain drawing | Sonnet |
 | S113 | 213, 215, 216 | Statistics "which test?" wizard, inline assumption checks, long-format paste | Opus 5 |
 | S114 | 214, 217, 218, 219, 220 | APA sentence; Bland-Altman bias; ROC cut-off; Kaplan-Meier risk table; sig-fig practice | Opus 5 |
