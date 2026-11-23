@@ -5,7 +5,11 @@ const CORE = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './i18n-en.js?h=089df04664',
+<<<<<<< HEAD
+  './i18n-en.js?h=2e208aebf2',
+=======
+  './i18n-en.js?h=2e208aebf2',
+>>>>>>> s103-wt
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png'

@@ -5471,5 +5471,21 @@
 "Gewicht": "Weight",
 "Beste model": "Best model",
 "{#}/[S] ({#}/mM)": "{#}/[S] ({#}/mM)",
-"{#}/[S] ({#}/µM)": "{#}/[S] ({#}/µM)"
+"{#}/[S] ({#}/µM)": "{#}/[S] ({#}/µM)",
+"Piektabel importeren (CSV/TSV)": "Import peak table (CSV/TSV)",
+"Plak een piektabel uit het integratieprogramma, met een kopregel (naam, retentietijd, oppervlakte, hoogte, breedte).": "Paste a peak table from the integration software, with a header row (name, retention time, area, height, width).",
+"Importeer in de tabel": "Import into the table",
+"Schets uit de piektabel (Gaussische pieken met de opgegeven hoogte of oppervlakte en breedte), geen meetdata.": "Sketch from the peak table (Gaussian peaks with the given height or area and width), not measured data.",
+"Geen retentietijd-kolom gevonden; zet een kopregel boven de tabel.": "No retention time column found; put a header row above the table.",
+"{#} pieken ingelezen": "{#} peaks imported",
+"Meerdere stoffen in één grafiek": "Several compounds in one chart",
+"Concentratie;Stof A;Stof B (kopregel, daarna een regel per meting; herhaalde concentraties zijn replicaten)": "Concentration;Compound A;Compound B (header row, then one line per measurement; repeated concentrations are replicates)",
+"Vergelijk": "Compare",
+"met": "with",
+"IC₅₀ / EC₅₀": "IC₅₀ / EC₅₀",
+"Kies twee verschillende stoffen.": "Choose two different compounds.",
+"Een van beide stoffen heeft te weinig punten voor een fit.": "One of the two compounds has too few points for a fit.",
+"Te weinig vrijheidsgraden voor de F-toets.": "Too few degrees of freedom for the F test.",
+"De log-IC₅₀ verschilt significant (significantieniveau vijf procent): aparte IC₅₀-waarden passen beter dan één gedeelde.": "The log IC₅₀ differs significantly (five percent significance level): separate IC₅₀ values fit better than one shared value.",
+"Geen significant verschil in log-IC₅₀ (significantieniveau vijf procent).": "No significant difference in log IC₅₀ (five percent significance level)."
 }
