@@ -120,6 +120,7 @@
         <template v-if="R.bars">
           <div class="f" style="max-width:220px;margin-top:12px"><label for="st-err">{{ t('Foutbalk') }}</label>
             <select id="st-err" style="width:100%" v-model="err"><option value="sd">SD</option><option value="sem">SEM</option><option value="ci">{{ t('95%-BI') }}</option></select></div>
+          <label class="chk" style="display:block;margin-top:8px"><input type="checkbox" id="st-ns" v-model="ns"> {{ t('Ook niet-significante paren (ns)') }}</label>
           <canvas id="stb-cv" style="margin-top:12px"></canvas>
           <div class="pic-bar" v-html="picBarHtml"></div>
         </template>
@@ -171,7 +172,7 @@ const SIDES = [{v: '2', n: 'Tweezijdig (≠)'}, {v: 'r', n: 'Rechtszijdig (A &gt
 export default {
   name: 'Stat',
   data() {
-    return {test: 'desc', err: 'sd', alphaRaw: '0.05', side: '2', mu: '0',
+    return {test: 'desc', err: 'sd', ns: false, alphaRaw: '0.05', side: '2', mu: '0',
       na: V('Middel 1'), nb: V('Middel 2'),
       a: N('0,7 -1,6 -0,2 -1,2 -0,1 3,4 3,7 0,8 0,0 2,0'),
       b: N('1,9 0,8 1,1 0,1 -0,1 4,4 5,5 1,6 4,6 3,4'),
@@ -760,7 +761,7 @@ export default {
       try {
         if (T === 'anova' && this.R.bars) {
           const cv = document.getElementById('stb-cv');
-          if (cv) stBars(cv, this.R.bars.AG, this.R.bars.R, this.alpha, this.err);
+          if (cv) stBars(cv, this.R.bars.AG, this.R.bars.R, this.alpha, this.err, this.ns);
         } else if (T === 'reg' && this.reg && !this.problem) {
           this.drawReg();
         } else if (T === 'power' && this.power && !this.problem) {

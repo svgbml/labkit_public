@@ -454,8 +454,10 @@ function anova2(cells){ const A=[...new Set(cells.map(c=>c.a))], B=[...new Set(c
   for(let i=0;i<a;i++) for(let j=0;j<b;j++){ SSAB+=n*(cm(i,j)-Am[i]-Bm[j]+G)**2; get(i,j).v.forEach(x=>SSE+=(x-cm(i,j))**2); }
   const dfA=a-1, dfB=b-1, dfAB=dfA*dfB, dfE=a*b*(n-1), MSE=SSE/dfE; const row=(ss,df)=>({ss,df,ms:ss/df,F:ss/df/MSE,p:1-fcdf(ss/df/MSE,df,dfE)});
   return {A,B,n,a:row(SSA,dfA),b:row(SSB,dfB),ab:row(SSAB,dfAB),e:{ss:SSE,df:dfE,ms:MSE},cm:A.map((_,i)=>B.map((_,j)=>cm(i,j)))}; }
-function stBars(cv,G,R,alpha,err){ err=err||'sd';   /* foutbalk (S81): sd | sem | ci */ const chs=chStyle(), K=chs.key==='scherm'?PCOL:{...PCOL,ink:chs.ink,muted:chs.muted,line:chs.grid||PCOL.line};   /* grafiekstijl (S80) */
-  const names=G.map(g=>g.name), ms=G.map(g=>mean(g.v)), sds=G.map(g=>{ const n=g.v.length; if(n<2) return 0; const s=sd(g.v); return err==='sd'?s:err==='sem'?s/Math.sqrt(n):tinv(0.975,n-1)*s/Math.sqrt(n); }), sig_=R.pairs.filter(q=>q.p<alpha);
+/* sterren volgens GraphPad Prism: asterisks (* p<0,05, ** p<0,01, *** p<0,001, **** p<0,0001); niet significant = ns */
+function stStars(p,alpha){ return p>=alpha?'ns':p<0.0001?'****':p<0.001?'***':p<0.01?'**':'*'; }
+function stBars(cv,G,R,alpha,err,showNs){ err=err||'sd';   /* foutbalk (S81): sd | sem | ci */ const chs=chStyle(), K=chs.key==='scherm'?PCOL:{...PCOL,ink:chs.ink,muted:chs.muted,line:chs.grid||PCOL.line};   /* grafiekstijl (S80) */
+  const names=G.map(g=>g.name), ms=G.map(g=>mean(g.v)), sds=G.map(g=>{ const n=g.v.length; if(n<2) return 0; const s=sd(g.v); return err==='sd'?s:err==='sem'?s/Math.sqrt(n):tinv(0.975,n-1)*s/Math.sqrt(n); }), sig_=R.pairs.filter(q=>showNs||q.p<alpha).map(q=>({a:q.a,b:q.b,p:q.p,label:stStars(q.p,alpha)}));
   const W=Math.max(420,100+names.length*110), H=340+sig_.length*22; const top0=20+sig_.length*22;
   const ymax=Math.max(...ms.map((m,i)=>m+sds[i]))*1.08, ymin=Math.min(0,...ms.map((m,i)=>m-sds[i]));
   pShow(cv,W,H,(x)=>{ const L=64, B=H-48, T=top0+10, Y=v=>B-(v-ymin)/(ymax-ymin)*(B-T), bw=56, X=i=>L+30+i*((W-L-40)/names.length)+bw/2;
@@ -463,10 +465,10 @@ function stBars(cv,G,R,alpha,err){ err=err||'sd';   /* foutbalk (S81): sd | sem 
     const st=niceStep(ymax-ymin,5); x.font='11px '+chs.font; x.textAlign='right'; x.fillStyle=K.muted; for(let v=Math.ceil(ymin/st)*st;v<=ymax+1e-9;v+=st){ x.fillText(tickLabel(v),L-6,Y(v)); x.strokeStyle=K.soft; x.beginPath(); x.moveTo(L+1,Y(v)); x.lineTo(W-14,Y(v)); x.stroke(); }
     names.forEach((nm,i)=>{ const cx=X(i); x.fillStyle=SERCOL[i%SERCOL.length]+'cc'; x.fillRect(cx-bw/2,Y(ms[i]),bw,Y(ymin<0?0:ymin)-Y(ms[i])); if(G[i].v.length>1){ x.strokeStyle=K.ink; x.lineWidth=1.4; x.beginPath(); x.moveTo(cx,Y(ms[i]-sds[i])); x.lineTo(cx,Y(ms[i]+sds[i])); x.moveTo(cx-8,Y(ms[i]+sds[i])); x.lineTo(cx+8,Y(ms[i]+sds[i])); x.moveTo(cx-8,Y(ms[i]-sds[i])); x.lineTo(cx+8,Y(ms[i]-sds[i])); x.stroke(); }
       x.fillStyle=K.ink; x.font='12px '+chs.font; x.textAlign='center'; x.fillText(nm,cx,B+16); G[i].v.forEach((v,k)=>{ x.fillStyle='rgba(31,41,51,.55)'; x.beginPath(); x.arc(cx-12+24*((k*0.618)%1),Y(v),2.4,0,7); x.fill(); }); });
-    sig_.forEach((q,k)=>{ const i=names.indexOf(q.b), j=names.indexOf(q.a), y=top0-k*22, xa=X(Math.min(i,j)), xb=X(Math.max(i,j)); x.strokeStyle=K.ink; x.lineWidth=1.2; x.beginPath(); x.moveTo(xa,y+6); x.lineTo(xa,y); x.lineTo(xb,y); x.lineTo(xb,y+6); x.stroke(); x.fillStyle=K.ink; x.font='600 13px '+chs.font; x.textAlign='center'; x.fillText(q.p<0.001?'***':q.p<0.01?'**':'*',(xa+xb)/2,y-7); });
+    sig_.forEach((q,k)=>{ const i=names.indexOf(q.b), j=names.indexOf(q.a), y=top0-k*22, xa=X(Math.min(i,j)), xb=X(Math.max(i,j)); x.strokeStyle=K.ink; x.lineWidth=1.2; x.beginPath(); x.moveTo(xa,y+6); x.lineTo(xa,y); x.lineTo(xb,y); x.lineTo(xb,y+6); x.stroke(); x.fillStyle=K.ink; x.font='600 13px '+chs.font; x.textAlign='center'; x.fillText(q.label,(xa+xb)/2,y-7); });
     x.save(); x.translate(16,(T+B)/2); x.rotate(-Math.PI/2); x.textAlign='center'; x.fillStyle=K.muted; x.font='12px '+chs.font; x.fillText(err==='sd'?'gemiddelde ± SD':err==='sem'?'gemiddelde ± SEM':'gemiddelde ± 95%-BI',0,0); x.restore();
     { const ns=G.map(g=>g.v.length), a=Math.min(...ns), b=Math.max(...ns), lab=err==='sd'?'SD':err==='sem'?'SEM':'95%-BI'; x.fillStyle=K.muted; x.font='11px '+chs.font; x.textAlign='center'; x.fillText('Staaf = gemiddelde, foutbalk = '+lab+' (n = '+(a===b?a:a+'–'+b)+')',(L+W-14)/2,H-8); } });
-  cv._err={kind:err,half:sds.slice()}; cv._data={head:['groep','gemiddelde',err==='sd'?'SD':err==='sem'?'SEM':'95%-BI','n'],rows:names.map((n,i)=>[n,ms[i],sds[i],G[i].v.length])}; }
+  cv._sig=sig_; cv._err={kind:err,half:sds.slice()}; cv._data={head:['groep','gemiddelde',err==='sd'?'SD':err==='sem'?'SEM':'95%-BI','n'],rows:names.map((n,i)=>[n,ms[i],sds[i],G[i].v.length])}; }
 /* ================= SPECTROFOTOMETRIE ================= */
 const AAM={A:71.0788,R:156.1875,N:114.1038,D:115.0886,C:103.1388,E:129.1155,Q:128.1307,G:57.0519,H:137.1411,I:113.1594,L:113.1594,K:128.1741,M:131.1926,F:147.1766,P:97.1167,S:87.0782,T:101.1051,W:186.2132,Y:163.1760,V:99.1326};
 /* ================= EENHEDEN ================= */
@@ -691,6 +693,7 @@ live({
   nctcdf: [() => nctcdf, v => { nctcdf = v; }],
   powerT: [() => powerT, v => { powerT = v; }],
   anova2: [() => anova2, v => { anova2 = v; }],
+  stStars: [() => stStars, v => { stStars = v; }],
   stBars: [() => stBars, v => { stBars = v; }],
   AAM: () => AAM,
   PALS: () => PALS,

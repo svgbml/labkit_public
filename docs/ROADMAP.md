@@ -320,7 +320,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S81 | 129, 125 | Error bar choice (SD/SEM/CI) and bar + dot plots | ✅ Foutbalk SD/SEM/95%-BI (veld st-err) met onderschrift in de grafiek; punten staan al op de staven | — |
 | S82 | 123 | SVG export for every chart *(partly there: SVG recorder from S21; 14 of 47 canvases have the bar)* | ✅ SVG-knop in de balk onder 30 grafiekcanvassen (de tekentools met een tekenbalk hadden hem al); Sanger, TelFoto en Gelfoto-editor zijn bewust overgeslagen (geen grafiek of eigen export) | — |
 | S83 | 127 | Chart editor panel (titles, ranges, log axis, legend, colours) | ✅ Knop *✎ Aanpassen* onder elke grafiek van `chart()` en `barChart()` (25 canvassen): venster met titel, astitels, bereik van x en y, lineaire of logaritmische as, plaats van de legenda (of verbergen) en een kleur per reeks; *Terug naar standaard* wist het. Bewaard per canvas-id in localStorage `lkChartEd`; `chEdApply` in `src/lib/chart.js` legt het over de opties van de tool, ook na herladen. Bij `barChart` alleen titel, y-titel, y-max en kleur. Getest in `tests/validate.py` | — |
-| S84 | 124 | Significance brackets from statistics output | Stars drawn on bar charts | Sonnet |
+| S84 | 124 | Significance brackets from statistics output | ✅ Haken met sterren (* tot ****) in de staafgrafiek van Statistiek, optioneel ns-paren | — |
 | S85 | 128 | Box, violin and scatter plots in Statistics | 3 new plot types | Opus 5 |
 | S86 | 126, 131 | Plate heatmaps and toggleable data tables under charts | Heatmap for plate tools | Sonnet |
 | S87 | 132, 133 | Chart annotations and overlaying several runs | Text/arrows/lines | Sonnet |
