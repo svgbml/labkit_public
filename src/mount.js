@@ -516,4 +516,5 @@ export function start() {
      openBench({title, steps}), zie src/tools/Bench.vue. */
   const bn = mountTool('#bench-app', Bench);
   window.openBench = spec => { if (bn && bn.vm) bn.vm.open(spec); };
+  window.benchPair = () => { if (bn && bn.vm) bn.vm.pairStart(); };
 }

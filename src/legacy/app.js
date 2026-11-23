@@ -120,7 +120,7 @@ document.addEventListener('paste',e=>{
 
 /* ================= INVOER ONTHOUDEN ================= */
 const STORE='labkit:v1:inputs';
-const NOPERSIST=/^(ui-lang|bento-q|pp-preset|nav-q|k-sq|gf-|o-preset|s-preset|q-preset|c-preset|b-ladder|w-fmt|tm-)/;
+const NOPERSIST=/^(ui-lang|sync-|bento-q|pp-preset|nav-q|k-sq|gf-|o-preset|s-preset|q-preset|c-preset|b-ladder|w-fmt|tm-)/;
 function storeGet(){ try{ return JSON.parse(localStorage.getItem(STORE)||'{}'); }catch(e){ return {}; } }
 function persistable(el){ return el&&el.id&&!NOPERSIST.test(el.id)&&el.type!=='file'&&!el.closest('table')&&(el.tagName==='INPUT'||el.tagName==='SELECT'||el.tagName==='TEXTAREA'); }
 function persistSave(e){ const el=e.target; if(!persistable(el)) return; const s=storeGet(); s[el.id]=el.type==='checkbox'?el.checked:el.value; try{ localStorage.setItem(STORE,JSON.stringify(s)); }catch(err){} }

@@ -515,6 +515,16 @@ html[data-dens=compact] .big{font-size:22px;margin-bottom:6px}
 .bench-nlist img{max-width:200px;border-radius:8px}
 .bench .bench-nlist button{position:absolute;top:4px;right:4px;min-height:36px;padding:2px 10px}
 .bench-wake{margin:8px 0 0;font-size:13px;color:var(--bn-gray,#aaa);text-align:center}
+/* koppelen (S61) */
+.bench-wake b{color:var(--bn-hi,#ffd400)}
+.bench .bench-link{min-height:32px;padding:2px 10px;margin-left:8px;font-size:13px;border-width:1px}
+.bench-pair{z-index:9001}
+.bench-pair p{margin:0}
+.bench-pnote{font-size:.8em;color:var(--bn-gray,#aaa)}
+.bench-qr{align-self:center;background:#fff;padding:6px;border-radius:8px;line-height:0}
+.bench-qr svg{width:min(300px,72vw);height:auto}
+.bench-vid{width:100%;max-height:40vh;border-radius:12px;background:#000}
+.bench-notes textarea[readonly]{font-family:monospace;font-size:12px;word-break:break-all}
 /* donkere kamer: rood op zwart (spaart het nachtzicht); komt na de thema's en wint daarvan */
 html.darkroom{--bg:#000;--surface:#0b0000;--ink:#e8392b;--muted:#a52a1f;--line:#4a120d;--accent:#ff4a3a;--accent-soft:#240504;--ok:#e8392b;--ok-soft:#1a0302;--warn:#ff6a55;--warn-soft:#2a0806;--bad:#ff7a66;--bad-soft:#2f0a07;--stv:#e8392b;--stv-soft:#1a0302;--stu:#ff6a55;--stu-soft:#2a0806;--sta:#c4372a;--sta-soft:#240504;--bn-fg:#e8392b;--bn-hi:#ff6a55;--bn-bg:#000;--bn-dim:#3a0c08;--bn-mid:#6a1a12;--bn-gray:#a52a1f;--bn-dark:#120100;--bn-err:#ff7a66;color-scheme:dark}
 html.darkroom img,html.darkroom canvas{filter:grayscale(1) sepia(1) hue-rotate(-50deg) saturate(6) brightness(.75)}

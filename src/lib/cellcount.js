@@ -76,4 +76,4 @@ function countCells(data, w, h, sens = 6) {
     n: b.a > 1.6 * ma ? Math.round(b.a / ma) : 1, dead: b.sb / b.a > 12}));
 }
 
-export {countCells};
+export {countCells, boxBlur, median};

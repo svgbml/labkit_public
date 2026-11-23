@@ -6,7 +6,7 @@
      De tellingen per buis blijven in de globale `reeksCounts` staan ({buis: [plaat 1, plaat 2]}):
      tblSnap()/tblRestore() bewaren ze daar en tests/validate.py zet ze daar. buildReeks() in
      web/index.html laadt ze daarna in deze component (load()), en een invoer hier schrijft ze
-     terug. De id's r-f, r-n, r-v, r-plan, r-pv, r-range, r-tbl en r-out blijven zoals ze waren. -->
+     terug. Een fototelling (KolonieFoto.vue, S59) komt via edit() in de tabel. De id's r-f, r-n, r-v, r-plan, r-pv, r-range, r-tbl en r-out blijven zoals ze waren. -->
 <template>
   <div class="grid2">
     <div class="stack">
@@ -60,6 +60,7 @@
         </div>
         <p style="font-size:13px;color:var(--muted);margin:8px 0 0"
           v-html="tHtml('Leeg laten = niet uitgeplaat. Typ &lt;span class=&quot;mono&quot;&gt;&amp;gt;&lt;/span&gt; of &lt;span class=&quot;mono&quot;&gt;TNTC&lt;/span&gt; voor ontelbaar.')"></p>
+        <kolonie-foto :tubes="m.rows.map(r => r.i)" @fill="edit"/>
       </div>
     </div>
     <div class="result" id="r-out">
@@ -101,6 +102,7 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import KolonieFoto from './KolonieFoto.vue';
 
 /* wat als ontelbaar telt (TNTC); ongewijzigd uit de oude calc.reeks() */
 /* een getal dat de component zelf opmaakt (sci, fmt, sig) in de taal van de gebruiker */
@@ -109,6 +111,7 @@ const TNTC = /^(>|≥|\+{2,}|∞)|tntc|tmtc|ontelbaar|te\s*veel|overgroei|conflu
 
 export default {
   name: 'Reeks',
+  components: {KolonieFoto},
   data() {
     return {f: '10', n: '7', v: '1000', pv: lkNumIn('0,1'), range: '30-300', counts: {}};
   },
