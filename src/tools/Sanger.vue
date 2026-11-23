@@ -89,6 +89,14 @@
           <p style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Allelen op de streng van de assay; een SNP op de andere streng wordt automatisch omgedraaid.') }}</p>
           <lk-table table-id="sg-gt-tbl" :cols="gtCols" :rows="gtRows"/>
         </div>
+        <!-- S167: de uitkomsten van de webtool, samengevat en als figuur (staat in .result, dus ook in het rapport) -->
+        <div v-if="rsRows.length" id="sg-rs-out" style="margin-top:12px">
+          <h3>{{ t('Uitkomsten van de webtool') }}</h3>
+          <lk-kv :rows="rsRows"/>
+          <lk-note v-for="(m, i) in rsWarn" :key="i" kind="warn">{{ m }}</lk-note>
+          <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Voorspeld door de HIrisPlex-S-webtool van het Erasmus MC, niet door LabKit. Een kans is geen zekerheid.') }}</p>
+          <template v-if="rsFig"><canvas v-for="g in RESULT_GROUPS" :key="g[0]" :id="'sg-rs-cv-' + g[0]" ref="rscv" :aria-label="t('Kansen per categorie van de webtool') + ': ' + t(g[1])"></canvas></template>
+        </div>
         <!-- S162: veel reads tegelijk, een rij per monster, en dezelfde SNP van alle monsters onder elkaar -->
         <div v-if="batch.length" id="sg-batch" style="margin-top:12px">
           <h3>{{ t('Batch: genotypes per monster') }}</h3>
@@ -152,6 +160,29 @@
           <a id="sg-hs-link" href="https://hirisplex.erasmusmc.nl/" target="_blank" rel="noopener">hirisplex.erasmusmc.nl</a>.
           {{ t('Je krijgt per monster de kans op elke categorie van oog-, haar- en huidskleur terug; die kun je hieronder bij Uitkomsten van de webtool invullen. Een lege cel wordt NA in het bestand.') }}</p>
         <lk-note kind="info">{{ t('LabKit voorspelt zelf geen kleuren en vervangt de webtool niet: de regressiecoëfficiënten van het model zijn niet openbaar, en geraden getallen zouden officieel lijken maar fout zijn.') }}</lk-note>
+      </details>
+      <details class="panel" id="sg-rsp" :open="rsOpen">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Uitkomsten van de webtool invullen') }}</summary>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('Vul de kansen in die de webtool teruggaf (een getal van 0 tot 1, of een percentage), of plak ze in de volgorde van de tabel.') }}</p>
+        <div v-if="!hs.samples.length"><lk-note kind="info">{{ t('Voeg eerst in het genotypeblad een monster toe.') }}</lk-note></div>
+        <template v-else>
+          <div class="f"><label for="sg-rs-smp">{{ t('Monster') }}</label>
+            <select id="sg-rs-smp" v-model="rsIdx"><option v-for="(sm, i) in hs.samples" :key="i" :value="i">{{ sm.id }}</option></select></div>
+          <div class="f" style="margin-top:8px"><label for="sg-rs-paste">{{ t('Plak de kansen') }}</label>
+            <textarea id="sg-rs-paste" class="mono" rows="2" v-model="rsPaste" spellcheck="false"></textarea></div>
+          <div class="row" style="gap:6px;margin-top:6px"><button type="button" id="sg-rs-go" @click="rsApply">{{ t('Verwerk') }}</button></div>
+          <lk-note v-if="rsMsg" kind="warn">{{ rsMsg }}</lk-note>
+          <table id="sg-rs-tbl" class="tbl" style="margin-top:8px">
+            <thead><tr><th>{{ t('Eigenschap') }}</th><th>{{ t('Categorie') }}</th><th>{{ t('Kans') }}</th></tr></thead>
+            <tbody><template v-for="g in RESULT_GROUPS" :key="g[0]"><tr v-for="(c, ci) in g[2]" :key="g[0] + ci">
+              <td>{{ ci ? '' : t(g[1]) }}</td><td>{{ t(c) }}</td>
+              <td><input class="mono" style="width:5em" inputmode="decimal" :aria-label="t(g[1]) + ' ' + t(c)" v-model="rsCur[g[0] + '.' + ci]"></td>
+            </tr></template></tbody>
+          </table>
+          <div class="f" style="margin-top:8px"><label for="sg-rs-thr">{{ t('Drempel voor een stellige uitspraak') }}</label>
+            <input id="sg-rs-thr" class="mono" style="width:5em" inputmode="decimal" v-model="rsThr"></div>
+          <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('De drempel is jouw keuze (standaard 0,7); onder die kans meldt LabKit dat de uitkomst niet stellig is.') }}</p>
+        </template>
       </details>
     </div>
     <div>
@@ -266,7 +297,7 @@ import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 import {parseRef, alignRead, variants, parseAssay, assayJson, snpCalls, confirm, TEACH, teachReads, DEC} from '../lib/sangeralign.js';
 import {callSample, genotypeRows, overlayStrips} from '../lib/sangerbatch.js';
-import {toCsv, PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate, autofill, mergeCalls, naReport} from '../lib/hiris.js';
+import {RESULT_GROUPS, parseProb, parseResultPaste, summarize, toCsv, PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate, autofill, mergeCalls, naReport} from '../lib/hiris.js';
 import {SEQ_TO} from '../lib/seq.js';
 
 /* de referentie kan uit Sequentie komen (ook een sequentie die daar bij NCBI is opgehaald) */
@@ -319,7 +350,7 @@ export default {
       edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1),
       refText: st['sg-ref'] != null ? String(st['sg-ref']) : '', assayKey: st['sg-assay'] != null ? String(st['sg-assay']) : '', own: jget(AKEY, []),
       read2: jget('sg-read2', null) ? markRaw(jget('sg-read2', null)) : null, paste2: st['sg-paste2'] != null ? String(st['sg-paste2']) : '',
-      hsCopied: '', batch: [], hs: Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {})), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
+      hsCopied: '', rsIdx: 0, rsPaste: '', rsMsg: '', rsThr: st['sg-rs-thr'] != null ? String(st['sg-rs-thr']) : NL(0.7, 1), batch: [], hs: (h => { h.samples = h.samples.map(x => Object.assign({res: {}, notes: {}}, x)); return h; })(Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {}))), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
   },
   computed: {
     HT() { return HT; },
@@ -537,6 +568,28 @@ export default {
       }
       return out;
     },
+    /* ---------- uitkomsten van de webtool (S167) ---------- */
+    RESULT_GROUPS() { return RESULT_GROUPS; },
+    rsCur() { return (this.hs.samples[this.rsIdx] || {res: {}}).res; },
+    thrN() { const n = Number(String(this.rsThr).replace(',', '.')); return n > 0 && n <= 1 ? n : 0.7; },
+    rsOpen() { return this.hs.samples.some(x => Object.keys(x.res).length > 0); },
+    /* per monster en eigenschap de hoogste categorie met zijn kans */
+    rsSum() { return this.hs.samples.map(sm => ({id: sm.id, rows: summarize(sm.res, this.thrN)})).filter(x => x.rows.length); },
+    rsRows() {
+      const t = this.t, out = [];
+      for (const m of this.rsSum) for (const r of m.rows) out.push([esc(m.id) + ' · ' + t(r.name), '<b>' + esc(t(r.top)) + '</b> (' + NL(r.p, 2) + ')' + (r.thr ? '' : ' · ' + t('onder de drempel'))]);
+      return out;
+    },
+    rsWarn() {
+      const t = this.t, out = [];
+      for (const m of this.rsSum) for (const r of m.rows) {
+        if (!r.ok) out.push(m.id + ', ' + t(r.name) + ': ' + t('niet alle categorieën zijn ingevuld.'));
+        else if (!r.full) out.push(m.id + ', ' + t(r.name) + ': ' + t('de kansen tellen op tot ' + NL(r.sum, 2) + ' in plaats van 1; klopt de invoer?'));
+      }
+      return out;
+    },
+    /* de figuur: alle kansen van het gekozen monster, in de volgorde van de tabel */
+    rsFig() { const x = this.hs.samples[this.rsIdx]; return !!x && summarize(x.res, this.thrN).length > 0; },
     edCols() { const t = this.t; return [{h: t('SNP (rs)'), t: 'txt', w: 110}, {h: t('Positie'), t: 'num', w: 60}, {h: t('Allelen'), t: 'txt', w: 60}, {h: t('Streng'), t: 'sel', o: ['+', '-']}]; }
   },
   watch: {
@@ -550,7 +603,10 @@ export default {
     het() { this.draw(); },
     trim() { this.draw(); },
     bsamples() { this.$nextTick(this.paintOv); },
-    hs: {deep: true, handler(v) { jset(HKEY, v); }},
+    rsFig() { this.$nextTick(this.paintRs); },
+    rsIdx() { this.$nextTick(this.paintRs); },
+    rsThr() { this.$nextTick(this.paintRs); },
+    hs: {deep: true, handler(v) { jset(HKEY, v); this.$nextTick(this.paintRs); }},
     ovSnp() { this.$nextTick(this.paintOv); },
     qN() { this.draw(); }
   },
@@ -558,6 +614,7 @@ export default {
   mounted() {
     window.__sgVm = this;
     this.ro = new ResizeObserver(() => { this.draw(); this.paintOv(); });
+    this.$nextTick(this.paintRs);
     this.ro.observe(this.$el);
     this.$nextTick(this.draw);
   },
@@ -913,19 +970,38 @@ export default {
     hsBad(sm, s) { return !!sm.vals[s.rs] && !HS_VALUES.includes(String(sm.vals[s.rs])); },
     noteText(c) { return this.t(NOTES[c] || c); },
     addSample(id, vals, notes) {
-      this.hs.samples.push({id: id || this.t('Monster') + ' ' + (this.hs.samples.length + 1), vals: vals || {}, notes: notes || {}});
+      this.hs.samples.push({id: id || this.t('Monster') + ' ' + (this.hs.samples.length + 1), vals: vals || {}, notes: notes || {}, res: {}});
     },
     delSample(i) { this.hs.samples.splice(i, 1); },
     /* het blad van één monster uit de calls van de assay; een monster met dezelfde naam wordt vervangen */
     putSample(id, calls) {
       const {vals, notes} = autofill(calls), i = this.hs.samples.findIndex(x => x.id === id);
-      if (i >= 0) this.hs.samples.splice(i, 1, {id, vals, notes}); else this.hs.samples.push({id, vals, notes});
+      if (i >= 0) this.hs.samples.splice(i, 1, {id, vals, notes, res: this.hs.samples[i].res || {}}); else this.hs.samples.push({id, vals, notes, res: {}});
     },
     /* het .csv zoals de webtool het wil: komma's, SampleID en een kolom per SNP; zonder BOM, anders is de eerste kolomnaam niet SampleID */
     sheetCsv() { return toCsv(this.hs.panel, this.hs.samples); },
     saveSheet() { saveBlob('hirisplex-' + this.hs.panel + '.csv', new Blob([this.sheetCsv()], {type: 'text/csv'})).catch(() => {}); },
     async copySheet() {
       try { await navigator.clipboard.writeText(this.sheetCsv()); this.hsCopied = this.t('Gekopieerd.'); } catch (e) { this.hsCopied = this.t('Kopiëren geblokkeerd.'); }
+    },
+    /* ---------- uitkomsten van de webtool (S167) ---------- */
+    rsApply() {
+      const r = parseResultPaste(this.rsPaste);
+      if (!Object.keys(r.res).length) { this.rsMsg = this.t('Er zijn ' + r.n + ' getallen gevonden; er horen er 14 te zijn, in de volgorde van de tabel.'); return; }
+      this.rsMsg = ''; this.rsPaste = '';
+      this.hs.samples[this.rsIdx].res = r.res;
+    },
+    /* een staafgrafiek per eigenschap voor het gekozen monster, in het rapport als losse figuren */
+    paintRs() {
+      const x = this.hs.samples[this.rsIdx], cvs = this.$refs.rscv;
+      if (!cvs || !x || typeof barChart !== 'function') return;
+      const t = this.t;
+      for (const cv of [].concat(cvs)) {
+        const g = RESULT_GROUPS.find(r => cv.id === 'sg-rs-cv-' + r[0]);
+        if (!g) continue;
+        const vals = g[2].map((c, i) => { const p = parseProb(x.res[g[0] + '.' + i]); return p == null ? NaN : p; }), nan = vals.map(() => NaN);
+        barChart(cv, g[2].map(c => t(c)), vals, nan, nan, {ylabel: t('Kans') + ' · ' + t(g[1]) + ' (' + x.id + ')', ref: false, ymax: 1});
+      }
     },
     fillRead() { this.putSample(this.m.r.name || this.t('Monster'), mergeCalls(this.snpc, this.snpc2)); },
     fillBatch() { for (const x of this.bsamples) this.putSample(x.name, x.calls); },

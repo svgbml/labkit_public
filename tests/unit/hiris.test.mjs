@@ -82,3 +82,17 @@ test('het geëxporteerde bestand begint met de koptekst van het sjabloon', () =>
   assert.equal(t[0], HEAD41);
   assert.equal(t[1].split(',').length, 42); assert.equal(t[2], '');
 });
+
+import {parseProb, parseResultPaste, summarize, RESULT_KEYS} from '../../src/lib/hiris.js';
+test('uitkomsten: kansen lezen, plakken en samenvatten', () => {
+  assert.equal(parseProb('0,82'), 0.82); assert.equal(parseProb('82%'), 0.82); assert.equal(parseProb('1,2'), null); assert.equal(parseProb(''), null); assert.equal(parseProb('x'), null);
+  assert.equal(RESULT_KEYS.length, 14);
+  const p = parseResultPaste('0.1,0.2,0.7\n0.05 0.1 0.8 0.05\n0.9;0.1\n0,1 0,2 0,3 0,3 0,1');
+  assert.equal(p.n, 14); assert.equal(p.res['eye.2'], '0.7'); assert.equal(p.res['skin.4'], '0,1');
+  assert.equal(parseResultPaste('1 2 3').n, 3); assert.deepEqual(parseResultPaste('1 2 3').res, {});
+  const s = summarize(p.res, 0.7);
+  assert.deepEqual(s.map(x => [x.group, x.top, x.p, x.thr]), [['eye', 'Bruin', 0.7, true], ['hair', 'Rood', 0.8, true], ['shade', 'Licht', 0.9, true], ['skin', 'Intermediair', 0.3, false]]);
+  assert.equal(s[0].full, true);
+  assert.deepEqual(summarize({'eye.0': '0,5'}, 0.7).map(x => [x.group, x.ok]), [['eye', false]]);
+  assert.deepEqual(summarize({}, 0.7), []);
+});

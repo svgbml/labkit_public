@@ -115,3 +115,51 @@ export function toCsv(panel, samples) {
   const snps = panelSnps(panel);
   return [csvHeader(panel)].concat(samples.map(s => [cell(String(s.id || ''))].concat(snps.map(x => s.vals && s.vals[x.rs] ? s.vals[x.rs] : 'NA')).join(','))).join('\n') + '\n';
 }
+
+/* ---------- uitkomsten van de webtool (S167, #326) ----------
+   De webtool geeft per monster een kans per categorie. Huidskleur (Chaitanya e.a. 2018): zeer bleek, bleek, intermediair, donker,
+   donker tot zwart. Oogkleur: blauw, intermediair, bruin; haarkleur: blond, bruin, rood, zwart, met de tint licht of donker
+   (Walsh e.a. 2013). De namen van de oog- en haarcategorieën en de volgorde van de kolommen zijn nog niet aan de webtool
+   gecontroleerd; de gebruiker vult de kansen in de volgorde van deze tabel in. */
+export const RESULT_GROUPS = [
+  ['eye', 'Oogkleur', ['Blauw', 'Intermediair', 'Bruin']],
+  ['hair', 'Haarkleur', ['Blond', 'Bruin', 'Rood', 'Zwart']],
+  ['shade', 'Haartint', ['Licht', 'Donker']],
+  ['skin', 'Huidskleur', ['Zeer bleek', 'Bleek', 'Intermediair', 'Donker', 'Donker tot zwart']]
+];
+export const RESULT_KEYS = RESULT_GROUPS.flatMap(([g, , cats]) => cats.map((c, i) => g + '.' + i));
+
+/* "0,82", "0.82" of "82%" → kans 0–1, of null als het geen kans is */
+export function parseProb(v) {
+  const t = String(v == null ? '' : v).trim().replace(',', '.');
+  if (!t) return null;
+  const pct = t.endsWith('%'), n = Number(pct ? t.slice(0, -1) : t);
+  if (!isFinite(n)) return null;
+  const p = pct ? n / 100 : n;
+  return p >= 0 && p <= 1 ? p : null;
+}
+
+/* geplakte getallen (gescheiden door tab, spatie, puntkomma, regeleinde of komma's bij punten als decimaalteken) in de volgorde van RESULT_KEYS;
+   {res, n}: res = {sleutel: tekst}, n = aantal gevonden getallen (leeg res als dat niet het aantal categorieën is) */
+export function parseResultPaste(text) {
+  /* komma's scheiden alleen als er punten als decimaalteken staan (0.1,0.2); anders is de komma een decimaalteken (0,82) */
+  const tok = String(text || '').split(/[\s;]+/).flatMap(x => /^[0-9.%]+(,[0-9.%]+)+$/.test(x) && x.includes('.') ? x.split(',') : [x]).map(x => x.trim()).filter(Boolean);
+  const nums = tok.filter(x => /^[0-9]*[.,]?[0-9]+%?$/.test(x));
+  const res = {};
+  if (nums.length === RESULT_KEYS.length) RESULT_KEYS.forEach((k, i) => { res[k] = nums[i]; });
+  return {res, n: nums.length};
+}
+
+/* per eigenschap de hoogste categorie: {group, name, top (naam), p, sum, ok (alles ingevuld), thr (haalt de drempel)} */
+export function summarize(res, thr = 0.7) {
+  const out = [];
+  for (const [g, name, cats] of RESULT_GROUPS) {
+    const ps = cats.map((c, i) => parseProb(res && res[g + '.' + i]));
+    if (ps.every(p => p == null)) continue;
+    const ok = ps.every(p => p != null), sum = ps.reduce((a, p) => a + (p || 0), 0);
+    let b = -1;
+    ps.forEach((p, i) => { if (p != null && (b < 0 || p > ps[b])) b = i; });
+    out.push({group: g, name, top: cats[b], p: ps[b], sum, ok, thr: ps[b] >= thr, full: ok && Math.abs(sum - 1) <= 0.02});
+  }
+  return out;
+}
