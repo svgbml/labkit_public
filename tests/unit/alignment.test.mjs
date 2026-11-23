@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import '../../src/lib/helpers.js';
-import {parseAlignment, alnTrim, alnWrite, alnPim, alnPair, pimParse, pimWrite, alnProfile, alnConserved, alnTranslate, fastaCheck, gcgCheck, ALN_OUT} from '../../src/lib/alignment.js';
+import {parseAlignment, alnTrim, alnWrite, alnPim, alnPair, pimParse, pimWrite, alnProfile, alnConserved, alnTranslate, fastaCheck, gcgCheck, alnSvg, ALN_OUT} from '../../src/lib/alignment.js';
 
 const fx = f => readFileSync(new URL('../fixtures/aln/' + f, import.meta.url), 'utf8');
 
@@ -131,4 +131,22 @@ test('MSF: GCG-controlegetal zoals in W_prot.msf', () => {
   /* NEXUS: een naam met een _ of een spatie blijft hetzelfde (tussen aanhalingstekens) */
   const n = parseAlignment(alnWrite({names: ["a_b", "c'd"], seqs: ['AC', 'AG'], len: 2}, 'nexus'));
   assert.deepEqual(n.names, ['a_b', "c'd"]);
+});
+
+test('figuur: blokken van de gekozen breedte, kleuren en nummers', () => {
+  const a = parseAlignment('>a<1>\nACGTACGTAC\n>b\nACG-ACGTAA\n');
+  const f = alnSvg(a, {width: 4, start: 11, fill: (i, c) => (a.seqs[i][c] === 'A' ? '#ff0000' : '')});
+  assert.equal(f.blocks.length, 3);  /* 4 + 4 + 2 kolommen */
+  assert.match(f.blocks[0], /^<svg [^>]*width="\d+"/);
+  assert.ok(f.blocks[0].includes('a&lt;1&gt;'), 'naam ontsnapt');
+  assert.ok(f.blocks[0].includes('>ACGT</text>') && f.blocks[1].includes('>ACGT</text>') && f.blocks[2].includes('>AC</text>'));
+  /* nummer van de eerste kolom van elk blok, vanaf start */
+  assert.ok(f.blocks[0].includes('>11</text>') && f.blocks[1].includes('>15</text>') && f.blocks[2].includes('>19</text>'));
+  /* één rechthoek per A: rij a heeft A op 0, 4, 8; rij b op 0, 4, 9 */
+  assert.equal((f.svg.match(/fill="#ff0000"/g) || []).length, 6);
+  /* de * : . -regel onder elk blok: kolom 1 t/m 3 gelijk, 4 heeft een gat */
+  assert.ok(f.blocks[0].includes('>*** </text>'));
+  /* alles in één svg, even breed als het breedste blok */
+  assert.equal((f.svg.match(/<svg/g) || []).length, 1);
+  assert.equal(alnSvg(a, {width: 60}).blocks.length, 1);
 });

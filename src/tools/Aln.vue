@@ -145,11 +145,24 @@
       <lk-table v-else :cols="regCols" :rows="regRows"/>
     </div>
   </details>
+  <!-- S188: figuur (SVG/PNG) en afdruk van wat de viewer toont -->
+  <details v-if="m.format && m.names.length" id="al-fig" class="panel" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Figuur en afdrukken') }}</summary>
+    <div class="fields" style="margin-top:12px">
+      <lk-field v-model="bw" :label="t('Kolommen per blok')" for-id="al-bw" inputmode="numeric"/>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('De figuur toont wat de viewer toont: bijgesneden of vertaald, in de gekozen volgorde en kleuren, op een witte achtergrond.') }} {{ t('Voor een stuk vul je Vanaf kolom en Tot en met kolom in onder Bijsnijden, vertalen en exporteren.') }}</p>
+    <div class="row" style="margin-top:10px">
+      <button type="button" id="al-svg" @click="saveSvg">{{ t('SVG opslaan') }}</button>
+      <button type="button" id="al-png" @click="savePng">{{ t('PNG opslaan') }}</button>
+      <button type="button" id="al-print" @click="print">{{ t('Afdrukken') }}</button>
+    </div>
+  </details>
   <!-- overzicht van de hele uitlijning: aandeel gaten per stukje, het kader is wat in beeld is; klikken springt erheen (S174) -->
   <canvas v-show="m.names.length" id="al-ovw" ref="ov" class="aln-ovw" data-xl="1" :title="t('Gaten over de hele uitlijning; klik om erheen te gaan')" @click="onOv"></canvas>
   <div v-show="m.names.length" id="al-view" ref="view" :class="['aln-view', {'aln-cbs': cbs}]" :style="{height: viewH + 'px'}" @scroll="onScroll">
     <span ref="probe" class="aln-mono aln-probe" aria-hidden="true">{{ 'M'.repeat(50) }}</span>
     <span ref="sw" class="aln-sw" aria-hidden="true"></span>
+    <span class="aln-paper" aria-hidden="true"><span ref="psw" class="aln-sw"></span></span>
     <div class="aln-sizer" :style="{width: g.W + 'px', height: g.H + 'px'}">
       <div class="aln-pin" :style="{width: vw + 'px', height: vh + 'px'}" @click="onCell">
         <!-- de kleuren staan op één canvas onder de tekst: duizenden gekleurde <span>s per
@@ -178,7 +191,7 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile, alnConsensus, alnMotif, alnIdentity, alnDiff,
-  alnTrim, alnWrite, ALN_OUT, alnPair, alnPim, pimWrite, alnConserved, alnTranslate, fastaCheck, NAMEMAX} from '../lib/alignment.js';
+  alnTrim, alnWrite, ALN_OUT, alnPair, alnPim, pimWrite, alnConserved, alnTranslate, fastaCheck, NAMEMAX, alnSvg} from '../lib/alignment.js';
 import {CODES, SEQ_TO, seqSend} from '../lib/seq.js';
 
 const EBI = 'https://www.ebi.ac.uk/jdispatcher/msa/clustalo';  /* Job Dispatcher, sinds 2024 het adres van de EBI-tools */
@@ -198,7 +211,7 @@ export default {
       gap: st['al-gap'] != null ? String(st['al-gap']) : '', from: st['al-from'] != null ? String(st['al-from']) : '', to: st['al-to'] != null ? String(st['al-to']) : '',
       xf: st['al-xf'] != null ? String(st['al-xf']) : 'fasta', gm: st['al-gm'] != null ? String(st['al-gm']) : 'ign',
       pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false,
-      ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, EBI, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
+      bw: st['al-bw'] != null ? String(st['al-bw']) : '60', ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, EBI, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
   },
   computed: {
     parsed() { return parseAlignment(this.txt); },
@@ -375,12 +388,50 @@ export default {
     /* klasse van cel (rij i, kolom c), '' zonder kleur */
     cellCls(i, c) { return this.tab === undefined ? '' : alnCls(this.tab, c, this.m.seqs[i][c]); },
     /* de kleur van een klasse in het huidige thema, uit de CSS gelezen (per thema en palet onthouden) */
-    shade(k) {
-      const key = (document.documentElement.getAttribute('data-theme') || '') + this.cbs + k;
+    shade(k, paper) {
+      const key = (document.documentElement.getAttribute('data-theme') || '') + this.cbs + k + !!paper;
       const memo = this.memo || (this.memo = {});
-      if (!(key in memo)) { const e = this.$refs.sw; e.className = 'aln-sw k-' + k; memo[key] = getComputedStyle(e).backgroundColor; }
+      if (!(key in memo)) { const e = this.$refs[paper ? 'psw' : 'sw']; e.className = 'aln-sw k-' + k; memo[key] = getComputedStyle(e).backgroundColor; }
       return memo[key];
     },
+    /* S188: een kleur op papier als #rrggbb (color-mix geeft color(srgb …), dat niet elk SVG-programma kent) */
+    hex(k) {
+      const memo = this.hexMemo || (this.hexMemo = {}), v = this.shade(k, true);
+      if (!(v in memo)) {
+        const x = (this.hexCv || (this.hexCv = document.createElement('canvas'))).getContext('2d', {willReadFrequently: true});
+        x.clearRect(0, 0, 1, 1); x.fillStyle = v; x.fillRect(0, 0, 1, 1);
+        memo[v] = '#' + [...x.getImageData(0, 0, 1, 1).data.slice(0, 3)].map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+      return memo[v];
+    },
+    /* de rijen in de volgorde van de viewer; nummers vanaf Vanaf kolom zolang er geen kolommen tussenuit vallen */
+    figure() {
+      const m = this.m, o = this.order, tab = this.tab, g = num(this.gap), f = Math.round(num(this.from));
+      const a = {names: o.map(i => m.names[i]), seqs: o.map(i => m.seqs[i]), len: m.len};
+      return alnSvg(a, {width: num(this.bw) || 60, start: !(g >= 0 && g < 100) && f > 1 ? f : 1,
+        fill: (i, c) => { const k = tab === undefined ? '' : alnCls(tab, c, a.seqs[i][c]); return k ? this.hex(k) : ''; }});
+    },
+    saveSvg() { saveBlob('uitlijning.svg', new Blob([this.figure().svg], {type: 'image/svg+xml'})).catch(() => {}); },
+    /* PNG: de SVG op dubbele resolutie op een canvas */
+    savePng() {
+      const f = this.figure(), u = URL.createObjectURL(new Blob([f.svg], {type: 'image/svg+xml'})), img = new Image();
+      img.onload = () => {
+        const cv = document.createElement('canvas'), x = cv.getContext('2d');
+        cv.width = f.w * 2; cv.height = f.h * 2; x.scale(2, 2); x.drawImage(img, 0, 0);
+        URL.revokeObjectURL(u);
+        cv.toBlob(b => { if (b) saveBlob('uitlijning.png', b).catch(() => {}); }, 'image/png');
+      };
+      img.src = u;
+    },
+    /* afdruk: A4, elk blok heel op één pagina, te brede blokken schalen mee */
+    printHtml() {
+      const f = this.figure(), m = this.m, t = this.t;
+      return '<!doctype html><meta charset="utf-8"><title>' + esc(t('Uitlijning')) + '</title><style>@page{size:A4;margin:12mm}body{font:12px system-ui,Arial,sans-serif;margin:0}'
+        + 'h1{font-size:16px;margin:0 0 4px}.i{margin:0 0 10px;color:#333}.r{break-inside:avoid;page-break-inside:avoid;margin:0 0 10px}svg{max-width:100%;height:auto;display:block}</style>'
+        + '<h1>' + esc(t('Uitlijning')) + '</h1><p class="i">' + esc(FMT[m.format] || '') + ' · ' + esc(t(m.names.length + ' sequenties')) + ' · ' + esc(t(m.len + ' kolommen')) + '</p>'
+        + f.blocks.map(b => '<div class="r">' + b + '</div>').join('');
+    },
+    print() { rpPrint(this.printHtml()); },
     /* de zichtbare cellen inkleuren, per run van dezelfde klasse één rechthoek */
     paint() {
       const cv = this.$refs.cv;

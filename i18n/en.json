@@ -5862,5 +5862,14 @@
 "Kopieer de schone FASTA en open Clustal Omega bij EBI.": "Copy the clean FASTA and open Clustal Omega at EBI.",
 "Plak de sequenties, kies DNA of eiwit en laat het uitvoerformaat op <b>ClustalW with character counts</b> staan.": "Paste the sequences, choose DNA or protein and leave the output format at <b>ClustalW with character counts</b>.",
 "Download na afloop de uitlijning (<b>.aln-clustal_num</b>) en open die hieronder; LabKit rekent de identiteitsmatrix zelf uit.": "When the job is done, download the alignment (<b>.aln-clustal_num</b>) and open it below; LabKit computes the identity matrix itself.",
-"Bewaar ook de <b>.pim</b> (identiteitsmatrix) en de <b>.dnd</b> (gidsboom, Newick) bij je resultaten.": "Also keep the <b>.pim</b> (identity matrix) and the <b>.dnd</b> (guide tree, Newick) with your results."
+"Bewaar ook de <b>.pim</b> (identiteitsmatrix) en de <b>.dnd</b> (gidsboom, Newick) bij je resultaten.": "Also keep the <b>.pim</b> (identity matrix) and the <b>.dnd</b> (guide tree, Newick) with your results.",
+"Figuur en afdrukken": "Figure and print",
+"Kolommen per blok": "Columns per block",
+"De figuur toont wat de viewer toont: bijgesneden of vertaald, in de gekozen volgorde en kleuren, op een witte achtergrond.": "The figure shows what the viewer shows: trimmed or translated, in the chosen order and colours, on a white background.",
+"Voor een stuk vul je Vanaf kolom en Tot en met kolom in onder Bijsnijden, vertalen en exporteren.": "For a region, fill in From column and Up to and including column under Trim, translate and export.",
+"SVG opslaan": "Save SVG",
+"PNG opslaan": "Save PNG",
+"Uitlijning": "Alignment",
+"{#} sequenties": "{#} sequences",
+"{#} kolommen": "{#} columns"
 }

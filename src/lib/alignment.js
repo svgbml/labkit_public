@@ -521,3 +521,41 @@ export function fastaCheck(text) {
   return {issues, n: out.length, type: alnType({seqs: out.map(r => r.seq)}),
     clean: out.map(r => '>' + r.h + '\n' + r.seq.match(/.{1,60}/g).join('\n') + '\n').join('')};
 }
+
+/* ---------- Figuur (S188) ----------
+   De uitlijning als SVG in blokken van `width` kolommen, zoals Clustal hem afdrukt: per blok een
+   regel met het nummer van de eerste en laatste kolom (vanaf `start`), de rijen met naam, en de
+   * : . -regel. fill(rij, kolom) geeft een achtergrondkleur of ''; elke run van dezelfde kleur is één
+   rechthoek. Elke letter staat op een vaste x (een x-lijst per regel), dus het lettertype verschuift niets.
+   Geeft {blocks: [svg per blok], svg: alles onder elkaar, w, h}. */
+const FCW = 8, FRH = 14, FGAP = 10;
+const xe = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+export function alnSvg(a, o = {}) {
+  const width = Math.max(1, Math.round(o.width) || 60), start = o.start || 1, fill = o.fill || (() => '');
+  const cons = alnConservation(a), names = a.names.map(n => (n.length > 30 ? n.slice(0, 29) + '…' : n));
+  const nw = (Math.max(4, ...names.map(n => n.length)) + 2) * FCW, W = nw + width * FCW + 6 * FCW;
+  const row = (y, s) => '<text x="' + [...s].map((_, k) => nw + k * FCW + FCW / 2).join(' ') + '" y="' + y + '" text-anchor="middle">' + xe(s) + '</text>';
+  const inner = [], base = y => y + FRH - 3;  /* tekstbasislijn in een rij */
+  for (let c0 = 0; c0 < a.len; c0 += width) {
+    const c1 = Math.min(a.len, c0 + width);
+    let o2 = '<text x="' + nw + '" y="' + base(0) + '" fill="#555">' + (start + c0) + '</text>'
+      + '<text x="' + (nw + (c1 - c0) * FCW + FCW) + '" y="' + base(0) + '" fill="#555">' + (start + c1 - 1) + '</text>';
+    a.seqs.forEach((s, i) => {
+      const y = (i + 1) * FRH;
+      for (let c = c0; c < c1;) {
+        const f = fill(i, c); let e = c + 1;
+        while (e < c1 && fill(i, e) === f) e++;
+        if (f) o2 += '<rect x="' + (nw + (c - c0) * FCW) + '" y="' + y + '" width="' + (e - c) * FCW + '" height="' + FRH + '" fill="' + f + '"/>';
+        c = e;
+      }
+      o2 += '<text x="0" y="' + base(y) + '">' + xe(names[i]) + '</text>' + row(base(y), s.slice(c0, c1));
+    });
+    inner.push({h: (a.seqs.length + 2) * FRH, body: o2 + row(base((a.seqs.length + 1) * FRH), cons.slice(c0, c1))});
+  }
+  const head = (w, h) => '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h
+    + '" font-family="ui-monospace,Consolas,Menlo,monospace" font-size="12" style="white-space:pre"><rect width="100%" height="100%" fill="#fff"/>';
+  let y = 0, all = '';
+  for (const b of inner) { all += '<g transform="translate(0,' + y + ')">' + b.body + '</g>'; y += b.h + FGAP; }
+  const H = Math.max(0, y - FGAP);
+  return {blocks: inner.map(b => head(W, b.h) + b.body + '</svg>'), svg: head(W, H) + all + '</svg>', w: W, h: H};
+}

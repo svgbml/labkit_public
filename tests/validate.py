@@ -1936,6 +1936,34 @@ def _(pg):
     pg.evaluate(ALN_RESET); pg.evaluate("__set('al-xf','fasta')"); pg.evaluate("__set('al-in','')")
     return out
 
+@case('Alignment bekijken', 'Figuur en afdruk: één A4-pagina', 'tests/fixtures/aln/hedgehog.aln (Biopython-testsuite, 5 sequenties, 447 kolommen), in het donkere thema; verwacht: 8 blokken van 60 kolommen (15 bij 30), de afdruk (A4, marge 12 mm) is één pagina, elk blok past in de breedte, de achtergrond is wit en elke kleur is licht genoeg voor zwarte tekst (relatieve luminantie > 0,4, WCAG 2.1); de laatste kolom van het laatste blok is 447')
+def _(pg):
+    import re
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'hedgehog.aln'
+    pg.evaluate("document.documentElement.setAttribute('data-theme','donker')")
+    pg.evaluate("__go('aln')"); pg.evaluate("t=>__set('al-in',t)", f.read_text(encoding='utf-8')); pg.wait_for_timeout(200); pg.evaluate(ALN_RESET)
+    pg.evaluate(ALN_OPEN, 'al-fig'); pg.evaluate("__set('al-bw','60')"); pg.wait_for_timeout(100)
+    blocks = pg.evaluate("__alnVm.figure().blocks.length"); html = pg.evaluate("__alnVm.printHtml()")
+    svg = pg.evaluate("__alnVm.figure().svg"); fills = set(re.findall(r'fill="(#[0-9a-f]{6})"', svg))
+    # PNG: saveBlob even afvangen en de afbeelding meten (dubbele resolutie van de SVG)
+    png = pg.evaluate("""()=>new Promise(r=>{const o=window.saveBlob; window.saveBlob=(n,b)=>{window.saveBlob=o; const i=new Image(); i.onload=()=>r([n,i.width,i.height]); i.src=URL.createObjectURL(b); return Promise.resolve()}; __alnVm.savePng()})""")
+    wh = pg.evaluate("[__alnVm.figure().w, __alnVm.figure().h]")
+    lum = lambda h: sum(w * ((c / 255) / 12.92 if c / 255 <= 0.04045 else ((c / 255 + 0.055) / 1.055) ** 2.4) for w, c in zip((0.2126, 0.7152, 0.0722), (int(h[i:i + 2], 16) for i in (1, 3, 5))))
+    pg.evaluate("__set('al-bw','30')"); pg.wait_for_timeout(100); b30 = pg.evaluate("__alnVm.figure().blocks.length")
+    pg.evaluate("__set('al-bw','60')"); pg.evaluate("document.documentElement.setAttribute('data-theme','')")
+    q = pg.context.browser.new_page(); q.set_content(html)
+    pdf = q.pdf(format='A4', prefer_css_page_size=True)
+    q.set_viewport_size({'width': 718, 'height': 1000})  # A4 min 2 x 12 mm marge
+    fit = q.evaluate("[...document.querySelectorAll('svg')].filter(s=>s.getBoundingClientRect().right<=document.body.clientWidth+0.5).length")
+    last = q.evaluate("[...document.querySelectorAll('svg')].pop().querySelectorAll('text')[1].textContent"); q.close()
+    pg.evaluate("__set('al-in','')")
+    return [('blokken van 60 kolommen', blocks, 8, 0), ('blokken van 30 kolommen', b30, 15, 0),
+            ('pagina\'s in de afdruk', len(re.findall(rb'/Type\s*/Page[^s]', pdf)), 1, 0),
+            ('blokken die in de breedte passen', fit, 8, 0), ('laatste kolom', int(last), 447, 0),
+            ('witte achtergrond', 1 if '<rect width="100%" height="100%" fill="#fff"/>' in svg else 0, 1, 0),
+            ('PNG: breedte (px)', png[1], wh[0] * 2, 0), ('PNG: hoogte (px)', png[2], wh[1] * 2, 0),
+            ('kleuren met luminantie onder 0,4', sum(lum(h) <= 0.4 for h in fills), 0, 0)]
+
 @case('Chromatogram', 'ABIF-bestand 3730.ab1 inlezen', 'Biopython 1.84, Tests/test_SeqIO_AbiIO.py (data_3730) en het bestand zelf (tests/fixtures/3730.ab1, Applied Biosystems 3730): monster 226032_C-ME-18_pCAGseqF, 1165 basen, eerste 12 basen GGGCGAGCKYYA; ABIF-indeling volgens de Applied Biosystems ABIF File Format Specification (2009)')
 def _(pg):
     pg.evaluate("__go('sanger')")
