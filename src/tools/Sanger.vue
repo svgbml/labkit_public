@@ -261,6 +261,18 @@
         </div>
         <lk-note v-for="(e, i) in edErr" :key="i" :kind="edOk ? 'ok' : 'bad'">{{ e }}</lk-note>
       </details>
+      <details class="panel" id="sg-casep">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Voorbeeld en case bewaren') }}</summary>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('Het voorbeeld is volledig verzonnen: oefenreads, een genotypeblad en uitkomsten die bij geen echt persoon horen. Zo kun je het hele pad volgen zonder sequencer.') }}</p>
+        <div class="row" style="gap:6px;flex-wrap:wrap">
+          <button type="button" id="sg-example" @click="loadExample">{{ t('Voorbeeldcase laden (verzonnen)') }}</button>
+          <button type="button" id="sg-case-save" @click="saveCase">{{ t('Case bewaren als bestand') }}</button>
+        </div>
+        <div class="f" style="margin-top:10px"><label for="sg-case-file">{{ t('Case openen') }}</label>
+          <input type="file" id="sg-case-file" accept=".json" @change="pickCase"></div>
+        <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Eén bestand met de reads (met trace en bewerkingen), de tweede read en de batch, de instellingen, de referentie en assay, het genotypeblad en de uitkomsten.') }}</p>
+        <lk-note v-if="caseMsg" :kind="caseOk ? 'ok' : 'bad'">{{ caseMsg }}</lk-note>
+      </details>
       <details class="panel" id="sg-bp" :open="batch.length > 0">
         <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Batch (veel bestanden)') }}</summary>
         <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('Kies of sleep meerdere .ab1- of FASTA-bestanden: elk is een monster. Ze worden tegen de referentie uitgelijnd met dezelfde drempels als hierboven.') }}</p>
@@ -297,6 +309,7 @@ import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 import {parseRef, alignRead, variants, parseAssay, assayJson, snpCalls, confirm, TEACH, teachReads, DEC} from '../lib/sangeralign.js';
 import {callSample, genotypeRows, overlayStrips} from '../lib/sangerbatch.js';
+import {makeCase, parseCase, exampleSample, EXAMPLE_ID} from '../lib/sangercase.js';
 import {RESULT_GROUPS, parseProb, parseResultPaste, summarize, toCsv, PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate, autofill, mergeCalls, naReport} from '../lib/hiris.js';
 import {SEQ_TO} from '../lib/seq.js';
 
@@ -350,7 +363,7 @@ export default {
       edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1),
       refText: st['sg-ref'] != null ? String(st['sg-ref']) : '', assayKey: st['sg-assay'] != null ? String(st['sg-assay']) : '', own: jget(AKEY, []),
       read2: jget('sg-read2', null) ? markRaw(jget('sg-read2', null)) : null, paste2: st['sg-paste2'] != null ? String(st['sg-paste2']) : '',
-      hsCopied: '', rsIdx: 0, rsPaste: '', rsMsg: '', rsThr: st['sg-rs-thr'] != null ? String(st['sg-rs-thr']) : NL(0.7, 1), batch: [], hs: (h => { h.samples = h.samples.map(x => Object.assign({res: {}, notes: {}}, x)); return h; })(Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {}))), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
+      caseMsg: '', caseOk: false, hsCopied: '', rsIdx: 0, rsPaste: '', rsMsg: '', rsThr: st['sg-rs-thr'] != null ? String(st['sg-rs-thr']) : NL(0.7, 1), batch: [], hs: (h => { h.samples = h.samples.map(x => Object.assign({res: {}, notes: {}}, x)); return h; })(Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {}))), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
   },
   computed: {
     HT() { return HT; },
@@ -1005,6 +1018,39 @@ export default {
     },
     fillRead() { this.putSample(this.m.r.name || this.t('Monster'), mergeCalls(this.snpc, this.snpc2)); },
     fillBatch() { for (const x of this.bsamples) this.putSample(x.name, x.calls); },
+    /* ---------- voorbeeld en case (S168) ---------- */
+    /* het verzonnen voorbeeld: oefenpanel met oefenreads, daarbij een verzonnen blad en verzonnen uitkomsten */
+    loadExample() {
+      this.assayKey = 'oefen'; this.teach();
+      const x = exampleSample(), i = this.hs.samples.findIndex(y => y.id === x.id);
+      this.hs.panel = 'hirisplexs';
+      if (i >= 0) this.hs.samples.splice(i, 1, x); else this.hs.samples.push(x);
+      this.rsIdx = this.hs.samples.findIndex(y => y.id === EXAMPLE_ID);
+      this.caseMsg = this.t('Voorbeeld geladen: de oefenreads, een verzonnen genotypeblad en verzonnen uitkomsten.'); this.caseOk = true;
+    },
+    saveCase() {
+      const c = makeCase({read: this.read ? Object.assign({}, this.read, {edits: this.edits}) : null, read2: this.read2, batch: this.batch.map(b => b.r),
+        win: this.win, qthr: this.qthr, hthr: this.hthr, refText: this.refText, assay: this.assay, assayKey: this.assayKey, sheet: JSON.parse(JSON.stringify(this.hs))}, typeof APPVER === 'string' ? APPVER : '');
+      c.paste = this.paste; c.paste2 = this.paste2;
+      const d = new Date(), stamp = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      saveBlob('sanger-case-' + stamp + '.json', new Blob([JSON.stringify(c)], {type: 'application/json'})).catch(() => {});
+    },
+    async pickCase(e) {
+      const f = e.target.files[0]; if (!f) return;
+      const r = parseCase(await f.text()); e.target.value = '';
+      if (!r.ok) { this.caseOk = false; this.caseMsg = this.t(r.err); return; }
+      const c = r.c;
+      this.win = String(c.win || '10'); this.qthr = String(c.qthr || '20'); this.hthr = String(c.hthr || NL(0.2, 1));
+      this.edits = c.read && c.read.edits ? c.read.edits : {}; this.sel = null; this.rng = null;
+      this.read = c.read ? markRaw(c.read) : null; jset('sg-read', c.read);
+      this.read2 = c.read2 ? markRaw(c.read2) : null; jset('sg-read2', c.read2);
+      this.batch = c.batch.map(x => ({id: ++this.bid, r: markRaw(x)}));
+      if (c.assay && String(c.assayKey).startsWith('eigen:')) this.storeAssay(c.assay); else this.assayKey = c.assayKey === 'oefen' ? 'oefen' : '';
+      this.refText = c.refText || ''; this.paste = c.paste || ''; this.paste2 = c.paste2 || '';
+      this.hs.panel = c.sheet.panel; this.hs.samples = c.sheet.samples; this.rsIdx = 0;
+      this.poke('sg-win', 'sg-q', 'sg-het', 'sg-ref', 'sg-paste', 'sg-paste2', 'sg-assay');
+      this.caseOk = true; this.caseMsg = this.t('Case geopend.');
+    },
     clear() {
       this.read = null; this.edits = {}; this.sel = null; this.rng = null; this.paste = ''; this.err = '';
       jset('sg-read', null);

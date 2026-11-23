@@ -1948,6 +1948,24 @@ def _(pg):
     pg.evaluate("()=>{__sgVm.clear();__set('sg-assay','');__set('sg-ref','')}")
     return out
 
+SG_HEAD = "SampleID,rs312262906_A,rs11547464_A,rs885479_T,rs1805008_T,rs1805005_T,rs1805006_A,rs1805007_T,rs1805009_C,rs201326893_A,rs2228479_A,rs1110400_C,rs28777_C,rs16891982_C,rs12821256_G,rs4959270_A,rs12203592_T,rs1042602_T,rs1800407_A,rs2402130_G,rs12913832_T,rs2378249_C,rs12896399_T,rs1393350_T,rs683_G,rs3114908_T,rs1800414_C,rs10756819_G,rs2238289_C,rs17128291_C,rs6497292_C,rs1129038_G,rs1667394_C,rs1126809_A,rs1470608_A,rs1426654_G,rs6119471_C,rs1545397_T,rs6059655_T,rs12441727_A,rs3212355_A,rs8051733_C"
+
+@case('Chromatogram', 'HIrisPlex-S-genotypeblad: koptekst, paneelwissel en voorbeeld', 'Lijst, volgorde en te tellen allel van de 41 SNPs volgens inst/extdata/hirisplex_panels.csv van het R-pakket hirisplexr 0.1.0 (CRAN), dat de webtool van het Erasmus MC (hirisplex.erasmusmc.nl) en de handleiding volgt; HIrisPlex = de eerste 24, IrisPlex = zes SNPs. De koptekst van het sjabloon van de webtool zelf is niet gecontroleerd')
+def _(pg):
+    pg.evaluate("__go('sanger')")
+    pg.evaluate("()=>{__sgVm.clear();__sgVm.hs.samples=[];__sgVm.loadExample()}")
+    pg.wait_for_function("()=>__sgVm.hs.samples.length===1")
+    v = pg.evaluate("()=>{const c=__sgVm.sheetCsv().split('\\n');return {h:c[0],n:c[1].split(',').length,r:__sgVm.hsSnps.length,ok:!__sgVm.hsMsgs.some(m=>m[0]==='bad'||/leeg|empty/.test(m[1]))}}")
+    out = [('koptekst van de export (41 SNPs)', 1 if v['h'] == SG_HEAD else 0, 1, 0), ('kolommen in de monsterrij', v['n'], 42, 0), ('rijen in het blad (HIrisPlex-S)', v['r'], 41, 0),
+           ('voorbeeld zonder lege of ongeldige cellen', 1 if v['ok'] else 0, 1, 0)]
+    for panel, n in (('hirisplex', 24), ('irisplex', 6)):
+        pg.evaluate("p=>{__sgVm.hs.panel=p}", panel)
+        pg.wait_for_function("n=>__sgVm.hsSnps.length===n", arg=n)
+        h = pg.evaluate("__sgVm.sheetCsv().split('\\n')[0]")
+        out.append((f'koptekst {panel} ({n} SNPs)', 1 if h.count(',') == n and (panel != 'hirisplex' or h == ','.join(SG_HEAD.split(',')[:25])) else 0, 1, 0))
+    pg.evaluate("()=>{__sgVm.hs.panel='hirisplexs';__sgVm.hs.samples=[];__sgVm.clear();__set('sg-assay','');__set('sg-ref','')}")
+    return out
+
 @case('Restrictiedigestie', 'In-silico digestie van pFA6a-kanMX6', 'Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa')
 def _(pg):
     fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')

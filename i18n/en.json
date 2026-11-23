@@ -5911,5 +5911,16 @@
 "Zeer bleek": "Very pale",
 "Bleek": "Pale",
 "Donker tot zwart": "Dark to black",
-"Haartint": "Hair shade"
+"Haartint": "Hair shade",
+"Voorbeeld en case bewaren": "Example and saving a case",
+"Het voorbeeld is volledig verzonnen: oefenreads, een genotypeblad en uitkomsten die bij geen echt persoon horen. Zo kun je het hele pad volgen zonder sequencer.": "The example is entirely invented: practice reads, a genotype sheet and results that belong to no real person. This lets you follow the whole path without a sequencer.",
+"Voorbeeldcase laden (verzonnen)": "Load the example case (invented)",
+"Case bewaren als bestand": "Save the case as a file",
+"Case openen": "Open a case",
+"Eén bestand met de reads (met trace en bewerkingen), de tweede read en de batch, de instellingen, de referentie en assay, het genotypeblad en de uitkomsten.": "One file with the reads (with trace and edits), the second read and the batch, the settings, the reference and assay, the genotype sheet and the results.",
+"Voorbeeld geladen: de oefenreads, een verzonnen genotypeblad en verzonnen uitkomsten.": "Example loaded: the practice reads, an invented genotype sheet and invented results.",
+"Case geopend.": "Case opened.",
+"Dit is geen geldig JSON-bestand.": "This is not a valid JSON file.",
+"Dit bestand is geen Sanger-case van LabKit.": "This file is not a LabKit Sanger case.",
+"De reads in dit bestand zijn onvolledig.": "The reads in this file are incomplete."
 }
