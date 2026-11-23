@@ -360,15 +360,45 @@ export function alnTrim(a, o) {
 }
 
 /* ---------- Schrijven (S177): FASTA, Clustal en PHYLIP ---------- */
-export const ALN_OUT = {fasta: ['FASTA', 'fasta'], clustal: ['Clustal', 'aln'], phylip: ['PHYLIP', 'phy']};
+export const ALN_OUT = {fasta: ['FASTA', 'fasta'], clustal: ['Clustal', 'aln'], phylip: ['PHYLIP', 'phy'],
+  nexus: ['NEXUS', 'nex'], msf: ['GCG MSF', 'msf'], pir: ['PIR/NBRF', 'pir']};
 const nm = n => n.replace(/\s+/g, '_');
+/* GCG-controlegetal van één sequentie (GCG Wisconsin Package; zoals Bio.SeqUtils.CheckSum.gcg) */
+export function gcgCheck(s) {
+  let t = 0;
+  for (let i = 0; i < s.length; i++) t += (i % 57 + 1) * s.toUpperCase().charCodeAt(i);
+  return t % 10000;
+}
+/* NEXUS-naam: tussen aanhalingstekens zodra er iets anders dan letters, cijfers of een punt in zit
+   (de lezer maakt van een kale _ een spatie) */
+const nxQ = n => (/^[A-Za-z0-9.]+$/.test(n) ? n : "'" + n.replace(/'/g, "''") + "'");
+/* S177, S187: wegschrijven in elk formaat dat parseAlignment leest; terug inlezen geeft dezelfde
+   namen (spaties worden _) en sequenties */
 export function alnWrite(a, fmt) {
-  const names = a.names.map(nm), NL = '\n';
-  if (fmt === 'fasta') return a.names.map((n, i) => '>' + n + NL + (a.seqs[i].match(/.{1,60}/g) || ['']).join(NL)).join(NL) + NL;
+  const names = a.names.map(nm), NL = '\n', nt = alnType(a) === 'nt';
+  const blocks = (s, n) => s.match(new RegExp('.{1,' + n + '}', 'g')) || [''];
+  if (fmt === 'fasta') return names.map((n, i) => '>' + n + NL + blocks(a.seqs[i], 60).join(NL)).join(NL) + NL;
+  if (fmt === 'pir') return names.map((n, i) => '>' + (nt ? 'DL' : 'P1') + ';' + n + NL + n + NL + blocks(a.seqs[i] + '*', 60).join(NL)).join(NL) + NL;
   const w = Math.max(10, ...names.map(n => n.length)) + 1;
   if (fmt === 'phylip') return ' ' + a.seqs.length + ' ' + a.len + NL + names.map((n, i) => n.padEnd(w) + a.seqs[i]).join(NL) + NL;
+  if (fmt === 'nexus') {
+    const q = names.map(nxQ), qw = Math.max(...q.map(n => n.length)) + 1;
+    return '#NEXUS' + NL + NL + 'BEGIN DATA;' + NL + '  DIMENSIONS NTAX=' + a.seqs.length + ' NCHAR=' + a.len + ';' + NL
+      + '  FORMAT DATATYPE=' + (nt ? 'DNA' : 'PROTEIN') + ' MISSING=? GAP=-;' + NL + '  MATRIX' + NL
+      + q.map((n, i) => '    ' + n.padEnd(qw) + a.seqs[i]).join(NL) + NL + '  ;' + NL + 'END;' + NL;
+  }
+  if (fmt === 'msf') {
+    /* gaten als '.', blokken van 50 in groepjes van 10, zoals GCG */
+    const g = a.seqs.map(s => s.replace(/-/g, '.')), ck = g.map(gcgCheck), tot = ck.reduce((x, y) => x + y, 0) % 10000;
+    let o = '!!' + (nt ? 'NA' : 'AA') + '_MULTIPLE_ALIGNMENT 1.0' + NL + NL + '  uitlijning.msf  MSF: ' + a.len + '  Type: ' + (nt ? 'N' : 'P') + '  Check: ' + tot + ' ..' + NL + NL
+      + names.map((n, i) => ' Name: ' + n.padEnd(w) + 'Len: ' + String(a.len).padStart(6) + '  Check: ' + String(ck[i]).padStart(4) + '  Weight: 1.00').join(NL) + NL + NL + '//' + NL;
+    for (let c = 0; c < a.len; c += 50) o += NL + names.map((n, i) => '  ' + n.padEnd(w) + blocks(g[i].slice(c, c + 50), 10).join(' ')).join(NL) + NL;
+    return o;
+  }
+  /* Clustal, met de * : . -regel onder elk blok zoals Clustal hem schrijft (alnConservation) */
+  const cons = alnConservation(a);
   let o = 'CLUSTAL multiple sequence alignment' + NL + NL;
-  for (let c = 0; c < a.len || !c; c += 60) o += names.map((n, i) => n.padEnd(w) + a.seqs[i].slice(c, c + 60)).join(NL) + NL + NL;
+  for (let c = 0; c < a.len || !c; c += 60) o += names.map((n, i) => n.padEnd(w) + a.seqs[i].slice(c, c + 60)).join(NL) + NL + (' '.repeat(w) + cons.slice(c, c + 60)).trimEnd() + NL + NL;
   return o;
 }
 
@@ -452,4 +482,80 @@ export function alnTranslate(a, frame, code) {
     return p;
   });
   return {...a, seqs, len: seqs.length ? seqs[0].length : 0, cons: ''};
+}
+
+/* ---------- FASTA klaarmaken voor Clustal Omega (S186) ----------
+   Controleert losse (niet uitgelijnde) sequenties voordat je ze uploadt en geeft een schone FASTA
+   terug. issues: {k, v} met k = eol (Windows- of oude Mac-regeleinden), dup (zelfde eerste woord
+   van de kop: EBI gebruikt dat als naam), bad (andere tekens dan letters), mixed (DNA én eiwit),
+   long (naam langer dan NAMEMAX), empty (kop zonder sequentie), noname (tekst vóór de eerste kop).
+   De schone FASTA: hoofdletters, alleen letters (spaties en cijfers zoals in GenBank vallen weg),
+   lege sequenties en tekst zonder kop weggelaten, een dubbele naam krijgt _2, _3, regels van 60, LF. */
+export const NAMEMAX = 30;  /* daarboven kappen sommige programma's en formaten af (PHYLIP al na 10) */
+export function fastaCheck(text) {
+  const src = String(text || '').replace(/^﻿/, ''), issues = [], recs = [];
+  if (/\r/.test(src)) issues.push({k: 'eol'});
+  let pre = '';
+  for (const ln of src.split(/\r\n|\r|\n/)) {
+    if (ln.startsWith('>')) { const h = ln.slice(1).trim(); recs.push({h, id: h.split(/\s+/)[0] || '', raw: ''}); }
+    else if (recs.length) recs[recs.length - 1].raw += ln;
+    else pre += ln;
+  }
+  if (/\S/.test(pre)) issues.push({k: 'noname'});
+  const bad = new Set(), seen = {}, dup = new Set(), long = [], empty = [], out = [];
+  for (const r of recs) {
+    const s = r.raw.replace(/[\s\d]/g, '');
+    for (const c of s) if (!/[A-Za-z]/.test(c)) bad.add(c);
+    if (r.id.length > NAMEMAX) long.push(r.id);
+    if (!s) { empty.push(r.id); continue; }
+    const k = seen[r.id] = (seen[r.id] || 0) + 1;
+    out.push({h: k > 1 ? r.id + '_' + k + r.h.slice(r.id.length) : r.h, seq: s.replace(/[^A-Za-z]/g, '').toUpperCase()});
+  }
+  recs.forEach((r, i) => { if (recs.findIndex(q => q.id === r.id) < i) dup.add(r.id); });
+  if (dup.size) issues.push({k: 'dup', v: [...dup]});
+  if (bad.size) issues.push({k: 'bad', v: [...bad]});
+  if (long.length) issues.push({k: 'long', v: long});
+  if (empty.length) issues.push({k: 'empty', v: empty});
+  const types = new Set(out.map(r => alnType({seqs: [r.seq]})));
+  if (types.has('nt') && types.has('aa')) issues.push({k: 'mixed'});
+  return {issues, n: out.length, type: alnType({seqs: out.map(r => r.seq)}),
+    clean: out.map(r => '>' + r.h + '\n' + r.seq.match(/.{1,60}/g).join('\n') + '\n').join('')};
+}
+
+/* ---------- Figuur (S188) ----------
+   De uitlijning als SVG in blokken van `width` kolommen, zoals Clustal hem afdrukt: per blok een
+   regel met het nummer van de eerste en laatste kolom (vanaf `start`), de rijen met naam, en de
+   * : . -regel. fill(rij, kolom) geeft een achtergrondkleur of ''; elke run van dezelfde kleur is één
+   rechthoek. Elke letter staat op een vaste x (een x-lijst per regel), dus het lettertype verschuift niets.
+   Geeft {blocks: [svg per blok], svg: alles onder elkaar, w, h}. */
+const FCW = 8, FRH = 14, FGAP = 10;
+const xe = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+export function alnSvg(a, o = {}) {
+  const width = Math.max(1, Math.round(o.width) || 60), start = o.start || 1, fill = o.fill || (() => '');
+  const cons = alnConservation(a), names = a.names.map(n => (n.length > 30 ? n.slice(0, 29) + '…' : n));
+  const nw = (Math.max(4, ...names.map(n => n.length)) + 2) * FCW, W = nw + width * FCW + 6 * FCW;
+  const row = (y, s) => '<text x="' + [...s].map((_, k) => nw + k * FCW + FCW / 2).join(' ') + '" y="' + y + '" text-anchor="middle">' + xe(s) + '</text>';
+  const inner = [], base = y => y + FRH - 3;  /* tekstbasislijn in een rij */
+  for (let c0 = 0; c0 < a.len; c0 += width) {
+    const c1 = Math.min(a.len, c0 + width);
+    let o2 = '<text x="' + nw + '" y="' + base(0) + '" fill="#555">' + (start + c0) + '</text>'
+      + '<text x="' + (nw + (c1 - c0) * FCW + FCW) + '" y="' + base(0) + '" fill="#555">' + (start + c1 - 1) + '</text>';
+    a.seqs.forEach((s, i) => {
+      const y = (i + 1) * FRH;
+      for (let c = c0; c < c1;) {
+        const f = fill(i, c); let e = c + 1;
+        while (e < c1 && fill(i, e) === f) e++;
+        if (f) o2 += '<rect x="' + (nw + (c - c0) * FCW) + '" y="' + y + '" width="' + (e - c) * FCW + '" height="' + FRH + '" fill="' + f + '"/>';
+        c = e;
+      }
+      o2 += '<text x="0" y="' + base(y) + '">' + xe(names[i]) + '</text>' + row(base(y), s.slice(c0, c1));
+    });
+    inner.push({h: (a.seqs.length + 2) * FRH, body: o2 + row(base((a.seqs.length + 1) * FRH), cons.slice(c0, c1))});
+  }
+  const head = (w, h) => '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h
+    + '" font-family="ui-monospace,Consolas,Menlo,monospace" font-size="12" style="white-space:pre"><rect width="100%" height="100%" fill="#fff"/>';
+  let y = 0, all = '';
+  for (const b of inner) { all += '<g transform="translate(0,' + y + ')">' + b.body + '</g>'; y += b.h + FGAP; }
+  const H = Math.max(0, y - FGAP);
+  return {blocks: inner.map(b => head(W, b.h) + b.body + '</svg>'), svg: head(W, H) + all + '</svg>', w: W, h: H};
 }

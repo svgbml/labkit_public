@@ -9,13 +9,47 @@
      blijft een uitlijning van duizenden kolommen vloeiend. -->
 <template>
   <div>
+  <!-- S186: losse sequenties controleren en als schone FASTA klaarzetten voor Clustal Omega -->
+  <details id="al-prep" class="panel" style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Sequenties klaarmaken voor Clustal Omega') }}</summary>
+    <div class="grid2" style="margin-top:12px">
+      <div class="f"><label for="al-raw">{{ t('Losse sequenties (FASTA)') }}</label>
+        <textarea id="al-raw" class="mono" rows="6" v-model="raw" spellcheck="false" wrap="off"></textarea>
+        <!-- een bestand houdt zijn regeleinden; geplakte tekst niet (een textarea maakt er LF van) -->
+        <input type="file" id="al-rawf" accept=".fa,.fasta,.fas,.fna,.faa,.txt" :aria-label="t('Bestand openen')" style="margin-top:8px" @change="e => readFile(e, 'raw')"></div>
+      <div id="al-prep-out">
+        <lk-note v-if="!raw.trim()" kind="info">{{ t('Plak de sequenties die je wilt uitlijnen, in FASTA: elke sequentie onder een eigen kopregel.') }}</lk-note>
+        <template v-else>
+          <lk-kv :rows="prepRows"/>
+          <lk-note v-for="(w, i) in prepNotes" :key="i" :kind="w[0]">{{ w[1] }}</lk-note>
+          <lk-note v-if="!prep.issues.length && prep.n" kind="ok">{{ t('Geen problemen gevonden.') }}</lk-note>
+          <div class="row" style="margin-top:10px">
+            <button type="button" class="primary" id="al-prep-cp" :disabled="!prep.n" @click="copyPrep">{{ t('Schone FASTA kopiëren') }}</button>
+            <button type="button" id="al-prep-sv" :disabled="!prep.n" @click="savePrep">{{ t('Opslaan als .fasta') }}</button>
+            <span v-if="copied" style="font-size:13px;color:var(--muted)">{{ copied }}</span>
+          </div>
+        </template>
+      </div>
+    </div>
+    <!-- S187: zo gaat het naar EBI en wat je terugbrengt -->
+    <div id="al-ebi" style="margin-top:12px">
+      <lk-steps :steps="ebiSteps"/>
+      <div class="row" style="margin-top:8px"><button type="button" id="al-ebi-go" @click="openExt(EBI)">{{ t('Clustal Omega bij EBI openen') }}</button></div>
+    </div>
+  </details>
   <div class="grid2">
     <div class="panel">
       <div class="f"><label for="al-in">{{ t('Uitlijning (Clustal, FASTA, PHYLIP, NEXUS, MSF of PIR)') }}</label>
         <textarea id="al-in" class="mono" rows="8" v-model="txt" spellcheck="false" wrap="off"></textarea></div>
       <div class="row" style="margin-top:8px">
-        <input type="file" id="al-file" accept=".aln,.clustal,.fa,.fasta,.fas,.afa,.phy,.phylip,.nex,.nexus,.msf,.pir,.txt" :aria-label="t('Bestand openen')" @change="onFile">
+        <input type="file" id="al-file" accept=".aln,.aln-clustal_num,.clustal_num,.clustal,.fa,.fasta,.fas,.afa,.phy,.phylip,.nex,.nexus,.msf,.pir,.txt" :aria-label="t('Bestand openen')" @change="onFile">
       </div>
+      <!-- S189: uitlijning, instellingen, volgorde en open panelen in één bestand -->
+      <div class="row" style="margin-top:8px">
+        <button type="button" id="al-proj-sv" :disabled="!txt.trim() && !raw.trim()" @click="saveProj">{{ t('Project opslaan') }}</button>
+        <label for="al-proj" style="font-size:13px">{{ t('Project openen') }}</label>
+        <input type="file" id="al-proj" accept=".labkitaln,application/json" @change="openProj">
+      </div>
+      <div id="al-proj-err"><lk-note v-if="projErr" kind="bad">{{ projErr }}</lk-note></div>
       <div class="fields" style="margin-top:12px">
         <div class="f"><label for="al-col">{{ t('Kleuren') }}</label>
           <select id="al-col" v-model="col">
@@ -118,11 +152,24 @@
       <lk-table v-else :cols="regCols" :rows="regRows"/>
     </div>
   </details>
+  <!-- S188: figuur (SVG/PNG) en afdruk van wat de viewer toont -->
+  <details v-if="m.format && m.names.length" id="al-fig" class="panel" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Figuur en afdrukken') }}</summary>
+    <div class="fields" style="margin-top:12px">
+      <lk-field v-model="bw" :label="t('Kolommen per blok')" for-id="al-bw" inputmode="numeric"/>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('De figuur toont wat de viewer toont: bijgesneden of vertaald, in de gekozen volgorde en kleuren, op een witte achtergrond.') }} {{ t('Voor een stuk vul je Vanaf kolom en Tot en met kolom in onder Bijsnijden, vertalen en exporteren.') }}</p>
+    <div class="row" style="margin-top:10px">
+      <button type="button" id="al-svg" @click="saveSvg">{{ t('SVG opslaan') }}</button>
+      <button type="button" id="al-png" @click="savePng">{{ t('PNG opslaan') }}</button>
+      <button type="button" id="al-print" @click="print">{{ t('Afdrukken') }}</button>
+    </div>
+  </details>
   <!-- overzicht van de hele uitlijning: aandeel gaten per stukje, het kader is wat in beeld is; klikken springt erheen (S174) -->
   <canvas v-show="m.names.length" id="al-ovw" ref="ov" class="aln-ovw" data-xl="1" :title="t('Gaten over de hele uitlijning; klik om erheen te gaan')" @click="onOv"></canvas>
   <div v-show="m.names.length" id="al-view" ref="view" :class="['aln-view', {'aln-cbs': cbs}]" :style="{height: viewH + 'px'}" @scroll="onScroll">
     <span ref="probe" class="aln-mono aln-probe" aria-hidden="true">{{ 'M'.repeat(50) }}</span>
     <span ref="sw" class="aln-sw" aria-hidden="true"></span>
+    <span class="aln-paper" aria-hidden="true"><span ref="psw" class="aln-sw"></span></span>
     <div class="aln-sizer" :style="{width: g.W + 'px', height: g.H + 'px'}">
       <div class="aln-pin" :style="{width: vw + 'px', height: vh + 'px'}" @click="onCell">
         <!-- de kleuren staan op één canvas onder de tekst: duizenden gekleurde <span>s per
@@ -151,9 +198,11 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile, alnConsensus, alnMotif, alnIdentity, alnDiff,
-  alnTrim, alnWrite, ALN_OUT, alnPair, alnPim, pimWrite, alnConserved, alnTranslate} from '../lib/alignment.js';
+  alnTrim, alnWrite, ALN_OUT, alnPair, alnPim, pimWrite, alnConserved, alnTranslate, fastaCheck, NAMEMAX, alnSvg} from '../lib/alignment.js';
 import {CODES, SEQ_TO, seqSend} from '../lib/seq.js';
 
+const PROJ = 'labkitaln';  /* kenmerk van een projectbestand, zoals .labkitgel bij de gelfoto-editor */
+const EBI = 'https://www.ebi.ac.uk/jdispatcher/msa/clustalo';  /* Job Dispatcher, sinds 2024 het adres van de EBI-tools */
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
 const PIMMAX = 60;  /* sequenties in de matrix: 60 x 60 cellen is wat een scherm nog toont */
@@ -163,17 +212,44 @@ export default {
   name: 'Aln',
   data() {
     const st = typeof storeGet === 'function' ? storeGet() : {};
-    return {txt: st['al-in'] != null ? String(st['al-in']) : '', col: st['al-col'] != null ? String(st['al-col']) : 'auto',
+    return {txt: st['al-in'] != null ? String(st['al-in']) : '', raw: st['al-raw'] != null ? String(st['al-raw']) : '', copied: '', projErr: '', col: st['al-col'] != null ? String(st['al-col']) : 'auto',
       cbs: !!st['al-cbs'], sel: null, hand: null,
       motif: st['al-motif'] != null ? String(st['al-motif']) : '', ord: st['al-ord'] != null ? String(st['al-ord']) : 'file', ref: st['al-ref'] != null ? String(st['al-ref']) : '', thr: st['al-thr'] != null ? String(st['al-thr']) : '50',
       tr: st['al-tr'] != null ? String(st['al-tr']) : '0', code: st['al-code'] != null ? String(st['al-code']) : '1',
       gap: st['al-gap'] != null ? String(st['al-gap']) : '', from: st['al-from'] != null ? String(st['al-from']) : '', to: st['al-to'] != null ? String(st['al-to']) : '',
       xf: st['al-xf'] != null ? String(st['al-xf']) : 'fasta', gm: st['al-gm'] != null ? String(st['al-gm']) : 'ign',
       pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false,
-      ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
+      bw: st['al-bw'] != null ? String(st['al-bw']) : '60', ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, EBI, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
   },
   computed: {
     parsed() { return parseAlignment(this.txt); },
+    /* S186 */
+    prep() { return fastaCheck(this.raw); },
+    prepRows() {
+      const p = this.prep, t = this.t;
+      return [[t('Sequenties in de schone FASTA'), N(p.n)], [t('Type'), p.type === 'nt' ? t('DNA/RNA') : p.type === 'aa' ? t('eiwit') : '–']];
+    },
+    ebiSteps() {
+      const h = this.tHtml;
+      return [h('Kopieer de schone FASTA en open Clustal Omega bij EBI.'),
+        h('Plak de sequenties, kies DNA of eiwit en laat het uitvoerformaat op <b>ClustalW with character counts</b> staan.'),
+        h('Download na afloop de uitlijning (<b>.aln-clustal_num</b>) en open die hieronder; LabKit rekent de identiteitsmatrix zelf uit.'),
+        h('Bewaar ook de <b>.pim</b> (identiteitsmatrix) en de <b>.dnd</b> (gidsboom, Newick) bij je resultaten.')];
+    },
+    /* per controle een of twee zinnen, elk een eigen sleutel; namen en tekens van de gebruiker via uv() */
+    prepNotes() {
+      const t = this.t, L = v => uv(v.slice(0, 5).join(', ') + (v.length > 5 ? ', …' : ''));
+      const msg = {
+        eol: ['info', () => [t('Windows- of Mac-regeleinden gevonden; de schone FASTA gebruikt gewone regeleinden.')]],
+        dup: ['bad', i => [t('Dezelfde naam komt vaker voor: ' + L(i.v) + '.'), t('EBI gebruikt het eerste woord van de kopregel als naam; de schone FASTA zet er _2, _3 achter.')]],
+        bad: ['warn', i => [t('Tekens die geen letter zijn: ' + L(i.v) + '.'), t('Ze zijn uit de schone FASTA gehaald.')]],
+        mixed: ['bad', () => [t('DNA en eiwit door elkaar; lijn ze apart uit.')]],
+        long: ['warn', i => [t('Namen langer dan ' + NAMEMAX + ' tekens: ' + L(i.v) + '.'), t('Sommige programma\'s en formaten kappen ze af (PHYLIP al na 10 tekens).')]],
+        empty: ['warn', i => [t('Kopregel zonder sequentie: ' + L(i.v) + '.'), t('Die is weggelaten.')]],
+        noname: ['warn', () => [t('Tekst vóór de eerste kopregel is weggelaten.')]]
+      };
+      return this.prep.issues.map(i => [msg[i.k][0], msg[i.k][1](i).join(' ')]);
+    },
     isNt() { return alnType(this.parsed) === 'nt'; },
     /* wat de viewer toont: de uitlijning, eventueel vertaald (S181) en dan bijgesneden (S177); zonder dat is het het ingelezen model zelf */
     tl() { return this.tr !== '0' && this.isNt && this.parsed.names.length ? alnTranslate(this.parsed, +this.tr, +this.code) : this.parsed; },
@@ -320,12 +396,50 @@ export default {
     /* klasse van cel (rij i, kolom c), '' zonder kleur */
     cellCls(i, c) { return this.tab === undefined ? '' : alnCls(this.tab, c, this.m.seqs[i][c]); },
     /* de kleur van een klasse in het huidige thema, uit de CSS gelezen (per thema en palet onthouden) */
-    shade(k) {
-      const key = (document.documentElement.getAttribute('data-theme') || '') + this.cbs + k;
+    shade(k, paper) {
+      const key = (document.documentElement.getAttribute('data-theme') || '') + this.cbs + k + !!paper;
       const memo = this.memo || (this.memo = {});
-      if (!(key in memo)) { const e = this.$refs.sw; e.className = 'aln-sw k-' + k; memo[key] = getComputedStyle(e).backgroundColor; }
+      if (!(key in memo)) { const e = this.$refs[paper ? 'psw' : 'sw']; e.className = 'aln-sw k-' + k; memo[key] = getComputedStyle(e).backgroundColor; }
       return memo[key];
     },
+    /* S188: een kleur op papier als #rrggbb (color-mix geeft color(srgb …), dat niet elk SVG-programma kent) */
+    hex(k) {
+      const memo = this.hexMemo || (this.hexMemo = {}), v = this.shade(k, true);
+      if (!(v in memo)) {
+        const x = (this.hexCv || (this.hexCv = document.createElement('canvas'))).getContext('2d', {willReadFrequently: true});
+        x.clearRect(0, 0, 1, 1); x.fillStyle = v; x.fillRect(0, 0, 1, 1);
+        memo[v] = '#' + [...x.getImageData(0, 0, 1, 1).data.slice(0, 3)].map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+      return memo[v];
+    },
+    /* de rijen in de volgorde van de viewer; nummers vanaf Vanaf kolom zolang er geen kolommen tussenuit vallen */
+    figure() {
+      const m = this.m, o = this.order, tab = this.tab, g = num(this.gap), f = Math.round(num(this.from));
+      const a = {names: o.map(i => m.names[i]), seqs: o.map(i => m.seqs[i]), len: m.len};
+      return alnSvg(a, {width: num(this.bw) || 60, start: !(g >= 0 && g < 100) && f > 1 ? f : 1,
+        fill: (i, c) => { const k = tab === undefined ? '' : alnCls(tab, c, a.seqs[i][c]); return k ? this.hex(k) : ''; }});
+    },
+    saveSvg() { saveBlob('uitlijning.svg', new Blob([this.figure().svg], {type: 'image/svg+xml'})).catch(() => {}); },
+    /* PNG: de SVG op dubbele resolutie op een canvas */
+    savePng() {
+      const f = this.figure(), u = URL.createObjectURL(new Blob([f.svg], {type: 'image/svg+xml'})), img = new Image();
+      img.onload = () => {
+        const cv = document.createElement('canvas'), x = cv.getContext('2d');
+        cv.width = f.w * 2; cv.height = f.h * 2; x.scale(2, 2); x.drawImage(img, 0, 0);
+        URL.revokeObjectURL(u);
+        cv.toBlob(b => { if (b) saveBlob('uitlijning.png', b).catch(() => {}); }, 'image/png');
+      };
+      img.src = u;
+    },
+    /* afdruk: A4, elk blok heel op één pagina, te brede blokken schalen mee */
+    printHtml() {
+      const f = this.figure(), m = this.m, t = this.t;
+      return '<!doctype html><meta charset="utf-8"><title>' + esc(t('Uitlijning')) + '</title><style>@page{size:A4;margin:12mm}body{font:12px system-ui,Arial,sans-serif;margin:0}'
+        + 'h1{font-size:16px;margin:0 0 4px}.i{margin:0 0 10px;color:#333}.r{break-inside:avoid;page-break-inside:avoid;margin:0 0 10px}svg{max-width:100%;height:auto;display:block}</style>'
+        + '<h1>' + esc(t('Uitlijning')) + '</h1><p class="i">' + esc(FMT[m.format] || '') + ' · ' + esc(t(m.names.length + ' sequenties')) + ' · ' + esc(t(m.len + ' kolommen')) + '</p>'
+        + f.blocks.map(b => '<div class="r">' + b + '</div>').join('');
+    },
+    print() { rpPrint(this.printHtml()); },
     /* de zichtbare cellen inkleuren, per run van dezelfde klasse één rechthoek */
     paint() {
       const cv = this.$refs.cv;
@@ -428,9 +542,39 @@ export default {
       const r = this.regs[+b.dataset.reg];
       seqSend(t, trPlain('Stuk', true) + '_' + r.from + '-' + r.to, r.seq);
     },
-    onFile(e) {
+    async copyPrep() {
+      try { await navigator.clipboard.writeText(this.prep.clean); this.copied = this.t('Gekopieerd.'); } catch (e) { this.copied = this.t('Kopiëren geblokkeerd.'); }
+    },
+    openExt(u) { openExt(u); },
+    savePrep() { saveBlob('sequenties.fasta', new Blob([this.prep.clean], {type: 'text/plain'})).catch(() => {}); },
+    /* S189: de waarden van alle velden (toolSnap), de volgorde met de hand en welke panelen open staan */
+    saveProj() {
+      const sec = this.$el.closest('section'), p = {kind: PROJ, v: 1, app: APPVER, snap: toolSnap('aln'), hand: this.hand,
+        open: [...sec.querySelectorAll('details[open]')].map(d => d.id).filter(Boolean)};
+      saveBlob('uitlijning.' + PROJ, new Blob([JSON.stringify(p)], {type: 'application/json'})).catch(() => {});
+    },
+    openProj(e) {
       const f = e.target.files[0];
-      if (f) f.text().then(x => { this.txt = x; });
+      e.target.value = '';
+      if (f) f.text().then(x => this.applyProj(x));
+    },
+    async applyProj(text) {
+      let p = null;
+      try { p = JSON.parse(text); } catch (err) { /* hieronder gemeld */ }
+      const ok = p && p.kind === PROJ && p.snap && p.snap.t === 'aln' && p.snap.v && typeof p.snap.v === 'object';
+      this.projErr = ok ? '' : this.t('Dit is geen projectbestand van Alignment bekijken.');
+      if (!ok) return;
+      /* twee keer: velden achter een v-if (genetische code, paar, drempels) bestaan pas na de eerste render */
+      toolApply(p.snap); await this.$nextTick(); toolApply(p.snap); await this.$nextTick();
+      const n = this.m.names.length, h = p.hand;
+      if (Array.isArray(h) && h.length === n && h.every(i => Number.isInteger(i) && i >= 0 && i < n) && new Set(h).size === n) { this.hand = h; this.ord = 'hand'; }
+      const sec = this.$el.closest('section');
+      sec.querySelectorAll('details[id]').forEach(d => { d.open = Array.isArray(p.open) && p.open.includes(d.id); });
+    },
+    onFile(e) { this.readFile(e, 'txt'); },
+    readFile(e, k) {
+      const f = e.target.files[0];
+      if (f) f.text().then(x => { this[k] = x; });
     }
   }
 };

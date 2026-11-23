@@ -1888,6 +1888,115 @@ def _(pg):
     pg.evaluate(ALN_RESET)
     return out
 
+@case('Alignment bekijken', 'FASTA klaarmaken: elke controle slaat aan', 'Een opzettelijk kapotte invoer met Windows-regeleinden, tekst vóór de eerste kop, een dubbele naam (EBI neemt het eerste woord van de kop als naam), een uitroepteken, een kop zonder sequentie, een naam van 40 tekens en DNA naast eiwit (FASTA-formaat volgens de NCBI BLAST-help "FASTA format"); verwacht: zeven meldingen, en de schone FASTA heeft twee sequenties met gewone regeleinden, alleen hoofdletters')
+def _(pg):
+    bad = 'ACGT\r\n>a x\r\nAC!GT\r\n>a y\r\n\r\n>' + 'x' * 40 + '\r\nMKWVTFISLLEEQ\r\n'
+    pg.evaluate("__go('aln')"); pg.evaluate(ALN_OPEN, 'al-prep')
+    # als bestand: een textarea zet geplakte regeleinden om naar LF
+    pg.set_input_files('#al-rawf', files=[{'name': 'kapot.fasta', 'mimeType': 'text/plain', 'buffer': bad.encode()}]); pg.wait_for_timeout(300)
+    notes = pg.evaluate("[...document.querySelectorAll('#al-prep-out .note')].map(e=>e.textContent)")
+    clean = pg.evaluate("__alnVm.prep.clean")
+    want = ['regeleinden', 'vóór de eerste', 'vaker voor', 'geen letter', 'zonder sequentie', 'langer dan 30', 'DNA en eiwit']
+    out = [(f'melding: {w}', 1 if any(w in n for n in notes) else 0, 1, 0) for w in want]
+    out.append(('schone FASTA', 1 if clean == '>a x\nACGT\n>' + 'x' * 40 + '\nMKWVTFISLLEEQ\n' else 0, 1, 0))
+    pg.evaluate("__set('al-raw','>a\\nACGT\\n>b\\nACGA\\n')"); pg.wait_for_timeout(150)
+    out.append(('goede invoer: meldingen anders dan OK', pg.evaluate("[...document.querySelectorAll('#al-prep-out .note')].filter(e=>!e.classList.contains('ok')).length"), 0, 0))
+    pg.evaluate("__set('al-raw','')")
+    return out
+
+@case('Alignment bekijken', 'Omzetten: Clustal → FASTA → Clustal zonder verlies', 'tests/fixtures/aln/hedgehog.aln (Biopython-testsuite, geschreven door Clustal); in Python gelezen: namen, rijen en de * : . -regel van Clustal zelf. LabKit schrijft de uitlijning als FASTA, leest die in, schrijft hem als Clustal en leest die weer in; daarna ook via NEXUS, GCG MSF (controlegetal volgens GCG, nagerekend in Python) en PIR')
+def _(pg):
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'hedgehog.aln'
+    rows = _aln_rows(f); n = len(rows); src = f.read_text(encoding='utf-8')
+    lines = src.splitlines(); cons = ''
+    for i, ln in enumerate(lines[1:], 1):
+        if ln.strip() and not ln[0].isspace() and (i + 1 >= len(lines) or not lines[i + 1][:1].strip()):
+            name, chunk = ln.split()[:2]; off = ln.index(chunk, len(name)); w = len(chunk)
+            nx = lines[i + 1] if i + 1 < len(lines) else ''
+            cons += (nx[off:] + ' ' * w)[:w]
+    def via(*fmts):
+        pg.evaluate("t=>__set('al-in',t)", src); pg.wait_for_timeout(150); pg.evaluate(ALN_RESET)
+        for fm in fmts:
+            pg.evaluate("v=>__set('al-xf',v)", fm); pg.wait_for_timeout(80)
+            pg.evaluate("t=>__set('al-in',t)", pg.evaluate("__alnVm.outText")); pg.wait_for_timeout(150)
+        return pg.evaluate("[__alnVm.m.seqs, __alnVm.m.names.length, __alnVm.m.cons, __alnVm.parsed.format]")
+    pg.evaluate("__go('aln')")
+    seqs, k, c, fm = via('fasta', 'clustal')
+    out = [('Clustal → FASTA → Clustal: rijen gelijk', sum(a == b for a, b in zip(seqs, rows)), n, 0),
+           ('aantal sequenties', k, n, 0), ('formaat is weer Clustal', 1 if fm == 'clustal' else 0, 1, 0),
+           ('de * : . -regel van Clustal komt terug', 1 if c.rstrip() == cons.rstrip() else 0, 1, 0)]
+    for fmts in (('nexus', 'clustal'), ('msf', 'clustal'), ('pir', 'clustal')):
+        seqs = via(*fmts)[0]
+        out.append((f'via {fmts[0]}: rijen gelijk', sum(a == b for a, b in zip(seqs, rows)), n, 0))
+    pg.evaluate("t=>__set('al-in',t)", src); pg.wait_for_timeout(150); pg.evaluate(ALN_RESET); pg.evaluate("__set('al-xf','msf')"); pg.wait_for_timeout(150)
+    ck = lambda s: sum((i % 57 + 1) * ord(ch.upper()) for i, ch in enumerate(s)) % 10000
+    msf = pg.evaluate("__alnVm.outText")
+    got = [int(l.split('Check:')[1].split()[0]) for l in msf.splitlines() if l.lstrip().startswith('Name:')]
+    out.append(('MSF: controlegetallen per sequentie', sum(a == ck(r.replace('-', '.')) for a, r in zip(got, rows)), n, 0))
+    pg.evaluate(ALN_RESET); pg.evaluate("__set('al-xf','fasta')"); pg.evaluate("__set('al-in','')")
+    return out
+
+@case('Alignment bekijken', 'Figuur en afdruk: één A4-pagina', 'tests/fixtures/aln/hedgehog.aln (Biopython-testsuite, 5 sequenties, 447 kolommen), in het donkere thema; verwacht: 8 blokken van 60 kolommen (15 bij 30), de afdruk (A4, marge 12 mm) is één pagina, elk blok past in de breedte, de achtergrond is wit en elke kleur is licht genoeg voor zwarte tekst (relatieve luminantie > 0,4, WCAG 2.1); de laatste kolom van het laatste blok is 447')
+def _(pg):
+    import re
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'hedgehog.aln'
+    pg.evaluate("document.documentElement.setAttribute('data-theme','donker')")
+    pg.evaluate("__go('aln')"); pg.evaluate("t=>__set('al-in',t)", f.read_text(encoding='utf-8')); pg.wait_for_timeout(200); pg.evaluate(ALN_RESET)
+    pg.evaluate(ALN_OPEN, 'al-fig'); pg.evaluate("__set('al-bw','60')"); pg.wait_for_timeout(100)
+    blocks = pg.evaluate("__alnVm.figure().blocks.length"); html = pg.evaluate("__alnVm.printHtml()")
+    svg = pg.evaluate("__alnVm.figure().svg"); fills = set(re.findall(r'fill="(#[0-9a-f]{6})"', svg))
+    # PNG: saveBlob even afvangen en de afbeelding meten (dubbele resolutie van de SVG)
+    png = pg.evaluate("""()=>new Promise(r=>{const o=window.saveBlob; window.saveBlob=(n,b)=>{window.saveBlob=o; const i=new Image(); i.onload=()=>r([n,i.width,i.height]); i.src=URL.createObjectURL(b); return Promise.resolve()}; __alnVm.savePng()})""")
+    wh = pg.evaluate("[__alnVm.figure().w, __alnVm.figure().h]")
+    lum = lambda h: sum(w * ((c / 255) / 12.92 if c / 255 <= 0.04045 else ((c / 255 + 0.055) / 1.055) ** 2.4) for w, c in zip((0.2126, 0.7152, 0.0722), (int(h[i:i + 2], 16) for i in (1, 3, 5))))
+    pg.evaluate("__set('al-bw','30')"); pg.wait_for_timeout(100); b30 = pg.evaluate("__alnVm.figure().blocks.length")
+    pg.evaluate("__set('al-bw','60')"); pg.evaluate("document.documentElement.setAttribute('data-theme','')")
+    q = pg.context.browser.new_page(); q.set_content(html)
+    pdf = q.pdf(format='A4', prefer_css_page_size=True)
+    q.set_viewport_size({'width': 718, 'height': 1000})  # A4 min 2 x 12 mm marge
+    fit = q.evaluate("[...document.querySelectorAll('svg')].filter(s=>s.getBoundingClientRect().right<=document.body.clientWidth+0.5).length")
+    last = q.evaluate("[...document.querySelectorAll('svg')].pop().querySelectorAll('text')[1].textContent"); q.close()
+    pg.evaluate("__set('al-in','')")
+    return [('blokken van 60 kolommen', blocks, 8, 0), ('blokken van 30 kolommen', b30, 15, 0),
+            ('pagina\'s in de afdruk', len(re.findall(rb'/Type\s*/Page[^s]', pdf)), 1, 0),
+            ('blokken die in de breedte passen', fit, 8, 0), ('laatste kolom', int(last), 447, 0),
+            ('witte achtergrond', 1 if '<rect width="100%" height="100%" fill="#fff"/>' in svg else 0, 1, 0),
+            ('PNG: breedte (px)', png[1], wh[0] * 2, 0), ('PNG: hoogte (px)', png[2], wh[1] * 2, 0),
+            ('kleuren met luminantie onder 0,4', sum(lum(h) <= 0.4 for h in fills), 0, 0)]
+
+@case('Alignment bekijken', 'Projectbestand: alles komt terug', 'tests/fixtures/aln/hedgehog.aln (Biopython-testsuite) met een reeks instellingen (kleuren, kleurenblind, drempel, motief, verschil, vertalen uit, bijsnijden, exportformaat, gatenmodus, paar, conserveringsdrempel, blokbreedte), een met de hand gekozen rijvolgorde, open panelen en losse sequenties in het FASTA-blok; verwacht: na opslaan, de pagina opnieuw laden met lege velden en het project openen is elke waarde, de volgorde en elk open paneel weer hetzelfde, en de getoonde uitlijning gelijk')
+def _(pg):
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'hedgehog.aln'
+    pg.evaluate("__go('aln')"); pg.evaluate("t=>__set('al-in',t)", f.read_text(encoding='utf-8')); pg.wait_for_timeout(200); pg.evaluate(ALN_RESET)
+    vals = {'al-col': 'ident', 'al-thr': '70', 'al-motif': 'GXHW', 'al-ref': '2', 'al-gap': '30', 'al-from': '20', 'al-to': '300',
+            'al-xf': 'nexus', 'al-gm': 'mis', 'al-pa': '1', 'al-pb': '3', 'al-ct': '80', 'al-cl': '5', 'al-bw': '40', 'al-raw': '>x\nACGT\n>y\nACGA\n'}
+    for k, v in vals.items(): pg.evaluate("([k,v])=>__set(k,v)", [k, v]); pg.wait_for_timeout(30)
+    pg.evaluate("__set('al-cbs',true)")
+    for d in ('al-pim-d', 'al-fig'): pg.evaluate(ALN_OPEN, d)
+    pg.evaluate("typeof tourStop==='function'&&tourStop()")
+    pg.click('#al-seqs [data-mv="1"][data-p="0"]'); pg.wait_for_timeout(100)
+    order, seqs = pg.evaluate("[__alnVm.order.slice(), __alnVm.m.seqs.slice()]")
+    data = pg.evaluate("""()=>new Promise(r=>{const o=window.saveBlob; window.saveBlob=(n,b)=>{window.saveBlob=o; b.text().then(t=>r([n,t])); return Promise.resolve()}; document.getElementById('al-proj-sv').click()})""")
+    # leeg beginnen: invoeropslag weg en de pagina opnieuw laden
+    pg.evaluate("localStorage.removeItem('labkit:v1:inputs')"); pg.reload(); pg.wait_for_timeout(800); pg.evaluate(HELPERS); pg.evaluate("__go('aln')")
+    empty = pg.evaluate("__alnVm.txt === '' && __alnVm.raw === ''")
+    pg.set_input_files('#al-proj', files=[{'name': data[0], 'mimeType': 'application/json', 'buffer': data[1].encode()}]); pg.wait_for_timeout(600)
+    got = pg.evaluate("ks=>ks.map(k=>document.getElementById(k).value)", list(vals))
+    out = [('naam eindigt op .labkitaln', 1 if data[0].endswith('.labkitaln') else 0, 1, 0), ('velden leeg na herladen', 1 if empty else 0, 1, 0),
+           ('uitlijning terug', 1 if pg.evaluate("__alnVm.txt") == f.read_text(encoding='utf-8') else 0, 1, 0),
+           ('instellingen terug', sum(a == b for a, b in zip(got, vals.values())), len(vals), 0),
+           ('kleurenblind-veilig terug', 1 if pg.evaluate("document.getElementById('al-cbs').checked") else 0, 1, 0),
+           ('rijvolgorde met de hand terug', 1 if pg.evaluate("__alnVm.order") == order and pg.evaluate("__alnVm.ord") == 'hand' else 0, 1, 0),
+           ('open panelen terug', pg.evaluate("['al-pim-d','al-fig'].filter(d=>document.getElementById(d).open).length"), 2, 0),
+           ('getoonde uitlijning gelijk', 1 if pg.evaluate("__alnVm.m.seqs") == seqs else 0, 1, 0)]
+    # een vreemd bestand wordt geweigerd en laat alles staan
+    pg.set_input_files('#al-proj', files=[{'name': 'x.json', 'mimeType': 'application/json', 'buffer': b'{"iets":1}'}]); pg.wait_for_timeout(300)
+    out.append(('vreemd bestand: melding', pg.evaluate("document.querySelectorAll('#al-proj-err .note.bad').length"), 1, 0))
+    out.append(('vreemd bestand: uitlijning blijft', 1 if pg.evaluate("__alnVm.txt") == f.read_text(encoding='utf-8') else 0, 1, 0))
+    pg.evaluate("__set('al-cbs',false)"); pg.evaluate(ALN_RESET)
+    for k, v in (('al-col', 'auto'), ('al-thr', '50'), ('al-xf', 'fasta'), ('al-bw', '60'), ('al-raw', ''), ('al-ord', 'file'), ('al-in', '')): pg.evaluate("([k,v])=>__set(k,v)", [k, v])
+    return out
+
 @case('Chromatogram', 'ABIF-bestand 3730.ab1 inlezen', 'Biopython 1.84, Tests/test_SeqIO_AbiIO.py (data_3730) en het bestand zelf (tests/fixtures/3730.ab1, Applied Biosystems 3730): monster 226032_C-ME-18_pCAGseqF, 1165 basen, eerste 12 basen GGGCGAGCKYYA; ABIF-indeling volgens de Applied Biosystems ABIF File Format Specification (2009)')
 def _(pg):
     pg.evaluate("__go('sanger')")

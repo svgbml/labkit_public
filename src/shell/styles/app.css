@@ -568,6 +568,8 @@ html[data-cvd=tritanopie] main{filter:url(#cvd-tritanopie)}
 .aln-extra{font-weight:400;font-style:italic;color:var(--muted)}
 .aln-sw{position:absolute;visibility:hidden;background:color-mix(in srgb,var(--c) calc(var(--mix,40%) * var(--dim,1)),var(--surface))}
 html[data-theme=donker] .aln-view{--dim:.75}
+/* S188: kleuren voor de figuur en de afdruk, op wit papier in elk thema */
+.aln-paper{--surface:#ffffff;--accent:#1558b0;--muted:#5f6b7a;--bad:#b0271f;--dim:1}
 .k-cb{--c:#80a0f0}.k-cr{--c:#f01505}.k-cm{--c:#c048c0}.k-cg{--c:#15c015}.k-cp{--c:#f08080}.k-co{--c:#f09048}.k-cy{--c:#c0c000}.k-cc{--c:#15a4a4}
 .k-na{--c:#64f73f}.k-nc{--c:#ffb340}.k-ng{--c:#eb413c}.k-nt{--c:#3c88ee}
 .k-i1{--c:var(--accent);--mix:18%}.k-i2{--c:var(--accent);--mix:32%}.k-i3{--c:var(--accent);--mix:48%}
