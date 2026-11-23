@@ -32,14 +32,17 @@ function gfDemo(){
   const W=760,H=520,c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
   const g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#1a1a1a'); g.addColorStop(1,'#0c0c0c'); x.fillStyle=g; x.fillRect(0,0,W,H);
   const Ysz=bp=>50+(3-Math.log10(bp))*360; const nL=9, lx=i=>70+i*(W-140)/(nL-1);
-  x.filter='blur(2.2px)';
   for(let i=0;i<nL;i++){ x.fillStyle='rgba(255,255,255,.18)'; x.fillRect(lx(i)-26,28,52,8); }
   const band=(i,bp,a)=>{ x.fillStyle=`rgba(235,255,240,${a})`; x.fillRect(lx(i)-24,Ysz(bp)-3,48,7); };
   [1000,900,800,700,600,500,400,300,200,100].forEach(bp=>band(0,bp,bp===500?0.95:0.6));
   const samples=[[650,.85],[650,.7],[650,.9],[350,.8],[650,.5],[],[650,.8]];
   samples.forEach((s,k)=>{ if(s.length) band(k+1,s[0],s[1]); band(k+1,58,0.22); if(k===4) band(k+1,350,0.35); });
   band(8,58,0.3);
-  x.filter='none';
+  /* vervagen met een vaste gaussische kern (σ 2,2 px) in plaats van ctx.filter: dat vervaagt in elke Chromium-versie net anders, en de visuele test vergelijkt pixels */
+  { const id=x.getImageData(0,0,W,H), d=id.data, R=7, k=[]; let ks=0; for(let i=-R;i<=R;i++){ const v=Math.exp(-i*i/(2*2.2*2.2)); k.push(v); ks+=v; } for(let i=0;i<k.length;i++) k[i]/=ks;
+    const t=new Float32Array(W*H*3); for(let y=0;y<H;y++) for(let X=0;X<W;X++) for(let ch=0;ch<3;ch++){ let s=0; for(let i=-R;i<=R;i++){ const xx=Math.min(W-1,Math.max(0,X+i)); s+=k[i+R]*d[(y*W+xx)*4+ch]; } t[(y*W+X)*3+ch]=s; }
+    for(let y=0;y<H;y++) for(let X=0;X<W;X++) for(let ch=0;ch<3;ch++){ let s=0; for(let i=-R;i<=R;i++){ const yy=Math.min(H-1,Math.max(0,y+i)); s+=k[i+R]*t[(yy*W+X)*3+ch]; } d[(y*W+X)*4+ch]=Math.round(s); }
+    x.putImageData(id,0,0); }
   /* vaste ruis (mulberry32, zaad 1): met Math.random herkende de detectie af en toe een extra lane, en de tests en de schermafbeeldingen werden onvoorspelbaar */
   let sd=1; const rnd=()=>{ sd=sd+0x6D2B79F5|0; let t=Math.imul(sd^sd>>>15,1|sd); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
   const id=x.getImageData(0,0,W,H), d=id.data; for(let i=0;i<d.length;i+=4){ const n=(rnd()-0.5)*14; d[i]=Math.max(0,Math.min(255,d[i]+n)); d[i+1]=Math.max(0,Math.min(255,d[i+1]+n)); d[i+2]=Math.max(0,Math.min(255,d[i+2]+n)); } x.putImageData(id,0,0);
