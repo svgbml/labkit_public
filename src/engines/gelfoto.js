@@ -314,6 +314,7 @@ function gfVlWarp(Ph,Wv){ const v=gf.vl; if(!v||!v.strip) return null; const L=v
   for(let y=0;y<c.height;y++){ const sy=map(y+0.5); if(sy>=0&&sy<S.height-1) x.drawImage(S,0,Math.floor(sy),S.width,1,0,y,Wv,1); }
   v.cache={key,c}; v.anchors=an.length; return c; }
 function gfRender(exportMode,scale=1){
+  if(!exportMode){ clearTimeout(gfHist.t); gfHist.t=setTimeout(gfHistRec,350); }   /* ongedaan maken (S74) */
   const c=exportMode?document.createElement('canvas'):gcv, x=c.getContext('2d');
   if(!gf.src){ c.width=800; c.height=300; x.fillStyle='#f3f5f7'; x.fillRect(0,0,800,300); x.fillStyle='#5a6a78'; x.font='16px Segoe UI, Arial, sans-serif'; x.textAlign='center'; x.fillText('Kies een gelfoto of laad de demo-gel.',400,150); return c; }
   if(gf.mode==='crop'&&!exportMode){ const r=gfRotated(); c.width=r.width; c.height=r.height; x.drawImage(r,0,0); const p=gf.pend; if(p){ x.fillStyle='rgba(0,0,0,.45)'; x.fillRect(0,0,r.width,p.y); x.fillRect(0,p.y+p.h,r.width,r.height-p.y-p.h); x.fillRect(0,p.y,p.x,p.h); x.fillRect(p.x+p.w,p.y,r.width-p.x-p.w,p.h); x.strokeStyle='#1558b0'; x.lineWidth=Math.max(2,r.width/300); x.strokeRect(p.x,p.y,p.w,p.h); const hs=Math.max(6,r.width/110); x.fillStyle='#fff'; [[0,0],[.5,0],[1,0],[0,.5],[1,.5],[0,1],[.5,1],[1,1]].forEach(([fx,fy])=>{ x.fillRect(p.x+p.w*fx-hs/2,p.y+p.h*fy-hs/2,hs,hs); x.strokeRect(p.x+p.w*fx-hs/2,p.y+p.h*fy-hs/2,hs,hs); }); } gf.layout={L:0,T:0,s:1,crop:true}; return c; }
@@ -545,9 +546,11 @@ function gfLabEdit(i){ const old=$('#gf-labed'); if(old) old.remove(); const l=g
    en de waarden van de velden. De virtuele ladder (een tweede foto) en de zoom gaan niet mee. */
 const GF_PROJ=['rot90','fine','flip','crop','inv','gray','bri','con','lanes','lw','ladder','ladKey','marks','title','fs','ang','angAuto','unit','disp','wells','autoLadder'];
 /* het veld-id's van de tool; de lanelabels staan in gf.lanes, de virtuele ladder gaat niet mee */
-const gfProjFields=()=>[...$$('#t-gelfoto input[id],#t-gelfoto select[id],#t-gelfoto textarea[id]')].filter(el=>el.type!=='file'&&!el.closest('table')&&!/^gf-(vl|ll)/.test(el.id));
+const gfProjFields=()=>[...$$('#t-gelfoto input[id],#t-gelfoto select[id],#t-gelfoto textarea[id]')].filter(el=>el.type!=='file'&&!el.closest('table')&&!/^gf-(vl|ll|labed|expert)/.test(el.id));
 /* geeft verwijzingen naar gf terug: wie bewaart, kopieert (JSON of IndexedDB doen dat zelf) */
-function gfProjSnap(){ if(!gf.src) return null; const s={}; GF_PROJ.forEach(k=>{ if(gf[k]!==undefined) s[k]=gf[k]; }); const inp={}; gfProjFields().forEach(el=>{ inp[el.id]=el.type==='checkbox'?el.checked:el.value; });
+/* de toestand zonder de foto: ook de momentopname van ongedaan maken (S74) */
+function gfStateSnap(){ const s={}; GF_PROJ.forEach(k=>{ if(gf[k]!==undefined) s[k]=gf[k]; }); const inp={}; gfProjFields().forEach(el=>{ inp[el.id]=el.type==='checkbox'?el.checked:el.value; }); return {gf:s,inp}; }
+function gfProjSnap(){ if(!gf.src) return null; const {gf:s,inp}=gfStateSnap();
   const u=ladUser(gf.ladKey); /* een eigen ladder gaat mee, zodat het project ook elders opent (gewone kopie: IndexedDB kloont geen Vue-proxy) */
   return {kind:'labkitgel',v:1,app:APPVER,img:gf.src.toDataURL('image/png'),gf:s,inp,lad:u?{id:u.id,n:u.n,s:[...u.s],u:u.u}:undefined}; }
 /* NaN (samengevoegde band, geen meting) zou in JSON null worden; dat telt isFinite() als 0 */
@@ -564,16 +567,58 @@ async function gfProjApply(p){
   const c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight; c.getContext('2d').drawImage(img,0,0);
   /* velden eerst, twee keer: de keuze van de ladder zet in een watcher de eenheid en de massa's
      en het eigen-ladderveld verschijnt pas daarna; de tweede ronde zet de bewaarde waarden terug */
+  await gfPutState(p,()=>{ gf.libId=null; gf.src=c; gf.crop=null; gf.wells=null; gf.vl=null; });
+  gfStatus('Project geopend.'); }
+/* velden en toestand terugzetten (project openen, ongedaan maken); voor() draait tussen velden en toestand */
+async function gfPutState(p,voor){
   const put=()=>gfProjFields().forEach(el=>{ if(!(el.id in (p.inp||{}))) return; const v=p.inp[el.id]; if(el.type==='checkbox') el.checked=!!v; else el.value=String(v); el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); });
   put(); await new Promise(r=>setTimeout(r,0)); put(); await new Promise(r=>setTimeout(r,0));
-  gf.libId=null; gf.src=c; gf.cache={}; gf.crop=null; gf.wells=null; gf.vl=null; gf.mode=null; gf.drag=null; gf.pend=null;
+  if(voor) voor(); gf.cache={}; gf.mode=null; gf.drag=null; gf.pend=null;
   GF_PROJ.forEach(k=>{ if(k in p.gf) gf[k]=p.gf[k]; });
   gf.lanes=gf.lanes.filter(l=>l&&isFinite(l.x)).map(l=>({...l,label:String(l.label??'')})); gf.marks=Array.isArray(gf.marks)?gf.marks:[];
   gf.ladder=Math.max(0,Math.min(gf.lanes.length-1,Math.round(+gf.ladder)||0));
   gf.bands=gf.lanes[gf.ladder]?(gf.lanes[gf.ladder].bands||(gf.lanes[gf.ladder].bands=[])):[];
   /* de velden hebben gfUpdate() laten lopen; zonder dit zet de rechtzet-timer de lanen opnieuw */
   gfFine=gf.fine; clearTimeout(gfFineT);
-  gfLanesTable(); gfBandsTable(); gfMarksTable(); gfRender(); gfStatus('Project geopend.'); }
+  gfLanesTable(); gfBandsTable(); gfMarksTable(); gfRender(); }
+
+/* ================= ONGEDAAN MAKEN MET ZICHTBARE GESCHIEDENIS (S74) =================
+   Na elke tekening van de editor (gfRender, dus na elke bewerking) volgt na een korte pauze een
+   momentopname van de toestand zonder foto; verschilt die van de huidige stap, dan komt er een
+   stap bij met een naam die zegt wat er veranderde. Tijdens slepen niet: pas bij loslaten.
+   Een nieuwe foto of een geopend project begint een nieuwe geschiedenis. Ongedaan maken en
+   opnieuw zetten velden en toestand terug zoals een project openen. */
+const gfHist={list:[],i:-1,src:null,busy:false,t:null};
+const gfHistJ=()=>JSON.stringify(gfStateSnap(),gfJsonW);
+function gfHistRec(){ if(gfHist.busy||!gf.src||gf.drag||gf.mode==='crop') return;
+  if(gf.src!==gfHist.src){ gfHist.src=gf.src; gfHist.list=[]; gfHist.i=-1; }
+  const j=gfHistJ(), cur=gfHist.list[gfHist.i]; if(cur&&cur.j===j) return;
+  gfHist.list.splice(gfHist.i+1); gfHist.list.push({j,lab:cur?gfHistLab(JSON.parse(cur.j,gfJsonR),JSON.parse(j,gfJsonR)):'Foto geladen'});
+  if(gfHist.list.length>80) gfHist.list.shift(); gfHist.i=gfHist.list.length-1; gfHistUi(); }
+/* wat veranderde er tussen twee momentopnamen; de eerste die past, telt */
+function gfHistLab(a,b){ const A=a.gf, B=b.gf, ne=(p,q)=>JSON.stringify(p)!==JSON.stringify(q), nb=g=>(g.lanes||[]).reduce((t,l)=>t+(l.lad&&l.bands?l.bands.length:0),0);
+  if(ne(A.crop,B.crop)) return 'Bijgesneden';
+  if(A.rot90!==B.rot90||A.flip!==B.flip||A.fine!==B.fine) return 'Gedraaid of rechtgezet';
+  if(A.lanes.length!==B.lanes.length) return B.lanes.length>A.lanes.length?'Lane toegevoegd':'Lane verwijderd';
+  if(A.marks.length!==B.marks.length) return B.marks.length>A.marks.length?'Meting toegevoegd':'Meting verwijderd';
+  if(nb(A)!==nb(B)) return nb(B)>nb(A)?'Ladderband toegevoegd':'Ladderband verwijderd';
+  if(A.lw!==B.lw) return 'Lanebreedte aangepast';
+  if(ne(A.lanes.map(l=>l.label),B.lanes.map(l=>l.label))) return 'Lanelabel gewijzigd';
+  if(ne(A.lanes.map(l=>l.x),B.lanes.map(l=>l.x))) return 'Lane verschoven';
+  if(ne(A.marks,B.marks)) return 'Meting verschoven';
+  if(ne(A.lanes,B.lanes)||A.ladder!==B.ladder||A.ladKey!==B.ladKey) return 'Ladder gewijzigd';
+  if(A.inv!==B.inv||A.gray!==B.gray||A.bri!==B.bri||A.con!==B.con) return 'Beeld aangepast';
+  if(A.title!==B.title||A.fs!==B.fs||A.ang!==B.ang||A.angAuto!==B.angAuto) return 'Opmaak gewijzigd';
+  return 'Instelling gewijzigd'; }
+function gfHistUi(){ if(window.__gfRefresh) window.__gfRefresh(); if(typeof undoBtns==='function') undoBtns(); }
+async function gfHistGo(k){ if(gfHist.busy||k<0||k>=gfHist.list.length||k===gfHist.i) return;
+  gfHist.busy=true; clearTimeout(gfHist.t); gfHist.i=k;
+  try{ await gfPutState(JSON.parse(gfHist.list[k].j,gfJsonR)); gfHist.list[k].j=gfHistJ(); }  /* de velden normaliseren hun waarde: bewaar wat er echt staat */
+  finally{ gfHist.busy=false; } gfStatus('Teruggezet: '+uv(trPlain(gfHist.list[k].lab))+'.'); gfHistUi(); }
+const gfUndo=()=>gfHistGo(gfHist.i-1), gfRedo=()=>gfHistGo(gfHist.i+1);
+document.addEventListener('keydown',e=>{ if(typeof current==='undefined'||current!=='gelfoto'||!(e.ctrlKey||e.metaKey)||e.altKey) return;
+  const t=e.target, k=e.key.toLowerCase(); if(t.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(t.tagName)||document.querySelector('.lk-modal')) return;
+  if(k==='z'&&!e.shiftKey){ e.preventDefault(); gfUndo(); } else if(k==='y'||(k==='z'&&e.shiftKey)){ e.preventDefault(); gfRedo(); } });
 
 /* bewaart de gel in de bibliotheek (IndexedDB); dezelfde gel werkt zijn eigen item bij */
 async function gfLibSave(quiet){ const s=gfProjSnap(); if(!s){ gfStatus('Kies eerst een gelfoto of laad de demo-gel.'); return; }
@@ -693,6 +738,16 @@ live({
   gfProjOpen: [() => gfProjOpen, v => { gfProjOpen = v; }],
   gfProjApply: [() => gfProjApply, v => { gfProjApply = v; }],
   gfLibSave: [() => gfLibSave, v => { gfLibSave = v; }],
+  gfStateSnap: [() => gfStateSnap, v => { gfStateSnap = v; }],
+  gfPutState: [() => gfPutState, v => { gfPutState = v; }],
+  gfHist: () => gfHist,
+  gfHistJ: () => gfHistJ,
+  gfHistRec: [() => gfHistRec, v => { gfHistRec = v; }],
+  gfHistLab: [() => gfHistLab, v => { gfHistLab = v; }],
+  gfHistUi: [() => gfHistUi, v => { gfHistUi = v; }],
+  gfHistGo: [() => gfHistGo, v => { gfHistGo = v; }],
+  gfUndo: () => gfUndo,
+  gfRedo: () => gfRedo,
   gfLibOpen: [() => gfLibOpen, v => { gfLibOpen = v; }],
   gfLabHit: [() => gfLabHit, v => { gfLabHit = v; }],
   gfLabEdit: [() => gfLabEdit, v => { gfLabEdit = v; }]

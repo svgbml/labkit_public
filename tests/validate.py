@@ -429,6 +429,25 @@ def _(pg):
     return [('dubbelklik meet 350 bp', bp, 350, 0.03), ('lager gesleept = kleiner', int(bp2 < bp * 0.95), 1, 0),
             ('dubbelklik op ladder: band erbij', n1 - n0, 1, 0), ('knijpen 2× uit elkaar', z, 2, 0.01)]
 
+@case('Gelfoto-editor', 'Ongedaan maken met geschiedenis', 'Zelftest: op de demo-gel een lane verwijderen, de metingen wissen, de lanebreedte en de titel wijzigen geeft vier benoemde stappen; vier keer Ctrl+Z zet alles terug (lanen, meting, breedte, titel), Ctrl+Y zet de lane-verwijdering terug, en een klik op een stap in de lijst springt ernaartoe')
+def _(pg):
+    pg.evaluate("__go('gelfoto'); __set('gf-lad','100'); gfDemo()"); pg.wait_for_timeout(600)
+    st = "JSON.stringify([gf.lanes.length, gf.marks.length, +$('#gf-lw').value, $('#gf-title').value])"
+    s0 = pg.evaluate(st)
+    for js in ("gfLaneDel(8)", "gf.marks=[]; gfMarksTable(); gfRender()", "gfSetIn('gf-lw',20)", "gfSetIn('gf-title','Andere titel')"):
+        pg.evaluate(js); pg.wait_for_timeout(600)
+    labs = pg.evaluate("gfHist.list.slice(1).map(s=>s.lab).join('|')")
+    pg.evaluate("document.activeElement.blur()")
+    for _ in range(4): pg.keyboard.press('Control+z'); pg.wait_for_timeout(500)
+    s1 = pg.evaluate(st)
+    pg.keyboard.press('Control+y'); pg.wait_for_timeout(500)
+    l1 = pg.evaluate("gf.lanes.length")
+    pg.evaluate("document.getElementById('gf-hist').open=true; document.querySelectorAll('#gf-hist li button')[4].click()"); pg.wait_for_timeout(500)
+    s4 = pg.evaluate(st)
+    return [('vier benoemde stappen', int(labs == 'Lane verwijderd|Meting verwijderd|Lanebreedte aangepast|Opmaak gewijzigd'), 1, 0),
+            ('4× Ctrl+Z = begintoestand', int(s1 == s0), 1, 0), ('Ctrl+Y: lane weer weg', l1, 8, 0),
+            ('klik op laatste stap', int(s4 == '[8,0,20,"Andere titel"]'), 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

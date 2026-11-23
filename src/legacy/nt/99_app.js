@@ -85,9 +85,9 @@ window.addEventListener('load',()=>setTimeout(async()=>{ const d=new URLSearchPa
 /* --- ongedaan maken per tool --- */
 const UNDO={}; let undoBusy=false, undoTimer=null;
 function undoReset(id){ const s=toolSnap(id); if(s) UNDO[id]=[JSON.stringify(s)]; undoBtns(); }
-function undoRec(id){ if(undoBusy||!id||id==='start') return; const s=toolSnap(id); if(!s) return; const j=JSON.stringify(s), st=UNDO[id]||(UNDO[id]=[]); if(st[st.length-1]!==j){ st.push(j); if(st.length>60) st.shift(); } undoBtns(); }
-function undoDo(id){ const st=UNDO[id]; if(!st||st.length<2) return; st.pop(); undoBusy=true; try{ toolApply(JSON.parse(st[st.length-1])); }finally{ setTimeout(()=>{ undoBusy=false; },0); } undoBtns(); }
-function undoBtns(){ $$('[data-undo]').forEach(b=>{ const st=UNDO[b.dataset.undo]; b.disabled=!st||st.length<2; }); }
+function undoRec(id){ if(undoBusy||!id||id==='start'||id==='gelfoto') return;   /* de gelfoto-editor heeft zijn eigen geschiedenis (gfHist, S74) */ const s=toolSnap(id); if(!s) return; const j=JSON.stringify(s), st=UNDO[id]||(UNDO[id]=[]); if(st[st.length-1]!==j){ st.push(j); if(st.length>60) st.shift(); } undoBtns(); }
+function undoDo(id){ if(id==='gelfoto'){ gfUndo(); return; } const st=UNDO[id]; if(!st||st.length<2) return; st.pop(); undoBusy=true; try{ toolApply(JSON.parse(st[st.length-1])); }finally{ setTimeout(()=>{ undoBusy=false; },0); } undoBtns(); }
+function undoBtns(){ $$('[data-undo]').forEach(b=>{ const st=UNDO[b.dataset.undo]; b.disabled=b.dataset.undo==='gelfoto'?!(gfHist.i>0):!st||st.length<2; }); }
 ['input','change','click'].forEach(ev=>document.addEventListener(ev,e=>{ if(undoBusy) return; const sec=e.target.closest&&e.target.closest('section.tool[data-tool]'); if(!sec||e.target.closest('[data-undo]')) return; const id=sec.dataset.tool; if(!UNDO[id]) return; clearTimeout(undoTimer); undoTimer=setTimeout(()=>undoRec(id),ev==='input'?600:150); },true));
 window.addEventListener('hashchange',()=>{ setTimeout(()=>{ if(current&&current!=='start'&&!UNDO[current]) undoReset(current); },60); });
 window.addEventListener('load',()=>setTimeout(()=>{ if(current&&current!=='start'&&!UNDO[current]) undoReset(current); },150));
