@@ -83,7 +83,7 @@
       <div v-if="plates.length" id="r-plates" style="margin-top:12px">
         <div class="lbl">{{ t('Platen') }}</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
-          <div v-for="d in plates" :key="d.key" :data-used="d.used ? 1 : 0" style="width:72px;text-align:center;font-size:12px">
+          <div v-for="d in plates" :key="d.key" :data-used="d.used ? 1 : 0" style="min-width:72px;text-align:center;font-size:12px">
             <svg viewBox="-30 -30 60 60" width="64" height="64" role="img" :aria-label="d.n + ' ' + d.label">
               <circle r="27" fill="var(--surface)" :stroke="d.used ? 'var(--accent)' : 'var(--line)'" :stroke-width="d.used ? 3 : 1.5"/>
               <circle v-for="(c, k) in d.dots" :key="k" :cx="c[0]" :cy="c[1]" r="1.7" :fill="d.used ? 'var(--accent)' : 'var(--muted)'"/>

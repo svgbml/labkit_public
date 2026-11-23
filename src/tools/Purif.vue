@@ -43,7 +43,7 @@
       </div>
     </div>
     <div class="panel" v-show="m.chart">
-      <div class="grid2"><div><canvas id="pf-cy"></canvas></div><div><canvas id="pf-cf"></canvas></div></div>
+      <div><canvas id="pf-cy"></canvas></div><div style="margin-top:12px"><canvas id="pf-cf"></canvas></div>
       <div class="lbl" style="margin-top:12px">{{ t('SDS-PAGE-schets per stap') }}</div>
       <svg v-if="m.chart" :viewBox="'0 0 ' + sds.w + ' 170'" style="width:100%;max-width:520px;display:block" role="img" :aria-label="t('SDS-PAGE-schets per stap')">
         <g v-for="(l, i) in sds.lanes" :key="i">
