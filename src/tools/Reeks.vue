@@ -80,6 +80,21 @@
         <div class="lbl">{{ t('Resultaat') }}</div>
         <lk-note kind="info">{{ t('Vul tellingen in om de KVE/mL te berekenen.') }}</lk-note>
       </template>
+      <div v-if="plates.length" id="r-plates" style="margin-top:12px">
+        <div class="lbl">{{ t('Platen') }}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <div v-for="d in plates" :key="d.key" :data-used="d.used ? 1 : 0" style="width:72px;text-align:center;font-size:12px">
+            <svg viewBox="-30 -30 60 60" width="64" height="64" role="img" :aria-label="d.n + ' ' + d.label">
+              <circle r="27" fill="var(--surface)" :stroke="d.used ? 'var(--accent)' : 'var(--line)'" :stroke-width="d.used ? 3 : 1.5"/>
+              <circle v-for="(c, k) in d.dots" :key="k" :cx="c[0]" :cy="c[1]" r="1.7" :fill="d.used ? 'var(--accent)' : 'var(--muted)'"/>
+            </svg>
+            <div class="mono">{{ d.n }}</div>
+            <div v-html="d.dil"></div>
+            <span :class="d.used ? 'chip ok' : 'chip'" style="font-size:11px">{{ d.label }}</span>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('Elke plaat is getekend met hooguit honderdvijftig stippen; ontelbaar staat als TNTC. Gebruikt voor de KVE/mL: platen binnen het telbare bereik (' + m.lo + '–' + m.hi + ').') }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -151,6 +166,19 @@ export default {
       }
       return {rows, used, allCounts, sumC, sumND, lo, hi, f};
     },
+    /* een rondje per ingevulde plaat; getekend wordt wat de berekening gebruikt (out.keep) */
+    plates() {
+      const t = this.t, {rows, lo, hi} = this.m, keep = this.out.keep || [], P = [];
+      rows.forEach(r => (this.counts[r.i] || []).forEach((v, p) => {
+        const raw = String(v).trim(), tn = raw !== '' && TNTC.test(raw), c = tn ? Infinity : num(raw);
+        if (raw === '' || (!tn && !/^\d+([.,]\d+)?$/.test(raw))) return;
+        const inR = c >= lo && c <= hi, used = inR && keep.includes(r.i), n = Math.min(tn ? 150 : c, 150);
+        const dots = Array.from({length: n}, (_, k) => { const a = k * 2.39996, q = 24 * Math.sqrt((k + 0.5) / n); return [q * Math.cos(a), q * Math.sin(a)]; });
+        P.push({key: r.i + '-' + p, n: tn ? 'TNTC' : String(raw), dil: r.dil, dots, used,
+          label: used ? t('in berekening') : inR ? t('niet gebruikt') : c < lo ? t('te weinig') : t('te veel')});
+      }));
+      return P;
+    },
     /* de uitkomst: ofwel N, ofwel een schatting, ofwel een melding */
     out() {
       const t = this.t, {allCounts, lo, hi, f} = this.m;
@@ -182,7 +210,7 @@ export default {
       }
       if (sumND > 0) {
         const N = sumC / (pv * sumND);
-        return {N, extra,
+        return {N, extra, keep: used.map(u => u.i),
           kv: [[t('Telbare platen'), used.length], [t('Som kolonies ΣC'), L(fmt(sumC, 0))], ['Σ nᵢ·dᵢ', L(sci(sumND, 3))], [t('Uitgeplaat'), L(fmt(pv, 3)) + ' mL']],
           formula: L('N = ΣC / (V × Σ nᵢ·dᵢ) = ' + fmt(sumC, 0) + ' / (' + fmt(pv, 3) + ' × ' + sci(sumND, 3) + ')')};
       }

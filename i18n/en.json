@@ -5487,5 +5487,20 @@
 "Een van beide stoffen heeft te weinig punten voor een fit.": "One of the two compounds has too few points for a fit.",
 "Te weinig vrijheidsgraden voor de F-toets.": "Too few degrees of freedom for the F test.",
 "De log-IC₅₀ verschilt significant (significantieniveau vijf procent): aparte IC₅₀-waarden passen beter dan één gedeelde.": "The log IC₅₀ differs significantly (five percent significance level): separate IC₅₀ values fit better than one shared value.",
-"Geen significant verschil in log-IC₅₀ (significantieniveau vijf procent).": "No significant difference in log IC₅₀ (five percent significance level)."
+"Geen significant verschil in log-IC₅₀ (significantieniveau vijf procent).": "No significant difference in log IC₅₀ (five percent significance level).",
+"Condities vergelijken": "Compare conditions",
+"Curven met dezelfde naam, op een volgnummer aan het eind na, tellen als replicaten van één conditie.": "Curves with the same name apart from a trailing sequence number count as replicates of one condition.",
+"Conditie": "Condition",
+"µ<sub>m</sub> (h⁻¹), gem. ± SD": "µ<sub>m</sub> (h⁻¹), mean ± SD",
+"Lag λ, gem. ± SD": "Lag λ, mean ± SD",
+"Tegen de eerste conditie": "Versus the first condition",
+"µ<sub>m</sub>: t": "µ<sub>m</sub>: t",
+"Lag: t": "Lag: t",
+"Welch-t-toets (ongelijke varianties), tweezijdig; sterren bij p onder de vijf procent. Alleen met minstens twee replicaten per conditie.": "Welch t-test (unequal variances), two-sided; stars below five percent. Only with at least two replicates per condition.",
+"Platen": "Plates",
+"in berekening": "in calculation",
+"niet gebruikt": "not used",
+"te weinig": "too few",
+"te veel": "too many",
+"Elke plaat is getekend met hooguit honderdvijftig stippen; ontelbaar staat als TNTC. Gebruikt voor de KVE/mL: platen binnen het telbare bereik ({#}–{#}).": "Each plate is drawn with at most one hundred and fifty dots; uncountable shows as TNTC. Used for the CFU/mL: plates within the countable range ({#}–{#})."
 }
