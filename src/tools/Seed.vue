@@ -46,8 +46,8 @@
               <circle v-if="pic.plate" :cx="o.x" :cy="o.y" :r="o.r" :fill="o.on ? 'var(--accent)' : 'none'" :fill-opacity="o.on ? .22 : 1" :stroke="o.on ? 'var(--accent)' : 'var(--line)'" stroke-width="1.5"/>
               <rect v-else :x="o.x - o.r" :y="o.y - 40" :width="o.r * 2" height="80" rx="12" fill="var(--accent)" fill-opacity=".22" stroke="var(--accent)" stroke-width="1.5"/>
               <template v-if="o.on && pic.txt">
-                <text :x="o.x" :y="o.y - 1" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text)">{{ pic.cells }}</text>
-                <text :x="o.x" :y="o.y + 11" text-anchor="middle" font-size="10" fill="var(--text)">{{ pic.sus }}</text>
+                <text :x="o.x" :y="o.y - 1" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">{{ pic.cells }}</text>
+                <text :x="o.x" :y="o.y + 11" text-anchor="middle" font-size="10" fill="var(--ink)">{{ pic.sus }}</text>
               </template>
             </g>
           </svg>
