@@ -59,6 +59,16 @@
         <button type="button" id="gf-flip" @click="flip">{{ t('Spiegelen') }}</button>
         <button type="button" id="gf-crop" @click="crop">{{ t('Bijsnijden') }}</button>
         <button type="button" id="gf-uncrop" @click="uncrop">{{ t('Herstel') }}</button>
+        <button type="button" id="gf-smartcrop" :title="t('Snijdt bij tot het gelvlak, vanaf net boven de putjes')" @click="smartCrop">{{ t('Slim bijsnijden') }}</button>
+        <button type="button" id="gf-persp" :title="t('Voor een foto die schuin is genomen: trek de vier hoeken van de gel recht')" @click="persp">{{ t('Perspectief') }}</button>
+      </div>
+      <!-- setMode() laat deze balk zien en verbergen, net als de bijsnijbalk -->
+      <div class="row" id="gf-perspbar" style="margin-top:8px;display:none">
+        <span style="font-size:13px;flex-basis:100%">{{ t('Sleep de vier oranje hoeken naar de hoeken van de gel en kies Toepassen.') }}</span>
+        <button type="button" id="gf-perspfind" @click="perspFind">{{ t('Hoeken zoeken') }}</button>
+        <button type="button" class="primary" id="gf-perspok" @click="perspOk">{{ t('Toepassen') }}</button>
+        <button type="button" id="gf-perspno" @click="persp">{{ t('Annuleren') }}</button>
+        <button type="button" id="gf-perspoff" @click="perspOff">{{ t('Zonder perspectief') }}</button>
       </div>
       <lk-note v-if="enh" kind="info" id="gf-enhlist">{{ t('Automatisch verbeteren paste toe:') }} {{ enh }}</lk-note>
       <!-- setMode() laat de balk hieronder zien en verbergen en zet de klasse 'on' op de
@@ -110,6 +120,11 @@ export default {
     crop() { if (gf.src) setMode('crop'); },
     uncrop() { gfUncrop(); },
     cropFind() { gfCropFind(); },
+    smartCrop() { gfSmartCrop(); },
+    persp() { if (gf.src) setMode('persp'); },
+    perspFind() { gfPerspFind(); },
+    perspOk() { gfPerspOk(); },
+    perspOff() { gfPerspOff(); },
     cropOk() { gfCropOk(); },
     cropCancel() { setMode('crop'); }
   }

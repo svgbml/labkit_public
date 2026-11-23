@@ -10,7 +10,7 @@ import {lkNumIn} from '../lib/bridge.js';
 import {libPut} from '../tools/gelfoto/library.js';
 
 /* ================= GELFOTO-EDITOR ================= */
-const gf={unit:'bp',disp:'bp',angAuto:true,src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null};
+const gf={unit:'bp',disp:'bp',angAuto:true,src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null,persp:null};
 const gcv=$('#gf-cv');
 /* Elke zin is een eigen vertaalsleutel (S270); een lege zin valt weg. #gf-status staat in een Vue-boom,
    dus de DOM-vertaallaag kwam er nooit: in het Engels bleven deze meldingen eerst Nederlands. */
@@ -23,7 +23,7 @@ function gfSetIn(id,v){ const el=$('#'+id); if(!el) return; el.value=String(v);
      niet meer, dus doen we het hier voordat v-model de waarde overneemt */
   if(LANG==='en'&&typeof i18nValue==='function'){ el.__iv=null; el.__typed=false; i18nValue(el); }
   el.dispatchEvent(new Event('input',{bubbles:true})); }
-function gfLoadCanvas(c){ gf.libId=null; gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; gfSetIn('gf-rot',0); gfUpdate(true); }
+function gfLoadCanvas(c){ gf.libId=null; gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.persp=null; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; gfSetIn('gf-rot',0); gfUpdate(true); }
 function gfFromImage(img){ const M=2400, s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); gfLoadCanvas(c); gf.title=''; gfSetIn('gf-title',''); gf.marks=[]; let auto=false; { const bx=gfFindGel(); if(bx&&bx.w*bx.h<0.8*c.width*c.height){ gf.crop=bx; gf.cache={}; auto=true; } } gfDetectLanes(); if(gf.lanes.length>=2) gfDetectBands(); gfMarksTable(); gfStatus(`Geladen: ${img.naturalWidth} × ${img.naturalHeight} px${s<1?' (verkleind voor bewerking)':''}.`, auto?'Gel automatisch bijgesneden (Herstel toont de hele foto).':'', `${gf.lanes.length} lanen gevonden.`, 'Staat de gel scheef? Gebruik "Automatisch rechtzetten".'); }
 function gfFile(f){ if(!f) return; const url=URL.createObjectURL(f); const img=new Image(); img.onload=()=>{ gfFromImage(img); URL.revokeObjectURL(url); }; img.onerror=()=>gfStatus('Dit bestand kan de browser niet openen (bijvoorbeeld TIFF). Exporteer de foto als PNG of JPG.'); img.src=url; }
 $('#gf-stage').addEventListener('dragover',e=>e.preventDefault());
@@ -49,15 +49,15 @@ function gfDemo(){
 }
 /* processing */
 function gfRotated(){
-  const k=`${gf.rot90}|${gf.fine}|${gf.flip}`; if(gf.cache.rk===k) return gf.cache.rot;
-  const s=gf.src, a=(gf.rot90*90+gf.fine)*Math.PI/180, cos=Math.abs(Math.cos(a)), sin=Math.abs(Math.sin(a));
+  const k=`${gf.rot90}|${gf.fine}|${gf.flip}|${JSON.stringify(gf.persp)}`; if(gf.cache.rk===k) return gf.cache.rot;
+  const s=gfWarped(), a=(gf.rot90*90+gf.fine)*Math.PI/180, cos=Math.abs(Math.cos(a)), sin=Math.abs(Math.sin(a));
   const W=Math.round(s.width*cos+s.height*sin), H=Math.round(s.width*sin+s.height*cos); const c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
   const sx=s.getContext('2d'), bd=[sx.getImageData(0,0,s.width,1).data,sx.getImageData(0,s.height-1,s.width,1).data,sx.getImageData(0,0,1,s.height).data,sx.getImageData(s.width-1,0,1,s.height).data]; let r=0,g=0,bb=0,cnt=0; bd.forEach(d=>{ for(let i=0;i<d.length;i+=4){ r+=d[i]; g+=d[i+1]; bb+=d[i+2]; cnt++; } }); x.fillStyle=`rgb(${Math.round(r/cnt)},${Math.round(g/cnt)},${Math.round(bb/cnt)})`; x.fillRect(0,0,W,H);
   x.translate(W/2,H/2); x.rotate(a); if(gf.flip) x.scale(-1,1); x.drawImage(s,-s.width/2,-s.height/2);
   gf.cache.rk=k; gf.cache.rot=c; return c;
 }
 function gfProc(){
-  const k=`${gf.rot90}|${gf.fine}|${gf.flip}|${JSON.stringify(gf.crop)}|${gf.inv}|${gf.gray}|${gf.bri}|${gf.con}`; if(gf.cache.pk===k) return gf.cache.proc;
+  const k=`${gf.rot90}|${gf.fine}|${gf.flip}|${JSON.stringify(gf.persp)}|${JSON.stringify(gf.crop)}|${gf.inv}|${gf.gray}|${gf.bri}|${gf.con}`; if(gf.cache.pk===k) return gf.cache.proc;
   const r=gfRotated(); const cr=gf.crop||{x:0,y:0,w:r.width,h:r.height};
   const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(cr.w)); c.height=Math.max(1,Math.round(cr.h)); const x=c.getContext('2d'); x.drawImage(r,cr.x,cr.y,cr.w,cr.h,0,0,c.width,c.height);
   const id=x.getImageData(0,0,c.width,c.height), d=id.data, n=c.width*c.height, gray=new Float32Array(n);
@@ -71,7 +71,7 @@ function gfProc(){
 /* Verzadigde pixels van de ruwe foto (vóór helderheid/contrast), in dezelfde uitsnede als gfProc().c.
    Heldere banden: kanaal >= 254; donkere banden: kanaal <= 1. Hoeken die het kantelen bijvult tellen mee. */
 function gfSat(){
-  const k=`${gf.rot90}|${gf.fine}|${gf.flip}|${JSON.stringify(gf.crop)}`; if(gf.cache.sk===k) return gf.cache.sat;
+  const k=`${gf.rot90}|${gf.fine}|${gf.flip}|${JSON.stringify(gf.persp)}|${JSON.stringify(gf.crop)}`; if(gf.cache.sk===k) return gf.cache.sat;
   const r=gfRotated(), cr=gf.crop||{x:0,y:0,w:r.width,h:r.height}, dark=gfProc().darkBands;
   const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(cr.w)); c.height=Math.max(1,Math.round(cr.h)); const x=c.getContext('2d'); x.drawImage(r,cr.x,cr.y,cr.w,cr.h,0,0,c.width,c.height);
   const id=x.getImageData(0,0,c.width,c.height), d=id.data, N=c.width*c.height; let n=0;
@@ -318,6 +318,10 @@ function gfRender(exportMode,scale=1){
   if(!exportMode){ clearTimeout(gfHist.t); gfHist.t=setTimeout(gfHistRec,350); }   /* ongedaan maken (S74) */
   const c=exportMode?document.createElement('canvas'):gcv, x=c.getContext('2d');
   if(!gf.src){ c.width=800; c.height=300; x.fillStyle='#f3f5f7'; x.fillRect(0,0,800,300); x.fillStyle='#5a6a78'; x.font='16px Segoe UI, Arial, sans-serif'; x.textAlign='center'; x.fillText('Kies een gelfoto of laad de demo-gel.',400,150); return c; }
+  if(gf.mode==='persp'&&!exportMode){ const s=gf.src, q=gf.pend; c.width=s.width; c.height=s.height; x.drawImage(s,0,0);
+    if(q){ const lw=Math.max(2,s.width/300), hs=Math.max(8,s.width/90); x.strokeStyle='#e8a317'; x.lineWidth=lw; x.beginPath(); q.forEach((p,i)=>i?x.lineTo(p.x,p.y):x.moveTo(p.x,p.y)); x.closePath(); x.stroke();
+      q.forEach(p=>{ x.fillStyle='#fff'; x.beginPath(); x.arc(p.x,p.y,hs,0,Math.PI*2); x.fill(); x.stroke(); }); }
+    gf.layout={L:0,T:0,s:1,crop:true}; return c; }
   if(gf.mode==='crop'&&!exportMode){ const r=gfRotated(); c.width=r.width; c.height=r.height; x.drawImage(r,0,0); const p=gf.pend; if(p){ x.fillStyle='rgba(0,0,0,.45)'; x.fillRect(0,0,r.width,p.y); x.fillRect(0,p.y+p.h,r.width,r.height-p.y-p.h); x.fillRect(0,p.y,p.x,p.h); x.fillRect(p.x+p.w,p.y,r.width-p.x-p.w,p.h); x.strokeStyle='#1558b0'; x.lineWidth=Math.max(2,r.width/300); x.strokeRect(p.x,p.y,p.w,p.h); const hs=Math.max(6,r.width/110); x.fillStyle='#fff'; [[0,0],[.5,0],[1,0],[0,.5],[1,.5],[0,1],[.5,1],[1,1]].forEach(([fx,fy])=>{ x.fillRect(p.x+p.w*fx-hs/2,p.y+p.h*fy-hs/2,hs,hs); x.strokeRect(p.x+p.w*fx-hs/2,p.y+p.h*fy-hs/2,hs,hs); }); } gf.layout={L:0,T:0,s:1,crop:true}; return c; }
   const o=gxOpts(), P=gfProc(), fs=gf.fs, U=gfDU(), edit=!exportMode&&o.help;
   const font=`600 ${fs}px Segoe UI, Arial, sans-serif`, sfont=`500 ${fs*0.85}px Segoe UI, Arial, sans-serif`, mfont=`600 ${fs*0.8}px Segoe UI, Arial, sans-serif`;
@@ -402,7 +406,8 @@ function gfGeom(){ const had=gf.lanes.length>0, hb=gf.bands.length>0; gf.marks=[
 function gfR90(){ gf.rot90=(gf.rot90+1)%4; gf.crop=null; gfGeom(); }
 function gfFlip(){ gf.flip=!gf.flip; gfGeom(); }
 function gfBandsBtn(){ gf.ladKey=$('#gf-lad').value; gfDetectBands(); }
-function setMode(m){ gf.mode=gf.mode===m?null:m; ['crop','addlane','addband','measure'].forEach(k=>{ const b=$({crop:'#gf-crop',addlane:'#gf-addlane',addband:'#gf-addband',measure:'#gf-measure'}[k]); if(b) b.classList.toggle('on',gf.mode===k); }); { const cb=$('#gf-cropbar'); if(cb) cb.style.display=gf.mode==='crop'?'flex':'none'; } gcv.style.cursor=gf.mode?'crosshair':'default'; gf.pend=gf.mode==='crop'&&gf.crop?{...gf.crop}:null; if(window.__gfRefresh) window.__gfRefresh(); gfRender(); }
+function setMode(m){ gf.mode=gf.mode===m?null:m; ['crop','addlane','addband','measure','persp'].forEach(k=>{ const b=$({crop:'#gf-crop',addlane:'#gf-addlane',addband:'#gf-addband',measure:'#gf-measure',persp:'#gf-persp'}[k]); if(b) b.classList.toggle('on',gf.mode===k); }); { const cb=$('#gf-cropbar'); if(cb) cb.style.display=gf.mode==='crop'?'flex':'none'; const pb=$('#gf-perspbar'); if(pb) pb.style.display=gf.mode==='persp'?'flex':'none'; } gcv.style.cursor=gf.mode?'crosshair':'default';
+  gf.pend=gf.mode==='crop'&&gf.crop?{...gf.crop}:gf.mode==='persp'&&gf.src?(gf.persp?gf.persp.map(q=>({...q})):gfFindQuad()||gfQuadDefault()):null; if(window.__gfRefresh) window.__gfRefresh(); gfRender(); }
 function gfMeasureBtn(){ if(gf.bands.filter(b=>isFinite(b.bp)).length<2){ gfStatus('Je hebt minstens twee ladderbanden met bp-waarde nodig om te meten.'); return; } setMode('measure'); }
 function gfUncrop(){ if(!gf.crop) return; gf.crop=null; gfGeom(); }
 function gfCropFind(){ const b=gfFindGel(); if(b){ gf.pend=b; gfRender(); gfStatus('Kader om het gelvlak gezet; stel het bij en kies Toepassen.'); } else gfStatus('Geen duidelijk gelvlak gevonden; sleep zelf een kader.'); }
@@ -440,6 +445,7 @@ gcv.addEventListener('pointerdown',e=>{
   if(!gf.src) return; const p=cvPt(e); const P=gf.mode==='crop'?null:gfProc();
   if(e.pointerType==='touch'){ gfTouch.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(gfTouch.size>=2){ const [a,b]=[...gfTouch.values()]; gf.drag=null; gf.pinch={d:Math.max(1,Math.hypot(a.x-b.x,a.y-b.y)),z:gf.zoom||1}; gfRender(); return; } }
   if(e.button===1){ const v=$('#gf-view'); gf.drag={t:'pan',cx:e.clientX,cy:e.clientY,sl:v.scrollLeft,st:v.scrollTop}; gcv.setPointerCapture(e.pointerId); e.preventDefault(); return; }
+  if(gf.mode==='persp'){ const q=gf.pend||[]; let bi=-1,bd=Math.max(24*p.s,gf.src.width/40); q.forEach((c,i)=>{ const d=Math.hypot(c.x-p.x,c.y-p.y); if(d<bd){bd=d;bi=i;} }); if(bi>=0){ gf.drag={t:'pc',i:bi}; gcv.setPointerCapture(e.pointerId); } return; }
   if(gf.mode==='crop'){ const h=gfCropHit(p); if(h){ gf.drag={t:'cropadj',h,x0:p.x,y0:p.y,o:{...gf.pend}}; } else { gf.drag={t:'crop',x0:p.x,y0:p.y}; gf.pend={x:p.x,y:p.y,w:0,h:0}; } gcv.setPointerCapture(e.pointerId); return; }
   const inside=p.x>=0&&p.y>=0&&p.x<=P.w&&p.y<=P.h;
   if(!gf.mode&&gfLabHit(p)>=0){ e.preventDefault(); gfLabEdit(gfLabHit(p)); return; }  /* preventDefault: anders haalt de muisklik de focus meteen weg */
@@ -469,6 +475,7 @@ gcv.addEventListener('pointermove',e=>{
     gf.pend={x:x0,y:y0,w:x1-x0,h:y1-y0}; gfRender(); return; }
   if(gf.drag.t==='crop'){ const r=gfRotated(); const x0=Math.max(0,Math.min(gf.drag.x0,p.x)), y0=Math.max(0,Math.min(gf.drag.y0,p.y)); gf.pend={x:x0,y:y0,w:Math.min(r.width,Math.max(gf.drag.x0,p.x))-x0,h:Math.min(r.height,Math.max(gf.drag.y0,p.y))-y0}; gfRender(); }
   else if(gf.drag.t==='lane'){ gf.lanes[gf.drag.i].x=Math.max(0,Math.min(gfProc().w,p.x)); gfRender(); }
+  else if(gf.drag.t==='pc'){ gf.pend[gf.drag.i]={x:Math.max(0,Math.min(gf.src.width,p.x)),y:Math.max(0,Math.min(gf.src.height,p.y))}; gfRender(); }
   else if(gf.drag.t==='mark'){ const m=gf.marks[gf.drag.i]; m.y=Math.max(0,Math.min(gfProc().h,p.y)); m.bp=gfEst(m.y,m.x); gfRender(); }
   else if(gf.drag.t==='lw'){ gf.lw=Math.max(4,Math.min(200,Math.round(2*Math.abs(p.x-gf.lanes[gf.drag.i].x)))); gfRender(); }
   else if(gf.drag.t==='band'){ gf.bands[gf.drag.i].y=Math.max(0,Math.min(gfProc().h,p.y)); gfRender(); }
@@ -509,7 +516,7 @@ function gfDensChanged(){ gf.marks.forEach(m=>m.int=null); gfMarksTable(); }
 
 /* ================= GELFOTO: AUTOMATISCH RECHTZETTEN ================= */
 function gfAutoStraighten(){
-  if(!gf.src) return; const s0=gf.src, sc=Math.min(1,420/Math.max(s0.width,s0.height)); const sw=Math.round(s0.width*sc), sh=Math.round(s0.height*sc);
+  if(!gf.src) return; const s0=gfWarped(), sc=Math.min(1,420/Math.max(s0.width,s0.height)); const sw=Math.round(s0.width*sc), sh=Math.round(s0.height*sc);
   const small=document.createElement('canvas'); small.width=sw; small.height=sh; small.getContext('2d').drawImage(s0,0,0,sw,sh);
   const c=document.createElement('canvas'), x=c.getContext('2d',{willReadFrequently:true}); c.width=sw; c.height=sh;
   const score=a=>{ x.setTransform(1,0,0,1,0,0); x.fillStyle='#808080'; x.fillRect(0,0,sw,sh); x.translate(sw/2,sh/2); x.rotate((gf.rot90*90+a)*Math.PI/180); if(gf.flip) x.scale(-1,1); x.drawImage(small,-sw/2,-sh/2);
@@ -522,6 +529,49 @@ function gfAutoStraighten(){
   gfStatus(`Rechtgezet met ${fmt(best,2)}°. Lanen en ladder worden opnieuw gedetecteerd.`);
 }
 
+/* ================= GELFOTO: PERSPECTIEF EN SLIM BIJSNIJDEN (S76) =================
+   gf.persp: vier punten (linksboven, rechtsboven, rechtsonder, linksonder) in de oorspronkelijke foto.
+   gfWarped() trekt die vierhoek recht tot een rechthoek (projectieve transformatie, bilineair
+   bemonsterd) vóór het draaien en bijsnijden, dus alles daarna werkt op de rechtgetrokken gel. */
+/* homografie die de punten a[i] op b[i] afbeeldt (8 onbekenden, 4 puntparen) */
+function gfHomog(a,b){ const A=[], v=[]; for(let i=0;i<4;i++){ const {x,y}=a[i], {x:u,y:w}=b[i]; A.push([x,y,1,0,0,0,-u*x,-u*y]); v.push(u); A.push([0,0,0,x,y,1,-w*x,-w*y]); v.push(w); }
+  const M=invMat(A); if(!M) return null; const h=M.map(r=>r.reduce((s,m,k)=>s+m*v[k],0)); return [...h,1]; }
+/* bemonstert src op H(x, y) voor elk doelpixel; buiten src blijft het doel doorzichtig */
+function gfWarp(src,H,W,Hh){ const c=document.createElement('canvas'); c.width=W; c.height=Hh; const sx=src.getContext('2d').getImageData(0,0,src.width,src.height), sd=sx.data, sw=src.width, sh=src.height;
+  const x=c.getContext('2d'), od=x.createImageData(W,Hh), o=od.data;
+  for(let y=0;y<Hh;y++) for(let X=0;X<W;X++){ const px=X+0.5, py=y+0.5, z=H[6]*px+H[7]*py+H[8], u=(H[0]*px+H[1]*py+H[2])/z-0.5, w=(H[3]*px+H[4]*py+H[5])/z-0.5; if(u<0||w<0||u>sw-1||w>sh-1) continue;
+    const u0=Math.floor(u), w0=Math.floor(w), fu=u-u0, fw=w-w0, u1=Math.min(sw-1,u0+1), w1=Math.min(sh-1,w0+1), k=(y*W+X)*4;
+    for(let ch=0;ch<4;ch++){ const a=sd[(w0*sw+u0)*4+ch], b=sd[(w0*sw+u1)*4+ch], cc=sd[(w1*sw+u0)*4+ch], d=sd[(w1*sw+u1)*4+ch]; o[k+ch]=(a*(1-fu)+b*fu)*(1-fw)+(cc*(1-fu)+d*fu)*fw; } }
+  x.putImageData(od,0,0); return c; }
+function gfWarped(){ const q=gf.persp; if(!q||q.length!==4) return gf.src; const k=JSON.stringify(q); if(gf.cache.wk===k) return gf.cache.warp;
+  const L=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y), W=Math.max(8,Math.round((L(q[0],q[1])+L(q[3],q[2]))/2)), H=Math.max(8,Math.round((L(q[0],q[3])+L(q[1],q[2]))/2));
+  const Hm=gfHomog([{x:0,y:0},{x:W,y:0},{x:W,y:H},{x:0,y:H}],q); if(!Hm) return gf.src;
+  gf.cache.wk=k; gf.cache.warp=gfWarp(gf.src,Hm,W,H); return gf.cache.warp; }
+const gfQuadDefault=()=>{ const w=gf.src.width, h=gf.src.height, m=0.08; return [{x:w*m,y:h*m},{x:w*(1-m),y:h*m},{x:w*(1-m),y:h*(1-m)},{x:w*m,y:h*(1-m)}]; };
+/* de hoeken van het gelvlak: de rand van de foto is de omgeving (tafel, transilluminator); alles wat
+   duidelijk anders is dan die rand (lichter of donkerder) en samenhangt met het midden, is de gel.
+   Daarvan de uiterste punten langs x+y en x−y (zo werkt het ook bij een schuine vierhoek). */
+function gfFindQuad(){ const s=gf.src, sc=Math.min(1,600/Math.max(s.width,s.height)), w=Math.max(8,Math.round(s.width*sc)), h=Math.max(8,Math.round(s.height*sc)), c=document.createElement('canvas'); c.width=w; c.height=h;
+  const x=c.getContext('2d'); x.drawImage(s,0,0,w,h); const d=x.getImageData(0,0,w,h).data, g=new Float32Array(w*h); for(let i=0;i<w*h;i++) g[i]=0.299*d[i*4]+0.587*d[i*4+1]+0.114*d[i*4+2];
+  const bw=Math.max(2,Math.round(Math.min(w,h)*0.03)), bord=[]; for(let y=0;y<h;y++) for(let X=0;X<w;X++) if(X<bw||X>=w-bw||y<bw||y>=h-bw) bord.push(g[y*w+X]);
+  bord.sort((p,q)=>p-q); const med=bord[bord.length>>1], mad=[...bord.map(v=>Math.abs(v-med))].sort((p,q)=>p-q)[bord.length>>1], tol=Math.max(5,4*mad);
+  const fg=i=>Math.abs(g[i]-med)>tol;
+  let st=-1, bd=Infinity; for(let i=0;i<w*h;i++) if(fg(i)){ const dd=Math.hypot(i%w-w/2,Math.floor(i/w)-h/2); if(dd<bd){ bd=dd; st=i; } } if(st<0) return null;
+  const seen=new Uint8Array(w*h), stack=[st]; seen[st]=1; let n=0; const ext=[[Infinity,0],[-Infinity,0],[-Infinity,0],[Infinity,0]];  /* min x+y, max x−y, max x+y, min x−y */
+  while(stack.length){ const i=stack.pop(), px=i%w, py=(i-px)/w; n++; const a=px+py, b=px-py;
+    if(a<ext[0][0]) ext[0]=[a,i]; if(b>ext[1][0]) ext[1]=[b,i]; if(a>ext[2][0]) ext[2]=[a,i]; if(b<ext[3][0]) ext[3]=[b,i];
+    for(const j of [px>0?i-1:-1,px<w-1?i+1:-1,py>0?i-w:-1,py<h-1?i+w:-1]) if(j>=0&&!seen[j]&&fg(j)){ seen[j]=1; stack.push(j); } }
+  if(n<0.08*w*h||n>0.97*w*h) return null; return ext.map(([,i])=>({x:((i%w)+0.5)/sc,y:(Math.floor(i/w)+0.5)/sc})); }
+function gfPerspFind(){ const q=gfFindQuad(); if(q){ gf.pend=q; gfRender(); gfStatus('Hoeken van de gel gevonden; stel ze bij en kies Toepassen.'); } else gfStatus('Geen duidelijk gelvlak gevonden; sleep de hoeken zelf.'); }
+function gfPerspOk(){ const q=gf.pend; if(!q||q.length!==4){ setMode('persp'); return; }
+  gf.persp=q.map(p=>({x:Math.round(p.x*10)/10,y:Math.round(p.y*10)/10})); gf.crop=null; gf.cache={}; setMode('persp'); gfSetIn('gf-rot',0); gf.fine=0; gfFine=0; clearTimeout(gfFineT); gfGeom();
+  gfStatus('Perspectief gecorrigeerd; lanen en ladder zijn opnieuw gedetecteerd.'); }
+function gfPerspOff(){ if(gf.mode==='persp') setMode('persp'); if(!gf.persp) return; gf.persp=null; gf.crop=null; gf.cache={}; gfGeom(); }
+/* slim bijsnijden: het gelvlak, en de bovenrand net boven de putjes van de kam */
+function gfSmartCrop(){ if(!gf.src) return; const b=gfFindGel(); if(!b){ gfStatus('Geen duidelijk gelvlak gevonden; sleep zelf een kader.'); return; }
+  gf.crop=b; gf.cache={}; const W=gfWells(), h=gfProc().h; let top=false; if(W&&W.y>h*0.05){ const dy=Math.round(W.y-h*0.04); gf.crop={...b,y:b.y+dy,h:b.h-dy}; top=true; }
+  if(gf.mode==='crop') setMode('crop'); gfGeom(); gfStatus(top?'Bijgesneden tot het gelvlak, vanaf net boven de putjes.':'Bijgesneden tot het gelvlak; de putjes zijn niet gevonden.'); }
+
 /* ================= GELFOTO: EERLIJK BEWERKEN (S75) =================
    gfRawCrop: de uitsnede zonder beeldaanpassingen (voor de voor/na-schuif). gfEdits: wat er met de
    foto gebeurde, als vertaalsleutels met de waarden erin, voor het paneel en de regel onder de figuur.
@@ -530,6 +580,7 @@ function gfAutoStraighten(){
 function gfRawCrop(){ const r=gfRotated(), cr=gf.crop||{x:0,y:0,w:r.width,h:r.height}, k=gf.cache.rk+'|'+JSON.stringify(gf.crop); if(gf.cache.rawk===k) return gf.cache.raw;
   const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(cr.w)); c.height=Math.max(1,Math.round(cr.h)); c.getContext('2d').drawImage(r,cr.x,cr.y,cr.w,cr.h,0,0,c.width,c.height); gf.cache.rawk=k; gf.cache.raw=c; return c; }
 function gfEdits(){ if(!gf.src) return []; const e=[], P=gfProc(), N=v=>uv(lkNumIn(fmt(v,2)));
+  if(gf.persp) e.push('Perspectief gecorrigeerd (vier hoeken)');
   if(gf.rot90) e.push('Gedraaid: '+uv(gf.rot90*90)+'°'); if(gf.flip) e.push('Gespiegeld');
   if(gf.fine) e.push('Rechtgezet: '+N(gf.fine)+'°');
   if(gf.crop) e.push('Bijgesneden tot '+uv(P.w)+' × '+uv(P.h)+' px');
@@ -582,7 +633,7 @@ function gfLabEdit(i){ const old=$('#gf-labed'); if(old) old.remove(); const l=g
 /* ================= PROJECTBESTAND .labkitgel (S62) =================
    De foto als PNG plus de toestand van de editor (lanen met hun banden, ladder, metingen, beeldwerk)
    en de waarden van de velden. De virtuele ladder (een tweede foto) en de zoom gaan niet mee. */
-const GF_PROJ=['rot90','fine','flip','crop','inv','gray','bri','con','lanes','lw','ladder','ladKey','marks','title','fs','ang','angAuto','unit','disp','wells','autoLadder'];
+const GF_PROJ=['persp','rot90','fine','flip','crop','inv','gray','bri','con','lanes','lw','ladder','ladKey','marks','title','fs','ang','angAuto','unit','disp','wells','autoLadder'];
 /* het veld-id's van de tool; de lanelabels staan in gf.lanes, de virtuele ladder gaat niet mee */
 const gfProjFields=()=>[...$$('#t-gelfoto input[id],#t-gelfoto select[id],#t-gelfoto textarea[id]')].filter(el=>el.type!=='file'&&!el.closest('table')&&!/^gf-(vl|ll|labed|expert|ba$)/.test(el.id));
 /* geeft verwijzingen naar gf terug: wie bewaart, kopieert (JSON of IndexedDB doen dat zelf) */
@@ -605,7 +656,7 @@ async function gfProjApply(p){
   const c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight; c.getContext('2d').drawImage(img,0,0);
   /* velden eerst, twee keer: de keuze van de ladder zet in een watcher de eenheid en de massa's
      en het eigen-ladderveld verschijnt pas daarna; de tweede ronde zet de bewaarde waarden terug */
-  await gfPutState(p,()=>{ gf.libId=null; gf.src=c; gf.crop=null; gf.wells=null; gf.vl=null; });
+  await gfPutState(p,()=>{ gf.libId=null; gf.src=c; gf.persp=null; gf.crop=null; gf.wells=null; gf.vl=null; });
   gfStatus('Project geopend.'); }
 /* velden en toestand terugzetten (project openen, ongedaan maken); voor() draait tussen velden en toestand */
 async function gfPutState(p,voor){
@@ -628,13 +679,14 @@ async function gfPutState(p,voor){
    opnieuw zetten velden en toestand terug zoals een project openen. */
 const gfHist={list:[],i:-1,src:null,busy:false,t:null};
 const gfHistJ=()=>JSON.stringify(gfStateSnap(),gfJsonW);
-function gfHistRec(){ if(gfHist.busy||!gf.src||gf.drag||gf.mode==='crop') return;
+function gfHistRec(){ if(gfHist.busy||!gf.src||gf.drag||gf.mode==='crop'||gf.mode==='persp') return;
   if(gf.src!==gfHist.src){ gfHist.src=gf.src; gfHist.list=[]; gfHist.i=-1; }
   const j=gfHistJ(), cur=gfHist.list[gfHist.i]; if(cur&&cur.j===j) return;
   gfHist.list.splice(gfHist.i+1); gfHist.list.push({j,lab:cur?gfHistLab(JSON.parse(cur.j,gfJsonR),JSON.parse(j,gfJsonR)):'Foto geladen'});
   if(gfHist.list.length>80) gfHist.list.shift(); gfHist.i=gfHist.list.length-1; gfHistUi(); }
 /* wat veranderde er tussen twee momentopnamen; de eerste die past, telt */
 function gfHistLab(a,b){ const A=a.gf, B=b.gf, ne=(p,q)=>JSON.stringify(p)!==JSON.stringify(q), nb=g=>(g.lanes||[]).reduce((t,l)=>t+(l.lad&&l.bands?l.bands.length:0),0);
+  if(ne(A.persp,B.persp)) return 'Perspectief gecorrigeerd';
   if(ne(A.crop,B.crop)) return 'Bijgesneden';
   if(A.rot90!==B.rot90||A.flip!==B.flip||A.fine!==B.fine) return 'Gedraaid of rechtgezet';
   if(A.lanes.length!==B.lanes.length) return B.lanes.length>A.lanes.length?'Lane toegevoegd':'Lane verwijderd';
@@ -769,6 +821,15 @@ live({
   gfAutoStraighten: [() => gfAutoStraighten, v => { gfAutoStraighten = v; }],
   LMASS: () => LMASS,
   gfRawCrop: [() => gfRawCrop, v => { gfRawCrop = v; }],
+  gfHomog: [() => gfHomog, v => { gfHomog = v; }],
+  gfWarp: [() => gfWarp, v => { gfWarp = v; }],
+  gfWarped: [() => gfWarped, v => { gfWarped = v; }],
+  gfQuadDefault: () => gfQuadDefault,
+  gfFindQuad: [() => gfFindQuad, v => { gfFindQuad = v; }],
+  gfPerspFind: [() => gfPerspFind, v => { gfPerspFind = v; }],
+  gfPerspOk: [() => gfPerspOk, v => { gfPerspOk = v; }],
+  gfPerspOff: [() => gfPerspOff, v => { gfPerspOff = v; }],
+  gfSmartCrop: [() => gfSmartCrop, v => { gfSmartCrop = v; }],
   gfEdits: [() => gfEdits, v => { gfEdits = v; }],
   gfEnhance: [() => gfEnhance, v => { gfEnhance = v; }],
   gfMassSlope: [() => gfMassSlope, v => { gfMassSlope = v; }],

@@ -469,6 +469,27 @@ def _(pg):
             ('export hoger met bewerkingsregel', int(h1 > h0), 1, 0), ('voor/na: links onbewerkt', int(a1 == raw and a0 != raw), 1, 0),
             ('export zonder voor/na', e1, 1, 0)]
 
+@case('Gelfoto-editor', 'Perspectief en slim bijsnijden', 'Rekentest: de demo-gel (760 × 520 px) projectief vervormd naar de vierhoek (150,120) (980,70) (1040,720) (90,690) op een grijze achtergrond (#2a2a2a), zoals een schuin genomen telefoonfoto. De hoeken worden binnen 1 % van de beeldbreedte gevonden; na rechttrekken weer 9 lanen en de producten 650 en 350 bp. Slim bijsnijden op de realistische testgel legt de bovenrand net boven de putjes')
+def _(pg):
+    pg.evaluate("__go('gelfoto')")
+    pg.evaluate("""(()=>{ gfDemo(); const D=gf.src, Q=[{x:150,y:120},{x:980,y:70},{x:1040,y:720},{x:90,y:690}];
+      const H=gfHomog(Q,[{x:0,y:0},{x:D.width,y:0},{x:D.width,y:D.height},{x:0,y:D.height}]), w=gfWarp(D,H,1100,800), c=document.createElement('canvas'); c.width=1100; c.height=800;
+      const x=c.getContext('2d'); x.fillStyle='#2a2a2a'; x.fillRect(0,0,1100,800); x.drawImage(w,0,0); gfLoadCanvas(c); })()""")
+    pg.evaluate("document.getElementById('gf-persp').click()"); pg.wait_for_timeout(300)
+    err = pg.evaluate("(()=>{ const Q=[[150,120],[980,70],[1040,720],[90,690]]; return Math.max(...gf.pend.map((p,i)=>Math.hypot(p.x-Q[i][0],p.y-Q[i][1]))); })()")
+    pg.evaluate("document.getElementById('gf-perspok').click()"); pg.wait_for_timeout(800)
+    pg.evaluate("__set('gf-lad','100'); gfDetectLanes(); gfDetectBands(); gf.marks=[]; gfMeasAll()")
+    n, bp = pg.evaluate("[gf.lanes.length, gf.marks.map(m=>m.bp)]")
+    b650 = [v for v in bp if 550 < v < 750]; b350 = [v for v in bp if 300 < v < 400]
+    pg.evaluate("gfPerspOff()")
+    pg.goto('about:blank'); pg.goto(URL + '#gelfoto'); pg.wait_for_timeout(800); pg.evaluate(HELPERS)
+    pg.set_input_files('#gf-file', str(ROOT / 'tests' / 'fixtures' / 'gel_realistic.png')); pg.wait_for_timeout(1500)
+    pg.evaluate("gf.crop=null; gf.cache={}; document.getElementById('gf-smartcrop').click()"); pg.wait_for_timeout(800)
+    wy = pg.evaluate("(()=>{ const W=gfWells(); return W?W.y/gfProc().h:NaN; })()")
+    return [('hoeken binnen 1 % van de breedte', int(err / 1100 < 0.01), 1, 0),
+            ('lanen na rechttrekken', n, 9, 0), ('650 bp (gem.)', sum(b650) / max(1, len(b650)), 650, 0.02), ('350 bp (gem.)', sum(b350) / max(1, len(b350)), 350, 0.03),
+            ('putjes net onder de bovenrand (< 8 %)', int(wy < 0.08), 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

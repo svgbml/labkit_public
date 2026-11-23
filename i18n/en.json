@@ -5116,5 +5116,19 @@
 "Bewerkingen vermelden": "List the edits",
 "Bewerkingen van de foto": "Edits to the photo",
 "Helderheid en contrast kappen {#} % van de pixels af.": "Brightness and contrast clip {#} % of the pixels.",
-"Dat is een niet-lineaire bewerking: banden in die pixels zijn niet meer te kwantificeren, en tijdschriften vragen dan om de onbewerkte foto.": "That is a non-linear edit: bands in those pixels can no longer be quantified, and journals then ask for the unedited photo."
+"Dat is een niet-lineaire bewerking: banden in die pixels zijn niet meer te kwantificeren, en tijdschriften vragen dan om de onbewerkte foto.": "That is a non-linear edit: bands in those pixels can no longer be quantified, and journals then ask for the unedited photo.",
+"Perspectief gecorrigeerd": "Perspective corrected",
+"Perspectief gecorrigeerd (vier hoeken)": "Perspective corrected (four corners)",
+"Hoeken van de gel gevonden; stel ze bij en kies Toepassen.": "Gel corners found; adjust them and choose Apply.",
+"Geen duidelijk gelvlak gevonden; sleep de hoeken zelf.": "No clear gel area found; drag the corners yourself.",
+"Perspectief gecorrigeerd; lanen en ladder zijn opnieuw gedetecteerd.": "Perspective corrected; lanes and ladder have been detected again.",
+"Bijgesneden tot het gelvlak, vanaf net boven de putjes.": "Cropped to the gel area, from just above the wells.",
+"Bijgesneden tot het gelvlak; de putjes zijn niet gevonden.": "Cropped to the gel area; the wells were not found.",
+"Snijdt bij tot het gelvlak, vanaf net boven de putjes": "Crops to the gel area, from just above the wells",
+"Slim bijsnijden": "Smart crop",
+"Voor een foto die schuin is genomen: trek de vier hoeken van de gel recht": "For a photo taken at an angle: pull the four corners of the gel straight",
+"Perspectief": "Perspective",
+"Sleep de vier oranje hoeken naar de hoeken van de gel en kies Toepassen.": "Drag the four orange corners to the corners of the gel and choose Apply.",
+"Hoeken zoeken": "Find corners",
+"Zonder perspectief": "Without perspective"
 }
