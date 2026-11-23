@@ -104,6 +104,14 @@ def _(pg):
     v = pg.evaluate("__cells('#s-unk tbody tr [data-x]')[0]")
     return [('terugberekend (IU/L)', v, 300, 0.01)]
 
+@case('Standaardcurve', 'Verdunningsadvies boven bereik', 'Verdunningsreeks 1-2-5 (ISO 3, Renard R3); Thermo Pierce BCA-protocol: monsters boven de hoogste standaard verdunnen en opnieuw meten. Rekenvoorbeeld: A = 0,1·c, standaarden 0–40, monster A = 1,2 → c = 120, doel = 20 (midden) → factor 6 → afgerond 10')
+def _(pg):
+    pg.evaluate("""__go('curve');__set('s-preset','leeg');__set('s-model','lin');__set('s-blank',false);
+      __tbl('s-std',[[0,0],[10,0.1],[20,0.2],[40,0.4]],'curve');
+      __tbl('s-unk',[['test',1.2,'','',1]],'curve');""")
+    v = pg.evaluate("__n(__el(document.querySelector('#s-adv')))")
+    return [('extra verdunning (×)', v, 10, 0.001)]
+
 @case('Enzymkinetiek', 'Puromycin (behandeld)', 'Treloar 1974 via R-dataset Puromycin (Bates & Watts 1988); referentie: SciPy curve_fit')
 def _(pg):
     pg.evaluate("""__go('enzym');__set('k-su','mM');__set('k-vu','µmol/min');

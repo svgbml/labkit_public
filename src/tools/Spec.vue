@@ -19,6 +19,14 @@
           <lk-field v-model="df" for-id="sp-df" :label="t('Verdunningsfactor')" data-expert=""/>
         </div>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Laat A of de concentratie leeg; dat veld wordt berekend.') }}</p>
+        <details style="margin-top:10px"><summary style="cursor:pointer;font-size:13px">{{ t('Golflengte en ε van een test') }}</summary>
+          <div class="f" style="margin-top:8px"><label for="sp-pre">{{ t('Voorinstelling') }}</label>
+            <select id="sp-pre" v-model="pre" @change="usePre">
+              <option value="">–</option>
+              <option v-for="(p, i) in PRE" :key="i" :value="i">{{ preName(p) }} ({{ p.nm }} nm)</option>
+            </select></div>
+          <lk-note v-if="cur" kind="info">{{ preNote }}</lk-note>
+        </details>
       </div>
       <div class="result" id="sp-out">
         <template v-if="m.mode === 'conc'">
@@ -70,12 +78,25 @@ const F = (x, d) => lkNumIn(fmt(x, d));
 const S = (x, s) => lkNumIn(sig(x, s));
 const N = v => lkNumIn(String(v).replace('.', ','));
 
+/* golflengte (nm) en molaire ε (M⁻¹·cm⁻¹) per test. NADH/NADPH 340 nm, 6220: Horecker & Kornberg, J Biol Chem 1948;175:385
+   en Bergmeyer, Methods of Enzymatic Analysis. p-Nitrofenol 405 nm, 18 300 bij alkalische pH (pH > 9): Sigma-Aldrich
+   p-nitrophenyl-fosfaat-protocol. Bradford 595 nm (Bradford 1976), BCA 562 nm (Smith e.a. 1985), Lowry 750 nm (Lowry e.a.
+   1951): kleurtests zonder vaste ε, die een ijkcurve nodig hebben (tool Standaardcurve). */
+const PRE = [{n: 'NADH', nm: 340, eps: 6220}, {n: 'NADPH', nm: 340, eps: 6220}, {n: 'p-nitrofenol (alkalisch)', nm: 405, eps: 18300},
+  {n: 'Bradford', nm: 595}, {n: 'BCA', nm: 562}, {n: 'Lowry', nm: 750}];
+
 export default {
   name: 'Spec',
   data() {
-    return {a: N('0,311'), e: N(6220), l: N(1), c: '', df: N(1), seq: '', nw: N(2), ny: N(20), nc: N(17), mw: N(66430), a280: N('0,45')};
+    return {pre: '', PRE, a: N('0,311'), e: N(6220), l: N(1), c: '', df: N(1), seq: '', nw: N(2), ny: N(20), nc: N(17), mw: N(66430), a280: N('0,45')};
   },
   computed: {
+    cur() { return this.pre === '' ? null : PRE[this.pre]; },
+    preNote() {
+      const p = this.cur, t = this.t;
+      return p.eps ? t('Meet bij ' + p.nm + ' nm; ε = ' + p.eps + ' M⁻¹·cm⁻¹ is ingevuld.')
+        : t('Meet bij ' + p.nm + ' nm. Deze test heeft geen vaste ε: maak een ijkcurve met de tool Standaardcurve.');
+    },
     hLB() { return this.tHtml('Lambert-Beer <span class="example">voorbeeld: NADH bij 340 nm</span>'); },
     /* alle maten van beide uitkomsten: één keer berekend, de rest van de component leest hieruit */
     m() {
@@ -99,6 +120,10 @@ export default {
       }
       return m;
     }
+  },
+  methods: {
+    preName(p) { return p.n.startsWith('p-') ? this.t(p.n) : p.n; },
+    usePre() { if (this.cur && this.cur.eps) this.e = N(this.cur.eps); }
   },
   watch: {
     /* een sequentie vult W, Y en de molmassa; een lege sequentie laat de aantallen staan */

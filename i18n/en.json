@@ -5441,5 +5441,21 @@
 "pKₐ bij deze temperatuur": "pKₐ at this temperature",
 "Buffers voor deze pH": "Buffers for this pH",
 "Geen buffer met een pKₐ binnen {#} eenheid van deze pH.": "No buffer with a pKₐ within {#} unit of this pH.",
-"Stockconcentratie (zuur- en basevorm)": "Stock concentration (acid and base form)"
+"Stockconcentratie (zuur- en basevorm)": "Stock concentration (acid and base form)",
+"Onder bereik: {*} concentreren of meer monster gebruiken (minder verdunnen).": "Below range: concentrate {*} or use more sample (dilute less).",
+"Boven bereik: {*} nog {#}× verdunnen en opnieuw meten.": "Above range: dilute {*} a further {#}× and measure again.",
+"buiten bereik": "out of range",
+"Golflengte en ε van een test": "Wavelength and ε of an assay",
+"Voorinstelling": "Preset",
+"p-nitrofenol (alkalisch)": "p-nitrophenol (alkaline)",
+"Meet bij {#} nm; ε = {#} M⁻¹·cm⁻¹ is ingevuld.": "Measure at {#} nm; ε = {#} M⁻¹·cm⁻¹ has been filled in.",
+"Meet bij {#} nm. Deze test heeft geen vaste ε: maak een ijkcurve met de tool Standaardcurve.": "Measure at {#} nm. This assay has no fixed ε: make a calibration curve with the Standard curve tool.",
+"Z′ ≥ {#}: uitstekende test voor screening (Zhang e.a. {#}).": "Z′ ≥ {#}: excellent assay for screening (Zhang et al. {#}).",
+"Z′ tussen {#} en {#}: matig; de test werkt, maar de controlebanden liggen dicht bij elkaar.": "Z′ between {#} and {#}: marginal; the assay works, but the control bands are close together.",
+"Z′ < {#}: onbruikbaar; de banden van positieve en negatieve controle overlappen.": "Z′ < {#}: unusable; the bands of the positive and negative control overlap.",
+"Controleputjes": "Control wells",
+"Kleur = signaal (donker is hoog); rood omcirkeld met ! = meer dan {#}σ van de overige putjes van de groep.": "Colour = signal (dark is high); red ring with ! = more than {#}σ from the other wells of the group.",
+"SDS-PAGE-schets per stap": "SDS-PAGE sketch per step",
+"Schets, geen meetdata: het aantal en de sterkte van de banden volgen alleen de zuiveringsfactor; de dikke band is het doeleiwit.": "Sketch, not measured data: the number and strength of the bands follow only the purification fold; the thick band is the target protein.",
+"Stap {#}": "Step {#}"
 }

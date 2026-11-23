@@ -100,6 +100,7 @@
           <span v-else :class="'chip ' + uo[ri].stCls">{{ t(uo[ri].stNl) }}</span>
         </template>
       </lk-etable>
+      <div id="s-adv"><lk-note v-for="(a, i) in advice" :key="i" kind="warn">{{ a }}</lk-note></div>
       <!-- de balk "Stuur monsters door naar"; de klik wordt afgehandeld door het globale
            document-handler op [data-send-curve] in tools/nt/99_app.js -->
       <div class="lk-send"><span>{{ t('Stuur monsters door naar') }}</span><button type="button" data-send-curve="sds">{{ t('SDS-PAGE') }}</button><button type="button" data-send-curve="wb">{{ t('Western blot') }}</button></div>
@@ -131,6 +132,9 @@ const unkRows = P => P.unk.map(r => { const x = row(r, UW); x[0] = T(r[0]); retu
 
 const MODELS = [{k: 'lin', n: 'Lineair y = a + bx'}, {k: 'lin0', n: 'Lineair door oorsprong'}, {k: 'quad', n: 'Kwadratisch'},
   {k: '4pl', n: '4PL (ELISA)'}, {k: '5pl', n: '5PL (asymmetrisch)'}];
+
+/* verdunningsfactor naar boven afgerond op de 1-2-5-reeks (2, 5, 10, 20, 50, 100, …), minstens 2 */
+const nice = f => { const p = 10 ** Math.floor(Math.log10(f)); return Math.max(2, [1, 2, 5, 10].map(k => k * p).find(v => v >= f * (1 - 1e-9))); };
 
 const ST = {out: ['buiten curve', 'bad'], hi: ['boven hoogste std', 'warn'], lo: ['onder laagste std', 'warn'], ok: ['binnen bereik', 'ok']};
 
@@ -205,7 +209,20 @@ export default {
         else st = 'ok';
         return {nm, m: FM(m, 3), mv: m, df, x, xs: isFinite(x) ? SG(x, 3) : '–', os: isFinite(o) ? SG(o, 3) : '', o,
           cv: isFinite(cvp) ? FM(cvp, 1) : '', cvp, cvCls: cvp <= 10 ? 'ok' : cvp <= 20 ? 'warn' : 'bad',
-          stNl: ST[st][0], stCls: ST[st][1]};
+          st, stNl: ST[st][0], stCls: ST[st][1]};
+      });
+    },
+    /* buiten het bereik van de standaarden: onder = concentreren, boven = het getal waarmee je nog moet verdunnen
+       om rond het midden van de standaarden uit te komen. Zonder terugberekening (buiten de curve) telt de
+       absorptieverhouding, dus een schatting. */
+    advice() {
+      const S = this.fs, t = this.t; if (S.stage !== 'ok') return [];
+      const xm = Math.max(...S.X) / 2, ym = (S.ylo + S.yhi) / 2;
+      return this.uo.flatMap(u => {
+        if (!u) return [];
+        if (u.st === 'lo') return [t('Onder bereik: ' + uv(u.nm) + ' concentreren of meer monster gebruiken (minder verdunnen).')];
+        if ((u.st === 'hi' && xm > 0) || (u.st === 'out' && u.mv > S.yhi && ym > 0)) return [t('Boven bereik: ' + uv(u.nm) + ' nog ' + nice(u.st === 'hi' ? u.x / xm : u.mv / ym) + '× verdunnen en opnieuw meten.')];
+        return [];
       });
     },
     /* de tekst voor "Kopieer resultaten" en de CSV: de oude `sText` */
@@ -276,13 +293,14 @@ export default {
       if (S.stage === 'few') { cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); return; }
       if (S.stage !== 'ok') return;
       const {X, Y, fit, useBlank, blank, logx, unit} = S;
-      const out = this.uo.filter(Boolean).map(u => ({x: u.x, m: u.mv, nm: u.nm}));
+      const out = this.uo.filter(Boolean).map(u => ({x: u.x, m: u.mv, nm: u.nm, st: u.st}));
       const xsPos = X.filter(x => logx ? x > 0 : true); const xsAll = xsPos.concat(out.map(u => u.x).filter(v => isFinite(v) && (!logx || v > 0)));
       const xmin = logx ? Math.min(...xsAll) / 1.5 : 0, xmax = Math.max(...xsAll) * (logx ? 1.5 : 1.05);
       const yAll = Y.concat(out.map(u => u.m)); const ymin = Math.min(0, ...yAll), ymax = Math.max(...yAll) * 1.08;
       chart(cv, {xmin, xmax, ymin, ymax, logx, xlabel: 'concentratie (' + unit + ')', ylabel: useBlank && blank ? 'absorptie − blanco' : 'absorptie',
-        series: [{fn: fit.f, x0: xmin, x1: xmax, name: 'fit'}, {pts: X.map((x, i) => [x, Y[i]]), color: '--ink', name: 'standaard'}, {pts: out.filter(u => isFinite(u.x)).map(u => [u.x, u.m]), color: '--bad', r: 5, hollow: true, name: 'monster'}],
-        legend: [['standaard', '--ink'], ['monster', '--bad']]});
+        series: [{fn: fit.f, x0: xmin, x1: xmax, name: 'fit'}, {pts: X.map((x, i) => [x, Y[i]]), color: '--ink', name: 'standaard'}, {pts: out.filter(u => isFinite(u.x) && u.st === 'ok').map(u => [u.x, u.m]), color: '--bad', r: 5, hollow: true, name: 'monster'},
+          {pts: out.filter(u => isFinite(u.x) && u.st !== 'ok').map(u => [u.x, u.m]), color: '--warn', r: 6, name: 'buiten bereik'}],
+        legend: [['standaard', '--ink'], ['monster', '--bad']].concat(out.some(u => isFinite(u.x) && u.st !== 'ok') ? [['buiten bereik', '--warn']] : [])});
     }
   }
 };
