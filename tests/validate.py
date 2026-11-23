@@ -658,6 +658,25 @@ def _(pg):
     pg.evaluate("(async()=>{ for(const e of await figList()) await figDel(e.id); localStorage.removeItem('lkFig'); })()"); pg.wait_for_timeout(300)
     return [('twee uitkomsten in de bak', info[0], 2, 0), ('elk met SVG', int(info[1]), 1, 0), ('PNG op 300 dpi', info[2], 300, 0.01), ('na herladen in de panelen', placed, 2, 0)]
 
+@case('Figuurmaker', 'Letters en export op 600 dpi', 'Rekentest: 183 mm (Nature, twee kolommen) bij 600 dpi = 183 / 25,4 × 600 = 4323 beeldpunten breed; twee panelen naast elkaar met 2 mm tussenruimte (47 px) en letters A en B; de PNG draagt 600 dpi in pHYs, de PDF is één pagina van 183 mm breed met de figuur als afbeelding, de SVG is geldige XML met de letters als tekst')
+def _(pg):
+    pg.evaluate("(async()=>{ for(const e of await figList()) await figDel(e.id); localStorage.removeItem('lkFig'); })()"); pg.wait_for_timeout(300)
+    pg.evaluate("__go('curve')"); pg.wait_for_timeout(400); pg.evaluate("document.querySelector('#t-curve [data-fig]').click()"); pg.wait_for_timeout(1500)
+    pg.evaluate("__go('gelfoto'); gfDemo(); document.getElementById('gf-tofig').click()"); pg.wait_for_timeout(1500)
+    pg.evaluate("__go('figuur')"); pg.wait_for_timeout(500)
+    pg.evaluate("(()=>{ __set('fig-lay','1x2'); __set('fig-w','183'); __set('fig-dpi','600'); __set('fig-let','A'); __set('fig-gap','2'); })()"); pg.wait_for_timeout(300)
+    pg.evaluate("(()=>{ const it=document.querySelectorAll('#fig-tray .fig-item'), sl=document.querySelectorAll('.fig-slot'); it[0].click(); sl[0].click(); it[1].click(); sl[1].click(); })()"); pg.wait_for_timeout(600)
+    r = pg.evaluate("""(async()=>{ const v=window.__figVm, {L,c}=await v.build(); const b=await new Promise(r=>c.toBlob(r,'image/png')), png=pngDpi(new Uint8Array(await b.arrayBuffer()),600);
+      let dpi=0; for(let i=8;i<png.length-12;i++) if(png[i]===0x70&&png[i+1]===0x48&&png[i+2]===0x59&&png[i+3]===0x73){ dpi=Math.round(((png[i+4]<<24)|(png[i+5]<<16)|(png[i+6]<<8)|png[i+7])*0.0254); break; }
+      const pdf=new Uint8Array(await (await figPdf(c,183)).arrayBuffer()), head=new TextDecoder().decode(pdf.slice(0,8)), tail=new TextDecoder().decode(pdf.slice(-6));
+      const txt=new TextDecoder('latin1').decode(pdf.slice(0,600)), mb=(txt.match(/MediaBox \[0 0 ([\d.]+)/)||[])[1];
+      const svgs=v.cells.map(id=>(id&&v.byId[id]&&v.byId[id].svg)||null), svg=figSvg(L,svgs,[],183), d=new DOMParser().parseFromString(svg,'image/svg+xml');
+      const lets=[...d.querySelectorAll(':scope > text')].map(t=>t.textContent).join();
+      return [L.W, L.cells[1].x-L.cells[0].x-L.cells[0].w, dpi, head, tail.trim(), +mb, d.getElementsByTagName('parsererror').length, lets]; })()""")
+    pg.evaluate("(async()=>{ for(const e of await figList()) await figDel(e.id); localStorage.removeItem('lkFig'); })()"); pg.wait_for_timeout(300)
+    return [('breedte (px)', r[0], 4323, 0), ('tussenruimte (px)', r[1], 47, 0.03), ('PNG-dpi', r[2], 600, 0), ('PDF-kop', int(r[3] == '%PDF-1.4' and r[4] == '%%EOF'), 1, 0),
+            ('PDF-breedte (mm)', r[5] / 72 * 25.4, 183, 0.001), ('SVG geldig', int(r[6] == 0), 1, 0), ('letters A en B', int(r[7] == 'A,B'), 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

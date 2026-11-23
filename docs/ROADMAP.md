@@ -127,7 +127,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | **Wave 5: charts, data, rework, workflows** | | | | |
 | C1a ✅ | Opus 5.5 | S80 chart style system, then S81–S84 (Opus 5 / Sonnet) | K3 | — |
 | C1b ✅ | Opus 5 | S85–S88 | C1a | anything except R3 |
-| C2 | Opus 5.5 | S89–S90 figure maker (new tool, Vue) | C1b | anything except G3 |
+| C2 ✅ | Opus 5.5 | S89–S90 figure maker (new tool, Vue) | C1b | anything except G3 |
 | C3 | Opus 5 | S91–S93, S96: imports and core-calculator extras | C1b | anything except R3 |
 | C4 | Sonnet | S94, S95 | C3 | anything |
 | R1 | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 |
@@ -326,7 +326,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S87 | 132, 133 | Chart annotations and overlaying several runs | ✅ Aantekeningen (tekst, pijl, lijnen) en eerdere runs in het venster Grafiek aanpassen; ook in PNG en SVG. | — |
 | S88 | 134, 135 | Colour-blind preview and poster export | ✅ Kleurenblindheid nabootsen in Instellingen (CSS-filter) en een Poster-knop bij elke grafiek. | — |
 | S89 | 121 | Figure maker part 1: canvas, drop outputs from tools | ✅ Nieuwe tool *Figuurmaker* (`figuur`, `Figuur.vue`): knop *→ Figuur* onder elke grafiek (`figFromCanvas`: PNG zoals *Download voor verslag*, 300 dpi, plus SVG) en in de Gelfoto-editor (`gf-tofig`); de uitkomsten staan in een bak in IndexedDB (`src/tools/figuur/store.js`, laatste 24). Raster 1×2, 2×1, 2×2, 1×3, 3×1 of 2×3 (`fig-lay`); een uitkomst in een paneel slepen of eerst aanklikken en dan het paneel; de indeling blijft bewaard (`lkFig`). Getest in `tests/validate.py` | — |
-| S90 | 121 | Figure maker part 2: A–D lettering, alignment, PNG/PDF/SVG export | 600 dpi export | Opus 5 |
+| S90 | 121 | Figure maker part 2: A–D lettering, alignment, PNG/PDF/SVG export | ✅ Figuurmaker: breedte 89, 120 of 183 mm (kolombreedtes van Nature), 300 of 600 dpi, letters A/a/(A)/A. in vet Arial op 8–14 pt, uitlijnen boven of midden, tussenruimte 1–4 mm; elke rij zo hoog als het hoogste paneel, lege rijen vallen weg (`src/tools/figuur/compose.js`: `figLayout`, `figCanvas`). Voorbeeld onder de panelen; export als PNG (dpi in pHYs), PDF (één pagina, eigen schrijver met FlateDecode, gecontroleerd met pdfinfo en pypdf) en SVG (de SVG van elk paneel genest, dus grafieken blijven vector; letters als tekst). Getest in `tests/validate.py` | — |
 | S91 | 136 | Plate-reader import wizard part 1: parser for 3 formats *(partly there: Standaardcurve reads a pasted plate grid)* | Test files parse | Opus 5 |
 | S92 | 136 | Import wizard part 2: map wells → standard curve, ELISA, Z′ | Data lands in the tool | Opus 5 |
 | S93 | 137, 195 | qPCR instrument import (CFX, QuantStudio, LightCycler) *(partly there: qPCR-analyse reads a pasted Ct table by its header)* | Ct tables import | Opus 5 |

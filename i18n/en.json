@@ -5280,5 +5280,14 @@
 "Gelfoto": "Gel photo",
 "Toegevoegd aan de Figuurmaker.": "Added to the Figure maker.",
 "Lukte niet": "Failed",
-"Grafieken": "Charts"
+"Grafieken": "Charts",
+"Breedte": "Width",
+"{#} mm (één kolom)": "{#} mm (one column)",
+"{#} mm (twee kolommen)": "{#} mm (two columns)",
+"Uitlijnen": "Align",
+"boven": "top",
+"midden": "middle",
+"Tussenruimte": "Spacing",
+"Bezig…": "Working…",
+"Kolombreedtes zoals Nature ze vraagt ({#} en {#} mm); de PNG heeft de gekozen resolutie in het bestand, de SVG houdt grafieken als vector, de PDF is één pagina zo groot als de figuur.": "Column widths as Nature asks for them ({#} and {#} mm); the PNG carries the chosen resolution in the file, the SVG keeps charts as vectors, the PDF is one page the size of the figure."
 }
