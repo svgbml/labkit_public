@@ -62,6 +62,10 @@
     </div>
     <div class="result">
       <canvas id="el-cv2" v-show="m.ok"></canvas>
+      <canvas id="el-hm" v-show="m.ok"></canvas>
+      <div v-if="m.ok && hm.out.length">
+        <lk-note kind="warn">{{ outText }}</lk-note>
+      </div>
       <div id="el-out">
         <lk-note v-if="!m.ok" kind="info">{{ m.err }}</lk-note>
         <template v-else>
@@ -112,6 +116,13 @@ export default {
     };
   },
   computed: {
+    /* alle gemeten wells voor de plaatheatmap, per replicaatgroep; de uitschieters staan er ook in */
+    outText() { return this.t('Uitschieters volgens de regel van Tukey, per replicaat: ' + uv(this.hm.out.join(', ')) + '. Controleer deze wells op een pipetteerfout of luchtbel.'); },
+    hm() {
+      const m = this.m; if (!m.ok) return {cells: [], out: []};
+      const cells = Object.keys(m.W).flatMap(n => m.W[n].map(x => ({w: x.w, v: x.a, g: n})));
+      return {cells, out: plateOut(cells, {rel: true})};
+    },
     /* alle maten van de plaat: één keer berekend, de rest van de component leest hieruit */
     m() {
       const t = this.t, fit = this.fit, un = this.u, cvmax = num(this.cv) || 10;
@@ -223,6 +234,7 @@ export default {
     },
     draw() {
       const cv = document.getElementById('el-cv2'), m = this.m; if (!cv || !m.ok) return;
+      const hc = document.getElementById('el-hm'); if (hc) plateHeat(hc, this.hm.cells, {rel: true, label: 'absorptie: donker = laag, licht = hoog; × = uitschieter'});
       const {ST, M, xs, ys, fn, fit} = m, un = this.u, ok = M.filter(x => isFinite(x.x));
       chart(cv, {logx: fit === '4pl', xmin: fit === '4pl' ? xs[0] / 2 : 0, xmax: xs[xs.length - 1] * (fit === '4pl' ? 1.5 : 1.08),
         ymin: Math.min(0, ...ys), ymax: Math.max(...ys, ...M.map(x => x.m)) * 1.1,

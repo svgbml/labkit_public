@@ -1452,6 +1452,26 @@ def _(pg):
     pg.evaluate("([a,l])=>{ __go('elisa'); __set('el-r',''); __set('el-s','1000 500 250 125 62,5 31,25 15,625'); __set('el-fit','4pl'); __set('el-d','M1=10'); __set('el-l',l); __set('el-a',a); }", ['\n'.join(A).replace('.', ','), '\n'.join(L)])
     return [('M1 (pg/mL)', pg.evaluate("__n(document.querySelector('#el-out tbody tr').cells[6].textContent)"), 1000, 0.01)]
 
+@case('ELISA-plaatanalyse', 'Plaatheatmap met uitschieter', 'Tukey 1977, 1.5×IQR: duplo\'s met identieke waarden, behalve G4 (×1,3); de heatmap (el-hm) moet G4 (en zijn duplo G3) als uitschieter melden en min/max van de plaat kennen')
+def _(pg):
+    f = lambda x: 0.05+2.4/(1+(x/180)**-1.15); S = [1000, 500, 250, 125, 62.5, 31.25, 15.625]
+    A = []; L = []
+    for r in range(8):
+        s = f(S[r]) if r < 7 else 0; m = f(40+r*30)*(1.3 if r == 6 else 1)
+        A.append('\t'.join([f"{s:.5f}"]*2+[f"{f(40+r*30):.5f}", f"{m:.5f}"]+['']*8)); L.append('\t'.join([f"S{r+1}" if r < 7 else 'B']*2+[f"M{r+1}"]*2+['-']*8))
+    pg.evaluate("([a,l])=>{ __go('elisa'); __set('el-r',''); __set('el-s','1000 500 250 125 62,5 31,25 15,625'); __set('el-fit','4pl'); __set('el-l',l); __set('el-a',a); }", ['\n'.join(A).replace('.', ','), '\n'.join(L)])
+    pg.wait_for_timeout(400)
+    h = pg.evaluate("(()=>{ const c=document.getElementById('el-hm'); return c&&c._heat?{min:c._heat.min,max:c._heat.max,out:c._heat.out}:null; })()")
+    out = h['out'] if h else []
+    return [('heatmap aanwezig', 1 if h else 0, 1, 0), ('G4 als uitschieter gemeld', 1 if 'G4' in out else 0, 1, 0), ('aantal gemarkeerde wells', len(out), 2, 0), ('maximum van de plaat (A)', h['max'] if h else float('nan'), max(f(1000), f(40+6*30)*1.3, f(40+7*30)), 0.002)]
+
+@case('ELISA-plaatanalyse', 'Datatabel onder de grafiek', 'De tabel onder de kalibratiecurve (knop Tabel tonen) heeft evenveel rijen als cv._data.rows')
+def _(pg):
+    pg.wait_for_timeout(300)
+    r = pg.evaluate("""(async()=>{ const cv=document.getElementById('el-cv2'), b=cv.nextElementSibling.querySelector('[data-tbl-tog]'); if(!b) return [-1,0]; b.click(); await new Promise(r=>setTimeout(r,400));
+      const d=cv.nextElementSibling.nextElementSibling, n=d&&d.classList.contains('lk-dtbl')?d.querySelectorAll('tbody tr').length:-2; const k=cv._data.rows.length; b.click(); return [n,k]; })()""")
+    return [('rijen in de tabel', r[0], r[1], 0)]
+
 @case('Flowcytometrie (panel & controles)', 'Cocktail, stain index en telbeads', '50 µL / 200 = 0,25 µL; SI = (18500 − 210)/(2 × 95) = 96,3; cellen/µL = 24500/5200 × 1000 × 50/100 = 2356')
 def _(pg):
     pg.evaluate("__go('facs');__set('fc-n','10');__set('fc-x','0');__set('fc-v','50');__tbl('fc-tbl',[['CD4','PE',200,'nee']],'facs');__set('fc-mp','18500');__set('fc-mn','210');__set('fc-sd','95');__set('fc-ce','24500');__set('fc-be','5200');__set('fc-bc','1000');__set('fc-bv','50');__set('fc-sv','100')")

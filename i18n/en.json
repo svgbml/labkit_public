@@ -5236,5 +5236,12 @@
 "Punt = meting, streep = gemiddelde, foutbalk = SEM (n = {#})": "Point = measurement, bar = mean, error bar = SEM (n = {#})",
 "Punt = meting, streep = gemiddelde, foutbalk = SEM (n = {#}–{#})": "Point = measurement, bar = mean, error bar = SEM (n = {#}–{#})",
 "Punt = meting, streep = gemiddelde, foutbalk = {#}%-BI (n = {#})": "Point = measurement, bar = mean, error bar = {#}% CI (n = {#})",
-"Punt = meting, streep = gemiddelde, foutbalk = {#}%-BI (n = {#}–{#})": "Point = measurement, bar = mean, error bar = {#}% CI (n = {#}–{#})"
+"Punt = meting, streep = gemiddelde, foutbalk = {#}%-BI (n = {#}–{#})": "Point = measurement, bar = mean, error bar = {#}% CI (n = {#}–{#})",
+"Tabel tonen": "Show table",
+"Tabel verbergen": "Hide table",
+"Toont of verbergt de getallen achter de grafiek als tabel onder de grafiek": "Shows or hides the numbers behind the chart as a table under the chart",
+"Uitschieters volgens de regel van Tukey, per replicaat: {*}. Controleer deze wells op een pipetteerfout of luchtbel.": "Outliers by Tukey's rule, per replicate group: {*}. Check these wells for a pipetting error or an air bubble.",
+"absorptie: donker = laag, licht = hoog; × = uitschieter": "absorbance: dark = low, light = high; × = outlier",
+"well": "well",
+"uitschieter": "outlier"
 }

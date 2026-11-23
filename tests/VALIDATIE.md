@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-23 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 479 van 479 controles binnen tolerantie.**
+**Resultaat: 484 van 484 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -455,6 +455,11 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Eiwitzuiveringstabel | Zuiveringsfactor en ammoniumsulfaat | g (NH₄)₂SO₄ per L | 231,3 | 231,3 | -0.01% | ✅ | SA stap 4 / SA stap 1 = (480/0,9)/(40/12,5) = 166,7; opbrengst 4800/8000 = 60%; 0 → 40% bij 0 °C: 515,35 × 0,4/(1 − 0,2722 × 0,4) = 231,3 g/L (Wingfield 2016) |
 | Gradiënt-PCR | Lineaire gradiënt | kolom 6 (°C) | 58,36 | 58,4 | +0.06% | ✅ | T₆ = 52 + 5 × (66 − 52)/11 = 58,36 °C |
 | ELISA-plaatanalyse | 4PL terugrekenen | M1 (pg/mL) | 1000 | 1000 | +0.00% | ✅ | Standaarden exact op y = 0,05 + 2,4/(1 + (x/180)^−1,15); monster met de absorptie van 100 pg/mL en verdunning 10 moet 1000 opleveren |
+| ELISA-plaatanalyse | Plaatheatmap met uitschieter | heatmap aanwezig | 1 | 1 | +0.00% | ✅ | Tukey 1977, 1.5×IQR: duplo's met identieke waarden, behalve G4 (×1,3); de heatmap (el-hm) moet G4 (en zijn duplo G3) als uitschieter melden en min/max van de plaat kennen |
+| ELISA-plaatanalyse | Plaatheatmap met uitschieter | G4 als uitschieter gemeld | 1 | 1 | +0.00% | ✅ | Tukey 1977, 1.5×IQR: duplo's met identieke waarden, behalve G4 (×1,3); de heatmap (el-hm) moet G4 (en zijn duplo G3) als uitschieter melden en min/max van de plaat kennen |
+| ELISA-plaatanalyse | Plaatheatmap met uitschieter | aantal gemarkeerde wells | 2 | 2 | +0.00% | ✅ | Tukey 1977, 1.5×IQR: duplo's met identieke waarden, behalve G4 (×1,3); de heatmap (el-hm) moet G4 (en zijn duplo G3) als uitschieter melden en min/max van de plaat kennen |
+| ELISA-plaatanalyse | Plaatheatmap met uitschieter | maximum van de plaat (A) | 2,157 | 2,157 | +0.00% | ✅ | Tukey 1977, 1.5×IQR: duplo's met identieke waarden, behalve G4 (×1,3); de heatmap (el-hm) moet G4 (en zijn duplo G3) als uitschieter melden en min/max van de plaat kennen |
+| ELISA-plaatanalyse | Datatabel onder de grafiek | rijen in de tabel | 73 | 73 | +0.00% | ✅ | De tabel onder de kalibratiecurve (knop Tabel tonen) heeft evenveel rijen als cv._data.rows |
 | Flowcytometrie (panel & controles) | Cocktail, stain index en telbeads | antilichaam per test (µL) | 0,25 | 0,25 | +0.00% | ✅ | 50 µL / 200 = 0,25 µL; SI = (18500 − 210)/(2 × 95) = 96,3; cellen/µL = 24500/5200 × 1000 × 50/100 = 2356 |
 | Flowcytometrie (panel & controles) | Cocktail, stain index en telbeads | stain index | 96,26 | 96,3 | +0.04% | ✅ | 50 µL / 200 = 0,25 µL; SI = (18500 − 210)/(2 × 95) = 96,3; cellen/µL = 24500/5200 × 1000 × 50/100 = 2356 |
 | Flowcytometrie (panel & controles) | Cocktail, stain index en telbeads | cellen/µL | 2356 | 2356 | +0.01% | ✅ | 50 µL / 200 = 0,25 µL; SI = (18500 − 210)/(2 × 95) = 96,3; cellen/µL = 24500/5200 × 1000 × 50/100 = 2356 |

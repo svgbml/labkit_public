@@ -72,7 +72,7 @@ function chart(cv,o){
   const D={head:['reeks',o.xlabel||'x',o.ylabel||'y'],rows:[]};
   (o.series||[]).forEach((s,i)=>{ if(s.pts) s.pts.forEach(p=>D.rows.push([s.name||('reeks '+(i+1)),p[0],p[1]])); });
   (o.series||[]).forEach(s=>{ if(s.fn&&s.name){ const a=tx(logx&&!((s.x0??xmin)>0)?xmin:(s.x0??xmin)), b=tx(s.x1??xmax); for(let k=0;k<=50;k++){ const xv=a+(b-a)*k/50, x=logx?10**xv:xv, y=s.fn(x); if(isFinite(y)) D.rows.push([s.name,x,y]); } } });
-  cv._data=D;
+  cv._data=D; if(cv._tblOn) dataTable(cv);
   return {X,Y};
 }
 const inp=(v,w=72,k='')=>`<input ${k} inputmode="decimal" value="${v==null||v===''||(typeof v==='number'&&!isFinite(v))?'':String(v).replace('.',',')}" style="text-align:right;width:${w}px">`;
@@ -93,8 +93,54 @@ function barChart(cv,cats,vals,lo,hi,o){
   x.beginPath(); x.moveTo(pad.l,pad.t); x.lineTo(pad.l,H-pad.b); x.lineTo(W-pad.r,H-pad.b); x.stroke();
   x.save(); x.translate(14,(H-pad.b+pad.t)/2); x.rotate(-Math.PI/2); x.textAlign='center'; x.textBaseline='middle'; x.fillStyle=st.muted; x.font=st.lab+'px '+st.font; x.fillText(o.ylabel,0,0); x.restore();
   if(o.title){ x.fillStyle=st.ink; x.font=`600 ${st.lab+2}px ${st.font}`; x.textAlign='center'; x.textBaseline='top'; x.fillText(o.title,(W+pad.l)/2,6); }
-  cv._data={head:['monster',o.ylabel,'ondergrens','bovengrens'],rows:cats.map((c,i)=>[c,vals[i],lo[i],hi[i]])};
+  cv._data={head:['monster',o.ylabel,'ondergrens','bovengrens'],rows:cats.map((c,i)=>[c,vals[i],lo[i],hi[i]])}; if(cv._tblOn) dataTable(cv);
 }
 
-expose({niceStep, tickLabel, chart, inp, barChart, chStyle, chCol, chVars, chEdGet, chEdApply});
+/* ================= DATATABEL ONDER EEN GRAFIEK (S86) =================
+   De knop "Tabel tonen" in de balk onder een canvas (reportBtns) zet cv._tblOn; deze functie bouwt dan
+   uit cv._data (kop + rijen) een tabel direct onder de balk (onder de pic-bar als die er is) en haalt hem
+   weg als de schakelaar uit staat. Alleen opnieuw bouwen als de data veranderd is: de bouw zelf zet de
+   MutationObserver in gang, en die roept reportBtns weer aan. */
+function dataTable(cv){ const bar=cv.nextElementSibling; if(!bar) return; let a=bar.nextElementSibling&&bar.nextElementSibling.classList.contains('pic-bar')?bar.nextElementSibling:bar;
+  let d=a.nextElementSibling; if(d&&!d.classList.contains('lk-dtbl')) d=null; const D=cv._data;
+  if(!cv._tblOn||!D){ if(d) d.remove(); return; }
+  const sig_=JSON.stringify(D); if(d&&d._sig===sig_) return;
+  if(!d){ d=document.createElement('div'); d.className='lk-dtbl tbl-wrap'; d.dataset.notr='1'; d.style.cssText='max-height:260px;overflow:auto;margin:0 0 8px'; a.after(d); } d._sig=sig_;
+  const t=document.createElement('table'); t.dataset.xl='1'; const h=t.createTHead().insertRow(); D.head.forEach(x=>{ const c=document.createElement('th'); c.textContent=trPlain(String(x)); h.appendChild(c); });
+  const tb=t.createTBody(), f=v=>typeof v==='number'?(isFinite(v)?NL(Number(v.toPrecision(5)),5):'–'):String(v==null?'':v);
+  D.rows.forEach(r=>{ const tr=tb.insertRow(); r.forEach(v=>{ const c=tr.insertCell(); c.textContent=f(v); if(typeof v==='number') c.style.textAlign='right'; }); }); d.replaceChildren(t); }
+
+/* ================= PLAATHEATMAP (S86) =================
+   plateOut(cells,o): welke putjes vallen buiten de hekken van Tukey (1977): Q1 − 1,5·IQR … Q3 + 1,5·IQR.
+   cells = [{w:'A1', v:getal, g:groep}]. Met groepen (replicaten) wordt per putje het verschil met de
+   mediaan van zijn groep genomen (o.rel: relatief) en gelden de hekken voor die verschillen van alle groepen
+   samen, zodat ook een duplo of triplo getoetst kan worden; zonder groepen gelden ze voor de waarden zelf.
+   Quartielen als R type 7. Minder dan 4 waarden: niets markeren.
+   plateHeat(cv,cells,o): tekent R×C (standaard 8×12) met een reeks die ook in grijstinten leest (donker = laag),
+   leeg = grijs, uitschieters met een dubbele ring, en een kleurbalk met min en max. Zet cv._heat={min,max,out}. */
+function plateOut(cells,o={}){ const med=a=>{ const s=a.slice().sort((x,y)=>x-y), n=s.length; return n%2?s[n>>1]:(s[n/2-1]+s[n/2])/2; };
+  const q=(s,p)=>{ const i=(s.length-1)*p, j=Math.floor(i); return s[j]+(s[Math.min(j+1,s.length-1)]-s[j])*(i-j); };
+  const ok=cells.filter(c=>isFinite(c.v)), grouped=ok.some(c=>c.g!=null), res=[];
+  if(!grouped) ok.forEach(c=>res.push([c,c.v]));
+  else { const G={}; ok.forEach(c=>(G[c.g]=G[c.g]||[]).push(c)); Object.values(G).forEach(g=>{ if(g.length<2) return; const m=med(g.map(c=>c.v)); g.forEach(c=>res.push([c,o.rel&&m?(c.v-m)/Math.abs(m):c.v-m])); }); }
+  if(res.length<4) return []; const s=res.map(r=>r[1]).sort((a,b)=>a-b), q1=q(s,.25), q3=q(s,.75), k=1.5*(q3-q1);
+  return res.filter(r=>r[1]<q1-k||r[1]>q3+k).map(r=>r[0].w); }
+const HEATPAL=['#440154','#3b528b','#21918c','#5ec962','#fde725'];   /* viridis: de helderheid stijgt gelijkmatig, dus ook in grijs */
+function heatCol(f){ const x=Math.min(1,Math.max(0,f))*(HEATPAL.length-1), i=Math.min(HEATPAL.length-2,Math.floor(x)), t=x-i, h=c=>[1,3,5].map(k=>parseInt(c.slice(k,k+2),16));
+  const a=h(HEATPAL[i]), b=h(HEATPAL[i+1]); return 'rgb('+a.map((v,k)=>Math.round(v+(b[k]-v)*t)).join(',')+')'; }
+function plateHeat(cv,cells,o={}){ const R=o.rows||8, C=o.cols||12, st=chStyle(), cs=34, L=30, T=o.title?34:16, W=L+C*cs+14, H=T+R*cs+58, dpr=window.devicePixelRatio||1;
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.width='100%'; cv.style.maxWidth=W+'px'; const x=cv.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,W,H); if(st.bg){ x.fillStyle=st.bg; x.fillRect(0,0,W,H); }
+  const vals=cells.map(c=>c.v).filter(isFinite), mn=vals.length?Math.min(...vals):0, mx=vals.length?Math.max(...vals):1, out=plateOut(cells,o), by={}; cells.forEach(c=>by[c.w]=c);
+  if(o.title){ x.fillStyle=st.ink; x.font=`600 ${st.lab+2}px ${st.font}`; x.textAlign='center'; x.textBaseline='top'; x.fillText(o.title,W/2,6); }
+  x.font=st.tick+'px '+st.font; x.fillStyle=st.muted; x.textAlign='center'; x.textBaseline='middle';
+  for(let c=0;c<C;c++) x.fillText(String(c+1),L+c*cs+cs/2,T-8); for(let r=0;r<R;r++) x.fillText(String.fromCharCode(65+r),L-14,T+r*cs+cs/2);
+  for(let r=0;r<R;r++) for(let c=0;c<C;c++){ const w=String.fromCharCode(65+r)+(c+1), cl=by[w], px=L+c*cs+1, py=T+r*cs+1;
+    if(cl&&isFinite(cl.v)){ x.fillStyle=heatCol(mx>mn?(cl.v-mn)/(mx-mn):.5); x.fillRect(px,py,cs-2,cs-2); } else { x.fillStyle='rgba(128,128,128,.25)'; x.fillRect(px,py,cs-2,cs-2); x.strokeStyle='rgba(128,128,128,.5)'; x.lineWidth=1; x.strokeRect(px+.5,py+.5,cs-3,cs-3); }
+    if(out.includes(w)){ x.lineWidth=3; x.strokeStyle='#fff'; x.strokeRect(px+2,py+2,cs-6,cs-6); x.lineWidth=1.5; x.strokeStyle='#000'; x.strokeRect(px+2,py+2,cs-6,cs-6); x.beginPath(); x.moveTo(px+9,py+9); x.lineTo(px+cs-11,py+cs-11); x.moveTo(px+cs-11,py+9); x.lineTo(px+9,py+cs-11); x.lineWidth=3; x.strokeStyle='#fff'; x.stroke(); x.lineWidth=1.5; x.strokeStyle='#000'; x.stroke(); } }
+  const by0=T+R*cs+14, bw=Math.min(240,C*cs-60), bx=L+30; for(let i=0;i<bw;i++){ x.fillStyle=heatCol(i/(bw-1)); x.fillRect(bx+i,by0,1,12); }
+  x.strokeStyle=st.axis; x.lineWidth=1; x.strokeRect(bx+.5,by0+.5,bw-1,11); x.fillStyle=st.ink; x.textBaseline='top'; x.textAlign='right'; x.fillText(tickLabel(mn),bx-4,by0-1); x.textAlign='left'; x.fillText(tickLabel(mx),bx+bw+4,by0-1);
+  x.textAlign='left'; x.fillStyle=st.muted; if(o.label) x.fillText(o.label,bx,by0+18);
+  cv._heat={min:mn,max:mx,out}; cv._data={head:['well',o.label||'waarde','uitschieter'],rows:cells.map(c=>[c.w,c.v,out.includes(c.w)?'ja':''])}; if(cv._tblOn) dataTable(cv); return cv._heat; }
+
+expose({dataTable, plateOut, plateHeat, niceStep, tickLabel, chart, inp, barChart, chStyle, chCol, chVars, chEdGet, chEdApply});
 live({chStyleKey: [() => chStyleKey, v => { chStyleKey = v; }]});
