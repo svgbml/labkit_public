@@ -66,6 +66,52 @@ export function treeNewick(n) {
   return f(n) + ';';
 }
 
+/* de volgorde van de rijen (indexen in names) zoals de bladen van de boom; namen die er niet in staan achteraan */
+export function treeOrder(root, names) {
+  const at = new Map(); names.forEach((n, i) => { if (!at.has(n)) at.set(n, i); });
+  const out = [], seen = new Set();
+  for (const l of treeLeaves(root)) { const i = at.get(l); if (i != null && !seen.has(i)) { out.push(i); seen.add(i); } }
+  names.forEach((_, i) => { if (!seen.has(i)) out.push(i); });
+  return out;
+}
+
+/* ---------- neighbour-joining (S183) ----------
+   Saitou & Nei 1987 (Mol Biol Evol 4:406), met het Q-criterium van Studier & Keppler 1988 (Mol Biol Evol 5:729):
+   Q(i,j) = (n − 2)·d(i,j) − Σd(i) − Σd(j); het paar met de kleinste Q wordt een nieuwe knoop u met
+   takken d(i,u) = d(i,j)/2 + (Σd(i) − Σd(j)) / (2(n − 2)) en d(j,u) = d(i,j) − d(i,u); d(k,u) = (d(i,k) + d(j,k) − d(i,j)) / 2.
+   De laatste drie knopen hangen aan een ongewortelde drietak, zoals Clustal een .dnd schrijft. */
+export function njTree(names, D) {
+  let nodes = names.map(n => ({name: n, len: null, kids: []})), d = D.map(r => r.slice());
+  while (nodes.length > 3) {
+    const n = nodes.length, r = d.map(row => row.reduce((a, b) => a + b, 0));
+    let bi = 0, bj = 1, bq = Infinity;
+    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+      const q = (n - 2) * d[i][j] - r[i] - r[j];
+      if (q < bq - 1e-12) { bq = q; bi = i; bj = j; }
+    }
+    const li = d[bi][bj] / 2 + (r[bi] - r[bj]) / (2 * (n - 2));
+    nodes[bi].len = li; nodes[bj].len = d[bi][bj] - li;
+    const u = {name: '', len: null, kids: [nodes[bi], nodes[bj]]}, keep = nodes.map((_, k) => k).filter(k => k !== bi && k !== bj);
+    const du = keep.map(k => (d[bi][k] + d[bj][k] - d[bi][bj]) / 2);
+    d = keep.map((k, a) => keep.map(l => d[k][l]).concat(du[a])).concat([du.concat(0)]);
+    nodes = keep.map(k => nodes[k]).concat(u);
+  }
+  if (nodes.length === 3) {
+    const [a, b, c] = [0, 1, 2];
+    nodes[a].len = (d[a][b] + d[a][c] - d[b][c]) / 2; nodes[b].len = (d[a][b] + d[b][c] - d[a][c]) / 2; nodes[c].len = (d[a][c] + d[b][c] - d[a][b]) / 2;
+  } else if (nodes.length === 2) nodes[0].len = nodes[1].len = d[0][1] / 2;
+  return {name: '', len: null, kids: nodes};
+}
+
+/* afstand uit identiteit (0–1): 'p' = 1 − identiteit; 'jc' = Jukes & Cantor (1969): −b·ln(1 − p/b) met b = 3/4 voor DNA,
+   19/20 voor eiwit. Boven de verzadiging (p ≥ b) Infinity. */
+export function idDist(id, mode, nt) {
+  const p = 1 - id;
+  if (mode !== 'jc') return p;
+  const b = nt ? 0.75 : 0.95, x = 1 - p / b;
+  return x > 0 ? -b * Math.log(x) : Infinity;
+}
+
 /* ---------- tekenen ----------
    mode 'rect': de bladen onder elkaar, rowH per blad, x = som van de takken vanaf de wortel.
    mode 'radial': de bladen rond een cirkel, straal = som van de takken, een boog verbindt de kinderen.

@@ -2280,5 +2280,32 @@ def _(pg):
     pg.evaluate("()=>{__set('al-tmode','rect');__set('al-dnd','')}")
     return out
 
+@case('Alignment bekijken', 'Neighbour-joining uit de identiteitsmatrix: uitgewerkt voorbeeld', 'Het vijf-taxa-voorbeeld uit het Wikipedia-artikel Neighbor joining (methode Saitou & Nei 1987, Mol Biol Evol 4:406; Q-criterium Studier & Keppler 1988): afstanden a-b 5, a-c 9, a-d 9, a-e 8, b-c 10, b-d 10, b-e 9, c-d 8, c-e 7, d-e 3 met als boom a 2, b 3, c 4, d 2, e 1 en binnentakken 3 (ab|cde) en 2 (abc|de). Als uitlijning van 40 basen waarin elke tak zijn eigen posities muteert, zodat het aantal verschillen per paar precies die afstand is; afstand = 1 - identiteit, dus elke tak gedeeld door 40')
+def _(pg):
+    import re
+    br = [('a', 2), ('b', 3), ('ab', 3), ('c', 4), ('abc', 2), ('d', 2), ('e', 1)]
+    seqs = {x: ['A'] * 40 for x in 'abcde'}; k = 0
+    for side, n in br:
+        for _ in range(n):
+            for x in side: seqs[x][k] = 'C'
+            k += 1
+    fa = ''.join('>' + x + '\n' + ''.join(v) + '\n' for x, v in seqs.items())
+    pg.evaluate("__go('aln')"); pg.evaluate("t=>__set('al-in',t)", fa); pg.wait_for_timeout(200)
+    pg.evaluate(ALN_RESET); pg.evaluate("()=>{__set('al-tsrc','nj');__set('al-tmode','rect')}"); pg.wait_for_timeout(100); pg.evaluate("__set('al-tdist','p')")
+    pg.evaluate(ALN_OPEN, 'al-tv-d'); pg.wait_for_timeout(300)
+    nwk = pg.evaluate("document.getElementById('al-nj-out').value")
+    leaf = {m[0]: float(m[1]) * 40 for m in re.findall(r'([a-e]):([0-9.]+)', nwk)}
+    inner = sorted(float(x) * 40 for x in re.findall(r'\):([0-9.]+)', nwk))
+    out = [('tak ' + x, leaf.get(x, -1), v, 1e-6) for x, v in [('a', 2), ('b', 3), ('c', 4), ('d', 2), ('e', 1)]]
+    out += [('binnentakken', len(inner), 2, 0), ('binnentak ab|cde', inner[1] if len(inner) == 2 else -1, 3, 1e-6), ('binnentak abc|de', inner[0] if inner else -1, 2, 1e-6)]
+    pg.evaluate("__set('al-ord','tree')"); pg.wait_for_timeout(200)
+    order = pg.evaluate("__alnVm.order.map(i=>__alnVm.m.names[i])")
+    leaves = re.findall(r'([a-e]):', nwk)
+    side = pg.evaluate("[...document.querySelectorAll('#al-tree .aln-tside > div')].map(d=>d.textContent)")
+    out += [('rijvolgorde = volgorde van de bladen', 1 if order == leaves else 0, 1, 0),
+            ('uitlijning naast elk blad', 1 if side == [''.join(seqs[x]) for x in leaves] else 0, 1, 0)]
+    pg.evaluate("()=>{__set('al-ord','file');__set('al-tsrc','dnd');__set('al-in','')}")
+    return out
+
 if __name__ == '__main__':
     main()

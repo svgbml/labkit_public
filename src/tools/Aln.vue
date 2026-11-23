@@ -34,6 +34,7 @@
             <option value="name">{{ t('Op naam') }}</option>
             <option value="ident">{{ t('Op identiteit met de eerste sequentie') }}</option>
             <option value="hand">{{ t('Met de hand (pijltjes in de tabel)') }}</option>
+            <option value="tree">{{ t('Volgens de boom') }}</option>
           </select></div>
         <div class="f"><label for="al-ref">{{ t('Verschil met') }}</label>
           <select id="al-ref" v-model="ref">
@@ -194,11 +195,21 @@
     <div class="fields" style="margin-top:12px">
       <div class="f"><label for="al-tmode">{{ t('Vorm') }}</label>
         <select id="al-tmode" v-model="tmode"><option value="rect">{{ t('Rechthoekig') }}</option><option value="radial">{{ t('Radiaal') }}</option></select></div>
+      <div class="f"><label for="al-tsrc">{{ t('Boom') }}</label>
+        <select id="al-tsrc" v-model="tsrc"><option value="dnd">{{ t('Gidsboom (.dnd)') }}</option><option value="nj">{{ t('Neighbour-joining uit de identiteitsmatrix') }}</option></select></div>
+      <div class="f" v-if="tsrc === 'nj'"><label for="al-tdist">{{ t('Afstand') }}</label>
+        <select id="al-tdist" v-model="tdist"><option value="p">{{ t('1 − identiteit (p-afstand)') }}</option><option value="jc">{{ t('Jukes-Cantor-correctie') }}</option></select></div>
     </div>
+    <p v-if="tsrc === 'nj'" style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ tdist === 'jc' ? t('Afstand = −b · ln(1 − p/b) met p = 1 − identiteit, b = 3/4 voor DNA en 19/20 voor eiwit (Jukes en Cantor 1969). Identiteit zoals in de identiteitsmatrix, met de keuze bij Gaten tellen.') : t('Afstand = 1 − identiteit, zonder correctie voor meervoudige mutaties. Identiteit zoals in de identiteitsmatrix, met de keuze bij Gaten tellen.') }}</p>
     <template v-if="tvOpen">
-      <lk-note v-if="!tree.root" :kind="dnd.trim() ? 'bad' : 'info'">{{ t(tree.error || 'Plak een .dnd of Newick-boom bij Gidsboom (.dnd).') }}</lk-note>
+      <lk-note v-if="!tree.root" :kind="tree.error ? 'bad' : 'info'">{{ t(tree.error || (tsrc === 'nj' ? 'Neighbour-joining heeft een uitlijning met minstens twee sequenties nodig.' : 'Plak een .dnd of Newick-boom bij Gidsboom (.dnd).')) }}</lk-note>
       <template v-else>
-        <div id="al-tree" class="aln-tree" style="margin-top:12px" v-html="treeView"></div>
+        <!-- S183: in de rechthoekige vorm staat de uitlijning naast de boom, een rij per blad in dezelfde volgorde -->
+        <div id="al-tree" class="aln-tree" style="margin-top:12px"><div class="aln-tbox"><div v-html="treeView"></div>
+          <div v-if="side.length" class="aln-mono aln-tside" :style="{paddingTop: treeL.top + 'px', lineHeight: treeL.rowH + 'px'}"><div v-for="(r, i) in side" :key="i">{{ r || ' ' }}</div></div></div></div>
+        <lk-note v-if="nj.capped" kind="warn">{{ t('Alleen de eerste ' + NJMAX + ' sequenties staan in de boom.') }}</lk-note>
+        <div class="f" v-if="tsrc === 'nj'" style="margin-top:10px"><label for="al-nj-out">{{ t('De boom als Newick') }}</label>
+          <textarea id="al-nj-out" class="mono" rows="3" readonly :value="njText" spellcheck="false"></textarea></div>
         <lk-note v-if="treeMiss.length" kind="warn">{{ t('Niet in de uitlijning:') }} <b style="overflow-wrap:anywhere">{{ treeMiss.join(', ') }}</b></lk-note>
         <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('Taklengtes op schaal; de streep onderaan geeft de lengte die erbij staat. Zonder taklengtes telt elke tak als één.') }}</p>
         <div class="row" style="margin-top:10px">
@@ -259,7 +270,7 @@ import {alnUngapped, EBI_URL} from '../lib/alnhand.js';
 import {alnFigure, figSvg, figPaint} from '../lib/alnfig.js';
 import {alnProjectWrite, alnProjectRead, PROJ_KEYS} from '../lib/alnproj.js';
 import {alnVariants, alnAddRead} from '../lib/alnvar.js';
-import {parseNewick, treeLeaves, treeLayout, treeSvg, treePaint} from '../lib/tree.js';
+import {parseNewick, treeLeaves, treeLayout, treeSvg, treePaint, njTree, idDist, treeNewick, treeOrder} from '../lib/tree.js';
 
 /* S180: een read uit het Chromatogram (of Sequentie) komt als eigen rij in de uitlijning */
 SEQ_TO.push({label: 'Alignment bekijken (eigen read)', tool: 'aln', id: 'al-read'});
@@ -268,8 +279,8 @@ const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
 const PROJ_IDS = {txt: 'al-in', dnd: 'al-dnd', col: 'al-col', cbs: 'al-cbs', thr: 'al-thr', motif: 'al-motif', ord: 'al-ord', ref: 'al-ref', tr: 'al-tr', code: 'al-code',
   gap: 'al-gap', from: 'al-from', to: 'al-to', xf: 'al-xf', gm: 'al-gm', pa: 'al-pa', pb: 'al-pb', ct: 'al-ct', cl: 'al-cl',
-  fgFrom: 'al-fg-from', fgTo: 'al-fg-to', fgPer: 'al-fg-per', fgTitle: 'al-fg-title', fgCons: 'al-fg-cons', vref: 'al-vref', rd: 'al-read', tmode: 'al-tmode'};
-const VARMAX = 500;  /* rijen in de variantentabel */
+  fgFrom: 'al-fg-from', fgTo: 'al-fg-to', fgPer: 'al-fg-per', fgTitle: 'al-fg-title', fgCons: 'al-fg-cons', vref: 'al-vref', rd: 'al-read', tmode: 'al-tmode', tsrc: 'al-tsrc', tdist: 'al-tdist'};
+const VARMAX = 500, NJMAX = 200, SIDEMAX = 5000;  /* rijen in de variantentabel, sequenties in de NJ-boom, letters per rij naast de boom */  /* rijen in de variantentabel */
 const PIMMAX = 60;  /* sequenties in de matrix: 60 x 60 cellen is wat een scherm nog toont */
 const CH = 18, RH = 22, PH = 32, MAXNAME = 24; /* rijhoogte, hoogte van de liniaal en van de plot, naamkolom in tekens */
 
@@ -285,7 +296,8 @@ export default {
       xf: st['al-xf'] != null ? String(st['al-xf']) : 'fasta', gm: st['al-gm'] != null ? String(st['al-gm']) : 'ign',
       pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false, projMsg: null, figOpen: false, fgFrom: st['al-fg-from'] != null ? String(st['al-fg-from']) : '', fgTo: st['al-fg-to'] != null ? String(st['al-fg-to']) : '', fgPer: st['al-fg-per'] != null ? String(st['al-fg-per']) : '60',
       fgTitle: st['al-fg-title'] != null ? String(st['al-fg-title']) : '', fgCons: st['al-fg-cons'] != null ? !!st['al-fg-cons'] : true, dnd: st['al-dnd'] != null ? String(st['al-dnd']) : '',
-      tmode: st['al-tmode'] != null ? String(st['al-tmode']) : 'rect', tvOpen: false,
+      tmode: st['al-tmode'] != null ? String(st['al-tmode']) : 'rect', tvOpen: false, NJMAX,
+      tsrc: st['al-tsrc'] != null ? String(st['al-tsrc']) : 'dnd', tdist: st['al-tdist'] != null ? String(st['al-tdist']) : 'p',
       rd: st['al-read'] != null ? String(st['al-read']) : '', vref: st['al-vref'] != null ? String(st['al-vref']) : '0', varOpen: false, VARMAX,
       fb: st['al-fb'] != null ? String(st['al-fb']) : '', fbt: st['al-fbt'] != null ? String(st['al-fbt']) : 'auto', NAMEMAX, EBI_URL,
       ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
@@ -303,10 +315,28 @@ export default {
         [t('Identiteit'), P(h.ident) + ' (' + N(h.mism) + ' ' + t('verschillen') + ', ' + N(h.ins + h.del) + ' ' + t('gaten') + ')']];
     },
     /* S182: de boom uit het .dnd-vak */
-    tree() { return this.dnd.trim() ? parseNewick(this.dnd) : {}; },
+    dndTree() { return this.dnd.trim() ? parseNewick(this.dnd) : {}; },
+    /* S183: NJ uit de identiteitsmatrix van wat de viewer toont; alleen als hij getekend of voor de volgorde gebruikt wordt */
+    nj() {
+      const m = this.m;
+      if (this.tsrc !== 'nj' || !(this.tvOpen || this.ord === 'tree') || m.names.length < 2) return {};
+      const k = Math.min(m.names.length, NJMAX), nt = alnType(m) === 'nt', P = alnPim({seqs: m.seqs.slice(0, k)}, this.gm);
+      const D = P.map((r, i) => r.map((v, j) => i === j ? 0 : idDist(v, this.tdist, nt)));
+      if (D.some(r => r.some(v => !Number.isFinite(v)))) return {error: 'Sommige paren verschillen te veel voor de Jukes-Cantor-correctie; kies 1 − identiteit.'};
+      return {root: njTree(m.names.slice(0, k), D), capped: m.names.length > k};
+    },
+    njText() { return this.nj.root ? treeNewick(this.nj.root) : ''; },
+    tree() { return this.tsrc === 'nj' ? this.nj : this.dndTree; },
     treeL() { return this.tree.root ? treeLayout(this.tree.root, {mode: this.tmode}) : null; },
+    /* de rijen van de uitlijning naast de bladen (alleen rechthoekig); een blad zonder rij blijft leeg */
+    side() {
+      const L = this.treeL, m = this.m;
+      if (!L || this.tmode !== 'rect' || !m.names.length) return [];
+      const at = new Map(); m.names.forEach((n, i) => { if (!at.has(n)) at.set(n, i); });
+      return L.leaves.map(l => at.has(l.name) ? this.disp[at.get(l.name)].slice(0, SIDEMAX) : '');
+    },
     treeView() { return this.treeL ? treeSvg(this.treeL, {ink: 'currentColor'}) : ''; },
-    treeMiss() { const s = new Set(this.parsed.names); return this.tree.root && s.size ? treeLeaves(this.tree.root).filter(n => !s.has(n)) : []; },
+    treeMiss() { const s = new Set(this.m.names); return this.tree.root && s.size ? treeLeaves(this.tree.root).filter(n => !s.has(n)) : []; },
     vars() { return this.varOpen ? alnVariants(this.src, this.vrefI) : []; },
     varCols() { const t = this.t; return [{h: t('Sequentie')}, {h: t('Variant')}, {h: t('Positie'), num: true}, {h: t('Kolom'), num: true}]; },
     varRows() { return this.vars.slice(0, VARMAX).map(v => [esc(v.name), '<span class="mono">' + esc(v.hgvs) + '</span>', N(v.pos), N(v.col)]); },
@@ -368,6 +398,7 @@ export default {
     order() {
       const m = this.m, ix = m.names.map((_, i) => i);
       if (this.ord === 'hand' && this.hand && this.hand.length === ix.length) return this.hand;
+      if (this.ord === 'tree' && this.tree.root) return treeOrder(this.tree.root, m.names);
       if (this.ord === 'name') return ix.sort((a, b) => m.names[a].localeCompare(m.names[b], undefined, {numeric: true}));
       if (this.ord === 'ident') return ix.sort((a, b) => this.ident[b] - this.ident[a] || a - b);
       return ix;

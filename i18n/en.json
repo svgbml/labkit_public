@@ -5999,5 +5999,17 @@
 "Haakjes kloppen niet: verwacht , of ).": "Parentheses do not match: expected , or ).",
 "Een taklengte is geen getal.": "A branch length is not a number.",
 "Er staat geen boom.": "There is no tree.",
-"Haakjes kloppen niet: tekst na het einde van de boom.": "Parentheses do not match: text after the end of the tree."
+"Haakjes kloppen niet: tekst na het einde van de boom.": "Parentheses do not match: text after the end of the tree.",
+"Boom": "Tree",
+"Neighbour-joining uit de identiteitsmatrix": "Neighbour joining from the identity matrix",
+"Afstand": "Distance",
+"{#} − identiteit (p-afstand)": "{#} − identity (p-distance)",
+"Jukes-Cantor-correctie": "Jukes-Cantor correction",
+"Afstand = −b · ln({#} − p/b) met p = {#} − identiteit, b = {#}/{#} voor DNA en {#}/{#} voor eiwit (Jukes en Cantor {#}). Identiteit zoals in de identiteitsmatrix, met de keuze bij Gaten tellen.": "Distance = −b · ln({#} − p/b) with p = {#} − identity, b = {#}/{#} for DNA and {#}/{#} for protein (Jukes and Cantor {#}). Identity as in the identity matrix, with the choice under Count gaps.",
+"Afstand = {#} − identiteit, zonder correctie voor meervoudige mutaties. Identiteit zoals in de identiteitsmatrix, met de keuze bij Gaten tellen.": "Distance = {#} − identity, without a correction for multiple substitutions. Identity as in the identity matrix, with the choice under Count gaps.",
+"Neighbour-joining heeft een uitlijning met minstens twee sequenties nodig.": "Neighbour joining needs an alignment with at least two sequences.",
+"Alleen de eerste {#} sequenties staan in de boom.": "Only the first {#} sequences are in the tree.",
+"De boom als Newick": "The tree as Newick",
+"Sommige paren verschillen te veel voor de Jukes-Cantor-correctie; kies {#} − identiteit.": "Some pairs differ too much for the Jukes-Cantor correction; choose {#} − identity.",
+"Volgens de boom": "By the tree"
 }
