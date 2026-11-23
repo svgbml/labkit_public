@@ -6018,5 +6018,12 @@
 "niet gevonden in de referentie; staat de SNP in dit amplicon?": "not found in the reference; is the SNP in this amplicon?",
 "dbSNP geeft geen enkel-base-allelen voor deze SNP.": "dbSNP gives no single-base alleles for this SNP.",
 "dbSNP kent meer dan één alternatief allel; ingevuld is": "dbSNP has more than one alternative allele; filled in is",
-"Panel ingevuld; bewaar het met Panel bewaren.": "Panel filled in; save it with Save panel."
+"Panel ingevuld; bewaar het met Panel bewaren.": "Panel filled in; save it with Save panel.",
+"Exporteer als offline pakket": "Export as offline pack",
+"Offline pakket openen": "Open offline pack",
+"Het pakket bevat alleen de vragen en de antwoorden van NCBI, geen e-mailadres of sleutel. Teruggezet werkt het ook met de schakelaar uit.": "The pack holds only the questions and NCBI's answers, no e-mail address or key. Once restored it also works with the switch off.",
+"{#} antwoorden uit het pakket teruggezet.": "{#} answers restored from the pack.",
+"Dit bestand is geen offline pakket van LabKit.": "This file is not a LabKit offline pack.",
+"De kolom Volgens dbSNP is een voorstel: je eigen pieken plus de allelen en de streng van dbSNP. Controleer dit tegen de trace (en de tweede read als je die hebt) voordat je het genotype gebruikt; de bevestiging is aan jou.": "The According to dbSNP column is a proposal: your own peaks plus the alleles and strand from dbSNP. Check this against the trace (and the second read if you have one) before you use the genotype; confirming it is up to you.",
+"voorstel": "proposal"
 }

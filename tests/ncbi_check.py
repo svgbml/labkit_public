@@ -266,6 +266,7 @@ with sync_playwright() as p:
     ck('S199: esummary en de flank opgevraagd', len(cl) == 2 and 'db=snp' in cl[0] and 'seq_start=89919689&seq_stop=89919729' in cl[1] and all('tool=labkit' in u for u in cl), cl)
     cell = gt_cell(5)[0]
     ck('S199: minstreng-SNP gemeld als C/T met ref C, zonder omdraaien met de hand', cell.startswith('C/T') and 'ref C' in cell and ('omgedraaid' in cell or 'flipped' in cell), cell)
+    ck('S201: bevestigingsnoot bij het opgezochte genotype', pg.locator('#sg-gt-confirm').count() == 1 and pg.locator('#sg-gt-confirm').is_visible(), '')
     pg.click('#sg-gt-db'); pg.wait_for_timeout(300)
     ck('S199: tweede keer uit de cache', pg.evaluate('__calls.length') == 2)
     pg.evaluate("ncbiCacheClear(); __calls=[]; ncbi.on=false")
@@ -310,6 +311,29 @@ with sync_playwright() as p:
     r = pg.evaluate(GET, ['esummary', {'db': 'snp', 'id': '429429', 'retmode': 'json'}])
     ck('S200: na een 429 lukt de tweede poging', r.get('ok') and r['v'] == {'r': 9} and pg.evaluate('__n429') == 2, r)
     pg.evaluate("window.fetch=window.__f0")
+
+    # S201: de bewaarde antwoorden als offline pakket; teruggezet werkt het met de schakelaar uit, zonder verzoek
+    pg.evaluate("ncbiCacheClear(); __calls=[]; ncbi.on=true; __fx={'db=snp&id=1805007&':arguments[0]}".replace('arguments[0]', json.dumps(snp_json)))
+    a = pg.evaluate(GET, ['esummary', {'db': 'snp', 'id': '1805007', 'retmode': 'json'}])
+    pack = pg.evaluate("ncbiPack()")
+    ck('S201: pakket met formaat, versie en het antwoord, zonder e-mail of sleutel', pack.get('format') == 'labkit-ncbi-pack' and pack.get('version') == 1 and len(pack.get('entries', {})) == 1
+       and 'email' not in json.dumps(pack) and 'api_key' not in json.dumps(pack), list(pack))
+    pf = ROOT / 'tests' / 'out_ncbi_pack.json'
+    pf.write_text(json.dumps(pack), encoding='utf8')
+    pg.evaluate("ncbiCacheClear(); __calls=[]; ncbi.on=false; location.hash='inst'")
+    pg.wait_for_selector('#inst-ncbi')
+    pg.set_input_files('#inst-ncbi input[type=file]', str(pf))
+    pg.wait_for_function("document.querySelector('#inst-ncbi .note.ok')")
+    pf.unlink()
+    ck('S201: teruggezet: melding en teller', '1' in pg.inner_text('#inst-ncbi .note.ok'), pg.inner_text('#inst-ncbi'))
+    b2 = pg.evaluate(GET, ['esummary', {'db': 'snp', 'id': '1805007', 'retmode': 'json'}])
+    ck('S201: met de schakelaar uit antwoordt het pakket, geen verzoek', b2.get('ok') and b2['v'] == a['v'] and pg.evaluate('__calls.length') == 0, b2)
+    bad = ROOT / 'tests' / 'out_ncbi_bad.json'
+    bad.write_text('{"format":"iets anders"}', encoding='utf8')
+    pg.set_input_files('#inst-ncbi input[type=file]', str(bad))
+    pg.wait_for_function("document.querySelector('#inst-ncbi .note.bad')")
+    bad.unlink()
+    ck('S201: geen pakket: melding, cache blijft', pg.evaluate('Object.keys(ncbiCache()).length') == 1)
 
     ck('geen paginafouten', not errs, errs)
     b.close()

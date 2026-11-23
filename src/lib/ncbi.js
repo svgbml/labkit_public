@@ -59,6 +59,22 @@ function cachePut(k, v) {
 }
 export const ncbiCacheClear = () => { jset(CKEY, {}); ncbiStat.n = 0; };
 
+/* ---- offline pakket (S201): de cache als JSON-bestand, om in een lokaal zonder internet terug te zetten ----
+   Alleen de vragen (zonder tool, e-mail of sleutel) en de antwoorden; terugzetten voegt toe aan wat er al is.
+   Met de schakelaar uit antwoordt ncbiGet() dan uit het pakket. */
+const PACK = 'labkit-ncbi-pack';
+export const ncbiPack = () => ({format: PACK, version: 1, made: new Date().toISOString().slice(0, 10), entries: ncbiCache()});
+/* tekst of object → {ok, n (aantal antwoorden), err (vertaalsleutel)} */
+export function ncbiUnpack(src) {
+  let o;
+  try { o = typeof src === 'string' ? JSON.parse(src) : src; } catch (e) { return {ok: false, err: 'Dit bestand is geen geldige JSON.'}; }
+  if (!o || o.format !== PACK || !o.entries || typeof o.entries !== 'object') return {ok: false, err: 'Dit bestand is geen offline pakket van LabKit.'};
+  const c = ncbiCache(), ks = Object.keys(o.entries).filter(k => /^e\w+\?/.test(k) && o.entries[k] && 'v' in o.entries[k]);
+  ks.forEach(k => { c[k] = {t: +o.entries[k].t || Date.now(), v: o.entries[k].v}; });
+  jset(CKEY, c); ncbiStat.n = Object.keys(c).length;
+  return {ok: true, n: ks.length};
+}
+
 /* ---- wachtrij: elk verzoek krijgt een eigen tijdslot ---- */
 let nextSlot = 0;
 function slot() {
@@ -94,4 +110,4 @@ async function request(util, params) {
   catch (e) { throw new NcbiError('down', 'NCBI stuurde een antwoord dat LabKit niet kan lezen. Probeer het later opnieuw.'); }
 }
 
-expose({ncbi, ncbiGet, ncbiCache, ncbiCacheClear});
+expose({ncbi, ncbiGet, ncbiCache, ncbiCacheClear, ncbiPack, ncbiUnpack});

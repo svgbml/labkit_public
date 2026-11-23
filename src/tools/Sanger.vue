@@ -88,6 +88,7 @@
           <h3>{{ t('Genotypes van de assay') }}</h3>
           <p style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Allelen op de streng van de assay; een SNP op de andere streng wordt automatisch omgedraaid.') }}</p>
           <lk-table table-id="sg-gt-tbl" :cols="gtCols" :rows="gtRows"/>
+          <div v-if="hasDb" id="sg-gt-confirm"><lk-note kind="info">{{ t('De kolom Volgens dbSNP is een voorstel: je eigen pieken plus de allelen en de streng van dbSNP. Controleer dit tegen de trace (en de tweede read als je die hebt) voordat je het genotype gebruikt; de bevestiging is aan jou.') }}</lk-note></div>
           <!-- S199: allelen en streng uit dbSNP, zodat een SNP op de andere streng vanzelf goed staat -->
           <details id="sg-gt-dbp" style="margin-top:8px">
             <summary style="cursor:pointer;font-size:13px">{{ t('Allelen en streng uit dbSNP') }}</summary>
@@ -581,7 +582,7 @@ export default {
     gtCols() {
       const t = this.t, c = [{h: 'SNP'}, {h: t('Positie') + ' (g.)', num: true}, {h: t('Allelen')}, {h: t('Streng')}, {h: t('Eerste read')}];
       if (this.snpc2) c.push({h: t('Tweede read')}, {h: t('Status')});
-      if (this.hasDb) c.push({h: t('Volgens dbSNP')});
+      if (this.hasDb) c.push({h: t('Volgens dbSNP') + ' (' + t('voorstel') + ')'});
       return c;
     },
     /* ---------- dbSNP (S199) ---------- */
