@@ -5316,5 +5316,18 @@
 "Niet goed: het antwoord is {*}.": "Not correct: the answer is {*}.",
 "De stock ({*}) werd verdund tot {*} door {*} stock aan te vullen tot {*} (C₁V₁ = C₂V₂).": "The stock ({*}) was diluted to {*} by making {*} of stock up to {*} (C₁V₁ = C₂V₂).",
 "Er werd gecentrifugeerd bij {*} × g ({*} rpm, rotorstraal {*} cm; RCF berekend uit rpm en rotorstraal).": "Samples were centrifuged at {*} × g ({*} rpm, rotor radius {*} cm; RCF calculated from rpm and rotor radius).",
-"Voor {*} oplossing werd afgewogen: {*}; daarna werd aangevuld met gedemineraliseerd water tot het eindvolume.": "For {*} of solution the following was weighed: {*}; it was then made up to the final volume with demineralised water."
+"Voor {*} oplossing werd afgewogen: {*}; daarna werd aangevuld met gedemineraliseerd water tot het eindvolume.": "For {*} of solution the following was weighed: {*}; it was then made up to the final volume with demineralised water.",
+"Schema van de plaat of flessen met cellen en suspensievolume per putje": "Diagram of the plate or flasks with cells and suspension volume per well",
+"Per putje of fles: {*} cellen in {*} suspensie en {*} medium.": "Per well or flask: {*} cells in {*} of suspension and {*} of medium.",
+"Plaatrij": "Plate row",
+"Putjes van de gekozen rij": "Wells of the selected row",
+"groei": "growth",
+"helder": "clear",
+"Tik op een putje: troebel (groei) of helder (geen groei). De MIC is het laagste helder putje vóór de eerste groei.": "Tap a well: turbid (growth) or clear (no growth). The MIC is the lowest concentration with no growth.",
+"Breekpunten: de tool bevat geen vaste tabel; controleer de actuele EUCAST-tabel voor jouw micro-organisme.": "Breakpoints: this tool has no built-in table; check the current EUCAST table for your organism.",
+"Buizen per verdunning": "Tubes per dilution",
+"buis": "tube",
+"positief": "positive",
+"negatief": "negative",
+"Tik op een buis: positief (troebel of gas) of negatief. De tabel hierboven past mee.": "Tap a tube: positive (turbid or gas) or negative. The table above follows."
 }

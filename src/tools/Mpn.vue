@@ -19,6 +19,14 @@
       <div class="row" style="margin-top:8px">
         <button type="button" id="mp-tbl-add" @click="addRow">{{ t('+ Verdunning') }}</button>
       </div>
+      <div v-if="tubes.length" class="mpn-tubes" role="group" :aria-label="t('Buizen per verdunning')">
+        <div v-for="r in tubes" :key="r.i" class="mpn-row">
+          <span class="mpn-m">{{ r.m }} {{ u }}</span>
+          <button v-for="j in r.n" :key="j" type="button" :class="{pos: j <= r.p}" :aria-pressed="j <= r.p"
+            :aria-label="r.m + ' ' + u + ', ' + t('buis') + ' ' + j + ': ' + (j <= r.p ? t('positief') : t('negatief'))" @click="tap(r.i, j)"></button>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Tik op een buis: positief (troebel of gas) of negatief. De tabel hierboven past mee.') }}</p>
+      </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Per verdunning de hoeveelheid oorspronkelijk monster per buis (bijv. 0,1 g, 0,01 g, 0,001 g), het aantal buizen en het aantal positieve buizen. Voorbeeld: 3-buizenreeks met uitslag 3-1-0.') }}</p>
     </div>
     <div class="result">
@@ -59,6 +67,11 @@ export default {
     cols() {
       return [{h: this.t('Monster per buis'), t: 'num', w: 90}, {h: this.t('Buizen'), t: 'num', w: 64}, {h: this.t('Positief'), t: 'num', w: 64}];
     },
+    /* de buizen per ingevulde rij; een buis aantikken verhoogt of verlaagt het aantal positieven */
+    tubes() {
+      return this.rows.map((r, i) => ({i, m: r[0], n: Math.round(num(r[1])), p: Math.max(0, Math.round(num(r[2])) || 0)}))
+        .filter(r => r.n > 0 && r.n <= 12 && num(r[0]) !== 0 && r.m !== '');
+    },
     per() { return this.t('per ' + this.u); },
     /* het rekenwerk van calc.mpn, ongewijzigd */
     m() {
@@ -81,6 +94,10 @@ export default {
   },
   methods: {
     S,
+    tap(i, j) {
+      const r = this.rows[i], p = Math.round(num(r[2])) || 0, np = j <= p ? j - 1 : j;
+      this.rows = this.rows.map((x, k) => (k === i ? [x[0], x[1], lkNumIn(String(np))] : x));
+    },
     addRow() { this.rows = [...this.rows, ['', '', '']]; }
   }
 };
