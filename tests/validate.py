@@ -507,6 +507,28 @@ def _(pg):
     return [('pad binnen 1,5 px van de bocht', int(err < 1.5), 1, 0), ('gelijke intensiteit (min/max)', min(i1) / max(i1), 1, 0.03),
             ('recht: buitenste lane mist de band', int(i0[0] < 0.2 * max(i0)), 1, 0)]
 
+@case('Gelfoto-editor', 'Bandlabels, aantekeningen, kanaal en pseudokleur', 'Zelftest: op de demo-gel komt een gesleepte pijl in gf.ann en in de export; "Grootte naast de banden" verandert de export; een kleurenfoto met de banden alleen in het groene kanaal kiest bij "automatisch" groen; de pseudokleur Vuur kleurt de export maar laat de gemeten bandgrootte gelijk')
+def _(pg):
+    pg.evaluate("__go('gelfoto'); __set('gf-lad','100'); __set('gf-chan','lum'); __set('gf-lut',''); gfDemo(); gf.marks=[]; gfMeasAll()"); pg.wait_for_timeout(300)
+    S = "(x,y)=>{ const r=gcv.getBoundingClientRect(), s=gcv.width/r.width, L=gf.layout; return [r.left+(L.L+x)/s, r.top+(L.T+y)/s]; }"
+    pg.evaluate("setMode('arrow')")
+    p1 = pg.evaluate(f"({S})(gf.lanes[4].x+90,gfYofBp(350)+60)"); p2 = pg.evaluate(f"({S})(gf.lanes[4].x+20,gfYofBp(350)+5)")
+    pg.mouse.move(*p1); pg.mouse.down(); pg.mouse.move(*p2, steps=4); pg.mouse.up(); pg.evaluate("setMode('arrow')"); pg.wait_for_timeout(200)
+    n = pg.evaluate("gf.ann.length")
+    red = pg.evaluate("(()=>{ const a=gfRender(true,1).toDataURL(), k=gf.ann; gf.ann=[]; const b=gfRender(true,1).toDataURL(); gf.ann=k; return +(a!==b); })()")
+    pg.evaluate("__set('gf-blab', false)"); e0 = pg.evaluate("gfRender(true,1).toDataURL()")
+    pg.evaluate("const b=document.getElementById('gf-blab'); b.checked=true; b.dispatchEvent(new Event('change',{bubbles:true})); gfRender()"); e1 = pg.evaluate("gfRender(true,1).toDataURL()")
+    bp0 = pg.evaluate("gf.marks.map(m=>Math.round(m.bp)).join()")
+    pg.evaluate("__set('gf-lut','fire')"); pg.wait_for_timeout(200)
+    col = pg.evaluate("(()=>{ const P=gfProc(), d=P.c.getContext('2d').getImageData(0,0,P.w,P.h).data; let n=0; for(let i=0;i<d.length;i+=16) if(Math.abs(d[i]-d[i+1])>20) n++; return n; })()")
+    pg.evaluate("gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x))"); bp1 = pg.evaluate("gf.marks.map(m=>Math.round(m.bp)).join()")
+    pg.evaluate("__set('gf-lut',''); const b=document.getElementById('gf-blab'); b.checked=false; b.dispatchEvent(new Event('change',{bubbles:true})); gf.ann=[]")
+    ch = pg.evaluate("""(()=>{ const c=document.createElement('canvas'); c.width=300; c.height=200; const x=c.getContext('2d'); x.fillStyle='rgb(120,20,120)'; x.fillRect(0,0,300,200);
+      for(let i=0;i<4;i++) for(let y=30;y<190;y+=40){ x.fillStyle='rgb(120,230,120)'; x.fillRect(30+i*70,y,40,6); } gfLoadCanvas(c); __set('gf-chan','auto'); gfProc(); const r=gf.cache.chanAuto; __set('gf-chan','lum'); return r; })()""")
+    return [('pijl opgeslagen', n, 1, 0), ('pijl in de export', red, 1, 0), ('bandlabels veranderen de export', int(e0 != e1), 1, 0),
+            ('pseudokleur kleurt de foto', int(col > 100), 1, 0), ('bandgrootte gelijk met pseudokleur', int(bp0 == bp1), 1, 0),
+            ('automatisch kanaal = groen', int(ch == 'g'), 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

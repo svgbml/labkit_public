@@ -10,7 +10,7 @@ import {lkNumIn} from '../lib/bridge.js';
 import {libPut} from '../tools/gelfoto/library.js';
 
 /* ================= GELFOTO-EDITOR ================= */
-const gf={unit:'bp',disp:'bp',angAuto:true,src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null,persp:null,curve:false,prof:false};
+const gf={unit:'bp',disp:'bp',angAuto:true,src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null,persp:null,curve:false,prof:false,chan:'lum',lut:'',ann:[]};
 const gcv=$('#gf-cv');
 /* Elke zin is een eigen vertaalsleutel (S270); een lege zin valt weg. #gf-status staat in een Vue-boom,
    dus de DOM-vertaallaag kwam er nooit: in het Engels bleven deze meldingen eerst Nederlands. */
@@ -23,7 +23,7 @@ function gfSetIn(id,v){ const el=$('#'+id); if(!el) return; el.value=String(v);
      niet meer, dus doen we het hier voordat v-model de waarde overneemt */
   if(LANG==='en'&&typeof i18nValue==='function'){ el.__iv=null; el.__typed=false; i18nValue(el); }
   el.dispatchEvent(new Event('input',{bubbles:true})); }
-function gfLoadCanvas(c){ gf.libId=null; gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.persp=null; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; gfSetIn('gf-rot',0); gfUpdate(true); }
+function gfLoadCanvas(c){ gf.libId=null; gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.persp=null; gf.ann=[]; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; gfSetIn('gf-rot',0); gfUpdate(true); }
 function gfFromImage(img){ const M=2400, s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); gfLoadCanvas(c); gf.title=''; gfSetIn('gf-title',''); gf.marks=[]; let auto=false; { const bx=gfFindGel(); if(bx&&bx.w*bx.h<0.8*c.width*c.height){ gf.crop=bx; gf.cache={}; auto=true; } } gfDetectLanes(); if(gf.lanes.length>=2) gfDetectBands(); gfMarksTable(); gfStatus(`Geladen: ${img.naturalWidth} × ${img.naturalHeight} px${s<1?' (verkleind voor bewerking)':''}.`, auto?'Gel automatisch bijgesneden (Herstel toont de hele foto).':'', `${gf.lanes.length} lanen gevonden.`, 'Staat de gel scheef? Gebruik "Automatisch rechtzetten".'); }
 function gfFile(f){ if(!f) return; const url=URL.createObjectURL(f); const img=new Image(); img.onload=()=>{ gfFromImage(img); URL.revokeObjectURL(url); }; img.onerror=()=>gfStatus('Dit bestand kan de browser niet openen (bijvoorbeeld TIFF). Exporteer de foto als PNG of JPG.'); img.src=url; }
 $('#gf-stage').addEventListener('dragover',e=>e.preventDefault());
@@ -57,12 +57,15 @@ function gfRotated(){
   gf.cache.rk=k; gf.cache.rot=c; return c;
 }
 function gfProc(){
-  const k=`${gf.rot90}|${gf.fine}|${gf.flip}|${JSON.stringify(gf.persp)}|${JSON.stringify(gf.crop)}|${gf.inv}|${gf.gray}|${gf.bri}|${gf.con}`; if(gf.cache.pk===k) return gf.cache.proc;
+  const k=`${gf.rot90}|${gf.fine}|${gf.flip}|${JSON.stringify(gf.persp)}|${JSON.stringify(gf.crop)}|${gf.inv}|${gf.gray}|${gf.bri}|${gf.con}|${gf.chan}|${gf.lut}`; if(gf.cache.pk===k) return gf.cache.proc;
   const r=gfRotated(); const cr=gf.crop||{x:0,y:0,w:r.width,h:r.height};
   const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(cr.w)); c.height=Math.max(1,Math.round(cr.h)); const x=c.getContext('2d'); x.drawImage(r,cr.x,cr.y,cr.w,cr.h,0,0,c.width,c.height);
   const id=x.getImageData(0,0,c.width,c.height), d=id.data, n=c.width*c.height, gray=new Float32Array(n);
   const adj=v=>{ v=v/255; if(gf.inv) v=1-v; v=(v-0.5)*gf.con+0.5+gf.bri/100; return v<0?0:v>1?1:v; };
-  let clip=0; for(let i=0,p=0;p<n;i+=4,p++){ const l=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]; const g=adj(l); gray[p]=g; if((g===0||g===1)&&l>0.5&&l<254.5) clip++; if(gf.gray){ d[i]=d[i+1]=d[i+2]=g*255; } else { d[i]=adj(d[i])*255; d[i+1]=adj(d[i+1])*255; d[i+2]=adj(d[i+2])*255; } }
+  /* kanaal (S78): luminantie, één kleurkanaal, of automatisch het kanaal met de grootste spreiding */
+  let ch=gf.chan||'lum'; if(ch==='auto'){ let bs=-1; ['r','g','b'].forEach((q,o)=>{ let s1=0,s2=0,m=0; for(let p=0;p<n;p+=29){ const v=d[p*4+o]; s1+=v; s2+=v*v; m++; } const sd=s2/m-(s1/m)**2; if(sd>bs){ bs=sd; ch=q; } }); gf.cache.chanAuto=ch; }
+  const ci={r:0,g:1,b:2}[ch], lut=gf.gray&&GF_LUTS[gf.lut]?gfLutTab(gf.lut):null;
+  let clip=0; for(let i=0,p=0;p<n;i+=4,p++){ const l=ci==null?0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]:d[i+ci]; const g=adj(l); gray[p]=g; if((g===0||g===1)&&l>0.5&&l<254.5) clip++; if(lut){ const q=Math.round(g*255)*3; d[i]=lut[q]; d[i+1]=lut[q+1]; d[i+2]=lut[q+2]; } else if(gf.gray){ d[i]=d[i+1]=d[i+2]=g*255; } else { d[i]=adj(d[i])*255; d[i+1]=adj(d[i+1])*255; d[i+2]=adj(d[i+2])*255; } }
   x.putImageData(id,0,0);
   const samp=[]; for(let p=0;p<n;p+=29) samp.push(gray[p]); samp.sort((a,b)=>a-b); const med=samp[samp.length>>1];
   const sig=new Float32Array(n); const darkBands=med>0.5; for(let p=0;p<n;p++) sig[p]=darkBands?1-gray[p]:gray[p];
@@ -243,7 +246,7 @@ function gfLadNg(v){ const lad=gfLadder()||[], ms=stNums($('#gf-lmass').value), 
 function gfMarkNg(m){ const sl=gfMassSlope(); if(m.int==null) m.int=gfIntensity(m.x,m.y); const v=(m.int||0)/sl; return isFinite(v)&&v>0?v:NaN; }
 const gfNgTxt=v=>!isFinite(v)?'–':fmt(v,v<10?1:0);
 const gfLab=v=>{ if(gf.disp==='ng'){ const n=gfLadNg(v); return isFinite(n)?gfNgTxt(n):'–'; } return gf.disp==='kb'?gfFmtSize(v):gf.unit==='kDa'?NL(v,1):String(Math.round(v)); };
-function gxOpts(){ const g=id=>{ const el=$('#'+id); return !!(el&&el.checked); }; return {integ:g('gx-integ'),title:g('gx-title'),lanes:g('gx-lanes'),bp:g('gx-bp'),ticks:g('gx-ticks'),unit:g('gx-unit'),marks:g('gx-marks'),pad:g('gx-pad'),mcol:$('#gx-mcol').value,help:g('gf-help')}; }
+function gxOpts(){ const g=id=>{ const el=$('#'+id); return !!(el&&el.checked); }; return {integ:g('gx-integ'),blab:g('gf-blab'),title:g('gx-title'),lanes:g('gx-lanes'),bp:g('gx-bp'),ticks:g('gx-ticks'),unit:g('gx-unit'),marks:g('gx-marks'),pad:g('gx-pad'),mcol:$('#gx-mcol').value,help:g('gf-help')}; }
 /* ===== ladder uit foto ===== */
 function gfLadAnalyze(c){ const w=c.width, h=c.height, d=c.getContext('2d').getImageData(0,0,w,h).data, L=new Float32Array(w*h); for(let i=0;i<w*h;i++) L[i]=(0.299*d[i*4]+0.587*d[i*4+1]+0.114*d[i*4+2])/255;
   /* drempel donker/licht via Otsu: gelachtergrond kan zwart of grijs zijn */ const hist=new Array(256).fill(0); for(let i=0;i<w*h;i++) hist[Math.min(255,Math.round(L[i]*255))]++; let sum=0; for(let i=0;i<256;i++) sum+=i*hist[i]; let sb=0,wb=0,bv=-1,ot=90; for(let i=0;i<256;i++){ wb+=hist[i]; if(!wb) continue; const wf=w*h-wb; if(!wf) break; sb+=i*hist[i]; const v=wb*wf*(sb/wb-(sum-sb)/wf)**2; if(v>bv){ bv=v; ot=i; } } const TD=Math.min(0.6,Math.max(0.3,ot/255)), TE=Math.min(0.7,TD+0.1);
@@ -372,6 +375,15 @@ function gfRender(exportMode,scale=1){
       else { const x1=tx-it.off, nw=it.off-fs*0.3-lead; x.fillText(it.t,x1,yy); const a=fs*0.28; x.strokeStyle='#111'; x.lineWidth=Math.max(1,fs/18); x.beginPath(); x.moveTo(x1+fs*0.15,yy); x.lineTo(tx-nw-fs*0.1,yy); x.lineTo(end-a,yb); x.stroke(); x.beginPath(); x.moveTo(end,yb); x.lineTo(end-a,yb-a*0.55); x.lineTo(end-a,yb+a*0.55); x.closePath(); x.fill(); } }); }
   if(tickOn){ x.strokeStyle='#111'; x.lineWidth=Math.max(1,fs/14); gf.bands.forEach(b=>{ x.beginPath(); x.moveTo(Lm-tickW,T+b.y); x.lineTo(Lm-1,T+b.y); x.stroke(); }); }
   if(unitOn){ x.font=sfont; x.textAlign='right'; x.textBaseline='bottom'; x.fillText(U,tx,T-fs*0.2); }
+  /* bandgroottes naast de banden op de foto (S78): per lane van boven naar onder, een label schuift omlaag als het het vorige zou raken; past het niet rechts, dan links */
+  if(o.blab&&gf.marks.length){ const bf=`600 ${fs*0.72}px Segoe UI, Arial, sans-serif`, lh=fs*0.85; x.font=bf; x.textBaseline='middle'; x.lineJoin='round';
+    const bt=m=>{ if(gf.disp==='ng'){ const n=gfMarkNg(m); return isFinite(n)?'≈ '+gfNgTxt(n)+' ng':'?'; } const t=gfSizeTxt(m.bp); return isFinite(m.bp)?(t[0]==='<'||t[0]==='>'?t:'≈ '+t)+' '+U:'?'; };
+    const dark=P.darkBands, byL=new Map(); gf.marks.forEach(m=>{ const k=Math.round(m.x); (byL.get(k)||byL.set(k,[]).get(k)).push(m); });
+    byL.forEach(ms=>{ let prev=-Infinity; ms.slice().sort((a,b)=>a.y-b.y).forEach(m=>{ const t=bt(m), tw=x.measureText(t).width, ty=Math.max(m.y,prev+lh); prev=ty; let tx=m.x+gf.lw/2+3, al='left'; if(tx+tw>P.w){ tx=m.x-gf.lw/2-3; al='right'; }
+      x.textAlign=al; x.strokeStyle=dark?'#fff':'#000'; x.lineWidth=Math.max(2,fs/6); x.strokeText(t,Lm+tx,T+ty); x.fillStyle=dark?'#111':'#fff'; x.fillText(t,Lm+tx,T+ty); }); });
+    x.textBaseline='alphabetic'; x.fillStyle='#111'; }
+  /* aantekeningen (S78): pijlen en kaders in beeldcoördinaten */
+  [...(gf.ann||[]),...(gf.annPend&&!exportMode?[gf.annPend]:[])].forEach(a=>gfAnnDraw(x,a,Lm,T,Math.max(2,fs/7)));
   if(marksOn){
     const ord=gf.marks.map(m=>({m,y:T+m.y})).sort((a,b)=>a.y-b.y); const gap=fs*1.05; for(let i=1;i<ord.length;i++) if(ord[i].y-ord[i-1].y<gap) ord[i].y=ord[i-1].y+gap;
     const ex=Lm+P.w+gw+Wv; x.font=mfont; x.textAlign='left'; x.textBaseline='middle';
@@ -406,7 +418,7 @@ function gfRender(exportMode,scale=1){
 }
 let gfFine=0, gfFineT=null;
 function gfUpdate(){ if(!$('#gf-inv')) return;   /* de velden staan in Vue en zijn er pas na het mounten */
-  gf.inv=$('#gf-inv').checked; gf.gray=$('#gf-gray').checked; gf.bri=+$('#gf-bri').value; gf.con=+$('#gf-con').value; gf.fine=+$('#gf-rot').value; gf.fs=+$('#gf-fs').value; gf.angAuto=$('#gf-ang').value==='auto'; gf.ang=gf.angAuto?0:+$('#gf-ang').value; gf.title=$('#gf-title').value; gf.lw=+$('#gf-lw').value; gf.ba=+(($('#gf-ba')||{}).value||0); gf.ladKey=$('#gf-lad').value; gf.disp=$('#gf-unit').value; gf.unit=gf.disp==='kDa'?'kDa':'bp';
+  gf.inv=$('#gf-inv').checked; gf.gray=$('#gf-gray').checked; gf.bri=+$('#gf-bri').value; gf.con=+$('#gf-con').value; gf.fine=+$('#gf-rot').value; gf.fs=+$('#gf-fs').value; gf.angAuto=$('#gf-ang').value==='auto'; gf.ang=gf.angAuto?0:+$('#gf-ang').value; gf.title=$('#gf-title').value; gf.lw=+$('#gf-lw').value; gf.ba=+(($('#gf-ba')||{}).value||0); { const c=$('#gf-chan'), l=$('#gf-lut'); if(c) gf.chan=c.value; if(l) gf.lut=l.value; } gf.ladKey=$('#gf-lad').value; gf.disp=$('#gf-unit').value; gf.unit=gf.disp==='kDa'?'kDa':'bp';
   gfMarksTable(); gfRender();
   if(gf.fine!==gfFine){ gfFine=gf.fine; clearTimeout(gfFineT); gfFineT=setTimeout(()=>{ if(gf.src) gfGeom(); },350); } }
 calc.gelfoto=e=>{ if(e&&e.target&&(e.target.closest('#gf-lanes')||e.target.closest('#gf-bt')||e.target.id==='gf-file'||e.target.id==='gf-n')) return; gfUpdate(); };
@@ -414,7 +426,7 @@ function gfGeom(){ const had=gf.lanes.length>0, hb=gf.bands.length>0; gf.marks=[
 function gfR90(){ gf.rot90=(gf.rot90+1)%4; gf.crop=null; gfGeom(); }
 function gfFlip(){ gf.flip=!gf.flip; gfGeom(); }
 function gfBandsBtn(){ gf.ladKey=$('#gf-lad').value; gfDetectBands(); }
-function setMode(m){ gf.mode=gf.mode===m?null:m; ['crop','addlane','addband','measure','persp'].forEach(k=>{ const b=$({crop:'#gf-crop',addlane:'#gf-addlane',addband:'#gf-addband',measure:'#gf-measure',persp:'#gf-persp'}[k]); if(b) b.classList.toggle('on',gf.mode===k); }); { const cb=$('#gf-cropbar'); if(cb) cb.style.display=gf.mode==='crop'?'flex':'none'; const pb=$('#gf-perspbar'); if(pb) pb.style.display=gf.mode==='persp'?'flex':'none'; } gcv.style.cursor=gf.mode?'crosshair':'default';
+function setMode(m){ gf.mode=gf.mode===m?null:m; ['crop','addlane','addband','measure','persp','arrow','box'].forEach(k=>{ const b=$({crop:'#gf-crop',addlane:'#gf-addlane',addband:'#gf-addband',measure:'#gf-measure',persp:'#gf-persp',arrow:'#gf-aarrow',box:'#gf-abox'}[k]); if(b) b.classList.toggle('on',gf.mode===k); }); { const cb=$('#gf-cropbar'); if(cb) cb.style.display=gf.mode==='crop'?'flex':'none'; const pb=$('#gf-perspbar'); if(pb) pb.style.display=gf.mode==='persp'?'flex':'none'; } gcv.style.cursor=gf.mode?'crosshair':'default';
   gf.pend=gf.mode==='crop'&&gf.crop?{...gf.crop}:gf.mode==='persp'&&gf.src?(gf.persp?gf.persp.map(q=>({...q})):gfFindQuad()||gfQuadDefault()):null; if(window.__gfRefresh) window.__gfRefresh(); gfRender(); }
 function gfMeasureBtn(){ if(gf.bands.filter(b=>isFinite(b.bp)).length<2){ gfStatus('Je hebt minstens twee ladderbanden met bp-waarde nodig om te meten.'); return; } setMode('measure'); }
 function gfUncrop(){ if(!gf.crop) return; gf.crop=null; gfGeom(); }
@@ -456,6 +468,7 @@ gcv.addEventListener('pointerdown',e=>{
   if(gf.mode==='persp'){ const q=gf.pend||[]; let bi=-1,bd=Math.max(24*p.s,gf.src.width/40); q.forEach((c,i)=>{ const d=Math.hypot(c.x-p.x,c.y-p.y); if(d<bd){bd=d;bi=i;} }); if(bi>=0){ gf.drag={t:'pc',i:bi}; gcv.setPointerCapture(e.pointerId); } return; }
   if(gf.mode==='crop'){ const h=gfCropHit(p); if(h){ gf.drag={t:'cropadj',h,x0:p.x,y0:p.y,o:{...gf.pend}}; } else { gf.drag={t:'crop',x0:p.x,y0:p.y}; gf.pend={x:p.x,y:p.y,w:0,h:0}; } gcv.setPointerCapture(e.pointerId); return; }
   const inside=p.x>=0&&p.y>=0&&p.x<=P.w&&p.y<=P.h;
+  if((gf.mode==='arrow'||gf.mode==='box')&&inside){ const c=($('#gf-acol')||{}).value||'#d62828'; gf.annPend={t:gf.mode,x1:p.x,y1:p.y,x2:p.x,y2:p.y,c}; gf.drag={t:'ann'}; gcv.setPointerCapture(e.pointerId); return; }
   if(!gf.mode&&gfLabHit(p)>=0){ e.preventDefault(); gfLabEdit(gfLabHit(p)); return; }  /* preventDefault: anders haalt de muisklik de focus meteen weg */
   if(gf.mode==='addlane'&&inside){ const act=gf.lanes[gf.ladder]; gf.lanes.push({x:p.x,label:String(gf.lanes.length+1)}); gf.lanes.sort((a,b)=>a.x-b.x); gf.ladder=Math.max(0,gf.lanes.indexOf(act)); gfLanesTable(); gfRender(); return; }
   if(gf.mode==='addband'&&inside&&gf.lanes[gf.ladder]){ const y=gfPeakNear(gf.lanes[gf.ladder].x,p.y); gf.bands.push({y,bp:NaN}); gf.bands.sort((a,b)=>a.y-b.y); gfBandsTable(); gfRender(); return; }
@@ -483,6 +496,7 @@ gcv.addEventListener('pointermove',e=>{
     gf.pend={x:x0,y:y0,w:x1-x0,h:y1-y0}; gfRender(); return; }
   if(gf.drag.t==='crop'){ const r=gfRotated(); const x0=Math.max(0,Math.min(gf.drag.x0,p.x)), y0=Math.max(0,Math.min(gf.drag.y0,p.y)); gf.pend={x:x0,y:y0,w:Math.min(r.width,Math.max(gf.drag.x0,p.x))-x0,h:Math.min(r.height,Math.max(gf.drag.y0,p.y))-y0}; gfRender(); }
   else if(gf.drag.t==='lane'){ gf.lanes[gf.drag.i].x=Math.max(0,Math.min(gfProc().w,p.x)); gfRender(); }
+  else if(gf.drag.t==='ann'){ const P=gfProc(); gf.annPend.x2=Math.max(0,Math.min(P.w,p.x)); gf.annPend.y2=Math.max(0,Math.min(P.h,p.y)); gfRender(); }
   else if(gf.drag.t==='pc'){ gf.pend[gf.drag.i]={x:Math.max(0,Math.min(gf.src.width,p.x)),y:Math.max(0,Math.min(gf.src.height,p.y))}; gfRender(); }
   else if(gf.drag.t==='mark'){ const m=gf.marks[gf.drag.i]; m.y=Math.max(0,Math.min(gfProc().h,p.y)); m.bp=gfEst(m.y,m.x); gfRender(); }
   else if(gf.drag.t==='lw'){ gf.lw=Math.max(4,Math.min(200,Math.round(2*Math.abs(p.x-gf.lanes[gf.drag.i].x)))); gfRender(); }
@@ -490,6 +504,7 @@ gcv.addEventListener('pointermove',e=>{
 });
 function gfUp(e){ gfTouch.delete(e.pointerId); if(gfTouch.size<2) gf.pinch=null;
   if(gf.drag&&gf.drag.t==='mark'){ gf.marks[gf.drag.i].int=null; gfMarksTable(); }
+  if(gf.drag&&gf.drag.t==='ann'){ const a=gf.annPend; gf.annPend=null; if(a&&Math.hypot(a.x2-a.x1,a.y2-a.y1)>6){ ['x1','y1','x2','y2'].forEach(k=>a[k]=Math.round(a[k])); gf.ann=[...(gf.ann||[]),a]; } if(window.__gfRefresh) window.__gfRefresh(); }
   if(gf.drag&&gf.drag.t==='lw'){ gf.marks.forEach(m=>m.int=null); gfSetIn('gf-lw',gf.lw); } if(gf.drag&&gf.drag.t==='band'){ gf.bands.sort((a,b)=>a.y-b.y); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfBandsTable(); gfMarksTable(); } if(gf.drag&&gf.drag.t==='lane'){ const act=gf.lanes[gf.ladder]; gf.lanes.sort((a,b)=>a.x-b.x); gf.ladder=Math.max(0,gf.lanes.indexOf(act)); gfLanesTable(); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); } gf.drag=null; gfRender(); }
 gcv.addEventListener('pointerup',gfUp); gcv.addEventListener('pointercancel',gfUp);
 
@@ -536,6 +551,25 @@ function gfAutoStraighten(){
   best=Math.round(best*4)/4; $('#gf-rot').value=best; $('#gf-rot').dispatchEvent(new Event('input',{bubbles:true}));
   gfStatus(`Rechtgezet met ${fmt(best,2)}°. Lanen en ladder worden opnieuw gedetecteerd.`);
 }
+
+/* ================= GELFOTO: AANTEKENINGEN EN KLEUREN (S78) =================
+   Pijlen en kaders staan in gf.ann in beeldcoördinaten (de gel zonder marge), dus ze bewegen mee
+   met marges en labels en gaan mee in de export, het project en de geschiedenis.
+   Pseudokleuren (LUT) kleuren alleen de weergave en de export; het signaal voor de metingen blijft
+   de grijswaarde, en gfEdits() meldt de LUT als niet-lineaire bewerking. */
+function gfAnnDraw(x,a,L,T,lw){ x.save(); x.strokeStyle=x.fillStyle=a.c||'#d62828'; x.lineWidth=lw; x.lineCap='round';
+  if(a.t==='box'){ x.strokeRect(L+Math.min(a.x1,a.x2),T+Math.min(a.y1,a.y2),Math.abs(a.x2-a.x1),Math.abs(a.y2-a.y1)); }
+  else { const ang=Math.atan2(a.y2-a.y1,a.x2-a.x1), hl=lw*4.5; x.beginPath(); x.moveTo(L+a.x1,T+a.y1); x.lineTo(L+a.x2-Math.cos(ang)*hl*0.6,T+a.y2-Math.sin(ang)*hl*0.6); x.stroke();
+    x.beginPath(); x.moveTo(L+a.x2,T+a.y2); x.lineTo(L+a.x2-hl*Math.cos(ang-0.45),T+a.y2-hl*Math.sin(ang-0.45)); x.lineTo(L+a.x2-hl*Math.cos(ang+0.45),T+a.y2-hl*Math.sin(ang+0.45)); x.closePath(); x.fill(); }
+  x.restore(); }
+function gfAnnDel(i){ gf.ann=(gf.ann||[]).filter((_,j)=>j!==i); if(window.__gfRefresh) window.__gfRefresh(); gfRender(); }
+/* LUT-ankers (waarde 0–1 → kleur); daartussen lineair */
+const GF_LUTS={fire:{n:'Vuur',s:[[0,0,0,0],[0.33,150,0,40],[0.66,255,120,0],[0.85,255,220,40],[1,255,255,255]]},
+  viridis:{n:'Viridis',s:[[0,68,1,84],[0.25,59,82,139],[0.5,33,145,140],[0.75,94,201,98],[1,253,231,37]]},
+  green:{n:'Groen',s:[[0,0,0,0],[1,40,255,80]]}, magenta:{n:'Magenta',s:[[0,0,0,0],[1,255,40,220]]}};
+function gfLutTab(k){ const c=gf.cache, key='lut'+k; if(c[key]) return c[key]; const s=GF_LUTS[k].s, t=new Uint8ClampedArray(256*3);
+  for(let i=0;i<256;i++){ const v=i/255; let j=0; while(j<s.length-2&&v>s[j+1][0]) j++; const a=s[j], b=s[j+1], f=(v-a[0])/(b[0]-a[0]||1); for(let q=1;q<4;q++) t[i*3+q-1]=a[q]+(b[q]-a[q])*f; }
+  c[key]=t; return t; }
 
 /* ================= GELFOTO: GEBOGEN LANEN (S77) =================
    Een lane die krom loopt (smile, een scheve kam, een gel die trok) volgt een parabool
@@ -616,6 +650,8 @@ function gfEdits(){ if(!gf.src) return []; const e=[], P=gfProc(), N=v=>uv(lkNum
   if(gf.fine) e.push('Rechtgezet: '+N(gf.fine)+'°');
   if(gf.crop) e.push('Bijgesneden tot '+uv(P.w)+' × '+uv(P.h)+' px');
   if(gf.inv) e.push('Geïnverteerd'); if(gf.gray) e.push('Grijswaarden');
+  if(gf.chan&&gf.chan!=='lum') e.push('Kanaal: '+uv(trPlain({r:'rood',g:'groen',b:'blauw'}[gf.chan==='auto'?gf.cache.chanAuto||'g':gf.chan]))+(gf.chan==='auto'?' (automatisch)':''));
+  if(gf.gray&&GF_LUTS[gf.lut]) e.push('Pseudokleur: '+uv(trPlain(GF_LUTS[gf.lut].n))+' (niet-lineair, niet voor kwantificatie)');
   if(gf.bri) e.push('Helderheid '+uv((gf.bri>0?'+':'')+gf.bri)); if(gf.con!==1) e.push('Contrast × '+N(gf.con));
   if(P.clip>0.001) e.push('Afgekapt: '+uv(lkNumIn(fmt(P.clip*100,1)))+' % van de pixels');
   return e; }
@@ -664,7 +700,7 @@ function gfLabEdit(i){ const old=$('#gf-labed'); if(old) old.remove(); const l=g
 /* ================= PROJECTBESTAND .labkitgel (S62) =================
    De foto als PNG plus de toestand van de editor (lanen met hun banden, ladder, metingen, beeldwerk)
    en de waarden van de velden. De virtuele ladder (een tweede foto) en de zoom gaan niet mee. */
-const GF_PROJ=['persp','curve','rot90','fine','flip','crop','inv','gray','bri','con','lanes','lw','ladder','ladKey','marks','title','fs','ang','angAuto','unit','disp','wells','autoLadder'];
+const GF_PROJ=['persp','curve','chan','lut','ann','rot90','fine','flip','crop','inv','gray','bri','con','lanes','lw','ladder','ladKey','marks','title','fs','ang','angAuto','unit','disp','wells','autoLadder'];
 /* het veld-id's van de tool; de lanelabels staan in gf.lanes, de virtuele ladder gaat niet mee */
 const gfProjFields=()=>[...$$('#t-gelfoto input[id],#t-gelfoto select[id],#t-gelfoto textarea[id]')].filter(el=>el.type!=='file'&&!el.closest('table')&&!/^gf-(vl|ll|labed|expert|ba$)/.test(el.id));
 /* geeft verwijzingen naar gf terug: wie bewaart, kopieert (JSON of IndexedDB doen dat zelf) */
@@ -719,6 +755,8 @@ function gfHistRec(){ if(gfHist.busy||!gf.src||gf.drag||gf.mode==='crop'||gf.mod
 function gfHistLab(a,b){ const A=a.gf, B=b.gf, ne=(p,q)=>JSON.stringify(p)!==JSON.stringify(q), nb=g=>(g.lanes||[]).reduce((t,l)=>t+(l.lad&&l.bands?l.bands.length:0),0);
   if(ne(A.persp,B.persp)) return 'Perspectief gecorrigeerd';
   if(ne(A.crop,B.crop)) return 'Bijgesneden';
+  if(ne(A.ann,B.ann)) return (B.ann||[]).length>(A.ann||[]).length?'Aantekening toegevoegd':'Aantekening verwijderd';
+  if(A.chan!==B.chan||A.lut!==B.lut) return 'Kanaal of kleuren gewijzigd';
   if(A.rot90!==B.rot90||A.flip!==B.flip||A.fine!==B.fine) return 'Gedraaid of rechtgezet';
   if(A.lanes.length!==B.lanes.length) return B.lanes.length>A.lanes.length?'Lane toegevoegd':'Lane verwijderd';
   if(A.marks.length!==B.marks.length) return B.marks.length>A.marks.length?'Meting toegevoegd':'Meting verwijderd';
@@ -854,6 +892,10 @@ live({
   gfRawCrop: [() => gfRawCrop, v => { gfRawCrop = v; }],
   gfHomog: [() => gfHomog, v => { gfHomog = v; }],
   gfLaneOff: [() => gfLaneOff, v => { gfLaneOff = v; }],
+  gfAnnDraw: [() => gfAnnDraw, v => { gfAnnDraw = v; }],
+  gfAnnDel: [() => gfAnnDel, v => { gfAnnDel = v; }],
+  GF_LUTS: () => GF_LUTS,
+  gfLutTab: [() => gfLutTab, v => { gfLutTab = v; }],
   gfTrackLanes: [() => gfTrackLanes, v => { gfTrackLanes = v; }],
   gfCurve: [() => gfCurve, v => { gfCurve = v; }],
   gfProf: [() => gfProf, v => { gfProf = v; }],
