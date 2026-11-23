@@ -59,6 +59,22 @@ function cachePut(k, v) {
 }
 export const ncbiCacheClear = () => { jset(CKEY, {}); ncbiStat.n = 0; };
 
+/* ---- offline pakket (S201): de cache als JSON-bestand, om in een lokaal zonder internet terug te zetten ----
+   Alleen de vragen (zonder tool, e-mail of sleutel) en de antwoorden; terugzetten voegt toe aan wat er al is.
+   Met de schakelaar uit antwoordt ncbiGet() dan uit het pakket. */
+const PACK = 'labkit-ncbi-pack';
+export const ncbiPack = () => ({format: PACK, version: 1, made: new Date().toISOString().slice(0, 10), entries: ncbiCache()});
+/* tekst of object → {ok, n (aantal antwoorden), err (vertaalsleutel)} */
+export function ncbiUnpack(src) {
+  let o;
+  try { o = typeof src === 'string' ? JSON.parse(src) : src; } catch (e) { return {ok: false, err: 'Dit bestand is geen geldige JSON.'}; }
+  if (!o || o.format !== PACK || !o.entries || typeof o.entries !== 'object') return {ok: false, err: 'Dit bestand is geen offline pakket van LabKit.'};
+  const c = ncbiCache(), ks = Object.keys(o.entries).filter(k => /^e\w+\?/.test(k) && o.entries[k] && 'v' in o.entries[k]);
+  ks.forEach(k => { c[k] = {t: +o.entries[k].t || Date.now(), v: o.entries[k].v}; });
+  jset(CKEY, c); ncbiStat.n = Object.keys(c).length;
+  return {ok: true, n: ks.length};
+}
+
 /* ---- wachtrij: elk verzoek krijgt een eigen tijdslot ---- */
 let nextSlot = 0;
 function slot() {
@@ -74,7 +90,9 @@ export function ncbiGet(util, params) {
   const k = cacheKey(util, params), c = ncbiCache();
   if (k in c) return Promise.resolve(c[k].v);
   if (!ncbi.on) return Promise.reject(new NcbiError('off', 'Online opzoeken staat uit. Zet het aan bij Instellingen.'));
-  if (!pending.has(k)) pending.set(k, slot().then(() => request(util, params)).then(v => { if (!(v && v.error)) cachePut(k, v); return v; }).finally(() => pending.delete(k)));
+  /* een 429 (te veel verzoeken; NCBI doet dat soms al onder 3 per seconde) wordt één keer opnieuw geprobeerd, na 1,5 s (S200) */
+  const once = () => slot().then(() => request(util, params));
+  if (!pending.has(k)) pending.set(k, once().catch(e => e.busy ? new Promise(r => setTimeout(r, 1500)).then(once) : Promise.reject(e)).then(v => { if (!(v && v.error)) cachePut(k, v); return v; }).finally(() => pending.delete(k)));
   return pending.get(k);
 }
 
@@ -84,7 +102,7 @@ async function request(util, params) {
   try { r = await fetch(ncbiUrl(util, params), {signal: ac.signal, credentials: 'omit', referrerPolicy: 'no-referrer'}); }
   catch (e) { throw failed(e && e.name === 'AbortError'); }
   finally { clearTimeout(timer); }
-  if (r.status === 429) throw new NcbiError('down', 'NCBI krijgt te veel verzoeken tegelijk. Wacht even en probeer het opnieuw.');
+  if (r.status === 429) throw Object.assign(new NcbiError('down', 'NCBI krijgt te veel verzoeken tegelijk. Wacht even en probeer het opnieuw.'), {busy: true});
   if (!r.ok) throw new NcbiError('down', 'NCBI gaf een fout (HTTP ' + r.status + '). Probeer het later opnieuw, of plak de sequentie zelf.');
   const txt = await r.text();
   if (params.retmode !== 'json') return txt;
@@ -92,4 +110,4 @@ async function request(util, params) {
   catch (e) { throw new NcbiError('down', 'NCBI stuurde een antwoord dat LabKit niet kan lezen. Probeer het later opnieuw.'); }
 }
 
-expose({ncbi, ncbiGet, ncbiCache, ncbiCacheClear});
+expose({ncbi, ncbiGet, ncbiCache, ncbiCacheClear, ncbiPack, ncbiUnpack});

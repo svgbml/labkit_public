@@ -1966,6 +1966,19 @@ def _(pg):
     pg.evaluate("()=>{__sgVm.hs.panel='hirisplexs';__sgVm.hs.samples=[];__sgVm.clear();__set('sg-assay','');__set('sg-ref','')}")
     return out
 
+@case('Chromatogram', 'SNaPshot/SBE: lengte met lokale Southern en een genotype per SNP', 'Verzonnen SBE-run (sbeDemo in src/lib/snapshot.js) waarvan de looptijd exact de vergelijking van Southern volgt, L = L0 + c/(m − m0) met L0 = 300, c = −200 000, m0 = 0, met GeneScan-120 LIZ (15, 20, 25, 35, 50, 62, 80, 110, 120 nt; Applied Biosystems). Lokale Southern (Elder & Southern, Anal Biochem 128:227–231, 1983; de methode van GeneMapper) moet de lengtes van de ingezette pieken (30,2; 29,8; 45; 70 nt) dan terugvinden; genotypen uit de ingezette kleuren')
+def _(pg):
+    pg.evaluate("__go('sanger')")
+    pg.wait_for_function("window.__sgVm")
+    pg.evaluate("()=>{document.getElementById('sg-sbep').open=true;__sgVm.sbeDemoLoad()}")
+    pg.wait_for_function("document.querySelectorAll('#sg-sbe-tbl tbody tr').length===3")
+    v = pg.evaluate("()=>({gt:__sgVm.sbeRes.calls.map(c=>c.gt),p:__sgVm.sbeRes.calls.map(c=>c.peaks.map(x=>x.size))})")
+    out = [(f'genotype {n}', 1 if g == e else 0, 1, 0) for n, g, e in zip(('OEF-A', 'OEF-B', 'OEF-C'), v['gt'], ('A/G', 'C/C', 'T/T'))]
+    out += [('lengte G-piek OEF-A (nt)', v['p'][0][0], 30.2, 0.002), ('lengte A-piek OEF-A (nt)', v['p'][0][1], 29.8, 0.002),
+            ('lengte C-piek OEF-B (nt)', v['p'][1][0], 45.0, 0.002), ('lengte T-piek OEF-C (nt)', v['p'][2][0], 70.0, 0.002)]
+    pg.evaluate("()=>{__sgVm.sbe=null;__set('sg-sbe-panel','')}")
+    return out
+
 @case('Restrictiedigestie', 'In-silico digestie van pFA6a-kanMX6', 'Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa')
 def _(pg):
     fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')

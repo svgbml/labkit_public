@@ -297,7 +297,7 @@ export default {
       } catch (e) { this.snpState = 'err'; this.snpErr = e && e.kind ? e.message : 'NCBI gaf een onverwacht antwoord. Probeer het later opnieuw.'; }
     },
     /* elke keer opnieuw: een tool die later laadt kan zich nog in SEQ_TO melden */
-    sendTargets() { return SEQ_TO.filter(x => document.getElementById(x.id)); },
+    sendTargets() { return SEQ_TO.filter(x => document.getElementById(x.id) || (typeof lkLazy === 'function' && lkLazy(x.tool))); },
     send(x) { const r = this.m.recs[+this.rec] || this.m.recs[0]; seqSend(x, r.name.replace(/\s.*/, '') + SUF[this.op], r.out); }
   }
 };

@@ -131,6 +131,7 @@ function put(id, v) {
   return true;
 }
 export function seqSend(t, name, seq) {
+  if (typeof lkEnsureTool === 'function') lkEnsureTool(t.tool);   /* een tool die nog niet is opgezet (S163) */
   const el = document.getElementById(t.id); if (!el) return;
   put(t.id, t.add ? (el.value.trim() ? el.value.replace(/\s*$/, '\n') : '') + name + '\t' + seq : '>' + name + '\n' + seq);
   location.hash = t.tool;

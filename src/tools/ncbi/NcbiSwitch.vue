@@ -16,18 +16,35 @@
       <div class="row" style="margin-top:10px">
         <span style="font-size:13px">{{ t(n + ' antwoorden bewaard op deze computer') }}</span>
         <button type="button" :disabled="!n" @click="clear">{{ t('Bewaarde antwoorden wissen') }}</button></div>
+      <!-- S201: de bewaarde antwoorden als offline pakket, voor een lokaal zonder internet -->
+      <div class="row" style="margin-top:10px;gap:6px;flex-wrap:wrap;align-items:center">
+        <button type="button" :disabled="!n" @click="exportPack">{{ t('Exporteer als offline pakket') }}</button>
+        <label style="font-size:13px">{{ t('Offline pakket openen') }} <input type="file" accept=".json,application/json" @change="importPack"></label></div>
+      <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Het pakket bevat alleen de vragen en de antwoorden van NCBI, geen e-mailadres of sleutel. Teruggezet werkt het ook met de schakelaar uit.') }}</p>
+      <lk-note v-if="packMsg" :kind="packMsg[0]">{{ packMsg[1] }}</lk-note>
     </template>
   </div>
 </template>
 
 <script>
-import {ncbi, ncbiSave, ncbiStat, ncbiCacheClear} from '../../lib/ncbi.js';
+import {ncbi, ncbiSave, ncbiStat, ncbiCacheClear, ncbiPack, ncbiUnpack} from '../../lib/ncbi.js';
 
 export default {
   name: 'NcbiSwitch',
   props: {full: Boolean},   /* full: ook het e-mailveld (Instellingen); anders alleen de schakelaar */
-  data() { return {s: ncbi, st: ncbiStat}; },
+  data() { return {s: ncbi, st: ncbiStat, packMsg: null}; },
   computed: {n() { return this.st.n; }},
-  methods: {save: ncbiSave, clear: ncbiCacheClear},
+  methods: {
+    save: ncbiSave, clear: ncbiCacheClear,
+    exportPack() {
+      const p = ncbiPack();
+      saveBlob('labkit-ncbi-pakket-' + p.made + '.json', new Blob([JSON.stringify(p)], {type: 'application/json'})).catch(() => {});
+    },
+    async importPack(e) {
+      const f = e.target.files[0]; if (!f) return;
+      const r = ncbiUnpack(await f.text()); e.target.value = '';
+      this.packMsg = r.ok ? ['ok', this.t(r.n + ' antwoorden uit het pakket teruggezet.')] : ['bad', this.t(r.err)];
+    }
+  },
 };
 </script>

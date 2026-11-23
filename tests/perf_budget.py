@@ -164,6 +164,49 @@ def gel_inp():
     ROWS.append((f'Typen (traagste: {worst[1]})', f'{worst[0]:.0f} ms', f'{INP_MS:.0f} ms'))
     return issues
 
+SG_GAP_MS = float(os.environ.get('SG_GAP_MS', '100'))
+
+# 20 .ab1-bestanden op de batch van het chromatogram slepen en meten hoe lang de hoofddraad
+# hoogstens vastzit (het grootste gat tussen twee requestAnimationFrames) tot alle 20 zijn uitgelijnd (S163)
+SG_DROP = """async (b64)=>{ const bin=atob(b64), u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
+  const vm=__sgVm; vm.bclear(); vm.clear();
+  const ab=await new Promise(r=>{ const dt=new DataTransfer(); dt.items.add(new File([u],'a.ab1'));
+    vm.load(dt.files[0]).then(()=>r(vm.read)); });
+  const el=document.getElementById('sg-ref'); el.value='>ref\\n'+ab.bases.slice(50,1050); el.dispatchEvent(new Event('input'));
+  await new Promise(r=>setTimeout(r,100));
+  const dt=new DataTransfer(); for(let i=0;i<20;i++) dt.items.add(new File([u],'m'+i+'.ab1'));
+  let gap=0, last=performance.now(), go=true;
+  const tick=()=>{ const n=performance.now(); gap=Math.max(gap,n-last); last=n; if(go) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+  const t0=performance.now();
+  document.querySelector('#sg-bp .dropzone').dispatchEvent(new DragEvent('drop',{dataTransfer:dt,bubbles:true,cancelable:true}));
+  while(!(vm.bsamples.length===20&&!vm.bbusy)) await new Promise(r=>setTimeout(r,10));
+  const ms=performance.now()-t0; go=false;
+  return {gap, ms, mode:vm.workerMode(), ok:vm.bsamples.filter(x=>x.aln).length}; }"""
+
+def sanger(worker=True):
+    import base64
+    b64 = base64.b64encode((ROOT / 'tests' / 'fixtures' / '3730.ab1').read_bytes()).decode()
+    with sync_playwright() as p:
+        b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1400, 'height': 900})
+        pg.add_init_script("try{localStorage.clear();localStorage.setItem('labkit:v1:lang','nl')}catch(e){}" + ('' if worker else ';window.Worker=undefined'))
+        errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
+        pg.goto(URL); pg.wait_for_load_state('load')
+        lazy = pg.evaluate("!window.__sgVm")
+        pg.evaluate("location.hash='sanger'"); pg.wait_for_function("window.__sgVm")
+        r = pg.evaluate(SG_DROP, b64)
+        b.close()
+    issues = []
+    if worker:
+        if not lazy: issues.append('chromatogram: al opgezet bij het opstarten (hoort pas bij het openen)')
+        if r['mode'] != 'worker': issues.append(f"chromatogram: worker draait niet vanaf file:// (mode {r['mode']})")
+        if r['gap'] > SG_GAP_MS: issues.append(f"chromatogram: 20 bestanden zetten de pagina {r['gap']:.0f} ms vast > {SG_GAP_MS:.0f} ms")
+    if r['ok'] != 20: issues.append(f"chromatogram: {r['ok']} van de 20 bestanden uitgelijnd")
+    issues += ['scriptfout: ' + e for e in errs]
+    print(f"[sanger] 20 .ab1 in de batch ({r['mode']}): klaar in {r['ms']:.0f} ms, langste blokkade {r['gap']:.0f} ms" + ('' if issues else ', in orde'))
+    if worker: ROWS.append(('Chromatogram 20 bestanden, langste blokkade', f"{r['gap']:.0f} ms", f'{SG_GAP_MS:.0f} ms'))
+    return issues
+
 def main():
     issues = size()
     for lang in ('nl', 'en'):
@@ -171,6 +214,7 @@ def main():
     issues += aln()
     issues += heap()
     issues += gel_inp()
+    issues += sanger()
     out = os.environ.get('GITHUB_STEP_SUMMARY')
     if out:
         with open(out, 'a', encoding='utf8') as fh:
@@ -181,4 +225,5 @@ def main():
     sys.exit(1 if issues else 0)
 
 if __name__ == '__main__':
+    if '--sanger' in sys.argv: sanger(True); sanger(False); sys.exit(0)
     main()

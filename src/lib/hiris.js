@@ -163,3 +163,16 @@ export function summarize(res, thr = 0.7) {
   }
   return out;
 }
+
+/* ---------- het hele paneel tegen dbSNP (S200, idee #388) ----------
+   snp = een element van SNPS, r = parseSnp (src/lib/dbsnp.js). status: 'ok' (het getelde allel is een allel van dbSNP),
+   'complement' (alleen het complement is dat: de webtool telt op de andere streng), 'mismatch' (geen van beide:
+   een fout in de lijst?) of 'notfound'. Een A/T- of C/G-SNP telt als 'ok', want daar is de streng niet te zien. */
+export function verifySnp(snp, r) {
+  const o = {rs: snp.rs, allele: snp.allele, found: !!(r && r.ok)};
+  if (!o.found) return Object.assign(o, {status: 'notfound'});
+  const S = [r.ref].concat(r.alts || []);
+  Object.assign(o, {chr: r.chr, acc: r.acc, pos: r.pos, ref: r.ref, alts: r.alts, genes: r.genes});
+  o.status = S.includes(snp.allele) ? 'ok' : S.includes(COMP[snp.allele]) ? 'complement' : 'mismatch';
+  return o;
+}

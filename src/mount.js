@@ -2,7 +2,7 @@
    Elke tool heeft een eigen host in de pagina (src/shell/sections/), bij de kop en de bronregel
    die gewone HTML blijven. calc[tool] blijft bestaan omdat de rest van de app dat aanroept na het
    delen van een link, ongedaan maken en bij het openen; een component rekent zelf opnieuw. */
-import {mountTool} from './lib/bridge.js';
+import {mountTool, mountLazy} from './lib/bridge.js';
 import Sigfig from './tools/Sigfig.vue';
 import Zprime from './tools/Zprime.vue';
 import Pipkeus from './tools/Pipkeus.vue';
@@ -138,8 +138,7 @@ export function start() {
   calc.figuur = () => {};
   mountTool('#al-app', Aln);
   calc.aln = () => {};
-  mountTool('#sg-app', Sanger);
-  calc.sanger = () => {};
+  mountLazy('sanger', '#sg-app', Sanger);   /* S163: pas opzetten bij het eerste openen */
   calc.digest = () => {};
 
   mountTool('#sq-app', Seq);
