@@ -5256,5 +5256,11 @@
 "Horizontale lijn: alleen y; verticale lijn: alleen x.": "Horizontal line: y only; vertical line: x only.",
 "Eerdere runs": "Earlier runs",
 "Naam van de run": "Name of the run",
-"Run bewaren": "Save run"
+"Run bewaren": "Save run",
+"PNG voor een poster: grote letters en dikke lijnen op wit, zes keer de schermresolutie": "PNG for a poster: large letters and thick lines on white, six times the screen resolution",
+"Kleurenblindheid nabootsen": "Simulate colour blindness",
+"Uit": "Off",
+"Deuteranopie (rood-groen, groen ontbreekt)": "Deuteranopia (red-green, green missing)",
+"Protanopie (rood-groen, rood ontbreekt)": "Protanopia (red-green, red missing)",
+"Tritanopie (blauw-geel)": "Tritanopia (blue-yellow)"
 }

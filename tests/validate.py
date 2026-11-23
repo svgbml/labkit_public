@@ -578,6 +578,25 @@ def _(pg):
     return [('Scherm: doorzichtig', int(out['scherm'][0].endswith(',0')), 1, 0), ('Verslag: wit', int(out['verslag'][0] == '255,255,255,255'), 1, 0),
             ('Publicatie: wit', int(out['publicatie'][0] == '255,255,255,255'), 1, 0), ('Publicatie: zwart, geen raster', int(out['publicatie'][1] == '["#000000",""]'), 1, 0)]
 
+@case('Instellingen', 'Kleurenblindheid en poster', 'Zelftest: ui-cvd=deuteranopie zet op main een CSS-filter naar de feColorMatrix (Machado, Oliveira & Fernandes 2009, IEEE TVCG 15(6):1291-1298, severity 1.0) en laat de canvaspixels ongemoeid; de posterexport is groter dan de verslagexport en tekent met stijl poster (tick 20, lab 24, lijn 4)')
+def _(pg):
+    pg.evaluate("__go('curve')"); pg.wait_for_timeout(400)
+    img0 = pg.evaluate("document.getElementById('s-cv').toDataURL()")
+    pg.evaluate("__go('inst'); __set('ui-cvd','deuteranopie'); applyUI()"); pg.wait_for_timeout(150)
+    pg.evaluate("__go('curve')"); pg.wait_for_timeout(400)
+    flt = pg.evaluate("getComputedStyle(document.querySelector('main')).filter")
+    mat = pg.evaluate("document.querySelector('#cvd-deuteranopie feColorMatrix').getAttribute('values').trim().startsWith('0.367322 0.860646 -0.227968')")
+    img1 = pg.evaluate("document.getElementById('s-cv').toDataURL()")
+    pg.evaluate("__go('inst'); __set('ui-cvd','uit'); applyUI()"); pg.wait_for_timeout(100)
+    off = pg.evaluate("getComputedStyle(document.querySelector('main')).filter")
+    pg.evaluate("__go('curve')"); pg.wait_for_timeout(400)
+    r = pg.evaluate("""async()=>{ const cv=document.getElementById('s-cv'), dim=async b=>{ const i=await createImageBitmap(b); return i.width; };
+      const a=await dim(await reportPng(cv)), b=await dim(await reportPng(cv,false,true)); chStyleKey='poster'; const st=chStyle(); chStyleKey='scherm';
+      return [a,b,st.tick,st.lab,st.lw,document.querySelectorAll('#t-curve [data-poster]').length]; }""")
+    return [('filter verwijst naar cvd-deuteranopie', int('cvd-deuteranopie' in flt), 1, 0), ('matrix Machado 2009', int(bool(mat)), 1, 0),
+            ('canvaspixels ongewijzigd', int(img0 == img1), 1, 0), ('uit: geen filter', int(off in ('none', '')), 1, 0),
+            ('poster breder dan verslag', int(r[1] > r[0]), 1, 0), ('posterstijl tick 20, lab 24, lw 4', int(r[2:5] == [20, 24, 4]), 1, 0), ('Poster-knop aanwezig', int(r[5] >= 1), 1, 0)]
+
 @case('Standaardcurve', 'Grafiek aanpassen (bewaard per grafiek)', 'Zelftest: in het venster ✎ van de standaardcurve titel, logaritmische x-as, y-bereik 0–2 en legenda rechtsonder kiezen; de keuze staat per canvas-id in lkChartEd, geldt ook bij opnieuw tekenen (de grafiek tekent anders dan zonder), en "Terug naar standaard" haalt hem weg')
 def _(pg):
     pg.evaluate("localStorage.removeItem('lkChartEd'); __go('curve')"); pg.wait_for_timeout(400)

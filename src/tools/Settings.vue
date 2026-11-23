@@ -51,6 +51,10 @@
             <select id="ui-chs" v-model="chs" style="width:100%" @change="apply">
               <option v-for="o in chss" :key="o[0]" :value="o[0]">{{ t(o[1]) }}</option>
             </select></div>
+          <div class="f"><label for="ui-cvd">{{ t('Kleurenblindheid nabootsen') }}</label>
+            <select id="ui-cvd" v-model="cvd" style="width:100%" @change="apply">
+              <option v-for="o in cvds" :key="o[0]" :value="o[0]">{{ t(o[1]) }}</option>
+            </select></div>
           <div class="f"><label for="ui-schema">{{ t("Kleur protocolschema's") }}</label>
             <input type="color" id="ui-schema" v-model="schema" style="width:52px;height:32px;padding:2px" @input="apply"></div>
         </div>
@@ -87,7 +91,7 @@
 
 <script>
 /* standaardwaarden: dezelfde als UIDEF in web/index.html */
-const DEF = {theme: 'auto', dens: 'ruim', fs: '14', accent: '#1558b0', accon: false, darkroom: false, pal: 'std', schema: '#1558b0', chs: 'scherm'};
+const DEF = {theme: 'auto', dens: 'ruim', fs: '14', accent: '#1558b0', accon: false, darkroom: false, pal: 'std', schema: '#1558b0', chs: 'scherm', cvd: 'uit'};
 
 export default {
   name: 'Settings',
@@ -100,6 +104,7 @@ export default {
       themes: [['auto', 'Automatisch (volgt systeem)'], ['licht', 'Licht'], ['donker', 'Donker'], ['papier', 'Papier (labjournaal)'], ['contrast', 'Hoog contrast'], ['leisteen', 'Leisteen (koel grijs)']],
       sizes: [['13', 'Klein'], ['14', 'Normaal'], ['15.5', 'Groot'], ['17', 'Extra groot']],
       chss: [['scherm', 'Scherm (volgt het thema)'], ['verslag', 'Verslag (zwart op wit, Arial)'], ['publicatie', 'Publicatie (zwart-wit, geen raster)']],
+      cvds: [['uit', 'Uit'], ['deuteranopie', 'Deuteranopie (rood-groen, groen ontbreekt)'], ['protanopie', 'Protanopie (rood-groen, rood ontbreekt)'], ['tritanopie', 'Tritanopie (blauw-geel)']],
       pals: [['std', 'Standaard'], ['okabe', 'Kleurenblind-veilig (Okabe-Ito)'], ['pastel', 'Pastel'], ['fel', 'Fel'], ['grijs', 'Grijstinten (zwart-witprint)']],
     };
   },
@@ -116,7 +121,7 @@ export default {
       Object.assign(this, DEF);
       /* de invoeropslag luistert naar input/change op de velden zelf, dus die krijgen ze na de render */
       this.$nextTick(() => {
-        ['ui-theme', 'ui-dens', 'ui-fs', 'ui-accent', 'ui-accon', 'ui-darkroom', 'ui-pal', 'ui-schema', 'ui-chs'].forEach(id => {
+        ['ui-theme', 'ui-dens', 'ui-fs', 'ui-accent', 'ui-accon', 'ui-darkroom', 'ui-pal', 'ui-schema', 'ui-chs', 'ui-cvd'].forEach(id => {
           const el = document.getElementById(id); if (el) el.dispatchEvent(new Event('change', {bubbles: true}));
         });
         if (typeof applyUI === 'function') applyUI();

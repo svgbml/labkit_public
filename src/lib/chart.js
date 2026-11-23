@@ -13,6 +13,7 @@ import {expose, live} from './global.js';
 let chStyleKey='scherm';
 function chStyle(){ const cs=getComputedStyle(document.documentElement), C=k=>cs.getPropertyValue(k).trim();
   if(chStyleKey==='verslag') return {key:'verslag',font:'Arial, Helvetica, sans-serif',tick:12,lab:13,leg:12,ink:'#111111',muted:'#333333',axis:'#333333',grid:'#e2e2e2',lw:2,r:4,bg:'#ffffff',acc:SERCOL_0()};
+  if(chStyleKey==='poster') return {key:'poster',font:'Arial, Helvetica, sans-serif',tick:20,lab:24,leg:20,ink:'#000000',muted:'#000000',axis:'#000000',grid:'#d0d0d0',lw:4,r:7,bg:'#ffffff',acc:SERCOL_0()};
   if(chStyleKey==='publicatie') return {key:'publicatie',font:'Arial, Helvetica, sans-serif',tick:12,lab:14,leg:12,ink:'#000000',muted:'#000000',axis:'#000000',grid:'',lw:1.6,r:4,bg:'#ffffff',acc:SERCOL_0()};
   return {key:'scherm',font:C('--font-ui'),tick:11,lab:12,leg:12,ink:C('--ink'),muted:C('--muted'),axis:C('--muted'),grid:C('--line'),lw:2,r:3.5,bg:'',acc:C('--accent')}; }
 /* het eerste kleur van het gekozen palet (SERCOL staat in src/legacy/app.js en is er pas na het laden) */

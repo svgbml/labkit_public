@@ -498,7 +498,7 @@ calc.inoc=function(){};
 const PALS={std:['#1558b0','#c2410c','#15803d','#7c3aed','#b91c1c','#0e7490','#a16207','#be185d'],okabe:['#0072B2','#D55E00','#009E73','#CC79A7','#E69F00','#56B4E9','#F0E442','#000000'],pastel:['#8fb8e8','#f2a98a','#9fd4a8','#c9b3ec','#f0a3a3','#93d3dc','#e6cf8a','#eeaacd'],fel:['#0057ff','#ff5a00','#00a43b','#9b1dff','#e6002d','#00a9c7','#d99a00','#ff1f8e'],grijs:['#1f2933','#4b5563','#6b7280','#9ca3af','#374151','#111827','#808891','#b6bcc4']};
 
 /* ================= INSTELLINGEN: UITERLIJK ================= */
-const UIDEF={'ui-theme':'auto','ui-dens':'ruim','ui-fs':'14','ui-accent':'#1558b0','ui-pal':'std','ui-schema':'#1558b0','ui-chs':'scherm'};
+const UIDEF={'ui-theme':'auto','ui-dens':'ruim','ui-fs':'14','ui-accent':'#1558b0','ui-pal':'std','ui-schema':'#1558b0','ui-chs':'scherm','ui-cvd':'uit'};
 const darkMQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
 function applyUI(){ const R=document.documentElement, sel=$('#ui-theme').value||'auto', th=sel==='auto'?(darkMQ&&darkMQ.matches?'donker':'licht'):sel;
   if(th==='licht') R.removeAttribute('data-theme'); else R.setAttribute('data-theme',th);
@@ -509,6 +509,7 @@ function applyUI(){ const R=document.documentElement, sel=$('#ui-theme').value||
   if($('#ui-accon').checked){ const a=$('#ui-accent').value, cs=getComputedStyle(R), sf=cs.getPropertyValue('--surface').trim()||'#ffffff'; R.style.setProperty('--accent',a); R.style.setProperty('--accent-soft',mixHex(sf.startsWith('#')?sf:'#ffffff',a,0.14)); }
   const pal=PALS[$('#ui-pal').value]||PALS.std; SERCOL.splice(0,SERCOL.length,...pal);
   { const c=$('#ui-chs'); chStyleKey=c&&c.value||'scherm'; }   /* grafiekstijl (S80), zie src/lib/chart.js */
+  { const c=$('#ui-cvd'), v=c&&c.value||'uit'; if(v==='uit') R.removeAttribute('data-cvd'); else R.setAttribute('data-cvd',v); }   /* kleurenblindheid nabootsen (S88): alleen CSS-filter, zie index.html */
   const sc=$('#ui-schema').value||'#1558b0'; PCOL.acc=sc; PCOL.liquid=sc; PCOL.accSoft=mixHex('#ffffff',sc,0.1);
   $('#ui-swatches').innerHTML=pal.map(c=>`<span title="${c}" style="width:26px;height:18px;border-radius:3px;background:${c};border:1px solid var(--line)"></span>`).join('');
   const m=document.querySelector('meta[name=theme-color]'); if(m) m.content=getComputedStyle(R).getPropertyValue('--accent').trim();
