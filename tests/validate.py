@@ -1102,6 +1102,13 @@ def _(pg):
     pg.evaluate("__set('hh-pka','7,20');__set('hh-ph','7,40')")
     return [('base : zuur', r, 10**0.24, 0.002), ('% basevorm', pg.evaluate("__kv('#hh-out','Aandeel basevorm')"), 100*10**0.2/(1+10**0.2), 0.002)]
 
+@case('pH-buffer', 'pKₐ-temperatuurcorrectie Tris', 'Goldberg e.a., J Phys Chem Ref Data 31:231 (2002): pKₐ(T) = pKₐ(25 °C) + dpKₐ/dT × (T − 25), Tris pKₐ 8,06 en dpKₐ/dT −0,028 per °C: 4 °C → 8,65; 37 °C → 7,72')
+def _(pg):
+    pg.evaluate("__go('hh');__set('hh-sys','tri');__set('hh-t','4')")
+    a = pg.evaluate("__kv('#hh-out','pKₐ bij deze')")
+    pg.evaluate("__set('hh-t','37')")
+    return [('pKₐ Tris 4 °C', a, 8.65, 0.01), ('pKₐ Tris 37 °C', pg.evaluate("__kv('#hh-out','pKₐ bij deze')"), 7.72, 0.01)]
+
 @case('Forensische matchkans', 'Productregel met θ', 'NRC II (1996) 4.1: het. 2pq = 2·0,1·0,2 = 0,04; hom. p² + p(1−p)θ = 0,01 + 0,1·0,9·0,01 = 0,0109; product 4,36 × 10⁻⁴ → 1 op 2294')
 def _(pg):
     pg.evaluate("__go('rmp');__set('rm-th','0.01');__tbl('rm-tbl',[['A',0.1,0.2],['B',0.1,'']],'rmp')")

@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-23 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 537 van 537 controles binnen tolerantie.**
+**Resultaat: 541 van 541 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -63,6 +63,8 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | PCR-cyclus | Amplificatie | kopieën | 4,0960e+08 | 4,1000e+08 | +0.10% | ✅ | KVV-studiemateriaal: 10⁵ × 2¹² = 4,1 × 10⁸ |
 | qPCR-analyse | ΔΔCt (Livak) | fold change | 6,498 | 6,5 | +0.03% | ✅ | CASRAI rekenvoorbeeld: controle 24,0/20,0, behandeld 21,5/20,2 → 6,5× |
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
+| qPCR-analyse | Efficiëntie uit standaardcurve | efficiëntie bij −3,3 (%) | 100,9 | 100,9 | +0.00% | ✅ | Pearson qPCR-efficiëntie (als bij PCR-cyclus): helling −3,3 → 100,9%; doelgen Ct 15,0 / 18,3 / 21,6 / 24,9 bij 10⁵…10² kopieën |
+| qPCR-analyse | t-toets van Welch op ΔCt | p (Welch, ΔCt) | 0,009408 | 0,0094 | -0.08% | ✅ | Yuan e.a., BMC Bioinformatics 7:85 (2006): toets op ΔCt-waarden; p onafhankelijk berekend met scipy.stats.ttest_ind(equal_var=False) |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
 | Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9512 | +0.72% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
@@ -333,6 +335,8 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Molmassa | Formules met kristalwater en haakjes | Ca(OH)2 | 74,09 | 74,09 | +0.00% | ✅ | Sigma-Aldrich productspecificaties: NaCl 58,44; Na₂HPO₄·7H₂O 268,07; EDTA-Na₂·2H₂O 372,24; Ca(OH)₂ 74,09 g/mol |
 | pH-buffer | Henderson-Hasselbalch | base : zuur | 1,738 | 1,74 | +0.13% | ✅ | pH = pKₐ + log([base]/[zuur]): acetaat pKₐ 4,76 bij pH 5,00 → 10^0,24 = 1,738; fosfaat pKₐ 7,20 bij pH 7,40 → 61,3% base |
 | pH-buffer | Henderson-Hasselbalch | % basevorm | 61,31 | 61,3 | -0.02% | ✅ | pH = pKₐ + log([base]/[zuur]): acetaat pKₐ 4,76 bij pH 5,00 → 10^0,24 = 1,738; fosfaat pKₐ 7,20 bij pH 7,40 → 61,3% base |
+| pH-buffer | pKₐ-temperatuurcorrectie Tris | pKₐ Tris 4 °C | 8,65 | 8,65 | +0.00% | ✅ | Goldberg e.a., J Phys Chem Ref Data 31:231 (2002): pKₐ(T) = pKₐ(25 °C) + dpKₐ/dT × (T − 25), Tris pKₐ 8,06 en dpKₐ/dT −0,028 per °C: 4 °C → 8,65; 37 °C → 7,72 |
+| pH-buffer | pKₐ-temperatuurcorrectie Tris | pKₐ Tris 37 °C | 7,72 | 7,72 | +0.00% | ✅ | Goldberg e.a., J Phys Chem Ref Data 31:231 (2002): pKₐ(T) = pKₐ(25 °C) + dpKₐ/dT × (T − 25), Tris pKₐ 8,06 en dpKₐ/dT −0,028 per °C: 4 °C → 8,65; 37 °C → 7,72 |
 | Forensische matchkans | Productregel met θ | matchkans | 0,000436 | 0,000436 | +0.00% | ✅ | NRC II (1996) 4.1: het. 2pq = 2·0,1·0,2 = 0,04; hom. p² + p(1−p)θ = 0,01 + 0,1·0,9·0,01 = 0,0109; product 4,36 × 10⁻⁴ → 1 op 2294 |
 | Updates | Versievergelijking | 1.10.0 t.o.v. 1.9.0 | 1 | 1 | +0.00% | ✅ | Semantische versies: 1.10.0 > 1.9.0, 1.9.0 = 1.9.0, 1.9.1 < 1.10.0 |
 | Updates | Versievergelijking | gelijk | 0 | 0 | +0.00% | ✅ | Semantische versies: 1.10.0 > 1.9.0, 1.9.0 = 1.9.0, 1.9.1 < 1.10.0 |

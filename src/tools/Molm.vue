@@ -8,11 +8,15 @@
     <div class="panel">
       <div class="f">
         <label for="mm-f">{{ t('Formule') }} <span class="example">{{ t('voorbeeld') }}</span></label>
-        <input id="mm-f" class="mono" v-model="f" spellcheck="false">
+        <input id="mm-f" class="mono" v-model="f" spellcheck="false" :placeholder="t('of een naam, bijv. Tris')">
       </div>
       <div class="row" style="margin-top:8px;gap:6px;font-size:13px">
         <span style="color:var(--muted)">{{ t('Snel:') }}</span>
         <button v-for="q in quick" :key="q.f" type="button" class="xlbtn" :data-mmf="q.f" @click="f = q.f" v-html="q.h"></button>
+      </div>
+      <div v-if="hyd.length" class="row" style="margin-top:8px;gap:6px;font-size:13px">
+        <span style="color:var(--muted)">{{ t('Kristalwater:') }}</span>
+        <button v-for="o in hyd" :key="o" type="button" class="xlbtn" :data-mmf="o" @click="f = o">{{ o }}</button>
       </div>
       <div class="fields" style="margin-top:12px">
         <div class="f">
@@ -52,6 +56,33 @@
 import {lkNumIn} from '../lib/bridge.js';
 
 const F = (x, d) => lkNumIn(fmt(x, d));
+/* naam of formule (klein, zonder spaties, · voor het kristalwater) -> de formules van die stof; de eerste is de standaard */
+const REAG = [
+  [['tris', 'trisbase', 'trizma'], ['C4H11NO3', 'C4H11NO3·HCl']],
+  [['edta', 'na2edta', 'edta-na2', 'edtadinatrium'], ['C10H14N2Na2O8·2H2O', 'C10H14N2Na2O8', 'C10H16N2O8']],
+  [['nacl', 'natriumchloride', 'keukenzout'], ['NaCl']],
+  [['kcl', 'kaliumchloride'], ['KCl']],
+  [['glucose', 'dextrose'], ['C6H12O6', 'C6H12O6·H2O']],
+  [['sucrose', 'sacharose'], ['C12H22O11']],
+  [['glycine', 'glycin'], ['C2H5NO2']],
+  [['sds'], ['C12H25NaO4S']],
+  [['naoh', 'natriumhydroxide'], ['NaOH']],
+  [['boorzuur'], ['H3BO3']],
+  [['hepes'], ['C8H18N2O4S']],
+  [['mes'], ['C6H13NO4S']],
+  [['cacl2', 'calciumchloride'], ['CaCl2', 'CaCl2·2H2O', 'CaCl2·6H2O']],
+  [['mgcl2', 'magnesiumchloride'], ['MgCl2', 'MgCl2·6H2O']],
+  [['na2hpo4'], ['Na2HPO4', 'Na2HPO4·2H2O', 'Na2HPO4·7H2O', 'Na2HPO4·12H2O']],
+  [['nah2po4'], ['NaH2PO4', 'NaH2PO4·H2O', 'NaH2PO4·2H2O']],
+  [['kh2po4'], ['KH2PO4']],
+  [['mgso4', 'magnesiumsulfaat'], ['MgSO4', 'MgSO4·7H2O']],
+  [['cuso4', 'kopersulfaat'], ['CuSO4', 'CuSO4·5H2O']],
+  [['natriumacetaat'], ['C2H3NaO2', 'C2H3NaO2·3H2O']],
+  [['citroenzuur'], ['C6H8O7', 'C6H8O7·H2O']],
+  [['trinatriumcitraat'], ['C6H5Na3O7', 'C6H5Na3O7·2H2O']]
+];
+const norm = x => String(x).toLowerCase().replace(/\s+/g, '').replace(/[₀-₉]/g, c => c.charCodeAt(0) - 8320).replace(/[.*•]/g, '·');
+const find = x => REAG.find(([n, fs]) => n.includes(norm(x)) || fs.some(f => norm(f) === norm(x)));
 const strip = s => String(s).replace(/[\u0002\u0003]/g, '');
 
 export default {
@@ -69,6 +100,8 @@ export default {
     hint() {
       return this.tHtml('Kristalwater schrijf je met een punt, ster of ·, bijvoorbeeld <span class="mono">CuSO4.5H2O</span>. Let op hoofdletters: <span class="mono">Co</span> is kobalt, <span class="mono">CO</span> is koolmonoxide.');
     },
+    /* de kristalwater-varianten van de stof die in het veld staat (alleen als er meer dan een is) */
+    hyd() { const g = find(this.f); return g && g[1].length > 1 ? g[1] : []; },
     R() { return parseFormula(this.f); },
     /* de parser geeft Nederlandse meldingen terug; bij de twee met een teken of element erin
        blijft dat stuk staan zoals de gebruiker het typte */
@@ -99,6 +132,10 @@ export default {
       const R = this.R;
       return Object.entries(R.tot).map(([e, n]) => [e, lkNumIn(n), F(ATOM[e], 3), F(ATOM[e] * n / R.M * 100, 2)]);
     }
+  },
+  watch: {
+    /* een naam ("Tris", "EDTA") wordt de formule; een formule blijft zoals getypt */
+    f(x) { const g = find(x); if (g && g[0].includes(norm(x)) && norm(g[1][0]) !== norm(x)) this.f = g[1][0]; }
   },
   methods: {F}
 };
