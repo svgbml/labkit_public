@@ -29,7 +29,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 10 performance | S122–S133 | ⏳ not started; F1a re-plans it first |
 | Phase 11 quality, tests and dev | S134–S142 | **part done:** S140, S142 open (batch Q2) |
 | Phase 12 Sanger and SNP analysis | S147–S169 | **part done:** S147–S161 ✅, S162–S169 open |
-| Phase 13 alignment and Clustal Omega | S170–S190 | **part done:** S170–S179 and S181 ✅, S180 and S182–S190 open |
+| Phase 13 alignment and Clustal Omega | S170–S190 | **part done:** S170–S184 and S186–S189 ✅, S185 and S190 open |
 | Phase 14 sequence toolbox and NCBI | S191–S201 | **part done:** S191–S198 ✅, S199–S201 open |
 | Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | ✅ done (batches V1a–V7 merged on 2026-11-21, S263 the same day) |
 | Phase 16 one source, one translation path | S264–S272 | ✅ done (batches K1–K3, 2026-11-21; replaces S143–S146) |
