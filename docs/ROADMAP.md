@@ -350,7 +350,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S107 | 184, 187 | Measure cells on calibrated photos; disinfection log-reduction chart ✅ one photo calibration (not one per objective), lines can only be cleared all at once, not moved; the disinfection table got an optional contact-time column for the chart | Sonnet |
 | S108 | 188, 189, 190 | DNA quant batch + purity badge + "make it X ng/µL"; read primer synthesis report ✅ the report reader (`src/lib/oligoreport.js`, unit-tested) reads tables with a header, lines with units and name/yield/MW blocks, but not a comma-separated table with decimal commas | Sonnet |
 | S109 | 191, 200 | PCR mastermix and cDNA kit presets ✅ five PCR kits in `QPRE`/`PRESETS` (each with the Mg already in its buffer) and four cDNA kits; the optional Q5 GC enhancer is not a row | Sonnet |
-| S110 | 196, 197, 198 | qPCR efficiency from standard curve; fold-change chart; melt curve overlay | Sonnet |
+| S110 | 196, 197, 198 | qPCR efficiency from standard curve; fold-change chart; melt curve overlay ✅ the fold-change chart and the melt overlay with a per-well verdict already existed; added the standard curve (feeds Pfaffl) and a Welch t-test on ΔCt against the calibrator, shown as p and stars above the bars | Sonnet |
 | S111 | 201, 205, 206 | Virtual electropherogram; ligation ratio picture; transformation plate tap-count | Sonnet |
 | S112 | 208, 209, 210 | STR electropherogram view; shared allele frequency table; bloodstain drawing | Sonnet |
 | S113 | 213, 215, 216 | Statistics "which test?" wizard, inline assumption checks, long-format paste | Opus 5 |

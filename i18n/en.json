@@ -5402,5 +5402,16 @@
 "Meng eerst primer, dNTP en RNA, verhit {#} min op {#} °C en zet {#} min op ijs; voeg dan de rest van de mix toe.": "First mix primer, dNTP and RNA, heat for {#} min at {#} °C and put on ice for {#} min; then add the rest of the mix.",
 "Meer dan {#} µg RNA per {#} µL-reactie; dat is het maximum voor deze kit.": "More than {#} µg RNA per {#} µL reaction; that is the maximum for this kit.",
 "Zet per monster ook een no-RT-controle in: dezelfde mix zonder reverse transcriptase (vervang door water), om DNA-contaminatie te zien. Vul bij No-RT-controles een aantal in (expertmodus).": "Also set up a no-RT control per sample: the same mix without reverse transcriptase (replace it with water), to detect DNA contamination. Enter a number under No-RT controls (expert mode).",
-"Standaardconcentraties volgens het NEB-protocol voor Taq DNA Polymerase (M{#}): {#}X buffer, {#} µM dNTP's, {#} µM per primer ({#}–{#} µM), {#} U per {#} µL; Mg²⁺ {#}–{#} mM. Kitrecepten (per {#} µL): NEB Q{#} (M{#}), Phusion (NEB M{#} / Thermo F{#}), NEB OneTaq (M{#}) en Thermo DreamTaq (EP{#}), volgens de standaardprotocollen van de fabrikant.": "Standard concentrations according to the NEB protocol for Taq DNA Polymerase (M{#}): {#}X buffer, {#} µM dNTPs, {#} µM per primer ({#}–{#} µM), {#} U per {#} µL; Mg²⁺ {#}–{#} mM. Kit recipes (per {#} µL): NEB Q{#} (M{#}), Phusion (NEB M{#} / Thermo F{#}), NEB OneTaq (M{#}) and Thermo DreamTaq (EP{#}), following the manufacturers' standard protocols."
+"Standaardconcentraties volgens het NEB-protocol voor Taq DNA Polymerase (M{#}): {#}X buffer, {#} µM dNTP's, {#} µM per primer ({#}–{#} µM), {#} U per {#} µL; Mg²⁺ {#}–{#} mM. Kitrecepten (per {#} µL): NEB Q{#} (M{#}), Phusion (NEB M{#} / Thermo F{#}), NEB OneTaq (M{#}) en Thermo DreamTaq (EP{#}), volgens de standaardprotocollen van de fabrikant.": "Standard concentrations according to the NEB protocol for Taq DNA Polymerase (M{#}): {#}X buffer, {#} µM dNTPs, {#} µM per primer ({#}–{#} µM), {#} U per {#} µL; Mg²⁺ {#}–{#} mM. Kit recipes (per {#} µL): NEB Q{#} (M{#}), Phusion (NEB M{#} / Thermo F{#}), NEB OneTaq (M{#}) and Thermo DreamTaq (EP{#}), following the manufacturers' standard protocols.",
+"Efficiëntie uit een standaardcurve (verdunningsreeks)": "Efficiency from a standard curve (dilution series)",
+"Plak per regel: hoeveelheid of verdunningsfactor, Ct doelgen, Ct referentiegen (optioneel)": "Paste one line per point: quantity or dilution factor, target Ct, reference Ct (optional)",
+"Eerste kolom is": "First column is",
+"hoeveelheid": "quantity",
+"verdunningsfactor": "dilution factor",
+"Gebruik in Pfaffl": "Use in Pfaffl",
+"Minstens drie regels met een hoeveelheid boven nul en een Ct nodig.": "At least three lines with a quantity above zero and a Ct are needed.",
+"Doelgen": "Target gene",
+"Referentiegen": "Reference gene",
+"p (Welch)": "p (Welch)",
+"ns": "ns"
 }

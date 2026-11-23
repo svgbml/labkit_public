@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-23 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 532 van 532 controles binnen tolerantie.**
+**Resultaat: 533 van 533 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -63,6 +63,7 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | PCR-cyclus | Amplificatie | kopieën | 4,0960e+08 | 4,1000e+08 | +0.10% | ✅ | KVV-studiemateriaal: 10⁵ × 2¹² = 4,1 × 10⁸ |
 | qPCR-analyse | ΔΔCt (Livak) | fold change | 6,498 | 6,5 | +0.03% | ✅ | CASRAI rekenvoorbeeld: controle 24,0/20,0, behandeld 21,5/20,2 → 6,5× |
 | qPCR-analyse | Pfaffl (efficiëntie-gecorrigeerd) | ratio | 5,856 | 5,86 | +0.07% | ✅ | CASRAI rekenvoorbeeld: E doel 1,92, E ref 1,98 → ≈ 5,9× |
+| qPCR-analyse | Efficiëntie uit standaardcurve | efficiëntie bij −3,3 (%) | 100,9 | 100,9 | +0.00% | ✅ | Pearson qPCR-efficiëntie (als bij PCR-cyclus): helling −3,3 → 100,9%; doelgen Ct 15,0 / 18,3 / 21,6 / 24,9 bij 10⁵…10² kopieën |
 | Ligatie | NEB 3:1 | insert (ng) | 30 | 30 | +0.00% | ✅ | NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert |
 | Agarosegel | 1% gel | agarose (g) | 1 | 1 | +0.00% | ✅ | miniPCR: 1 g agarose in 100 mL = 1% |
 | Gelfoto-editor | Densitometrie demo-gel | lane 1 / lane 3 | 0,9444 | 0,9512 | +0.72% | ✅ | Rekentest: banden getekend met bekende sterkte (0,85 / 0,70 / 0,90 / 0,50) |
