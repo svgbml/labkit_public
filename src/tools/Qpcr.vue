@@ -28,6 +28,7 @@
       <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:13.5px">{{ t('Ct-export van het qPCR-apparaat inlezen') }}</summary>
         <div class="f" style="margin-top:8px"><label for="qp-imp">{{ t('Plak de export (kolommen monster, target en Ct of Cq; met kopregel)') }}</label>
           <textarea id="qp-imp" rows="5" spellcheck="false" v-model="imp" :placeholder="placeholder"></textarea></div>
+        <div class="row" style="margin-top:6px;gap:8px;align-items:center"><input type="file" id="qp-impfile" accept=".csv,.txt,.tsv" @change="onImpFile"><span style="font-size:12.5px;color:var(--muted)">{{ t('Herkent de exports van Bio-Rad CFX, QuantStudio en LightCycler; anders een tabel met kopregel.') }}</span></div>
         <div class="row" style="margin-top:8px">
           <div class="f" data-expert=""><label for="qp-refname">{{ t('Naam referentiegen in de export') }}</label>
             <input id="qp-refname" class="txt" v-model="refname" style="width:140px"></div>
@@ -147,13 +148,12 @@ export default {
       const txt = this.imp, ref = this.refname.trim().toLowerCase();
       const lines = txt.replace(/\r/g, '').split('\n').filter(l => l.trim());
       if (lines.length < 2) { note('info', this.t('Plak de export met kopregel.')); return; }
-      const sp = l => l.includes('\t') ? l.split('\t') : l.includes(';') ? l.split(';') : l.split(',');
-      let hi = lines.findIndex(l => /(ct|cq)/i.test(l) && /(sample|monster|naam|name)/i.test(l)); if (hi < 0) hi = 0;
-      const H = sp(lines[hi]).map(h => h.trim().toLowerCase());
-      const ci = H.findIndex(h => /^(ct|cq|c[tq] mean|ct value|cq value)$/.test(h)) >= 0 ? H.findIndex(h => /^(ct|cq|c[tq] mean|ct value|cq value)$/.test(h)) : H.findIndex(h => /\b(ct|cq)\b/.test(h)),
-        si = H.findIndex(h => /(sample|monster|naam|name)/.test(h)), ti = H.findIndex(h => /(target|detector|gen|gene|doel)/.test(h));
-      if (ci < 0 || si < 0 || ti < 0) { note('bad', this.t('Kolommen voor monster, target en Ct/Cq niet gevonden in de kopregel.')); return; }
-      const recs = lines.slice(hi + 1).map(l => sp(l).map(x => x.trim())).map(c => ({s: c[si], t: (c[ti] || '').toLowerCase(), ct: num(String(c[ci]).replace(/undetermined|n\/a/i, ''))})).filter(r => r.s && isFinite(r.ct));
+      /* S93: de exports van CFX, QuantStudio en LightCycler eerst (src/lib/qpcrread.js), anders de kopregel */
+      const Q = qpcrRead(txt);
+      const recs = Q.recs.length ? Q.recs.map(r => ({s: r.s, t: String(r.t).toLowerCase(), ct: r.ct})) : this.headerRecs(lines, note);
+      if (!recs) return;
+      const FMT = {cfx: 'Bio-Rad CFX', quantstudio: 'QuantStudio', lightcycler: 'LightCycler'};
+      const fmtNote = Q.format ? this.t('Herkend als ' + this.uv(FMT[Q.format]) + '.') + ' ' + (Q.undet ? this.t(Q.undet + ' putje(s) zonder Ct overgeslagen.') + ' ' : '') : '';
       const targets = [...new Set(recs.map(r => r.t))];
       if (!ref || !targets.includes(ref)) { note('bad', this.tHtml('Referentiegen niet gevonden. Gevonden targets: ' + ud(targets.join(', ')) + '.')); return; }
       const tgt = targets.find(t => t !== ref), by = {};
@@ -163,11 +163,21 @@ export default {
         const a = o[tgt] || [], b = o[ref] || [];
         for (let i = 0; i < Math.max(a.length, b.length); i++) rows.push([s, a[i] ?? (a.length ? mean(a) : NaN), b[i] ?? (b.length ? mean(b) : NaN)]);
       });
-      /* dezelfde omzetting als de tabelcomponent zelf doet bij set(): komma's, lege cel voor NaN */
       const dec = v => (v == null || v === '' || (typeof v === 'number' && !isFinite(v)) ? '' : String(v).replace('.', ','));
       this.rows = rows.map(r => [String(r[0]), dec(r[1]), dec(r[2])]);
-      note('info', this.tHtml(rows.length + ' rijen ingelezen: doelgen "' + ud(tgt) + '", referentiegen "' + ud(ref) + '".'));
-    }
+      note('info', esc(fmtNote) + this.tHtml(rows.length + ' rijen ingelezen: doelgen "' + ud(tgt) + '", referentiegen "' + ud(ref) + '".'));
+    },
+    /* de oude herkenning: een kopregel met monster, target en Ct/Cq */
+    headerRecs(lines, note) {
+      const sp = l => l.includes('\t') ? l.split('\t') : l.includes(';') ? l.split(';') : l.split(',');
+      let hi = lines.findIndex(l => /(ct|cq)/i.test(l) && /(sample|monster|naam|name)/i.test(l)); if (hi < 0) hi = 0;
+      const H = sp(lines[hi]).map(h => h.trim().toLowerCase());
+      const ci = H.findIndex(h => /^(ct|cq|c[tq] mean|ct value|cq value)$/.test(h)) >= 0 ? H.findIndex(h => /^(ct|cq|c[tq] mean|ct value|cq value)$/.test(h)) : H.findIndex(h => /\b(ct|cq)\b/.test(h)),
+        si = H.findIndex(h => /(sample|monster|naam|name)/.test(h)), ti = H.findIndex(h => /(target|detector|gen|gene|doel)/.test(h));
+      if (ci < 0 || si < 0 || ti < 0) { note('bad', this.t('Kolommen voor monster, target en Ct/Cq niet gevonden in de kopregel.')); return null; }
+      return lines.slice(hi + 1).map(l => sp(l).map(x => x.trim())).map(c => ({s: c[si], t: (c[ti] || '').toLowerCase(), ct: num(String(c[ci]).replace(/undetermined|n\/a/i, ''))})).filter(r => r.s && isFinite(r.ct));
+    },
+    onImpFile(e) { const f = e.target.files[0]; if (f) f.text().then(t => { this.imp = t; }); }
   }
 };
 </script>

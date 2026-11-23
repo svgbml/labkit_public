@@ -1011,6 +1011,21 @@ def _(pg):
     m=re.findall(r'6,4\d|6,5\d?', v)
     return [('fold change gevonden (1 = ja)', 1 if m else 0, 1, 0)]
 
+@case('qPCR-analyse', 'Exports van CFX, QuantStudio en LightCycler', 'Rekentest (Livak & Schmittgen 2001, 2^−ΔΔCt, E = 100 %): dezelfde run als export van Bio-Rad CFX, QuantStudio en LightCycler 480 (tests/fixtures/qpcr): Controle IL6/GAPDH 27,40/18,20, Behandeld 24,90/18,35 (triplo) → ΔΔCt = −2,65, fold change 2^2,65 = 6,28; de NTC zonder Ct wordt overgeslagen')
+def _(pg):
+    out = []
+    for f in ('cfx.csv', 'quantstudio.txt', 'lightcycler.txt'):
+        txt = open(ROOT / 'tests' / 'fixtures' / 'qpcr' / f, encoding='utf8').read()
+        pg.evaluate(f"__go('qpcr');__set('qp-et','100');__set('qp-er','100');__set('qp-m','livak');__set('qp-imp',{txt!r});__set('qp-refname','GAPDH');document.getElementById('qp-impgo').click();")
+        pg.wait_for_timeout(250)
+        rows = pg.evaluate("TBLDEF['qp-tbl'].get().length")
+        v = pg.evaluate("[...document.querySelectorAll('#qp-res table tbody tr')].map(r=>r.textContent).join('|')")
+        msg = pg.evaluate("document.getElementById('qp-impmsg').textContent")
+        out.append((rows, '6,28' in v or '6,27' in v, 'NTC' not in v and '2 putje' in msg))
+    return [(f'{n}: rijen', o[0], 6, 0) for n, o in zip(('CFX', 'QuantStudio', 'LightCycler'), out)] + \
+           [(f'{n}: fold change 6,28', int(o[1]), 1, 0) for n, o in zip(('CFX', 'QuantStudio', 'LightCycler'), out)] + \
+           [(f'{n}: NTC overgeslagen', int(o[2]), 1, 0) for n, o in zip(('CFX', 'QuantStudio', 'LightCycler'), out)]
+
 @case('Gelfoto-editor', 'Massa per band', 'NEB 100 bp DNA Ladder (N3231), 0,5 µg per laan: 1517–100 bp = 45, 35, 95, 27, 24, 21, 18, 97, 38, 29, 25, 48 ng (som 502 ng)')
 def _(pg):
     v=pg.evaluate("stNums(LMASS.neb100).reduce((a,b)=>a+b,0)")

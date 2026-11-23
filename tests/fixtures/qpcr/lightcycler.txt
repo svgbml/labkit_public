@@ -1,0 +1,20 @@
+Experiment: GAPDH_run1  Selected Filter: SYBR Green I / HRM Dye (465-510)
+Include	Color	Pos	Name	Cp	Concentration	Standard	Status
+True	255	A1	Controle	18.08		0	
+True	255	A2	Controle	18.23		0	
+True	255	A3	Controle	18.29		0	
+True	255	A7	Behandeld	18.23		0	
+True	255	A8	Behandeld	18.38		0	
+True	255	A9	Behandeld	18.44		0	
+True	255	B1	NTC			0	
+
+Experiment: IL6_run1  Selected Filter: SYBR Green I / HRM Dye (465-510)
+Include	Color	Pos	Name	Cp	Concentration	Standard	Status
+True	255	A4	Controle	27.28		0	
+True	255	A5	Controle	27.43		0	
+True	255	A6	Controle	27.49		0	
+True	255	A10	Behandeld	24.78		0	
+True	255	A11	Behandeld	24.93		0	
+True	255	A12	Behandeld	24.99		0	
+True	255	B2	NTC			0	
+
