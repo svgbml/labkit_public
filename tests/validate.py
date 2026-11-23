@@ -140,8 +140,11 @@ def _(pg):
         # eerst dicht en wachten tot de knop weg is: anders klikt de tweede ronde op de uitkomst van de eerste foto
         pg.evaluate("__go('reeks');document.querySelector('#t-reeks details').open=false"); pg.wait_for_selector('#r-pfill', state='detached')
         pg.evaluate("__set('r-f','10');__set('r-n','3');reeksCounts={};buildReeks();document.querySelector('#t-reeks details').open=true"); pg.wait_for_selector('#r-photo', state='attached')
+        prev = pg.evaluate("(document.querySelector('#t-reeks details .kv')||{}).innerText||''")
         pg.set_input_files('#r-photo', str(ROOT / 'tests' / 'fixtures' / f))
-        pg.wait_for_selector('#r-pfill'); pg.evaluate("__set('r-thr','6');__set('r-pbuis','%d');__set('r-pplaat','1');document.getElementById('r-pfill').click()" % tube); pg.wait_for_timeout(100)
+        # wachten tot deze foto geteld is (het totaal verandert en de knop staat er), niet op de knop van de vorige
+        pg.wait_for_function("p=>{ const k=document.querySelector('#t-reeks details .kv'); return k&&k.innerText!==p&&document.getElementById('r-pfill'); }", arg=prev)
+        pg.evaluate("__set('r-thr','6');__set('r-pbuis','%d');__set('r-pplaat','1');document.getElementById('r-pfill').click()" % tube); pg.wait_for_timeout(100)
         out.append((f + ' kolonies', pg.evaluate("__n(document.querySelector('#r-tbl tr[data-i=\"%d\"] input[data-p=\"1\"]').value)" % tube), n, 0.1))
     pg.evaluate("reeksCounts={};buildReeks();document.querySelector('#t-reeks details').open=false")
     return out

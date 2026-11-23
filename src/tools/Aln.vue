@@ -72,7 +72,7 @@
         <!-- de kleuren staan op één canvas onder de tekst: duizenden gekleurde <span>s per
              scrollstap kosten meer dan een frame (S172) -->
         <!-- data-xl: geen knoppen Kopieer grafiek/data, dit zijn geen grafieken -->
-        <canvas ref="cv" class="aln-bg" data-xl="1" :style="{width: vw + 'px', height: vh + 'px'}"></canvas>
+        <canvas ref="cv" id="al-bg" class="aln-bg" data-xl="1" :style="{width: vw + 'px', height: vh + 'px'}"></canvas>
         <div v-for="r in vis.rows" :key="r.i" class="aln-mono aln-seq" :style="{top: r.top + 'px', left: vis.left + 'px'}">{{ r.txt }}</div>
         <div class="aln-names" :style="{width: g.nameW + 'px'}">
           <div v-for="r in vis.rows" :key="r.i" :class="['aln-mono', 'aln-name', {'aln-extra': r.x}]" :style="{top: r.top + 'px'}" :title="r.name">{{ r.name }}</div>

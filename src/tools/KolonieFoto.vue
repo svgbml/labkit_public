@@ -61,6 +61,7 @@ export default {
     /* de foto verkleind tot hoogstens 1000 px; de pixels blijven buiten Vue (zoals in TelFoto.vue) */
     load(e) {
       const f = e.target.files && e.target.files[0]; if (!f) return;
+      this.res = null;   /* de telling van de vorige foto weg tot deze geteld is */
       const img = new Image(), url = URL.createObjectURL(f);
       img.onload = () => {
         const k = Math.min(1, 1000 / Math.max(img.width, img.height)), c = document.createElement('canvas');
