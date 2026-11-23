@@ -342,7 +342,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S99 | 159, 160, 161 | Interactive titration curve; osmolarity presets; merge chemistry calculators into one tool | Opus 5 |
 | S100 | 162, 163 | Standard curve: compare models (AIC) and residual plot with click-to-exclude | Opus 5 |
 | S101 | 164, 167, 171, 172 | Out-of-range unknowns, wavelength presets, Z′ verdict, purification chart ✅ dilution advice for unknowns above the standards (1-2-5 steps); Spec has no wavelength field, so a preset fills ε and names the wavelength; the Z′ well strip lists the control values, not their plate positions | Sonnet |
-| S102 | 165, 166 | Enzyme kinetics: all plots from one table; inhibition comparison | Sonnet |
+| S102 | 165, 166 | Enzyme kinetics: all plots from one table; inhibition comparison ✅ global fit of four inhibition models with AICc and Akaike weights (`src/lib/inhib.js`); with noise-free competitive data the mixed model ties on fit, so the competitive weight tops out near 0.84 at n = 18 | Sonnet |
 | S103 | 168, 169 | Dose-response multi-compound; chromatography peak import | Sonnet |
 | S104 | 173, 176 | CFU plate drawing with countable range; growth curve comparison stats | Sonnet |
 | S105 | 177, 178 | One cell-counting tool with grid entry (merges telkamer, teller, viability) | Opus 5 |

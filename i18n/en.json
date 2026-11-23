@@ -5457,5 +5457,19 @@
 "Kleur = signaal (donker is hoog); rood omcirkeld met ! = meer dan {#}σ van de overige putjes van de groep.": "Colour = signal (dark is high); red ring with ! = more than {#}σ from the other wells of the group.",
 "SDS-PAGE-schets per stap": "SDS-PAGE sketch per step",
 "Schets, geen meetdata: het aantal en de sterkte van de banden volgen alleen de zuiveringsfactor; de dikke band is het doeleiwit.": "Sketch, not measured data: the number and strength of the bands follow only the purification fold; the thick band is the target protein.",
-"Stap {#}": "Step {#}"
+"Stap {#}": "Step {#}",
+"Alle vier de grafieken naast elkaar": "All four plots side by side",
+"De lijnen volgen de niet-lineaire fit; de punten zijn de metingen zonder remmer.": "The lines follow the nonlinear fit; the points are the measurements without inhibitor.",
+"Remmingstype vergelijken (meerdere [I])": "Compare inhibition types (several [I])",
+"[S], v en [I] per regel": "[S], v and [I] per line",
+"Eén regel per meting; [I] in dezelfde eenheid als [S]. Alle punten worden samen gefit met gedeelde Vmax en Km.": "One line per measurement; [I] in the same unit as [S]. All points are fitted together with a shared Vmax and Km.",
+"Vul minstens zes regels in, waarvan een deel met [I] boven nul.": "Enter at least six lines, some with [I] above zero.",
+"Geen duidelijk type; meer [S] of [I] meten.": "No clear type; measure more [S] or [I].",
+"beste model volgens AICc.": "best model by AICc.",
+"Bronnen: Copeland, Enzymes (Wiley), hoofdstuk over remming; Burnham en Anderson, Model selection (AICc).": "Sources: Copeland, Enzymes (Wiley), chapter on inhibition; Burnham and Anderson, Model selection (AICc).",
+"Uit deze lijn: Km {*}, Vmax {*} — minder betrouwbaar dan de niet-lineaire fit": "From this line: Km {*}, Vmax {*} — less reliable than the nonlinear fit",
+"Gewicht": "Weight",
+"Beste model": "Best model",
+"{#}/[S] ({#}/mM)": "{#}/[S] ({#}/mM)",
+"{#}/[S] ({#}/µM)": "{#}/[S] ({#}/µM)"
 }

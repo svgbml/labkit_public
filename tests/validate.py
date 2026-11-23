@@ -1550,6 +1550,18 @@ def _(pg):
     r = pg.evaluate("(()=>{ const tr=[...document.querySelectorAll('#k-res table')].pop().querySelectorAll('tbody tr')[2]; return [__n(tr.cells[2].textContent),__n(tr.cells[3].textContent)]; })()")
     return [('helling', r[0], -2, 0.002), ('y-asafsnede', r[1], 100, 0.002)]
 
+@case('Enzymkinetiek', 'Remmingstype (AICc, Akaike-gewichten)', 'Exacte competitieve data (V_max 100, K_m 2, K_i 1; [S] 0,5–16; [I] 0, 1, 3): Copeland, Enzymes (2e dr., Wiley 2000) hfst. 8 voor v = V[S]/(K_m(1+[I]/K_i)+[S]); Burnham & Anderson 2002 voor AICc = n·ln(RSS/n) + 2k + 2k(k+1)/(n−k−1) en w = exp(−Δ/2)/Σ. Het gemengde model bevat het competitieve en past even exact, dus alleen de AICc-straf scheidt ze: w = 1/(1+exp(−Δ/2)) met Δ = AICc(k=4) − AICc(k=3) bij gelijke RSS (0,84 bij n = 18; > 0,9 is hier niet haalbaar)')
+def _(pg):
+    import math
+    rows = '\\n'.join(f'{s} {round(100*s/(2*(1+i)+s), 6)} {i}' for i in (0, 1, 3) for s in (0.5, 1, 2, 4, 8, 16))
+    pg.evaluate(f"__go('enzym');__set('ki-d','{rows}'.replace(/\\./g,','))")
+    n = 18; aicc = lambda k: 2*k + 2*k*(k+1)/(n-k-1)
+    w = 1/(1+math.exp(-(aicc(4)-aicc(3))/2))
+    return [('Ki', pg.evaluate("__kv('#ki-det','Ki')"), 1.0, 0.005), ('Km', pg.evaluate("__kv('#ki-det','Km')"), 2.0, 0.005),
+            ('Vmax', pg.evaluate("__kv('#ki-det','Vmax')"), 100.0, 0.005),
+            ('Akaike-gewicht competitief (%)', pg.evaluate("__cells('#ki-det tr.hl td:nth-child(3)')[0]"), w*100, 0.01),
+            ('beste model is competitief', 1 if pg.evaluate("document.querySelector('#ki-det tr.hl td').textContent") == 'Competitief' else 0, 1, 0)]
+
 @case('Plasmidekaart', 'pFA6a-kanMX6 uit GenBank', 'Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb: 3938 bp circulair, SP6-promotor op 3922..2 over het nulpunt) en Biopython Bio.Restriction (REBASE): 22 van de 50 enzymen knippen één keer, EcoRI op 1517 en BamHI op 44')
 def _(pg):
     gb = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.gb').read_text(encoding='utf-8')
