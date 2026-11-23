@@ -43,6 +43,13 @@
       <div class="row" style="margin-top:8px">
         <input type="file" id="al-file" accept=".aln,.aln-clustal_num,.clustal_num,.clustal,.fa,.fasta,.fas,.afa,.phy,.phylip,.nex,.nexus,.msf,.pir,.txt" :aria-label="t('Bestand openen')" @change="onFile">
       </div>
+      <!-- S189: uitlijning, instellingen, volgorde en open panelen in één bestand -->
+      <div class="row" style="margin-top:8px">
+        <button type="button" id="al-proj-sv" :disabled="!txt.trim() && !raw.trim()" @click="saveProj">{{ t('Project opslaan') }}</button>
+        <label for="al-proj" style="font-size:13px">{{ t('Project openen') }}</label>
+        <input type="file" id="al-proj" accept=".labkitaln,application/json" @change="openProj">
+      </div>
+      <div id="al-proj-err"><lk-note v-if="projErr" kind="bad">{{ projErr }}</lk-note></div>
       <div class="fields" style="margin-top:12px">
         <div class="f"><label for="al-col">{{ t('Kleuren') }}</label>
           <select id="al-col" v-model="col">
@@ -194,6 +201,7 @@ import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile
   alnTrim, alnWrite, ALN_OUT, alnPair, alnPim, pimWrite, alnConserved, alnTranslate, fastaCheck, NAMEMAX, alnSvg} from '../lib/alignment.js';
 import {CODES, SEQ_TO, seqSend} from '../lib/seq.js';
 
+const PROJ = 'labkitaln';  /* kenmerk van een projectbestand, zoals .labkitgel bij de gelfoto-editor */
 const EBI = 'https://www.ebi.ac.uk/jdispatcher/msa/clustalo';  /* Job Dispatcher, sinds 2024 het adres van de EBI-tools */
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
@@ -204,7 +212,7 @@ export default {
   name: 'Aln',
   data() {
     const st = typeof storeGet === 'function' ? storeGet() : {};
-    return {txt: st['al-in'] != null ? String(st['al-in']) : '', raw: st['al-raw'] != null ? String(st['al-raw']) : '', copied: '', col: st['al-col'] != null ? String(st['al-col']) : 'auto',
+    return {txt: st['al-in'] != null ? String(st['al-in']) : '', raw: st['al-raw'] != null ? String(st['al-raw']) : '', copied: '', projErr: '', col: st['al-col'] != null ? String(st['al-col']) : 'auto',
       cbs: !!st['al-cbs'], sel: null, hand: null,
       motif: st['al-motif'] != null ? String(st['al-motif']) : '', ord: st['al-ord'] != null ? String(st['al-ord']) : 'file', ref: st['al-ref'] != null ? String(st['al-ref']) : '', thr: st['al-thr'] != null ? String(st['al-thr']) : '50',
       tr: st['al-tr'] != null ? String(st['al-tr']) : '0', code: st['al-code'] != null ? String(st['al-code']) : '1',
@@ -539,6 +547,30 @@ export default {
     },
     openExt(u) { openExt(u); },
     savePrep() { saveBlob('sequenties.fasta', new Blob([this.prep.clean], {type: 'text/plain'})).catch(() => {}); },
+    /* S189: de waarden van alle velden (toolSnap), de volgorde met de hand en welke panelen open staan */
+    saveProj() {
+      const sec = this.$el.closest('section'), p = {kind: PROJ, v: 1, app: APPVER, snap: toolSnap('aln'), hand: this.hand,
+        open: [...sec.querySelectorAll('details[open]')].map(d => d.id).filter(Boolean)};
+      saveBlob('uitlijning.' + PROJ, new Blob([JSON.stringify(p)], {type: 'application/json'})).catch(() => {});
+    },
+    openProj(e) {
+      const f = e.target.files[0];
+      e.target.value = '';
+      if (f) f.text().then(x => this.applyProj(x));
+    },
+    async applyProj(text) {
+      let p = null;
+      try { p = JSON.parse(text); } catch (err) { /* hieronder gemeld */ }
+      const ok = p && p.kind === PROJ && p.snap && p.snap.t === 'aln' && p.snap.v && typeof p.snap.v === 'object';
+      this.projErr = ok ? '' : this.t('Dit is geen projectbestand van Alignment bekijken.');
+      if (!ok) return;
+      /* twee keer: velden achter een v-if (genetische code, paar, drempels) bestaan pas na de eerste render */
+      toolApply(p.snap); await this.$nextTick(); toolApply(p.snap); await this.$nextTick();
+      const n = this.m.names.length, h = p.hand;
+      if (Array.isArray(h) && h.length === n && h.every(i => Number.isInteger(i) && i >= 0 && i < n) && new Set(h).size === n) { this.hand = h; this.ord = 'hand'; }
+      const sec = this.$el.closest('section');
+      sec.querySelectorAll('details[id]').forEach(d => { d.open = Array.isArray(p.open) && p.open.includes(d.id); });
+    },
     onFile(e) { this.readFile(e, 'txt'); },
     readFile(e, k) {
       const f = e.target.files[0];
