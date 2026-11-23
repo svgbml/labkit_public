@@ -10,3 +10,8 @@ Biopython's `AlignIO.convert`.
 `biopython.json` holds the reference reading of each file by Biopython's `Bio.AlignIO`: the
 number of sequences, the alignment length and the names. `tests/validate.py` compares LabKit's
 reading against it.
+
+`small_pim.aln` (five short protein sequences made for the identity matrix, S178) and `small_pim.pim`
+(its expected percent identity matrix in Clustal's `.pim` layout) are made by hand for LabKit; the
+values were computed with a separate Python script, as identical letters divided by the columns where
+neither sequence has a gap, which is what Clustal Omega reports.

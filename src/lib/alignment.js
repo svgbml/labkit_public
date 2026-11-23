@@ -9,6 +9,8 @@
    (Felsenstein, "Molecular sequence data"), NEXUS (Maddison, Swofford & Maddison 1997, Syst. Biol.
    46:590), GCG Wisconsin Package MSF en PIR (NBRF). */
 
+import {translate, CODES} from './seq.js';
+
 const GAPS = /[.~]/g;
 
 /* naam van het formaat aan de eerste regels herkennen; null als het niets bekends is */
@@ -337,4 +339,117 @@ export function alnDiff(s, r) {
   let o = '';
   for (let c = 0; c < s.length; c++) o += s[c] !== '-' && s[c].toUpperCase() === (r[c] || '').toUpperCase() ? '.' : s[c];
   return o;
+}
+
+/* ---------- Bijsnijden en maskeren (S177) ----------
+   Een nieuwe uitlijning met alleen de kolommen die blijven: binnen from..to (1-based, beide
+   inbegrepen; leeg = het hele bereik) en met hoogstens maxGap % gaten (leeg = elke kolom; een kolom
+   blijft als het aandeel gaten de drempel niet overschrijdt). De * : . -regel van een
+   Clustal-bestand vervalt. */
+export function alnTrim(a, o) {
+  const f = Math.max(1, o.from || 1), l = Math.min(a.len, o.to || a.len), n = a.seqs.length, keep = [];
+  for (let c = f - 1; c < l; c++) {
+    if (o.maxGap != null && n) {
+      let g = 0; for (const s of a.seqs) if (s[c] === '-') g++;
+      if (g * 100 / n > o.maxGap) continue;
+    }
+    keep.push(c);
+  }
+  const seqs = a.seqs.map(s => keep.map(c => s[c]).join(''));
+  return {...a, seqs, len: keep.length, cons: ''};
+}
+
+/* ---------- Schrijven (S177): FASTA, Clustal en PHYLIP ---------- */
+export const ALN_OUT = {fasta: ['FASTA', 'fasta'], clustal: ['Clustal', 'aln'], phylip: ['PHYLIP', 'phy']};
+const nm = n => n.replace(/\s+/g, '_');
+export function alnWrite(a, fmt) {
+  const names = a.names.map(nm), NL = '\n';
+  if (fmt === 'fasta') return a.names.map((n, i) => '>' + n + NL + (a.seqs[i].match(/.{1,60}/g) || ['']).join(NL)).join(NL) + NL;
+  const w = Math.max(10, ...names.map(n => n.length)) + 1;
+  if (fmt === 'phylip') return ' ' + a.seqs.length + ' ' + a.len + NL + names.map((n, i) => n.padEnd(w) + a.seqs[i]).join(NL) + NL;
+  let o = 'CLUSTAL multiple sequence alignment' + NL + NL;
+  for (let c = 0; c < a.len || !c; c += 60) o += names.map((n, i) => n.padEnd(w) + a.seqs[i].slice(c, c + 60)).join(NL) + NL + NL;
+  return o;
+}
+
+/* ---------- Identiteit tussen alle paren (S178) ----------
+   Per paar: gelijke letters (hoofd/klein gelijk) gedeeld door het aantal kolommen volgens de gatregel:
+     'ign'  alleen kolommen waar beide een letter hebben; zo rekent Clustal Omega (.pim);
+     'mis'  een gat tegenover een letter telt als verschil; kolommen waar beide een gat hebben vallen af;
+     'len'  alle kolommen van de uitlijning.
+   Gelijkenis (eiwit): gelijk, of beide letters in dezelfde 'sterke' groep van Clustal (: -regel). Het
+   resultaat per paar is {same, sim, n (de noemer), gaps (kolommen met een gat in één van beide)}. */
+export const ALN_GAPMODES = ['ign', 'mis', 'len'];
+export function alnPair(x, y, mode) {
+  let same = 0, sim = 0, both = 0, one = 0;
+  for (let c = 0; c < x.length; c++) {
+    const p = x[c].toUpperCase(), q = y[c].toUpperCase();
+    if (p === '-' && q === '-') continue;
+    if (p === '-' || q === '-') { one++; continue; }
+    both++;
+    if (p === q) { same++; sim++; } else if (STRONG.some(g => g.includes(p) && g.includes(q))) sim++;
+  }
+  const n = mode === 'len' ? x.length : mode === 'mis' ? both + one : both;
+  return {same, sim, n, gaps: one, id: n ? same / n : 0, sm: n ? sim / n : 0};
+}
+export function alnPim(a, mode) {
+  const n = a.seqs.length, m = [];
+  for (let i = 0; i < n; i++) m.push(new Array(n));
+  for (let i = 0; i < n; i++) {
+    m[i][i] = a.seqs[i].replace(/-/g, '') ? 1 : 0;
+    for (let j = i + 1; j < n; j++) m[i][j] = m[j][i] = alnPair(a.seqs[i], a.seqs[j], mode).id;
+  }
+  return m;
+}
+/* de matrix zoals Clustal Omega hem als .pim schrijft: een kopregel, dan per rij nummer, naam en procenten */
+export function pimWrite(names, m) {
+  const w = Math.max(...names.map(n => n.length)), NL = '\n';
+  return 'Percent Identity  Matrix - created by LabKit' + NL + NL + names.map((n, i) =>
+    String(i + 1).padStart(6) + ': ' + n.padEnd(w) + m[i].map(v => (v * 100).toFixed(2).padStart(8)).join('')).join(NL) + NL;
+}
+/* een .pim lezen: namen en waarden in procenten (0-100) */
+export function pimParse(text) {
+  const names = [], m = [];
+  for (const ln of String(text).split(/\r?\n/)) {
+    const r = /^\s*(\d+):\s+(\S+)((?:\s+-?\d+(?:\.\d+)?)+)\s*$/.exec(ln);
+    if (r) { names.push(r[2]); m.push(r[3].trim().split(/\s+/).map(Number)); }
+  }
+  return {names, m};
+}
+
+/* ---------- Geconserveerde stukken (S179) ----------
+   Aaneengesloten kolommen waar het aandeel van de meest voorkomende letter (gaten tellen mee in de
+   noemer, zoals alnProfile) minstens thr % is, minstens minLen lang; de langste eerst. seq is de
+   meest voorkomende letter per kolom van het stuk (nooit een gat). */
+export function alnConserved(a, p, thr, minLen) {
+  const t = Math.max(thr, 1e-9), out = [];
+  let s = -1;
+  for (let c = 0; c <= a.len; c++) {
+    const ok = c < a.len && p.top[c] !== '-' && p.frac[c] * 100 >= t;
+    if (ok && s < 0) s = c;
+    if (!ok && s >= 0) {
+      if (c - s >= Math.max(1, minLen)) out.push({from: s + 1, to: c, len: c - s, seq: p.top.slice(s, c).join('')});
+      s = -1;
+    }
+  }
+  return out.sort((x, y) => y.len - x.len || x.from - y.from);
+}
+
+/* ---------- Vertalen naar eiwit (S181) ----------
+   Een nucleotide-uitlijning wordt een eiwituitlijning: vanaf kolom frame (1–3) steeds drie kolommen
+   per codon, in elke sequentie. Drie letters geven een aminozuur (tabel code uit CODES, U = T; een
+   ambigue base geeft X); drie gaten geven '-', dus een gat van een veelvoud van drie houdt de codons
+   uitgelijnd; een codon met één of twee gaten (een frameshift) wordt X. Kolommen na het laatste hele
+   codon vervallen. */
+export function alnTranslate(a, frame, code) {
+  const aa = (CODES[code] || CODES[1])[1], f = Math.max(1, Math.min(3, frame || 1)) - 1;
+  const seqs = a.seqs.map(s => {
+    let p = '';
+    for (let c = f; c + 3 <= s.length; c += 3) {
+      const k = s.slice(c, c + 3).toUpperCase().replace(/U/g, 'T'), g = (k.match(/-/g) || []).length;
+      p += g === 3 ? '-' : g ? 'X' : translate(k, aa);
+    }
+    return p;
+  });
+  return {...a, seqs, len: seqs.length ? seqs[0].length : 0, cons: ''};
 }
