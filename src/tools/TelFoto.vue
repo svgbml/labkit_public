@@ -48,6 +48,7 @@ export default {
     load(e) {
       const f = e.target.files && e.target.files[0]; if (!f) return;
       const img = new Image(), url = URL.createObjectURL(f);
+      this.cells = null;   /* de telling van de vorige foto weg tot deze geteld is */
       img.onload = () => {
         const k = Math.min(1, 1000 / Math.max(img.width, img.height)), c = document.createElement('canvas');
         c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);

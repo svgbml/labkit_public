@@ -48,6 +48,7 @@
           <label class="chk" for="sg-rc"><input type="checkbox" id="sg-rc" v-model="rc"> {{ t('Reverse complement') }}</label>
           <button type="button" id="sg-copy" @click="copy">{{ t('Kopieer als FASTA') }}</button>
           <button type="button" id="sg-fasta" @click="saveFasta">{{ t('FASTA van de getrimde read') }}</button>
+          <button type="button" id="sg-to-aln" @click="toAln">{{ t('Naar Alignment bekijken') }}</button>
           <template v-if="m.r.traces">
             <button type="button" id="sg-png" @click="savePng">{{ t('PNG van het venster') }}</button>
             <button type="button" id="sg-svg" @click="saveSvg">{{ t('SVG van het venster') }}</button>
@@ -364,7 +365,7 @@ import {parseRef, alignRead, variants, parseAssay, assayJson, snpCalls, confirm,
 import {callSample, genotypeRows, overlayStrips} from '../lib/sangerbatch.js';
 import {makeCase, parseCase, exampleSample, EXAMPLE_ID} from '../lib/sangercase.js';
 import {RESULT_GROUPS, parseProb, parseResultPaste, summarize, toCsv, PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate, autofill, mergeCalls, naReport, verifySnp} from '../lib/hiris.js';
-import {SEQ_TO} from '../lib/seq.js';
+import {SEQ_TO, seqSend} from '../lib/seq.js';
 import NcbiSwitch from './ncbi/NcbiSwitch.vue';
 import {ncbiGet} from '../lib/ncbi.js';
 import {parseSnp, rsId} from '../lib/dbsnp.js';
@@ -907,6 +908,11 @@ export default {
     saveFasta() {
       const t = this.trim, txt = fasta(this.m.r.name, this.seq, t ? {a: t.start - 1, b: t.end - 1} : null, this.rc);
       saveBlob(this.base() + '.fasta', new Blob([txt], {type: 'text/plain'})).catch(() => {});
+    },
+    /* S180: de getrimde read (zoals FASTA van de getrimde read) als eigen rij in Alignment bekijken */
+    toAln() {
+      const t = this.trim, x = SEQ_TO.find(y => y.tool === 'aln');
+      if (x) seqSend(x, this.base(), parseRef(fasta('', this.seq, t ? {a: t.start - 1, b: t.end - 1} : null, this.rc)).seq);
     },
     /* afdruk: de hele read in rijen van 60 basen, elke rij op zijn eigen hoogteschaal; getrimde einden grijs */
     printHtml() {
