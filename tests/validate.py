@@ -529,6 +529,23 @@ def _(pg):
             ('pseudokleur kleurt de foto', int(col > 100), 1, 0), ('bandgrootte gelijk met pseudokleur', int(bp0 == bp1), 1, 0),
             ('automatisch kanaal = groen', int(ch == 'g'), 1, 0)]
 
+@case('Gelfoto-editor', 'Vergelijken met de Gelplanner, naar WB, SVG', 'Zelftest: de Gelplanner verwacht 650 bp in slotje 2, 650 en 300 bp in slotje 3 en 350 bp in slotje 4; op de demo-gel (650 bp in lane 2–4, 350 bp in lane 5–6) zijn 650 gevonden en 300 en 350 ontbrekend. Doorsturen met doel 650 en laadcontrole 58 bp vult de WB-tabel met 5 lanen. De SVG is geldige XML met de lanelabels als tekst')
+def _(pg):
+    pg.evaluate("__go('gplan')"); pg.wait_for_timeout(300)
+    keep = pg.evaluate("JSON.stringify(TBLDEF['gp-tbl'].get())")
+    pg.evaluate("const r=TBLDEF['gp-tbl'].get(); r[1][2]='650'; r[2][2]='650 300'; r[3][2]='350'; TBLDEF['gp-tbl'].set(r)"); pg.wait_for_timeout(200)
+    pg.evaluate("__go('gelfoto'); __set('gf-lad','100'); gfDemo(); gf.marks=[]; gfMeasAll()"); pg.wait_for_timeout(300)
+    r = pg.evaluate("JSON.stringify(gfCompare().map(c=>c.exp.map(e=>e.bp+(e.found?'+':'-')).join(' ')))")
+    svg = pg.evaluate("(()=>{ const t=gfSvg(), d=new DOMParser().parseFromString(t,'image/svg+xml'); return [d.getElementsByTagName('parsererror').length, [...d.getElementsByTagName('text')].map(e=>e.textContent)]; })()")
+    pg.evaluate("gfCompareOff()")
+    pg.evaluate("__go('wb')"); pg.wait_for_timeout(200); wkeep = pg.evaluate("JSON.stringify(TBLDEF['wb-tbl'].get())"); pg.evaluate("__go('gelfoto')")
+    n = pg.evaluate("gfToWb(650,58)"); pg.wait_for_timeout(300)
+    wb = pg.evaluate("TBLDEF['wb-tbl'].get().length")
+    pg.evaluate(f"document.querySelectorAll('.lk-modal').forEach(m=>m.remove()); TBLDEF['wb-tbl'].set(JSON.parse({wkeep!r}).map(r=>[r[0],num(r[1]),num(r[2]),r[3]]))"); pg.wait_for_timeout(200)
+    pg.evaluate(f"__go('gplan'); TBLDEF['gp-tbl'].set(JSON.parse({keep!r}))"); pg.wait_for_timeout(200)
+    return [('vergelijking per slotje', int(r == '["650+","650+ 300-","350-"]'), 1, 0), ('5 lanen naar WB', n, 5, 0), ('WB-tabel gevuld', wb, 5, 0),
+            ('SVG is geldige XML', int(svg[0] == 0), 1, 0), ('lanelabel als SVG-tekst', int('NTC' in svg[1]), 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

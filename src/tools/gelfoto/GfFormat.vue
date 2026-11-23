@@ -88,6 +88,8 @@
       <div class="row" style="margin-top:10px">
         <button type="button" class="primary" id="gf-dl" v-if="dlOn" @click="download">{{ t('Downloaden') }}</button>
         <button type="button" id="gf-copy" @click="copy">{{ t('Kopieer afbeelding') }}</button>
+        <button type="button" id="gf-copycap" :title="t('Afbeelding met de figuurlegenda eronder, om in je labjournaal te plakken')" @click="copyCap">{{ t('Kopieer met onderschrift') }}</button>
+        <button type="button" id="gf-svg" :title="t('De gel als afbeelding, de tekst als bewerkbare tekst (Inkscape, Illustrator)')" @click="svg">SVG</button>
       </div>
       <p id="gf-exmsg" style="font-size:12.5px;color:var(--muted);margin:8px 0 0">{{ msg || t('De gel zelf blijft onbewerkt: tekst, streepjes en metingen staan altijd in de witte marge eromheen. De blauwe en oranje markeringen in de editor komen niet in de export.') }}</p>
     </div>
@@ -184,6 +186,23 @@ export default {
           this.msg = this.t(err && err.code === 'declined' ? 'Download geannuleerd.' : 'Downloaden lukte niet hier.');
         }
       }, fmtx === 'jpg' ? 'image/jpeg' : 'image/png', 0.95);
+    },
+    /* SVG (S79): rasterafbeelding met de tekst als echte tekst */
+    async svg() {
+      if (!gf.src) return;
+      const name = safeName(this.f['gx-name'] || gf.title || 'gelfoto') + '.svg';
+      try { await saveBlob(name, new Blob([gfSvg()], {type: 'image/svg+xml'})); this.msg = this.t('Opgeslagen.'); }
+      catch (err) { this.msg = this.t(err && err.code === 'declined' ? 'Download geannuleerd.' : 'Downloaden lukte niet hier.'); }
+    },
+    /* afbeelding plus legenda (S79): HTML voor Word en OneNote, platte tekst als terugval */
+    async copyCap() {
+      if (!gf.src) return;
+      const c = gfRender(true, +this.f['gx-scale']), url = c.toDataURL('image/png'), cap = (document.getElementById('gf-legend') || {}).textContent || '';
+      const html = `<figure><img src="${url}" width="${Math.round(c.width / +this.f['gx-scale'])}"><figcaption>${esc(cap)}</figcaption></figure>`;
+      try {
+        await navigator.clipboard.write([new ClipboardItem({'text/html': new Blob([html], {type: 'text/html'}), 'text/plain': new Blob([cap], {type: 'text/plain'})})]);
+        this.msg = this.t('Afbeelding met onderschrift gekopieerd.');
+      } catch (err) { this.msg = this.t('Kopiëren werd geblokkeerd; gebruik rechtsklik → Afbeelding opslaan als.'); }
     },
     async copy() {
       if (!gf.src) return;

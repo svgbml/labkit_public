@@ -10,7 +10,7 @@ import {lkNumIn} from '../lib/bridge.js';
 import {libPut} from '../tools/gelfoto/library.js';
 
 /* ================= GELFOTO-EDITOR ================= */
-const gf={unit:'bp',disp:'bp',angAuto:true,src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null,persp:null,curve:false,prof:false,chan:'lum',lut:'',ann:[]};
+const gf={unit:'bp',disp:'bp',angAuto:true,src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null,persp:null,curve:false,prof:false,chan:'lum',lut:'',ann:[],cmp:null};
 const gcv=$('#gf-cv');
 /* Elke zin is een eigen vertaalsleutel (S270); een lege zin valt weg. #gf-status staat in een Vue-boom,
    dus de DOM-vertaallaag kwam er nooit: in het Engels bleven deze meldingen eerst Nederlands. */
@@ -23,7 +23,7 @@ function gfSetIn(id,v){ const el=$('#'+id); if(!el) return; el.value=String(v);
      niet meer, dus doen we het hier voordat v-model de waarde overneemt */
   if(LANG==='en'&&typeof i18nValue==='function'){ el.__iv=null; el.__typed=false; i18nValue(el); }
   el.dispatchEvent(new Event('input',{bubbles:true})); }
-function gfLoadCanvas(c){ gf.libId=null; gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.persp=null; gf.ann=[]; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; gfSetIn('gf-rot',0); gfUpdate(true); }
+function gfLoadCanvas(c){ gf.libId=null; gf.autoLadder=true; gf.ladder=0; gf.src=c; gf.persp=null; gf.ann=[]; gf.cmp=null; gf.rot90=0; gf.fine=0; gf.flip=false; gf.crop=null; gf.lanes=[]; gf.bands=[]; gf.marks=[]; gf.cache={}; gfSetIn('gf-rot',0); gfUpdate(true); }
 function gfFromImage(img){ const M=2400, s=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight)); const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); gfLoadCanvas(c); gf.title=''; gfSetIn('gf-title',''); gf.marks=[]; let auto=false; { const bx=gfFindGel(); if(bx&&bx.w*bx.h<0.8*c.width*c.height){ gf.crop=bx; gf.cache={}; auto=true; } } gfDetectLanes(); if(gf.lanes.length>=2) gfDetectBands(); gfMarksTable(); gfStatus(`Geladen: ${img.naturalWidth} × ${img.naturalHeight} px${s<1?' (verkleind voor bewerking)':''}.`, auto?'Gel automatisch bijgesneden (Herstel toont de hele foto).':'', `${gf.lanes.length} lanen gevonden.`, 'Staat de gel scheef? Gebruik "Automatisch rechtzetten".'); }
 function gfFile(f){ if(!f) return; const url=URL.createObjectURL(f); const img=new Image(); img.onload=()=>{ gfFromImage(img); URL.revokeObjectURL(url); }; img.onerror=()=>gfStatus('Dit bestand kan de browser niet openen (bijvoorbeeld TIFF). Exporteer de foto als PNG of JPG.'); img.src=url; }
 $('#gf-stage').addEventListener('dragover',e=>e.preventDefault());
@@ -320,7 +320,7 @@ function gfVlWarp(Ph,Wv){ const v=gf.vl; if(!v||!v.strip) return null; const L=v
   const sd=S.getContext('2d').getImageData(0,0,S.width,S.height).data, lum=[]; for(let i=0;i<sd.length;i+=16) lum.push([0.299*sd[i]+0.587*sd[i+1]+0.114*sd[i+2],i]); lum.sort((p,q)=>p[0]-q[0]); const bi=lum[Math.floor(lum.length*0.3)][1]; x.fillStyle=`rgb(${sd[bi]},${sd[bi+1]},${sd[bi+2]})`; x.fillRect(0,0,Wv,c.height);
   for(let y=0;y<c.height;y++){ const sy=map(y+0.5); if(sy>=0&&sy<S.height-1) x.drawImage(S,0,Math.floor(sy),S.width,1,0,y,Wv,1); }
   v.cache={key,c}; v.anchors=an.length; return c; }
-function gfRender(exportMode,scale=1){
+function gfRender(exportMode,scale=1,svgRec){
   if(!exportMode){ clearTimeout(gfHist.t); gfHist.t=setTimeout(gfHistRec,350); }   /* ongedaan maken (S74) */
   const c=exportMode?document.createElement('canvas'):gcv, x=c.getContext('2d');
   if(!gf.src){ c.width=800; c.height=300; x.fillStyle='#f3f5f7'; x.fillRect(0,0,800,300); x.fillStyle='#5a6a78'; x.font='16px Segoe UI, Arial, sans-serif'; x.textAlign='center'; x.fillText('Kies een gelfoto of laad de demo-gel.',400,150); return c; }
@@ -364,6 +364,8 @@ function gfRender(exportMode,scale=1){
     ['Beeldbewerking:',...its].forEach(t=>{ const tw=x.measureText(t).width; if(row.length&&w+gap+tw>maxw){ intL.push(row); row=[]; w=0; } row.push({t,x:w?w+gap:0}); w=(w?w+gap:0)+tw; }); if(row.length) intL.push(row); B+=intL.length*ilh+ifs*0.3; } }
   const H=T+P.h+B;
   c.width=Math.round(W*scale); c.height=Math.round(H*scale); x.setTransform(scale,0,0,scale,0,0);
+  /* SVG (S79): de tekst wordt niet getekend maar opgenomen (met zijn transformatie), de rest blijft de rasterafbeelding */
+  if(svgRec){ x.fillText=function(t,X,Y){ svgRec.push({t:trCanvas(String(t)),x:X,y:Y,font:this.font,fill:this.fillStyle,al:this.textAlign,bl:this.textBaseline,m:this.getTransform()}); }; x.strokeText=()=>{}; }
   x.fillStyle='#fff'; x.fillRect(0,0,W,H); x.imageSmoothingQuality='high'; x.drawImage(P.c,Lm,T); { const so=$('#gf-sat'); if(!exportMode&&so&&so.checked) x.drawImage(gfSat().c,Lm,T); }
   if(vlOn){ const wc=gfVlWarp(P.h,Wv); if(wc) x.drawImage(wc,VX,T); const vlab=vlabT; if(vlab&&lanesOn){ x.save(); x.font=font; x.fillStyle='#111'; x.translate(VX+Wv/2,T-fs*0.45); if(gf.angEff){ x.rotate(-gf.angEff*Math.PI/180); x.textAlign='left'; x.textBaseline='middle'; x.fillText(uv(vlab),fs*0.1,0); } else { x.textAlign='center'; x.fillText(uv(vlab),0,0); } x.restore(); } }
   if(!exportMode) gf.layout={L:Lm,T,s:1,hs,lab:lanesOn?labH:0};
@@ -398,6 +400,10 @@ function gfRender(exportMode,scale=1){
   /* voor/na (S75): links van de lijn de foto zonder helderheid, contrast en inverteren */
   if(!exportMode&&gf.ba>0){ const raw=gfRawCrop(), bw=P.w*gf.ba/100; x.drawImage(raw,0,0,bw,P.h,Lm,T,bw,P.h); x.strokeStyle='#e8a317'; x.lineWidth=Math.max(2,hs/4); x.beginPath(); x.moveTo(Lm+bw,T); x.lineTo(Lm+bw,T+P.h); x.stroke();
     x.font=`600 ${hs*1.2}px Segoe UI, Arial, sans-serif`; x.fillStyle='#e8a317'; x.textBaseline='top'; x.textAlign='right'; x.fillText('Voor',Lm+bw-hs*0.4,T+hs*0.4); x.textAlign='left'; x.fillText('Na',Lm+bw+hs*0.4,T+hs*0.4); x.textBaseline='alphabetic'; }
+  /* vergelijking met de Gelplanner (S79): verwacht en gevonden groen, verwacht en ontbrekend rood gestippeld, extra oranje omcirkeld */
+  if(!exportMode&&gf.cmp){ x.save(); x.lineWidth=Math.max(2,hs/4); gf.cmp.forEach(c=>{ const l=gf.lanes[c.li]; if(!l) return;
+      c.exp.forEach(e=>{ const y=gfYofBp(e.bp); if(!isFinite(y)) return; x.strokeStyle=e.found?'#2e9d4f':'#d62828'; x.setLineDash(e.found?[]:[hs*0.5,hs*0.35]); x.beginPath(); x.moveTo(Lm+l.x-gf.lw/2-hs*0.6,T+y); x.lineTo(Lm+l.x+gf.lw/2+hs*0.6,T+y); x.stroke(); });
+      x.setLineDash([]); x.strokeStyle='#e8a317'; c.extra.forEach(m=>{ x.beginPath(); x.ellipse(Lm+m.x,T+m.y,gf.lw/2+hs*0.5,hs*0.9,0,0,Math.PI*2); x.stroke(); }); }); x.restore(); }
   if(edit){
     /* lanegrenzen (S72): gestippeld over de gel; versleep er een om de lanebreedte te zetten */
     x.save(); x.strokeStyle='rgba(110,160,240,.5)'; x.lineWidth=Math.max(1,hs/9); x.setLineDash([hs*0.5,hs*0.4]);
@@ -553,6 +559,35 @@ function gfAutoStraighten(){
   best=Math.round(best*4)/4; $('#gf-rot').value=best; $('#gf-rot').dispatchEvent(new Event('input',{bubbles:true}));
   gfStatus(`Rechtgezet met ${fmt(best,2)}°. Lanen en ladder worden opnieuw gedetecteerd.`);
 }
+
+/* ================= GELFOTO: VERGELIJKEN, DOORSTUREN, SVG (S79) =================
+   gfCompare: de verwachte banden uit de Gelplanner (tabel gp-tbl: slotje i = lane i van de foto)
+   naast de metingen; binnen 10 % telt een meting als gevonden. gfToWb: per lane de intensiteit van
+   de band die het dichtst bij de gekozen doel- en laadcontrolegrootte ligt, naar de WB-normalisatie.
+   gfSvg: de figuur als SVG met de rasterafbeelding eronder en de tekst als echte, bewerkbare tekst. */
+function gfCompare(){ const D=typeof TBLDEF!=='undefined'&&TBLDEF['gp-tbl']; const rows=D&&D.get?D.get():[]; if(!gf.src||!rows.length){ gfStatus('Open eerst de Gelplanner en vul daar de verwachte banden in.'); return null; }
+  gfSyncBands(); gfMarkInt(); const ladRow=Math.round(num(($('#gp-ladlane')||{}).value))-1, sz=t=>String(t||'').split(/[\s,;]+/).map(num).filter(v=>isFinite(v)&&v>0);
+  const near=(m,l)=>Math.abs(m.x-l.x)<gf.lw/2+1; let named=0;
+  gf.cmp=gf.lanes.map((l,li)=>{ const r=rows[li]; if(!r||li===ladRow||l.lad) return null;
+    if(r[0]&&(!l.label||l.label===String(li+1)||/^\d+$/.test(l.label))){ l.label=String(r[0]); named++; }
+    const ms=gf.marks.filter(m=>near(m,l)&&isFinite(m.bp)), used=new Set();
+    const exp=sz(r[2]).map(bp=>{ let bi=-1,bd=0.1; ms.forEach((m,i)=>{ const d=Math.abs(m.bp-bp)/bp; if(d<bd&&!used.has(i)){bd=d;bi=i;} }); if(bi>=0) used.add(bi); return {bp,found:bi>=0}; });
+    return {li,name:String(r[0]||''),exp,extra:ms.filter((_,i)=>!used.has(i))}; }).filter(c=>c&&(c.exp.length||c.extra.length));
+  const miss=gf.cmp.reduce((t,c)=>t+c.exp.filter(e=>!e.found).length,0), extra=gf.cmp.reduce((t,c)=>t+c.extra.length,0);
+  gfLanesTable(); gfRender(); gfStatus(`Vergeleken met de Gelplanner: ${miss} verwachte band(en) ontbreken, ${extra} extra band(en).`, named?`${named} lanenamen overgenomen.`:''); return gf.cmp; }
+function gfCompareOff(){ gf.cmp=null; if(window.__gfRefresh) window.__gfRefresh(); gfRender(); }
+/* de gemeten groottes, samengevoegd binnen 10 % (de keuzes voor doel en laadcontrole) */
+function gfSizeGroups(){ const v=gf.marks.map(m=>m.bp).filter(b=>isFinite(b)&&b>0).sort((a,b)=>a-b), g=[]; v.forEach(b=>{ const q=g[g.length-1]; if(q&&b<=q.lo*1.1){ q.v.push(b); } else g.push({lo:b,v:[b]}); });
+  return g.map(q=>Math.round(q.v.reduce((a,b)=>a+b,0)/q.v.length)); }
+function gfToWb(tgt,lc){ if(!(tgt>0)||!(lc>0)){ gfStatus('Kies de grootte van het doeleiwit en van de laadcontrole.'); return 0; } gfMarkInt();
+  const pick=(l,bp)=>{ let best=null,bd=0.15; gf.marks.forEach(m=>{ if(Math.abs(m.x-l.x)>gf.lw/2+1||!isFinite(m.bp)) return; const d=Math.abs(m.bp-bp)/bp; if(d<bd){bd=d;best=m;} }); return best; };
+  const rows=[]; gf.lanes.forEach((l,i)=>{ if(l.lad) return; const a=pick(l,tgt), b=pick(l,lc); if(a&&b) rows.push([l.label||String(i+1),+a.int.toPrecision(4),+b.int.toPrecision(4),'0']); });
+  if(!rows.length){ gfStatus('Geen lane heeft zowel het doeleiwit als de laadcontrole gemeten.'); return 0; }
+  rows[0][3]='1'; TBLDEF['wb-tbl'].set(rows); location.hash='#wb'; if(typeof alertBox==='function') alertBox(trPlain(`${rows.length} lanen naar de WB-normalisatie gestuurd.`)+' '+trPlain('Zet Controle op ja bij de controle-lanen (nu de eerste).')); return rows.length; }
+function gfSvg(){ if(!gf.src) return ''; const rec=[], c=gfRender(true,1,rec), W=c.width, H=c.height, e=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  const anc={left:'start',start:'start',center:'middle',right:'end',end:'end'}, bl={middle:'middle',top:'hanging',hanging:'hanging',bottom:'text-after-edge',alphabetic:'auto'};
+  const txt=rec.map(r=>{ const m=r.m; return `<text transform="matrix(${[m.a,m.b,m.c,m.d,m.e,m.f].map(v=>+v.toFixed(4)).join(' ')})" x="${+r.x.toFixed(2)}" y="${+r.y.toFixed(2)}" style="font:${e(r.font)}" fill="${e(r.fill)}" text-anchor="${anc[r.al]||'start'}" dominant-baseline="${bl[r.bl]||'auto'}">${e(r.t)}</text>`; }).join('\n');
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">\n<image width="${W}" height="${H}" xlink:href="${c.toDataURL('image/png')}"/>\n${txt}\n</svg>`; }
 
 /* ================= GELFOTO: AANTEKENINGEN EN KLEUREN (S78) =================
    Pijlen en kaders staan in gf.ann in beeldcoördinaten (de gel zonder marge), dus ze bewegen mee
@@ -895,6 +930,11 @@ live({
   gfHomog: [() => gfHomog, v => { gfHomog = v; }],
   gfLaneOff: [() => gfLaneOff, v => { gfLaneOff = v; }],
   gfAnnDraw: [() => gfAnnDraw, v => { gfAnnDraw = v; }],
+  gfCompare: [() => gfCompare, v => { gfCompare = v; }],
+  gfCompareOff: [() => gfCompareOff, v => { gfCompareOff = v; }],
+  gfSizeGroups: [() => gfSizeGroups, v => { gfSizeGroups = v; }],
+  gfToWb: [() => gfToWb, v => { gfToWb = v; }],
+  gfSvg: [() => gfSvg, v => { gfSvg = v; }],
   gfAnnDel: [() => gfAnnDel, v => { gfAnnDel = v; }],
   GF_LUTS: () => GF_LUTS,
   gfLutTab: [() => gfLutTab, v => { gfLutTab = v; }],

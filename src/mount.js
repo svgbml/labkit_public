@@ -100,6 +100,7 @@ import {gfRefresh} from './tools/gelfoto/tick.js';
 import GfGuide from './tools/gelfoto/GfGuide.vue';
 import GfHistory from './tools/gelfoto/GfHistory.vue';
 import GfAnnot from './tools/gelfoto/GfAnnot.vue';
+import GfLink from './tools/gelfoto/GfLink.vue';
 import GfImage from './tools/gelfoto/GfImage.vue';
 import GfLibrary from './tools/gelfoto/GfLibrary.vue';
 import GfLanes from './tools/gelfoto/GfLanes.vue';
@@ -496,6 +497,7 @@ export function start() {
   mountTool('#gf-app-marks', GfMarks);
   mountTool('#gf-app-res', GfResult);
   mountTool('#gf-app-fmt', GfFormat);
+  mountTool('#gf-app-link', GfLink);
   /* calc.gelfoto blijft gfUpdate() in index.html: dat leest de velden en tekent opnieuw. */
 
   /* De app-schil (S263). De startpagina leest de navigatie, de fase, de favorieten en de werkstroom
