@@ -347,7 +347,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S104 | 173, 176 | CFU plate drawing with countable range; growth curve comparison stats | Sonnet |
 | S105 | 177, 178 | One cell-counting tool with grid entry (merges telkamer, teller, viability) | Opus 5 |
 | S106 | 179, 181, 183 | Seeding picture; visual MIC plate with EUCAST note; MPN tap tubes ✅ MIC has no built-in breakpoints per species, so the note points to the current EUCAST table; MPN tubes only for rows of up to 12 tubes | Sonnet |
-| S107 | 184, 187 | Measure cells on calibrated photos; disinfection log-reduction chart | Sonnet |
+| S107 | 184, 187 | Measure cells on calibrated photos; disinfection log-reduction chart ✅ one photo calibration (not one per objective), lines can only be cleared all at once, not moved; the disinfection table got an optional contact-time column for the chart | Sonnet |
 | S108 | 188, 189, 190 | DNA quant batch + purity badge + "make it X ng/µL"; read primer synthesis report | Sonnet |
 | S109 | 191, 200 | PCR mastermix and cDNA kit presets | Sonnet |
 | S110 | 196, 197, 198 | qPCR efficiency from standard curve; fold-change chart; melt curve overlay | Sonnet |

@@ -5329,5 +5329,22 @@
 "buis": "tube",
 "positief": "positive",
 "negatief": "negative",
-"Tik op een buis: positief (troebel of gas) of negatief. De tabel hierboven past mee.": "Tap a tube: positive (turbid or gas) or negative. The table above follows."
+"Tik op een buis: positief (troebel of gas) of negatief. De tabel hierboven past mee.": "Tap a tube: positive (turbid or gas) or negative. The table above follows.",
+"Meten op een foto": "Measure on a photo",
+"Foto (objectmicrometer of preparaat)": "Photo (stage micrometer or specimen)",
+"Wat teken je?": "What do you draw?",
+"Ijklijn over een bekende afstand": "Calibration line over a known distance",
+"Meetlijn over een object": "Measurement line over an object",
+"Bekende afstand": "Known distance",
+"Ijking: {#} µm per pixel": "Calibration: {#} µm per pixel",
+"Teken eerst een ijklijn over een bekende afstand, bijvoorbeeld {#} µm op de objectmicrometer.": "First draw a calibration line over a known distance, for example {#} µm on the stage micrometer.",
+"Pixels": "Pixels",
+"Kopieer metingen": "Copy measurements",
+"Wis metingen": "Clear measurements",
+"Kies een foto, teken met muis of vinger een lijn over een bekende afstand om te ijken, en teken daarna meetlijnen. De foto blijft in je browser. De ijking geldt voor dit objectief en deze camera-instelling.": "Choose a photo, draw a line over a known distance with mouse or finger to calibrate, then draw measurement lines. The photo stays in your browser. The calibration applies to this objective and this camera setting.",
+"ijk": "cal.",
+"Contacttijd (min)": "Contact time (min)",
+"eis": "requirement",
+"contacttijd (min)": "contact time (min)",
+"log-reductie (lg)": "log reduction (lg)"
 }
