@@ -1828,6 +1828,33 @@ def _(pg):
     out = [(f'positie {p} ({e})', 1 if g == e else 0, 1, 0) for p, e, g in zip(pos, exp, got)]
     return out
 
+SG_TEACH = 'CATAGGCGGACCTCCGTAGCGACCTAGCTATGCAGGTGTATTTAAGGCGCATCGTCCTCTAGAGACTATTTTCGTAAGAGCCCAGCCCCTCCCGTGACACCTAACCGTCCCTGGCCATCTTCACACAGACCAGTGTTCCTAGGAGAGTATCATGCCTGATTTCGGACCTCCAGCCTTTTGGAGGAACCCTACTTTGAACTGTCGCTACAAGCAACCGCTGATACTACTTCAATAGCGTTG'
+def _sg_rc(s): return s[::-1].translate(str.maketrans('ACGTRY', 'TGCAYR'))
+def _sg_put(s, p, b): return s[:p - 1] + b + s[p:]
+
+@case('Chromatogram', 'Read tegen een referentie: offset, streng, HGVS-notatie, rs-nummer en forward/reverse', 'Synthetische reads uit het verzonnen oefenamplicon (240 basen) met bekende offset (15 en 30), streng, heterozygote Y op 60, A op 180, een C op 120 alleen in de reverse read en een deletie van één T uit TTTT; verwachte waarden met de hand afgeleid. Notatie volgens de HGVS-aanbevelingen (den Dunnen e.a., Hum Mutat 37:564–569, 2016): substitutie g.180G>A, heterozygoot g.[60T>C];[60=], deletie in een herhaling op de meest 3′-positie')
+def _(pg):
+    f = _sg_put(_sg_put(SG_TEACH, 60, 'Y'), 180, 'A')[15:225]
+    r = _sg_rc(_sg_put(_sg_put(_sg_put(SG_TEACH, 60, 'Y'), 180, 'A'), 120, 'C')[30:238])
+    pg.evaluate("__go('sanger')")
+    pg.evaluate("([f,r])=>{__sgVm.clear();__set('sg-win',10);__set('sg-q',20);__set('sg-het','0.2');__set('sg-assay','oefen');__set('sg-paste','>F\\n'+f);__set('sg-paste2','>R\\n'+r)}", [f, r])
+    pg.wait_for_function("()=>__sgVm.aln2&&__sgVm.aln2.offset===30&&__sgVm.vars.length")
+    v = pg.evaluate("({a1:[__sgVm.aln1.strand,__sgVm.aln1.offset],a2:[__sgVm.aln2.strand,__sgVm.aln2.offset],h:__sgVm.vars.map(x=>x.hgvs+' '+x.rs),gt:__sgVm.snpc.map(x=>x.gt),gt2:__sgVm.snpc2.map(x=>x.gt),d:__sgVm.conf.rows.filter(x=>x.st==='diff').map(x=>x.r+1)})")
+    out = [('read 1 forward, offset 15', 1 if v['a1'] == ['+', 15] else 0, 1, 0),
+           ('read 2 reverse, offset 30', 1 if v['a2'] == ['-', 30] else 0, 1, 0),
+           ('varianten g.[60T>C];[60=] OEF-1 en g.180G>A OEF-3', 1 if v['h'] == ['g.[60T>C];[60=] OEF-1', 'g.180G>A OEF-3'] else 0, 1, 0),
+           ('genotypes read 1 (OEF-2 op de minstreng: T wordt A)', 1 if v['gt'] == ['C/T', 'A/A', 'A/A'] else 0, 1, 0),
+           ('genotypes read 2', 1 if v['gt2'] == ['C/T', 'G/G', 'A/A'] else 0, 1, 0),
+           ('forward/reverse oneens alleen op 120', 1 if v['d'] == [120] else 0, 1, 0)]
+    i = SG_TEACH.index('TTTT')
+    d = SG_TEACH[10:i + 1] + SG_TEACH[i + 2:200]   # de tweede T van TTTT weg; 3'-regel: de laatste T (1-gebaseerd i + 4)
+    pg.evaluate("d=>{__set('sg-paste2','');__set('sg-paste','>D\\n'+d)}", d)
+    pg.wait_for_function("()=>__sgVm.aln1&&__sgVm.aln1.offset===10&&!__sgVm.aln2")
+    h = pg.evaluate("__sgVm.vars.map(x=>x.hgvs)")
+    out.append((f'deletie in TTTT als g.{i + 4}del', 1 if h == [f'g.{i + 4}del'] else 0, 1, 0))
+    pg.evaluate("()=>{__sgVm.clear();__set('sg-assay','');__set('sg-ref','')}")
+    return out
+
 @case('Restrictiedigestie', 'In-silico digestie van pFA6a-kanMX6', 'Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa')
 def _(pg):
     fa = (ROOT / 'tests' / 'fixtures' / 'pFA6a-kanMX6.fa').read_text(encoding='utf-8')
