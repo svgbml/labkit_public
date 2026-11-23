@@ -133,6 +133,17 @@ def _(pg):
       reeksCounts={1:['',''],2:['232','244'],3:['33','28']}; buildReeks(); calc.reeks();""")
     return [('KVE/mL', pg.evaluate("__big('#r-out')"), 24409, 0.005)]
 
+@case('Verdunningsreeks & KVE', 'Kolonies tellen uit een foto', 'Synthetische testfoto\'s met bekend aantal (tests/fixtures/make_colonies.py, vaste seed): petrischaal met wand, reflectie, verloop, ruis en onscherpte; 40 donkere kolonies op lichte agar en 150 lichte op donkere agar (12 raakparen); tolerantie 10%')
+def _(pg):
+    out = []
+    for f, n, tube in (('colonies_light.png', 40, 2), ('colonies_dark.png', 150, 3)):
+        pg.evaluate("__go('reeks');__set('r-f','10');__set('r-n','3');reeksCounts={};buildReeks();document.querySelector('#t-reeks details').open=true"); pg.wait_for_selector('#r-photo', state='attached')
+        pg.set_input_files('#r-photo', str(ROOT / 'tests' / 'fixtures' / f))
+        pg.wait_for_selector('#r-pfill'); pg.evaluate("__set('r-thr','6');__set('r-pbuis','%d');__set('r-pplaat','1');document.getElementById('r-pfill').click()" % tube); pg.wait_for_timeout(100)
+        out.append((f + ' kolonies', pg.evaluate("__n(document.querySelector('#r-tbl tr[data-i=\"%d\"] input[data-p=\"1\"]').value)" % tube), n, 0.1))
+    pg.evaluate("reeksCounts={};buildReeks();document.querySelector('#t-reeks details').open=false")
+    return out
+
 @case('Groeicurve', 'Kiemgetallen E. coli', 'Microbial growth study material (KVV): log KVE 6,0–8,7 over 2–6 h, generatietijd ≈ 26 min; regressie: 26,96 min')
 def _(pg):
     pg.evaluate("""__go('groei');__set('g2-tu','h');__set('g2-type','kve');__set('g2-win','man');__set('g2-from','1');__set('g2-to','5');

@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-23 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 555 van 555 controles binnen tolerantie.**
+**Resultaat: 557 van 557 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -36,6 +36,8 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Enzymkinetiek | Puromycin (behandeld) | Km (mM) | 0,06412 | 0,0641 | -0.03% | ✅ | Treloar 1974 via R-dataset Puromycin (Bates & Watts 1988); referentie: SciPy curve_fit |
 | Enzymkinetiek | LDH-activiteit uit ΔA/min | U/mL | 0,3859 | 0,386 | +0.04% | ✅ | Sigma-Aldrich, Enzymatic Assay of L-Lactic Dehydrogenase (3 mL totaal, 0,1 mL enzym, ε 6,22) |
 | Verdunningsreeks & KVE | FDA BAM-voorbeeld | KVE/mL | 2,441e+04 | 2,441e+04 | +0.00% | ✅ | FDA BAM hoofdstuk 3: 1:100 → 232, 244; 1:1000 → 33, 28; N = 24.409 |
+| Verdunningsreeks & KVE | Kolonies tellen uit een foto | colonies_light.png kolonies | 40 | 40 | +0.00% | ✅ | Synthetische testfoto's met bekend aantal (tests/fixtures/make_colonies.py, vaste seed): petrischaal met wand, reflectie, verloop, ruis en onscherpte; 40 donkere kolonies op lichte agar en 150 lichte op donkere agar (12 raakparen); tolerantie 10% |
+| Verdunningsreeks & KVE | Kolonies tellen uit een foto | colonies_dark.png kolonies | 150 | 148 | -1.33% | ✅ | Synthetische testfoto's met bekend aantal (tests/fixtures/make_colonies.py, vaste seed): petrischaal met wand, reflectie, verloop, ruis en onscherpte; 40 donkere kolonies op lichte agar en 150 lichte op donkere agar (12 raakparen); tolerantie 10% |
 | Groeicurve | Kiemgetallen E. coli | verdubbelingstijd (min) | 26,96 | 27 | +0.15% | ✅ | Microbial growth study material (KVV): log KVE 6,0–8,7 over 2–6 h, generatietijd ≈ 26 min; regressie: 26,96 min |
 | Groeicurve | OD₆₀₀, twee punten in log-fase | verdubbelingstijd (min) | 30 | 30 | +0.00% | ✅ | Science Insights rekenvoorbeeld: OD 0,05 → 0,8 in 2 h, µ = 1,39 h⁻¹, t_d = 30 min |
 | Groeicurve | OD₆₀₀, twee punten in log-fase | µ (h⁻¹) | 1,386 | 1,386 | +0.00% | ✅ | Science Insights rekenvoorbeeld: OD 0,05 → 0,8 in 2 h, µ = 1,39 h⁻¹, t_d = 30 min |

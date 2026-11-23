@@ -5502,5 +5502,11 @@
 "niet gebruikt": "not used",
 "te weinig": "too few",
 "te veel": "too many",
-"Elke plaat is getekend met hooguit honderdvijftig stippen; ontelbaar staat als TNTC. Gebruikt voor de KVE/mL: platen binnen het telbare bereik ({#}–{#}).": "Each plate is drawn with at most one hundred and fifty dots; uncountable shows as TNTC. Used for the CFU/mL: plates within the countable range ({#}–{#})."
+"Elke plaat is getekend met hooguit honderdvijftig stippen; ontelbaar staat als TNTC. Gebruikt voor de KVE/mL: platen binnen het telbare bereik ({#}–{#}).": "Each plate is drawn with at most one hundred and fifty dots; uncountable shows as TNTC. Used for the CFU/mL: plates within the countable range ({#}–{#}).",
+"Kolonies tellen uit een foto": "Count colonies from a photo",
+"Foto van de plaat (van boven)": "Photo of the plate (from above)",
+"Drempel (hoger = alleen duidelijke kolonies)": "Threshold (higher = only clear colonies)",
+"Kolonies": "Colonies",
+"Zet in de verdunningsreeks": "Put in the dilution series",
+"Elke gevonden kolonie krijgt een groene cirkel; een getal erbij betekent dat een klont als meer kolonies telt. De blauwe stippellijn is de gevonden schaal: alles daarbuiten en de rand zelf tellen niet mee. Tik op een kolonie om hem weg te halen, tik op lege agar om er een toe te voegen.": "Each colony found gets a green circle; a number next to it means a clump counts as several colonies. The dashed blue line is the dish that was found: everything outside it and the rim itself are not counted. Tap a colony to remove it, tap empty agar to add one."
 }
