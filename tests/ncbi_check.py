@@ -147,7 +147,8 @@ with sync_playwright() as p:
     # onbekende rs
     pg.fill('#sq-rs', 'rs999999999999')
     pg.click('#sq-rs-go')
-    pg.wait_for_function("document.querySelector('#sq-snp .note')&&!document.querySelector('#sq-snp .big')")
+    # wachten op de uitkomst, niet op de melding 'Bezig met opzoeken…' (die is ook een .note)
+    pg.wait_for_function("(e=>e&&/dbSNP/.test(e.innerText)&&!document.querySelector('#sq-snp .big'))(document.querySelector('#sq-snp .note'))")
     ck('onbekende rs: niet gevonden', ('niet in dbSNP' in pg.inner_text('#sq-snp') or 'not in dbSNP' in pg.inner_text('#sq-snp')), pg.inner_text('#sq-snp'))
     ck('onbekende rs: geen resultaatlijst', pg.locator('#sq-snp dl.kv').count() == 0)
 
