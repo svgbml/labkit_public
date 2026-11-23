@@ -89,6 +89,32 @@
           <p style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Allelen op de streng van de assay; een SNP op de andere streng wordt automatisch omgedraaid.') }}</p>
           <lk-table table-id="sg-gt-tbl" :cols="gtCols" :rows="gtRows"/>
         </div>
+        <!-- S167: de uitkomsten van de webtool, samengevat en als figuur (staat in .result, dus ook in het rapport) -->
+        <div v-if="rsRows.length" id="sg-rs-out" style="margin-top:12px">
+          <h3>{{ t('Uitkomsten van de webtool') }}</h3>
+          <lk-kv :rows="rsRows"/>
+          <lk-note v-for="(m, i) in rsWarn" :key="i" kind="warn">{{ m }}</lk-note>
+          <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Voorspeld door de HIrisPlex-S-webtool van het Erasmus MC, niet door LabKit. Een kans is geen zekerheid.') }}</p>
+          <template v-if="rsFig"><canvas v-for="g in RESULT_GROUPS" :key="g[0]" :id="'sg-rs-cv-' + g[0]" ref="rscv" :aria-label="t('Kansen per categorie van de webtool') + ': ' + t(g[1])"></canvas></template>
+        </div>
+        <!-- S162: veel reads tegelijk, een rij per monster, en dezelfde SNP van alle monsters onder elkaar -->
+        <div v-if="batch.length" id="sg-batch" style="margin-top:12px">
+          <h3>{{ t('Batch: genotypes per monster') }}</h3>
+          <lk-note v-if="!refSeq" kind="warn">{{ t('Geef bij Referentie en assay een referentie of een assay; dan worden de bestanden uitgelijnd.') }}</lk-note>
+          <template v-else>
+            <p style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Allelen op de streng van de assay; een streepje betekent dat de read de SNP niet dekt, een uitroepteken dat de allelen niet bij de assay horen.') }}</p>
+            <div style="overflow:auto"><lk-table table-id="sg-bt-tbl" :cols="btCols" :rows="btRows"/></div>
+            <div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><button type="button" id="sg-bt-csv" @click="saveBatch">{{ t('Tabel als CSV') }}</button></div>
+            <template v-if="assayOn && assayEff.snps.length">
+              <h3 style="margin-top:12px">{{ t('Overlay per SNP') }}</h3>
+              <div class="f"><label for="sg-ov-snp">{{ t('SNP') }}</label>
+                <select id="sg-ov-snp" v-model="ovSnp"><option v-for="(s, i) in assayEff.snps" :key="i" :value="String(i)">{{ s.rs }}</option></select></div>
+              <canvas id="sg-ovcv" ref="ovcv" style="width:100%;display:block;margin-top:6px" :style="{height: ovH + 'px'}"
+                      :aria-label="t('De trace rond één SNP van alle monsters onder elkaar')"></canvas>
+              <p style="font-size:13px;color:var(--muted);margin:4px 0 0">{{ t('Elke strook toont 17 basen rond de SNP, gecentreerd op de piek van de SNP; bij een reverse read loopt de trace in de richting van de read.') }}</p>
+            </template>
+          </template>
+        </div>
         <div v-if="aln1 && aln2" id="sg-fr" style="margin-top:12px">
           <h3>{{ t('Forward/reverse-bevestiging') }}</h3>
           <p style="font-size:13px;margin:4px 0">{{ frCounts }}</p>
@@ -97,6 +123,67 @@
           <lk-table v-if="frDiff.length" table-id="sg-fr-tbl" :cols="frCols" :rows="frDiff"/>
         </div>
       </div>
+      <!-- S164: het genotypeblad van HIrisPlex-S; LabKit bereidt voor en controleert, de voorspelling doet de webtool -->
+      <details class="panel" id="sg-hsp" :open="hs.samples.length > 0">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('HIrisPlex-S genotypeblad') }}</summary>
+        <lk-note kind="info">{{ t('LabKit vult dit blad in, controleert het en exporteert het; de voorspelling van oog-, haar- en huidskleur doet LabKit niet zelf. Die berekent de webtool van het Erasmus MC.') }}</lk-note>
+        <div class="f" style="margin-top:10px"><label for="sg-hs-panel">{{ t('Paneel') }}</label>
+          <select id="sg-hs-panel" v-model="hs.panel"><option v-for="(n, k) in PANEL_NAME" :key="k" :value="k">{{ t(n) }}</option></select></div>
+        <p style="font-size:13px;color:var(--muted);margin:6px 0">{{ t('Per SNP het aantal kopieën (0, 1 of 2) van het allel in de kolom Telt, of NA als het genotype ontbreekt. Volgorde en allelen zoals in de webtool.') }}</p>
+        <div style="overflow:auto;max-height:28em">
+          <table id="sg-hs-tbl" class="tbl">
+            <thead><tr><th>#</th><th>SNP</th><th>{{ t('Telt') }}</th>
+              <th v-for="(sm, si) in hs.samples" :key="si" style="min-width:7em"><input class="mono" style="width:6em" :value="sm.id" :aria-label="t('Monsternaam')" @input="sm.id = $event.target.value">
+                <button type="button" :aria-label="t('Monster verwijderen')" @click="delSample(si)">×</button></th></tr></thead>
+            <tbody><tr v-for="s in hsSnps" :key="s.rs">
+              <td>{{ s.order }}</td><td class="mono">{{ s.rs }}</td><td class="mono"><b>{{ s.allele }}</b></td>
+              <td v-for="(sm, si) in hs.samples" :key="si" :style="{background: hsBad(sm, s) ? '#ffcdd2' : null}">
+                <select class="mono" :aria-label="s.rs + ' ' + sm.id" v-model="sm.vals[s.rs]"><option v-for="v in HS_VALUES" :key="v" :value="v">{{ v || '–' }}</option></select>
+                <span v-if="sm.notes && sm.notes[s.rs]" :title="noteText(sm.notes[s.rs])" style="cursor:help"> ⚠</span></td>
+            </tr></tbody>
+          </table>
+        </div>
+        <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button type="button" id="sg-hs-add" @click="addSample('')">{{ t('+ Monster') }}</button>
+          <button type="button" id="sg-hs-fill" :disabled="!snpc.length" @click="fillRead">{{ t('Vul in uit de calls van de read') }}</button>
+          <button type="button" id="sg-hs-fillb" :disabled="!batch.length || !assayEff.snps.length" @click="fillBatch">{{ t('Vul in uit de batch') }}</button>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Het genotype van de assay wordt omgezet naar het aantal kopieën van het allel dat de webtool telt; staat een SNP op de andere streng, dan wordt hij omgedraaid. Een ⚠ bij een cel zegt waarom je hem moet nakijken.') }}</p>
+        <lk-note v-for="(m, i) in hsMsgs" :key="i" :kind="m[0]">{{ m[1] }}</lk-note>
+        <h3 style="margin-top:14px">{{ t('Naar de webtool') }}</h3>
+        <div class="row" style="gap:6px;flex-wrap:wrap">
+          <button type="button" id="sg-hs-csv" :disabled="!hs.samples.length" @click="saveSheet">{{ t('Exporteer als .csv') }}</button>
+          <button type="button" id="sg-hs-copy" :disabled="!hs.samples.length" @click="copySheet">{{ t('Kopieer het .csv') }}</button>
+          <span v-if="hsCopied" role="status">{{ hsCopied }}</span>
+        </div>
+        <p style="font-size:13px;margin:8px 0 0">{{ t('Upload het .csv-bestand op de webtool van het Erasmus MC:') }}
+          <a id="sg-hs-link" href="https://hirisplex.erasmusmc.nl/" target="_blank" rel="noopener">hirisplex.erasmusmc.nl</a>.
+          {{ t('Je krijgt per monster de kans op elke categorie van oog-, haar- en huidskleur terug; die kun je hieronder bij Uitkomsten van de webtool invullen. Een lege cel wordt NA in het bestand.') }}</p>
+        <lk-note kind="info">{{ t('LabKit voorspelt zelf geen kleuren en vervangt de webtool niet: de regressiecoëfficiënten van het model zijn niet openbaar, en geraden getallen zouden officieel lijken maar fout zijn.') }}</lk-note>
+      </details>
+      <details class="panel" id="sg-rsp" :open="rsOpen">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Uitkomsten van de webtool invullen') }}</summary>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('Vul de kansen in die de webtool teruggaf (een getal van 0 tot 1, of een percentage), of plak ze in de volgorde van de tabel.') }}</p>
+        <div v-if="!hs.samples.length"><lk-note kind="info">{{ t('Voeg eerst in het genotypeblad een monster toe.') }}</lk-note></div>
+        <template v-else>
+          <div class="f"><label for="sg-rs-smp">{{ t('Monster') }}</label>
+            <select id="sg-rs-smp" v-model="rsIdx"><option v-for="(sm, i) in hs.samples" :key="i" :value="i">{{ sm.id }}</option></select></div>
+          <div class="f" style="margin-top:8px"><label for="sg-rs-paste">{{ t('Plak de kansen') }}</label>
+            <textarea id="sg-rs-paste" class="mono" rows="2" v-model="rsPaste" spellcheck="false"></textarea></div>
+          <div class="row" style="gap:6px;margin-top:6px"><button type="button" id="sg-rs-go" @click="rsApply">{{ t('Verwerk') }}</button></div>
+          <lk-note v-if="rsMsg" kind="warn">{{ rsMsg }}</lk-note>
+          <table id="sg-rs-tbl" class="tbl" style="margin-top:8px">
+            <thead><tr><th>{{ t('Eigenschap') }}</th><th>{{ t('Categorie') }}</th><th>{{ t('Kans') }}</th></tr></thead>
+            <tbody><template v-for="g in RESULT_GROUPS" :key="g[0]"><tr v-for="(c, ci) in g[2]" :key="g[0] + ci">
+              <td>{{ ci ? '' : t(g[1]) }}</td><td>{{ t(c) }}</td>
+              <td><input class="mono" style="width:5em" inputmode="decimal" :aria-label="t(g[1]) + ' ' + t(c)" v-model="rsCur[g[0] + '.' + ci]"></td>
+            </tr></template></tbody>
+          </table>
+          <div class="f" style="margin-top:8px"><label for="sg-rs-thr">{{ t('Drempel voor een stellige uitspraak') }}</label>
+            <input id="sg-rs-thr" class="mono" style="width:5em" inputmode="decimal" v-model="rsThr"></div>
+          <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('De drempel is jouw keuze (standaard 0,7); onder die kans meldt LabKit dat de uitkomst niet stellig is.') }}</p>
+        </template>
+      </details>
     </div>
     <div>
       <div class="panel">
@@ -174,6 +261,28 @@
         </div>
         <lk-note v-for="(e, i) in edErr" :key="i" :kind="edOk ? 'ok' : 'bad'">{{ e }}</lk-note>
       </details>
+      <details class="panel" id="sg-casep">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Voorbeeld en case bewaren') }}</summary>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('Het voorbeeld is volledig verzonnen: oefenreads, een genotypeblad en uitkomsten die bij geen echt persoon horen. Zo kun je het hele pad volgen zonder sequencer.') }}</p>
+        <div class="row" style="gap:6px;flex-wrap:wrap">
+          <button type="button" id="sg-example" @click="loadExample">{{ t('Voorbeeldcase laden (verzonnen)') }}</button>
+          <button type="button" id="sg-case-save" @click="saveCase">{{ t('Case bewaren als bestand') }}</button>
+        </div>
+        <div class="f" style="margin-top:10px"><label for="sg-case-file">{{ t('Case openen') }}</label>
+          <input type="file" id="sg-case-file" accept=".json" @change="pickCase"></div>
+        <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Eén bestand met de reads (met trace en bewerkingen), de tweede read en de batch, de instellingen, de referentie en assay, het genotypeblad en de uitkomsten.') }}</p>
+        <lk-note v-if="caseMsg" :kind="caseOk ? 'ok' : 'bad'">{{ caseMsg }}</lk-note>
+      </details>
+      <details class="panel" id="sg-bp" :open="batch.length > 0">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Batch (veel bestanden)') }}</summary>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('Kies of sleep meerdere .ab1- of FASTA-bestanden: elk is een monster. Ze worden tegen de referentie uitgelijnd met dezelfde drempels als hierboven.') }}</p>
+        <div class="dropzone" :style="bover ? 'outline:2px dashed var(--accent)' : ''" style="padding:10px"
+             @dragover.prevent="bover = true" @dragleave="bover = false" @drop.prevent="bdrop">
+          <input type="file" id="sg-bfiles" multiple accept=".ab1,.abi,.fasta,.fa,.fas,.seq,.txt" :aria-label="t('Meerdere bestanden kiezen')" @change="bpick">
+        </div>
+        <p v-if="batch.length" style="font-size:13px;margin:6px 0 0">{{ t(batch.length + ' monsters geladen') }}</p>
+        <div class="row" style="gap:6px;margin-top:8px"><button type="button" id="sg-bclear" @click="bclear">{{ t('Wissen') }}</button></div>
+      </details>
       <details class="panel" id="sg-r2p" :open="read2Ok">
         <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Tweede read (forward/reverse)') }}</summary>
         <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('De andere read van hetzelfde monster. Beide worden tegen de referentie uitgelijnd en per positie vergeleken.') }}</p>
@@ -199,11 +308,15 @@ import {hetCalls, flags} from '../lib/sangerhet.js';
 import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 import {parseRef, alignRead, variants, parseAssay, assayJson, snpCalls, confirm, TEACH, teachReads, DEC} from '../lib/sangeralign.js';
+import {callSample, genotypeRows, overlayStrips} from '../lib/sangerbatch.js';
+import {makeCase, parseCase, exampleSample, EXAMPLE_ID} from '../lib/sangercase.js';
+import {RESULT_GROUPS, parseProb, parseResultPaste, summarize, toCsv, PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate, autofill, mergeCalls, naReport} from '../lib/hiris.js';
 import {SEQ_TO} from '../lib/seq.js';
 
 /* de referentie kan uit Sequentie komen (ook een sequentie die daar bij NCBI is opgehaald) */
 SEQ_TO.push({label: 'Chromatogram (referentie)', tool: 'sanger', id: 'sg-ref'});
-const AKEY = 'labkit:v1:sg-assays', REFMAX = 200000;
+const AKEY = 'labkit:v1:sg-assays', HKEY = 'labkit:v1:sg-sheet', REFMAX = 200000;
+const NOTES = {absent: 'Deze SNP staat niet in de assay.', nocall: 'De read dekt deze SNP niet.', badcall: 'De call hoort niet bij de assay of is geen genotype.', mismatch: 'De allelen van de assay passen niet bij deze SNP.', flip: 'Streng omgedraaid: het allel van de webtool is het complement van het allel van de assay.', ambig: 'A/T- of C/G-SNP: de streng is niet af te leiden; controleer deze SNP met de hand.', conflict: 'Forward en reverse read zijn het oneens.'};
 const VTYPE = {sub: 'Substitutie', del: 'Deletie', dup: 'Duplicatie', ins: 'Insertie'};
 /* een read uit een bestand (ABIF of FASTA) of null met een foutzin */
 function readFile(buf, fname) {
@@ -250,7 +363,7 @@ export default {
       edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1),
       refText: st['sg-ref'] != null ? String(st['sg-ref']) : '', assayKey: st['sg-assay'] != null ? String(st['sg-assay']) : '', own: jget(AKEY, []),
       read2: jget('sg-read2', null) ? markRaw(jget('sg-read2', null)) : null, paste2: st['sg-paste2'] != null ? String(st['sg-paste2']) : '',
-      edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
+      caseMsg: '', caseOk: false, hsCopied: '', rsIdx: 0, rsPaste: '', rsMsg: '', rsThr: st['sg-rs-thr'] != null ? String(st['sg-rs-thr']) : NL(0.7, 1), batch: [], hs: (h => { h.samples = h.samples.map(x => Object.assign({res: {}, notes: {}}, x)); return h; })(Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {}))), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
   },
   computed: {
     HT() { return HT; },
@@ -442,6 +555,54 @@ export default {
     },
     frCols() { const t = this.t; return [{h: t('Positie') + ' (g.)', num: true}, {h: t('Referentie')}, {h: t('Eerste read')}, {h: t('Tweede read')}]; },
     frDiff() { return this.conf.rows.filter(x => x.st === 'diff').map(x => [this.G + x.r, this.refSeq[x.r], esc(x.a || '–'), esc(x.b || '–')]); },
+    /* ---------- batch (S162) ---------- */
+    bsamples() {
+      const ref = this.refSeq && !this.refBig ? this.refSeq : '';
+      return this.batch.map(b => Object.assign(callSample(b.r, ref, this.assayEff, {het: this.hN, win: this.winN, q: this.qN}), {read: b.r, id: b.id}));
+    },
+    btCols() { const t = this.t; return [{h: t('Monster')}, {h: t('Identiek') + ' %', num: true}].concat(this.assayEff.snps.map(s => ({h: s.rs}))); },
+    btRows() { return genotypeRows(this.bsamples, this.assayEff).map(r => r.map((v, i) => i === 1 ? (v == null ? '–' : NL(v, 1)) : esc(String(v)))); },
+    ovH() { return Math.max(60, this.batch.length * 52 + 8); },
+    /* ---------- HIrisPlex-S genotypeblad (S164) ---------- */
+    PANEL_NAME() { return PANEL_NAME; },
+    HS_VALUES() { return HS_VALUES; },
+    hsSnps() { return panelSnps(this.hs.panel); },
+    hsMsgs() {
+      const t = this.t, out = [];
+      for (const sm of this.hs.samples) {
+        const v = hsValidate(sm.vals, this.hs.panel), bad = v.filter(x => x.why === 'bad').length, blank = v.length - bad;
+        const nm = sm.id || t('(zonder naam)');
+        if (bad) out.push(['bad', nm + ': ' + t(bad + ' cellen hebben een waarde die niet kan (alleen 0, 1, 2 of NA).')]);
+        if (blank) out.push(['info', nm + ': ' + t(blank + ' cellen zijn nog leeg; bij het exporteren worden ze NA.')]);
+        if (!v.length) out.push(['ok', nm + ': ' + t('alle cellen van dit paneel zijn ingevuld.')]);
+        for (const r of naReport(sm.vals, this.hs.panel)) {
+          if (r.na) out.push([r.warn ? 'warn' : 'info', nm + ', ' + t(r.name) + ': ' + t(r.na + ' van de ' + r.n + ' SNP\'s ontbreken (NA)') + (r.warn ? '. ' + t('Een voorspelling op zo weinig gegevens is onbetrouwbaar.') : '.')]);
+        }
+      }
+      return out;
+    },
+    /* ---------- uitkomsten van de webtool (S167) ---------- */
+    RESULT_GROUPS() { return RESULT_GROUPS; },
+    rsCur() { return (this.hs.samples[this.rsIdx] || {res: {}}).res; },
+    thrN() { const n = Number(String(this.rsThr).replace(',', '.')); return n > 0 && n <= 1 ? n : 0.7; },
+    rsOpen() { return this.hs.samples.some(x => Object.keys(x.res).length > 0); },
+    /* per monster en eigenschap de hoogste categorie met zijn kans */
+    rsSum() { return this.hs.samples.map(sm => ({id: sm.id, rows: summarize(sm.res, this.thrN)})).filter(x => x.rows.length); },
+    rsRows() {
+      const t = this.t, out = [];
+      for (const m of this.rsSum) for (const r of m.rows) out.push([esc(m.id) + ' · ' + t(r.name), '<b>' + esc(t(r.top)) + '</b> (' + NL(r.p, 2) + ')' + (r.thr ? '' : ' · ' + t('onder de drempel'))]);
+      return out;
+    },
+    rsWarn() {
+      const t = this.t, out = [];
+      for (const m of this.rsSum) for (const r of m.rows) {
+        if (!r.ok) out.push(m.id + ', ' + t(r.name) + ': ' + t('niet alle categorieën zijn ingevuld.'));
+        else if (!r.full) out.push(m.id + ', ' + t(r.name) + ': ' + t('de kansen tellen op tot ' + NL(r.sum, 2) + ' in plaats van 1; klopt de invoer?'));
+      }
+      return out;
+    },
+    /* de figuur: alle kansen van het gekozen monster, in de volgorde van de tabel */
+    rsFig() { const x = this.hs.samples[this.rsIdx]; return !!x && summarize(x.res, this.thrN).length > 0; },
     edCols() { const t = this.t; return [{h: t('SNP (rs)'), t: 'txt', w: 110}, {h: t('Positie'), t: 'num', w: 60}, {h: t('Allelen'), t: 'txt', w: 60}, {h: t('Streng'), t: 'sel', o: ['+', '-']}]; }
   },
   watch: {
@@ -454,12 +615,19 @@ export default {
     edits() { this.draw(); },
     het() { this.draw(); },
     trim() { this.draw(); },
+    bsamples() { this.$nextTick(this.paintOv); },
+    rsFig() { this.$nextTick(this.paintRs); },
+    rsIdx() { this.$nextTick(this.paintRs); },
+    rsThr() { this.$nextTick(this.paintRs); },
+    hs: {deep: true, handler(v) { jset(HKEY, v); this.$nextTick(this.paintRs); }},
+    ovSnp() { this.$nextTick(this.paintOv); },
     qN() { this.draw(); }
   },
-  created() { this.dye = DYE; this.view = {x0: 0, spp: 1}; this.drag = null; },
+  created() { this.bid = 0; this.dye = DYE; this.view = {x0: 0, spp: 1}; this.drag = null; },
   mounted() {
     window.__sgVm = this;
-    this.ro = new ResizeObserver(() => this.draw());
+    this.ro = new ResizeObserver(() => { this.draw(); this.paintOv(); });
+    this.$nextTick(this.paintRs);
     this.ro.observe(this.$el);
     this.$nextTick(this.draw);
   },
@@ -772,6 +940,116 @@ export default {
     alnClick(e) {
       const el = e.target.closest('[data-q]');
       if (el && this.read && this.read.peaks.length) this.goTo(+el.dataset.q);
+    },
+    /* ---------- batch (S162) ---------- */
+    bpick(e) { this.addBatch([...e.target.files]); e.target.value = ''; },
+    bdrop(e) { this.bover = false; this.addBatch([...e.dataTransfer.files]); },
+    async addBatch(files) {
+      const out = [];
+      for (const f of files) {
+        const x = readFile(await f.arrayBuffer(), f.name);
+        if (x.err) { this.err = this.t(x.err) + ' (' + f.name + ')'; continue; }
+        out.push({id: ++this.bid, r: markRaw(x.r)});
+      }
+      this.batch = this.batch.concat(out);
+    },
+    bclear() { this.batch = []; const f = document.getElementById('sg-bfiles'); if (f) f.value = ''; },
+    saveBatch() {
+      const rows = [this.btCols.map(c => c.h)].concat(this.btRows.map(r => r.map(v => String(v).replace(/&amp;/g, '&'))));
+      saveBlob('chromatogram-batch.csv', csvBlob(rows.map(r => r.join('\t')).join('\n'))).catch(() => {});
+    },
+    /* de overlay: per monster de trace rond de gekozen SNP, op de piek van de SNP gecentreerd */
+    paintOv() {
+      const cv = this.$refs.ovcv;
+      if (!cv || !cv.clientWidth) return;
+      const W = cv.clientWidth, H = this.ovH, s = window.devicePixelRatio || 1, i = Number(this.ovSnp) || 0, SH = 52;
+      cv.width = Math.round(W * s); cv.height = Math.round(H * s);
+      const x = cv.getContext('2d');
+      x.setTransform(s, 0, 0, s, 0, 0); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+      x.font = '11px system-ui,sans-serif'; x.textBaseline = 'top';
+      overlayStrips(this.bsamples, i, 8, W).forEach((st, k) => {
+        const y = k * SH + 4;
+        x.fillStyle = '#5f6b7a'; x.textAlign = 'left';
+        x.fillText(st.name + (st.q < 0 ? ' – ' + this.t('niet gedekt') : ' · ' + st.gt + (st.strand === '-' ? ' (−)' : '')), 4, y);
+        if (st.q < 0) return;
+        if (st.traces) {
+          drawTraces(x, st.traces, {x0: st.x0, spp: st.spp}, {x: 0, y: y + 14, w: W, h: SH - 20});
+          x.strokeStyle = 'rgba(21,101,192,.5)'; x.setLineDash([3, 3]); x.beginPath(); x.moveTo(st.cx, y + 14); x.lineTo(st.cx, y + SH - 6); x.stroke(); x.setLineDash([]);
+        } else { x.fillStyle = DYE[st.base] || GREY; x.font = 'bold 14px system-ui,sans-serif'; x.textAlign = 'center'; x.fillText(st.base, W / 2, y + 18); x.font = '11px system-ui,sans-serif'; }
+        x.strokeStyle = '#e1e4ea'; x.beginPath(); x.moveTo(0, y + SH - 3.5); x.lineTo(W, y + SH - 3.5); x.stroke();
+      });
+    },
+    /* ---------- HIrisPlex-S genotypeblad (S164) ---------- */
+    hsBad(sm, s) { return !!sm.vals[s.rs] && !HS_VALUES.includes(String(sm.vals[s.rs])); },
+    noteText(c) { return this.t(NOTES[c] || c); },
+    addSample(id, vals, notes) {
+      this.hs.samples.push({id: id || this.t('Monster') + ' ' + (this.hs.samples.length + 1), vals: vals || {}, notes: notes || {}, res: {}});
+    },
+    delSample(i) { this.hs.samples.splice(i, 1); },
+    /* het blad van één monster uit de calls van de assay; een monster met dezelfde naam wordt vervangen */
+    putSample(id, calls) {
+      const {vals, notes} = autofill(calls), i = this.hs.samples.findIndex(x => x.id === id);
+      if (i >= 0) this.hs.samples.splice(i, 1, {id, vals, notes, res: this.hs.samples[i].res || {}}); else this.hs.samples.push({id, vals, notes, res: {}});
+    },
+    /* het .csv zoals de webtool het wil: komma's, SampleID en een kolom per SNP; zonder BOM, anders is de eerste kolomnaam niet SampleID */
+    sheetCsv() { return toCsv(this.hs.panel, this.hs.samples); },
+    saveSheet() { saveBlob('hirisplex-' + this.hs.panel + '.csv', new Blob([this.sheetCsv()], {type: 'text/csv'})).catch(() => {}); },
+    async copySheet() {
+      try { await navigator.clipboard.writeText(this.sheetCsv()); this.hsCopied = this.t('Gekopieerd.'); } catch (e) { this.hsCopied = this.t('Kopiëren geblokkeerd.'); }
+    },
+    /* ---------- uitkomsten van de webtool (S167) ---------- */
+    rsApply() {
+      const r = parseResultPaste(this.rsPaste);
+      if (!Object.keys(r.res).length) { this.rsMsg = this.t('Er zijn ' + r.n + ' getallen gevonden; er horen er 14 te zijn, in de volgorde van de tabel.'); return; }
+      this.rsMsg = ''; this.rsPaste = '';
+      this.hs.samples[this.rsIdx].res = r.res;
+    },
+    /* een staafgrafiek per eigenschap voor het gekozen monster, in het rapport als losse figuren */
+    paintRs() {
+      const x = this.hs.samples[this.rsIdx], cvs = this.$refs.rscv;
+      if (!cvs || !x || typeof barChart !== 'function') return;
+      const t = this.t;
+      for (const cv of [].concat(cvs)) {
+        const g = RESULT_GROUPS.find(r => cv.id === 'sg-rs-cv-' + r[0]);
+        if (!g) continue;
+        const vals = g[2].map((c, i) => { const p = parseProb(x.res[g[0] + '.' + i]); return p == null ? NaN : p; }), nan = vals.map(() => NaN);
+        barChart(cv, g[2].map(c => t(c)), vals, nan, nan, {ylabel: t('Kans') + ' · ' + t(g[1]) + ' (' + x.id + ')', ref: false, ymax: 1});
+      }
+    },
+    fillRead() { this.putSample(this.m.r.name || this.t('Monster'), mergeCalls(this.snpc, this.snpc2)); },
+    fillBatch() { for (const x of this.bsamples) this.putSample(x.name, x.calls); },
+    /* ---------- voorbeeld en case (S168) ---------- */
+    /* het verzonnen voorbeeld: oefenpanel met oefenreads, daarbij een verzonnen blad en verzonnen uitkomsten */
+    loadExample() {
+      this.assayKey = 'oefen'; this.teach();
+      const x = exampleSample(), i = this.hs.samples.findIndex(y => y.id === x.id);
+      this.hs.panel = 'hirisplexs';
+      if (i >= 0) this.hs.samples.splice(i, 1, x); else this.hs.samples.push(x);
+      this.rsIdx = this.hs.samples.findIndex(y => y.id === EXAMPLE_ID);
+      this.caseMsg = this.t('Voorbeeld geladen: de oefenreads, een verzonnen genotypeblad en verzonnen uitkomsten.'); this.caseOk = true;
+    },
+    saveCase() {
+      const c = makeCase({read: this.read ? Object.assign({}, this.read, {edits: this.edits}) : null, read2: this.read2, batch: this.batch.map(b => b.r),
+        win: this.win, qthr: this.qthr, hthr: this.hthr, refText: this.refText, assay: this.assay, assayKey: this.assayKey, sheet: JSON.parse(JSON.stringify(this.hs))}, typeof APPVER === 'string' ? APPVER : '');
+      c.paste = this.paste; c.paste2 = this.paste2;
+      const d = new Date(), stamp = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      saveBlob('sanger-case-' + stamp + '.json', new Blob([JSON.stringify(c)], {type: 'application/json'})).catch(() => {});
+    },
+    async pickCase(e) {
+      const f = e.target.files[0]; if (!f) return;
+      const r = parseCase(await f.text()); e.target.value = '';
+      if (!r.ok) { this.caseOk = false; this.caseMsg = this.t(r.err); return; }
+      const c = r.c;
+      this.win = String(c.win || '10'); this.qthr = String(c.qthr || '20'); this.hthr = String(c.hthr || NL(0.2, 1));
+      this.edits = c.read && c.read.edits ? c.read.edits : {}; this.sel = null; this.rng = null;
+      this.read = c.read ? markRaw(c.read) : null; jset('sg-read', c.read);
+      this.read2 = c.read2 ? markRaw(c.read2) : null; jset('sg-read2', c.read2);
+      this.batch = c.batch.map(x => ({id: ++this.bid, r: markRaw(x)}));
+      if (c.assay && String(c.assayKey).startsWith('eigen:')) this.storeAssay(c.assay); else this.assayKey = c.assayKey === 'oefen' ? 'oefen' : '';
+      this.refText = c.refText || ''; this.paste = c.paste || ''; this.paste2 = c.paste2 || '';
+      this.hs.panel = c.sheet.panel; this.hs.samples = c.sheet.samples; this.rsIdx = 0;
+      this.poke('sg-win', 'sg-q', 'sg-het', 'sg-ref', 'sg-paste', 'sg-paste2', 'sg-assay');
+      this.caseOk = true; this.caseMsg = this.t('Case geopend.');
     },
     clear() {
       this.read = null; this.edits = {}; this.sel = null; this.rng = null; this.paste = ''; this.err = '';
