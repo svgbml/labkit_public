@@ -1025,6 +1025,20 @@ def _(pg):
     v=pg.evaluate("[...document.querySelector('#gm-out tbody tr').cells].slice(1,5).map(c=>__n(c.textContent))")
     return [('µm', v[0], 0.8, 0.005), ('lag λ', v[2], 2.0, 0.01), ('A', v[3], 3.5, 0.01)]
 
+@case('Groeicurves vergelijken', 't-toets van Welch op µmax per conditie', 'Onafhankelijk berekend met scipy.stats.ttest_ind(equal_var=False) op de µmax-waarden per replicaat uit de tabel (drie replicaten per conditie, Gompertz-data met µm 0,70–0,92 h⁻¹)')
+def _(pg):
+    import math
+    from scipy import stats
+    def curve(mu, lam=2.0):
+        return [0.05 * math.exp(3.5 * math.exp(-math.exp(mu * math.e / 3.5 * (lam - t / 2) + 1))) for t in range(0, 25)]
+    C = {'Wild 1': curve(0.70), 'Wild 2': curve(0.74), 'Wild 3': curve(0.78), 'Mut 1': curve(0.80, 2.5), 'Mut 2': curve(0.86, 2.5), 'Mut 3': curve(0.92, 2.5)}
+    txt = 't\t' + '\t'.join(C) + '\n' + '\n'.join(str(t / 2).replace('.', ',') + '\t' + '\t'.join(f"{C[k][t]:.6f}".replace('.', ',') for k in C) for t in range(25))
+    pg.evaluate(f"__go('gcomp');__set('gm-blank','0');__set('gm-tu','h');__set('gm-data',{txt!r})")
+    mu = pg.evaluate("[...document.querySelectorAll('#gm-out tbody tr')].map(r=>__n(r.cells[1].textContent))")
+    c = pg.evaluate("[...document.querySelector('#gm-welch tbody tr').cells].map(c=>__n(c.textContent))")
+    r = stats.ttest_ind(mu[3:], mu[:3], equal_var=False)
+    return [('t µmax', c[1], r.statistic, 0.02), ('p µmax', c[3], r.pvalue, 0.02)]
+
 @case('Western blot-normalisatie', 'Relatieve expressie', 'Rekentest voorbeelddata: (31500/30800 + 29800/29900)/2 gedeeld door controle-gemiddelde (15200/30100 + 14800/29500)/2')
 def _(pg):
     pg.evaluate("__go('wb')")

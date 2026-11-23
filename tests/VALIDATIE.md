@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-23 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 542 van 542 controles binnen tolerantie.**
+**Resultaat: 544 van 544 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -312,6 +312,8 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Groeicurves vergelijken | Gompertz-fit | µm | 0,8 | 0,8 | +0.00% | ✅ | Rekentest: data berekend met A = 3,5; µm = 0,8 h⁻¹; λ = 2 h (Zwietering 1990) moeten terugkomen |
 | Groeicurves vergelijken | Gompertz-fit | lag λ | 2 | 2 | +0.00% | ✅ | Rekentest: data berekend met A = 3,5; µm = 0,8 h⁻¹; λ = 2 h (Zwietering 1990) moeten terugkomen |
 | Groeicurves vergelijken | Gompertz-fit | A | 3,5 | 3,5 | +0.00% | ✅ | Rekentest: data berekend met A = 3,5; µm = 0,8 h⁻¹; λ = 2 h (Zwietering 1990) moeten terugkomen |
+| Groeicurves vergelijken | t-toets van Welch op µmax per conditie | t µmax | 2,882 | 2,88 | -0.08% | ✅ | Onafhankelijk berekend met scipy.stats.ttest_ind(equal_var=False) op de µmax-waarden per replicaat uit de tabel (drie replicaten per conditie, Gompertz-data met µm 0,70–0,92 h⁻¹) |
+| Groeicurves vergelijken | t-toets van Welch op µmax per conditie | p µmax | 0,05298 | 0,0531 | +0.23% | ✅ | Onafhankelijk berekend met scipy.stats.ttest_ind(equal_var=False) op de µmax-waarden per replicaat uit de tabel (drie replicaten per conditie, Gompertz-data met µm 0,70–0,92 h⁻¹) |
 | Western blot-normalisatie | Relatieve expressie | behandeling 1 | 2,006 | 2,006 | +0.00% | ✅ | Rekentest voorbeelddata: (31500/30800 + 29800/29900)/2 gedeeld door controle-gemiddelde (15200/30100 + 14800/29500)/2 |
 | qPCR-smeltcurve | Tm-bepaling | Tm monster 1 | 84,5 | 84,5 | +0.00% | ✅ | Rekentest: smeltcurven berekend met Tm 84,5 °C en een dimeerpiek bij 76,0 °C (stap 0,5 °C) |
 | qPCR-smeltcurve | Tm-bepaling | dimeerpiek monster 2 | 76 | 76 | +0.00% | ✅ | Rekentest: smeltcurven berekend met Tm 84,5 °C en een dimeerpiek bij 76,0 °C (stap 0,5 °C) |
