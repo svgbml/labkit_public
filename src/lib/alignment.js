@@ -213,3 +213,128 @@ export function alnType(a) {
   }
   return !n ? '' : nt / n >= 0.9 ? 'nt' : 'aa';
 }
+
+/* ---------- Kleuren (S172) ----------
+   Per kolom een tabel residu (hoofdletter) → klassenaam, zodat de viewer alleen hoeft op te zoeken.
+   ClustalX: de regels uit colprot.par van Clustal X (Larkin e.a. 2007), zoals Jalview ze documenteert
+   ("Clustal X colours"): een residu krijgt zijn kleur alleen als de kolom aan een drempel voldoet.
+   Percentages over alle sequenties van de kolom (gaten tellen mee in de noemer, zoals Jalview).
+   Nucleotiden: vaste kleur per base. Identiteit: de meest voorkomende letter van de kolom, in drie
+   tinten bij > 80, > 60 en > 40% (Jalview "Percentage identity"). */
+const HYD = 'WLVIMAFCHP';
+function clustalxCol(cnt, n) {
+  const p = s => { let k = 0; for (const c of s) k += cnt[c] || 0; return k * 100 / n; };
+  const any = (s, t) => [...s].some(c => (cnt[c] || 0) * 100 / n > t);
+  const hyd = p(HYD) > 60, kr = p('KR') > 60, qe = p('QE') > 50, ed = p('ED') > 50, out = {G: 'co', P: 'cy'};
+  if (hyd) for (const c of 'AILMFWV') out[c] = 'cb';
+  out.C = any('C', 85) ? 'cp' : hyd ? 'cb' : '';
+  if (kr || any('KRQ', 80)) out.K = out.R = 'cr';
+  if (kr || qe || ed || any('EQD', 85)) out.E = 'cm';
+  if (kr || ed || any('KRQ', 85)) out.D = 'cm';
+  if (any('N', 50) || any('NY', 85)) out.N = 'cg';
+  if (kr || qe || any('QEKR', 85)) out.Q = 'cg';
+  if (hyd || p('TS') > 50 || any('ST', 85)) out.S = out.T = 'cg';
+  if (hyd || any('WYACPQFHILMV', 85)) out.H = out.Y = 'cc';
+  return out;
+}
+const NUC = {A: 'na', C: 'nc', G: 'ng', T: 'nt', U: 'nt'};
+export function alnColours(a, scheme) {
+  if (scheme === 'nt') return null;  /* vaste kleur per base: geen kolomtabel nodig */
+  const n = a.seqs.length, cols = [];
+  for (let c = 0; c < a.len; c++) {
+    const cnt = {};
+    for (const s of a.seqs) { const r = s[c].toUpperCase(); if (r !== '-') cnt[r] = (cnt[r] || 0) + 1; }
+    if (scheme === 'clustalx') { cols.push(clustalxCol(cnt, n)); continue; }
+    let top = '', k = 0;
+    for (const r in cnt) if (cnt[r] > k) { top = r; k = cnt[r]; }
+    const f = k * 100 / n;
+    cols.push(f > 80 ? {[top]: 'i3'} : f > 60 ? {[top]: 'i2'} : f > 40 ? {[top]: 'i1'} : {});
+  }
+  return cols;
+}
+/* klasse van residu r in kolom c (of '') bij een tabel van alnColours */
+export const alnCls = (tab, c, r) => (tab ? tab[c][r.toUpperCase()] : NUC[r.toUpperCase()]) || '';
+
+/* ---------- Conservering en consensus (S173) ----------
+   De * : . -regel zoals Clustal W/X hem schrijft (Thompson e.a. 1994; Larkin e.a. 2007): '*' als de
+   kolom overal dezelfde letter heeft, ':' als alle letters in één 'sterke' groep vallen, '.' bij
+   één 'zwakke' groep, anders een spatie. Een gat in de kolom geeft altijd een spatie. Bij DNA/RNA
+   schrijft Clustal alleen '*'. */
+const STRONG = ['STA', 'NEQK', 'NHQK', 'NDEQ', 'QHRK', 'MILV', 'MILF', 'HY', 'FYW'];
+const WEAK = ['CSA', 'ATV', 'SAG', 'STNK', 'STPA', 'SGND', 'SNDEQK', 'NDEQHK', 'NEQHRK', 'FVLIM', 'HFY'];
+export function alnConservation(a) {
+  const nt = alnType(a) === 'nt', in1 = (set, gs) => gs.some(g => [...set].every(c => g.includes(c)));
+  let out = '';
+  for (let c = 0; c < a.len; c++) {
+    const set = new Set(a.seqs.map(s => s[c].toUpperCase()));
+    out += set.has('-') || !set.size ? ' ' : set.size === 1 ? '*' : nt ? ' ' : in1(set, STRONG) ? ':' : in1(set, WEAK) ? '.' : ' ';
+  }
+  return out;
+}
+/* per kolom de meest voorkomende letter (geen gat), zijn aandeel over alle sequenties (0–1) en
+   het aantal gaten (S174);
+   de consensus is die letter als het aandeel de drempel haalt, anders x (eiwit) of n (DNA/RNA),
+   zoals EMBOSS cons */
+export function alnProfile(a) {
+  const n = a.seqs.length, top = [], frac = [], gaps = [];
+  for (let c = 0; c < a.len; c++) {
+    const cnt = {};
+    let t = '-', k = 0, g = 0;
+    for (const s of a.seqs) { const r = s[c].toUpperCase(); if (r === '-') g++; else if ((cnt[r] = (cnt[r] || 0) + 1) > k) { t = r; k = cnt[r]; } }
+    top.push(t); frac.push(n ? k / n : 0); gaps.push(g);
+  }
+  return {top, frac, gaps};
+}
+export function alnConsensus(a, p, thr) {
+  const no = alnType(a) === 'nt' ? 'n' : 'x';
+  return p.top.map((t, c) => t === '-' ? '-' : p.frac[c] * 100 >= thr ? t : no).join('');
+}
+
+/* ---------- Motief zoeken (S175) ----------
+   Een motief is letters, [..] voor één van een paar letters en X of . voor elke letter; bij DNA/RNA
+   ook de IUPAC-codes (N, R, Y, …) en T = U. Gezocht wordt in de sequentie zonder gaten, zodat een
+   motief over een gat heen loopt; elke treffer komt terug als [eerste, laatste] kolom (0-based).
+   Overlappende treffers tellen mee. Geeft null bij een ongeldig motief. */
+const IUPAC = {R: 'AG', Y: 'CTU', S: 'CG', W: 'ATU', K: 'GTU', M: 'AC', B: 'CGTU', D: 'AGTU', H: 'ACTU', V: 'ACG', N: 'ACGTU', T: 'TU', U: 'TU'};
+const MAXHITS = 20000;  /* shortcut: een motief als 'X' raakt elke letter; daarboven stoppen, tot iemand meer nodig heeft */
+export function alnMotif(a, pat, nt) {
+  const p = String(pat || '').toUpperCase().replace(/\s+/g, '');
+  if (!/^(?:[A-Z.*]|\[[A-Z*]+\])+$/.test(p)) return null;
+  const one = c => c === '.' || (!nt && c === 'X') ? '[^-]' : nt && IUPAC[c] ? '[' + IUPAC[c] + ']' : c === '*' ? '\\*' : c;
+  const src = p.replace(/\[([A-Z*]+)\]|./g, (m, g) => g ? '[' + [...g].map(c => (nt && IUPAC[c] || c).replace('*', '\\*')).join('') + ']' : one(m));
+  const re = new RegExp('(?=(' + src + '))', 'g');
+  let total = 0;
+  const hits = a.seqs.map(s => {
+    const col = [], out = [];
+    let u = '';
+    for (let c = 0; c < s.length; c++) if (s[c] !== '-') { col.push(c); u += s[c].toUpperCase(); }
+    for (const m of u.matchAll(re)) {
+      if (total >= MAXHITS || !m[1]) break;
+      out.push([col[m.index], col[m.index + m[1].length - 1]]); total++;
+    }
+    return out;
+  });
+  return {hits, total, capped: total >= MAXHITS};
+}
+
+/* identiteit van elke sequentie met sequentie ref: gelijke letters / kolommen waar beide een letter hebben */
+export function alnIdentity(a, ref) {
+  const r = a.seqs[ref].toUpperCase();
+  return a.seqs.map(s => {
+    let same = 0, both = 0;
+    for (let c = 0; c < s.length; c++) {
+      const x = s[c].toUpperCase();
+      if (x !== '-' && r[c] !== '-') { both++; if (x === r[c]) same++; }
+    }
+    return both ? same / both : 0;
+  });
+}
+
+/* ---------- Verschilweergave (S176) ----------
+   s tegen referentie r (even lang): een punt waar beide dezelfde letter hebben (hoofd/klein gelijk),
+   anders de eigen letter; een gat blijft een gat */
+export function alnDiff(s, r) {
+  let o = '';
+  for (let c = 0; c < s.length; c++) o += s[c] !== '-' && s[c].toUpperCase() === (r[c] || '').toUpperCase() ? '.' : s[c];
+  return o;
+}

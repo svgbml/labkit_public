@@ -6,9 +6,9 @@ const CORE = [
   './index.html',
   './manifest.webmanifest',
 <<<<<<< HEAD
-  './i18n-en.js?h=9cc394e0ab',
+  './i18n-en.js?h=68cad8aca8',
 =======
-  './i18n-en.js?h=9cc394e0ab',
+  './i18n-en.js?h=68cad8aca8',
 >>>>>>> s103-wt
   './icons/icon.svg',
   './icons/icon-192.png',

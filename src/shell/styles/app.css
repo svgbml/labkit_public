@@ -557,3 +557,18 @@ html[data-cvd=tritanopie] main{filter:url(#cvd-tritanopie)}
 .mpn-m{width:76px;font-size:12.5px;color:var(--muted)}
 .mpn-row button{width:28px;height:44px;padding:0;border-radius:3px 3px 14px 14px;border:2px solid var(--line);background:var(--surface);cursor:pointer}
 .mpn-row button.pos{background:var(--accent);border-color:var(--accent)}
+/* S172 kleuren: tint gemengd met --surface, zodat --ink in alle thema's leesbaar blijft; .aln-cbs = Okabe-Ito.
+   De viewer leest de kleur van .aln-sw en tekent die op het canvas .aln-bg. */
+.aln-bg{position:absolute;top:0;left:0}
+.k-bar{--c:var(--accent);--mix:100%}.k-gap{--c:var(--muted);--mix:70%}.k-hit{--c:var(--bad);--mix:100%}
+.aln-mvs{white-space:nowrap}.aln-mv{padding:0 5px;margin-left:2px;font-size:11px;line-height:18px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
+.aln-ovw{display:block;width:100%;height:26px;margin-top:16px;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer}
+.aln-ovw+.aln-view{margin-top:6px}
+.aln-extra{font-weight:400;font-style:italic;color:var(--muted)}
+.aln-sw{position:absolute;visibility:hidden;background:color-mix(in srgb,var(--c) calc(var(--mix,40%) * var(--dim,1)),var(--surface))}
+html[data-theme=donker] .aln-view{--dim:.75}
+.k-cb{--c:#80a0f0}.k-cr{--c:#f01505}.k-cm{--c:#c048c0}.k-cg{--c:#15c015}.k-cp{--c:#f08080}.k-co{--c:#f09048}.k-cy{--c:#c0c000}.k-cc{--c:#15a4a4}
+.k-na{--c:#64f73f}.k-nc{--c:#ffb340}.k-ng{--c:#eb413c}.k-nt{--c:#3c88ee}
+.k-i1{--c:var(--accent);--mix:18%}.k-i2{--c:var(--accent);--mix:32%}.k-i3{--c:var(--accent);--mix:48%}
+.aln-cbs .k-cb{--c:#0072b2}.aln-cbs .k-cr{--c:#d55e00}.aln-cbs .k-cm{--c:#cc79a7}.aln-cbs .k-cg{--c:#009e73}.aln-cbs .k-cp{--c:#999999}.aln-cbs .k-co{--c:#e69f00}.aln-cbs .k-cy{--c:#f0e442}.aln-cbs .k-cc{--c:#56b4e9}
+.aln-cbs .k-na{--c:#009e73}.aln-cbs .k-nc{--c:#0072b2}.aln-cbs .k-ng{--c:#e69f00}.aln-cbs .k-nt{--c:#d55e00}
