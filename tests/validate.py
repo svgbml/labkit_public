@@ -1795,6 +1795,99 @@ def _(pg):
         out.append((step + ': rijen zoals verwacht', ok, n, 0))
     return out
 
+ALN_RESET = "()=>{for(const [i,v] of [['al-gap',''],['al-from',''],['al-to',''],['al-tr','0'],['al-gm','ign'],['al-ct','90'],['al-cl','20'],['al-ref',''],['al-motif','']]) __set(i,v)}"
+ALN_OPEN = "d=>{const e=document.getElementById(d); if(!e.open) e.querySelector('summary').click()}"
+
+def _aln_rows(f):
+    seqs = {}
+    for ln in f.read_text(encoding='utf-8').splitlines()[1:]:
+        if ln.strip() and not ln[0].isspace():
+            name, chunk = ln.split()[:2]; seqs[name] = seqs.get(name, '') + chunk
+    return list(seqs.values())
+
+@case('Alignment bekijken', 'Bijsnijden en opslaan: de bijgesneden uitlijning opent weer goed', 'tests/fixtures/aln/hedgehog.aln (Biopython-testsuite); verwacht in Python berekend: de kolommen met hoogstens 20% gaten binnen kolom 50 t/m 400 (zoals trimAl -gt: een kolom blijft als het aandeel gaten de drempel niet overschrijdt); het bestand dat LabKit als FASTA, Clustal en PHYLIP schrijft wordt weer ingelezen en moet dezelfde rijen geven')
+def _(pg):
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'hedgehog.aln'
+    rows = _aln_rows(f); n = len(rows)
+    keep = [c for c in range(49, 400) if sum(r[c] == '-' for r in rows) * 100 / n <= 20]
+    exp = [''.join(r[c] for c in keep) for r in rows]
+    pg.evaluate("__go('aln')"); pg.evaluate(ALN_RESET); pg.evaluate("t=>__set('al-in',t)", f.read_text(encoding='utf-8')); pg.wait_for_timeout(200)
+    pg.evaluate("()=>{__set('al-gap','20');__set('al-from','50');__set('al-to','400')}"); pg.wait_for_timeout(250)
+    out = [('kolommen na bijsnijden', pg.evaluate("__alnVm.m.len"), len(keep), 0),
+           ('rijen zoals verwacht', sum(a == b for a, b in zip(pg.evaluate("__alnVm.m.seqs"), exp)), n, 0)]
+    for fmt in ('fasta', 'clustal', 'phylip'):
+        pg.evaluate("v=>__set('al-xf',v)", fmt); pg.wait_for_timeout(100)
+        txt = pg.evaluate("__alnVm.outText")
+        pg.evaluate("()=>{__set('al-gap','');__set('al-from','');__set('al-to','')}")
+        pg.evaluate("t=>__set('al-in',t)", txt); pg.wait_for_timeout(200)
+        out.append((fmt + ': opnieuw ingelezen rijen gelijk', sum(a == b for a, b in zip(pg.evaluate("__alnVm.m.seqs"), exp)), n, 0))
+        out.append((fmt + ': lengte', pg.evaluate("__alnVm.m.len"), len(keep), 0))
+        pg.evaluate("t=>__set('al-in',t)", f.read_text(encoding='utf-8'))
+        pg.evaluate("()=>{__set('al-gap','20');__set('al-from','50');__set('al-to','400')}"); pg.wait_for_timeout(150)
+    pg.evaluate(ALN_RESET); pg.evaluate("__set('al-xf','fasta')")
+    return out
+
+@case('Alignment bekijken', 'Identiteitsmatrix komt overeen met een Clustal .pim', 'tests/fixtures/aln/small_pim.aln met de verwachte matrix tests/fixtures/aln/small_pim.pim (Clustal .pim-indeling), apart in Python berekend als gelijke letters / kolommen waar geen van beide een gat heeft, zoals Clustal Omega rekent; gatenopties: een gat tegenover een letter als verschil, en alle kolommen in de noemer')
+def _(pg):
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'small_pim.aln'
+    ref = [[float(x) for x in ln.split()[2:]] for ln in (ROOT / 'tests' / 'fixtures' / 'aln' / 'small_pim.pim').read_text(encoding='utf-8').splitlines() if ln.strip()[:2].rstrip(':').isdigit()]
+    rows = _aln_rows(f)
+    pg.evaluate("__go('aln')"); pg.evaluate(ALN_RESET); pg.evaluate("t=>__set('al-in',t)", f.read_text(encoding='utf-8')); pg.wait_for_timeout(200)
+    pg.evaluate(ALN_OPEN, 'al-pim-d'); pg.wait_for_timeout(250)
+    shown = pg.evaluate("[...document.querySelectorAll('#al-hm tbody tr')].map(r=>[...r.querySelectorAll('td')].map(c=>__n(c.textContent)))")
+    out = [('cellen in de matrix', sum(abs(shown[i][j] - ref[i][j]) < 0.06 for i in range(5) for j in range(5)), 25, 0)]
+    both = lambda a, b: [(x, y) for x, y in zip(a, b) if not (x == '-' and y == '-')]
+    for mode, den in (('mis', lambda p, a, b: len(p)), ('len', lambda p, a, b: len(a))):
+        pg.evaluate("v=>__set('al-gm',v)", mode); pg.wait_for_timeout(200)
+        shown = pg.evaluate("[...document.querySelectorAll('#al-hm tbody tr')].map(r=>[...r.querySelectorAll('td')].map(c=>__n(c.textContent)))")
+        ok = 0
+        for i in range(5):
+            for j in range(5):
+                if i == j: ok += shown[i][j] == 100; continue
+                p = both(rows[i], rows[j]); same = sum(x == y != '-' for x, y in p)
+                ok += abs(shown[i][j] - 100 * same / den(p, rows[i], rows[j])) < 0.06
+        out.append(('gatenoptie ' + mode, ok, 25, 0))
+    pg.evaluate("__set('al-gm','ign')")
+    pg.evaluate("()=>{__set('al-pa','0');__set('al-pb','4')}"); pg.wait_for_timeout(200)
+    out.append(('paar 1-5 identiteit', pg.evaluate("__n(__alnVm.pair[0][1].split('%')[0])"), ref[0][4], 0.06))
+    return out
+
+@case('Alignment bekijken', 'Geconserveerd stuk naar de primerkaart', 'Kolommen van twee gelijke DNA-sequenties met twee afwijkende posities (kolom 20 en 60 in de derde); verwacht in Python: de langste doorlopende stuk met 100% conservering is kolom 21 t/m 59, en het stuk komt als regel naam<tab>sequentie in de Primerkaart (veld ol-seq)')
+def _(pg):
+    base = 'ATGGCCAAATAGGCATGGAACCCGGGTTTAAATGCGTACGATCGATCGATGCATGCGTACGATGCCCGGATAGCTAGCTAGGATCGGATTACAGGTCCATTGACCA'[:90]
+    v = list(base); v[19] = 'A' if base[19] != 'A' else 'C'; v[59] = 'A' if base[59] != 'A' else 'C'
+    fa = f">a\n{base}\n>b\n{base}\n>c\n{''.join(v)}\n"
+    cols = [i for i in range(90) if i not in (19, 59)]
+    runs, s = [], None
+    for i in range(91):
+        ok = i < 90 and i in cols
+        if ok and s is None: s = i
+        if not ok and s is not None: runs.append((s, i)); s = None
+    best = max(runs, key=lambda r: (r[1] - r[0], -r[0]))
+    pg.evaluate("__go('aln')"); pg.evaluate(ALN_RESET); pg.evaluate("t=>__set('al-in',t)", fa); pg.wait_for_timeout(200)
+    pg.evaluate(ALN_OPEN, 'al-cons-d'); pg.evaluate("__set('al-cl','10')"); pg.wait_for_timeout(250)
+    pg.evaluate("()=>__set('ol-seq','Forward\\tAGCTGACCTGAAGGCTCTGAAG')")
+    pg.click('#al-regs .aln-mv'); pg.wait_for_timeout(300)
+    last = pg.evaluate("document.getElementById('ol-seq').value.split('\\n').pop()")
+    out = [('stuk van', last.split('\t')[0], f'Region_{best[0] + 1}-{best[1]}', 0) if False else
+           ('regel in de primerkaart', 1 if last.split('\t')[1:] == [base[best[0]:best[1]]] and last.split('\t')[0].endswith(f'_{best[0] + 1}-{best[1]}') else 0, 1, 0),
+           ('de tool wisselde naar de primerkaart', 1 if pg.evaluate("location.hash") == '#oligo' else 0, 1, 0)]
+    pg.evaluate("__go('aln')"); pg.evaluate(ALN_RESET)
+    return out
+
+@case('Alignment bekijken', 'Vertalen naar eiwit met codonbewuste kolommen', 'Standaard genetische code (NCBI tabel 1) op ATG GCC AAA TAG = M A K * (leesraam 1), TGG CCA AAT = W P N (leesraam 2) en GGC CAA ATA = G Q I (leesraam 3); een gat van drie kolommen geeft een gat in het eiwit (M - K *), een codon met één of twee gaten een X (leesraam 2 en 3 geven dat bij de rijen met een gat); RNA (U) wordt als T gelezen')
+def _(pg):
+    aln = '>een\nATGGCCAAATAG\n>twee\nATG---AAATAG\n>drie\nATGG-CAAATAG\n>vier\naugGCCAAAuag\n'
+    pg.evaluate("__go('aln')"); pg.evaluate(ALN_RESET); pg.evaluate("t=>__set('al-in',t)", aln); pg.wait_for_timeout(200)
+    out = []
+    for fr, exp in (('1', ['MAK*', 'M-K*', 'MXK*', 'MAK*']), ('2', ['WPN', 'XXN', 'WXN', 'WPN']), ('3', ['GQI', 'XXI', 'XQI', 'GQI'])):
+        pg.evaluate("v=>__set('al-tr',v)", fr); pg.wait_for_timeout(200)
+        got = pg.evaluate("__alnVm.m.seqs")
+        out.append((f'leesraam {fr}: eerste sequentie', 1 if got[0] == exp[0] else 0, 1, 0))
+        out.append((f'leesraam {fr}: alle vier de rijen', 1 if got == exp else 0, 1, 0))
+    pg.evaluate(ALN_RESET)
+    return out
+
 @case('Chromatogram', 'ABIF-bestand 3730.ab1 inlezen', 'Biopython 1.84, Tests/test_SeqIO_AbiIO.py (data_3730) en het bestand zelf (tests/fixtures/3730.ab1, Applied Biosystems 3730): monster 226032_C-ME-18_pCAGseqF, 1165 basen, eerste 12 basen GGGCGAGCKYYA; ABIF-indeling volgens de Applied Biosystems ABIF File Format Specification (2009)')
 def _(pg):
     pg.evaluate("__go('sanger')")

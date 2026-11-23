@@ -42,6 +42,24 @@
           </select></div>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Een motief is letters, [..] voor één van een paar letters en X of . voor elke letter; bij DNA ook IUPAC-codes zoals N, R en Y. Gaten worden overgeslagen.') }}</p>
+      <details class="panel" id="al-more" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Bijsnijden, vertalen en exporteren') }}</summary>
+        <div class="fields" style="margin-top:12px">
+          <div class="f"><label for="al-tr">{{ t('Vertalen naar eiwit') }}</label>
+            <select id="al-tr" v-model="tr">
+              <option value="0">{{ t('Uit') }}</option>
+              <option value="1">{{ t('Leesraam') }} 1</option><option value="2">{{ t('Leesraam') }} 2</option><option value="3">{{ t('Leesraam') }} 3</option>
+            </select></div>
+          <div class="f" v-if="tr !== '0'"><label for="al-code">{{ t('Genetische code') }}</label>
+            <select id="al-code" v-model="code"><option v-for="(c, k) in codes" :key="k" :value="String(k)">{{ t(c[0]) }}</option></select></div>
+          <lk-field v-model="gap" :label="t('Kolommen met meer gaten weglaten')" for-id="al-gap" unit="%" inputmode="numeric"/>
+          <lk-field v-model="from" :label="t('Vanaf kolom')" for-id="al-from" inputmode="numeric"/>
+          <lk-field v-model="to" :label="t('Tot en met kolom')" for-id="al-to" inputmode="numeric"/>
+          <div class="f"><label for="al-xf">{{ t('Opslaan als') }}</label>
+            <select id="al-xf" v-model="xf"><option v-for="(f, k) in outFmts" :key="k" :value="k">{{ f[0] }}</option></select></div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Bijsnijden en vertalen werken op wat de viewer toont; opslaan schrijft precies die kolommen weg.') }}</p>
+        <div class="row" style="margin-top:10px"><button type="button" class="primary" id="al-exp" :disabled="!m.names.length" @click="exportAln">{{ t('Uitlijning opslaan') }}</button></div>
+      </details>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Het formaat wordt aan de eerste regel herkend. Uitlijnen doe je met Clustal Omega bij EBI; download daar de uitkomst als .aln en open die hier.') }}</p>
     </div>
     <div class="result">
@@ -52,6 +70,8 @@
         <template v-else>
           <lk-kv :rows="rows"/>
           <lk-note v-for="(w, i) in m.warn" :key="i" kind="warn">{{ t(w) }}</lk-note>
+          <lk-note v-if="tr !== '0' && !isNt" kind="warn">{{ t('Vertalen kan alleen bij een nucleotide-uitlijning.') }}</lk-note>
+          <lk-note v-if="m.len === 0" kind="warn">{{ t('Er blijven geen kolommen over; maak de grenzen ruimer.') }}</lk-note>
           <lk-note v-if="motif.trim() && !mot" kind="bad">{{ t('Dit motief is niet geldig: gebruik letters, [..], X of .') }}</lk-note>
           <lk-note v-else-if="mot && mot.capped" kind="warn">{{ t('Meer dan 20.000 treffers: alleen de eerste worden getoond.') }}</lk-note>
         </template>
@@ -62,6 +82,42 @@
   <div v-if="m.format && m.names.length" id="al-seqs" class="result" style="margin-top:16px" @click="onMove">
     <lk-table :cols="cols" :rows="seqRows"/>
   </div>
+  <!-- identiteitsmatrix met heatmap (S178) en geconserveerde stukken (S179): ingeklapt, de matrix wordt pas berekend als hij open staat -->
+  <details v-if="m.format && m.names.length" id="al-pim-d" class="panel" style="margin-top:12px" @toggle="pimOpen = $event.target.open"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Identiteitsmatrix en paren') }}</summary>
+    <div class="fields" style="margin-top:12px">
+      <div class="f"><label for="al-gm">{{ t('Gaten tellen') }}</label>
+        <select id="al-gm" v-model="gm">
+          <option value="ign">{{ t('Niet meetellen (alleen kolommen met twee letters)') }}</option>
+          <option value="mis">{{ t('Als verschil (gat tegenover een letter)') }}</option>
+          <option value="len">{{ t('Alle kolommen in de noemer') }}</option>
+        </select></div>
+      <div class="f"><label for="al-pa">{{ t('Paar') }}</label>
+        <select id="al-pa" v-model="pa"><option v-for="(n, i) in m.names" :key="i" :value="String(i)">{{ n }}</option></select></div>
+      <div class="f"><label for="al-pb">{{ t('met') }}</label>
+        <select id="al-pb" v-model="pb"><option v-for="(n, i) in m.names" :key="i" :value="String(i)">{{ n }}</option></select></div>
+    </div>
+    <template v-if="pimOpen">
+      <lk-kv v-if="pair" :rows="pair" style="margin-top:12px"/>
+      <lk-note v-if="m.names.length > PIMMAX" kind="warn">{{ t('Alleen de eerste ' + PIMMAX + ' sequenties staan in de matrix.') }}</lk-note>
+      <div class="aln-hmw" style="margin-top:12px"><table id="al-hm" class="aln-hm">
+        <thead><tr><th></th><th v-for="(n, j) in pimNames" :key="j" :title="n">{{ j + 1 }}</th></tr></thead>
+        <tbody><tr v-for="(n, i) in pimNames" :key="i"><th :title="n">{{ i + 1 }}: {{ n }}</th>
+          <td v-for="(v, j) in pim[i]" :key="j" :style="{background: heat(v)}">{{ pc(v) }}</td></tr></tbody>
+      </table></div>
+      <div class="row" style="margin-top:10px"><button type="button" id="al-pimx" @click="exportPim">{{ t('Matrix opslaan als .pim') }}</button></div>
+    </template>
+  </details>
+  <details v-if="m.format && m.names.length" id="al-cons-d" class="panel" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Geconserveerde stukken') }}</summary>
+    <div class="fields" style="margin-top:12px">
+      <lk-field v-model="ct" :label="t('Conservering minstens')" for-id="al-ct" unit="%" inputmode="numeric"/>
+      <lk-field v-model="cl" :label="t('Lengte minstens')" for-id="al-cl" :unit="t('kolommen')" inputmode="numeric"/>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Het aandeel van de meest voorkomende letter per kolom (gaten tellen mee), over aaneengesloten kolommen. Bij DNA kun je een stuk naar de Primerkaart sturen.') }}</p>
+    <div id="al-regs" class="result" style="margin-top:12px" @click="onReg">
+      <lk-note v-if="!regs.length" kind="info">{{ t('Geen stukken gevonden; verlaag de drempel of de minimale lengte.') }}</lk-note>
+      <lk-table v-else :cols="regCols" :rows="regRows"/>
+    </div>
+  </details>
   <!-- overzicht van de hele uitlijning: aandeel gaten per stukje, het kader is wat in beeld is; klikken springt erheen (S174) -->
   <canvas v-show="m.names.length" id="al-ovw" ref="ov" class="aln-ovw" data-xl="1" :title="t('Gaten over de hele uitlijning; klik om erheen te gaan')" @click="onOv"></canvas>
   <div v-show="m.names.length" id="al-view" ref="view" :class="['aln-view', {'aln-cbs': cbs}]" :style="{height: viewH + 'px'}" @scroll="onScroll">
@@ -94,10 +150,13 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
-import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile, alnConsensus, alnMotif, alnIdentity, alnDiff} from '../lib/alignment.js';
+import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile, alnConsensus, alnMotif, alnIdentity, alnDiff,
+  alnTrim, alnWrite, ALN_OUT, alnPair, alnPim, pimWrite, alnConserved, alnTranslate} from '../lib/alignment.js';
+import {CODES, SEQ_TO, seqSend} from '../lib/seq.js';
 
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
+const PIMMAX = 60;  /* sequenties in de matrix: 60 x 60 cellen is wat een scherm nog toont */
 const CH = 18, RH = 22, PH = 32, MAXNAME = 24; /* rijhoogte, hoogte van de liniaal en van de plot, naamkolom in tekens */
 
 export default {
@@ -106,10 +165,46 @@ export default {
     const st = typeof storeGet === 'function' ? storeGet() : {};
     return {txt: st['al-in'] != null ? String(st['al-in']) : '', col: st['al-col'] != null ? String(st['al-col']) : 'auto',
       cbs: !!st['al-cbs'], sel: null, hand: null,
-      motif: st['al-motif'] != null ? String(st['al-motif']) : '', ord: st['al-ord'] != null ? String(st['al-ord']) : 'file', ref: st['al-ref'] != null ? String(st['al-ref']) : '', thr: st['al-thr'] != null ? String(st['al-thr']) : '50', RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
+      motif: st['al-motif'] != null ? String(st['al-motif']) : '', ord: st['al-ord'] != null ? String(st['al-ord']) : 'file', ref: st['al-ref'] != null ? String(st['al-ref']) : '', thr: st['al-thr'] != null ? String(st['al-thr']) : '50',
+      tr: st['al-tr'] != null ? String(st['al-tr']) : '0', code: st['al-code'] != null ? String(st['al-code']) : '1',
+      gap: st['al-gap'] != null ? String(st['al-gap']) : '', from: st['al-from'] != null ? String(st['al-from']) : '', to: st['al-to'] != null ? String(st['al-to']) : '',
+      xf: st['al-xf'] != null ? String(st['al-xf']) : 'fasta', gm: st['al-gm'] != null ? String(st['al-gm']) : 'ign',
+      pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false,
+      ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
   },
   computed: {
-    m() { return parseAlignment(this.txt); },
+    parsed() { return parseAlignment(this.txt); },
+    isNt() { return alnType(this.parsed) === 'nt'; },
+    /* wat de viewer toont: de uitlijning, eventueel vertaald (S181) en dan bijgesneden (S177); zonder dat is het het ingelezen model zelf */
+    tl() { return this.tr !== '0' && this.isNt && this.parsed.names.length ? alnTranslate(this.parsed, +this.tr, +this.code) : this.parsed; },
+    m() {
+      const a = this.tl, g = num(this.gap), f = Math.round(num(this.from)), l = Math.round(num(this.to));
+      const gOk = g >= 0 && g < 100;
+      if (!a.names.length || (!gOk && !(f > 1) && !(l >= 1 && l < a.len))) return a;
+      return alnTrim(a, {maxGap: gOk ? g : null, from: f > 1 ? f : 1, to: l >= 1 ? l : a.len});
+    },
+    codes() { return CODES; },
+    outFmts() { return ALN_OUT; },
+    outText() { return alnWrite(this.m, this.xf in ALN_OUT ? this.xf : 'fasta'); },
+    /* S178: identiteit van alle paren; alleen als het blok open staat */
+    pimNames() { return this.m.names.slice(0, PIMMAX); },
+    pim() { return this.pimOpen ? alnPim({seqs: this.m.seqs.slice(0, PIMMAX)}, this.gm) : []; },
+    pair() {
+      const a = +this.pa, b = +this.pb, s = this.m.seqs, t = this.t;
+      if (!(a >= 0 && a < s.length && b >= 0 && b < s.length)) return null;
+      const r = alnPair(s[a], s[b], this.gm), aa = alnType(this.m) !== 'nt';
+      return [[t('Identiteit'), P(r.id) + ' (' + N(r.same) + ' / ' + N(r.n) + ')'],
+        aa && [t('Gelijkenis'), P(r.sm) + ' (' + N(r.sim) + ' / ' + N(r.n) + ')'],
+        [t('Kolommen met een gat in één van beide'), N(r.gaps)]].filter(Boolean);
+    },
+    /* S179 */
+    regs() { const th = num(this.ct), ml = num(this.cl); return alnConserved(this.m, this.prof, isFinite(th) ? th : 90, isFinite(ml) ? ml : 1); },
+    regCols() { const t = this.t; return [{h: t('Van'), num: true}, {h: t('Tot'), num: true}, {h: t('Lengte'), num: true}, {h: t('Consensus')}, {h: ''}]; },
+    regRows() {
+      const nt = alnType(this.m) === 'nt', b = esc(trPlain('Naar Primerkaart'));
+      return this.regs.slice(0, 50).map((r, i) => [N(r.from), N(r.to), N(r.len), '<span class="mono">' + esc(r.seq.length > 40 ? r.seq.slice(0, 40) + '…' : r.seq) + '</span>',
+        nt ? '<button type="button" class="aln-mv" data-reg="' + i + '">' + b + '</button>' : '']);
+    },
     /* het gekozen schema (Automatisch: nucleotiden of ClustalX naar het type) en zijn kolomtabel */
     sch() { return this.col === 'auto' ? (alnType(this.m) === 'nt' ? 'nt' : 'clustalx') : this.col; },
     tab() { return this.sch === 'none' ? undefined : alnColours(this.m, this.sch); },
@@ -155,13 +250,15 @@ export default {
       return {rows, ticks, plot, c0, c1, left: g.nameW + c0 * cw - this.sx};
     },
     rows() {
-      const m = this.m, t = this.t, ty = alnType(m);
+      const m = this.m, t = this.t, ty = alnType(m), base = this.tl.len;
       return [[t('Formaat'), FMT[m.format]], [t('Sequenties'), N(m.names.length)],
         [t('Lengte'), N(m.len) + ' ' + t('kolommen')],
+        this.tl !== this.parsed && [t('Vertaald'), this.t('leesraam ' + this.tr)],
+        m !== this.tl && [t('Bijgesneden'), N(base) + ' → ' + N(m.len) + ' ' + t('kolommen')],
         [t('Kolommen met gaten'), N(this.prof.gaps.filter(Boolean).length) + ' ' + t('kolommen')],
         this.mot && [t('Motief gevonden in'), this.t(this.mot.hits.filter(h => h.length).length + ' van ' + m.names.length + ' sequenties')],
         [t('Volledig geconserveerd (*)'), N(this.cons.split('*').length - 1) + ' ' + t('kolommen')],
-        [t('Type'), ty === 'nt' ? t('DNA/RNA') : ty === 'aa' ? t('eiwit') : '–']];
+        [t('Type'), ty === 'nt' ? t('DNA/RNA') : ty === 'aa' ? t('eiwit') : '–']].filter(Boolean);
     },
     cols() {
       const t = this.t;
@@ -316,6 +413,21 @@ export default {
     },
     /* synchroon: Vue rendert in een microtaak, dus nog vóór het scherm wordt getekend */
     onScroll(e) { this.sx = e.target.scrollLeft; this.sy = e.target.scrollTop; },
+    /* heatmap: de kleur van --accent, gemengd met --surface zodat --ink leesbaar blijft */
+    heat(v) { return 'color-mix(in srgb, var(--accent) ' + Math.round(v * 45) + '%, var(--surface))'; },
+    pc(v) { return lkNumIn(fmt(v * 100, 1)); },
+    exportAln() {
+      const f = ALN_OUT[this.xf] || ALN_OUT.fasta;
+      saveBlob('uitlijning.' + f[1], new Blob([this.outText], {type: 'text/plain'})).catch(() => {});
+    },
+    exportPim() { saveBlob('identiteit.pim', new Blob([pimWrite(this.pimNames, this.pim)], {type: 'text/plain'})).catch(() => {}); },
+    /* een geconserveerd stuk (consensus, zonder gaten) als regel in de Primerkaart */
+    onReg(e) {
+      const b = e.target.closest('[data-reg]'), t = SEQ_TO.find(x => x.tool === 'oligo');
+      if (!b || !t) return;
+      const r = this.regs[+b.dataset.reg];
+      seqSend(t, trPlain('Stuk', true) + '_' + r.from + '-' + r.to, r.seq);
+    },
     onFile(e) {
       const f = e.target.files[0];
       if (f) f.text().then(x => { this.txt = x; });

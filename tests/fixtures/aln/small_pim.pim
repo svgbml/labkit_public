@@ -1,0 +1,7 @@
+Percent Identity  Matrix - computed with a separate Python script (identical / columns where neither has a gap)
+
+     1: alfa    100.00   96.97   82.14   78.57   87.10
+     2: beta     96.97  100.00   82.76   82.14   90.32
+     3: gamma    82.14   82.76  100.00   60.87   73.08
+     4: delta    78.57   82.14   60.87  100.00   69.23
+     5: eps      87.10   90.32   73.08   69.23  100.00
