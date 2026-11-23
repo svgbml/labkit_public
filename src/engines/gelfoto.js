@@ -371,6 +371,8 @@ function gfRender(exportMode,scale=1){
     /* lanegrenzen (S72): gestippeld over de gel; versleep er een om de lanebreedte te zetten */
     x.save(); x.strokeStyle='rgba(110,160,240,.5)'; x.lineWidth=Math.max(1,hs/9); x.setLineDash([hs*0.5,hs*0.4]);
     gf.lanes.forEach(l=>[l.x-gf.lw/2,l.x+gf.lw/2].forEach(bx=>{ x.beginPath(); x.moveTo(Lm+bx,T); x.lineTo(Lm+bx,T+P.h); x.stroke(); })); x.restore();
+    /* metingen (S73): haakjes links en rechts van de band, versleepbaar langs de lane */
+    x.strokeStyle=o.mcol; x.lineWidth=Math.max(1.5,hs/4); gf.marks.forEach(m=>[-1,1].forEach(d=>{ const e=Lm+m.x+d*gf.lw/2; x.beginPath(); x.moveTo(e,T+m.y); x.lineTo(e+d*hs*0.7,T+m.y); x.stroke(); }));
     const tri=(cx,cy,dir,col)=>{ x.fillStyle=col; x.beginPath(); if(dir==='up'){ x.moveTo(cx,cy); x.lineTo(cx-hs*0.6,cy+hs); x.lineTo(cx+hs*0.6,cy+hs); } else if(dir==='right'){ x.moveTo(cx,cy); x.lineTo(cx-hs,cy-hs*0.6); x.lineTo(cx-hs,cy+hs*0.6); } else { x.moveTo(cx,cy); x.lineTo(cx+hs,cy-hs*0.6); x.lineTo(cx+hs,cy+hs*0.6); } x.closePath(); x.fill(); };
     gf.lanes.forEach((l,i)=>tri(Lm+l.x,T+P.h+2,'up',i===gf.ladder?'#d98a00':l.lad?'#f2c26b':'#1558b0'));
     gf.bands.forEach(b=>tri(Lm-2,T+b.y,'right','#d98a00'));
@@ -412,9 +414,19 @@ function gfFindGel(){ const r=gfRotated(), sc=Math.min(1,260/Math.max(r.width,r.
 function gfZoom(z,cx,cy){ const v=$('#gf-view'), old=gf.zoom||1; z=Math.max(1,Math.min(8,z)); const rc=v.getBoundingClientRect(), ax=cx==null?rc.width/2:cx-rc.left, ay=cy==null?rc.height/2:cy-rc.top, fx=(v.scrollLeft+ax)/old, fy=(v.scrollTop+ay)/old; gf.zoom=z; v.classList.toggle('zoomed',z>1); gcv.style.maxWidth='none'; gcv.style.width=(z*100)+'%'; v.scrollLeft=fx*z-ax; v.scrollTop=fy*z-ay; $('#gf-zv').textContent=Math.round(z*100)+'%'; }
 /* welke lanegrens ligt onder de muis: alleen op de gel en alleen als de grens dichterbij is dan het midden van de lane */
 function gfLwHit(p,tol){ if(!gf.layout||gf.layout.crop||p.y<0||p.y>gfProc().h) return -1; let li=-1,bd=tol; gf.lanes.forEach((l,i)=>{ const c=Math.abs(p.x-l.x), d=Math.abs(c-gf.lw/2); if(d<bd&&d<c){bd=d;li=i;} }); return li; }
+function gfMarkHit(p,tol){ let mi=-1,bd=tol; gf.marks.forEach((m,i)=>{ const d=Math.abs(m.y-p.y); if(d<bd&&Math.abs(m.x-p.x)<gf.lw/2+tol){bd=d;mi=i;} }); return mi; }
+/* dubbelklik of dubbeltik (S73): op de actieve ladderlane een ladderband erbij, op een andere lane een meting */
+function gfDbl(p){ const P=gfProc(); if(p.x<0||p.y<0||p.x>P.w||p.y>P.h||!gf.lanes.length) return false;
+  let li=0,bd=Infinity; gf.lanes.forEach((l,j)=>{ const d=Math.abs(l.x-p.x); if(d<bd){bd=d;li=j;} });
+  if(li===gf.ladder&&bd<gf.lw/2){ const y=gfPeakNear(gf.lanes[li].x,p.y); gf.bands.push({y,bp:NaN}); gf.bands.sort((a,b)=>a.y-b.y); gfBandsTable(); gfRender(); gfStatus('Ladderband toegevoegd.','Vul de grootte in de tabel in.'); return true; }
+  if(gf.bands.filter(b=>isFinite(b.bp)).length<2){ gfStatus('Je hebt minstens twee ladderbanden met bp-waarde nodig om te meten.'); return true; }
+  const lx=bd<gf.lw?gf.lanes[li].x:p.x, y=gfPeakNear(lx,p.y); gf.marks.push({x:lx,y,bp:gfEst(y,lx)}); gfMarksTable(); gfRender(); return true; }
+/* aanraken (S73): twee vingers knijpen om te zoomen en schuiven samen de foto mee */
+const gfTouch=new Map();
 function cvPt(e){ const r=gcv.getBoundingClientRect(), s=gcv.width/r.width; const lay=gf.layout||{L:0,T:0}; return {x:(e.clientX-r.left)*s-lay.L, y:(e.clientY-r.top)*s-lay.T, s}; }
 gcv.addEventListener('pointerdown',e=>{
   if(!gf.src) return; const p=cvPt(e); const P=gf.mode==='crop'?null:gfProc();
+  if(e.pointerType==='touch'){ gfTouch.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(gfTouch.size>=2){ const [a,b]=[...gfTouch.values()]; gf.drag=null; gf.pinch={d:Math.max(1,Math.hypot(a.x-b.x,a.y-b.y)),z:gf.zoom||1}; gfRender(); return; } }
   if(e.button===1){ const v=$('#gf-view'); gf.drag={t:'pan',cx:e.clientX,cy:e.clientY,sl:v.scrollLeft,st:v.scrollTop}; gcv.setPointerCapture(e.pointerId); e.preventDefault(); return; }
   if(gf.mode==='crop'){ const h=gfCropHit(p); if(h){ gf.drag={t:'cropadj',h,x0:p.x,y0:p.y,o:{...gf.pend}}; } else { gf.drag={t:'crop',x0:p.x,y0:p.y}; gf.pend={x:p.x,y:p.y,w:0,h:0}; } gcv.setPointerCapture(e.pointerId); return; }
   const inside=p.x>=0&&p.y>=0&&p.x<=P.w&&p.y<=P.h;
@@ -422,7 +434,10 @@ gcv.addEventListener('pointerdown',e=>{
   if(gf.mode==='addlane'&&inside){ const act=gf.lanes[gf.ladder]; gf.lanes.push({x:p.x,label:String(gf.lanes.length+1)}); gf.lanes.sort((a,b)=>a.x-b.x); gf.ladder=Math.max(0,gf.lanes.indexOf(act)); gfLanesTable(); gfRender(); return; }
   if(gf.mode==='addband'&&inside&&gf.lanes[gf.ladder]){ const y=gfPeakNear(gf.lanes[gf.ladder].x,p.y); gf.bands.push({y,bp:NaN}); gf.bands.sort((a,b)=>a.y-b.y); gfBandsTable(); gfRender(); return; }
   if(gf.mode==='measure'&&inside){ let li=0,bd=Infinity; gf.lanes.forEach((l,j)=>{ const d=Math.abs(l.x-p.x); if(d<bd){bd=d;li=j;} }); const lx=gf.lanes.length&&bd<gf.lw?gf.lanes[li].x:p.x; const y=gfPeakNear(lx,p.y); gf.marks.push({x:lx,y,bp:gfEst(y,lx)}); gfMarksTable(); gfRender(); return; }
+  if(e.button===0&&!gf.mode){ const last=gf.tap; gf.tap={t:e.timeStamp,x:e.clientX,y:e.clientY};
+    if(last&&e.timeStamp-last.t<400&&Math.hypot(e.clientX-last.x,e.clientY-last.y)<14){ gf.tap=null; if(gfDbl(p)) return; } }
   const tol=Math.max(8*p.s,(gf.layout.hs||9)); const Ld=gf.lanes[gf.ladder];
+  { const mi=gfMarkHit(p,tol); if(mi>=0){ gf.drag={t:'mark',i:mi}; gcv.setPointerCapture(e.pointerId); return; } }
   if(p.x<0||(Ld&&Math.abs(p.x-Ld.x)<gf.lw/2)){ let bi=-1,bd=tol; gf.bands.forEach((b,i)=>{ const d=Math.abs(b.y-p.y); if(d<bd){bd=d;bi=i;} }); if(bi>=0){ gf.drag={t:'band',i:bi}; gcv.setPointerCapture(e.pointerId); return; } }
   { const bi=gfLwHit(p,tol); if(bi>=0){ gf.drag={t:'lw',i:bi}; gcv.setPointerCapture(e.pointerId); return; } }
   let li=-1,ld=tol; gf.lanes.forEach((l,i)=>{ const d=Math.abs(l.x-p.x); if(d<ld){ld=d;li=i;} }); if(li>=0){ gf.drag={t:'lane',i:li}; gcv.setPointerCapture(e.pointerId); return; }
@@ -430,8 +445,10 @@ gcv.addEventListener('pointerdown',e=>{
   if((gf.zoom||1)>1){ const v=$('#gf-view'); gf.drag={t:'pan',cx:e.clientX,cy:e.clientY,sl:v.scrollLeft,st:v.scrollTop}; gcv.setPointerCapture(e.pointerId); }
 });
 gcv.addEventListener('pointermove',e=>{
+  if(gfTouch.has(e.pointerId)){ const prev=gfTouch.get(e.pointerId); gfTouch.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(gf.pinch&&gfTouch.size>=2){ const [a,b]=[...gfTouch.values()], v=$('#gf-view'); v.scrollLeft-=(e.clientX-prev.x)/2; v.scrollTop-=(e.clientY-prev.y)/2; gfZoom(gf.pinch.z*Math.hypot(a.x-b.x,a.y-b.y)/gf.pinch.d,(a.x+b.x)/2,(a.y+b.y)/2); return; } }
   if(!gf.drag&&gf.mode==='crop'&&gf.src){ const h=gfCropHit(cvPt(e)); gcv.style.cursor=!h?'crosshair':h==='m'?'move':({n:'ns-resize',s:'ns-resize',e:'ew-resize',w:'ew-resize',nw:'nwse-resize',se:'nwse-resize',ne:'nesw-resize',sw:'nesw-resize'})[h]; return; }
-  if(!gf.drag){ if(gf.src&&!gf.mode&&gf.layout&&!gf.layout.crop){ const p=cvPt(e); const tol=Math.max(8*p.s,gf.layout.hs||9); const nearL=gf.lanes.some(l=>Math.abs(l.x-p.x)<tol); const nearB=p.x<0&&gf.bands.some(b=>Math.abs(b.y-p.y)<tol); gcv.style.cursor=gfLabHit(p)>=0?'text':nearB?'ns-resize':gfLwHit(p,tol)>=0?'col-resize':nearL?'ew-resize':(gf.zoom||1)>1?'grab':'default'; } return; }
+  if(!gf.drag){ if(gf.src&&!gf.mode&&gf.layout&&!gf.layout.crop){ const p=cvPt(e); const tol=Math.max(8*p.s,gf.layout.hs||9); const nearL=gf.lanes.some(l=>Math.abs(l.x-p.x)<tol); const nearB=p.x<0&&gf.bands.some(b=>Math.abs(b.y-p.y)<tol); gcv.style.cursor=gfLabHit(p)>=0?'text':nearB||gfMarkHit(p,tol)>=0?'ns-resize':gfLwHit(p,tol)>=0?'col-resize':nearL?'ew-resize':(gf.zoom||1)>1?'grab':'default'; } return; }
   const p=cvPt(e);
   if(gf.drag.t==='pan'){ const v=$('#gf-view'); v.scrollLeft=gf.drag.sl-(e.clientX-gf.drag.cx); v.scrollTop=gf.drag.st-(e.clientY-gf.drag.cy); return; }
   if(gf.drag.t==='cropadj'){ const r=gfRotated(), o=gf.drag.o, h=gf.drag.h, dx=p.x-gf.drag.x0, dy=p.y-gf.drag.y0; let x0=o.x, y0=o.y, x1=o.x+o.w, y1=o.y+o.h;
@@ -440,10 +457,14 @@ gcv.addEventListener('pointermove',e=>{
     gf.pend={x:x0,y:y0,w:x1-x0,h:y1-y0}; gfRender(); return; }
   if(gf.drag.t==='crop'){ const r=gfRotated(); const x0=Math.max(0,Math.min(gf.drag.x0,p.x)), y0=Math.max(0,Math.min(gf.drag.y0,p.y)); gf.pend={x:x0,y:y0,w:Math.min(r.width,Math.max(gf.drag.x0,p.x))-x0,h:Math.min(r.height,Math.max(gf.drag.y0,p.y))-y0}; gfRender(); }
   else if(gf.drag.t==='lane'){ gf.lanes[gf.drag.i].x=Math.max(0,Math.min(gfProc().w,p.x)); gfRender(); }
+  else if(gf.drag.t==='mark'){ const m=gf.marks[gf.drag.i]; m.y=Math.max(0,Math.min(gfProc().h,p.y)); m.bp=gfEst(m.y,m.x); gfRender(); }
   else if(gf.drag.t==='lw'){ gf.lw=Math.max(4,Math.min(200,Math.round(2*Math.abs(p.x-gf.lanes[gf.drag.i].x)))); gfRender(); }
   else if(gf.drag.t==='band'){ gf.bands[gf.drag.i].y=Math.max(0,Math.min(gfProc().h,p.y)); gfRender(); }
 });
-gcv.addEventListener('pointerup',()=>{ if(gf.drag&&gf.drag.t==='lw'){ gf.marks.forEach(m=>m.int=null); gfSetIn('gf-lw',gf.lw); } if(gf.drag&&gf.drag.t==='band'){ gf.bands.sort((a,b)=>a.y-b.y); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfBandsTable(); gfMarksTable(); } if(gf.drag&&gf.drag.t==='lane'){ const act=gf.lanes[gf.ladder]; gf.lanes.sort((a,b)=>a.x-b.x); gf.ladder=Math.max(0,gf.lanes.indexOf(act)); gfLanesTable(); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); } gf.drag=null; gfRender(); });
+function gfUp(e){ gfTouch.delete(e.pointerId); if(gfTouch.size<2) gf.pinch=null;
+  if(gf.drag&&gf.drag.t==='mark'){ gf.marks[gf.drag.i].int=null; gfMarksTable(); }
+  if(gf.drag&&gf.drag.t==='lw'){ gf.marks.forEach(m=>m.int=null); gfSetIn('gf-lw',gf.lw); } if(gf.drag&&gf.drag.t==='band'){ gf.bands.sort((a,b)=>a.y-b.y); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfBandsTable(); gfMarksTable(); } if(gf.drag&&gf.drag.t==='lane'){ const act=gf.lanes[gf.ladder]; gf.lanes.sort((a,b)=>a.x-b.x); gf.ladder=Math.max(0,gf.lanes.indexOf(act)); gfLanesTable(); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); } gf.drag=null; gfRender(); }
+gcv.addEventListener('pointerup',gfUp); gcv.addEventListener('pointercancel',gfUp);
 
 /* ================= GELFOTO: DENSITOMETRIE EN AUTOMATISCH METEN ================= */
 function gfIntensity(x,y){ const pr=laneProfile(x), h=pr.length, k=Math.max(0,Math.min(h-1,Math.round(y))), pk=pr[k]; if(!(pk>0)) return 0;
@@ -648,6 +669,10 @@ live({
   gfFindGel: [() => gfFindGel, v => { gfFindGel = v; }],
   gfZoom: [() => gfZoom, v => { gfZoom = v; }],
   cvPt: [() => cvPt, v => { cvPt = v; }],
+  gfMarkHit: [() => gfMarkHit, v => { gfMarkHit = v; }],
+  gfDbl: [() => gfDbl, v => { gfDbl = v; }],
+  gfTouch: () => gfTouch,
+  gfUp: [() => gfUp, v => { gfUp = v; }],
   gfLwHit: [() => gfLwHit, v => { gfLwHit = v; }],
   gfIntensity: [() => gfIntensity, v => { gfIntensity = v; }],
   gfMarkInt: [() => gfMarkInt, v => { gfMarkInt = v; }],

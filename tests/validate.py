@@ -410,6 +410,25 @@ def _(pg):
     return [('lanebreedte na slepen', lw, round(2 * (pt['lw'] / 2 + 10 * pt['s'])), 0.03), ('veld volgt', fld, lw, 0),
             ('lanen blijven staan', int(xs == pt['xs']), 1, 0), ('verschoven (px)', sl - q['sl'], 120, 0.05)]
 
+@case('Gelfoto-editor', 'Dubbelklikken, metingen slepen en knijpen', 'Zelftest: op de demo-gel geeft dubbelklikken op de band van lane 5 (getekend op 350 bp) een meting van 350 bp, op de ladderlane een extra ladderband; een meting 20 schermpixels omlaag slepen geeft een kleinere grootte; twee vingers (tussen de lanen) twee keer zo ver uit elkaar zoomen 2×')
+def _(pg):
+    pg.evaluate("__go('gelfoto'); __set('gf-lad','100'); gfDemo(); gf.marks=[]; gfMarksTable(); gfSetIn('gf-lw', 30); gfRender()"); pg.wait_for_timeout(300)  # een eerder geval laat een eigen ladder gekozen staan
+    S = "(x,y)=>{ const r=gcv.getBoundingClientRect(), s=gcv.width/r.width, L=gf.layout; return [r.left+(L.L+x)/s, r.top+(L.T+y)/s]; }"
+    x4, y350 = pg.evaluate("[gf.lanes[4].x, gfYofBp(350)]")
+    pg.mouse.dblclick(*pg.evaluate(f"({S})({x4},{y350}+3)")); pg.wait_for_timeout(200)
+    bp = pg.evaluate("gf.marks.length===1?gf.marks[0].bp:NaN")
+    pg.wait_for_timeout(500); sx, sy = pg.evaluate(f"({S})(gf.marks[0].x,gf.marks[0].y)")
+    pg.mouse.move(sx, sy); pg.mouse.down(); pg.mouse.move(sx, sy + 20, steps=3); pg.mouse.up(); pg.wait_for_timeout(200)
+    bp2 = pg.evaluate("gf.marks[0].bp")
+    n0 = pg.evaluate("gf.bands.length"); pg.wait_for_timeout(500)
+    pg.mouse.dblclick(*pg.evaluate(f"({S})(gf.lanes[gf.ladder].x,gfProc().h*0.9)")); pg.wait_for_timeout(200)
+    n1 = pg.evaluate("gf.bands.length")
+    z = pg.evaluate(f"""(()=>{{ const [x1,cy]=({S})((gf.lanes[2].x+gf.lanes[3].x)/2,gfProc().h*0.95), [x2]=({S})((gf.lanes[5].x+gf.lanes[6].x)/2,0), cx=(x1+x2)/2;
+      const ev=(t,id,x)=>gcv.dispatchEvent(new PointerEvent(t,{{pointerId:id,pointerType:'touch',clientX:x,clientY:cy,bubbles:true}}));
+      ev('pointerdown',11,x1); ev('pointerdown',12,x2); ev('pointermove',12,2*x2-cx); ev('pointermove',11,2*x1-cx); const z=gf.zoom; ev('pointerup',11,2*x1-cx); ev('pointerup',12,2*x2-cx); gfZoom(1); return z; }})()""")
+    return [('dubbelklik meet 350 bp', bp, 350, 0.03), ('lager gesleept = kleiner', int(bp2 < bp * 0.95), 1, 0),
+            ('dubbelklik op ladder: band erbij', n1 - n0, 1, 0), ('knijpen 2× uit elkaar', z, 2, 0.01)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")
