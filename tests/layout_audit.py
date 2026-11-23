@@ -29,7 +29,7 @@ PATCH = PATCH.replace("get(){ return Object.getOwnPropertyDescriptor(HTMLCanvasE
 PATCH = "window.__gw=Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype,'width').get;" + PATCH
 
 AUDIT = r"""
-(tool)=>{ const sec=document.getElementById('t-'+tool), out=[]; const vis=e=>{ const r=e.getBoundingClientRect(); const cs=getComputedStyle(e); return r.width>0&&r.height>0&&cs.visibility!=='hidden'&&cs.display!=='none'; };
+(tool)=>{ const sec=document.getElementById('t-'+tool), out=[]; const vis=e=>{ const r=e.getBoundingClientRect(); const cs=getComputedStyle(e); return r.width>0&&r.height>0&&cs.visibility!=='hidden'&&cs.display!=='none'&&(!e.checkVisibility||e.checkVisibility()); };   /* checkVisibility: ook de inhoud van een dichte <details> telt niet */
   const name=e=>{ const t=(e.textContent||e.value||e.id||e.tagName).trim().replace(/\s+/g,' ').slice(0,40); return `${e.tagName.toLowerCase()}${e.id?'#'+e.id:''}${e.className&&typeof e.className==='string'?'.'+e.className.split(' ')[0]:''} "${t}"`; };
   /* 1. tekstoverloop */
   sec.querySelectorAll('button,.chip,label,th,.well,.kv dt,.kv dd,.big,h2,h3,.lbl,.cbtn,.grp,.u,summary').forEach(e=>{ if(!vis(e)||e.closest('.tbl-wrap')&&e.matches('td,th')) return; const cs=getComputedStyle(e); if(cs.overflow!=='visible'&&e.matches('.well')===false) return;

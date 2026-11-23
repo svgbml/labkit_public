@@ -537,3 +537,13 @@ html.darkroom img,html.darkroom canvas{filter:grayscale(1) sepia(1) hue-rotate(-
 html[data-cvd=deuteranopie] main{filter:url(#cvd-deuteranopie)}
 html[data-cvd=protanopie] main{filter:url(#cvd-protanopie)}
 html[data-cvd=tritanopie] main{filter:url(#cvd-tritanopie)}
+.mic-wells{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 0}
+.mic-wells button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:40px;padding:3px 2px;border:0;background:none;font-size:11px;color:var(--text);cursor:pointer}
+.mic-wells b{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);background:var(--surface)}
+.mic-wells .grow b{background:var(--muted);border-color:var(--muted)}
+.mic-wells .mic b{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.mpn-tubes{margin-top:12px}
+.mpn-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.mpn-m{width:76px;font-size:12.5px;color:var(--muted)}
+.mpn-row button{width:28px;height:44px;padding:0;border-radius:3px 3px 14px 14px;border:2px solid var(--line);background:var(--surface);cursor:pointer}
+.mpn-row button.pos{background:var(--accent);border-color:var(--accent)}

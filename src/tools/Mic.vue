@@ -27,6 +27,22 @@
         <div class="row" style="margin-top:10px">
           <button type="button" id="mi-add" @click="addMi">{{ t('+ Rij') }}</button>
         </div>
+        <div v-if="miRows.length" style="margin-top:12px">
+          <div class="f">
+            <label for="mi-sel">{{ t('Plaatrij') }}</label>
+            <select id="mi-sel" style="width:100%" v-model.number="sel">
+              <option v-for="(r, i) in miRows" :key="i" :value="i">{{ r[0] || (i + 1) }}</option>
+            </select>
+          </div>
+          <div class="mic-wells" role="group" :aria-label="t('Putjes van de gekozen rij')">
+            <button v-for="(g, i) in wellGrowth" :key="i" type="button" :class="{grow: g, mic: i === micIdx}" :aria-pressed="g"
+              :aria-label="concLbl[i] + ' ' + u + ': ' + (g ? t('groei') : t('helder'))" @click="tap(i)">
+              <b></b><span>{{ concLbl[i] }}</span>
+            </button>
+          </div>
+          <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Tik op een putje: troebel (groei) of helder (geen groei). De MIC is het laagste helder putje vóór de eerste groei.') }}</p>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Breekpunten: de tool bevat geen vaste tabel; controleer de actuele EUCAST-tabel voor jouw micro-organisme.') }}</p>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0"
           v-html="tHtml('Groei per putje van hoog naar laag: &lt;span class=&quot;mono&quot;&gt;− − − − + + + + + +&lt;/span&gt; of OD-waarden. Breekpunten in dezelfde eenheid; leeg laten = alleen MIC.')"></p>
       </div>
@@ -91,7 +107,7 @@ export default {
   data() {
     return {
       c0: '64', f: '2', n: '10', u: 'mg/L', od: lkNumIn('0,1'),
-      miRows: MIDATA.map(ex), mzRowsData: MZDATA.map(ex)
+      sel: 0, miRows: MIDATA.map(ex), mzRowsData: MZDATA.map(ex)
     };
   },
   computed: {
@@ -112,17 +128,20 @@ export default {
       const n = Math.max(2, Math.min(24, Math.round(num(this.n) || 10)));
       return {n, list: [...Array(n).keys()].map(i => c0 / f ** i)};
     },
-    concText() { return this.conc.list.map(v => L(sig(v, 3))).join(' · ') + ' ' + this.u; },
+    concLbl() { return this.conc.list.map(v => L(sig(v, 3))); },
+    concText() { return this.concLbl.join(' · ') + ' ' + this.u; },
     micRows() {
       const odT = num(this.od);
-      return this.miRows.map(r => {
-        const raw = String(r[1]).trim();
-        let gr;
-        if (/[+\-−]/.test(raw) && !/\d/.test(raw)) {
-          gr = raw.replace(/\s+/g, '').replace(/−/g, '-').split('').filter(ch => ch === '+' || ch === '-').map(ch => ch === '+');
-        } else gr = stNums(raw).map(v => v >= odT);
-        return {name: r[0], gr, s: num(r[2]), r: num(r[3])};
-      }).filter(r => r.gr.length);
+      return this.miRows.map(r => ({name: r[0], gr: this.grOf(r[1], odT), s: num(r[2]), r: num(r[3])})).filter(r => r.gr.length);
+    },
+    /* de gekozen rij als putjes: true = groei; een rij met OD-waarden wordt bij de eerste tik een +/−-rij */
+    wellGrowth() {
+      const g = this.grOf((this.miRows[this.sel] || [])[1] || '', num(this.od));
+      return this.conc.list.map((_, i) => !!g[i]);
+    },
+    micIdx() {
+      const m = micOf(this.wellGrowth, this.conc.list);
+      return m.gt ? 0 : m.lt ? this.conc.n - 1 : this.conc.list.indexOf(m.mic);
     },
     micCols() {
       const t = this.t;
@@ -168,6 +187,17 @@ export default {
       return c === '?' ? '<span class="chip info">' + this.t('reeks te kort') + '</span>'
         : c === 'S' ? '<span class="chip ok">S</span>' : c === 'R' ? '<span class="chip bad">R</span>'
         : c === 'I' ? '<span class="chip warn">I</span>' : '–';
+    },
+    grOf(rawIn, odT) {
+      const raw = String(rawIn).trim();
+      if (/[+\-−]/.test(raw) && !/\d/.test(raw)) {
+        return raw.replace(/\s+/g, '').replace(/−/g, '-').split('').filter(ch => ch === '+' || ch === '-').map(ch => ch === '+');
+      }
+      return stNums(raw).map(v => v >= odT);
+    },
+    tap(i) {
+      const g = this.wellGrowth.slice(); g[i] = !g[i];
+      this.miRows = this.miRows.map((r, k) => (k === this.sel ? [r[0], g.map(x => (x ? '+' : '-')).join(' '), r[2], r[3]] : r));
     },
     addMi() { this.miRows = [...this.miRows, ['', '', '', '']]; },
     addMz() { this.mzRowsData = [...this.mzRowsData, ['', '', '', '']]; }

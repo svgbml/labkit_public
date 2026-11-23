@@ -36,6 +36,22 @@
         </div>
         <div id="qp-impmsg"><lk-note v-if="impMsg" :kind="impMsg.kind" :html="impMsg.html"/></div>
       </details>
+      <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:13.5px">{{ t('Efficiëntie uit een standaardcurve (verdunningsreeks)') }}</summary>
+        <div class="f" style="margin-top:8px"><label for="qp-sc">{{ t('Plak per regel: hoeveelheid of verdunningsfactor, Ct doelgen, Ct referentiegen (optioneel)') }}</label>
+          <textarea id="qp-sc" rows="5" spellcheck="false" v-model="sc" :placeholder="scPlaceholder"></textarea></div>
+        <div class="row" style="margin-top:8px;gap:8px;align-items:flex-end">
+          <div class="f"><label for="qp-sc-k">{{ t('Eerste kolom is') }}</label>
+            <select id="qp-sc-k" v-model="scKind"><option value="q">{{ t('hoeveelheid') }}</option><option value="d">{{ t('verdunningsfactor') }}</option></select></div>
+          <button type="button" id="qp-sc-use" :disabled="!scOk" @click="useSc">{{ t('Gebruik in Pfaffl') }}</button>
+        </div>
+        <div id="qp-sc-res">
+          <lk-note v-if="!scOk" kind="info">{{ t('Minstens drie regels met een hoeveelheid boven nul en een Ct nodig.') }}</lk-note>
+          <template v-else>
+            <lk-big v-if="scRes.t" :label="t('Efficiëntie doelgen')" :value="F(scRes.t.eff, 1) + ' %'"/>
+            <lk-table :cols="scCols" :rows="scRows"/>
+          </template>
+        </div>
+      </details>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0" v-html="hint"></p>
     </div>
     <div class="result"><canvas id="qp-cv"></canvas>
@@ -67,7 +83,7 @@ export default {
       et: '100', er: '100', cal: '', mode: 'auto',
       rows: [[trPlain('Controle'), lkNumIn('23,9'), '20'], [trPlain('Controle'), '24', lkNumIn('20,1')], [trPlain('Controle'), lkNumIn('24,1'), lkNumIn('19,9')],
         [trPlain('Behandeld'), lkNumIn('21,4'), lkNumIn('20,2')], [trPlain('Behandeld'), lkNumIn('21,5'), lkNumIn('20,1')], [trPlain('Behandeld'), lkNumIn('21,6'), lkNumIn('20,3')]],
-      imp: '', refname: 'GAPDH', impMsg: null
+      imp: '', refname: 'GAPDH', impMsg: null, sc: '', scKind: 'q'
     };
   },
   computed: {
@@ -76,6 +92,20 @@ export default {
       return [{h: t('Monster'), t: 'txt', w: 130}, {h: t('Ct doelgen'), t: 'num', w: 80},
         {h: t('Ct referentiegen'), t: 'num', w: 80}];
     },
+    scPlaceholder() { return lkNumIn('100000\t15,0\t16,1\n10000\t18,3\t16,0\n1000\t21,6\t16,1'); },
+    /* helling door lineaire regressie van Ct tegen log10(hoeveelheid); E = 10^(−1/helling) − 1 (Pfaffl 2001; MIQE) */
+    scRes() {
+      const L = this.sc.split('\n').map(l => l.trim().split(/[\t;]|\s+/).map(num)).filter(c => c[0] > 0);
+      const fit = k => {
+        const P = L.filter(c => isFinite(c[k])); if (P.length < 3) return null;
+        const r = linreg(P.map(c => Math.log10(c[0]) * (this.scKind === 'd' ? -1 : 1)), P.map(c => c[k]));
+        return {b: r.b, r2: r.r2, eff: (10 ** (-1 / r.b) - 1) * 100};
+      };
+      return {t: fit(1), r: fit(2)};
+    },
+    scOk() { const r = this.scRes; return !!(r.t && isFinite(r.t.eff)); },
+    scCols() { const t = this.t; return [{h: ''}, {h: t('Helling'), num: true}, {h: 'R²', num: true}, {h: t('Efficiëntie'), num: true}]; },
+    scRows() { const t = this.t, r = this.scRes; return [[t('Doelgen'), r.t], [t('Referentiegen'), r.r]].filter(x => x[1]).map(([n, g]) => [n, F(g.b, 3), F(g.r2, 4), F(g.eff, 1) + ' %']); },
     placeholder() { return typeof LANG !== 'undefined' && LANG === 'en' ? PH_EN : PH_NL; },
     hint() {
       return this.tHtml('Efficiëntie haal je uit een verdunningsreeks (PCR-cyclus → qPCR-efficiëntie). Laat beide op 100% voor de klassieke 2<sup>−ΔΔCt</sup>.');
@@ -91,8 +121,16 @@ export default {
         byName[n].t.push(t); byName[n].r.push(rf);
       });
       if (groups.length < 2) return {ok: false, groups, eT, eR};
-      groups.forEach(g => { g.mt = mean(g.t); g.mr = mean(g.r); const d = g.t.map((t, i) => t - g.r[i]); g.dct = mean(d); g.sd = sd(d); });
+      groups.forEach(g => { g.mt = mean(g.t); g.mr = mean(g.r); const d = g.t.map((t, i) => t - g.r[i]); g.dct = mean(d); g.sd = sd(d); g.n2 = d.length; });
       const cal = byName[this.cal] || groups[0];
+      /* S110: t-toets van Welch op de ΔCt-waarden van elk monster tegen de kalibrator (Yuan e.a.,
+         BMC Bioinformatics 7:85, 2006); alleen met minstens twee replicaten aan beide kanten */
+      groups.forEach(g => {
+        if (g === cal || g.n2 < 2 || cal.n2 < 2) return;
+        const a = g.sd ** 2 / g.n2, b = cal.sd ** 2 / cal.n2, se2 = a + b; if (!(se2 > 0)) return;
+        const tv = (g.dct - cal.dct) / Math.sqrt(se2), df = se2 ** 2 / (a ** 2 / (g.n2 - 1) + b ** 2 / (cal.n2 - 1));
+        g.p = 2 * (1 - tcdf(Math.abs(tv), df));
+      });
       groups.forEach(g => { g.ddct = g.dct - cal.dct; g.fc = 2 ** (-g.ddct); g.lo = 2 ** (-(g.ddct + g.sd)); g.hi = 2 ** (-(g.ddct - g.sd)); g.pf = Et ** (cal.mt - g.mt) / Er ** (cal.mr - g.mr); });
       const usePf = this.mode === 'pfaffl' || (this.mode === 'auto' && (eT !== 100 || eR !== 100));
       return {ok: true, groups, cal, eT, eR, usePf, test: groups.filter(g => g !== cal),
@@ -112,7 +150,7 @@ export default {
       const t = this.t;
       return [{h: t('Monster')}, {h: 'n', num: true}, {h: t('Ct doel'), num: true}, {h: t('Ct ref'), num: true},
         {h: 'ΔCt', num: true}, {h: 'SD', num: true}, {h: 'ΔΔCt', num: true}, {h: '2^−ΔΔCt', num: true},
-        {h: t('Bereik'), num: true}, {h: 'Pfaffl', num: true}, {h: 'log₂ FC', num: true}];
+        {h: t('Bereik'), num: true}, {h: 'Pfaffl', num: true}, {h: 'log₂ FC', num: true}, {h: t('p (Welch)'), num: true}];
     },
     outRows() {
       const {groups, cal, usePf} = this.m;
@@ -120,7 +158,8 @@ export default {
         cls: g === cal ? 'dim' : null,
         cells: [g === cal ? this.tHtml(ud(g.n) + ' (kalibrator)') : esc(g.n), lkNumIn(g.t.length), F(g.mt, 2), F(g.mr, 2), F(g.dct, 2),
           g.t.length > 1 ? F(g.sd, 2) : '', F(g.ddct, 2), S(g.fc, 3),
-          g.t.length > 1 ? S(g.lo, 3) + ' – ' + S(g.hi, 3) : '', S(g.pf, 3), F(Math.log2(usePf ? g.pf : g.fc), 2)]
+          g.t.length > 1 ? S(g.lo, 3) + ' – ' + S(g.hi, 3) : '', S(g.pf, 3), F(Math.log2(usePf ? g.pf : g.fc), 2),
+          g.p != null ? S(g.p, 2) + ' ' + stStars(g.p, 0.05) : '']
       }));
     },
     warnings() {
@@ -135,12 +174,15 @@ export default {
   mounted() { this.draw(); },
   updated() { this.draw(); },
   methods: {
+    F,
+    useSc() { const r = this.scRes; if (r.t) this.et = lkNumIn(fmt(r.t.eff, 1)); if (r.r) this.er = lkNumIn(fmt(r.r.eff, 1)); },
     addRow() { this.rows = [...this.rows, ['', '', '']]; },
     draw() {
       const cv = document.getElementById('qp-cv'), m = this.m; if (!cv || !m.ok) return;
       const {groups, cal, usePf} = m;
       barChart(cv, groups.map(g => g.n), groups.map(g => usePf ? g.pf : g.fc), groups.map(g => usePf ? NaN : g.lo), groups.map(g => usePf ? NaN : g.hi),
-        {ylabel: this.t(usePf ? 'relatieve expressie (Pfaffl)' : 'fold change (2^−ΔΔCt)'), cal: cal.n});
+        {ylabel: this.t(usePf ? 'relatieve expressie (Pfaffl)' : 'fold change (2^−ΔΔCt)'), cal: cal.n,
+          stars: groups.map(g => (g.p != null ? stStars(g.p, 0.05) : ''))});
     },
     /* een Ct-export van het apparaat: kolommen monster, target en Ct/Cq, met kopregel */
     doImport() {
