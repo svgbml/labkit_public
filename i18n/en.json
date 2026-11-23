@@ -5839,5 +5839,18 @@
 "leesraam {#}": "frame {#}",
 "Alleen de eerste {#} sequenties staan in de matrix.": "Only the first {#} sequences are in the matrix.",
 "Stuk": "Region",
-"Naar Primerkaart": "To primer card"
+"Naar Primerkaart": "To primer card",
+"Batch: genotypes per monster": "Batch: genotypes per sample",
+"Geef bij Referentie en assay een referentie of een assay; dan worden de bestanden uitgelijnd.": "Give a reference or an assay under Reference and assay; the files are then aligned.",
+"Allelen op de streng van de assay; een streepje betekent dat de read de SNP niet dekt, een uitroepteken dat de allelen niet bij de assay horen.": "Alleles on the strand of the assay; a dash means the read does not cover the SNP, an exclamation mark that the alleles do not belong to the assay.",
+"Tabel als CSV": "Table as CSV",
+"Overlay per SNP": "Overlay per SNP",
+"SNP": "SNP",
+"De trace rond één SNP van alle monsters onder elkaar": "The trace around one SNP of all samples stacked",
+"Elke strook toont {#} basen rond de SNP, gecentreerd op de piek van de SNP; bij een reverse read loopt de trace in de richting van de read.": "Each strip shows {#} bases around the SNP, centred on the SNP's peak; for a reverse read the trace runs in the direction of the read.",
+"Batch (veel bestanden)": "Batch (many files)",
+"Kies of sleep meerdere .ab{#}- of FASTA-bestanden: elk is een monster. Ze worden tegen de referentie uitgelijnd met dezelfde drempels als hierboven.": "Choose or drop several .ab{#} or FASTA files: each is one sample. They are aligned to the reference with the same thresholds as above.",
+"Meerdere bestanden kiezen": "Choose several files",
+"Identiek": "Identical",
+"{#} monsters geladen": "{#} samples loaded"
 }

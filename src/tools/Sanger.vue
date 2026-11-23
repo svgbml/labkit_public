@@ -89,6 +89,24 @@
           <p style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Allelen op de streng van de assay; een SNP op de andere streng wordt automatisch omgedraaid.') }}</p>
           <lk-table table-id="sg-gt-tbl" :cols="gtCols" :rows="gtRows"/>
         </div>
+        <!-- S162: veel reads tegelijk, een rij per monster, en dezelfde SNP van alle monsters onder elkaar -->
+        <div v-if="batch.length" id="sg-batch" style="margin-top:12px">
+          <h3>{{ t('Batch: genotypes per monster') }}</h3>
+          <lk-note v-if="!refSeq" kind="warn">{{ t('Geef bij Referentie en assay een referentie of een assay; dan worden de bestanden uitgelijnd.') }}</lk-note>
+          <template v-else>
+            <p style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Allelen op de streng van de assay; een streepje betekent dat de read de SNP niet dekt, een uitroepteken dat de allelen niet bij de assay horen.') }}</p>
+            <div style="overflow:auto"><lk-table table-id="sg-bt-tbl" :cols="btCols" :rows="btRows"/></div>
+            <div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><button type="button" id="sg-bt-csv" @click="saveBatch">{{ t('Tabel als CSV') }}</button></div>
+            <template v-if="assayOn && assayEff.snps.length">
+              <h3 style="margin-top:12px">{{ t('Overlay per SNP') }}</h3>
+              <div class="f"><label for="sg-ov-snp">{{ t('SNP') }}</label>
+                <select id="sg-ov-snp" v-model="ovSnp"><option v-for="(s, i) in assayEff.snps" :key="i" :value="String(i)">{{ s.rs }}</option></select></div>
+              <canvas id="sg-ovcv" ref="ovcv" style="width:100%;display:block;margin-top:6px" :style="{height: ovH + 'px'}"
+                      :aria-label="t('De trace rond één SNP van alle monsters onder elkaar')"></canvas>
+              <p style="font-size:13px;color:var(--muted);margin:4px 0 0">{{ t('Elke strook toont 17 basen rond de SNP, gecentreerd op de piek van de SNP; bij een reverse read loopt de trace in de richting van de read.') }}</p>
+            </template>
+          </template>
+        </div>
         <div v-if="aln1 && aln2" id="sg-fr" style="margin-top:12px">
           <h3>{{ t('Forward/reverse-bevestiging') }}</h3>
           <p style="font-size:13px;margin:4px 0">{{ frCounts }}</p>
@@ -174,6 +192,16 @@
         </div>
         <lk-note v-for="(e, i) in edErr" :key="i" :kind="edOk ? 'ok' : 'bad'">{{ e }}</lk-note>
       </details>
+      <details class="panel" id="sg-bp" :open="batch.length > 0">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Batch (veel bestanden)') }}</summary>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('Kies of sleep meerdere .ab1- of FASTA-bestanden: elk is een monster. Ze worden tegen de referentie uitgelijnd met dezelfde drempels als hierboven.') }}</p>
+        <div class="dropzone" :style="bover ? 'outline:2px dashed var(--accent)' : ''" style="padding:10px"
+             @dragover.prevent="bover = true" @dragleave="bover = false" @drop.prevent="bdrop">
+          <input type="file" id="sg-bfiles" multiple accept=".ab1,.abi,.fasta,.fa,.fas,.seq,.txt" :aria-label="t('Meerdere bestanden kiezen')" @change="bpick">
+        </div>
+        <p v-if="batch.length" style="font-size:13px;margin:6px 0 0">{{ t(batch.length + ' monsters geladen') }}</p>
+        <div class="row" style="gap:6px;margin-top:8px"><button type="button" id="sg-bclear" @click="bclear">{{ t('Wissen') }}</button></div>
+      </details>
       <details class="panel" id="sg-r2p" :open="read2Ok">
         <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Tweede read (forward/reverse)') }}</summary>
         <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('De andere read van hetzelfde monster. Beide worden tegen de referentie uitgelijnd en per positie vergeleken.') }}</p>
@@ -199,6 +227,7 @@ import {hetCalls, flags} from '../lib/sangerhet.js';
 import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 import {parseRef, alignRead, variants, parseAssay, assayJson, snpCalls, confirm, TEACH, teachReads, DEC} from '../lib/sangeralign.js';
+import {callSample, genotypeRows, overlayStrips} from '../lib/sangerbatch.js';
 import {SEQ_TO} from '../lib/seq.js';
 
 /* de referentie kan uit Sequentie komen (ook een sequentie die daar bij NCBI is opgehaald) */
@@ -250,7 +279,7 @@ export default {
       edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1),
       refText: st['sg-ref'] != null ? String(st['sg-ref']) : '', assayKey: st['sg-assay'] != null ? String(st['sg-assay']) : '', own: jget(AKEY, []),
       read2: jget('sg-read2', null) ? markRaw(jget('sg-read2', null)) : null, paste2: st['sg-paste2'] != null ? String(st['sg-paste2']) : '',
-      edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
+      batch: [], bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
   },
   computed: {
     HT() { return HT; },
@@ -442,6 +471,14 @@ export default {
     },
     frCols() { const t = this.t; return [{h: t('Positie') + ' (g.)', num: true}, {h: t('Referentie')}, {h: t('Eerste read')}, {h: t('Tweede read')}]; },
     frDiff() { return this.conf.rows.filter(x => x.st === 'diff').map(x => [this.G + x.r, this.refSeq[x.r], esc(x.a || '–'), esc(x.b || '–')]); },
+    /* ---------- batch (S162) ---------- */
+    bsamples() {
+      const ref = this.refSeq && !this.refBig ? this.refSeq : '';
+      return this.batch.map(b => Object.assign(callSample(b.r, ref, this.assayEff, {het: this.hN, win: this.winN, q: this.qN}), {read: b.r, id: b.id}));
+    },
+    btCols() { const t = this.t; return [{h: t('Monster')}, {h: t('Identiek') + ' %', num: true}].concat(this.assayEff.snps.map(s => ({h: s.rs}))); },
+    btRows() { return genotypeRows(this.bsamples, this.assayEff).map(r => r.map((v, i) => i === 1 ? (v == null ? '–' : NL(v, 1)) : esc(String(v)))); },
+    ovH() { return Math.max(60, this.batch.length * 52 + 8); },
     edCols() { const t = this.t; return [{h: t('SNP (rs)'), t: 'txt', w: 110}, {h: t('Positie'), t: 'num', w: 60}, {h: t('Allelen'), t: 'txt', w: 60}, {h: t('Streng'), t: 'sel', o: ['+', '-']}]; }
   },
   watch: {
@@ -454,12 +491,14 @@ export default {
     edits() { this.draw(); },
     het() { this.draw(); },
     trim() { this.draw(); },
+    bsamples() { this.$nextTick(this.paintOv); },
+    ovSnp() { this.$nextTick(this.paintOv); },
     qN() { this.draw(); }
   },
-  created() { this.dye = DYE; this.view = {x0: 0, spp: 1}; this.drag = null; },
+  created() { this.bid = 0; this.dye = DYE; this.view = {x0: 0, spp: 1}; this.drag = null; },
   mounted() {
     window.__sgVm = this;
-    this.ro = new ResizeObserver(() => this.draw());
+    this.ro = new ResizeObserver(() => { this.draw(); this.paintOv(); });
     this.ro.observe(this.$el);
     this.$nextTick(this.draw);
   },
@@ -772,6 +811,44 @@ export default {
     alnClick(e) {
       const el = e.target.closest('[data-q]');
       if (el && this.read && this.read.peaks.length) this.goTo(+el.dataset.q);
+    },
+    /* ---------- batch (S162) ---------- */
+    bpick(e) { this.addBatch([...e.target.files]); e.target.value = ''; },
+    bdrop(e) { this.bover = false; this.addBatch([...e.dataTransfer.files]); },
+    async addBatch(files) {
+      const out = [];
+      for (const f of files) {
+        const x = readFile(await f.arrayBuffer(), f.name);
+        if (x.err) { this.err = this.t(x.err) + ' (' + f.name + ')'; continue; }
+        out.push({id: ++this.bid, r: markRaw(x.r)});
+      }
+      this.batch = this.batch.concat(out);
+    },
+    bclear() { this.batch = []; const f = document.getElementById('sg-bfiles'); if (f) f.value = ''; },
+    saveBatch() {
+      const rows = [this.btCols.map(c => c.h)].concat(this.btRows.map(r => r.map(v => String(v).replace(/&amp;/g, '&'))));
+      saveBlob('chromatogram-batch.csv', csvBlob(rows.map(r => r.join('\t')).join('\n'))).catch(() => {});
+    },
+    /* de overlay: per monster de trace rond de gekozen SNP, op de piek van de SNP gecentreerd */
+    paintOv() {
+      const cv = this.$refs.ovcv;
+      if (!cv || !cv.clientWidth) return;
+      const W = cv.clientWidth, H = this.ovH, s = window.devicePixelRatio || 1, i = Number(this.ovSnp) || 0, SH = 52;
+      cv.width = Math.round(W * s); cv.height = Math.round(H * s);
+      const x = cv.getContext('2d');
+      x.setTransform(s, 0, 0, s, 0, 0); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+      x.font = '11px system-ui,sans-serif'; x.textBaseline = 'top';
+      overlayStrips(this.bsamples, i, 8, W).forEach((st, k) => {
+        const y = k * SH + 4;
+        x.fillStyle = '#5f6b7a'; x.textAlign = 'left';
+        x.fillText(st.name + (st.q < 0 ? ' – ' + this.t('niet gedekt') : ' · ' + st.gt + (st.strand === '-' ? ' (−)' : '')), 4, y);
+        if (st.q < 0) return;
+        if (st.traces) {
+          drawTraces(x, st.traces, {x0: st.x0, spp: st.spp}, {x: 0, y: y + 14, w: W, h: SH - 20});
+          x.strokeStyle = 'rgba(21,101,192,.5)'; x.setLineDash([3, 3]); x.beginPath(); x.moveTo(st.cx, y + 14); x.lineTo(st.cx, y + SH - 6); x.stroke(); x.setLineDash([]);
+        } else { x.fillStyle = DYE[st.base] || GREY; x.font = 'bold 14px system-ui,sans-serif'; x.textAlign = 'center'; x.fillText(st.base, W / 2, y + 18); x.font = '11px system-ui,sans-serif'; }
+        x.strokeStyle = '#e1e4ea'; x.beginPath(); x.moveTo(0, y + SH - 3.5); x.lineTo(W, y + SH - 3.5); x.stroke();
+      });
     },
     clear() {
       this.read = null; this.edits = {}; this.sel = null; this.rng = null; this.paste = ''; this.err = '';
