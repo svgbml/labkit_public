@@ -118,7 +118,7 @@
         <div class="f" style="margin-top:12px"><label for="al-dnd">{{ t('Newick-tekst van de boom') }}</label>
           <textarea id="al-dnd" class="mono" rows="4" v-model="dnd" spellcheck="false" wrap="off"></textarea></div>
         <div class="row" style="margin-top:8px"><input type="file" id="al-dnd-file" accept=".dnd,.nwk,.newick,.tree,.txt" :aria-label="t('Bestand openen')" @change="onDnd"></div>
-        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('De boom wordt bewaard en gaat mee in het projectbestand; hier tekenen kan nog niet.') }}</p>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('De boom gaat mee in het projectbestand en wordt getekend bij Boom tekenen, onder de uitlijning.') }}</p>
       </details>
       <!-- S180: varianten in de nummering van een referentie, en een eigen Sanger-read als extra rij -->
       <details class="panel" id="al-var-d" style="margin-top:12px" @toggle="varOpen = $event.target.open"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Varianten en eigen read') }}</summary>
@@ -189,6 +189,25 @@
       <div class="row" style="margin-top:10px"><button type="button" id="al-pimx" @click="exportPim">{{ t('Matrix opslaan als .pim') }}</button></div>
     </template>
   </details>
+  <!-- S182: de boom tekenen (rechthoekig of radiaal) met taklengtes en schaalstreep; SVG op het scherm, PNG via een canvas buiten de pagina -->
+  <details id="al-tv-d" class="panel" style="margin-top:12px" @toggle="tvOpen = $event.target.open"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Boom tekenen') }}</summary>
+    <div class="fields" style="margin-top:12px">
+      <div class="f"><label for="al-tmode">{{ t('Vorm') }}</label>
+        <select id="al-tmode" v-model="tmode"><option value="rect">{{ t('Rechthoekig') }}</option><option value="radial">{{ t('Radiaal') }}</option></select></div>
+    </div>
+    <template v-if="tvOpen">
+      <lk-note v-if="!tree.root" :kind="dnd.trim() ? 'bad' : 'info'">{{ t(tree.error || 'Plak een .dnd of Newick-boom bij Gidsboom (.dnd).') }}</lk-note>
+      <template v-else>
+        <div id="al-tree" class="aln-tree" style="margin-top:12px" v-html="treeView"></div>
+        <lk-note v-if="treeMiss.length" kind="warn">{{ t('Niet in de uitlijning:') }} <b style="overflow-wrap:anywhere">{{ treeMiss.join(', ') }}</b></lk-note>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('Taklengtes op schaal; de streep onderaan geeft de lengte die erbij staat. Zonder taklengtes telt elke tak als één.') }}</p>
+        <div class="row" style="margin-top:10px">
+          <button type="button" class="primary" id="al-tree-png" @click="treePng">{{ t('PNG opslaan') }}</button>
+          <button type="button" id="al-tree-svg" @click="treeSvgSave">{{ t('SVG opslaan') }}</button>
+        </div>
+      </template>
+    </template>
+  </details>
   <details v-if="m.format && m.names.length" id="al-cons-d" class="panel" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Geconserveerde stukken') }}</summary>
     <div class="fields" style="margin-top:12px">
       <lk-field v-model="ct" :label="t('Conservering minstens')" for-id="al-ct" unit="%" inputmode="numeric"/>
@@ -240,6 +259,7 @@ import {alnUngapped, EBI_URL} from '../lib/alnhand.js';
 import {alnFigure, figSvg, figPaint} from '../lib/alnfig.js';
 import {alnProjectWrite, alnProjectRead, PROJ_KEYS} from '../lib/alnproj.js';
 import {alnVariants, alnAddRead} from '../lib/alnvar.js';
+import {parseNewick, treeLeaves, treeLayout, treeSvg, treePaint} from '../lib/tree.js';
 
 /* S180: een read uit het Chromatogram (of Sequentie) komt als eigen rij in de uitlijning */
 SEQ_TO.push({label: 'Alignment bekijken (eigen read)', tool: 'aln', id: 'al-read'});
@@ -248,7 +268,7 @@ const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
 const PROJ_IDS = {txt: 'al-in', dnd: 'al-dnd', col: 'al-col', cbs: 'al-cbs', thr: 'al-thr', motif: 'al-motif', ord: 'al-ord', ref: 'al-ref', tr: 'al-tr', code: 'al-code',
   gap: 'al-gap', from: 'al-from', to: 'al-to', xf: 'al-xf', gm: 'al-gm', pa: 'al-pa', pb: 'al-pb', ct: 'al-ct', cl: 'al-cl',
-  fgFrom: 'al-fg-from', fgTo: 'al-fg-to', fgPer: 'al-fg-per', fgTitle: 'al-fg-title', fgCons: 'al-fg-cons', vref: 'al-vref', rd: 'al-read'};
+  fgFrom: 'al-fg-from', fgTo: 'al-fg-to', fgPer: 'al-fg-per', fgTitle: 'al-fg-title', fgCons: 'al-fg-cons', vref: 'al-vref', rd: 'al-read', tmode: 'al-tmode'};
 const VARMAX = 500;  /* rijen in de variantentabel */
 const PIMMAX = 60;  /* sequenties in de matrix: 60 x 60 cellen is wat een scherm nog toont */
 const CH = 18, RH = 22, PH = 32, MAXNAME = 24; /* rijhoogte, hoogte van de liniaal en van de plot, naamkolom in tekens */
@@ -265,6 +285,7 @@ export default {
       xf: st['al-xf'] != null ? String(st['al-xf']) : 'fasta', gm: st['al-gm'] != null ? String(st['al-gm']) : 'ign',
       pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false, projMsg: null, figOpen: false, fgFrom: st['al-fg-from'] != null ? String(st['al-fg-from']) : '', fgTo: st['al-fg-to'] != null ? String(st['al-fg-to']) : '', fgPer: st['al-fg-per'] != null ? String(st['al-fg-per']) : '60',
       fgTitle: st['al-fg-title'] != null ? String(st['al-fg-title']) : '', fgCons: st['al-fg-cons'] != null ? !!st['al-fg-cons'] : true, dnd: st['al-dnd'] != null ? String(st['al-dnd']) : '',
+      tmode: st['al-tmode'] != null ? String(st['al-tmode']) : 'rect', tvOpen: false,
       rd: st['al-read'] != null ? String(st['al-read']) : '', vref: st['al-vref'] != null ? String(st['al-vref']) : '0', varOpen: false, VARMAX,
       fb: st['al-fb'] != null ? String(st['al-fb']) : '', fbt: st['al-fbt'] != null ? String(st['al-fbt']) : 'auto', NAMEMAX, EBI_URL,
       ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
@@ -281,6 +302,11 @@ export default {
       return [[t('Streng'), h.strand === '+' ? t('zoals de referentie') : t('reverse complement')], [t('Op de referentie'), N(h.rFrom + 1) + ' – ' + N(h.rTo + 1)],
         [t('Identiteit'), P(h.ident) + ' (' + N(h.mism) + ' ' + t('verschillen') + ', ' + N(h.ins + h.del) + ' ' + t('gaten') + ')']];
     },
+    /* S182: de boom uit het .dnd-vak */
+    tree() { return this.dnd.trim() ? parseNewick(this.dnd) : {}; },
+    treeL() { return this.tree.root ? treeLayout(this.tree.root, {mode: this.tmode}) : null; },
+    treeView() { return this.treeL ? treeSvg(this.treeL, {ink: 'currentColor'}) : ''; },
+    treeMiss() { const s = new Set(this.parsed.names); return this.tree.root && s.size ? treeLeaves(this.tree.root).filter(n => !s.has(n)) : []; },
     vars() { return this.varOpen ? alnVariants(this.src, this.vrefI) : []; },
     varCols() { const t = this.t; return [{h: t('Sequentie')}, {h: t('Variant')}, {h: t('Positie'), num: true}, {h: t('Kolom'), num: true}]; },
     varRows() { return this.vars.slice(0, VARMAX).map(v => [esc(v.name), '<span class="mono">' + esc(v.hgvs) + '</span>', N(v.pos), N(v.col)]); },
@@ -298,7 +324,7 @@ export default {
       const t = this.t;
       return [['<span class="mono">.aln</span> / <span class="mono">.clustal_num</span>', t('de uitlijning'), t('Plak hem of open hem bij Uitlijning, bovenaan.')],
         ['<span class="mono">.pim</span>', t('identiteit per paar'), t('Niet nodig: de Identiteitsmatrix hieronder rekent hetzelfde uit en slaat hem op als .pim.')],
-        ['<span class="mono">.dnd</span>', t('de gidsboom (Newick)'), t('Bij Gidsboom (.dnd), hieronder: hij wordt bewaard; tekenen kan nog niet.')]];
+        ['<span class="mono">.dnd</span>', t('de gidsboom (Newick)'), t('Bij Gidsboom (.dnd), hieronder; getekend bij Boom tekenen.')]];
     },
     /* S188: de figuur van wat de viewer toont (bijgesneden, vertaald, in de gekozen volgorde en kleuren) */
     fig() { return this.figOpen ? this.makeFig() : {W: 0}; },
@@ -618,6 +644,12 @@ export default {
       const f = ALN_OUT[this.xf] || ALN_OUT.fasta;
       saveBlob('uitlijning.' + f[1], new Blob([this.outText], {type: 'text/plain'})).catch(() => {});
     },
+    treePng() {
+      const cv = document.createElement('canvas');   /* alleen voor het bestand, nooit in de pagina: geen SVGSKIP nodig */
+      treePaint(cv, this.treeL, 2);
+      cv.toBlob(bl => { if (bl) saveBlob('boom.png', bl).catch(() => {}); }, 'image/png');
+    },
+    treeSvgSave() { saveBlob('boom.svg', new Blob([treeSvg(this.treeL, {bg: '#fff'})], {type: 'image/svg+xml'})).catch(() => {}); },
     exportPim() { saveBlob('identiteit.pim', new Blob([pimWrite(this.pimNames, this.pim)], {type: 'text/plain'})).catch(() => {}); },
     /* een geconserveerd stuk (consensus, zonder gaten) als regel in de Primerkaart */
     onReg(e) {

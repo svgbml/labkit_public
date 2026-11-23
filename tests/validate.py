@@ -2259,5 +2259,26 @@ def _(pg):
     return out
 
 
+@case('Alignment bekijken', 'Clustal-gidsboom (.dnd) tekenen met taklengtes', 'tests/fixtures/aln/small.dnd in de opmaak van Clustal W/Omega (een knoop per regel, drietak in de wortel; Newick-formaat volgens Felsenstein, PHYLIP-documentatie). Verwacht, met de hand opgeteld: afstand tot de wortel A 0,15, B 0,25, C 0,36, D e 0,46, E 0,70; in de rechthoekige tekening staat elk label op x = 14 + afstand x 360/0,70 (taklengtes op schaal), in de radiale op straal 4 + afstand x 160/0,70 van het midden; schaalstreep 0,2')
+def _(pg):
+    exp = {'A': 0.15, 'B': 0.25, 'C': 0.36, 'D e': 0.46, 'E': 0.70}
+    pg.evaluate("__go('aln')"); pg.evaluate("t=>__set('al-dnd',t)", (ROOT / 'tests' / 'fixtures' / 'aln' / 'small.dnd').read_text(encoding='utf-8'))
+    pg.evaluate("__set('al-tmode','rect')"); pg.evaluate(ALN_OPEN, 'al-tv-d'); pg.wait_for_timeout(300)
+    lab = "[...document.querySelectorAll('#al-tree svg text')].map(e=>[e.textContent,+e.getAttribute('x'),+e.getAttribute('y')])"
+    t = pg.evaluate(lab)
+    out = [('labels (5 bladen + schaal)', len(t), 6, 0)]
+    for name, d in exp.items():
+        x = [r[1] for r in t if r[0] == name]
+        out.append(('rechthoekig: x van ' + name, x[0] if x else -1, 14 + d * 360 / 0.7, 0.002))
+    out.append(('schaalstreep', float(t[-1][0]) if t else -1, 0.2, 0))
+    pg.evaluate("__set('al-tmode','radial')"); pg.wait_for_timeout(300)
+    t = pg.evaluate(lab); svg = pg.evaluate("document.querySelector('#al-tree svg').getAttribute('width')")
+    c = float(svg) / 2
+    for name, d in exp.items():
+        r = [((x - c) ** 2 + (y - c) ** 2) ** 0.5 for n, x, y in t if n == name]
+        out.append(('radiaal: straal van ' + name, r[0] if r else -1, 4 + d * 160 / 0.7, 0.002))
+    pg.evaluate("()=>{__set('al-tmode','rect');__set('al-dnd','')}")
+    return out
+
 if __name__ == '__main__':
     main()

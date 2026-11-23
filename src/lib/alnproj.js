@@ -3,7 +3,7 @@
 /* ---------- projectbestand (S189) ----------
    Eén JSON: {app, tool: 'aln', versie, opgeslagen, uitlijning (tekst), boom (tekst van .dnd of ''), instellingen {...}}.
    Dezelfde 'app'-sleutel als het sessiebestand van LabKit, met tool: 'aln' om ze uit elkaar te houden. */
-export const PROJ_KEYS = ['col', 'cbs', 'thr', 'motif', 'ord', 'hand', 'ref', 'tr', 'code', 'gap', 'from', 'to', 'xf', 'gm', 'pa', 'pb', 'ct', 'cl', 'fgFrom', 'fgTo', 'fgPer', 'fgTitle', 'fgCons', 'vref', 'rd'];
+export const PROJ_KEYS = ['col', 'cbs', 'thr', 'motif', 'ord', 'hand', 'ref', 'tr', 'code', 'gap', 'from', 'to', 'xf', 'gm', 'pa', 'pb', 'ct', 'cl', 'fgFrom', 'fgTo', 'fgPer', 'fgTitle', 'fgCons', 'vref', 'rd', 'tmode'];
 export function alnProjectWrite(st, version) {
   const instellingen = {};
   for (const k of PROJ_KEYS) if (st[k] !== undefined) instellingen[k] = st[k];

@@ -5986,5 +5986,18 @@
 "Variant": "Variant",
 "Eigen read": "Own read",
 "Alignment bekijken (eigen read)": "View alignment (own read)",
-"Naar Alignment bekijken": "To View alignment"
+"Naar Alignment bekijken": "To View alignment",
+"De boom gaat mee in het projectbestand en wordt getekend bij Boom tekenen, onder de uitlijning.": "The tree is saved in the project file and drawn under Draw tree, below the alignment.",
+"Bij Gidsboom (.dnd), hieronder; getekend bij Boom tekenen.": "In Guide tree (.dnd), below; drawn under Draw tree.",
+"Boom tekenen": "Draw tree",
+"Rechthoekig": "Rectangular",
+"Radiaal": "Radial",
+"Plak een .dnd of Newick-boom bij Gidsboom (.dnd).": "Paste a .dnd or Newick tree in Guide tree (.dnd).",
+"Niet in de uitlijning:": "Not in the alignment:",
+"Taklengtes op schaal; de streep onderaan geeft de lengte die erbij staat. Zonder taklengtes telt elke tak als één.": "Branch lengths to scale; the bar at the bottom shows the length written next to it. Without branch lengths every branch counts as one.",
+"Een naam tussen aanhalingstekens wordt niet afgesloten.": "A quoted name is not closed.",
+"Haakjes kloppen niet: verwacht , of ).": "Parentheses do not match: expected , or ).",
+"Een taklengte is geen getal.": "A branch length is not a number.",
+"Er staat geen boom.": "There is no tree.",
+"Haakjes kloppen niet: tekst na het einde van de boom.": "Parentheses do not match: text after the end of the tree."
 }
