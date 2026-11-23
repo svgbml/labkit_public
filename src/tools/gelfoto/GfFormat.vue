@@ -58,6 +58,12 @@
           <input type="checkbox" :id="o.id" v-model="f[o.id]"> {{ t(o.n) }}
         </label>
       </div>
+      <div id="gf-integ" style="font-size:12.5px;margin-top:8px">
+        <b>{{ t('Bewerkingen van de foto') }}</b>
+        <span v-if="!edits.length" style="color:var(--muted)"> {{ t('geen') }}</span>
+        <ul v-else style="margin:2px 0 0;padding-left:18px"><li v-for="e in edits" :key="e">{{ t(e) }}</li></ul>
+        <lk-note v-if="clip" kind="warn">{{ t('Helderheid en contrast kappen ' + clip + ' % van de pixels af.') }} {{ t('Dat is een niet-lineaire bewerking: banden in die pixels zijn niet meer te kwantificeren, en tijdschriften vragen dan om de onbewerkte foto.') }}</lk-note>
+      </div>
       <div class="row" style="margin-top:10px">
         <div class="f">
           <label for="gx-fmt">{{ t('Formaat') }}</label>
@@ -101,7 +107,8 @@ const BOXES = [
   {id: 'gx-ticks', n: 'Streepjes ladder'},
   {id: 'gx-unit', n: 'Eenheid (bp/kDa)'},
   {id: 'gx-marks', n: 'Metingen'},
-  {id: 'gx-pad', n: 'Witte rand'}
+  {id: 'gx-pad', n: 'Witte rand'},
+  {id: 'gx-integ', n: 'Bewerkingen vermelden'}
 ];
 
 /* Stijlpresets: alleen waarden voor bestaande velden; gxOpts() en gfUpdate() tekenen ze.
@@ -144,6 +151,9 @@ export default {
     /* de preset waarvan alle velden nog gelden; wie een veld aanpast, wist de markering */
     active() { const p = PRESETS.find(p => Object.keys(p.v).every(k => String(this.f[k]) === String(p.v[k]))); return p && p.id; },
     fsTxt() { return lkNumIn(String(Math.round(+this.f.fs) || 0)); },
+    /* eerlijk bewerken (S75): de lijst uit gfEdits(), dezelfde die onder de figuur komt */
+    edits() { this.tick; return gfEdits(); },
+    clip() { this.tick; if (!gf.src) return ''; const c = gfProc().clip; return c > 0.005 ? lkNumIn(fmt(c * 100, 1)) : ''; },
     /* De downloadknop verschijnt pas als opslaan kan (buiten de app van Claude altijd, daar
        zodra de downloadcapability er is). showDl() in index.html tikt de componenten op. */
     dlOn() { this.tick; return typeof dlShown !== 'undefined' && dlShown; }

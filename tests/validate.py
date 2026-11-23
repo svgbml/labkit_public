@@ -448,6 +448,27 @@ def _(pg):
             ('4× Ctrl+Z = begintoestand', int(s1 == s0), 1, 0), ('Ctrl+Y: lane weer weg', l1, 8, 0),
             ('klik op laatste stap', int(s4 == '[8,0,20,"Andere titel"]'), 1, 0)]
 
+@case('Gelfoto-editor', 'Automatisch verbeteren en eerlijk bewerken', 'Zelftest: op de realistische testgel (tests/make_test_gel.py, 2,0° scheef) zet automatisch verbeteren hem 2° recht en rekt het contrast op, en noemt beide; de export krijgt met "Bewerkingen vermelden" een regel eronder (hoger dan zonder); de voor/na-schuif toont links de onbewerkte foto, de export niet')
+def _(pg):
+    pg.goto('about:blank'); pg.goto(URL + '#gelfoto'); pg.wait_for_timeout(800); pg.evaluate(HELPERS)
+    pg.set_input_files('#gf-file', str(ROOT / 'tests' / 'fixtures' / 'gel_realistic.png')); pg.wait_for_timeout(1500)
+    pg.evaluate("document.getElementById('gf-enh').click()"); pg.wait_for_timeout(1500)
+    fine, con, enh = pg.evaluate("[gf.fine, gf.con, gf.enh.join('|')]")
+    h1 = pg.evaluate("gfRender(true,1).height")
+    pg.evaluate("const e=document.getElementById('gx-integ'); e.checked=false; e.dispatchEvent(new Event('change',{bubbles:true})); gfRender()")
+    h0 = pg.evaluate("gfRender(true,1).height")
+    pg.evaluate("const e=document.getElementById('gx-integ'); e.checked=true; e.dispatchEvent(new Event('change',{bubbles:true}))")
+    px = "(c=>{ const L=gf.layout||{L:0,T:0}, P=gfProc(); return Array.from(c.getContext('2d').getImageData(L.L+Math.round(P.w*0.2),L.T+Math.round(P.h*0.5),1,1).data.slice(0,3)).join(); })"
+    pg.evaluate("__set('gf-ba','0')"); pg.wait_for_timeout(200); a0 = pg.evaluate(px + "(gcv)")
+    pg.evaluate("__set('gf-ba','60')"); pg.wait_for_timeout(200); a1 = pg.evaluate(px + "(gcv)")
+    raw = pg.evaluate("(()=>{ const r=gfRawCrop(), P=gfProc(); return Array.from(r.getContext('2d').getImageData(Math.round(P.w*0.2),Math.round(P.h*0.5),1,1).data.slice(0,3)).join(); })()")
+    e1 = pg.evaluate("(()=>{ const a=gfRender(true,1); gf.ba=0; const b=gfRender(true,1); gf.ba=60; return +(a.toDataURL()===b.toDataURL()); })()")
+    pg.evaluate("__set('gf-ba','0')")
+    return [('rechtgezet (°)', fine, 2, 0.15), ('contrast opgerekt', int(con > 1), 1, 0),
+            ('genoemd: rechtgezet en contrast', int('Rechtgezet' in enh and 'Contrast' in enh), 1, 0),
+            ('export hoger met bewerkingsregel', int(h1 > h0), 1, 0), ('voor/na: links onbewerkt', int(a1 == raw and a0 != raw), 1, 0),
+            ('export zonder voor/na', e1, 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

@@ -47,13 +47,20 @@
         <input type="range" id="gf-rot" min="-15" max="15" step="0.25" v-model="f.rot" @change="sync">
         <span id="gf-rotv">{{ rotTxt }}</span>
       </div>
+      <div class="rng">
+        <label for="gf-ba" :title="t('Links van de lijn de foto zonder helderheid, contrast en inverteren')">{{ t('Voor/na') }}</label>
+        <input type="range" id="gf-ba" min="0" max="100" step="1" v-model="f.ba" @change="sync">
+        <span>{{ f.ba > 0 ? lkNumIn(String(f.ba)) + ' %' : t('uit') }}</span>
+      </div>
       <div class="row" style="margin-top:8px">
+        <button type="button" id="gf-enh" :title="t('Rechtzetten, bijsnijden en het contrast oprekken; je ziet hieronder wat er gebeurde')" @click="enhance">{{ t('Automatisch verbeteren') }}</button>
         <button type="button" id="gf-auto" @click="straighten">{{ t('Automatisch rechtzetten') }}</button>
         <button type="button" id="gf-r90" @click="r90">⟳ 90°</button>
         <button type="button" id="gf-flip" @click="flip">{{ t('Spiegelen') }}</button>
         <button type="button" id="gf-crop" @click="crop">{{ t('Bijsnijden') }}</button>
         <button type="button" id="gf-uncrop" @click="uncrop">{{ t('Herstel') }}</button>
       </div>
+      <lk-note v-if="enh" kind="info" id="gf-enhlist">{{ t('Automatisch verbeteren paste toe:') }} {{ enh }}</lk-note>
       <!-- setMode() laat de balk hieronder zien en verbergen en zet de klasse 'on' op de
            knoppen hierboven, net als eerst; Vue bindt die twee dus niet -->
       <div class="row" id="gf-cropbar" style="margin-top:8px;display:none">
@@ -75,13 +82,15 @@ export default {
   name: 'GfImage',
   mixins: [gfMix],
   data() {
-    return {f: {inv: false, gray: true, sat: true, bri: '0', con: '1', rot: '0'}};
+    return {f: {inv: false, gray: true, sat: true, bri: '0', con: '1', rot: '0', ba: '0'}};
   },
   computed: {
     satPct() { this.tick; if (!gf.src) return ''; const q = gfSat(); if (!q.n) return ''; const p = q.frac * 100; return lkNumIn(p < 0.1 ? '0.1' : fmt(p, 1)); },
     briTxt() { return lkNumIn(String(Math.round(+this.f.bri) || 0)); },
     conTxt() { return lkNumIn(fmt(+this.f.con, 2)); },
-    rotTxt() { return lkNumIn(fmt(+this.f.rot, 2)) + '°'; }
+    rotTxt() { return lkNumIn(fmt(+this.f.rot, 2)) + '°'; },
+    /* wat automatisch verbeteren deed (gf.enh, gezet door gfEnhance); elk onderdeel een eigen sleutel */
+    enh() { this.tick; return (gf.enh || []).map(z => trPlain(z)).join('; '); }
   },
   methods: {
     /* De motor zet gf-rot zelf ook (bij een nieuwe foto en bij automatisch rechtzetten) en
@@ -94,6 +103,8 @@ export default {
     projSave() { gfProjSave(); },
     projOpen(e) { gfProjOpen(e.target.files[0]); e.target.value = ''; },
     straighten() { gfAutoStraighten(); },
+    enhance() { gfEnhance(); },
+    lkNumIn(v) { return lkNumIn(v); },
     r90() { gfR90(); },
     flip() { gfFlip(); },
     crop() { if (gf.src) setMode('crop'); },
