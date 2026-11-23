@@ -135,7 +135,12 @@
             </tr></tbody>
           </table>
         </div>
-        <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap"><button type="button" id="sg-hs-add" @click="addSample('')">{{ t('+ Monster') }}</button></div>
+        <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button type="button" id="sg-hs-add" @click="addSample('')">{{ t('+ Monster') }}</button>
+          <button type="button" id="sg-hs-fill" :disabled="!snpc.length" @click="fillRead">{{ t('Vul in uit de calls van de read') }}</button>
+          <button type="button" id="sg-hs-fillb" :disabled="!batch.length || !assayEff.snps.length" @click="fillBatch">{{ t('Vul in uit de batch') }}</button>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Het genotype van de assay wordt omgezet naar het aantal kopieën van het allel dat de webtool telt; staat een SNP op de andere streng, dan wordt hij omgedraaid. Een ⚠ bij een cel zegt waarom je hem moet nakijken.') }}</p>
         <lk-note v-for="(m, i) in hsMsgs" :key="i" :kind="m[0]">{{ m[1] }}</lk-note>
       </details>
     </div>
@@ -251,7 +256,7 @@ import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 import {parseRef, alignRead, variants, parseAssay, assayJson, snpCalls, confirm, TEACH, teachReads, DEC} from '../lib/sangeralign.js';
 import {callSample, genotypeRows, overlayStrips} from '../lib/sangerbatch.js';
-import {PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate} from '../lib/hiris.js';
+import {PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate, autofill, mergeCalls, naReport} from '../lib/hiris.js';
 import {SEQ_TO} from '../lib/seq.js';
 
 /* de referentie kan uit Sequentie komen (ook een sequentie die daar bij NCBI is opgehaald) */
@@ -516,6 +521,9 @@ export default {
         if (bad) out.push(['bad', nm + ': ' + t(bad + ' cellen hebben een waarde die niet kan (alleen 0, 1, 2 of NA).')]);
         if (blank) out.push(['info', nm + ': ' + t(blank + ' cellen zijn nog leeg; bij het exporteren worden ze NA.')]);
         if (!v.length) out.push(['ok', nm + ': ' + t('alle cellen van dit paneel zijn ingevuld.')]);
+        for (const r of naReport(sm.vals, this.hs.panel)) {
+          if (r.na) out.push([r.warn ? 'warn' : 'info', nm + ', ' + t(r.name) + ': ' + t(r.na + ' van de ' + r.n + ' SNP\'s ontbreken (NA)') + (r.warn ? '. ' + t('Een voorspelling op zo weinig gegevens is onbetrouwbaar.') : '.')]);
+        }
       }
       return out;
     },
@@ -898,6 +906,13 @@ export default {
       this.hs.samples.push({id: id || this.t('Monster') + ' ' + (this.hs.samples.length + 1), vals: vals || {}, notes: notes || {}});
     },
     delSample(i) { this.hs.samples.splice(i, 1); },
+    /* het blad van één monster uit de calls van de assay; een monster met dezelfde naam wordt vervangen */
+    putSample(id, calls) {
+      const {vals, notes} = autofill(calls), i = this.hs.samples.findIndex(x => x.id === id);
+      if (i >= 0) this.hs.samples.splice(i, 1, {id, vals, notes}); else this.hs.samples.push({id, vals, notes});
+    },
+    fillRead() { this.putSample(this.m.r.name || this.t('Monster'), mergeCalls(this.snpc, this.snpc2)); },
+    fillBatch() { for (const x of this.bsamples) this.putSample(x.name, x.calls); },
     clear() {
       this.read = null; this.edits = {}; this.sel = null; this.rng = null; this.paste = ''; this.err = '';
       jset('sg-read', null);

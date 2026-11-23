@@ -61,3 +61,18 @@ test('csv-export', () => {
   assert.equal(t[1], '"a,b",2,0,NA,NA,NA,NA'); assert.equal(t[2], 'c,NA,NA,NA,NA,NA,NA');
   assert.equal(panelSnps('hirisplex').length, 24);
 });
+
+/* van reads naar blad: de verzonnen oefenreads met de rs-nummers van het blad, allelen willekeurig gekozen (testwaarden) */
+import {TEACH, parseAssay, alignRead, snpCalls, teachReads} from '../../src/lib/sangeralign.js';
+test('van read naar blad, forward en reverse samen, streng omgedraaid', () => {
+  const {assay} = parseAssay({name: 't', ref: TEACH.ref, snps: [{rs: 'rs12913832', pos: 60, alleles: 'C/T', strand: '+'}, {rs: 'rs1800407', pos: 120, alleles: 'A/G', strand: '-'}, {rs: 'rs885479', pos: 180, alleles: 'G/A', strand: '+'}]});
+  const t = teachReads(), seq = x => x.split('\n')[1];
+  const c1 = snpCalls(alignRead(seq(t.f), assay.ref), assay), c2 = snpCalls(alignRead(seq(t.r), assay.ref), assay);
+  const {vals, notes} = autofill(mergeCalls(c1, c2));
+  const hand = Object.fromEntries(SNPS.map(s => [s.rs, 'NA']));
+  /* hand: rs12913832 heterozygoot C/T, webtool telt T: 1. rs1800407: read 1 ziet T op de referentiestreng = A op de streng van de assay: 2 keer A, maar read 2
+     ziet C = G: de reads zijn het oneens, dus NA. rs885479: A/A, de webtool telt T = complement van A: 2 */
+  Object.assign(hand, {rs12913832: '1', rs885479: '2'});
+  assert.deepEqual(vals, hand);
+  assert.equal(notes.rs1800407, 'conflict'); assert.equal(notes.rs885479, 'flip');
+});

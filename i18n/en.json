@@ -5873,5 +5873,13 @@
 "De allelen van de assay passen niet bij deze SNP.": "The alleles of the assay do not fit this SNP.",
 "Streng omgedraaid: het allel van de webtool is het complement van het allel van de assay.": "Strand flipped: the webtool's allele is the complement of the assay's allele.",
 "A/T- of C/G-SNP: de streng is niet af te leiden; controleer deze SNP met de hand.": "A/T or C/G SNP: the strand cannot be derived; check this SNP by hand.",
-"Forward en reverse read zijn het oneens.": "Forward and reverse read disagree."
+"Forward en reverse read zijn het oneens.": "Forward and reverse read disagree.",
+"Vul in uit de calls van de read": "Fill in from the read's calls",
+"Vul in uit de batch": "Fill in from the batch",
+"Het genotype van de assay wordt omgezet naar het aantal kopieën van het allel dat de webtool telt; staat een SNP op de andere streng, dan wordt hij omgedraaid. Een ⚠ bij een cel zegt waarom je hem moet nakijken.": "The assay's genotype is converted to the number of copies of the allele the webtool counts; a SNP on the other strand is flipped. A ⚠ next to a cell says why you should check it.",
+"{#} van de {#} SNP's ontbreken (NA)": "{#} of the {#} SNPs are missing (NA)",
+"Een voorspelling op zo weinig gegevens is onbetrouwbaar.": "A prediction on so little data is unreliable.",
+"Oogkleur": "Eye colour",
+"Haarkleur": "Hair colour",
+"Huidskleur": "Skin colour"
 }
