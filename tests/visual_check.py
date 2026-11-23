@@ -70,6 +70,10 @@ def main():
                 if bad is not None:
                     d = (new * 0.3 + 255 * 0.7).astype(np.uint8); d[bad] = (0, 0, 255); cv2.imwrite(str(OUT / (name + '-diff.png')), d)
                 print(f'MISLUKT {name}: {why} (max {MAXFRAC:.1%}); zie tests/visual/out/')
+                if bad is not None:  # waar het verschil zit, ook leesbaar als de diff-afbeelding niet te downloaden is
+                    rows = np.where(bad.any(axis=1))[0]; runs = np.split(rows, np.where(np.diff(rows) > 3)[0] + 1) if len(rows) else []
+                    for r in sorted(runs, key=lambda r: -bad[r].sum())[:6]:
+                        cols = np.where(bad[r].any(axis=0))[0]; print(f'    y {r[0]}–{r[-1]}, x {cols[0]}–{cols[-1]}: {int(bad[r].sum())} px')
             else: print(f'ok {name}: {why}')
         b.close()
     sys.exit(1 if fails else 0)
