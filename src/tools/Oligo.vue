@@ -35,6 +35,23 @@
       </template>
     </div>
   </div>
+  <!-- syntheserapport plakken: naam, nmol en MW per oligo; het volume voor 100 µM is nmol × 10 µL -->
+  <div class="grid2">
+    <div class="panel">
+      <h3>{{ t('Syntheserapport plakken') }}</h3>
+      <div class="f"><label for="ol-rep">{{ t('Tekst van het specificatieblad (naam, nmol en MW per oligo)') }}</label>
+        <textarea id="ol-rep" class="mono" rows="5" v-model="report" spellcheck="false"></textarea></div>
+      <div class="row" style="margin-top:6px"><button type="button" id="ol-rep-use" :disabled="!rep.oligos.length" @click="useReport">{{ t('Naar de tabel (stock 100 µM)') }}</button></div>
+    </div>
+    <div class="result" id="ol-repout">
+      <lk-note v-if="!report.trim()" kind="info">{{ t('Plak het rapport van IDT, Sigma, Eurofins of Thermo.') }}</lk-note>
+      <template v-else>
+        <lk-table v-if="rep.oligos.length" :cols="repCols" :rows="repRows"/>
+        <lk-note v-for="(x, i) in rep.bad" :key="i" kind="warn" :html="repBad(x)"/>
+        <lk-note v-if="!rep.oligos.length && !rep.bad.length" kind="warn">{{ t('Geen oligo herkend: er is geen naam met nmol en MW gevonden.') }}</lk-note>
+      </template>
+    </div>
+  </div>
   <!-- primerkaart (S42): eigenschappen per sequentie, af te drukken -->
   <div class="grid2">
     <div class="panel">
@@ -76,6 +93,7 @@
 <script>
 import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
+import {parseReport} from '../lib/oligoreport.js';
 import {parsePrimers, analyse, dimer, dimerBad, hairBad} from '../lib/primer.js';
 
 const F = (x, d) => lkNumIn(fmt(x, d));
@@ -97,7 +115,7 @@ export default {
       seqs: st['ol-seq'] != null ? String(st['ol-seq'])
         : trPlain('Forward', true) + '\tAGCTGACCTGAAGGCTCTGAAG\n' + trPlain('Reverse', true) + '\tTCGTCGTACTTGACCAGGCTAT',
       pf: st['ol-pf'] != null ? String(st['ol-pf']) : '0', pr: st['ol-pr'] != null ? String(st['ol-pr']) : '1',
-      s: g('ol-s', '100'), w: g('ol-w', '10'), wv: g('ol-wv', '100'),
+      report: '', s: g('ol-s', '100'), w: g('ol-w', '10'), wv: g('ol-wv', '100'),
       rows: DATA.map(r => mk(trPlain(r[0], true), lkNumIn(val(r[1]))))
     };
   },
@@ -118,6 +136,9 @@ export default {
         return {row, buf: a > 0 && S > 0 ? lkNumIn(vol(a / S * 1000)) : '', bufv: a / S * 1000};
       });
     },
+    rep() { return parseReport(this.report); },
+    repCols() { return [{h: this.t('Primer')}, {h: 'nmol', num: true}, {h: 'MW (g/mol)', num: true}, {h: this.t('Water of TE voor 100 µM'), num: true}]; },
+    repRows() { return this.rep.oligos.map(o => [esc(o.name), F(o.nmol, 2), F(o.mw, 1), lkNumIn(vol(o.nmol * 10)) + pipHtml(o.nmol * 10)]); },
     /* primerkaart: één keer analyseren, de tabel, de waarschuwingen en de afdruk lezen hieruit */
     cards() {
       return parsePrimers(this.seqs).slice(0, 50).map((p, i) =>
@@ -171,6 +192,8 @@ export default {
   },
   methods: {
     F,
+    repBad(x) { return this.t('Regel niet gelezen:') + ' ' + esc(x); },
+    useReport() { this.s = lkNumIn('100'); this.setRows(this.rep.oligos.map(o => [o.name, o.nmol])); },
     addRow() { this.rows.push(mk('', '')); },
     del(i) { this.rows.splice(i, 1); },
     /* de primerkaart als A4: per primer de sequentie en de eigenschappen, plus de waarschuwingen */

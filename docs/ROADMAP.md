@@ -131,7 +131,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | C3 | Opus 5 | S91–S93, S96: imports and core-calculator extras | C1b | anything except R3 |
 | C4 | Sonnet | S94, S95 | C3 | anything |
 | R1 | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 |
-| R2a | Sonnet | S106–S110 | K3 | anything except E3 |
+| R2a ✅ | Sonnet | S106–S110 | K3 | anything except E3 |
 | R2b | Sonnet | S111, S112, S115, S116 | K3 | anything |
 | R3 | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 |
 | W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — |
@@ -346,11 +346,11 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S103 | 168, 169 | Dose-response multi-compound; chromatography peak import | Sonnet |
 | S104 | 173, 176 | CFU plate drawing with countable range; growth curve comparison stats | Sonnet |
 | S105 | 177, 178 | One cell-counting tool with grid entry (merges telkamer, teller, viability) | Opus 5 |
-| S106 | 179, 181, 183 | Seeding picture; visual MIC plate with EUCAST note; MPN tap tubes | Sonnet |
-| S107 | 184, 187 | Measure cells on calibrated photos; disinfection log-reduction chart | Sonnet |
-| S108 | 188, 189, 190 | DNA quant batch + purity badge + "make it X ng/µL"; read primer synthesis report | Sonnet |
-| S109 | 191, 200 | PCR mastermix and cDNA kit presets | Sonnet |
-| S110 | 196, 197, 198 | qPCR efficiency from standard curve; fold-change chart; melt curve overlay | Sonnet |
+| S106 | 179, 181, 183 | Seeding picture; visual MIC plate with EUCAST note; MPN tap tubes ✅ MIC has no built-in breakpoints per species, so the note points to the current EUCAST table; MPN tubes only for rows of up to 12 tubes | Sonnet |
+| S107 | 184, 187 | Measure cells on calibrated photos; disinfection log-reduction chart ✅ one photo calibration (not one per objective), lines can only be cleared all at once, not moved; the disinfection table got an optional contact-time column for the chart | Sonnet |
+| S108 | 188, 189, 190 | DNA quant batch + purity badge + "make it X ng/µL"; read primer synthesis report ✅ the report reader (`src/lib/oligoreport.js`, unit-tested) reads tables with a header, lines with units and name/yield/MW blocks, but not a comma-separated table with decimal commas | Sonnet |
+| S109 | 191, 200 | PCR mastermix and cDNA kit presets ✅ five PCR kits in `QPRE`/`PRESETS` (each with the Mg already in its buffer) and four cDNA kits; the optional Q5 GC enhancer is not a row | Sonnet |
+| S110 | 196, 197, 198 | qPCR efficiency from standard curve; fold-change chart; melt curve overlay ✅ the fold-change chart and the melt overlay with a per-well verdict already existed; added the standard curve (feeds Pfaffl) and a Welch t-test on ΔCt against the calibrator, shown as p and stars above the bars | Sonnet |
 | S111 | 201, 205, 206 | Virtual electropherogram; ligation ratio picture; transformation plate tap-count | Sonnet |
 | S112 | 208, 209, 210 | STR electropherogram view; shared allele frequency table; bloodstain drawing | Sonnet |
 | S113 | 213, 215, 216 | Statistics "which test?" wizard, inline assumption checks, long-format paste | Opus 5 |

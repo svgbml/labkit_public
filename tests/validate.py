@@ -248,6 +248,21 @@ def _(pg):
     pg.evaluate("__go('qpcr');__set('qp-et','92');__set('qp-er','98');__set('qp-m','pfaffl')")
     return [('ratio', pg.evaluate("__big('#qp-res')"), 5.856, 0.002)]
 
+@case('qPCR-analyse', 'Efficiëntie uit standaardcurve', 'Pearson qPCR-efficiëntie (als bij PCR-cyclus): helling −3,3 → 100,9%; doelgen Ct 15,0 / 18,3 / 21,6 / 24,9 bij 10⁵…10² kopieën')
+def _(pg):
+    pg.evaluate("__go('qpcr');__set('qp-sc','100000 15\\n10000 18,3\\n1000 21,6\\n100 24,9')")
+    return [('efficiëntie bij −3,3 (%)', pg.evaluate("__big('#qp-sc-res')"), 100.9, 0.002)]
+
+@case('qPCR-analyse', 't-toets van Welch op ΔCt', 'Yuan e.a., BMC Bioinformatics 7:85 (2006): toets op ΔCt-waarden; p onafhankelijk berekend met scipy.stats.ttest_ind(equal_var=False)')
+def _(pg):
+    from scipy import stats
+    C = [(24.1, 20.0), (23.8, 19.9), (24.4, 20.3)]; B = [(21.6, 20.1), (21.2, 20.3), (21.9, 20.0)]
+    pg.evaluate("__go('qpcr');__set('qp-et','100');__set('qp-er','100');__set('qp-m','livak');"
+      "__tbl('qp-tbl',[" + ','.join(f"['Controle',{t},{r}]" for t, r in C) + ',' + ','.join(f"['Behandeld',{t},{r}]" for t, r in B) + "],'qpcr');__set('qp-cal','Controle');")
+    p = pg.evaluate("(()=>{ const r=[...document.querySelectorAll('#qp-res tr')].find(r=>r.cells[0]&&r.cells[0].textContent.trim()==='Behandeld'); return parseFloat(r.cells[r.cells.length-1].textContent.replace(',','.')); })()")
+    ref = stats.ttest_ind([t - r for t, r in B], [t - r for t, r in C], equal_var=False).pvalue
+    return [('p (Welch, ΔCt)', p, ref, 0.02)]
+
 @case('Ligatie', 'NEB 3:1', 'NEB FAQ: 50 ng 5 kb-vector, 1 kb-insert, 3:1 → 30 ng insert')
 def _(pg):
     pg.evaluate("__go('ligatie');__set('l-vng','50');__set('l-vbp','5000');__set('l-ibp','1000');__set('l-r','3')")

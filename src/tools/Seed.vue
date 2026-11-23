@@ -39,6 +39,19 @@
         <lk-note v-else-if="m.err === 2" kind="bad" :html="tooDilute"/>
         <template v-else>
           <lk-big :label="t('Celsuspensie')" :html="V(m.vs * 1000) + pipHtml(m.vs * 1000)"/>
+          <svg :viewBox="'0 0 ' + pic.w + ' ' + pic.h" role="img" :aria-label="t('Schema van de plaat of flessen met cellen en suspensievolume per putje')"
+            style="width:100%;max-width:520px;display:block;margin:12px 0 4px">
+            <rect v-if="pic.plate" x="1" y="1" :width="pic.w - 2" :height="pic.h - 2" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="2"/>
+            <g v-for="(o, i) in pic.items" :key="i">
+              <circle v-if="pic.plate" :cx="o.x" :cy="o.y" :r="o.r" :fill="o.on ? 'var(--accent)' : 'none'" :fill-opacity="o.on ? .22 : 1" :stroke="o.on ? 'var(--accent)' : 'var(--line)'" stroke-width="1.5"/>
+              <rect v-else :x="o.x - o.r" :y="o.y - 40" :width="o.r * 2" height="80" rx="12" fill="var(--accent)" fill-opacity=".22" stroke="var(--accent)" stroke-width="1.5"/>
+              <template v-if="o.on && pic.txt">
+                <text :x="o.x" :y="o.y - 1" text-anchor="middle" font-size="11" font-weight="600" fill="var(--text)">{{ pic.cells }}</text>
+                <text :x="o.x" :y="o.y + 11" text-anchor="middle" font-size="10" fill="var(--text)">{{ pic.sus }}</text>
+              </template>
+            </g>
+          </svg>
+          <p style="font-size:13px;color:var(--muted);margin:0 0 10px" v-html="caption"></p>
           <lk-kv :rows="rows"/>
           <lk-steps :steps="steps"/>
           <lk-formula :html="tHtml('V&lt;sub&gt;suspensie&lt;/sub&gt; = cellen per putje × aantal × (1 + marge) / celconcentratie')"/>
@@ -74,6 +87,19 @@ export default {
       const per = mode === 'cm2' ? d * area : d, tot = v * mult, cells = per * mult, vs = cells / C;
       if (vs > tot) return {err: 2, vs, tot, cells, why};
       return {err: 0, area, n, v, x, per, tot, cells, vs, why};
+    },
+    /* tekening: de putjes van het gekozen formaat (rijen × kolommen), de eerste n gevuld; flessen als blokken */
+    pic() {
+      const m = this.m, dim = {'0.32|0.1': [8, 12], '0.95|0.3': [6, 8], '1.9|0.5': [4, 6], '3.8|1': [3, 4], '9.5|2': [2, 3]}[this.fmtV];
+      const [R, K] = dim || [1, 3], cs = dim ? (K <= 6 ? 56 : 36) : 110, items = [];
+      for (let i = 0; i < R * K; i++) items.push({x: cs * (i % K + .5), y: cs * (Math.floor(i / K) + .5), r: dim ? cs * .42 : cs * .4, on: i < m.n});
+      const per = m.per / num(this.c) * 1000;
+      return {plate: !!dim, w: cs * K, h: cs * R, items, txt: !dim || K <= 6,
+        cells: lkNumIn(m.per >= 1e4 ? m.per.toExponential(1).replace('e+', 'e') : String(+m.per.toPrecision(2))), sus: V(per)};
+    },
+    caption() {
+      const m = this.m, sus = m.per / num(this.c) * 1000;
+      return this.tHtml('Per putje of fles: ' + ud(S(m.per)) + ' cellen in ' + ud(V(sus)) + ' suspensie en ' + ud(V(m.v * 1000 - sus)) + ' medium.');
     },
     tooDilute() {
       const m = this.m;

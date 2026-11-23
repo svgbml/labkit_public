@@ -91,13 +91,15 @@ function barChart(cv,cats,vals,lo,hi,o){
   { const e=chEdGet(cv&&cv.id); o={...o}; if(e){ if(e.yl) o.ylabel=e.yl; o.title=e.ti||''; if(Array.isArray(e.col)&&e.col[0]) o.col=e.col[0]; if(e.ymax!==''&&e.ymax!=null&&isFinite(num(e.ymax))) o.ymax=num(e.ymax); } cv._chart={series:[{name:o.ylabel||'',color:'--accent'}],bar:true}; }
   const W=480,H=300,dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=H*dpr; cv.style.width='100%'; cv.style.maxWidth=W+'px';
   const x=cv.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,W,H); const st=chStyle(), C=k=>({'--line':st.grid,'--muted':st.muted,'--ink':st.ink,'--accent':st.acc})[k]; if(st.bg){ x.fillStyle=st.bg; x.fillRect(0,0,W,H); }
-  const pad={l:58,r:14,t:o.title?36:16,b:46}; const ymax=o.ymax>0?o.ymax:Math.max(1.2,...vals.filter(isFinite),...hi.filter(isFinite))*1.12; const Y=v=>H-pad.b-v/ymax*(H-pad.t-pad.b);
+  const pad={l:58,r:14,t:o.title?36:16,b:46}; const ymax=o.ymax>0?o.ymax:Math.max(1.2,...vals.filter(isFinite),...hi.filter(isFinite))*(o.stars&&o.stars.some(Boolean)?1.24:1.12); const Y=v=>H-pad.b-v/ymax*(H-pad.t-pad.b);
   x.font=st.tick+'px '+st.font; const stp=niceStep(ymax,5); x.textAlign='right'; x.textBaseline='middle';
   for(let t=0;t<=ymax+1e-9;t+=stp){ x.strokeStyle=C('--line')||'rgba(0,0,0,0)'; x.beginPath(); x.moveTo(pad.l,Y(t)); x.lineTo(W-pad.r,Y(t)); x.stroke(); x.fillStyle=C('--muted'); x.fillText(tickLabel(t),pad.l-6,Y(t)); }
   const bw=(W-pad.l-pad.r)/Math.max(1,cats.length);
   cats.forEach((c,i)=>{ const cx=pad.l+bw*(i+0.5), w=Math.min(56,bw*0.55); if(isFinite(vals[i])){ x.fillStyle=o.cal===c?C('--muted'):o.col||C('--accent'); x.fillRect(cx-w/2,Y(vals[i]),w,Y(0)-Y(vals[i])); }
     if(isFinite(lo[i])&&isFinite(hi[i])&&hi[i]>lo[i]){ x.strokeStyle=C('--ink'); x.lineWidth=1.3; x.beginPath(); x.moveTo(cx,Y(lo[i])); x.lineTo(cx,Y(hi[i])); x.moveTo(cx-6,Y(lo[i])); x.lineTo(cx+6,Y(lo[i])); x.moveTo(cx-6,Y(hi[i])); x.lineTo(cx+6,Y(hi[i])); x.stroke(); x.lineWidth=1; }
-    x.fillStyle=C('--ink'); x.textAlign='center'; x.textBaseline='top'; x.fillText(c.length>14?c.slice(0,13)+'…':c,cx,H-pad.b+6); if(isFinite(vals[i])){ x.textBaseline='bottom'; x.fillText(sig(vals[i],3).replace(/<[^>]+>/g,''),cx,Y(Math.max(vals[i],isFinite(hi[i])?hi[i]:0))-3); } });
+    x.fillStyle=C('--ink'); x.textAlign='center'; x.textBaseline='top'; x.fillText(c.length>14?c.slice(0,13)+'…':c,cx,H-pad.b+6); if(isFinite(vals[i])){ x.textBaseline='bottom'; x.fillText(sig(vals[i],3).replace(/<[^>]+>/g,''),cx,Y(Math.max(vals[i],isFinite(hi[i])?hi[i]:0))-3);
+      /* S110: o.stars = sterren of 'ns' per staaf (toets tegen de kalibrator), boven het getal */
+      if(o.stars&&o.stars[i]){ x.font='600 '+(st.tick+1)+'px '+st.font; x.fillText(o.stars[i],cx,Y(Math.max(vals[i],isFinite(hi[i])?hi[i]:0))-3-st.tick-4); x.font=st.tick+'px '+st.font; } } });
   x.strokeStyle=C('--muted'); x.setLineDash([4,3]); x.beginPath(); x.moveTo(pad.l,Y(1)); x.lineTo(W-pad.r,Y(1)); x.stroke(); x.setLineDash([]);
   x.beginPath(); x.moveTo(pad.l,pad.t); x.lineTo(pad.l,H-pad.b); x.lineTo(W-pad.r,H-pad.b); x.stroke();
   x.save(); x.translate(14,(H-pad.b+pad.t)/2); x.rotate(-Math.PI/2); x.textAlign='center'; x.textBaseline='middle'; x.fillStyle=st.muted; x.font=st.lab+'px '+st.font; x.fillText(o.ylabel,0,0); x.restore();
