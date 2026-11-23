@@ -115,6 +115,29 @@
           <lk-table v-if="frDiff.length" table-id="sg-fr-tbl" :cols="frCols" :rows="frDiff"/>
         </div>
       </div>
+      <!-- S164: het genotypeblad van HIrisPlex-S; LabKit bereidt voor en controleert, de voorspelling doet de webtool -->
+      <details class="panel" id="sg-hsp" :open="hs.samples.length > 0">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('HIrisPlex-S genotypeblad') }}</summary>
+        <lk-note kind="info">{{ t('LabKit vult dit blad in, controleert het en exporteert het; de voorspelling van oog-, haar- en huidskleur doet LabKit niet zelf. Die berekent de webtool van het Erasmus MC.') }}</lk-note>
+        <div class="f" style="margin-top:10px"><label for="sg-hs-panel">{{ t('Paneel') }}</label>
+          <select id="sg-hs-panel" v-model="hs.panel"><option v-for="(n, k) in PANEL_NAME" :key="k" :value="k">{{ t(n) }}</option></select></div>
+        <p style="font-size:13px;color:var(--muted);margin:6px 0">{{ t('Per SNP het aantal kopieën (0, 1 of 2) van het allel in de kolom Telt, of NA als het genotype ontbreekt. Volgorde en allelen zoals in de webtool.') }}</p>
+        <div style="overflow:auto;max-height:28em">
+          <table id="sg-hs-tbl" class="tbl">
+            <thead><tr><th>#</th><th>SNP</th><th>{{ t('Telt') }}</th>
+              <th v-for="(sm, si) in hs.samples" :key="si" style="min-width:7em"><input class="mono" style="width:6em" :value="sm.id" :aria-label="t('Monsternaam')" @input="sm.id = $event.target.value">
+                <button type="button" :aria-label="t('Monster verwijderen')" @click="delSample(si)">×</button></th></tr></thead>
+            <tbody><tr v-for="s in hsSnps" :key="s.rs">
+              <td>{{ s.order }}</td><td class="mono">{{ s.rs }}</td><td class="mono"><b>{{ s.allele }}</b></td>
+              <td v-for="(sm, si) in hs.samples" :key="si" :style="{background: hsBad(sm, s) ? '#ffcdd2' : null}">
+                <select class="mono" :aria-label="s.rs + ' ' + sm.id" v-model="sm.vals[s.rs]"><option v-for="v in HS_VALUES" :key="v" :value="v">{{ v || '–' }}</option></select>
+                <span v-if="sm.notes && sm.notes[s.rs]" :title="noteText(sm.notes[s.rs])" style="cursor:help"> ⚠</span></td>
+            </tr></tbody>
+          </table>
+        </div>
+        <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap"><button type="button" id="sg-hs-add" @click="addSample('')">{{ t('+ Monster') }}</button></div>
+        <lk-note v-for="(m, i) in hsMsgs" :key="i" :kind="m[0]">{{ m[1] }}</lk-note>
+      </details>
     </div>
     <div>
       <div class="panel">
@@ -228,11 +251,13 @@ import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 import {parseRef, alignRead, variants, parseAssay, assayJson, snpCalls, confirm, TEACH, teachReads, DEC} from '../lib/sangeralign.js';
 import {callSample, genotypeRows, overlayStrips} from '../lib/sangerbatch.js';
+import {PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate} from '../lib/hiris.js';
 import {SEQ_TO} from '../lib/seq.js';
 
 /* de referentie kan uit Sequentie komen (ook een sequentie die daar bij NCBI is opgehaald) */
 SEQ_TO.push({label: 'Chromatogram (referentie)', tool: 'sanger', id: 'sg-ref'});
-const AKEY = 'labkit:v1:sg-assays', REFMAX = 200000;
+const AKEY = 'labkit:v1:sg-assays', HKEY = 'labkit:v1:sg-sheet', REFMAX = 200000;
+const NOTES = {absent: 'Deze SNP staat niet in de assay.', nocall: 'De read dekt deze SNP niet.', badcall: 'De call hoort niet bij de assay of is geen genotype.', mismatch: 'De allelen van de assay passen niet bij deze SNP.', flip: 'Streng omgedraaid: het allel van de webtool is het complement van het allel van de assay.', ambig: 'A/T- of C/G-SNP: de streng is niet af te leiden; controleer deze SNP met de hand.', conflict: 'Forward en reverse read zijn het oneens.'};
 const VTYPE = {sub: 'Substitutie', del: 'Deletie', dup: 'Duplicatie', ins: 'Insertie'};
 /* een read uit een bestand (ABIF of FASTA) of null met een foutzin */
 function readFile(buf, fname) {
@@ -279,7 +304,7 @@ export default {
       edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1),
       refText: st['sg-ref'] != null ? String(st['sg-ref']) : '', assayKey: st['sg-assay'] != null ? String(st['sg-assay']) : '', own: jget(AKEY, []),
       read2: jget('sg-read2', null) ? markRaw(jget('sg-read2', null)) : null, paste2: st['sg-paste2'] != null ? String(st['sg-paste2']) : '',
-      batch: [], bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
+      batch: [], hs: Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {})), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
   },
   computed: {
     HT() { return HT; },
@@ -479,6 +504,21 @@ export default {
     btCols() { const t = this.t; return [{h: t('Monster')}, {h: t('Identiek') + ' %', num: true}].concat(this.assayEff.snps.map(s => ({h: s.rs}))); },
     btRows() { return genotypeRows(this.bsamples, this.assayEff).map(r => r.map((v, i) => i === 1 ? (v == null ? '–' : NL(v, 1)) : esc(String(v)))); },
     ovH() { return Math.max(60, this.batch.length * 52 + 8); },
+    /* ---------- HIrisPlex-S genotypeblad (S164) ---------- */
+    PANEL_NAME() { return PANEL_NAME; },
+    HS_VALUES() { return HS_VALUES; },
+    hsSnps() { return panelSnps(this.hs.panel); },
+    hsMsgs() {
+      const t = this.t, out = [];
+      for (const sm of this.hs.samples) {
+        const v = hsValidate(sm.vals, this.hs.panel), bad = v.filter(x => x.why === 'bad').length, blank = v.length - bad;
+        const nm = sm.id || t('(zonder naam)');
+        if (bad) out.push(['bad', nm + ': ' + t(bad + ' cellen hebben een waarde die niet kan (alleen 0, 1, 2 of NA).')]);
+        if (blank) out.push(['info', nm + ': ' + t(blank + ' cellen zijn nog leeg; bij het exporteren worden ze NA.')]);
+        if (!v.length) out.push(['ok', nm + ': ' + t('alle cellen van dit paneel zijn ingevuld.')]);
+      }
+      return out;
+    },
     edCols() { const t = this.t; return [{h: t('SNP (rs)'), t: 'txt', w: 110}, {h: t('Positie'), t: 'num', w: 60}, {h: t('Allelen'), t: 'txt', w: 60}, {h: t('Streng'), t: 'sel', o: ['+', '-']}]; }
   },
   watch: {
@@ -492,6 +532,7 @@ export default {
     het() { this.draw(); },
     trim() { this.draw(); },
     bsamples() { this.$nextTick(this.paintOv); },
+    hs: {deep: true, handler(v) { jset(HKEY, v); }},
     ovSnp() { this.$nextTick(this.paintOv); },
     qN() { this.draw(); }
   },
@@ -850,6 +891,13 @@ export default {
         x.strokeStyle = '#e1e4ea'; x.beginPath(); x.moveTo(0, y + SH - 3.5); x.lineTo(W, y + SH - 3.5); x.stroke();
       });
     },
+    /* ---------- HIrisPlex-S genotypeblad (S164) ---------- */
+    hsBad(sm, s) { return !!sm.vals[s.rs] && !HS_VALUES.includes(String(sm.vals[s.rs])); },
+    noteText(c) { return this.t(NOTES[c] || c); },
+    addSample(id, vals, notes) {
+      this.hs.samples.push({id: id || this.t('Monster') + ' ' + (this.hs.samples.length + 1), vals: vals || {}, notes: notes || {}});
+    },
+    delSample(i) { this.hs.samples.splice(i, 1); },
     clear() {
       this.read = null; this.edits = {}; this.sel = null; this.rng = null; this.paste = ''; this.err = '';
       jset('sg-read', null);
