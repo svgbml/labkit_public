@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-23 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 443 van 443 controles binnen tolerantie.**
+**Resultaat: 447 van 447 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -148,6 +148,10 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Gelfoto-editor | Vergelijken met de Gelplanner, naar WB, SVG | WB-tabel gevuld | 5 | 5 | +0.00% | ✅ | Zelftest: de Gelplanner verwacht 650 bp in slotje 2, 650 en 300 bp in slotje 3 en 350 bp in slotje 4; op de demo-gel (650 bp in lane 2–4, 350 bp in lane 5–6) zijn 650 gevonden en 300 en 350 ontbrekend. Doorsturen met doel 650 en laadcontrole 58 bp vult de WB-tabel met 5 lanen. De SVG is geldige XML met de lanelabels als tekst |
 | Gelfoto-editor | Vergelijken met de Gelplanner, naar WB, SVG | SVG is geldige XML | 1 | 1 | +0.00% | ✅ | Zelftest: de Gelplanner verwacht 650 bp in slotje 2, 650 en 300 bp in slotje 3 en 350 bp in slotje 4; op de demo-gel (650 bp in lane 2–4, 350 bp in lane 5–6) zijn 650 gevonden en 300 en 350 ontbrekend. Doorsturen met doel 650 en laadcontrole 58 bp vult de WB-tabel met 5 lanen. De SVG is geldige XML met de lanelabels als tekst |
 | Gelfoto-editor | Vergelijken met de Gelplanner, naar WB, SVG | lanelabel als SVG-tekst | 1 | 1 | +0.00% | ✅ | Zelftest: de Gelplanner verwacht 650 bp in slotje 2, 650 en 300 bp in slotje 3 en 350 bp in slotje 4; op de demo-gel (650 bp in lane 2–4, 350 bp in lane 5–6) zijn 650 gevonden en 300 en 350 ontbrekend. Doorsturen met doel 650 en laadcontrole 58 bp vult de WB-tabel met 5 lanen. De SVG is geldige XML met de lanelabels als tekst |
+| Instellingen | Grafiekstijl | Scherm: doorzichtig | 1 | 1 | +0.00% | ✅ | Zelftest: met het donkere thema heeft de standaardlijn (Scherm) een doorzichtige achtergrond; Verslag en Publicatie tekenen een witte achtergrond met zwarte (Publicatie) of bijna zwarte (Verslag) tekst, en Publicatie zonder rasterlijnen |
+| Instellingen | Grafiekstijl | Verslag: wit | 1 | 1 | +0.00% | ✅ | Zelftest: met het donkere thema heeft de standaardlijn (Scherm) een doorzichtige achtergrond; Verslag en Publicatie tekenen een witte achtergrond met zwarte (Publicatie) of bijna zwarte (Verslag) tekst, en Publicatie zonder rasterlijnen |
+| Instellingen | Grafiekstijl | Publicatie: wit | 1 | 1 | +0.00% | ✅ | Zelftest: met het donkere thema heeft de standaardlijn (Scherm) een doorzichtige achtergrond; Verslag en Publicatie tekenen een witte achtergrond met zwarte (Publicatie) of bijna zwarte (Verslag) tekst, en Publicatie zonder rasterlijnen |
+| Instellingen | Grafiekstijl | Publicatie: zwart, geen raster | 1 | 1 | +0.00% | ✅ | Zelftest: met het donkere thema heeft de standaardlijn (Scherm) een doorzichtige achtergrond; Verslag en Publicatie tekenen een witte achtergrond met zwarte (Publicatie) of bijna zwarte (Verslag) tekst, en Publicatie zonder rasterlijnen |
 | Centrifuge | rpm → × g | × g | 1957 | 1957 | +0.00% | ✅ | Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g |
 | Centrifuge | × g → rpm | rpm | 5837 | 5837 | +0.00% | ✅ | CASRAI: 4000 × g, r = 10,5 cm → 5837 rpm |
 | Centrifuge | Rotorbalans | n=12 k=5 gebalanceerd | 1 | 1 | +0.00% | ✅ | Som van de plaatsvectoren = 0: opgebouwd uit gelijkmatige p-hoeken met p | n (n = 12, k = 5 → 2 + 3; n = 6, k = 1 en k = 5 kunnen niet) |

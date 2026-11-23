@@ -546,6 +546,18 @@ def _(pg):
     return [('vergelijking per slotje', int(r == '["650+","650+ 300-","350-"]'), 1, 0), ('5 lanen naar WB', n, 5, 0), ('WB-tabel gevuld', wb, 5, 0),
             ('SVG is geldige XML', int(svg[0] == 0), 1, 0), ('lanelabel als SVG-tekst', int('NTC' in svg[1]), 1, 0)]
 
+@case('Instellingen', 'Grafiekstijl', 'Zelftest: met het donkere thema heeft de standaardlijn (Scherm) een doorzichtige achtergrond; Verslag en Publicatie tekenen een witte achtergrond met zwarte (Publicatie) of bijna zwarte (Verslag) tekst, en Publicatie zonder rasterlijnen')
+def _(pg):
+    px = "(()=>{ const c=document.querySelector('#t-curve canvas'), x=c.getContext('2d'); return Array.from(x.getImageData(2,2,1,1).data).join(); })()"
+    out = {}
+    for k in ('scherm', 'verslag', 'publicatie'):
+        pg.evaluate(f"__go('inst'); __set('ui-theme','donker'); __set('ui-chs','{k}'); applyUI()"); pg.wait_for_timeout(150)
+        pg.evaluate("__go('curve')"); pg.wait_for_timeout(300)
+        out[k] = (pg.evaluate(px), pg.evaluate("JSON.stringify([chStyle().ink, chStyle().grid])"))
+    pg.evaluate("__go('inst'); __set('ui-theme','auto'); __set('ui-chs','scherm'); applyUI()")
+    return [('Scherm: doorzichtig', int(out['scherm'][0].endswith(',0')), 1, 0), ('Verslag: wit', int(out['verslag'][0] == '255,255,255,255'), 1, 0),
+            ('Publicatie: wit', int(out['publicatie'][0] == '255,255,255,255'), 1, 0), ('Publicatie: zwart, geen raster', int(out['publicatie'][1] == '["#000000",""]'), 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

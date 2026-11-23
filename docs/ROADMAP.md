@@ -316,7 +316,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 ## Phase 7: charts, figures and data (17 steps)
 | Step | Ideas | What | Done when | Model |
 |---|---|---|---|---|
-| S80 | 122, 130 | Shared chart style system (fonts, sizes, palettes) applied to the chart helper | All charts use it | Opus 5.5 |
+| S80 | 122, 130 | Shared chart style system (fonts, sizes, palettes) applied to the chart helper | ✅ `chStyle()` in `src/lib/chart.js` met drie stijlen: *Scherm* (volgt het thema, zoals tot nu toe), *Verslag* (wit, Arial, zwarte tekst, lichte rasterlijnen) en *Publicatie* (wit, Arial, zwart, geen raster); keuze in Instellingen (`ui-chs`, `applyUI` zet `chStyleKey`). `chart()`, `barChart()`, het PCR-profiel (`drawProfile`), de ijklijn van Agarosegel en het staafdiagram van Statistiek (`stBars`) gebruiken hem; themakleuren van reeksen worden in Verslag/Publicatie de stijlkleuren (`chCol`), tools met eigen tekencode krijgen `chVars()`. Het palet blijft de keuze *Kleurenpalet*. Getest in `tests/validate.py` | — |
 | S81 | 129, 125 | Error bar choice (SD/SEM/CI) and bar + dot plots | Labelled in legend | Sonnet |
 | S82 | 123 | SVG export for every chart *(partly there: SVG recorder from S21; 14 of 47 canvases have the bar)* | SVG opens in Inkscape | Sonnet |
 | S83 | 127 | Chart editor panel (titles, ranges, log axis, legend, colours) | Remembered per chart | Opus 5 |

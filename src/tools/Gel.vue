@@ -203,10 +203,10 @@ export default {
     draw() {
       const cv = document.getElementById('b-cv'); if (!cv) return;
       const ctx = cv.getContext('2d'), f = this.fit;
-      const cs = getComputedStyle(document.documentElement), C = k => cs.getPropertyValue(k).trim();
+      const C = chVars();   /* grafiekstijl (S80) */
       const dpr = window.devicePixelRatio || 1, W = 420, H = 260;
       cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, W, H);
+      ctx.clearRect(0, 0, W, H); if (C.bg) { ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H); }
       if (!f) return;
       const {pts, unk, xs, ys, a, b, est} = f;
       cv._data = {head: ['type', 'afstand (mm)', 'grootte (bp)'],
