@@ -5307,5 +5307,14 @@
 "Plaat overgenomen; kies de kolommen van de standaarden en monsters en klik Importeren.": "Plate taken over; choose the columns of the standards and samples and click Import.",
 "Plaat overgenomen.": "Plate taken over.",
 "{#} putje(s) zonder Ct overgeslagen.": "{#} well(s) without Ct skipped.",
-"Herkent de exports van Bio-Rad CFX, QuantStudio en LightCycler; anders een tabel met kopregel.": "Recognises exports from Bio-Rad CFX, QuantStudio and LightCycler; otherwise a table with a header row."
+"Herkent de exports van Bio-Rad CFX, QuantStudio en LightCycler; anders een tabel met kopregel.": "Recognises exports from Bio-Rad CFX, QuantStudio and LightCycler; otherwise a table with a header row.",
+"Kopieer methodezin": "Copy method sentence",
+"Rapport": "Report",
+"Controleer je antwoord:": "Check your answer:",
+"Je eigen antwoord": "Your own answer",
+"Goed": "Correct",
+"Niet goed: het antwoord is {*}.": "Not correct: the answer is {*}.",
+"De stock ({*}) werd verdund tot {*} door {*} stock aan te vullen tot {*} (C₁V₁ = C₂V₂).": "The stock ({*}) was diluted to {*} by making {*} of stock up to {*} (C₁V₁ = C₂V₂).",
+"Er werd gecentrifugeerd bij {*} × g ({*} rpm, rotorstraal {*} cm; RCF berekend uit rpm en rotorstraal).": "Samples were centrifuged at {*} × g ({*} rpm, rotor radius {*} cm; RCF calculated from rpm and rotor radius).",
+"Voor {*} oplossing werd afgewogen: {*}; daarna werd aangevuld met gedemineraliseerd water tot het eindvolume.": "For {*} of solution the following was weighed: {*}; it was then made up to the final volume with demineralised water."
 }

@@ -57,6 +57,7 @@ export default {
       tools: rpTools(), sel: jget(RKEY, []).slice(0, 4)
     };
   },
+  created() { window.__rpVm = this; },   /* S96: "→ Rapport" in een tool zet die tool vooraan */
   computed: {
     /* de aangevinkte tools in de volgorde van de lijst, zoals de DOM ze eerder gaf */
     ids() { return this.tools.map(t => t.id).filter(id => this.sel.includes(id)); },

@@ -677,6 +677,20 @@ def _(pg):
     return [('breedte (px)', r[0], 4323, 0), ('tussenruimte (px)', r[1], 47, 0.03), ('PNG-dpi', r[2], 600, 0), ('PDF-kop', int(r[3] == '%PDF-1.4' and r[4] == '%%EOF'), 1, 0),
             ('PDF-breedte (mm)', r[5] / 72 * 25.4, 183, 0.001), ('SVG geldig', int(r[6] == 0), 1, 0), ('letters A en B', int(r[7] == 'A,B'), 1, 0)]
 
+@case('Verdunning', 'Methodezin, antwoordcontrole en naar het rapport', 'Zelftest op het voorbeeld 50X TAE naar 500 mL 1X (Bio-Rad Bulletin 6205: 10 mL stock): de methodezin noemt 50 X, 1 X, 10 mL en 500 mL; 10 en 10,05 mL zijn goed (binnen 1 %), 12 mL niet; "→ Rapport" opent het rapport met Verdunning vooraan en de methodezin staat erin')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('d-c1u','X');__set('d-c2u','X');__set('d-c1','50');__set('d-c2','1');__set('d-v1','');__set('d-v2u','mL');__set('d-v1u','mL');__set('d-v2','500')"); pg.wait_for_timeout(200)
+    m = pg.evaluate("document.querySelector('#t-verdunning .lk-method').textContent")
+    def chk(v):
+        pg.evaluate(f"const e=document.querySelector('#t-verdunning [data-check]'); e.value={v!r}; e.dispatchEvent(new Event('input',{{bubbles:true}}))"); pg.wait_for_timeout(100)
+        return pg.evaluate("(document.querySelector('#t-verdunning [data-verdict]')||{dataset:{}}).dataset.verdict")
+    v = [chk('10'), chk('10,05'), chk('12')]
+    pg.evaluate("document.querySelector('#t-verdunning [data-torep]').click()"); pg.wait_for_timeout(400)
+    rep = pg.evaluate("[location.hash, window.__rpVm.sel[0], window.__rpVm.html().includes('door 10 mL stock aan te vullen tot 500 mL')]")
+    pg.evaluate("__go('verdunning')")
+    return [('methodezin', int(all(x in m for x in ('50 X', '1 X', '10 mL', '500 mL'))), 1, 0), ('10 mL goed', int(v[0] == 'ok'), 1, 0), ('10,05 mL goed', int(v[1] == 'ok'), 1, 0),
+            ('12 mL fout', int(v[2] == 'bad'), 1, 0), ('rapport geopend met Verdunning', int(rep[0] == '#report' and rep[1] == 'verdunning'), 1, 0), ('methodezin in het rapport', int(rep[2]), 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

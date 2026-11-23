@@ -85,6 +85,7 @@
       <lk-note v-if="tooSmall" kind="warn"><span v-html="tooSmall"></span></lk-note>
       <lk-note v-if="order" kind="info"><span v-html="order"></span></lk-note>
     </div>
+    <div class="result" v-if="method" style="margin-top:12px"><lk-report tool="oplossing" :sentence="method"/></div>
     <p class="src" id="o-src-rec" data-notr="" style="margin:8px 0 0" v-html="recipeSource"></p>
     <lk-formula :html="tHtml('massa (g) = c (mol/L) × V (L) × M (g/mol) · % w/v: g = % / 100 × V (mL)')"/>
   </div>
@@ -124,6 +125,12 @@ export default {
       return this.rows.some(r => { const f = hydFind(r.n); return f && HYD[f[0]][0] === 'EDTA' && f[1] === 1; });
     },
     filled() { return this.rows.map((r, i) => i).filter(i => isFinite(this.masses[i])); },
+    /* S96: de methodezin (één sleutel; de lijst met namen en massa's is invoer van de gebruiker) */
+    method() {
+      if (!this.filled.length) return '';
+      const list = this.filled.map(i => (this.rows[i].n || trPlain('component', true)) + ' ' + lkNumIn(mass(this.masses[i]))).join(', ');
+      return esc(this.t('Voor ' + uv(this.vtxt) + ' oplossing werd afgewogen: ' + uv(list) + '; daarna werd aangevuld met gedemineraliseerd water tot het eindvolume.'));
+    },
     vtxt() { return this.vu === 'L' ? lkNumIn(fmt(num(this.v), 3)) + ' L' : lkNumIn(fmt(num(this.v), 1)) + ' mL'; },
     steps() {
       const t = this.t;

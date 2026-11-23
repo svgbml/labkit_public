@@ -42,6 +42,7 @@
         <!-- geen t(): deze regel heeft geen woord van twee letters, dus de vertaallaag heeft
              er nooit een sleutel voor gemaakt en er is niets te vertalen -->
         <lk-formula html="V₁ = C₂ × V₂ / C₁"/>
+        <lk-report tool="verdunning" :sentence="method" :answer="check.a" :unit="check.u" :digits="4"/>
       </template>
     </div>
   </div>
@@ -181,6 +182,19 @@ export default {
       return {b1, b2, v1, v2, which};
     },
     ok() { return !this.problem; },
+    /* S96: de methodezin en het antwoord om je eigen berekening mee te controleren, in de eenheid van het gevraagde veld */
+    method() {
+      const {u1, u2} = this.raw, {b1, b2, v1, v2} = this.solve, {D1, D2} = this.kinds;
+      return esc(this.t('De stock (' + uv(lkNumIn(sig(b1 / D1[1], 4)) + ' ' + u1) + ') werd verdund tot ' + uv(lkNumIn(sig(b2 / D2[1], 4)) + ' ' + u2)
+        + ' door ' + uv(lkNumIn(vol(v1))) + ' stock aan te vullen tot ' + uv(lkNumIn(vol(v2))) + ' (C₁V₁ = C₂V₂).'));
+    },
+    check() {
+      const V = this.v, {c1, v1, v2} = this.raw, {b1, b2, v1: s1, v2: s2} = this.solve, {D1, D2} = this.kinds;
+      if (isNaN(v1)) return {a: s1 / UV[V['d-v1u']], u: V['d-v1u']};
+      if (isNaN(v2)) return {a: s2 / UV[V['d-v2u']], u: V['d-v2u']};
+      if (isNaN(c1)) return {a: b1 / D1[1], u: this.raw.u1};
+      return {a: b2 / D2[1], u: this.raw.u2};
+    },
     solved() {
       /* het grote getal staat er ook bij een te hoge C₂: dan vertelt de melding eronder waarom */
       const bad = this.problem && this.problem.kind === 'bad' && this.kinds.D1[0] === this.kinds.D2[0];

@@ -1,4 +1,4 @@
-import {h, onMounted, onUnmounted, watch} from 'vue';
+import {h, onMounted, onUnmounted, watch, ref} from 'vue';
 import {pipHtml} from './pip.js';
 
 /* ================= GEDEELDE VUE-COMPONENTEN =================
@@ -160,6 +160,49 @@ LKUI.steps = {
   }
 };
 
+/* ---------- methodezin, naar het rapport en antwoordcontrole (S96) ----------
+   <lk-report tool="verdunning" :sentence="html" :answer="getal" unit="mL" :digits="3">
+   - de methodezin staat als tekst in het resultaat, dus het rapport (rpSection kopieert .result) neemt hem
+     mee; Kopieer zet hem op het klembord;
+   - "→ Rapport" zet deze tool vooraan in de keuze van het rapport en opent het (window.__rpVm, Rapport.vue);
+   - "Controleer je antwoord": je eigen uitkomst; goed binnen 1 % of binnen een halve eenheid van het laatste
+     cijfer dat je gaf. De knoppen en het invoerveld staan in een .row, die het rapport weglaat. */
+/* getallen in de notatie van de gebruiker (zoals lkNumIn in bridge.js; die importeert dit bestand zelf) */
+const lkn = v => (LANG === 'en' && typeof i18nNum === 'function' ? String(v).replace(/\d+(?:[.,]\d+)*/g, m => i18nNum(m)) : String(v));
+LKUI.report = {
+  props: {tool: String, sentence: {type: String, default: ''}, answer: {type: Number, default: NaN}, unit: {type: String, default: ''}, digits: {type: Number, default: 3}},
+  setup(props) {
+    const mine = ref(''), copied = ref(false);
+    const verdict = () => {
+      const t = mine.value.trim(); if (!t || !isFinite(props.answer)) return null;
+      const u = num(t); if (!isFinite(u)) return null;
+      const dec = (t.replace(/^[^\d]*/, '').split(/[.,]/)[1] || '').replace(/[^\d]/g, '').length, half = 0.5 * 10 ** -dec;
+      const ok = Math.abs(u - props.answer) <= Math.max(Math.abs(props.answer) * 0.01, half);
+      return {ok, dev: props.answer ? (u - props.answer) / Math.abs(props.answer) * 100 : 0};
+    };
+    const copy = async () => { const d = document.createElement('div'); d.innerHTML = props.sentence; try { await navigator.clipboard.writeText(d.textContent); copied.value = true; setTimeout(() => { copied.value = false; }, 1500); } catch (e) {} };
+    const toRep = () => { try { const r = jget('labkit:v1:recent', []).filter(x => x !== props.tool); r.unshift(props.tool); jset('labkit:v1:recent', r.slice(0, 8)); } catch (e) {}
+      const vm = window.__rpVm; if (vm) vm.sel = [props.tool, ...vm.sel.filter(x => x !== props.tool)]; location.hash = '#report'; };
+    return () => {
+      const v = verdict(), U = props.unit ? ' ' + props.unit : '';
+      return h('div', {class: 'lk-report', style: 'margin-top:10px'}, [
+        props.sentence ? h('p', {class: 'lk-method', style: 'font-size:13px;margin:0 0 6px'}, [h('b', trPlain('Methode') + ': '), h('span', {innerHTML: props.sentence})]) : null,
+        h('div', {class: 'row', style: 'gap:6px;align-items:center;flex-wrap:wrap'}, [
+          props.sentence ? h('button', {type: 'button', class: 'xlbtn', 'data-method-copy': '', onClick: copy}, trPlain(copied.value ? 'Gekopieerd' : 'Kopieer methodezin')) : null,
+          h('button', {type: 'button', class: 'xlbtn', 'data-torep': '', onClick: toRep}, '→ ' + trPlain('Rapport')),
+          isFinite(props.answer) ? h('label', {style: 'display:flex;gap:6px;align-items:center;font-size:13px;margin-left:auto'}, [
+            trPlain('Controleer je antwoord:'),
+            h('input', {class: 'txt', inputmode: 'decimal', style: 'width:110px', 'data-check': '', 'aria-label': trPlain('Je eigen antwoord'), value: mine.value, onInput: e => { mine.value = e.target.value; }}),
+            props.unit ? h('span', props.unit) : null,
+            v ? h('span', {'data-verdict': v.ok ? 'ok' : 'bad', style: 'font-weight:600;color:var(--' + (v.ok ? 'ok' : 'bad') + ')'},
+              v.ok ? '✓ ' + trPlain('Goed') : '✗ ' + trPlain('Niet goed: het antwoord is ' + uv(lkn(sig(props.answer, props.digits).replace(/<[^>]+>/g, '')) + U) + '.')) : null
+          ]) : null
+        ])
+      ]);
+    };
+  }
+};
+
 /* ---------- de bewerkbare tabel ----------
    ET() in tools/nt/00_lib.js bouwt zo'n tabel met strings HTML en leest hem met etGet() weer
    uit de DOM. In Vue kan dat niet: de volgende render gooit het terug. Deze component neemt
@@ -304,5 +347,6 @@ export function lkUiInstall(app) {
   app.component('lk-overage', LKUI.overage);
   app.component('lk-formula', LKUI.formula);
   app.component('lk-steps', LKUI.steps);
+  app.component('lk-report', LKUI.report);
   app.component('lk-etable', LKUI.etable);
 }

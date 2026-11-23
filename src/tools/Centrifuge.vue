@@ -51,6 +51,7 @@
         <lk-kv :rows="res.rows"/>
         <lk-formula html="RCF = 1,118 × 10⁻⁵ × r × rpm²"/>
         <lk-note>{{ t('Controleer of de waarde binnen het maximum van de rotor valt en balanceer de buizen.') }}</lk-note>
+        <lk-report tool="centrifuge" :sentence="method" :answer="last === 'rpm' ? val.g : val.rpm" :unit="last === 'rpm' ? '× g' : 'rpm'" :digits="4"/>
       </template>
       <div class="fields" style="margin-top:14px">
         <div class="f">
@@ -112,6 +113,11 @@ export default {
     dots() {
       const n = num(this.n), on = new Set(this.bal.set);
       return [...Array(n).keys()].map(i => ({i, on: on.has(i), x: 40 * Math.sin(2 * Math.PI * i / n), y: -40 * Math.cos(2 * Math.PI * i / n)}));
+    },
+    /* S96: de methodezin */
+    method() {
+      const {r, rpm, g} = this.val; if (!isFinite(rpm) || !isFinite(g) || !isFinite(r)) return '';
+      return esc(this.t('Er werd gecentrifugeerd bij ' + uv(nl(g)) + ' × g (' + uv(nl(rpm)) + ' rpm, rotorstraal ' + uv(lkNumIn(fmt(r, 1))) + ' cm; RCF berekend uit rpm en rotorstraal).'));
     },
     res() {
       const t = this.t, {r, rpm, g} = this.val, byRpm = this.last === 'rpm';
