@@ -5972,5 +5972,22 @@
 "Eén bestand met de uitlijning, de boom (.dnd) en alle instellingen: kleuren, drempels, bijsnijden, vertaling, volgorde en figuur.": "One file with the alignment, the tree (.dnd) and all settings: colours, thresholds, trimming, translation, order and figure.",
 "Dit bestand is geen geldige JSON.": "This file is not valid JSON.",
 "Dit bestand is geen alignment-project van LabKit.": "This file is not a LabKit alignment project.",
-"Bezig met uitlijnen…": "Aligning…"
+"Bezig met uitlijnen…": "Aligning…",
+"SNaPshot / SBE (.fsa)": "SNaPshot / SBE (.fsa)",
+"Een single-base-extension-run geeft per SNP één piek per allel: de kleur is de base, de lengte de SNP. LabKit leest de vier kleurkanalen en de lengtestandaard (GeneScan-{#} LIZ) uit een .fsa-bestand.": "A single-base-extension run gives one peak per allele for each SNP: the colour is the base, the length is the SNP. LabKit reads the four dye channels and the size standard (GeneScan-{#} LIZ) from an .fsa file.",
+"SBE-run kiezen": "Choose an SBE run",
+"SBE-panel: per regel naam, van en tot (nt) en kleur=allel": "SBE panel: per line name, from and to (nt) and dye=allele",
+"Kleuren: blauw (dR{#}), groen (dR{#}G), zwart (dTAMRA, op het scherm vaak geel) en rood (dROX). Vul het allel in zoals de primer het inbouwt; bij een reverse primer is dat het complement.": "Dyes: blue (dR{#}), green (dR{#}G), black (dTAMRA, often shown as yellow) and red (dROX). Enter the allele the primer incorporates; for a reverse primer that is the complement.",
+"Verzonnen voorbeeld laden": "Load made-up example",
+"De lengtestandaard heeft te weinig pieken voor GeneScan-{#} LIZ ({#} fragmenten van {#} tot {#} nt).": "The size standard has too few peaks for GeneScan-{#} LIZ ({#} fragments from {#} to {#} nt).",
+"Lengtes met lokale Southern tussen de {#} pieken van de standaard (buiten de standaard lineair). Een allel telt vanaf {#}% van de hoogste piek van zijn SNP.": "Sizes by local Southern between the {#} peaks of the standard (linear outside the standard). An allele counts from {#}% of the highest peak of its SNP.",
+"Pieken (kleur, allel, lengte, hoogte)": "Peaks (dye, allele, size, height)",
+"geen call": "no call",
+"Regel {#}": "Line {#}",
+"zwart": "black",
+"Schrijf naam, van, tot (nt) en kleur=allel.": "Write name, from, to (nt) and dye=allele.",
+"Onbekende kleur of allel (blauw, groen, zwart, rood = A, C, G of T).": "Unknown dye or allele (blue, green, black, red = A, C, G or T).",
+"Dit bestand heeft geen vier kleurkanalen.": "This file does not have four dye channels.",
+"Dit bestand heeft geen kanaal met de lengtestandaard.": "This file has no size standard channel.",
+"Geen ABIF-bestand (.ab1 of .fsa).": "Not an ABIF file (.ab1 or .fsa)."
 }

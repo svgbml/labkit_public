@@ -284,6 +284,25 @@
         <p v-if="batch.length" style="font-size:13px;margin:6px 0 0">{{ t(batch.length + ' monsters geladen') }}</p>
         <div class="row" style="gap:6px;margin-top:8px"><button type="button" id="sg-bclear" @click="bclear">{{ t('Wissen') }}</button></div>
       </details>
+      <!-- S169: SNaPshot / SBE, pieken per kleur en lengte in plaats van een sequentie -->
+      <details class="panel" id="sg-sbep" :open="!!sbe">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('SNaPshot / SBE (.fsa)') }}</summary>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('Een single-base-extension-run geeft per SNP één piek per allel: de kleur is de base, de lengte de SNP. LabKit leest de vier kleurkanalen en de lengtestandaard (GeneScan-120 LIZ) uit een .fsa-bestand.') }}</p>
+        <input type="file" id="sg-sbe-file" accept=".fsa,.ab1,.abi" :aria-label="t('SBE-run kiezen')" @change="pickSbe">
+        <div class="f" style="margin-top:10px"><label for="sg-sbe-panel">{{ t('SBE-panel: per regel naam, van en tot (nt) en kleur=allel') }}</label>
+          <textarea id="sg-sbe-panel" class="mono" rows="4" v-model="sbeText" spellcheck="false" placeholder="rs12913832 28 32 blauw=G groen=A"></textarea></div>
+        <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Kleuren: blauw (dR110), groen (dR6G), zwart (dTAMRA, op het scherm vaak geel) en rood (dROX). Vul het allel in zoals de primer het inbouwt; bij een reverse primer is dat het complement.') }}</p>
+        <div class="row" style="gap:6px;margin-top:8px"><button type="button" id="sg-sbe-demo" @click="sbeDemoLoad">{{ t('Verzonnen voorbeeld laden') }}</button></div>
+        <lk-note v-for="(e, i) in sbeErr" :key="i" kind="bad">{{ e }}</lk-note>
+        <template v-if="sbe">
+          <p style="font-size:13px;margin:8px 0 4px">{{ t('Geladen') }}: {{ sbe.name }}</p>
+          <lk-note v-if="!sbeRes.ladder.length" kind="bad">{{ t('De lengtestandaard heeft te weinig pieken voor GeneScan-120 LIZ (9 fragmenten van 15 tot 120 nt).') }}</lk-note>
+          <template v-else>
+            <p style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Lengtes met lokale Southern tussen de 9 pieken van de standaard (buiten de standaard lineair). Een allel telt vanaf 10% van de hoogste piek van zijn SNP.') }}</p>
+            <div style="overflow:auto"><lk-table table-id="sg-sbe-tbl" :cols="sbeCols" :rows="sbeRows"/></div>
+          </template>
+        </template>
+      </details>
       <details class="panel" id="sg-r2p" :open="read2Ok">
         <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Tweede read (forward/reverse)') }}</summary>
         <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('De andere read van hetzelfde monster. Beide worden tegen de referentie uitgelijnd en per positie vergeleken.') }}</p>
@@ -315,6 +334,8 @@ import {callSample, genotypeRows, overlayStrips} from '../lib/sangerbatch.js';
 import {makeCase, parseCase, exampleSample, EXAMPLE_ID} from '../lib/sangercase.js';
 import {RESULT_GROUPS, parseProb, parseResultPaste, summarize, toCsv, PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate, autofill, mergeCalls, naReport} from '../lib/hiris.js';
 import {SEQ_TO} from '../lib/seq.js';
+import {readAbif} from '../lib/abif.js';
+import {parsePanel, sbeChannels, sbeGenotypes, sbeDemo, DEMO_PANEL, DYES} from '../lib/snapshot.js';
 
 /* de referentie kan uit Sequentie komen (ook een sequentie die daar bij NCBI is opgehaald) */
 SEQ_TO.push({label: 'Chromatogram (referentie)', tool: 'sanger', id: 'sg-ref'});
@@ -349,7 +370,7 @@ export default {
       edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1),
       refText: st['sg-ref'] != null ? String(st['sg-ref']) : '', assayKey: st['sg-assay'] != null ? String(st['sg-assay']) : '', own: jget(AKEY, []),
       read2: jget('sg-read2', null) ? markRaw(jget('sg-read2', null)) : null, paste2: st['sg-paste2'] != null ? String(st['sg-paste2']) : '',
-      caseMsg: '', caseOk: false, hsCopied: '', rsIdx: 0, rsPaste: '', rsMsg: '', rsThr: st['sg-rs-thr'] != null ? String(st['sg-rs-thr']) : NL(0.7, 1), batch: [], bsamples: [], bbusy: false, hs: (h => { h.samples = h.samples.map(x => Object.assign({res: {}, notes: {}}, x)); return h; })(Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {}))), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
+      caseMsg: '', caseOk: false, hsCopied: '', rsIdx: 0, rsPaste: '', rsMsg: '', rsThr: st['sg-rs-thr'] != null ? String(st['sg-rs-thr']) : NL(0.7, 1), sbe: null, sbeText: st['sg-sbe-panel'] != null ? String(st['sg-sbe-panel']) : '', sbeFileErr: '', batch: [], bsamples: [], bbusy: false, hs: (h => { h.samples = h.samples.map(x => Object.assign({res: {}, notes: {}}, x)); return h; })(Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {}))), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
   },
   computed: {
     HT() { return HT; },
@@ -590,6 +611,17 @@ export default {
     },
     /* de figuur: alle kansen van het gekozen monster, in de volgorde van de tabel */
     rsFig() { const x = this.hs.samples[this.rsIdx]; return !!x && summarize(x.res, this.thrN).length > 0; },
+    /* ---------- SNaPshot / SBE (S169) ---------- */
+    sbePanel() { return parsePanel(this.sbeText); },
+    sbeErr() { return (this.sbeFileErr ? [this.sbeFileErr] : []).concat(this.sbePanel.err.map(e => this.t('Regel ' + e[1]) + ': ' + this.t(e[0]))); },
+    sbeRes() { return this.sbe ? sbeGenotypes(this.sbe.ch, this.sbe.std, this.sbePanel.snps) : {ladder: [], calls: []}; },
+    sbeCols() { const t = this.t; return [{h: 'SNP'}, {h: t('Venster') + ' (nt)'}, {h: t('Pieken (kleur, allel, lengte, hoogte)')}, {h: t('Genotype')}]; },
+    sbeRows() {
+      const t = this.t;
+      return this.sbeRes.calls.map(c => [esc(c.id), NL(c.min, 1) + '–' + NL(c.max, 1),
+        c.peaks.map(p => t(DYES[p.dye]) + ' ' + p.allele + ' ' + NL(p.size, 1) + ' nt (' + NL(p.h, 0) + ')').join('; ') || '–',
+        c.gt ? '<b>' + c.gt + '</b>' : t('geen call')]);
+    },
     edCols() { const t = this.t; return [{h: t('SNP (rs)'), t: 'txt', w: 110}, {h: t('Positie'), t: 'num', w: 60}, {h: t('Allelen'), t: 'txt', w: 60}, {h: t('Streng'), t: 'sel', o: ['+', '-']}]; }
   },
   watch: {
@@ -950,6 +982,13 @@ export default {
       if (gen !== this.bgen) return;
       this.bsamples = out.map(x => markRaw(x)); this.bbusy = false;
     },
+    async pickSbe(e) {
+      const f = e.target.files[0]; if (!f) return;
+      this.sbeFileErr = '';
+      try { const c = sbeChannels(readAbif(await f.arrayBuffer())); this.sbe = markRaw(Object.assign({name: f.name}, c)); }
+      catch (x) { this.sbe = null; this.sbeFileErr = this.t(String(x.message)); }
+    },
+    sbeDemoLoad() { this.sbe = markRaw(sbeDemo()); this.sbeFileErr = ''; this.sbeText = DEMO_PANEL; this.poke('sg-sbe-panel'); },
     workerMode() { return W ? W.mode : 'none'; },
     bclear() { this.batch = []; const f = document.getElementById('sg-bfiles'); if (f) f.value = ''; },
     saveBatch() {
