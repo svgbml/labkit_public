@@ -5857,5 +5857,21 @@
 "Klaar voor Clustal Omega:": "Ready for Clustal Omega:",
 "sequenties": "sequences",
 "Schone FASTA": "Clean FASTA",
-"Namen kunnen tot {#} tekens; de naam is het eerste woord van de kopregel.": "Names can be up to {#} characters; the name is the first word of the header line."
+"Namen kunnen tot {#} tekens; de naam is het eerste woord van de kopregel.": "Names can be up to {#} characters; the name is the first word of the header line.",
+"Kopieer schone FASTA": "Copy clean FASTA",
+"Open Clustal Omega bij EBI": "Open Clustal Omega at EBI",
+"Neem de uitlijning hierboven als losse reeksen": "Use the alignment above as separate sequences",
+"Terugbrengen van EBI": "Bringing the result back from EBI",
+"Wat het is": "What it is",
+"Waar je het laadt": "Where to load it",
+"de uitlijning": "the alignment",
+"identiteit per paar": "identity per pair",
+"de gidsboom (Newick)": "the guide tree (Newick)",
+"Plak hem of open hem bij Uitlijning, bovenaan.": "Paste it or open it under Alignment, at the top.",
+"Niet nodig: de Identiteitsmatrix hieronder rekent hetzelfde uit en slaat hem op als .pim.": "Not needed: the identity matrix below computes the same and saves it as .pim.",
+"Bij Gidsboom (.dnd), hieronder: hij wordt bewaard; tekenen kan nog niet.": "Under Guide tree (.dnd), below: it is kept; drawing is not possible yet.",
+"Geblokkeerd": "Blocked",
+"Gidsboom (.dnd)": "Guide tree (.dnd)",
+"Newick-tekst van de boom": "Newick text of the tree",
+"De boom wordt bewaard en gaat mee in het projectbestand; hier tekenen kan nog niet.": "The tree is kept and goes into the project file; drawing it here is not possible yet."
 }

@@ -58,7 +58,8 @@
             <select id="al-xf" v-model="xf"><option v-for="(f, k) in outFmts" :key="k" :value="k">{{ f[0] }}</option></select></div>
         </div>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Bijsnijden en vertalen werken op wat de viewer toont; opslaan schrijft precies die kolommen weg.') }}</p>
-        <div class="row" style="margin-top:10px"><button type="button" class="primary" id="al-exp" :disabled="!m.names.length" @click="exportAln">{{ t('Uitlijning opslaan') }}</button></div>
+        <div class="row" style="margin-top:10px"><button type="button" class="primary" id="al-exp" :disabled="!m.names.length" @click="exportAln">{{ t('Uitlijning opslaan') }}</button>
+          <button type="button" id="al-cpy" :disabled="!m.names.length" @click="copyAln">{{ t('Kopieer') }}</button></div>
       </details>
       <!-- S186: reeksen controleren voordat ze naar Clustal Omega bij EBI gaan -->
       <details class="panel" id="al-prep-d" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Invoer voor Clustal Omega klaarmaken') }}</summary>
@@ -76,7 +77,21 @@
         </div>
         <div class="f" v-if="fc.text" style="margin-top:10px"><label for="al-fb-out">{{ t('Schone FASTA') }}</label>
           <textarea id="al-fb-out" class="mono" rows="5" readonly :value="fc.text" spellcheck="false" wrap="off"></textarea></div>
+        <div class="row" style="margin-top:10px">
+          <button type="button" class="primary" id="al-fb-copy" :disabled="!fc.text" @click="copyFb">{{ t('Kopieer schone FASTA') }}</button>
+          <a id="al-ebi" class="aln-lnk" :href="EBI_URL" target="_blank" rel="noopener">{{ t('Open Clustal Omega bij EBI') }}</a>
+          <button type="button" id="al-fb-from" :disabled="!m.names.length" @click="fromAln">{{ t('Neem de uitlijning hierboven als losse reeksen') }}</button>
+        </div>
+        <!-- S187: wat je bij EBI terugkrijgt en waar het hier heen gaat -->
+        <p style="font-size:13px;margin:12px 0 4px"><b>{{ t('Terugbrengen van EBI') }}</b></p>
+        <lk-table id="al-back" data-xl="1" :cols="backCols" :rows="backRows"/>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Namen kunnen tot ' + NAMEMAX + ' tekens; de naam is het eerste woord van de kopregel.') }}</p>
+      </details>
+      <details class="panel" id="al-tree-d" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Gidsboom (.dnd)') }}</summary>
+        <div class="f" style="margin-top:12px"><label for="al-dnd">{{ t('Newick-tekst van de boom') }}</label>
+          <textarea id="al-dnd" class="mono" rows="4" v-model="dnd" spellcheck="false" wrap="off"></textarea></div>
+        <div class="row" style="margin-top:8px"><input type="file" id="al-dnd-file" accept=".dnd,.nwk,.newick,.tree,.txt" :aria-label="t('Bestand openen')" @change="onDnd"></div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('De boom wordt bewaard en gaat mee in het projectbestand; hier tekenen kan nog niet.') }}</p>
       </details>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Het formaat wordt aan de eerste regel herkend. Uitlijnen doe je met Clustal Omega bij EBI; download daar de uitkomst als .aln en open die hier.') }}</p>
     </div>
@@ -172,6 +187,7 @@ import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile
   alnTrim, alnWrite, ALN_OUT, alnPair, alnPim, pimWrite, alnConserved, alnTranslate} from '../lib/alignment.js';
 import {CODES, SEQ_TO, seqSend} from '../lib/seq.js';
 import {fastaCheck, NAMEMAX} from '../lib/alnprep.js';
+import {alnUngapped, EBI_URL} from '../lib/alnhand.js';
 
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
@@ -188,8 +204,8 @@ export default {
       tr: st['al-tr'] != null ? String(st['al-tr']) : '0', code: st['al-code'] != null ? String(st['al-code']) : '1',
       gap: st['al-gap'] != null ? String(st['al-gap']) : '', from: st['al-from'] != null ? String(st['al-from']) : '', to: st['al-to'] != null ? String(st['al-to']) : '',
       xf: st['al-xf'] != null ? String(st['al-xf']) : 'fasta', gm: st['al-gm'] != null ? String(st['al-gm']) : 'ign',
-      pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false,
-      fb: st['al-fb'] != null ? String(st['al-fb']) : '', fbt: st['al-fbt'] != null ? String(st['al-fbt']) : 'auto', NAMEMAX,
+      pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false, dnd: st['al-dnd'] != null ? String(st['al-dnd']) : '',
+      fb: st['al-fb'] != null ? String(st['al-fb']) : '', fbt: st['al-fbt'] != null ? String(st['al-fbt']) : 'auto', NAMEMAX, EBI_URL,
       ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
   },
   computed: {
@@ -204,6 +220,13 @@ export default {
       return alnTrim(a, {maxGap: gOk ? g : null, from: f > 1 ? f : 1, to: l >= 1 ? l : a.len});
     },
     fc() { return fastaCheck(this.fb, this.fbt === 'auto' ? undefined : this.fbt); },
+    backCols() { const t = this.t; return [{h: t('Bestand')}, {h: t('Wat het is')}, {h: t('Waar je het laadt')}]; },
+    backRows() {
+      const t = this.t;
+      return [['<span class="mono">.aln</span> / <span class="mono">.clustal_num</span>', t('de uitlijning'), t('Plak hem of open hem bij Uitlijning, bovenaan.')],
+        ['<span class="mono">.pim</span>', t('identiteit per paar'), t('Niet nodig: de Identiteitsmatrix hieronder rekent hetzelfde uit en slaat hem op als .pim.')],
+        ['<span class="mono">.dnd</span>', t('de gidsboom (Newick)'), t('Bij Gidsboom (.dnd), hieronder: hij wordt bewaard; tekenen kan nog niet.')]];
+    },
     codes() { return CODES; },
     outFmts() { return ALN_OUT; },
     outText() { return alnWrite(this.m, this.xf in ALN_OUT ? this.xf : 'fasta'); },
@@ -437,6 +460,14 @@ export default {
     /* heatmap: de kleur van --accent, gemengd met --surface zodat --ink leesbaar blijft */
     heat(v) { return 'color-mix(in srgb, var(--accent) ' + Math.round(v * 45) + '%, var(--surface))'; },
     pc(v) { return lkNumIn(fmt(v * 100, 1)); },
+    /* de uitlijning zoals bij Opslaan als (bijgesneden, in het gekozen formaat) op het klembord */
+    copyAln() { this.copy(this.outText); },
+    fromAln() { this.fb = alnUngapped(this.m); },
+    copyFb() { this.copy(this.fc.text); },
+    copy(x) {
+      const done = () => window.lkToast && window.lkToast(this.t('Gekopieerd.'));
+      try { navigator.clipboard.writeText(x).then(done, () => window.lkToast && window.lkToast(this.t('Geblokkeerd'))); } catch (e) { if (window.lkToast) window.lkToast(this.t('Geblokkeerd')); }
+    },
     exportAln() {
       const f = ALN_OUT[this.xf] || ALN_OUT.fasta;
       saveBlob('uitlijning.' + f[1], new Blob([this.outText], {type: 'text/plain'})).catch(() => {});
@@ -451,6 +482,7 @@ export default {
     },
     /* een bestand houdt zijn regeleinden (CRLF, CR); een tekstvak zou ze al platslaan */
     onFb(e) { const f = e.target.files[0]; if (f) f.text().then(x => { this.fb = x; }); },
+    onDnd(e) { const f = e.target.files[0]; if (f) f.text().then(x => { this.dnd = x.trim(); }); },
     onFile(e) {
       const f = e.target.files[0];
       if (f) f.text().then(x => { this.txt = x; });

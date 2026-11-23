@@ -2142,5 +2142,21 @@ def _(pg):
     return out
 
 
+@case('Alignment bekijken', 'Clustal → FASTA → Clustal zonder verlies', "De vier .aln-bestanden uit tests/fixtures/aln (Biopython-testsuite): Opslaan als FASTA, dat weer inlezen, opslaan als Clustal en weer inlezen geeft dezelfde namen, sequenties en volgorde; de formaatlezers en -schrijvers van de viewer zelf (geen externe referentie nodig: de wet is gelijkheid)")
+def _(pg):
+    D = ROOT / 'tests' / 'fixtures' / 'aln'
+    pg.evaluate("__go('aln')")
+    out = []
+    for f in sorted(p.name for p in D.glob('*.aln')):
+        pg.evaluate("t=>{__set('al-in',t);__set('al-gap','');__set('al-from','');__set('al-to','');__set('al-tr','0')}", (D / f).read_text(encoding='utf-8')); pg.wait_for_timeout(120)
+        r = pg.evaluate("""()=>{const v=__alnVm, j=m=>JSON.stringify([m.names,m.seqs]), a=j(v.m); const step=fm=>{__set('al-xf',fm); const t=v.outText; __set('al-in',t); return t};
+            const fa=step('fasta'), b=j(v.m), fm1=v.m.format; const cl=step('clustal'), c=j(v.m); return [a===b?1:0, fm1==='fasta'?1:0, a===c?1:0, v.m.format==='clustal'?1:0]}""")
+        out += [(f + ': FASTA gelijk', r[0], 1, 0), (f + ': Clustal gelijk', r[2], 1, 0)]
+    pg.evaluate("__set('al-in','');__set('al-xf','fasta')")
+    pg.evaluate("document.getElementById('al-prep-d').open=true")
+    out.append(('koppeling naar EBI', int(pg.evaluate("document.getElementById('al-ebi').href") == 'https://www.ebi.ac.uk/jdispatcher/msa/clustalo'), 1, 0))
+    return out
+
+
 if __name__ == '__main__':
     main()
