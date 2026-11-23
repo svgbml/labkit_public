@@ -42,6 +42,18 @@
         <lk-formula :html="tHtml('g/L = G&lt;sub&gt;sat&lt;/sub&gt;·(S₂ − S₁) / (1 − P·S₂) · zuiveringsfactor = SA&lt;sub&gt;stap&lt;/sub&gt; / SA&lt;sub&gt;stap 1&lt;/sub&gt;')"/>
       </div>
     </div>
+    <div class="panel" v-show="m.chart">
+      <div><canvas id="pf-cy"></canvas></div><div style="margin-top:12px"><canvas id="pf-cf"></canvas></div>
+      <div class="lbl" style="margin-top:12px">{{ t('SDS-PAGE-schets per stap') }}</div>
+      <svg v-if="m.chart" :viewBox="'0 0 ' + sds.w + ' 170'" style="width:100%;max-width:520px;display:block" role="img" :aria-label="t('SDS-PAGE-schets per stap')">
+        <g v-for="(l, i) in sds.lanes" :key="i">
+          <rect :x="l.x" y="6" width="44" height="132" rx="3" fill="var(--line)"/>
+          <rect v-for="(b, j) in l.bands" :key="j" :x="l.x + 3" :y="6 + b.y * 132" width="38" :height="b.h" fill="var(--ink)" :opacity="b.o"/>
+          <text :x="l.x + 22" y="152" text-anchor="middle" font-size="9" fill="var(--muted)">{{ l.n }}<title>{{ l.full }}</title></text>
+        </g>
+      </svg>
+      <p style="font-size:12.5px;color:var(--muted);margin:6px 0 0">{{ t('Schets, geen meetdata: het aantal en de sterkte van de banden volgen alleen de zuiveringsfactor; de dikke band is het doeleiwit.') }}</p>
+    </div>
   </div>
 </template>
 
@@ -51,6 +63,8 @@ import {lkNumIn} from '../lib/bridge.js';
 /* getallen in de taal van de gebruiker: de DOM-vertaallaag komt niet in een Vue-boom */
 const F = (x, d) => lkNumIn(fmt(x, d)), G = (x, d) => lkNumIn(sig(x, d));
 const N = v => lkNumIn(String(v));
+/* posities (0-1 van boven naar onder) van de verontreinigingen in een lane, in de volgorde waarin ze verdwijnen; het doeleiwit zit op 0,55 */
+const CONT = [0.88, 0.12, 0.3, 0.77, 0.2, 0.4, 0.68], TARGET = 0.55;
 const ASAT = {'0': [515.35, 0.2722], '20': [536.49, 0.290], '25': [541.80, 0.2945]};
 
 export default {
@@ -69,6 +83,15 @@ export default {
       return [{h: t('Stap'), t: 'txt', w: 200}, {h: t('Volume (mL)'), t: 'num', w: 80}, {h: t('Eiwit (mg/mL)'), t: 'num', w: 80}, {h: t('Activiteit (U/mL)'), t: 'num', w: 90}];
     },
     /* alle maten van de uitkomst: één keer berekend, de rest van de component leest hieruit */
+    /* schets: hoe hoger de zuiveringsfactor, hoe minder en hoe zwakker de verontreinigingen en hoe sterker het doeleiwit */
+    sds() {
+      const R = this.m.R, fm = Math.max(1, ...R.map(r => r.f).filter(isFinite));
+      return {w: R.length * 52 + 8, lanes: R.map((r, i) => {
+        const q = fm > 1 && isFinite(r.f) ? Math.log(Math.max(r.f, 1)) / Math.log(fm) : 0, nc = Math.round(7 - 5 * q);
+        return {x: 8 + i * 52, n: r.n.length > 8 ? r.n.slice(0, 7) + '…' : r.n, full: r.n,
+          bands: [...CONT.slice(0, nc).map(y => ({y, h: 3, o: 0.55 - 0.3 * q})), {y: TARGET, h: 5, o: 0.4 + 0.55 * q}]};
+      })};
+    },
     m() {
       const t = this.t, tHtml = this.tHtml;
       const R = this.rows.map(r => r.slice()).map(r => ({n: r[0] || '?', v: num(r[1]), c: num(r[2]), a: num(r[3])})).filter(r => r.v > 0 && r.c > 0 && r.a >= 0).map(r => ({...r, mg: r.v * r.c, U: r.v * r.a, sa: r.a / r.c}));
@@ -102,6 +125,9 @@ export default {
     add() { this.rows = [...this.rows, this.cols.map(() => '')]; },
     draw() {
       const cv = document.getElementById('pf-cv'), m = this.m; if (!cv || !m.chart) return;
+      const cats = m.R.map((r, i) => 'Stap ' + (i + 1)), nan = m.R.map(() => NaN);
+      barChart(document.getElementById('pf-cy'), cats, m.R.map(r => r.y), nan, nan, {ylabel: 'Opbrengst (%)', ref: false});
+      barChart(document.getElementById('pf-cf'), cats, m.R.map(r => r.f), nan, nan, {ylabel: 'Zuiveringsfactor'});
       const R = m.R, interp = k => x => { const i = Math.max(0, Math.min(R.length - 2, Math.floor(x) - 1)); return R[i][k] + (R[i + 1][k] - R[i][k]) * (x - (i + 1)); };
       chart(cv, {xmin: 0.5, xmax: R.length + 0.5, ymin: 0, ymax: Math.max(100, ...R.map(r => r.y), ...R.map(r => r.f)) * 1.1, xlabel: 'stap', ylabel: 'opbrengst (%) · zuiveringsfactor',
         series: [{pts: R.map((r, i) => [i + 1, r.y]), name: 'opbrengst (%)'}, {fn: interp('y'), x0: 1, x1: R.length},

@@ -538,7 +538,7 @@ html[data-cvd=deuteranopie] main{filter:url(#cvd-deuteranopie)}
 html[data-cvd=protanopie] main{filter:url(#cvd-protanopie)}
 html[data-cvd=tritanopie] main{filter:url(#cvd-tritanopie)}
 .mic-wells{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 0}
-.mic-wells button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:40px;padding:3px 2px;border:0;background:none;font-size:11px;color:var(--text);cursor:pointer}
+.mic-wells button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:40px;padding:3px 2px;border:0;background:none;font-size:11px;color:var(--ink);cursor:pointer}
 .mic-wells b{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);background:var(--surface)}
 .mic-wells .grow b{background:var(--muted);border-color:var(--muted)}
 .mic-wells .mic b{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}

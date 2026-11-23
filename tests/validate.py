@@ -104,6 +104,14 @@ def _(pg):
     v = pg.evaluate("__cells('#s-unk tbody tr [data-x]')[0]")
     return [('terugberekend (IU/L)', v, 300, 0.01)]
 
+@case('Standaardcurve', 'Verdunningsadvies boven bereik', 'Verdunningsreeks 1-2-5 (ISO 3, Renard R3); Thermo Pierce BCA-protocol: monsters boven de hoogste standaard verdunnen en opnieuw meten. Rekenvoorbeeld: A = 0,1·c, standaarden 0–40, monster A = 1,2 → c = 120, doel = 20 (midden) → factor 6 → afgerond 10')
+def _(pg):
+    pg.evaluate("""__go('curve');__set('s-preset','leeg');__set('s-model','lin');__set('s-blank',false);
+      __tbl('s-std',[[0,0],[10,0.1],[20,0.2],[40,0.4]],'curve');
+      __tbl('s-unk',[['test',1.2,'','',1]],'curve');""")
+    v = pg.evaluate("__n(__el(document.querySelector('#s-adv')))")
+    return [('extra verdunning (×)', v, 10, 0.001)]
+
 @case('Enzymkinetiek', 'Puromycin (behandeld)', 'Treloar 1974 via R-dataset Puromycin (Bates & Watts 1988); referentie: SciPy curve_fit')
 def _(pg):
     pg.evaluate("""__go('enzym');__set('k-su','mM');__set('k-vu','µmol/min');
@@ -1017,6 +1025,20 @@ def _(pg):
     v=pg.evaluate("[...document.querySelector('#gm-out tbody tr').cells].slice(1,5).map(c=>__n(c.textContent))")
     return [('µm', v[0], 0.8, 0.005), ('lag λ', v[2], 2.0, 0.01), ('A', v[3], 3.5, 0.01)]
 
+@case('Groeicurves vergelijken', 't-toets van Welch op µmax per conditie', 'Onafhankelijk berekend met scipy.stats.ttest_ind(equal_var=False) op de µmax-waarden per replicaat uit de tabel (drie replicaten per conditie, Gompertz-data met µm 0,70–0,92 h⁻¹)')
+def _(pg):
+    import math
+    from scipy import stats
+    def curve(mu, lam=2.0):
+        return [0.05 * math.exp(3.5 * math.exp(-math.exp(mu * math.e / 3.5 * (lam - t / 2) + 1))) for t in range(0, 25)]
+    C = {'Wild 1': curve(0.70), 'Wild 2': curve(0.74), 'Wild 3': curve(0.78), 'Mut 1': curve(0.80, 2.5), 'Mut 2': curve(0.86, 2.5), 'Mut 3': curve(0.92, 2.5)}
+    txt = 't\t' + '\t'.join(C) + '\n' + '\n'.join(str(t / 2).replace('.', ',') + '\t' + '\t'.join(f"{C[k][t]:.6f}".replace('.', ',') for k in C) for t in range(25))
+    pg.evaluate(f"__go('gcomp');__set('gm-blank','0');__set('gm-tu','h');__set('gm-data',{txt!r})")
+    mu = pg.evaluate("[...document.querySelectorAll('#gm-out tbody tr')].map(r=>__n(r.cells[1].textContent))")
+    c = pg.evaluate("[...document.querySelector('#gm-welch tbody tr').cells].map(c=>__n(c.textContent))")
+    r = stats.ttest_ind(mu[3:], mu[:3], equal_var=False)
+    return [('t µmax', c[1], r.statistic, 0.02), ('p µmax', c[3], r.pvalue, 0.02)]
+
 @case('Western blot-normalisatie', 'Relatieve expressie', 'Rekentest voorbeelddata: (31500/30800 + 29800/29900)/2 gedeeld door controle-gemiddelde (15200/30100 + 14800/29500)/2')
 def _(pg):
     pg.evaluate("__go('wb')")
@@ -1101,6 +1123,13 @@ def _(pg):
     r = pg.evaluate("__big('#hh-out')")
     pg.evaluate("__set('hh-pka','7,20');__set('hh-ph','7,40')")
     return [('base : zuur', r, 10**0.24, 0.002), ('% basevorm', pg.evaluate("__kv('#hh-out','Aandeel basevorm')"), 100*10**0.2/(1+10**0.2), 0.002)]
+
+@case('pH-buffer', 'pKₐ-temperatuurcorrectie Tris', 'Goldberg e.a., J Phys Chem Ref Data 31:231 (2002): pKₐ(T) = pKₐ(25 °C) + dpKₐ/dT × (T − 25), Tris pKₐ 8,06 en dpKₐ/dT −0,028 per °C: 4 °C → 8,65; 37 °C → 7,72')
+def _(pg):
+    pg.evaluate("__go('hh');__set('hh-sys','tri');__set('hh-t','4')")
+    a = pg.evaluate("__kv('#hh-out','pKₐ bij deze')")
+    pg.evaluate("__set('hh-t','37')")
+    return [('pKₐ Tris 4 °C', a, 8.65, 0.01), ('pKₐ Tris 37 °C', pg.evaluate("__kv('#hh-out','pKₐ bij deze')"), 7.72, 0.01)]
 
 @case('Forensische matchkans', 'Productregel met θ', 'NRC II (1996) 4.1: het. 2pq = 2·0,1·0,2 = 0,04; hom. p² + p(1−p)θ = 0,01 + 0,1·0,9·0,01 = 0,0109; product 4,36 × 10⁻⁴ → 1 op 2294')
 def _(pg):
@@ -1235,6 +1264,18 @@ def _(pg):
     rows = [[x, round(f(x), 6), round(f(x), 6), ''] for x in xs]
     pg.evaluate(f"__go('ic50');__set('ic-norm','raw');__tbl('ic-tbl',{rows},'ic50')")
     return [('IC50', pg.evaluate("__big('#ic-out')"), 3.0, 0.005)]
+
+@case('Dosis-respons (IC50/EC50)', 'Twee stoffen: IC50 met 95%-interval en F-toets', 'Zelfde 4PL-fit per stof (scipy.optimize.curve_fit; t-kwantiel scipy.stats.t) en extra-som-van-kwadraten-F-toets van gedeelde tegen aparte log-IC50 (Motulsky & Christopoulos, Fitting models to biological data, 2004, hfst. 22; scipy.optimize.least_squares en scipy.stats.f) voor verzonnen data')
+def _(pg):
+    conc = [0.1, 0.3, 1, 3, 10, 30, 100]
+    A = [[1.00, 0.98], [0.97, 0.99], [0.90, 0.93], [0.70, 0.66], [0.38, 0.42], [0.15, 0.12], [0.07, 0.06]]
+    B = [[1.01, 0.99], [1.00, 0.98], [0.95, 0.97], [0.88, 0.84], [0.62, 0.58], [0.30, 0.34], [0.12, 0.10]]
+    txt = 'Concentratie;A;B\n' + '\n'.join(f"{c};{a[k]};{b[k]}".replace('.', ',') for c, a, b in zip(conc, A, B) for k in (0, 1))
+    pg.evaluate("__go('ic50');__set('ic-norm','raw')")
+    pg.evaluate("t=>__set('ic-multi',t)", txt)
+    row = lambda i, j: pg.evaluate(f"__n(__el(document.querySelectorAll('#ic-multi-box table tbody tr')[{i}].cells[{j}]))")
+    return [('IC50 A', row(0, 1), 6.1114, 0.005), ('ondergrens A', row(0, 2), 5.0916, 0.005), ('bovengrens A', pg.evaluate("__n(__el(document.querySelectorAll('#ic-multi-box table tbody tr')[0].cells[2]).split('–')[1])"), 7.3356, 0.005),
+            ('IC50 B', row(1, 1), 14.435, 0.05), ('F', pg.evaluate("__kv('#ic-cmp-out','F')"), 52.811, 0.01), ('p', pg.evaluate("__kv('#ic-cmp-out','p')"), 4.9755e-7, 1e-9)]
 
 @case('Sterilisatie (D, z, F₀)', 'F₀ van 15 min op 121,1 °C', 'Ph. Eur. 5.1.5: F₀ = Δt·Σ10^((T−121,1)/10) = 15 min; D uit log-lineaire overleving met D = 2,5 min')
 def _(pg):
@@ -1476,6 +1517,26 @@ def _(pg):
     pg.evaluate("__set('d-c1u','X');__set('d-c2u','X');__set('d-c1','50');__set('d-c2','1');__set('d-v2','500')")
     return [('V₁ (µL)', v, 1.25, 0.001), ('foutmelding bij C₂ > C₁', 1 if bad else 0, 1, 0)]
 
+@case('Verdunning', 'Verdunningsreeks 1:10 × 5', 'Seriële verdunning (Harris, Quantitative Chemical Analysis): 1000 µL per buis, factor 10 → 100 µL over, 900 µL verdunningsmiddel; 10⁹ → buis 5 = 10⁴')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('d-mode','reeks')")
+    pg.wait_for_timeout(100)
+    pg.evaluate("__set('d-c1u','X');__set('d-c1','1000000000');__set('ds-f','10');__set('ds-n','5');__set('ds-v','1000')")
+    pg.wait_for_timeout(100)
+    r = pg.evaluate("[...document.querySelectorAll('#d-out tbody tr')].map(tr=>[...tr.cells].map(c=>c.textContent))")
+    pg.evaluate("__set('d-mode','een')")
+    num = lambda x: float(''.join(ch for ch in x.split()[0] if ch.isdigit()))  # whole numbers only: separators dropped
+    return [('buis 5 (X)', num(r[5][3]), 1e4, 0.001), ('overdracht (µL)', num(r[1][1]), 100, 0), ('verdunningsmiddel (µL)', num(r[1][2]), 900, 0)]
+
+@case('Eenheden omrekenen', 'Tweewegomrekening', '0,9% NaCl (58,44 g/mol) = 9 g/L = 154 mmol/L; typen in het mM-vak geeft 0,9% terug')
+def _(pg):
+    pg.evaluate("__go('units');__set('un-mw','58,44');__set('un2-pct','0,9')"); pg.wait_for_timeout(100)
+    mm = pg.evaluate("document.getElementById('un2-mM').value")
+    pg.evaluate("__set('un2-mM','154')"); pg.wait_for_timeout(100)
+    pc = pg.evaluate("document.getElementById('un2-pct').value")
+    f = lambda x: float(x.replace(',', '.'))
+    return [('mM', f(mm), 154.0, 0.002), ('% w/v', f(pc), 0.9, 0.002)]
+
 @case('Verdunning', 'Antistofverdunning met overmaat', 'Onafhankelijk berekend: 1:1000, 2 blots × 10 mL + 10% = 22 mL → 22 µL antistof en 21,978 mL buffer; met +1 reactie 3 × 10 mL → 30 µL')
 def _(pg):
     pg.evaluate("__go('verdunning');__set('ab-d','1000');__set('ab-u','mL');__set('ab-v','10');__set('ab-k','2');__set('ab-ov','pct');__set('ab-x','10')")
@@ -1514,6 +1575,18 @@ def _(pg):
     pg.evaluate(f"__go('enzym');__tbl('k-tbl',{rows},'enzym')")
     r = pg.evaluate("(()=>{ const tr=[...document.querySelectorAll('#k-res table')].pop().querySelectorAll('tbody tr')[2]; return [__n(tr.cells[2].textContent),__n(tr.cells[3].textContent)]; })()")
     return [('helling', r[0], -2, 0.002), ('y-asafsnede', r[1], 100, 0.002)]
+
+@case('Enzymkinetiek', 'Remmingstype (AICc, Akaike-gewichten)', 'Exacte competitieve data (V_max 100, K_m 2, K_i 1; [S] 0,5–16; [I] 0, 1, 3): Copeland, Enzymes (2e dr., Wiley 2000) hfst. 8 voor v = V[S]/(K_m(1+[I]/K_i)+[S]); Burnham & Anderson 2002 voor AICc = n·ln(RSS/n) + 2k + 2k(k+1)/(n−k−1) en w = exp(−Δ/2)/Σ. Het gemengde model bevat het competitieve en past even exact, dus alleen de AICc-straf scheidt ze: w = 1/(1+exp(−Δ/2)) met Δ = AICc(k=4) − AICc(k=3) bij gelijke RSS (0,84 bij n = 18; > 0,9 is hier niet haalbaar)')
+def _(pg):
+    import math
+    rows = '\\n'.join(f'{s} {round(100*s/(2*(1+i)+s), 6)} {i}' for i in (0, 1, 3) for s in (0.5, 1, 2, 4, 8, 16))
+    pg.evaluate(f"__go('enzym');__set('ki-d','{rows}'.replace(/\\./g,','))")
+    n = 18; aicc = lambda k: 2*k + 2*k*(k+1)/(n-k-1)
+    w = 1/(1+math.exp(-(aicc(4)-aicc(3))/2))
+    return [('Ki', pg.evaluate("__kv('#ki-det','Ki')"), 1.0, 0.005), ('Km', pg.evaluate("__kv('#ki-det','Km')"), 2.0, 0.005),
+            ('Vmax', pg.evaluate("__kv('#ki-det','Vmax')"), 100.0, 0.005),
+            ('Akaike-gewicht competitief (%)', pg.evaluate("__cells('#ki-det tr.hl td:nth-child(3)')[0]"), w*100, 0.01),
+            ('beste model is competitief', 1 if pg.evaluate("document.querySelector('#ki-det tr.hl td').textContent") == 'Competitief' else 0, 1, 0)]
 
 @case('Plasmidekaart', 'pFA6a-kanMX6 uit GenBank', 'Het GenBank-bestand zelf (Addgene 39296, tests/fixtures/pFA6a-kanMX6.gb: 3938 bp circulair, SP6-promotor op 3922..2 over het nulpunt) en Biopython Bio.Restriction (REBASE): 22 van de 50 enzymen knippen één keer, EcoRI op 1517 en BamHI op 44')
 def _(pg):

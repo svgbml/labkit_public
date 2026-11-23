@@ -113,17 +113,49 @@
         </div>
       </div>
     </div>
+    <details class="panel" id="k-gdet">
+      <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Alle vier de grafieken naast elkaar') }}</summary>
+      <lk-note v-if="!kin" kind="info" style="margin-top:10px">{{ t('Vul minstens drie substraatconcentraties met snelheid in.') }}</lk-note>
+      <div v-else style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px;margin-top:10px">
+        <div v-for="g in plots" :key="g.k">
+          <div class="lbl">{{ t(g.n) }}</div>
+          <canvas :id="'k-g-' + g.k"></canvas>
+          <p v-if="g.k !== 'mm'" style="font-size:12px;color:var(--muted);margin:4px 0 0">{{ linNote(g.k) }}</p>
+        </div>
+      </div>
+      <p v-if="kin" style="font-size:12px;color:var(--muted);margin:10px 0 0">{{ t('De lijnen volgen de niet-lineaire fit; de punten zijn de metingen zonder remmer.') }}</p>
+    </details>
+    <details class="panel" id="ki-det">
+      <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Remmingstype vergelijken (meerdere [I])') }}</summary>
+      <div class="f" style="margin-top:10px">
+        <label for="ki-d">{{ t('[S], v en [I] per regel') }} <span class="example">{{ t('voorbeeld') }}</span></label>
+        <textarea id="ki-d" rows="8" v-model="kiData"></textarea>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('Eén regel per meting; [I] in dezelfde eenheid als [S]. Alle punten worden samen gefit met gedeelde Vmax en Km.') }}</p>
+      <lk-note v-if="!ki" kind="info">{{ t('Vul minstens zes regels in, waarvan een deel met [I] boven nul.') }}</lk-note>
+      <template v-else>
+        <lk-table :cols="kiCols" :rows="kiRows"/>
+        <lk-note :kind="kiBest.w < 0.7 ? 'warn' : 'ok'">{{ kiMsg }}</lk-note>
+        <lk-kv :rows="kiBestRows"/>
+        <canvas id="ki-cv" style="margin-top:10px"></canvas>
+      </template>
+      <p style="font-size:12px;color:var(--muted);margin:8px 0 0">{{ t('Bronnen: Copeland, Enzymes (Wiley), hoofdstuk over remming; Burnham en Anderson, Model selection (AICc).') }}</p>
+    </details>
   </div>
 </template>
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {MODELS, inhibFit} from '../lib/inhib.js';
 
 /* F(x, d, true) is sig(); zonder derde argument fmt() */
 const FM = (x, d) => lkNumIn(fmt(x, d)), SG = (x, d) => lkNumIn(sig(x, d)), SC = (x, d) => lkNumIn(sci(x, d));
 
 /* de voorbeeldreeks van de oude tool */
 const KDATA = [[0.25, 8.9, 4.9], [0.5, 14.2, 8.4], [1, 23.1, 15.0], [2, 30.6, 22.2], [4, 39.0, 31.8], [8, 43.1, 38.1]];
+
+/* voorbeeld: competitieve remming (Vmax 100, Km 2, Ki 1) op één decimaal afgerond; kolommen [S], v, [I] */
+const KIDATA = [[0.5, 20.0, 0], [1, 33.3, 0], [2, 50.0, 0], [4, 66.7, 0], [8, 80.0, 0], [16, 88.9, 0], [0.5, 11.1, 1], [1, 20.0, 1], [2, 33.3, 1], [4, 50.0, 1], [8, 66.7, 1], [16, 80.0, 1], [0.5, 5.9, 3], [1, 11.1, 3], [2, 20.0, 3], [4, 33.3, 3], [8, 50.0, 3], [16, 66.7, 3]];
 
 const PLOTS = [{k: 'mm', n: 'Michaelis-Menten'}, {k: 'lb', n: 'Lineweaver-Burk'},
   {k: 'hw', n: 'Hanes-Woolf'}, {k: 'eh', n: 'Eadie-Hofstee'}];
@@ -136,7 +168,7 @@ export default {
       vt: '3', ve: lkNumIn('0,1'), df: '1', prot: lkNumIn('0,5'),
       su: 'mM', vu: 'µM/min', E: lkNumIn('0,01'), I: lkNumIn('0,5'),
       rows: KDATA.map(r => r.map(v => lkNumIn(String(v).replace('.', ',')))),
-      plot: 'mm'
+      plot: 'mm', kiData: KIDATA.map(r => r.map(v => lkNumIn(String(v).replace('.', ','))).join('  ')).join('\n')
     };
   },
   computed: {
@@ -174,6 +206,32 @@ export default {
       const G = B.length >= 3 ? mmFit(B.map(r => r.s), B.map(r => r.vi)) : null;
       const sMax = Math.max(...rows.filter(r => r.s > 0).map(r => r.s));
       return {A, B, F, G, sMax};
+    },
+    /* de remmingsvergelijking: punten uit het tekstvak, globale fit van de vier modellen */
+    kiPts() {
+      return this.kiData.split('\n').map(l => nums(l)).filter(a => a.length >= 2 && a[0] > 0 && a[1] > 0)
+        .map(a => ({s: a[0], v: a[1], i: a[2] > 0 ? a[2] : 0}));
+    },
+    ki() { const L = this.kiPts; return inhibFit(L.map(r => r.s), L.map(r => r.v), L.map(r => r.i)); },
+    kiBest() { return this.ki.models[this.ki.best]; },
+    kiCols() {
+      return [{h: this.t('Model')}, {h: 'AICc', num: true}, {h: this.t('Gewicht'), num: true}, {h: 'K<sub>i</sub>', num: true}];
+    },
+    kiRows() {
+      const t = this.t, su = this.su, b = this.ki.best;
+      return this.ki.models.map((m, j) => ({cells: [t(m.name), FM(m.aicc, 1), FM(m.w * 100, 0) + '%',
+        `${SG(m.p[2], 3)} ${su}`], cls: j === b ? 'hl' : ''}));
+    },
+    kiMsg() {
+      const b = this.kiBest, t = this.t;
+      return b.w < 0.7 ? t('Geen duidelijk type; meer [S] of [I] meten.') : t(b.name) + ': ' + t('beste model volgens AICc.');
+    },
+    kiBestRows() {
+      const b = this.kiBest, su = this.su, vu = this.vu, pm = (v, e, u) => `${SG(v, 3)}${isFinite(e) ? ` ± ${SG(e, 2)}` : ''} ${u}`;
+      const r = [[this.t('Beste model'), `${this.t(b.name)} (${FM(b.w * 100, 0)}%)`], [this.tHtml('V<sub>max</sub>'), pm(b.p[0], b.se[0], vu)],
+        [this.tHtml('K<sub>m</sub>'), pm(b.p[1], b.se[1], su)], [this.tHtml('K<sub>i</sub>'), pm(b.p[2], b.se[2], su)]];
+      if (b.p.length > 3) r.push([this.tHtml('αK<sub>i</sub>'), pm(b.p[3], b.se[3], su)]);
+      return r;
     },
     methCols() {
       return [{h: this.t('Methode')}, {h: 'V<sub>max</sub>', num: true}, {h: 'K<sub>m</sub>', num: true},
@@ -232,9 +290,42 @@ export default {
         [t('Indicatie'), `<span class="chip info">${t(type)}</span>`]];
     }
   },
-  mounted() { this.draw(); },
-  updated() { this.draw(); },
+  mounted() { this.draw(); this.drawGrid(); this.drawKi(); },
+  updated() { this.draw(); this.drawGrid(); this.drawKi(); },
   methods: {
+    /* de regressiewaarden van één lineaire grafiek, als kleine uitleg onder de tekening */
+    linNote(k) {
+      const o = this.kin.F[k];
+      return this.t('Uit deze lijn: Km ' + uv(SG(o.K, 3)) + ', Vmax ' + uv(SG(o.V, 3)) + ' — minder betrouwbaar dan de niet-lineaire fit');
+    },
+    /* vier kleine grafieken: punten en de lijn van de niet-lineaire Km en Vmax */
+    drawGrid() {
+      const K = this.kin, c = k => document.getElementById('k-g-' + k); if (!K || !c('mm')) return;
+      const {A, F, sMax} = K, {Vm, Km} = F, su = this.su, vu = this.vu, o = {w: 360, h: 250}, ymax = Math.max(Vm, ...A.map(r => r.v)) * 1.1;
+      chart(c('mm'), {...o, xmin: 0, xmax: sMax * 1.08, ymin: 0, ymax, xlabel: `[S] (${su})`, ylabel: `v (${vu})`,
+        series: [{fn: s => Vm * s / (Km + s), x0: 0}, {pts: A.map(r => [r.s, r.v]), color: '--ink'}]});
+      const xl = -1 / Km * 1.15, lx = A.map(r => 1 / r.s), ly = A.map(r => 1 / r.v), lb = x => 1 / Vm + Km / Vm * x;
+      chart(c('lb'), {...o, xmin: xl, xmax: Math.max(...lx) * 1.08, ymin: Math.min(lb(xl), 0) * 1.1, ymax: Math.max(...ly) * 1.1, xlabel: `1/[S] (1/${su})`, ylabel: '1/v',
+        series: [{fn: lb}, {pts: A.map((r, i) => [lx[i], ly[i]]), color: '--ink'}]});
+      const hw = x => (x + Km) / Vm, hy = A.map(r => r.s / r.v), hx = -Km * 1.15;
+      chart(c('hw'), {...o, xmin: hx, xmax: sMax * 1.08, ymin: Math.min(hw(hx), 0) * 1.1, ymax: Math.max(...hy) * 1.1, xlabel: `[S] (${su})`, ylabel: '[S]/v',
+        series: [{fn: hw}, {pts: A.map((r, i) => [r.s, hy[i]]), color: '--ink'}]});
+      const ex = A.map(r => r.v / r.s);
+      chart(c('eh'), {...o, xmin: 0, xmax: Math.max(...ex, Vm / Km) * 1.08, ymin: 0, ymax, xlabel: 'v/[S]', ylabel: `v (${vu})`,
+        series: [{fn: x => Vm - Km * x}, {pts: A.map((r, i) => [ex[i], r.v]), color: '--ink'}]});
+    },
+    /* Lineweaver-Burk met een kleur per [I] en de lijnen van het beste model */
+    drawKi() {
+      const cv = document.getElementById('ki-cv'); if (!cv || !this.ki) return;
+      const L = this.kiPts, m = this.kiBest, mod = MODELS.find(x => x.id === m.id), col = j => SERCOL[j % SERCOL.length];
+      const Is = [...new Set(L.map(r => r.i))].sort((a, b) => a - b), apps = Is.map(i => mod.app(m.p, i));
+      const lines = apps.map(a => x => 1 / a.V + a.K / a.V * x), xs = L.map(r => 1 / r.s), ys = L.map(r => 1 / r.v);
+      const xmin = -Math.max(...apps.map(a => 1 / a.K)) * 1.15;
+      chart(cv, {xmin, xmax: Math.max(...xs) * 1.08, ymin: Math.min(...lines.map(f => f(xmin)), 0) * 1.1, ymax: Math.max(...ys) * 1.1,
+        xlabel: `1/[S] (1/${this.su})`, ylabel: '1/v',
+        series: Is.flatMap((i, j) => [{fn: lines[j], color: col(j)}, {pts: L.filter(r => r.i === i).map(r => [1 / r.s, 1 / r.v]), color: col(j)}]),
+        legend: Is.map((i, j) => ['[I] = ' + lkNumIn(sig(i, 3)), col(j)])});
+    },
     F(x, d, sig) { return sig ? SG(x, d) : FM(x, d); },
     G: SG,
     isFinite,

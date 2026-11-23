@@ -36,11 +36,22 @@
         <lk-note v-else kind="info">{{ t('Vul per piek een retentietijd en breedte in.') }}</lk-note>
       </div>
     </div>
+    <details class="panel" id="chr-imp-box">
+      <summary>{{ t('Piektabel importeren (CSV/TSV)') }}</summary>
+      <textarea id="chr-imp" rows="5" style="width:100%;margin-top:8px" v-model="imp" :placeholder="t('Plak een piektabel uit het integratieprogramma, met een kopregel (naam, retentietijd, oppervlakte, hoogte, breedte).')"></textarea>
+      <div class="row" style="margin-top:8px"><button type="button" id="chr-imp-go" @click="doImport">{{ t('Importeer in de tabel') }}</button></div>
+      <lk-note v-if="impMsg" :kind="impMsg[0]">{{ impMsg[1] }}</lk-note>
+      <template v-if="skp.length">
+        <canvas id="chr-cv2"></canvas>
+        <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Schets uit de piektabel (Gaussische pieken met de opgegeven hoogte of oppervlakte en breedte), geen meetdata.') }}</p>
+      </template>
+    </details>
   </div>
 </template>
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {parsePeakTable, sketchPeaks} from '../lib/peaktable.js';
 
 /* getallen in de taal van de gebruiker: de DOM-vertaallaag komt niet in een Vue-boom */
 const F = (x, d) => lkNumIn(fmt(x, d));
@@ -51,7 +62,7 @@ export default {
   data() {
     const t = this.t;
     return {
-      t0: lkNumIn('1,10'), L: N(150), wt: 'h',
+      t0: lkNumIn('1,10'), L: N(150), wt: 'h', imp: '', impMsg: null, skp: [],
       rows: [['Theobromine', 2.85, 0.075, 0.14, 0.065], ['Theofylline', 3.42, 0.082, 0.16, 0.072], ['Cafeïne', 4.95, 0.110, 0.23, 0.098]]
         .map(r => r.map((v, i) => i ? N(v) : t(v)))
     };
@@ -91,7 +102,23 @@ export default {
     /* de oude ET()-knop zette een lege rij onderaan; de breedte komt uit de kolommen, zodat
        het ook werkt als alle rijen weg zijn */
     add() { this.rows = [...this.rows, this.cols.map(() => '')]; },
+    doImport() {
+      const t = this.t, r = parsePeakTable(this.imp);
+      if (!r) { this.skp = []; this.impMsg = ['warn', t('Geen retentietijd-kolom gevonden; zet een kopregel boven de tabel.')]; return; }
+      const w = r.peaks.find(p => p.width > 0);
+      if (w) this.wt = w.wkind;
+      this.rows = r.peaks.map(p => [p.name, N(p.rt), p.width > 0 ? N(+p.width.toPrecision(4)) : '', '', '']);
+      this.skp = sketchPeaks(r.peaks);
+      this.impMsg = ['ok', t(r.peaks.length + ' pieken ingelezen')];
+    },
     draw() {
+      const c2 = document.getElementById('chr-cv2'), K = this.skp;
+      if (c2 && K.length) {
+        const f2 = x => K.reduce((s, p) => s + p.amp * Math.exp(-0.5 * ((x - p.rt) / p.sigma) ** 2), 0);
+        const g2 = chart(c2, {xmin: Math.max(0, Math.min(...K.map(p => p.rt - 4 * p.sigma)) - 0.3), xmax: Math.max(...K.map(p => p.rt + 4 * p.sigma)) + 0.3, ymin: 0, ymax: 1.25, xlabel: 'tijd (min)', ylabel: 'signaal (relatief, schets)', series: [{fn: f2, name: 'schets'}]});
+        const c = c2.getContext('2d'); c.font = '11px ' + PFONT(); c.fillStyle = PCOL.ink; c.textAlign = 'center';
+        K.forEach(p => c.fillText(uv(p.name.length > 14 ? p.name.slice(0, 13) + '…' : p.name), g2.X(p.rt), g2.Y(f2(p.rt)) - 10));
+      }
       const cv = document.getElementById('chr-cv'), m = this.m; if (!cv || !m.chart) return;
       const P = m.P;
       const x0 = Math.max(0, Math.min(...P.map(p => p.t - 4 * p.sg)) - 0.3), x1 = Math.max(...P.map(p => p.t + 4 * p.sg)) + 0.3, f = x => P.reduce((s, p) => s + Math.exp(-0.5 * ((x - p.t) / p.sg) ** 2), 0);

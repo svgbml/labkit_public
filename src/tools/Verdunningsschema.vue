@@ -87,6 +87,9 @@ import {lkNumIn} from '../lib/bridge.js';
 const loc = v => (LANG === 'en' ? trPlain(v, true) : v);
 
 /* de invoer die storeGet() eerder bewaarde onder de id's van deze velden */
+/* overdracht en verdunningsmiddel per buis; ook gebruikt door Verdunning.vue (reeksmodus) */
+export const serie = (f, V) => ({tr: V / f, dv: V - V / f});
+
 const stored = (id, d) => { try { const v = storeGet()[id]; return v == null ? d : v; } catch (e) { return d; } };
 
 export default {
@@ -107,7 +110,7 @@ export default {
       const c0 = num(this.c0), cu = this.cu.trim(), f = num(this.f), n = Math.max(1, Math.min(10, Math.round(num(this.n) || 1))), V = num(this.v), dil = this.dil.trim() || 'verdunningsmiddel';
       const np = Math.max(0, Math.min(n, Math.round(num(this.plate) || 0))), pvol = num(this.pv), lab = this.lab, title = this.title.trim();
       if (!(f > 1) || !(V > 0)) return {bad: true};
-      const tr = V / f, dv = V - tr;
+      const {tr, dv} = serie(f, V);
       return {bad: false, c0, cu, f, n, V, dil, np, pvol, lab, title, tr, dv};
     },
     rows() {

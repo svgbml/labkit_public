@@ -100,7 +100,8 @@ function barChart(cv,cats,vals,lo,hi,o){
     x.fillStyle=C('--ink'); x.textAlign='center'; x.textBaseline='top'; x.fillText(c.length>14?c.slice(0,13)+'…':c,cx,H-pad.b+6); if(isFinite(vals[i])){ x.textBaseline='bottom'; x.fillText(sig(vals[i],3).replace(/<[^>]+>/g,''),cx,Y(Math.max(vals[i],isFinite(hi[i])?hi[i]:0))-3);
       /* S110: o.stars = sterren of 'ns' per staaf (toets tegen de kalibrator), boven het getal */
       if(o.stars&&o.stars[i]){ x.font='600 '+(st.tick+1)+'px '+st.font; x.fillText(o.stars[i],cx,Y(Math.max(vals[i],isFinite(hi[i])?hi[i]:0))-3-st.tick-4); x.font=st.tick+'px '+st.font; } } });
-  x.strokeStyle=C('--muted'); x.setLineDash([4,3]); x.beginPath(); x.moveTo(pad.l,Y(1)); x.lineTo(W-pad.r,Y(1)); x.stroke(); x.setLineDash([]);
+  if(o.ref!==false){ x.strokeStyle=C('--muted'); x.setLineDash([4,3]); x.beginPath(); x.moveTo(pad.l,Y(1)); x.lineTo(W-pad.r,Y(1)); x.stroke(); x.setLineDash([]); }   /* o.ref=false: geen stippellijn op 1 (bijv. opbrengst in %) */
+  x.strokeStyle=C('--muted');
   x.beginPath(); x.moveTo(pad.l,pad.t); x.lineTo(pad.l,H-pad.b); x.lineTo(W-pad.r,H-pad.b); x.stroke();
   x.save(); x.translate(14,(H-pad.b+pad.t)/2); x.rotate(-Math.PI/2); x.textAlign='center'; x.textBaseline='middle'; x.fillStyle=st.muted; x.font=st.lab+'px '+st.font; x.fillText(o.ylabel,0,0); x.restore();
   if(o.title){ x.fillStyle=st.ink; x.font=`600 ${st.lab+2}px ${st.font}`; x.textAlign='center'; x.textBaseline='top'; x.fillText(o.title,(W+pad.l)/2,6); }

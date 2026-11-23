@@ -130,7 +130,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | C2 ✅ | Opus 5.5 | S89–S90 figure maker (new tool, Vue) | C1b | anything except G3 |
 | C3 | Opus 5 | S91–S93, S96: imports and core-calculator extras | C1b | anything except R3 |
 | C4 | Sonnet | S94, S95 | C3 | anything |
-| R1 | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 |
+| R1 ✅ | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 |
 | R2a ✅ | Sonnet | S106–S110 | K3 | anything except E3 |
 | R2b | Sonnet | S111, S112, S115, S116 | K3 | anything |
 | R3 | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 |
@@ -337,14 +337,14 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 ## Phase 8: rework existing tools (20 steps)
 | Step | Ideas | What | Model |
 |---|---|---|---|
-| S97 | 151, 152, 155 | Dilution: tube visual, serial mode; live two-way unit converter | Sonnet |
-| S98 | 156, 157, 158 | Molar mass name lookup; buffer picker; Tris temperature correction | Sonnet |
+| S97 | 151, 152, 155 | Dilution: tube visual, serial mode; live two-way unit converter ✅ the tool already solved the one empty field; serial mode reuses `serie()` from *Verdunningsschema*, which stays as its own tool | Sonnet |
+| S98 | 156, 157, 158 | Molar mass name lookup; buffer picker; Tris temperature correction ✅ hydrate buttons only for the substances in the small `REAG` table of *Molmassa*; pKa temperature slopes from Goldberg et al. 2002 | Sonnet |
 | S99 | 159, 160, 161 | Interactive titration curve; osmolarity presets; merge chemistry calculators into one tool | Opus 5 |
 | S100 | 162, 163 | Standard curve: compare models (AIC) and residual plot with click-to-exclude | Opus 5 |
-| S101 | 164, 167, 171, 172 | Out-of-range unknowns, wavelength presets, Z′ verdict, purification chart | Sonnet |
-| S102 | 165, 166 | Enzyme kinetics: all plots from one table; inhibition comparison | Sonnet |
-| S103 | 168, 169 | Dose-response multi-compound; chromatography peak import | Sonnet |
-| S104 | 173, 176 | CFU plate drawing with countable range; growth curve comparison stats | Sonnet |
+| S101 | 164, 167, 171, 172 | Out-of-range unknowns, wavelength presets, Z′ verdict, purification chart ✅ dilution advice for unknowns above the standards (1-2-5 steps); Spec has no wavelength field, so a preset fills ε and names the wavelength; the Z′ well strip lists the control values, not their plate positions | Sonnet |
+| S102 | 165, 166 | Enzyme kinetics: all plots from one table; inhibition comparison ✅ global fit of four inhibition models with AICc and Akaike weights (`src/lib/inhib.js`); with noise-free competitive data the mixed model ties on fit, so the competitive weight tops out near 0.84 at n = 18 | Sonnet |
+| S103 | 168, 169 | Dose-response multi-compound; chromatography peak import ✅ several compounds via a paste box with IC50 ± 95% CI and an extra-sum-of-squares F test for two at a time; peak-table parser in `src/lib/peaktable.js` (unit-tested) with a labelled chromatogram sketch | Sonnet |
+| S104 | 173, 176 | CFU plate drawing with countable range; growth curve comparison stats ✅ the dishes show the plates the tool already selects (its own range setting); conditions in *Groeicurves vergelijken* come from series names without a trailing number, Welch test per condition against the first | Sonnet |
 | S105 | 177, 178 | One cell-counting tool with grid entry (merges telkamer, teller, viability) | Opus 5 |
 | S106 | 179, 181, 183 | Seeding picture; visual MIC plate with EUCAST note; MPN tap tubes ✅ MIC has no built-in breakpoints per species, so the note points to the current EUCAST table; MPN tubes only for rows of up to 12 tubes | Sonnet |
 | S107 | 184, 187 | Measure cells on calibrated photos; disinfection log-reduction chart ✅ one photo calibration (not one per objective), lines can only be cleared all at once, not moved; the disinfection table got an optional contact-time column for the chart | Sonnet |

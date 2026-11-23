@@ -34,6 +34,14 @@
           <lk-kv :rows="rows"/>
           <lk-kv v-if="sampleRows.length" :rows="sampleRows"/>
           <lk-note v-if="few" kind="info">{{ t('Met minder dan 8 controles per groep is de Z′ onnauwkeurig.') }}</lk-note>
+          <lk-note :kind="grade.kind">{{ verdict }}</lk-note>
+          <div class="lbl" style="margin-top:10px">{{ t('Controleputjes') }}</div>
+          <div v-for="g in plate" :key="g.n" style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;margin:4px 0">
+            <span style="font-size:12.5px;color:var(--muted);width:70px">{{ g.n }}</span>
+            <span v-for="(w, i) in g.ws" :key="i" :title="w.title"
+              :style="{width:'22px',height:'22px',borderRadius:'50%',border:'1px solid var(--line)',fontSize:'11px',lineHeight:'20px',textAlign:'center',background:'color-mix(in srgb, var(--accent) ' + w.pct + '%, var(--surface))',outline:w.out ? '2px solid var(--bad)' : 'none'}">{{ w.out ? '!' : '' }}</span>
+          </div>
+          <p style="font-size:12.5px;color:var(--muted);margin:4px 0 0">{{ t('Kleur = signaal (donker is hoog); rood omcirkeld met ! = meer dan 3σ van de overige putjes van de groep.') }}</p>
           <lk-formula :html="tHtml('Z′ = 1 − 3(σ<sub>p</sub> + σ<sub>n</sub>) / |μ<sub>p</sub> − μ<sub>n</sub>| · banden: μ ± 3σ')"/>
         </template>
       </div>
@@ -71,6 +79,20 @@ export default {
       if (z >= 0.5) return {kind: 'ok', text: t('uitstekend')};
       if (z >= 0) return {kind: 'warn', text: t('matig')};
       return {kind: 'bad', text: t('onbruikbaar')};
+    },
+    /* Zhang, Chung & Oldenburg 1999, J Biomol Screen 4:67: Z′ ≥ 0,5 uitstekend, 0 ≤ Z′ < 0,5 matig, Z′ < 0 onbruikbaar */
+    verdict() {
+      const z = this.stats.z, t = this.t;
+      return z >= 0.5 ? t('Z′ ≥ 0,5: uitstekende test voor screening (Zhang e.a. 1999).')
+        : z >= 0 ? t('Z′ tussen 0 en 0,5: matig; de test werkt, maar de controlebanden liggen dicht bij elkaar.')
+          : t('Z′ < 0: onbruikbaar; de banden van positieve en negatieve controle overlappen.');
+    },
+    /* de controles als een rij putjes, gekleurd naar signaal; een waarde buiten μ ± 3σ van de eigen groep valt op */
+    plate() {
+      const {P, N} = this.sets, all = [...P, ...N], lo = Math.min(...all), hi = Math.max(...all), t = this.t;
+      /* uitschieter: meer dan 3σ van het gemiddelde van de overige putjes (anders trekt hij zelf de σ omhoog) */
+      const g = (n, a) => ({n, ws: a.map((v, i) => { const o = a.filter((_, j) => j !== i); return {pct: hi > lo ? Math.round(10 + 85 * (v - lo) / (hi - lo)) : 50, out: o.length > 1 && Math.abs(v - mean(o)) > 3 * sd(o), title: G(v, 4)}; })});
+      return [g(t('Positief'), P), g(t('Negatief'), N)];
     },
     rows() {
       const t = this.t, {P, N} = this.sets, {mp, sp, mn, sn, d} = this.stats;
