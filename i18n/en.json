@@ -6011,5 +6011,21 @@
 "Alleen de eerste {#} sequenties staan in de boom.": "Only the first {#} sequences are in the tree.",
 "De boom als Newick": "The tree as Newick",
 "Sommige paren verschillen te veel voor de Jukes-Cantor-correctie; kies {#} − identiteit.": "Some pairs differ too much for the Jukes-Cantor correction; choose {#} − identity.",
-"Volgens de boom": "By the tree"
+"Volgens de boom": "By the tree",
+"Twee sequenties uitlijnen": "Align two sequences",
+"De eigen motor van LabKit, voor twee sequenties. Voor veel of lange sequenties is Clustal Omega bij EBI de juiste keuze; dit is daar geen vervanging voor.": "LabKit's own engine, for two sequences. For many or long sequences, Clustal Omega at EBI is the right choice; this does not replace it.",
+"Sequentie {#} (FASTA of letters)": "Sequence {#} (FASTA or letters)",
+"Globaal (Needleman-Wunsch)": "Global (Needleman-Wunsch)",
+"Lokaal (Smith-Waterman)": "Local (Smith-Waterman)",
+"Scoring": "Scoring",
+"DNA (gelijk +{#}, verschil −{#})": "DNA (match +{#}, mismatch −{#})",
+"Gat openen": "Gap open",
+"Gat verlengen": "Gap extend",
+"Een gat van k posities kost openen + (k − {#}) × verlengen, zoals EMBOSS needle en water; gelijke waarden geven een lineaire gatstraf. Globaal tellen ook gaten aan de uiteinden. Matrices zoals NCBI ze verspreidt.": "A gap of k positions costs open + (k − {#}) × extend, as in EMBOSS needle and water; equal values give a linear gap penalty. In global mode end gaps count too. Matrices as distributed by NCBI.",
+"Open als uitlijning": "Open as alignment",
+"Geef twee sequenties met letters.": "Enter two sequences with letters.",
+"Gat openen en verlengen moeten getallen van {#} of meer zijn.": "Gap open and extend must be numbers of {#} or more.",
+"Te lang voor de eigen motor: gebruik EMBOSS needle of water, of Clustal Omega bij EBI.": "Too long for the built-in engine: use EMBOSS needle or water, or Clustal Omega at EBI.",
+"Score": "Score",
+"Uitgelijnd stuk": "Aligned region"
 }

@@ -2307,5 +2307,21 @@ def _(pg):
     pg.evaluate("()=>{__set('al-ord','file');__set('al-tsrc','dnd');__set('al-in','')}")
     return out
 
+@case('Alignment bekijken', 'Paarsgewijs uitlijnen: Durbin et al. 1998 en een affien gat', 'Durbin, Eddy, Krogh & Mitchison 1998, Biological Sequence Analysis, par. 2.3 (fig. 2.5 en 2.6): HEAGAWGHEE tegen PAWHEAE met BLOSUM50 en lineaire gatstraf 8 geeft globaal (Needleman-Wunsch) score 1 en lokaal (Smith-Waterman) AWGHE / AW-HE met score 28 (5 + 15 - 8 + 10 + 6). BLOSUM50 uit het NCBI-bestand. Affien, met de hand: AAAGGGTTT tegen AAATTT, DNA +5/-4, gat openen 10 en verlengen 0,5 (EMBOSS-conventie: een gat van k kost 10 + (k - 1) x 0,5) geeft 6 x 5 - 11 = 19 met een gat van drie')
+def _(pg):
+    pg.evaluate("__go('aln')"); pg.evaluate(ALN_OPEN, 'al-pw-d')
+    pg.evaluate("()=>{__set('al-pw-a','>x\\nHEAGAWGHEE');__set('al-pw-b','>y\\nPAWHEAE');__set('al-pw-mat','BLOSUM50');__set('al-pw-go','8');__set('al-pw-ge','8');__set('al-pw-mode','global')}"); pg.wait_for_timeout(250)
+    out = [('globaal: score', pg.evaluate("__alnVm.pw.score"), 1, 0)]
+    pg.evaluate("__set('al-pw-mode','local')"); pg.wait_for_timeout(250)
+    r = pg.evaluate("({s: __alnVm.pw.score, a: __alnVm.pw.a, b: __alnVm.pw.b, pre: document.getElementById('al-pw-out').textContent})")
+    out += [('lokaal: score', r['s'], 28, 0), ('lokaal: AWGHE / AW-HE', 1 if (r['a'], r['b']) == ('AWGHE', 'AW-HE') and 'AWGHE' in r['pre'] and 'AW-HE' in r['pre'] else 0, 1, 0)]
+    pg.evaluate("()=>{__set('al-pw-a','AAAGGGTTT');__set('al-pw-b','AAATTT');__set('al-pw-mat','DNA');__set('al-pw-go','10');__set('al-pw-ge','0,5');__set('al-pw-mode','global')}"); pg.wait_for_timeout(250)
+    r = pg.evaluate("({s: __alnVm.pw.score, b: __alnVm.pw.b})")
+    out += [('affien: score', r['s'], 19, 0), ('affien: een gat van drie', 1 if r['b'] == 'AAA---TTT' else 0, 1, 0)]
+    pg.evaluate("document.getElementById('al-pw-use').click()"); pg.wait_for_timeout(250)
+    out.append(('als uitlijning geopend', 1 if pg.evaluate("__alnVm.m.seqs.join(',')") == 'AAAGGGTTT,AAA---TTT' else 0, 1, 0))
+    pg.evaluate("()=>{__set('al-pw-a','');__set('al-pw-b','');__set('al-pw-mat','auto');__set('al-pw-go','10');__set('al-pw-ge','0,5');__set('al-in','')}")
+    return out
+
 if __name__ == '__main__':
     main()

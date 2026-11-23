@@ -219,6 +219,33 @@
       </template>
     </template>
   </details>
+  <!-- S184: twee sequenties met de eigen motor (Needleman-Wunsch / Smith-Waterman, affiene gaten) -->
+  <details id="al-pw-d" class="panel" style="margin-top:12px" @toggle="pwOpen = $event.target.open"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Twee sequenties uitlijnen') }}</summary>
+    <lk-note kind="info" style="margin-top:12px">{{ t('De eigen motor van LabKit, voor twee sequenties. Voor veel of lange sequenties is Clustal Omega bij EBI de juiste keuze; dit is daar geen vervanging voor.') }}</lk-note>
+    <div class="grid2" style="margin-top:8px">
+      <div class="f"><label for="al-pw-a">{{ t('Sequentie 1 (FASTA of letters)') }}</label>
+        <textarea id="al-pw-a" class="mono" rows="3" v-model="pwA" spellcheck="false"></textarea></div>
+      <div class="f"><label for="al-pw-b">{{ t('Sequentie 2 (FASTA of letters)') }}</label>
+        <textarea id="al-pw-b" class="mono" rows="3" v-model="pwB" spellcheck="false"></textarea></div>
+    </div>
+    <div class="fields" style="margin-top:8px">
+      <div class="f"><label for="al-pw-mode">{{ t('Soort') }}</label>
+        <select id="al-pw-mode" v-model="pwMode"><option value="global">{{ t('Globaal (Needleman-Wunsch)') }}</option><option value="local">{{ t('Lokaal (Smith-Waterman)') }}</option></select></div>
+      <div class="f"><label for="al-pw-mat">{{ t('Scoring') }}</label>
+        <select id="al-pw-mat" v-model="pwMat"><option value="auto">{{ t('Automatisch') }}</option><option value="BLOSUM62">BLOSUM62</option><option value="BLOSUM50">BLOSUM50</option><option value="PAM250">PAM250</option><option value="DNA">{{ t('DNA (gelijk +5, verschil −4)') }}</option></select></div>
+      <lk-field v-model="pwGo" :label="t('Gat openen')" for-id="al-pw-go" inputmode="decimal"/>
+      <lk-field v-model="pwGe" :label="t('Gat verlengen')" for-id="al-pw-ge" inputmode="decimal"/>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Een gat van k posities kost openen + (k − 1) × verlengen, zoals EMBOSS needle en water; gelijke waarden geven een lineaire gatstraf. Globaal tellen ook gaten aan de uiteinden. Matrices zoals NCBI ze verspreidt.') }}</p>
+    <template v-if="pwOpen && pwA.trim() && pwB.trim()">
+      <lk-note v-if="pw.err" kind="warn">{{ t(pw.err) }}</lk-note>
+      <template v-else>
+        <lk-kv :rows="pwRows" style="margin-top:10px"/>
+        <pre id="al-pw-out" class="mono aln-pw">{{ pwText }}</pre>
+        <div class="row" style="margin-top:10px"><button type="button" id="al-pw-use" @click="pwUse">{{ t('Open als uitlijning') }}</button></div>
+      </template>
+    </template>
+  </details>
   <details v-if="m.format && m.names.length" id="al-cons-d" class="panel" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Geconserveerde stukken') }}</summary>
     <div class="fields" style="margin-top:12px">
       <lk-field v-model="ct" :label="t('Conservering minstens')" for-id="al-ct" unit="%" inputmode="numeric"/>
@@ -270,17 +297,24 @@ import {alnUngapped, EBI_URL} from '../lib/alnhand.js';
 import {alnFigure, figSvg, figPaint} from '../lib/alnfig.js';
 import {alnProjectWrite, alnProjectRead, PROJ_KEYS} from '../lib/alnproj.js';
 import {alnVariants, alnAddRead} from '../lib/alnvar.js';
+import {pairAlign, pairScore} from '../lib/pairwise.js';
 import {parseNewick, treeLeaves, treeLayout, treeSvg, treePaint, njTree, idDist, treeNewick, treeOrder} from '../lib/tree.js';
 
 /* S180: een read uit het Chromatogram (of Sequentie) komt als eigen rij in de uitlijning */
 SEQ_TO.push({label: 'Alignment bekijken (eigen read)', tool: 'aln', id: 'al-read'});
 
+/* S184: FASTA of kale letters → {name, seq}; zonder kopregel 'seq1'/'seq2' */
+const pwSeq = (x, k) => {
+  const L = String(x || '').split(/\r?\n/), h = L.find(l => l.startsWith('>'));
+  return {name: h ? h.slice(1).trim().split(/\s/)[0] || 'seq' + k : 'seq' + k, seq: L.filter(l => !l.startsWith('>')).join('').toUpperCase().replace(/[^A-Z*]/g, '')};
+};
+const pwPos = (a, b, mat) => mat !== 'DNA' && pairScore(a, b, {matrix: mat, open: 0, ext: 0}) > 0;
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
 const PROJ_IDS = {txt: 'al-in', dnd: 'al-dnd', col: 'al-col', cbs: 'al-cbs', thr: 'al-thr', motif: 'al-motif', ord: 'al-ord', ref: 'al-ref', tr: 'al-tr', code: 'al-code',
   gap: 'al-gap', from: 'al-from', to: 'al-to', xf: 'al-xf', gm: 'al-gm', pa: 'al-pa', pb: 'al-pb', ct: 'al-ct', cl: 'al-cl',
   fgFrom: 'al-fg-from', fgTo: 'al-fg-to', fgPer: 'al-fg-per', fgTitle: 'al-fg-title', fgCons: 'al-fg-cons', vref: 'al-vref', rd: 'al-read', tmode: 'al-tmode', tsrc: 'al-tsrc', tdist: 'al-tdist'};
-const VARMAX = 500, NJMAX = 200, SIDEMAX = 5000;  /* rijen in de variantentabel, sequenties in de NJ-boom, letters per rij naast de boom */  /* rijen in de variantentabel */
+const VARMAX = 500, NJMAX = 200, SIDEMAX = 5000, PWMAX = 4e6;  /* ... en cellen in de paarsgewijze matrix (twee keer 2000 letters) */  /* rijen in de variantentabel, sequenties in de NJ-boom, letters per rij naast de boom */  /* rijen in de variantentabel */
 const PIMMAX = 60;  /* sequenties in de matrix: 60 x 60 cellen is wat een scherm nog toont */
 const CH = 18, RH = 22, PH = 32, MAXNAME = 24; /* rijhoogte, hoogte van de liniaal en van de plot, naamkolom in tekens */
 
@@ -296,6 +330,9 @@ export default {
       xf: st['al-xf'] != null ? String(st['al-xf']) : 'fasta', gm: st['al-gm'] != null ? String(st['al-gm']) : 'ign',
       pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false, projMsg: null, figOpen: false, fgFrom: st['al-fg-from'] != null ? String(st['al-fg-from']) : '', fgTo: st['al-fg-to'] != null ? String(st['al-fg-to']) : '', fgPer: st['al-fg-per'] != null ? String(st['al-fg-per']) : '60',
       fgTitle: st['al-fg-title'] != null ? String(st['al-fg-title']) : '', fgCons: st['al-fg-cons'] != null ? !!st['al-fg-cons'] : true, dnd: st['al-dnd'] != null ? String(st['al-dnd']) : '',
+      pwOpen: false, pwA: st['al-pw-a'] != null ? String(st['al-pw-a']) : '', pwB: st['al-pw-b'] != null ? String(st['al-pw-b']) : '',
+      pwMode: st['al-pw-mode'] != null ? String(st['al-pw-mode']) : 'global', pwMat: st['al-pw-mat'] != null ? String(st['al-pw-mat']) : 'auto',
+      pwGo: st['al-pw-go'] != null ? String(st['al-pw-go']) : lkNumIn('10'), pwGe: st['al-pw-ge'] != null ? String(st['al-pw-ge']) : lkNumIn('0,5'),
       tmode: st['al-tmode'] != null ? String(st['al-tmode']) : 'rect', tvOpen: false, NJMAX,
       tsrc: st['al-tsrc'] != null ? String(st['al-tsrc']) : 'dnd', tdist: st['al-tdist'] != null ? String(st['al-tdist']) : 'p',
       rd: st['al-read'] != null ? String(st['al-read']) : '', vref: st['al-vref'] != null ? String(st['al-vref']) : '0', varOpen: false, VARMAX,
@@ -337,6 +374,42 @@ export default {
     },
     treeView() { return this.treeL ? treeSvg(this.treeL, {ink: 'currentColor'}) : ''; },
     treeMiss() { const s = new Set(this.m.names); return this.tree.root && s.size ? treeLeaves(this.tree.root).filter(n => !s.has(n)) : []; },
+    /* S184: de twee sequenties (FASTA of kale letters) en hun uitlijning */
+    pwIn() { return [this.pwA, this.pwB].map((x, i) => pwSeq(x, i + 1)); },
+    pwMatEff() {
+      if (this.pwMat !== 'auto') return this.pwMat;
+      const s = this.pwIn.map(r => r.seq).join(''), nt = (s.match(/[ACGTUN]/g) || []).length;
+      return s && nt >= 0.9 * s.length ? 'DNA' : 'BLOSUM62';
+    },
+    pw() {
+      if (!this.pwOpen) return {};
+      const [a, b] = this.pwIn, go = num(this.pwGo), ge = num(this.pwGe);
+      if (!a.seq || !b.seq) return {err: 'Geef twee sequenties met letters.'};
+      if (!(go >= 0 && ge >= 0)) return {err: 'Gat openen en verlengen moeten getallen van 0 of meer zijn.'};
+      if (a.seq.length * b.seq.length > PWMAX) return {err: 'Te lang voor de eigen motor: gebruik EMBOSS needle of water, of Clustal Omega bij EBI.'};
+      return pairAlign(a.seq, b.seq, {mode: this.pwMode, matrix: this.pwMatEff, open: go, ext: ge});
+    },
+    pwRows() {
+      const r = this.pw, t = this.t, aln = r.len - r.gaps;
+      return [[t('Score'), lkNumIn(fmt(r.score, 1))], [t('Scoring'), this.pwMatEff === 'DNA' ? t('DNA (gelijk +5, verschil −4)') : this.pwMatEff],
+        [t('Identiteit'), P(r.len ? r.same / r.len : 0) + ' (' + N(r.same) + ' / ' + N(r.len) + ')'],
+        this.pwMatEff !== 'DNA' && [t('Gelijkenis'), P(r.len ? r.sim / r.len : 0) + ' (' + N(r.sim) + ' / ' + N(r.len) + ')'],
+        [t('Gaten'), N(r.gaps)],
+        this.pwMode === 'local' && [t('Uitgelijnd stuk'), N(r.a0 + 1) + '–' + N(r.a1) + ' / ' + N(r.b0 + 1) + '–' + N(r.b1)]].filter(Boolean);
+    },
+    /* blokken van 60 kolommen: naam, positie, letters; ertussen | gelijk, : positieve score */
+    pwText() {
+      const r = this.pw, [A, B] = this.pwIn, w = Math.min(16, Math.max(A.name.length, B.name.length, 4)), out = [];
+      const nm = s => (s.length > w ? s.slice(0, w) : s).padEnd(w);
+      let i = r.a0, j = r.b0;
+      for (let k = 0; k < r.len; k += 60) {
+        const x = r.a.slice(k, k + 60), y = r.b.slice(k, k + 60), mid = x.split('').map((c, q) => c === '-' || y[q] === '-' ? ' ' : c === y[q] ? '|' : pwPos(c, y[q], this.pwMatEff) ? ':' : ' ').join('');
+        const ni = i + x.replace(/-/g, '').length, nj = j + y.replace(/-/g, '').length;
+        out.push(nm(A.name) + ' ' + String(i + 1).padStart(6) + ' ' + x + ' ' + ni, ' '.repeat(w + 8) + mid, nm(B.name) + ' ' + String(j + 1).padStart(6) + ' ' + y + ' ' + nj, '');
+        i = ni; j = nj;
+      }
+      return out.join('\n');
+    },
     vars() { return this.varOpen ? alnVariants(this.src, this.vrefI) : []; },
     varCols() { const t = this.t; return [{h: t('Sequentie')}, {h: t('Variant')}, {h: t('Positie'), num: true}, {h: t('Kolom'), num: true}]; },
     varRows() { return this.vars.slice(0, VARMAX).map(v => [esc(v.name), '<span class="mono">' + esc(v.hgvs) + '</span>', N(v.pos), N(v.col)]); },
@@ -681,6 +754,7 @@ export default {
       cv.toBlob(bl => { if (bl) saveBlob('boom.png', bl).catch(() => {}); }, 'image/png');
     },
     treeSvgSave() { saveBlob('boom.svg', new Blob([treeSvg(this.treeL, {bg: '#fff'})], {type: 'image/svg+xml'})).catch(() => {}); },
+    pwUse() { const [A, B] = this.pwIn; this.txt = '>' + A.name + '\n' + this.pw.a + '\n>' + B.name + '\n' + this.pw.b + '\n'; },
     exportPim() { saveBlob('identiteit.pim', new Blob([pimWrite(this.pimNames, this.pim)], {type: 'text/plain'})).catch(() => {}); },
     /* een geconserveerd stuk (consensus, zonder gaten) als regel in de Primerkaart */
     onReg(e) {
