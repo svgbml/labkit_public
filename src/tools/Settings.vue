@@ -73,6 +73,7 @@
         <div id="upd-status" style="margin-top:10px"></div>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('De controle vraagt alleen het versienummer van de laatste release op bij GitHub; er worden geen gegevens van jou verstuurd. De web-app haalt een nieuwe versie zelf op zodra je vernieuwt; het Windows-programma downloadt de nieuwe installer, die je daarna uitvoert.') }}</p>
       </div>
+      <div class="panel" id="inst-ncbi"><h3>{{ t('Online opzoeken (NCBI)') }}</h3><ncbi-switch full/></div>
       <div class="panel"><h3>{{ t('Wat is er nieuw') }}</h3>
         <p style="margin:0 0 10px;color:var(--muted);font-size:13px">{{ t('De wijzigingen per versie, zoals ze ook na een update worden getoond.') }}</p>
         <div class="row"><button type="button" data-news="">{{ t('Alle wijzigingen bekijken') }}</button></div></div>
@@ -94,10 +95,13 @@
 
 <script>
 /* standaardwaarden: dezelfde als UIDEF in web/index.html */
+import NcbiSwitch from './ncbi/NcbiSwitch.vue';
+
 const DEF = {theme: 'auto', dens: 'ruim', fs: '14', accent: '#1558b0', accon: false, darkroom: false, pal: 'std', schema: '#1558b0', chs: 'scherm', cvd: 'uit'};
 
 export default {
   name: 'Settings',
+  components: {NcbiSwitch},
   data() {
     return {
       ...DEF,

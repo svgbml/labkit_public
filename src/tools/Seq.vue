@@ -91,13 +91,61 @@
       </template>
     </div>
   </div>
+  <!-- dbSNP opzoeken op rs-nummer (S196): alleen na een klik of Enter, nooit vanzelf -->
+  <div class="grid2">
+    <div class="panel">
+      <h3>{{ t('Online opzoeken (NCBI)') }}</h3>
+      <ncbi-switch/>
+      <div class="f" style="margin-top:12px"><label for="sq-rs">{{ t('rs-nummer') }}</label>
+        <input id="sq-rs" class="txt" v-model="rs" placeholder="rs1805007" spellcheck="false" autocomplete="off" @keydown.enter.prevent="lookup"></div>
+      <div class="row" style="margin-top:10px"><button type="button" id="sq-rs-go" @click="lookup">{{ t('Opzoeken') }}</button></div>
+      <h3 style="margin-top:16px">{{ t('Sequentie ophalen') }}</h3>
+      <div class="f"><label for="sq-acc">{{ t('Accessienummer') }}</label>
+        <input id="sq-acc" class="txt" v-model="acc" placeholder="NM_002386.4" spellcheck="false" autocomplete="off" @keydown.enter.prevent="fetchAcc"></div>
+      <div class="fields" style="margin-top:10px">
+        <lk-field v-model="from" :label="t('Van')" for-id="sq-from" unit="bp" inputmode="numeric"/>
+        <lk-field v-model="to" :label="t('Tot')" for-id="sq-to" unit="bp" inputmode="numeric"/>
+      </div>
+      <div class="row" style="margin-top:10px"><button type="button" id="sq-acc-go" @click="fetchAcc">{{ t('Ophalen') }}</button></div>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Laat Van en Tot leeg voor de hele sequentie. De sequentie komt als FASTA in het invoerveld bovenaan; van daaruit kun je hem doorsturen.') }}</p>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Typ een rs-nummer uit dbSNP, met of zonder rs. Het opzoeken gebeurt alleen als je op Opzoeken klikt.') }}</p>
+    </div>
+    <div class="result" id="sq-snp">
+      <lk-note v-if="fnote" :kind="fnote.kind" id="sq-fetch">{{ t(fnote.msg) }}</lk-note>
+      <lk-note v-if="snpState === 'idle'" kind="info">{{ t('Typ een rs-nummer en klik op Opzoeken.') }}</lk-note>
+      <lk-note v-else-if="snpState === 'wait'" kind="info">{{ t('Bezig met opzoeken bij NCBI…') }}</lk-note>
+      <lk-note v-else-if="snpState === 'bad'" kind="bad">{{ t('Dit is geen rs-nummer. Typ bijvoorbeeld rs1805007.') }}</lk-note>
+      <lk-note v-else-if="snpState === 'err'" kind="bad">{{ t(snpErr) }}</lk-note>
+      <lk-note v-else-if="snpState === 'none'" kind="warn">{{ t('Dit rs-nummer staat niet in dbSNP.') }}</lk-note>
+      <template v-else-if="snp">
+        <lk-big :label="'rs' + snp.id" :value="snp.genes.length ? snp.genes.join(', ') : '—'"/>
+        <lk-kv :rows="snpRows"/>
+        <div v-if="snp.acc && snp.pos" class="fields" style="margin-top:10px;align-items:end">
+          <lk-field v-model="flank" :label="t('Flank')" for-id="sq-flank" unit="bp" inputmode="numeric"/>
+          <button type="button" id="sq-rs-region" @click="region">{{ t('Regio rond deze SNP ophalen') }}</button>
+        </div>
+        <template v-if="snp.hgvs.length">
+          <h3 style="margin-top:14px">{{ t('HGVS-namen') }}</h3>
+          <div class="mono" data-notr style="font-size:12px;word-break:break-all"><div v-for="h in snp.hgvs" :key="h">{{ h }}</div></div>
+        </template>
+        <template v-if="snp.freqs.length">
+          <h3 style="margin-top:14px">{{ t('Allelfrequenties') }}</h3>
+          <lk-table :cols="snpCols" :rows="snpFreq"/>
+        </template>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Bron: dbSNP bij NCBI. Posities gelden voor GRCh38.') }}</p>
+      </template>
+    </div>
+  </div>
   </div>
 </template>
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
-import {parseSeqs, OPS, formatSeq, facts, CODES, frames, orfs, SEQ_TO, seqSend} from '../lib/seq.js';
+import {parseSeqs, OPS, formatSeq, facts, CODES, frames, orfs, SEQ_TO, seqSend, seqReceive} from '../lib/seq.js';
 import {ENZ, cuts, siteStarts} from '../lib/digest.js';
+import {ncbiGet} from '../lib/ncbi.js';
+import {parseSnp, rsId, accOk, regionOk} from '../lib/dbsnp.js';
+import NcbiSwitch from './ncbi/NcbiSwitch.vue';
 
 const F = (x, d) => lkNumIn(fmt(x, d));
 const OPN = {rc: 'Reverse complement', r: 'Omgekeerd (reverse)', c: 'Complement', n: 'Opgeschoond'};
@@ -109,13 +157,16 @@ const MAXORF = 50, MAXVIEW = 20000;
 
 export default {
   name: 'Seq',
+  components: {NcbiSwitch},
   data() {
     const st = typeof storeGet === 'function' ? storeGet() : {};
     const g = (id, d) => (st[id] != null ? String(st[id]) : d);
     return {txt: g('sq-in', '>' + trPlain('Voorbeeld') + '\nATG GCN AAR TAY 12 GGW TCS\nATCGATCGAT'), op: g('sq-op', 'rc'),
       type: g('sq-type', 'dna'), lcase: g('sq-case', 'up'), w: g('sq-w', '0'), fmt: g('sq-fmt', 'auto'), rec: g('sq-rec', '0'),
       code: g('sq-code', '1'), min: g('sq-min', '50'), enz: g('sq-enz', ''),
-      uniq: st['sq-uniq'] != null ? !!st['sq-uniq'] : true, circ: !!st['sq-circ']};
+      uniq: st['sq-uniq'] != null ? !!st['sq-uniq'] : true, circ: !!st['sq-circ'],
+      /* opzoeken: nooit automatisch, ook niet na herstellen of delen */
+      rs: '', acc: '', from: '', to: '', flank: '100', fnote: null, snp: null, snpState: 'idle', snpErr: ''};
   },
   computed: {
     /* één keer opschonen en bewerken; de rest leest hieruit */
@@ -176,6 +227,17 @@ export default {
     orfRows() {
       return this.tr.orfs.slice(0, MAXORF).map(o => [o.f > 0 ? '+' + o.f : '−' + -o.f, F(o.from, 0), F(o.to, 0), F(o.aa, 0), F(3 * o.aa + 3, 0)]);
     },
+    snpCols() { return [{h: this.t('Studie')}, {h: this.t('Allel')}, {h: this.t('Frequentie'), num: true}, {h: this.t('Aantal'), num: true}]; },
+    snpFreq() { return this.snp.freqs.map(f => [esc(f.study), esc(f.allele), F(f.freq, 4), F(f.n, 0)]); },
+    snpRows() {
+      const s = this.snp, t = this.t;
+      return [[t('Gen'), s.genes.length ? esc(s.genes.join(', ')) : '—'], [t('Chromosoom'), esc(s.chr)],
+        s.pos ? [t('Positie (GRCh38)'), esc(s.acc + ':' + s.pos)] : null,
+        s.ref ? [t('Referentie-allel'), esc(s.ref)] : null,
+        s.alts.length ? [t('Alternatieve allelen'), esc(s.alts.join(', '))] : null,
+        s.fxn.length ? [t('Functionele klasse'), esc(s.fxn.join(', '))] : null,
+        s.clin.length ? [t('Klinische betekenis'), esc(s.clin.join(', '))] : null];
+    },
     factRows() {
       const f = this.fx, t = this.t, rna = this.type === 'rna', c = b => F(f.n[b] || 0, 0);
       const tm = f.L <= 60 ? primerInfo(this.cur.seq, ION) : null;
@@ -189,6 +251,51 @@ export default {
   },
   methods: {
     F,
+    async fetchAcc() {
+      const bad = m => { this.fnote = {kind: 'bad', msg: m}; };
+      const acc = this.acc.trim().toUpperCase(), r = regionOk(this.from, this.to);
+      if (!accOk(acc)) return bad('Dit is geen accessienummer. Typ bijvoorbeeld NM_002386.4.');
+      if (!r.ok) return bad('Van en Tot moeten allebei leeg zijn, of allebei hele getallen met Van vanaf 1 en niet groter dan Tot.');
+      this.fnote = {kind: 'info', msg: 'Bezig met ophalen bij NCBI…'};
+      try {
+        const sm = await ncbiGet('esummary', {db: 'nuccore', id: acc, retmode: 'json'}), res = sm && sm.result;
+        const rec = res && !sm.error && res.uids && res.uids.length ? res[res.uids[0]] : null;
+        if (!rec) return bad('Dit accessienummer is niet gevonden bij NCBI.');
+        const len = +rec.slen || 0, ver = rec.accessionversion || acc, MAX = 1e6;
+        const p = {db: 'nuccore', id: ver, rettype: 'fasta', retmode: 'text'};
+        let n = len;
+        if (r.none) {
+          if (len > MAX) return bad('Deze sequentie is ' + len + ' bp lang. Vul Van en Tot in om een stuk van hoogstens 1 miljoen bp op te halen.');
+        } else {
+          const to = len ? Math.min(r.to, len) : r.to;
+          if (len && r.from > len) return bad('Van ligt voorbij het einde van de sequentie (' + len + ' bp).');
+          if (to - r.from + 1 > MAX) return bad('Dit stuk is langer dan 1 miljoen bp. Kies een kleiner stuk.');
+          p.seq_start = r.from; p.seq_stop = to; n = to - r.from + 1;
+        }
+        const txt = await ncbiGet('efetch', p);
+        if (typeof txt !== 'string' || txt.charAt(0) !== '>') return bad('NCBI stuurde geen sequentie terug. Probeer het later opnieuw.');
+        seqReceive(txt.trim() + '\n');
+        this.fnote = {kind: 'ok', msg: 'Opgehaald: ' + uv(ver) + ', ' + n + ' bp. Staat nu in het invoerveld bovenaan.'};
+      } catch (e) { bad(e && e.kind ? e.message : 'NCBI gaf een onverwacht antwoord. Probeer het later opnieuw.'); }
+    },
+    /* de regio rond de SNP: dezelfde opvraag met Van en Tot ingevuld */
+    region() {
+      const fl = String(this.flank).trim(), s = this.snp;
+      if (!/^\d+$/.test(fl) || +fl > 5000) { this.fnote = {kind: 'bad', msg: 'Flank moet een geheel getal van 0 tot 5000 zijn.'}; return; }
+      this.acc = s.acc; this.from = String(Math.max(1, s.pos - +fl)); this.to = String(s.pos + +fl);
+      return this.fetchAcc();
+    },
+    async lookup() {
+      const id = rsId(this.rs);
+      this.snp = null;
+      if (!id) { this.snpState = 'bad'; return; }
+      this.snpState = 'wait';
+      try {
+        const r = parseSnp(await ncbiGet('esummary', {db: 'snp', id, retmode: 'json'}), id);
+        if (r.notFound) { this.snpState = 'none'; return; }
+        this.snp = r; this.snpState = 'ok';
+      } catch (e) { this.snpState = 'err'; this.snpErr = e && e.kind ? e.message : 'NCBI gaf een onverwacht antwoord. Probeer het later opnieuw.'; }
+    },
     /* elke keer opnieuw: een tool die later laadt kan zich nog in SEQ_TO melden */
     sendTargets() { return SEQ_TO.filter(x => document.getElementById(x.id)); },
     send(x) { const r = this.m.recs[+this.rec] || this.m.recs[0]; seqSend(x, r.name.replace(/\s.*/, '') + SUF[this.op], r.out); }
