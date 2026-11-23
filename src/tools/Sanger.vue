@@ -100,6 +100,7 @@
         <!-- S162: veel reads tegelijk, een rij per monster, en dezelfde SNP van alle monsters onder elkaar -->
         <div v-if="batch.length" id="sg-batch" style="margin-top:12px">
           <h3>{{ t('Batch: genotypes per monster') }}</h3>
+          <lk-note v-if="bbusy" kind="info">{{ t('Bezig met uitlijnen…') }}</lk-note>
           <lk-note v-if="!refSeq" kind="warn">{{ t('Geef bij Referentie en assay een referentie of een assay; dan worden de bestanden uitgelijnd.') }}</lk-note>
           <template v-else>
             <p style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Allelen op de streng van de assay; een streepje betekent dat de read de SNP niet dekt, een uitroepteken dat de allelen niet bij de assay horen.') }}</p>
@@ -302,7 +303,9 @@
 <script>
 import {markRaw} from 'vue';
 import {lkNumIn} from '../lib/bridge.js';
-import {readAbif, abifRead} from '../lib/abif.js';
+import {readFile, parseSeq} from '../lib/sangerfile.js';
+import {inWorker} from '../lib/inworker.js';
+import SangerWorker from '../workers/sanger.worker.js?worker&inline';
 import {trimWindow, comp, fasta} from '../lib/sangertrim.js';
 import {hetCalls, flags} from '../lib/sangerhet.js';
 import {traceSvg} from '../lib/tracesvg.js';
@@ -317,21 +320,12 @@ import {SEQ_TO} from '../lib/seq.js';
 SEQ_TO.push({label: 'Chromatogram (referentie)', tool: 'sanger', id: 'sg-ref'});
 const AKEY = 'labkit:v1:sg-assays', HKEY = 'labkit:v1:sg-sheet', REFMAX = 200000;
 const NOTES = {absent: 'Deze SNP staat niet in de assay.', nocall: 'De read dekt deze SNP niet.', badcall: 'De call hoort niet bij de assay of is geen genotype.', mismatch: 'De allelen van de assay passen niet bij deze SNP.', flip: 'Streng omgedraaid: het allel van de webtool is het complement van het allel van de assay.', ambig: 'A/T- of C/G-SNP: de streng is niet af te leiden; controleer deze SNP met de hand.', conflict: 'Forward en reverse read zijn het oneens.'};
+/* S163: bestanden lezen en de batch uitlijnen in een worker (pas bij het eerste gebruik gestart) */
+let W = null;
+const sw = () => W || (W = inWorker(() => new SangerWorker(), {readFile, callSample}));
+/* een bestand via de worker; de buffer verhuist naar de worker */
+const readIn = async f => { const buf = await f.arrayBuffer(); return sw().call('readFile', [buf, f.name], [buf]); };
 const VTYPE = {sub: 'Substitutie', del: 'Deletie', dup: 'Duplicatie', ins: 'Insertie'};
-/* een read uit een bestand (ABIF of FASTA) of null met een foutzin */
-function readFile(buf, fname) {
-  try {
-    const ab = readAbif(buf), d = abifRead(ab);
-    if (!d.bases) return {err: 'Dit ABIF-bestand bevat geen basecalls.'};
-    return {r: {name: fname, meta: ab.meta, order: d.order, traces: d.traces, bases: d.bases, peaks: d.peaks, qual: d.qual, mismatch: d.mismatch}};
-  } catch (x) {
-    if (!String(x.message).startsWith('Geen ABIF')) return {err: 'Het ABIF-bestand is afgebroken.'};
-    const p = parseSeq(new TextDecoder().decode(buf));
-    if (!p.bases) return {err: 'Geen ABIF-bestand en geen sequentie gevonden.'};
-    return {r: {name: p.name || fname, meta: null, order: '', traces: null, bases: p.bases, peaks: [], qual: []}};
-  }
-}
-
 const LB = 18, TH = 190, QB = 28, OV = 40, GAP = 20;   // hoogte trace, kwaliteitsstrook, overzichtsstrook en de strook met posities (CSS-pixels); LB = strook met de baseletters bovenaan
 const Y1 = LB + TH + QB;   // onderkant van trace + kwaliteitsstrook
 const HT = Y1 + GAP + OV + 8;
@@ -345,14 +339,6 @@ const intIn = (v, lo, hi, d) => { const n = Number(String(v).replace(',', '.'));
 const FLN = {weak: 'Zwak signaal', sat: 'Verzadigd', broad: 'Brede piek', blob: 'Kleurstofblob', N: 'N-call', slip: 'Mogelijke slippage'};
 const NL = (x, d) => lkNumIn(fmt(x, d));
 
-/* FASTA of kale basen: een regel met > geeft de naam, de rest houdt alleen IUPAC-letters */
-function parseSeq(text) {
-  const lines = String(text || '').split(/\r?\n/);
-  const h = lines.find(l => l.startsWith('>'));
-  const bases = lines.filter(l => !/^\s*[>;]/.test(l)).join('').toUpperCase().replace(/U/g, 'T').replace(/[^ACGTRYSWKMBDHVN]/g, '');
-  return {name: h ? h.slice(1).trim() : '', bases};
-}
-
 export default {
   name: 'Sanger',
   data() {
@@ -363,7 +349,7 @@ export default {
       edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1),
       refText: st['sg-ref'] != null ? String(st['sg-ref']) : '', assayKey: st['sg-assay'] != null ? String(st['sg-assay']) : '', own: jget(AKEY, []),
       read2: jget('sg-read2', null) ? markRaw(jget('sg-read2', null)) : null, paste2: st['sg-paste2'] != null ? String(st['sg-paste2']) : '',
-      caseMsg: '', caseOk: false, hsCopied: '', rsIdx: 0, rsPaste: '', rsMsg: '', rsThr: st['sg-rs-thr'] != null ? String(st['sg-rs-thr']) : NL(0.7, 1), batch: [], hs: (h => { h.samples = h.samples.map(x => Object.assign({res: {}, notes: {}}, x)); return h; })(Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {}))), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
+      caseMsg: '', caseOk: false, hsCopied: '', rsIdx: 0, rsPaste: '', rsMsg: '', rsThr: st['sg-rs-thr'] != null ? String(st['sg-rs-thr']) : NL(0.7, 1), batch: [], bsamples: [], bbusy: false, hs: (h => { h.samples = h.samples.map(x => Object.assign({res: {}, notes: {}}, x)); return h; })(Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {}))), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
   },
   computed: {
     HT() { return HT; },
@@ -556,9 +542,10 @@ export default {
     frCols() { const t = this.t; return [{h: t('Positie') + ' (g.)', num: true}, {h: t('Referentie')}, {h: t('Eerste read')}, {h: t('Tweede read')}]; },
     frDiff() { return this.conf.rows.filter(x => x.st === 'diff').map(x => [this.G + x.r, this.refSeq[x.r], esc(x.a || '–'), esc(x.b || '–')]); },
     /* ---------- batch (S162) ---------- */
-    bsamples() {
+    /* wat de uitlijning van de batch bepaalt; bij een wijziging lijnt de worker opnieuw uit (bsamples) */
+    bkey() {
       const ref = this.refSeq && !this.refBig ? this.refSeq : '';
-      return this.batch.map(b => Object.assign(callSample(b.r, ref, this.assayEff, {het: this.hN, win: this.winN, q: this.qN}), {read: b.r, id: b.id}));
+      return {batch: this.batch, ref, assay: JSON.parse(JSON.stringify(this.assayEff)), o: {het: this.hN, win: this.winN, q: this.qN}};
     },
     btCols() { const t = this.t; return [{h: t('Monster')}, {h: t('Identiek') + ' %', num: true}].concat(this.assayEff.snps.map(s => ({h: s.rs}))); },
     btRows() { return genotypeRows(this.bsamples, this.assayEff).map(r => r.map((v, i) => i === 1 ? (v == null ? '–' : NL(v, 1)) : esc(String(v)))); },
@@ -615,6 +602,7 @@ export default {
     edits() { this.draw(); },
     het() { this.draw(); },
     trim() { this.draw(); },
+    bkey(k) { this.alignBatch(k); },
     bsamples() { this.$nextTick(this.paintOv); },
     rsFig() { this.$nextTick(this.paintRs); },
     rsIdx() { this.$nextTick(this.paintRs); },
@@ -638,7 +626,7 @@ export default {
     async load(file) {
       if (!file) return;
       this.err = '';
-      const x = readFile(await file.arrayBuffer(), file.name);
+      const x = await readIn(file);
       if (x.err) { this.err = this.t(x.err); return; }
       const r = x.r;
       this.edits = {}; this.sel = null; this.rng = null;
@@ -922,7 +910,7 @@ export default {
     },
     async pick2(e) {
       const f = e.target.files[0]; if (!f) return;
-      const x = readFile(await f.arrayBuffer(), f.name);
+      const x = await readIn(f);
       if (x.err) { this.err = this.t(x.err); return; }
       this.err = ''; this.read2 = markRaw(x.r); jset('sg-read2', x.r);
     },
@@ -945,14 +933,24 @@ export default {
     bpick(e) { this.addBatch([...e.target.files]); e.target.value = ''; },
     bdrop(e) { this.bover = false; this.addBatch([...e.dataTransfer.files]); },
     async addBatch(files) {
+      const xs = await Promise.all(files.map(f => readIn(f).catch(e => ({err: String(e.message)}))));
       const out = [];
-      for (const f of files) {
-        const x = readFile(await f.arrayBuffer(), f.name);
-        if (x.err) { this.err = this.t(x.err) + ' (' + f.name + ')'; continue; }
+      xs.forEach((x, k) => {
+        if (x.err) { this.err = this.t(x.err) + ' (' + files[k].name + ')'; return; }
         out.push({id: ++this.bid, r: markRaw(x.r)});
-      }
+      });
       this.batch = this.batch.concat(out);
     },
+    /* de batch in de worker uitlijnen; een antwoord op een oudere vraag telt niet meer */
+    async alignBatch(k) {
+      const gen = this.bgen = (this.bgen || 0) + 1;
+      this.bbusy = k.batch.length > 0;
+      const out = await Promise.all(k.batch.map(b => sw().call('callSample', [b.r, k.ref, k.assay, k.o])
+        .then(x => Object.assign(x, {read: b.r, id: b.id}))));
+      if (gen !== this.bgen) return;
+      this.bsamples = out.map(x => markRaw(x)); this.bbusy = false;
+    },
+    workerMode() { return W ? W.mode : 'none'; },
     bclear() { this.batch = []; const f = document.getElementById('sg-bfiles'); if (f) f.value = ''; },
     saveBatch() {
       const rows = [this.btCols.map(c => c.h)].concat(this.btRows.map(r => r.map(v => String(v).replace(/&amp;/g, '&'))));

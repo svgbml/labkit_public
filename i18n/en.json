@@ -5971,5 +5971,6 @@
 "Project opslaan en openen": "Save and open a project",
 "Eén bestand met de uitlijning, de boom (.dnd) en alle instellingen: kleuren, drempels, bijsnijden, vertaling, volgorde en figuur.": "One file with the alignment, the tree (.dnd) and all settings: colours, thresholds, trimming, translation, order and figure.",
 "Dit bestand is geen geldige JSON.": "This file is not valid JSON.",
-"Dit bestand is geen alignment-project van LabKit.": "This file is not a LabKit alignment project."
+"Dit bestand is geen alignment-project van LabKit.": "This file is not a LabKit alignment project.",
+"Bezig met uitlijnen…": "Aligning…"
 }

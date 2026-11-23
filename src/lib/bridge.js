@@ -86,6 +86,19 @@ export function mountTool(sel, options, opts = {}) {
   } catch (e) { console.error('Vue kon ' + sel + ' niet opzetten', e); return null; }
 }
 
+/* Een tool pas opzetten als hij voor het eerst open gaat (S163). Er is geen dynamische import(),
+   dus de code zit wel in de bundel; wat er wacht is het opzetten zelf. route() roept calc[tool]
+   aan bij het openen, en lkEnsureTool(tool) zet hem ook op als andere code zijn velden nodig
+   heeft (Sequentie stuurt een referentie door). lkLazy(tool): wacht deze tool nog? */
+const LAZY = {};
+export function mountLazy(tool, sel, options, opts) {
+  LAZY[tool] = () => { delete LAZY[tool]; return mountTool(sel, options, opts); };
+  calc[tool] = () => { lkEnsureTool(tool); };
+}
+export function lkEnsureTool(tool) { return LAZY[tool] ? LAZY[tool]() : null; }
+export const lkLazy = tool => !!LAZY[tool];
+window.lkEnsureTool = lkEnsureTool; window.lkLazy = lkLazy;
+
 /* De laag "Meer instellingen" (xpChanged in web/index.html) en de invoeropslag vergelijken een
    veld met zijn standaardwaarde: defaultValue, defaultChecked of de optie met defaultSelected.
    Die komen uit de HTML, en Vue zet alleen de eigenschap, dus zonder dit zou elk veld van een
