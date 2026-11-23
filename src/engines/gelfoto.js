@@ -40,7 +40,9 @@ function gfDemo(){
   samples.forEach((s,k)=>{ if(s.length) band(k+1,s[0],s[1]); band(k+1,58,0.22); if(k===4) band(k+1,350,0.35); });
   band(8,58,0.3);
   x.filter='none';
-  const id=x.getImageData(0,0,W,H), d=id.data; for(let i=0;i<d.length;i+=4){ const n=(Math.random()-0.5)*14; d[i]=Math.max(0,Math.min(255,d[i]+n)); d[i+1]=Math.max(0,Math.min(255,d[i+1]+n)); d[i+2]=Math.max(0,Math.min(255,d[i+2]+n)); } x.putImageData(id,0,0);
+  /* vaste ruis (mulberry32, zaad 1): met Math.random herkende de detectie af en toe een extra lane, en de tests en de schermafbeeldingen werden onvoorspelbaar */
+  let sd=1; const rnd=()=>{ sd=sd+0x6D2B79F5|0; let t=Math.imul(sd^sd>>>15,1|sd); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
+  const id=x.getImageData(0,0,W,H), d=id.data; for(let i=0;i<d.length;i+=4){ const n=(rnd()-0.5)*14; d[i]=Math.max(0,Math.min(255,d[i]+n)); d[i+1]=Math.max(0,Math.min(255,d[i+1]+n)); d[i+2]=Math.max(0,Math.min(255,d[i+2]+n)); } x.putImageData(id,0,0);
   gfLoadCanvas(c); gfStatus('Demo-gel geladen (getekend). Lanen en ladder zijn automatisch gedetecteerd.');
   gf.title='Demo: PCR-product, 1,5% agarose'; gfSetIn('gf-title',gf.title);
   gfSetIn('gf-n',''); gfDetectLanes(); gf.lanes.forEach((l,i)=>l.label=i===0?'M':i===nL-1?'NTC':String(i)); gfDetectBands(); gfLanesTable();
