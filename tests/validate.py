@@ -2229,6 +2229,99 @@ def _(pg):
     pg.evaluate("()=>{for (const k of ['al-dnd','al-motif','al-gap','al-from','al-to','al-fg-title']) __set(k,''); __set('al-col','auto');__set('al-ord','file');__set('al-thr','50');__set('al-fg-per','60');__set('al-xf','fasta');__set('al-gm','ign');__set('al-ct','90');__set('al-cl','20');__set('al-cbs',false);__set('al-fg-cons',true);__set('al-in','')}")
     return out
 
+@case('Alignment bekijken', 'Eigen Sanger-read in de uitlijning: de variant staat in referentienummering', 'Verzonnen referentie van 150 basen (vaste pseudo-willekeurige reeks) en een tweede rij met een insertie, zodat de referentie een gat heeft; de read is basen 21-130 met één substitutie op referentiepositie 71 en gaat via de knop Naar Alignment bekijken in het Chromatogram. Verwacht: HGVS g.-notatie (den Dunnen e.a. 2016, Hum Mutat 37:564) g.71X>Y op de referentie zonder gaten, de read als derde rij met de gewijzigde base in de kolom van referentiepositie 71')
+def _(pg):
+    s = 5; ref = ''
+    for _ in range(150):
+        s = (s * 1103515245 + 12345) % 2147483648; ref += 'ACGT'[s * 4 // 2147483648]
+    oth = {'A': 'C', 'C': 'G', 'G': 'T', 'T': 'A'}
+    rrow = ref[:40] + '-' + ref[40:]; orow = ref[:40] + 'G' + ref[40:]
+    read = ref[20:70] + oth[ref[70]] + ref[71:130]
+    hg = 'g.71' + ref[70] + '>' + oth[ref[70]]
+    pg.evaluate("__go('aln')")
+    pg.evaluate("t=>{__set('al-read','');__set('al-in',t)}", '>ref\n' + rrow + '\n>ander\n' + orow + '\n'); pg.wait_for_timeout(200)
+    pg.evaluate(ALN_RESET); pg.evaluate("__set('al-vref','0')")
+    pg.evaluate("__go('sanger')"); pg.wait_for_timeout(200)
+    pg.evaluate("r=>{__sgVm.clear();__set('sg-paste','>mijnread\\n'+r)}", read); pg.wait_for_timeout(300)
+    pg.evaluate("document.getElementById('sg-to-aln').click()"); pg.wait_for_timeout(400)
+    pg.evaluate(ALN_OPEN, 'al-var-d'); pg.wait_for_timeout(250)
+    rows = pg.evaluate("[...document.querySelectorAll('#al-var tbody tr')].map(r=>[...r.cells].map(c=>c.textContent.trim()))")
+    mine = [r for r in rows if r[0] == 'mijnread']
+    m = pg.evaluate("({names: __alnVm.m.names, seqs: __alnVm.m.seqs})")
+    col = 71  # referentiepositie 71 staat na het gat in kolom 41 in kolom 72 (0-gebaseerd 71)
+    out = [('tool gewisseld naar de uitlijning', 1 if pg.evaluate("location.hash") == '#aln' else 0, 1, 0),
+           ('read als derde rij', 1 if m['names'][2:] == ['mijnread'] else 0, 1, 0),
+           ('variant van de read ' + hg, 1 if len(mine) == 1 and mine[0][1] == hg else 0, 1, 0),
+           ('positie op de referentie', int(mine[0][2]) if mine else -1, 71, 0),
+           ('gewijzigde base in de kolom van positie 71', 1 if m['seqs'][2][col] == oth[ref[70]] and m['seqs'][0][col] == ref[70] else 0, 1, 0),
+           ('read zonder gaten gelijk aan de ingevoerde read', 1 if m['seqs'][2].replace('-', '') == read else 0, 1, 0)]
+    pg.evaluate("()=>{__set('al-read','');__set('al-in','')}"); pg.evaluate("()=>{__go('sanger');__sgVm.clear();__go('aln')}")
+    return out
+
+
+@case('Alignment bekijken', 'Clustal-gidsboom (.dnd) tekenen met taklengtes', 'tests/fixtures/aln/small.dnd in de opmaak van Clustal W/Omega (een knoop per regel, drietak in de wortel; Newick-formaat volgens Felsenstein, PHYLIP-documentatie). Verwacht, met de hand opgeteld: afstand tot de wortel A 0,15, B 0,25, C 0,36, D e 0,46, E 0,70; in de rechthoekige tekening staat elk label op x = 14 + afstand x 360/0,70 (taklengtes op schaal), in de radiale op straal 4 + afstand x 160/0,70 van het midden; schaalstreep 0,2')
+def _(pg):
+    exp = {'A': 0.15, 'B': 0.25, 'C': 0.36, 'D e': 0.46, 'E': 0.70}
+    pg.evaluate("__go('aln')"); pg.evaluate("t=>__set('al-dnd',t)", (ROOT / 'tests' / 'fixtures' / 'aln' / 'small.dnd').read_text(encoding='utf-8'))
+    pg.evaluate("__set('al-tmode','rect')"); pg.evaluate(ALN_OPEN, 'al-tv-d'); pg.wait_for_timeout(300)
+    lab = "[...document.querySelectorAll('#al-tree svg text')].map(e=>[e.textContent,+e.getAttribute('x'),+e.getAttribute('y')])"
+    t = pg.evaluate(lab)
+    out = [('labels (5 bladen + schaal)', len(t), 6, 0)]
+    for name, d in exp.items():
+        x = [r[1] for r in t if r[0] == name]
+        out.append(('rechthoekig: x van ' + name, x[0] if x else -1, 14 + d * 360 / 0.7, 0.002))
+    out.append(('schaalstreep', float(t[-1][0]) if t else -1, 0.2, 0))
+    pg.evaluate("__set('al-tmode','radial')"); pg.wait_for_timeout(300)
+    t = pg.evaluate(lab); svg = pg.evaluate("document.querySelector('#al-tree svg').getAttribute('width')")
+    c = float(svg) / 2
+    for name, d in exp.items():
+        r = [((x - c) ** 2 + (y - c) ** 2) ** 0.5 for n, x, y in t if n == name]
+        out.append(('radiaal: straal van ' + name, r[0] if r else -1, 4 + d * 160 / 0.7, 0.002))
+    pg.evaluate("()=>{__set('al-tmode','rect');__set('al-dnd','')}")
+    return out
+
+@case('Alignment bekijken', 'Neighbour-joining uit de identiteitsmatrix: uitgewerkt voorbeeld', 'Het vijf-taxa-voorbeeld uit het Wikipedia-artikel Neighbor joining (methode Saitou & Nei 1987, Mol Biol Evol 4:406; Q-criterium Studier & Keppler 1988): afstanden a-b 5, a-c 9, a-d 9, a-e 8, b-c 10, b-d 10, b-e 9, c-d 8, c-e 7, d-e 3 met als boom a 2, b 3, c 4, d 2, e 1 en binnentakken 3 (ab|cde) en 2 (abc|de). Als uitlijning van 40 basen waarin elke tak zijn eigen posities muteert, zodat het aantal verschillen per paar precies die afstand is; afstand = 1 - identiteit, dus elke tak gedeeld door 40')
+def _(pg):
+    import re
+    br = [('a', 2), ('b', 3), ('ab', 3), ('c', 4), ('abc', 2), ('d', 2), ('e', 1)]
+    seqs = {x: ['A'] * 40 for x in 'abcde'}; k = 0
+    for side, n in br:
+        for _ in range(n):
+            for x in side: seqs[x][k] = 'C'
+            k += 1
+    fa = ''.join('>' + x + '\n' + ''.join(v) + '\n' for x, v in seqs.items())
+    pg.evaluate("__go('aln')"); pg.evaluate("t=>__set('al-in',t)", fa); pg.wait_for_timeout(200)
+    pg.evaluate(ALN_RESET); pg.evaluate("()=>{__set('al-tsrc','nj');__set('al-tmode','rect')}"); pg.wait_for_timeout(100); pg.evaluate("__set('al-tdist','p')")
+    pg.evaluate(ALN_OPEN, 'al-tv-d'); pg.wait_for_timeout(300)
+    nwk = pg.evaluate("document.getElementById('al-nj-out').value")
+    leaf = {m[0]: float(m[1]) * 40 for m in re.findall(r'([a-e]):([0-9.]+)', nwk)}
+    inner = sorted(float(x) * 40 for x in re.findall(r'\):([0-9.]+)', nwk))
+    out = [('tak ' + x, leaf.get(x, -1), v, 1e-6) for x, v in [('a', 2), ('b', 3), ('c', 4), ('d', 2), ('e', 1)]]
+    out += [('binnentakken', len(inner), 2, 0), ('binnentak ab|cde', inner[1] if len(inner) == 2 else -1, 3, 1e-6), ('binnentak abc|de', inner[0] if inner else -1, 2, 1e-6)]
+    pg.evaluate("__set('al-ord','tree')"); pg.wait_for_timeout(200)
+    order = pg.evaluate("__alnVm.order.map(i=>__alnVm.m.names[i])")
+    leaves = re.findall(r'([a-e]):', nwk)
+    side = pg.evaluate("[...document.querySelectorAll('#al-tree .aln-tside > div')].map(d=>d.textContent)")
+    out += [('rijvolgorde = volgorde van de bladen', 1 if order == leaves else 0, 1, 0),
+            ('uitlijning naast elk blad', 1 if side == [''.join(seqs[x]) for x in leaves] else 0, 1, 0)]
+    pg.evaluate("()=>{__set('al-ord','file');__set('al-tsrc','dnd');__set('al-in','')}")
+    return out
+
+@case('Alignment bekijken', 'Paarsgewijs uitlijnen: Durbin et al. 1998 en een affien gat', 'Durbin, Eddy, Krogh & Mitchison 1998, Biological Sequence Analysis, par. 2.3 (fig. 2.5 en 2.6): HEAGAWGHEE tegen PAWHEAE met BLOSUM50 en lineaire gatstraf 8 geeft globaal (Needleman-Wunsch) score 1 en lokaal (Smith-Waterman) AWGHE / AW-HE met score 28 (5 + 15 - 8 + 10 + 6). BLOSUM50 uit het NCBI-bestand. Affien, met de hand: AAAGGGTTT tegen AAATTT, DNA +5/-4, gat openen 10 en verlengen 0,5 (EMBOSS-conventie: een gat van k kost 10 + (k - 1) x 0,5) geeft 6 x 5 - 11 = 19 met een gat van drie')
+def _(pg):
+    pg.evaluate("__go('aln')"); pg.evaluate(ALN_OPEN, 'al-pw-d')
+    pg.evaluate("()=>{__set('al-pw-a','>x\\nHEAGAWGHEE');__set('al-pw-b','>y\\nPAWHEAE');__set('al-pw-mat','BLOSUM50');__set('al-pw-go','8');__set('al-pw-ge','8');__set('al-pw-mode','global')}"); pg.wait_for_timeout(250)
+    out = [('globaal: score', pg.evaluate("__alnVm.pw.score"), 1, 0)]
+    pg.evaluate("__set('al-pw-mode','local')"); pg.wait_for_timeout(250)
+    r = pg.evaluate("({s: __alnVm.pw.score, a: __alnVm.pw.a, b: __alnVm.pw.b, pre: document.getElementById('al-pw-out').textContent})")
+    out += [('lokaal: score', r['s'], 28, 0), ('lokaal: AWGHE / AW-HE', 1 if (r['a'], r['b']) == ('AWGHE', 'AW-HE') and 'AWGHE' in r['pre'] and 'AW-HE' in r['pre'] else 0, 1, 0)]
+    pg.evaluate("()=>{__set('al-pw-a','AAAGGGTTT');__set('al-pw-b','AAATTT');__set('al-pw-mat','DNA');__set('al-pw-go','10');__set('al-pw-ge','0,5');__set('al-pw-mode','global')}"); pg.wait_for_timeout(250)
+    r = pg.evaluate("({s: __alnVm.pw.score, b: __alnVm.pw.b})")
+    out += [('affien: score', r['s'], 19, 0), ('affien: een gat van drie', 1 if r['b'] == 'AAA---TTT' else 0, 1, 0)]
+    pg.evaluate("document.getElementById('al-pw-use').click()"); pg.wait_for_timeout(250)
+    out.append(('als uitlijning geopend', 1 if pg.evaluate("__alnVm.m.seqs.join(',')") == 'AAAGGGTTT,AAA---TTT' else 0, 1, 0))
+    pg.evaluate("()=>{__set('al-pw-a','');__set('al-pw-b','');__set('al-pw-mat','auto');__set('al-pw-go','10');__set('al-pw-ge','0,5');__set('al-in','')}")
+    return out
 
 if __name__ == '__main__':
     main()
