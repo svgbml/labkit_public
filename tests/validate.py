@@ -1888,6 +1888,22 @@ def _(pg):
     pg.evaluate(ALN_RESET)
     return out
 
+@case('Alignment bekijken', 'FASTA klaarmaken: elke controle slaat aan', 'Een opzettelijk kapotte invoer met Windows-regeleinden, tekst vóór de eerste kop, een dubbele naam (EBI neemt het eerste woord van de kop als naam), een uitroepteken, een kop zonder sequentie, een naam van 40 tekens en DNA naast eiwit (FASTA-formaat volgens de NCBI BLAST-help "FASTA format"); verwacht: zeven meldingen, en de schone FASTA heeft twee sequenties met gewone regeleinden, alleen hoofdletters')
+def _(pg):
+    bad = 'ACGT\r\n>a x\r\nAC!GT\r\n>a y\r\n\r\n>' + 'x' * 40 + '\r\nMKWVTFISLLEEQ\r\n'
+    pg.evaluate("__go('aln')"); pg.evaluate(ALN_OPEN, 'al-prep')
+    # als bestand: een textarea zet geplakte regeleinden om naar LF
+    pg.set_input_files('#al-rawf', files=[{'name': 'kapot.fasta', 'mimeType': 'text/plain', 'buffer': bad.encode()}]); pg.wait_for_timeout(300)
+    notes = pg.evaluate("[...document.querySelectorAll('#al-prep-out .note')].map(e=>e.textContent)")
+    clean = pg.evaluate("__alnVm.prep.clean")
+    want = ['regeleinden', 'vóór de eerste', 'vaker voor', 'geen letter', 'zonder sequentie', 'langer dan 30', 'DNA en eiwit']
+    out = [(f'melding: {w}', 1 if any(w in n for n in notes) else 0, 1, 0) for w in want]
+    out.append(('schone FASTA', 1 if clean == '>a x\nACGT\n>' + 'x' * 40 + '\nMKWVTFISLLEEQ\n' else 0, 1, 0))
+    pg.evaluate("__set('al-raw','>a\\nACGT\\n>b\\nACGA\\n')"); pg.wait_for_timeout(150)
+    out.append(('goede invoer: meldingen anders dan OK', pg.evaluate("[...document.querySelectorAll('#al-prep-out .note')].filter(e=>!e.classList.contains('ok')).length"), 0, 0))
+    pg.evaluate("__set('al-raw','')")
+    return out
+
 @case('Chromatogram', 'ABIF-bestand 3730.ab1 inlezen', 'Biopython 1.84, Tests/test_SeqIO_AbiIO.py (data_3730) en het bestand zelf (tests/fixtures/3730.ab1, Applied Biosystems 3730): monster 226032_C-ME-18_pCAGseqF, 1165 basen, eerste 12 basen GGGCGAGCKYYA; ABIF-indeling volgens de Applied Biosystems ABIF File Format Specification (2009)')
 def _(pg):
     pg.evaluate("__go('sanger')")

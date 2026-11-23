@@ -453,3 +453,41 @@ export function alnTranslate(a, frame, code) {
   });
   return {...a, seqs, len: seqs.length ? seqs[0].length : 0, cons: ''};
 }
+
+/* ---------- FASTA klaarmaken voor Clustal Omega (S186) ----------
+   Controleert losse (niet uitgelijnde) sequenties voordat je ze uploadt en geeft een schone FASTA
+   terug. issues: {k, v} met k = eol (Windows- of oude Mac-regeleinden), dup (zelfde eerste woord
+   van de kop: EBI gebruikt dat als naam), bad (andere tekens dan letters), mixed (DNA én eiwit),
+   long (naam langer dan NAMEMAX), empty (kop zonder sequentie), noname (tekst vóór de eerste kop).
+   De schone FASTA: hoofdletters, alleen letters (spaties en cijfers zoals in GenBank vallen weg),
+   lege sequenties en tekst zonder kop weggelaten, een dubbele naam krijgt _2, _3, regels van 60, LF. */
+export const NAMEMAX = 30;  /* daarboven kappen sommige programma's en formaten af (PHYLIP al na 10) */
+export function fastaCheck(text) {
+  const src = String(text || '').replace(/^﻿/, ''), issues = [], recs = [];
+  if (/\r/.test(src)) issues.push({k: 'eol'});
+  let pre = '';
+  for (const ln of src.split(/\r\n|\r|\n/)) {
+    if (ln.startsWith('>')) { const h = ln.slice(1).trim(); recs.push({h, id: h.split(/\s+/)[0] || '', raw: ''}); }
+    else if (recs.length) recs[recs.length - 1].raw += ln;
+    else pre += ln;
+  }
+  if (/\S/.test(pre)) issues.push({k: 'noname'});
+  const bad = new Set(), seen = {}, dup = new Set(), long = [], empty = [], out = [];
+  for (const r of recs) {
+    const s = r.raw.replace(/[\s\d]/g, '');
+    for (const c of s) if (!/[A-Za-z]/.test(c)) bad.add(c);
+    if (r.id.length > NAMEMAX) long.push(r.id);
+    if (!s) { empty.push(r.id); continue; }
+    const k = seen[r.id] = (seen[r.id] || 0) + 1;
+    out.push({h: k > 1 ? r.id + '_' + k + r.h.slice(r.id.length) : r.h, seq: s.replace(/[^A-Za-z]/g, '').toUpperCase()});
+  }
+  recs.forEach((r, i) => { if (recs.findIndex(q => q.id === r.id) < i) dup.add(r.id); });
+  if (dup.size) issues.push({k: 'dup', v: [...dup]});
+  if (bad.size) issues.push({k: 'bad', v: [...bad]});
+  if (long.length) issues.push({k: 'long', v: long});
+  if (empty.length) issues.push({k: 'empty', v: empty});
+  const types = new Set(out.map(r => alnType({seqs: [r.seq]})));
+  if (types.has('nt') && types.has('aa')) issues.push({k: 'mixed'});
+  return {issues, n: out.length, type: alnType({seqs: out.map(r => r.seq)}),
+    clean: out.map(r => '>' + r.h + '\n' + r.seq.match(/.{1,60}/g).join('\n') + '\n').join('')};
+}

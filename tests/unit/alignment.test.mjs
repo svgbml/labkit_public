@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import '../../src/lib/helpers.js';
-import {parseAlignment, alnTrim, alnWrite, alnPim, alnPair, pimParse, pimWrite, alnProfile, alnConserved, alnTranslate, ALN_OUT} from '../../src/lib/alignment.js';
+import {parseAlignment, alnTrim, alnWrite, alnPim, alnPair, pimParse, pimWrite, alnProfile, alnConserved, alnTranslate, fastaCheck, ALN_OUT} from '../../src/lib/alignment.js';
 
 const fx = f => readFileSync(new URL('../fixtures/aln/' + f, import.meta.url), 'utf8');
 
@@ -70,4 +70,30 @@ test('vertalen: leesraam, gaten van drie, deels gat wordt X', () => {
   /* leesraam 2: TGG CCA AAT (AG valt af) = W P N */
   assert.equal(t(2).seqs[0], 'WPN');
   assert.equal(t(3).seqs[0], 'GQI');  /* GGC CAA ATA = G Q I */
+});
+
+test('FASTA klaarmaken: elke controle slaat aan op een kapotte invoer', () => {
+  const kinds = t => fastaCheck(t).issues.map(i => i.k).sort();
+  assert.deepEqual(kinds('>a\nACGT\n>b\nACGA\n'), []);
+  assert.deepEqual(kinds('>a\r\nACGT\r\n>b\r\nACGA\r\n'), ['eol']);
+  assert.deepEqual(kinds('>a\rACGT\r>b\rACGA\r'), ['eol']);
+  assert.deepEqual(kinds('>a x\nACGT\n>a y\nACGA\n'), ['dup']);  /* EBI neemt het eerste woord als naam */
+  assert.deepEqual(kinds('>a\nAC!GT\n>b\nAC-GA\n'), ['bad']);
+  assert.deepEqual(kinds('>a\nACGTACGTAC\n>b\nMKWVTFISLL\n'), ['mixed']);
+  assert.deepEqual(kinds('>' + 'x'.repeat(31) + '\nACGT\n>b\nACGA\n'), ['long']);
+  assert.deepEqual(kinds('>a\n\n>b\nACGA\n'), ['empty']);
+  assert.deepEqual(kinds('ACGT\n>b\nACGA\n'), ['noname']);
+  /* alles tegelijk */
+  assert.deepEqual(kinds('ACGT\r\n>a\r\nAC!GT\r\n>a\r\n\r\n>' + 'x'.repeat(40) + '\r\nMKWVTFISLLEEQ\r\n'), ['bad', 'dup', 'empty', 'eol', 'long', 'mixed', 'noname']);
+});
+
+test('FASTA klaarmaken: de schone FASTA', () => {
+  const r = fastaCheck('>a één\r\nac gt 12\r\nAC!G\r\n>a\r\n\r\n>a twee\r\nTTTT\r\n');
+  /* spaties en cijfers weg, vreemde tekens weg, lege sequentie weg, dubbele naam uniek, LF */
+  assert.equal(r.clean, '>a één\nACGTACG\n>a_2 twee\nTTTT\n');
+  assert.deepEqual(r.issues.find(i => i.k === 'bad').v, ['!']);
+  assert.deepEqual(r.issues.find(i => i.k === 'dup').v, ['a']);
+  assert.equal(r.n, 2);
+  assert.equal(fastaCheck('>x\n' + 'A'.repeat(130) + '\n').clean.split('\n')[1].length, 60);
+  assert.equal(fastaCheck('>a\nACGT\n>b\nACGA\n').type, 'nt');
 });

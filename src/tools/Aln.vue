@@ -9,6 +9,28 @@
      blijft een uitlijning van duizenden kolommen vloeiend. -->
 <template>
   <div>
+  <!-- S186: losse sequenties controleren en als schone FASTA klaarzetten voor Clustal Omega -->
+  <details id="al-prep" class="panel" style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Sequenties klaarmaken voor Clustal Omega') }}</summary>
+    <div class="grid2" style="margin-top:12px">
+      <div class="f"><label for="al-raw">{{ t('Losse sequenties (FASTA)') }}</label>
+        <textarea id="al-raw" class="mono" rows="6" v-model="raw" spellcheck="false" wrap="off"></textarea>
+        <!-- een bestand houdt zijn regeleinden; geplakte tekst niet (een textarea maakt er LF van) -->
+        <input type="file" id="al-rawf" accept=".fa,.fasta,.fas,.fna,.faa,.txt" :aria-label="t('Bestand openen')" style="margin-top:8px" @change="e => readFile(e, 'raw')"></div>
+      <div id="al-prep-out">
+        <lk-note v-if="!raw.trim()" kind="info">{{ t('Plak de sequenties die je wilt uitlijnen, in FASTA: elke sequentie onder een eigen kopregel.') }}</lk-note>
+        <template v-else>
+          <lk-kv :rows="prepRows"/>
+          <lk-note v-for="(w, i) in prepNotes" :key="i" :kind="w[0]">{{ w[1] }}</lk-note>
+          <lk-note v-if="!prep.issues.length && prep.n" kind="ok">{{ t('Geen problemen gevonden.') }}</lk-note>
+          <div class="row" style="margin-top:10px">
+            <button type="button" class="primary" id="al-prep-cp" :disabled="!prep.n" @click="copyPrep">{{ t('Schone FASTA kopiëren') }}</button>
+            <button type="button" id="al-prep-sv" :disabled="!prep.n" @click="savePrep">{{ t('Opslaan als .fasta') }}</button>
+            <span v-if="copied" style="font-size:13px;color:var(--muted)">{{ copied }}</span>
+          </div>
+        </template>
+      </div>
+    </div>
+  </details>
   <div class="grid2">
     <div class="panel">
       <div class="f"><label for="al-in">{{ t('Uitlijning (Clustal, FASTA, PHYLIP, NEXUS, MSF of PIR)') }}</label>
@@ -151,7 +173,7 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile, alnConsensus, alnMotif, alnIdentity, alnDiff,
-  alnTrim, alnWrite, ALN_OUT, alnPair, alnPim, pimWrite, alnConserved, alnTranslate} from '../lib/alignment.js';
+  alnTrim, alnWrite, ALN_OUT, alnPair, alnPim, pimWrite, alnConserved, alnTranslate, fastaCheck, NAMEMAX} from '../lib/alignment.js';
 import {CODES, SEQ_TO, seqSend} from '../lib/seq.js';
 
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
@@ -163,7 +185,7 @@ export default {
   name: 'Aln',
   data() {
     const st = typeof storeGet === 'function' ? storeGet() : {};
-    return {txt: st['al-in'] != null ? String(st['al-in']) : '', col: st['al-col'] != null ? String(st['al-col']) : 'auto',
+    return {txt: st['al-in'] != null ? String(st['al-in']) : '', raw: st['al-raw'] != null ? String(st['al-raw']) : '', copied: '', col: st['al-col'] != null ? String(st['al-col']) : 'auto',
       cbs: !!st['al-cbs'], sel: null, hand: null,
       motif: st['al-motif'] != null ? String(st['al-motif']) : '', ord: st['al-ord'] != null ? String(st['al-ord']) : 'file', ref: st['al-ref'] != null ? String(st['al-ref']) : '', thr: st['al-thr'] != null ? String(st['al-thr']) : '50',
       tr: st['al-tr'] != null ? String(st['al-tr']) : '0', code: st['al-code'] != null ? String(st['al-code']) : '1',
@@ -174,6 +196,26 @@ export default {
   },
   computed: {
     parsed() { return parseAlignment(this.txt); },
+    /* S186 */
+    prep() { return fastaCheck(this.raw); },
+    prepRows() {
+      const p = this.prep, t = this.t;
+      return [[t('Sequenties in de schone FASTA'), N(p.n)], [t('Type'), p.type === 'nt' ? t('DNA/RNA') : p.type === 'aa' ? t('eiwit') : '–']];
+    },
+    /* per controle een of twee zinnen, elk een eigen sleutel; namen en tekens van de gebruiker via uv() */
+    prepNotes() {
+      const t = this.t, L = v => uv(v.slice(0, 5).join(', ') + (v.length > 5 ? ', …' : ''));
+      const msg = {
+        eol: ['info', () => [t('Windows- of Mac-regeleinden gevonden; de schone FASTA gebruikt gewone regeleinden.')]],
+        dup: ['bad', i => [t('Dezelfde naam komt vaker voor: ' + L(i.v) + '.'), t('EBI gebruikt het eerste woord van de kopregel als naam; de schone FASTA zet er _2, _3 achter.')]],
+        bad: ['warn', i => [t('Tekens die geen letter zijn: ' + L(i.v) + '.'), t('Ze zijn uit de schone FASTA gehaald.')]],
+        mixed: ['bad', () => [t('DNA en eiwit door elkaar; lijn ze apart uit.')]],
+        long: ['warn', i => [t('Namen langer dan ' + NAMEMAX + ' tekens: ' + L(i.v) + '.'), t('Sommige programma\'s en formaten kappen ze af (PHYLIP al na 10 tekens).')]],
+        empty: ['warn', i => [t('Kopregel zonder sequentie: ' + L(i.v) + '.'), t('Die is weggelaten.')]],
+        noname: ['warn', () => [t('Tekst vóór de eerste kopregel is weggelaten.')]]
+      };
+      return this.prep.issues.map(i => [msg[i.k][0], msg[i.k][1](i).join(' ')]);
+    },
     isNt() { return alnType(this.parsed) === 'nt'; },
     /* wat de viewer toont: de uitlijning, eventueel vertaald (S181) en dan bijgesneden (S177); zonder dat is het het ingelezen model zelf */
     tl() { return this.tr !== '0' && this.isNt && this.parsed.names.length ? alnTranslate(this.parsed, +this.tr, +this.code) : this.parsed; },
@@ -428,9 +470,14 @@ export default {
       const r = this.regs[+b.dataset.reg];
       seqSend(t, trPlain('Stuk', true) + '_' + r.from + '-' + r.to, r.seq);
     },
-    onFile(e) {
+    async copyPrep() {
+      try { await navigator.clipboard.writeText(this.prep.clean); this.copied = this.t('Gekopieerd.'); } catch (e) { this.copied = this.t('Kopiëren geblokkeerd.'); }
+    },
+    savePrep() { saveBlob('sequenties.fasta', new Blob([this.prep.clean], {type: 'text/plain'})).catch(() => {}); },
+    onFile(e) { this.readFile(e, 'txt'); },
+    readFile(e, k) {
       const f = e.target.files[0];
-      if (f) f.text().then(x => { this.txt = x; });
+      if (f) f.text().then(x => { this[k] = x; });
     }
   }
 };
