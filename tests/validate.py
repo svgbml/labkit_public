@@ -140,8 +140,11 @@ def _(pg):
         # eerst dicht en wachten tot de knop weg is: anders klikt de tweede ronde op de uitkomst van de eerste foto
         pg.evaluate("__go('reeks');document.querySelector('#t-reeks details').open=false"); pg.wait_for_selector('#r-pfill', state='detached')
         pg.evaluate("__set('r-f','10');__set('r-n','3');reeksCounts={};buildReeks();document.querySelector('#t-reeks details').open=true"); pg.wait_for_selector('#r-photo', state='attached')
+        prev = pg.evaluate("(document.querySelector('#t-reeks details .kv')||{}).innerText||''")
         pg.set_input_files('#r-photo', str(ROOT / 'tests' / 'fixtures' / f))
-        pg.wait_for_selector('#r-pfill'); pg.evaluate("__set('r-thr','6');__set('r-pbuis','%d');__set('r-pplaat','1');document.getElementById('r-pfill').click()" % tube); pg.wait_for_timeout(100)
+        # wachten tot deze foto geteld is (het totaal verandert en de knop staat er), niet op de knop van de vorige
+        pg.wait_for_function("p=>{ const k=document.querySelector('#t-reeks details .kv'); return k&&k.innerText!==p&&document.getElementById('r-pfill'); }", arg=prev)
+        pg.evaluate("__set('r-thr','6');__set('r-pbuis','%d');__set('r-pplaat','1');document.getElementById('r-pfill').click()" % tube); pg.wait_for_timeout(100)
         out.append((f + ' kolonies', pg.evaluate("__n(document.querySelector('#r-tbl tr[data-i=\"%d\"] input[data-p=\"1\"]').value)" % tube), n, 0.1))
     pg.evaluate("reeksCounts={};buildReeks();document.querySelector('#t-reeks details').open=false")
     return out
@@ -1632,10 +1635,164 @@ def _(pg):
             pg.set_input_files('#al-file', str(D / f)); pg.wait_for_timeout(300)
         else:
             pg.evaluate("t=>__set('al-in',t)", (D / f).read_text(encoding='utf-8'))
-        names = pg.evaluate("[...document.querySelectorAll('#al-out tbody tr')].map(r=>r.cells[0].textContent.trim())")
+        names = pg.evaluate("[...document.querySelectorAll('#al-seqs tbody tr')].map(r=>r.cells[0].textContent.trim())")
         out += [(f + ': sequenties', pg.evaluate("__kv('#al-out','Sequenties')"), r['n'], 0),
                 (f + ': lengte', pg.evaluate("__kv('#al-out','Lengte')"), r['len'], 0),
                 (f + ': namen gelijk', sum(a == b for a, b in zip(names, r['names'])), r['n'], 0)]
+    return out
+
+@case('Alignment bekijken', 'Kleurschema\'s in alle vijf thema\'s', 'ClustalX-regels uit colprot.par van Clustal X (Larkin e.a., Bioinformatics 23:2947, 2007) zoals Jalview ze documenteert (Jalview-help "Clustal X colours": G altijd oranje, P altijd geel; Waterhouse e.a., Bioinformatics 25:1189, 2009); nucleotidekleuren en procentuele identiteit volgens dezelfde Jalview-help; tekstcontrast minstens 4,5:1 volgens WCAG 2.1, criterium 1.4.3; kleurenblind-veilig palet van Okabe & Ito (2008, Color Universal Design)')
+def _(pg):
+    D = ROOT / 'tests' / 'fixtures' / 'aln'
+    pg.evaluate("__go('aln')")
+    # per klasse welke letters erin staan, het laagste tekstcontrast en het kleinste verschil met de achtergrond van het venster
+    js = r"""()=>{ const P=c=>{const f=c.startsWith('color(')?1:255; return c.match(/[\d.]+/g).map(Number).slice(0,3).map(v=>v*255/f)};
+      const L=c=>{const m=P(c).map(v=>{v/=255; return v<=.03928?v/12.92:((v+.055)/1.055)**2.4}); return .2126*m[0]+.7152*m[1]+.0722*m[2]};
+      const C=(a,b)=>(Math.max(a,b)+.05)/(Math.min(a,b)+.05), vm=__alnVm, v=vm.vis, view=document.getElementById('al-view');
+      const sf=L(getComputedStyle(view).backgroundColor), ink=L(getComputedStyle(view.querySelector('.aln-seq')).color);
+      const r={chars:{}, txt:99, bg:99, all:'', px:0};
+      for(const row of v.rows.filter(r=>!r.x)) for(let c=v.c0;c<v.c1;c++){ const ch=vm.m.seqs[row.i][c], k=vm.cellCls(row.i,c); r.all+=ch;
+        if(!k) continue; r.chars[k]=(r.chars[k]||'')+ch; const b=L(vm.shade(k)); r.txt=Math.min(r.txt,C(b,ink)); r.bg=Math.min(r.bg,C(b,sf)); }
+      /* steekproef: het midden van de eerste gekleurde cel op het canvas heeft die tint */
+      const row=v.rows[0], c=[...Array(v.c1-v.c0).keys()].map(d=>v.c0+d).find(c=>vm.cellCls(row.i,c)), cv=vm.$refs.cv, d=devicePixelRatio||1;
+      if(c!=null){ const p=cv.getContext('2d').getImageData(Math.round((v.left+(c-v.c0+.5)*vm.cw)*d),Math.round((row.top+9)*d),1,1).data, e=P(vm.shade(vm.cellCls(row.i,c)));
+        r.px=e.every((x,j)=>Math.abs(x-p[j])<=2)?1:0; }
+      return r; }"""
+    prot, nt = (D / 'W_prot.msf').read_text(encoding='utf-8'), (D / 'opuntia.aln').read_text(encoding='utf-8')
+    worst_txt, worst_bg, ok_rules, px = 99, 99, 0, 0
+    for th in ('licht', 'donker', 'papier', 'contrast', 'leisteen'):
+        pg.evaluate("t=>t==='licht'?document.documentElement.removeAttribute('data-theme'):document.documentElement.setAttribute('data-theme',t)", th)
+        for txt, sch in ((prot, 'clustalx'), (nt, 'nt'), (prot, 'ident')):
+            pg.evaluate("t=>__set('al-in',t)", txt)
+            for cb in (0, 1):
+                pg.evaluate("([s,c])=>{__set('al-col',s);__set('al-cbs',c)}", [sch, cb]); pg.wait_for_timeout(80)
+                r = pg.evaluate(js)
+                worst_txt, worst_bg = min(worst_txt, r['txt']), min(worst_bg, r['bg'])
+                ch = r['chars']
+                if sch == 'clustalx':  # elke G oranje, elke P geel, en die klassen bevatten niets anders
+                    ok_rules += (set(ch.get('co', '')) == {'G'} and len(ch['co']) == r['all'].count('G')
+                                 and set(ch.get('cy', '')) == {'P'} and len(ch['cy']) == r['all'].count('P'))
+                elif sch == 'nt':  # elke A, C, G, T in zijn eigen kleur
+                    ok_rules += all(len(ch.get('n' + k.lower(), '')) == r['all'].upper().count(k) and set(ch.get('n' + k.lower(), '').upper()) == {k} for k in 'ACGT')
+                else:  # identiteit: alleen de drie tinten
+                    ok_rules += bool(ch) and set(ch) <= {'i1', 'i2', 'i3'}
+                px += r['px']
+    pg.evaluate("()=>{document.documentElement.removeAttribute('data-theme');__set('al-col','auto');__set('al-cbs',0)}")
+    return [('schema\'s × thema\'s × kleurenblind die de regels volgen', ok_rules, 30, 0),
+            ('laagste tekstcontrast ≥ 4,5:1', 1 if worst_txt >= 4.5 else 0, 1, 0),
+            ('elke tint zichtbaar tegen de achtergrond (≥ 1,1:1)', 1 if worst_bg >= 1.1 else 0, 1, 0),
+            ('canvas toont de tint van de cel', px, 30, 0)]
+
+@case('Alignment bekijken', 'Conservering tegen de * : . -regel van Clustal', 'Clustal-uitvoer uit de testsuite van Biopython (tests/fixtures/aln: opuntia.aln, DNA uit Clustal W 1.81; hedgehog.aln, eiwit uit Clustal 2.0.9; clustalw.aln, eiwit uit Clustal W 1.81) met de * : . -regel die Clustal zelf schreef; groepen volgens Clustal W/X (Thompson, Higgins & Gibson 1994; Larkin e.a. 2007). Consensus bij een drempel van 100%: precies de kolommen met *')
+def _(pg):
+    D = ROOT / 'tests' / 'fixtures' / 'aln'
+    pg.evaluate("__go('aln')")
+    out = []
+    for f in ('opuntia.aln', 'hedgehog.aln', 'clustalw.aln'):
+        pg.evaluate("t=>{__set('al-in',t);__set('al-thr','100')}", (D / f).read_text(encoding='utf-8')); pg.wait_for_timeout(150)
+        r = pg.evaluate("()=>{const m=__alnVm.m, c=m.cons.padEnd(m.len,' '), k=__alnVm.cons;"
+                        "return {len:m.len, same:[...k].filter((x,i)=>x===c[i]).length, star:c.split('*').length-1,"
+                        "cons100:[...__alnVm.consensus].filter(x=>!'xn-'.includes(x)).length}}")
+        out += [(f + ': kolommen gelijk aan Clustal', r['same'], r['len'], 0),
+                (f + ': volledig geconserveerd (*)', pg.evaluate("__kv('#al-out','Volledig geconserveerd')"), r['star'], 0),
+                (f + ': consensus bij 100%', r['cons100'], r['star'], 0)]
+    pg.evaluate("()=>__set('al-thr','50')")
+    return out
+
+@case('Alignment bekijken', 'Gaten en kolomdetails na een klik', 'tests/fixtures/aln/hedgehog.aln (Biopython-testsuite, Clustal 2.0.9, 5 eiwitsequenties van 447 kolommen); verwachte tellingen in Python rechtstreeks uit het bestand geteld (naam + stuk sequentie per regel, blokken aan elkaar)')
+def _(pg):
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'hedgehog.aln'
+    seqs = {}
+    for ln in f.read_text(encoding='utf-8').splitlines()[1:]:
+        if ln.strip() and not ln[0].isspace():
+            name, chunk = ln.split()[:2]; seqs[name] = seqs.get(name, '') + chunk
+    rows = list(seqs.values())
+    pg.evaluate("__go('aln')"); pg.evaluate("t=>__set('al-in',t)", f.read_text(encoding='utf-8')); pg.wait_for_timeout(200)
+    gaps = pg.evaluate("[...document.querySelectorAll('#al-seqs tbody tr')].map(r=>__n(r.cells[2].textContent))")
+    out = [('gaten per sequentie gelijk', sum(a == r.count('-') for a, r in zip(gaps, rows)), len(rows), 0),
+           ('kolommen met gaten', pg.evaluate("__kv('#al-out','Kolommen met gaten')"), sum('-' in col for col in zip(*rows)), 0)]
+    pg.evaluate("typeof tourStop==='function'&&tourStop()")  # de rondleiding bij het eerste bezoek ligt anders over het raster
+    for c in (1, 46, 300, 447):  # 1-based; de kolom in beeld schuiven en er echt op klikken
+        pg.evaluate("c=>{const v=document.getElementById('al-view'); v.scrollIntoView({block:'center',behavior:'instant'}); v.scrollLeft=Math.max(0,(c-5)*__alnVm.cw); v.dispatchEvent(new Event('scroll'))}", c)
+        pg.wait_for_timeout(100)
+        x, y = pg.evaluate("c=>{const vm=__alnVm, v=document.getElementById('al-view'), r=v.getBoundingClientRect();"
+                           "return [r.left+v.clientLeft+vm.g.nameW+(c-0.5)*vm.cw-vm.sx, r.top+v.clientTop+40]}", c)
+        pg.mouse.click(x, y); pg.wait_for_timeout(150)
+        got = pg.evaluate("Object.fromEntries([...document.querySelectorAll('#al-coldet tbody tr')].map(r=>[r.cells[0].textContent.trim(),__n(r.cells[1].textContent)]))")
+        col = [r[c - 1].upper() for r in rows]
+        exp = {k: col.count(k) for k in set(col) if k != '-'}
+        out += [(f'kolom {c}: tellingen per letter', 1 if got == exp else 0, 1, 0),
+                (f'kolom {c}: gaten', pg.evaluate("__kv('#al-coldet','Gaten')"), col.count('-'), 0)]
+    return out
+
+@case('Alignment bekijken', 'Motief zoeken en volgorde', 'tests/fixtures/aln/hedgehog.aln (eiwit) en opuntia.aln (DNA) uit de Biopython-testsuite. Verwacht in Python berekend: treffers met re op de sequenties zonder gaten (motief G[IV][HF]WY, het geconserveerde stuk bij kolom 416 van hedgehog; TATACATTRAAG met IUPAC R = A/G in opuntia), de kolom van de eerste letter, de volgorde op naam (natuurlijke sortering) en op identiteit met de eerste sequentie (gelijke letters / kolommen waar beide een letter hebben)')
+def _(pg):
+    import re
+    D = ROOT / 'tests' / 'fixtures' / 'aln'
+    def clustal(f):
+        seqs = {}
+        for ln in (D / f).read_text(encoding='utf-8').splitlines()[1:]:
+            if ln.strip() and not ln[0].isspace():
+                name, chunk = ln.split()[:2]; seqs[name] = seqs.get(name, '') + chunk
+        return seqs
+    def first_cols(seqs, pat):
+        out = []
+        for s in seqs.values():
+            cols = [i for i, ch in enumerate(s) if ch != '-']
+            m = re.search(pat, s.replace('-', '').upper())
+            out.append(cols[m.start()] + 1 if m else 0)
+        return out
+    pg.evaluate("__go('aln')")
+    seqcol = "()=>{const h=[...document.querySelectorAll('#al-seqs thead th')].map(t=>t.textContent.trim()), k=h.indexOf('Motief');" \
+             "return [...document.querySelectorAll('#al-seqs tbody tr')].map(r=>{const m=r.cells[k].textContent.match(/kolom (\\d+)/); return m?+m[1]:0})}"
+    names = "[...document.querySelectorAll('#al-seqs tbody tr')].map(r=>r.cells[0].textContent.trim())"
+    view = "__alnVm.vis.rows.filter(r=>!r.x).map(r=>r.name)"
+    out = []
+    for f, motif, pat in (('hedgehog.aln', 'G[IV][HF]WY', 'G[IV][HF]WY'), ('opuntia.aln', 'TATACATTRAAG', 'TATACATT[AG]AAG')):
+        seqs = clustal(f); exp = first_cols(seqs, pat)
+        pg.evaluate("([t,m])=>{__set('al-in',t);__set('al-ord','file');__set('al-motif',m)}", [(D / f).read_text(encoding='utf-8'), motif]); pg.wait_for_timeout(150)
+        out += [(f + ': sequenties met het motief', pg.evaluate("__kv('#al-out','Motief gevonden in')"), sum(1 for c in exp if c), 0),
+                (f + ': kolom van de treffer gelijk', sum(a == b for a, b in zip(pg.evaluate(seqcol), exp)), len(exp), 0)]
+    seqs = clustal('hedgehog.aln'); ns = list(seqs)
+    pg.evaluate("t=>{__set('al-in',t);__set('al-motif','');__set('al-ord','name')}", (D / 'hedgehog.aln').read_text(encoding='utf-8')); pg.wait_for_timeout(150)
+    nat = lambda x: [int(p) if p.isdigit() else p.lower() for p in re.split(r'(\d+)', x)]
+    out.append(('volgorde op naam', 1 if pg.evaluate(names) == sorted(ns, key=nat) else 0, 1, 0))
+    r0 = seqs[ns[0]].upper()
+    def ident(s):
+        both = [(a, b) for a, b in zip(s.upper(), r0) if a != '-' and b != '-']
+        return sum(a == b for a, b in both) / len(both)
+    pg.evaluate("()=>__set('al-ord','ident')"); pg.wait_for_timeout(150)
+    by_id = sorted(ns, key=lambda n: (-ident(seqs[n]), ns.index(n)))
+    out.append(('volgorde op identiteit', 1 if pg.evaluate(names) == by_id and pg.evaluate(view) == by_id else 0, 1, 0))
+    pg.click('#al-seqs tbody tr:nth-child(1) [data-mv="1"]'); pg.wait_for_timeout(150)  # eerste rij een plek omlaag
+    hand = [by_id[1], by_id[0]] + by_id[2:]
+    out.append(('met de hand: ▼ wisselt rij 1 en 2 (tabel en raster)', 1 if pg.evaluate(names) == hand and pg.evaluate(view) == hand
+                and pg.evaluate("document.getElementById('al-ord').value") == 'hand' else 0, 1, 0))
+    pg.evaluate("()=>__set('al-ord','file')")
+    return out
+
+@case('Alignment bekijken', 'Verschilweergave tegen een referentie', 'tests/fixtures/aln/hedgehog.aln (Biopython-testsuite); verwacht in Python berekend: een punt waar een letter gelijk is aan die van de referentie, de referentie zelf ongewijzigd, en uit/aan/uit geeft weer precies de oorspronkelijke rijen')
+def _(pg):
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'hedgehog.aln'
+    seqs = {}
+    for ln in f.read_text(encoding='utf-8').splitlines()[1:]:
+        if ln.strip() and not ln[0].isspace():
+            name, chunk = ln.split()[:2]; seqs[name] = seqs.get(name, '') + chunk
+    rows = list(seqs.values())
+    diff = lambda s, r: ''.join('.' if a != '-' and a.upper() == b.upper() else a for a, b in zip(s, r))
+    shown = "__alnVm.vis.rows.filter(r=>!r.x).map(r=>[r.i,r.txt])"
+    c0 = "__alnVm.vis.c0"
+    pg.evaluate("__go('aln')")
+    pg.evaluate("t=>{__set('al-in',t);__set('al-ord','file');__set('al-motif','');__set('al-ref','')}", f.read_text(encoding='utf-8')); pg.wait_for_timeout(150)
+    def same(ref):
+        a, k = pg.evaluate(shown), pg.evaluate(c0)
+        exp = [r if ref is None or i == ref else diff(r, rows[ref]) for i, r in enumerate(rows)]
+        return sum(t == exp[i][k:k + len(t)] for i, t in a), len(a)
+    out = []
+    for step, ref in (('uit', None), ('referentie 1', 0), ('uit', None), ('referentie 3', 2), ('weer uit', None)):
+        pg.evaluate("v=>__set('al-ref',v)", '' if ref is None else str(ref)); pg.wait_for_timeout(120)
+        ok, n = same(ref)
+        out.append((step + ': rijen zoals verwacht', ok, n, 0))
     return out
 
 @case('Chromatogram', 'ABIF-bestand 3730.ab1 inlezen', 'Biopython 1.84, Tests/test_SeqIO_AbiIO.py (data_3730) en het bestand zelf (tests/fixtures/3730.ab1, Applied Biosystems 3730): monster 226032_C-ME-18_pCAGseqF, 1165 basen, eerste 12 basen GGGCGAGCKYYA; ABIF-indeling volgens de Applied Biosystems ABIF File Format Specification (2009)')
@@ -1659,6 +1816,16 @@ def _(pg):
         out += [(f'venster {win} Q{q} start', t['start'], a, 0), (f'venster {win} Q{q} einde', t['end'], b, 0)]
     pg.evaluate("()=>{__set('sg-win',10);__set('sg-q',20)}"); pg.wait_for_timeout(200)
     out.append(('na trimmen (basen)', pg.evaluate("__kv('#sg-out','Na trimmen')"), 1081, 0))
+    return out
+
+@case('Chromatogram', 'Heterozygoten als IUPAC-code uit de piekverhouding op 3730.ab1', 'De gemengde calls die de KB-basecaller van de Applied Biosystems 3730 zelf in tests/fixtures/3730.ab1 zette (PBAS2, zoals Biopython 1.84 ze leest): K op 9, Y op 10, 11 en 13, R op 1091 en 1109, Y op 1155; methode: verhouding tweede/hoogste piek per base (Nickerson, Tobe & Taylor, PolyPhred, Nucleic Acids Res 25:2745–2751, 1997; Rausch e.a., Tracy, BMC Genomics 21:230, 2020), drempel 0,2')
+def _(pg):
+    pg.evaluate("__go('sanger')")
+    pg.set_input_files('#sg-file', str(ROOT / 'tests' / 'fixtures' / '3730.ab1')); pg.wait_for_timeout(800)
+    pg.evaluate("__set('sg-het','0.2')"); pg.wait_for_timeout(200)
+    pos, exp = (9, 10, 11, 13, 1091, 1109, 1155), 'KYYYRRY'
+    got = pg.evaluate("p=>p.map(i=>__sgVm.seq[i-1]).join('')", list(pos))
+    out = [(f'positie {p} ({e})', 1 if g == e else 0, 1, 0) for p, e, g in zip(pos, exp, got)]
     return out
 
 @case('Restrictiedigestie', 'In-silico digestie van pFA6a-kanMX6', 'Biopython Bio.Restriction 1.84 (REBASE, dezelfde enzymdata als NEBcutter) op pFA6a-kanMX6 (Addgene 39296, 3938 bp); tests/fixtures/pFA6a-kanMX6.fa')

@@ -16,11 +16,18 @@
       <div class="row" style="margin-top:8px">
         <button type="button" id="bp-tbl-add" @click="addRow">{{ t('+ Vlek') }}</button>
       </div>
+      <div class="row" style="margin-top:8px;align-items:flex-end">
+        <div class="f"><label for="bp-photo">{{ t('Foto als achtergrond') }}</label><input id="bp-photo" type="file" accept="image/*" @change="loadPhoto"></div>
+        <lk-field v-model="pw" :label="t('Breedte van de foto')" for-id="bp-pw" unit="cm"/>
+        <button type="button" id="bp-draw" :class="{ghost: !drawMode}" @click="drawMode = !drawMode">{{ t('Teken vlek') }}</button>
+      </div>
+      <p v-if="drawMode" style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Druk op de tekening op de plek van de vlek en sleep in de looprichting van de druppel.') }}</p>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Meet breedte en lengte van de ellips zonder staart of satellietdruppels. Positie x, y in cm op het oppervlak; richting γ = looprichting van de druppel in graden (0° = positieve x-as, tegen de klok in). Voor convergentie zijn minstens twee vlekken met positie en richting nodig. Voorbeelddata zijn berekend voor een oorsprong op (60, 40) cm en 45 cm hoogte.') }}</p>
     </div>
     <div class="result">
-      <canvas id="bp-cv" v-show="m && m.P.length"></canvas>
-      <div class="pic-bar" v-show="m && m.P.length">
+      <canvas id="bp-cv" v-show="showCv" :style="drawMode ? 'touch-action:none;cursor:crosshair' : ''" @pointerdown="pdown" @pointerup="pup"></canvas>
+      <lk-note v-if="pend.length" kind="info">{{ t('Getekende vlek: vul breedte en lengte in.') }}</lk-note>
+      <div class="pic-bar" v-show="showCv">
         <button type="button" data-png="bp">PNG</button><button type="button" data-svg="bp">SVG</button><button type="button" data-copy="bp">{{ t('Kopieer afbeelding') }}</button><button type="button" data-picprint="bp">{{ t('Afdrukken') }}</button>
       </div>
       <div id="bp-out">
@@ -50,7 +57,8 @@ export default {
     return {
       rows: [['1', '6,7', '10', '20', '10', '217'], ['2', '6,5', '10', '110', '25', '343'],
         ['3', '6,2', '10', '95', '85', '52'], ['4', '6,1', '10', '30', '90', '121'],
-        ['5', '5,9', '10', '70', '100', '81']].map(r => r.map(v => lkNumIn(v)))
+        ['5', '5,9', '10', '70', '100', '81']].map(r => r.map(v => lkNumIn(v))),
+      pw: '100', photo: false, drawMode: false
     };
   },
   computed: {
@@ -60,6 +68,12 @@ export default {
         {h: t('Lengte (mm)'), t: 'num', w: 80}, {h: 'x (cm)', t: 'num', w: 64},
         {h: 'y (cm)', t: 'num', w: 64}, {h: 'γ (°)', t: 'num', w: 60}];
     },
+    /* getekende vlekken zonder breedte/lengte: niet in m(), wel zichtbaar op de tekening */
+    pend() {
+      return this.rows.map(r => ({n: r[0], w: num(r[1]), l: num(r[2]), x: num(r[3]), y: num(r[4]), g: num(r[5])}))
+        .filter(s => !(s.w > 0 && s.l > 0) && isFinite(s.x) && isFinite(s.y) && isFinite(s.g));
+    },
+    showCv() { return !!((this.m && this.m.P.length) || this.photo || this.pend.length); },
     /* het rekenwerk van calc.bpa, ongewijzigd: de waarschuwingen blijven Nederlandse zinnen met
        ud() rond de naam van de vlek, en gaan pas bij het tonen door tHtml() */
     m() {
@@ -112,16 +126,58 @@ export default {
   mounted() { this.draw(); },
   updated() { this.draw(); },
   methods: {
+    loadPhoto(e) {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f), im = new Image();
+      im.onload = () => { this._img = im; this.photo = true; };
+      im.onerror = () => { URL.revokeObjectURL(url); };
+      im.src = url;
+    },
+    /* canvaspunt (CSS-pixels) → cm, met de transformatie van draw() */
+    toCm(ev) {
+      const cv = ev.currentTarget, b = cv.getBoundingClientRect(), T = this._tf;
+      if (!T || !b.width) return null;
+      const k = T.W / b.width, cx = (ev.clientX - b.left) * k, cy = (ev.clientY - b.top) * k;
+      return {x: T.x0 + (cx - 30) / T.sc, y: T.y0 + (T.H - 30 - cy) / T.sc};
+    },
+    pdown(ev) {
+      if (!this.drawMode) return;
+      this._p0 = this.toCm(ev);
+      ev.currentTarget.setPointerCapture && ev.currentTarget.setPointerCapture(ev.pointerId);
+    },
+    /* loslaten: nieuwe rij met positie en richting γ (0° = +x, tegen de klok in); breedte/lengte blijven leeg */
+    pup(ev) {
+      const a = this._p0, b = this.toCm(ev);
+      this._p0 = null;
+      if (!this.drawMode || !a || !b || Math.hypot(b.x - a.x, b.y - a.y) * this._tf.sc < 6) return;
+      const g = (Math.round(Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI) + 360) % 360,
+        v = z => lkNumIn(String(Math.round(z * 10) / 10).replace('.', ','));
+      this.rows = [...this.rows.filter(r => r.some(c => String(c).trim())),
+        [String(this.rows.length + 1), '', '', v(a.x), v(a.y), lkNumIn(String(g))]];
+    },
     addRow() { this.rows = [...this.rows, ['', '', '', '', '', '']]; },
     /* de tekening van calc.bpa: bovenaanzicht met de looprichtingen en het convergentiepunt */
     draw() {
-      const cv = document.getElementById('bp-cv'); if (!cv || !this.m || !this.m.P.length) return;
-      const {P, C} = this.m;
-      const xs = [...P.map(s => s.x), ...(C ? [C.x] : [])], ys = [...P.map(s => s.y), ...(C ? [C.y] : [])],
-        x0 = Math.min(...xs) - 15, x1 = Math.max(...xs) + 15, y0 = Math.min(...ys) - 15, y1 = Math.max(...ys) + 15,
+      const cv = document.getElementById('bp-cv'); if (!cv || !this.showCv) return;
+      const {P, C} = this.m || {P: [], C: null}, pend = this.pend, img = this.photo && this._img;
+      /* foto in cm: breedte uit het veld, hoogte volgens de beeldverhouding; oorsprong linksonder */
+      const pwc = num(this.pw), ph = img && pwc > 0 ? {w: pwc, h: pwc * img.naturalHeight / img.naturalWidth} : null;
+      const pts = [...P, ...pend, ...(C ? [C] : [])], xs = pts.map(s => s.x), ys = pts.map(s => s.y);
+      if (ph) { xs.push(0, ph.w); ys.push(0, ph.h); }
+      const mg = ph ? 2 : 15,
+        x0 = Math.min(...xs) - mg, x1 = Math.max(...xs) + mg, y0 = Math.min(...ys) - mg, y1 = Math.max(...ys) + mg,
         W = 460, sc = (W - 60) / Math.max(x1 - x0, y1 - y0, 1), H = Math.round((y1 - y0) * sc + 60);
+      this._tf = {x0, y0, sc, W, H};  // voor de omgekeerde afbeelding bij "Teken vlek"
       pShow(cv, W, H, (x) => {
         const X = v => 30 + (v - x0) * sc, Y = v => H - 30 - (v - y0) * sc;
+        if (ph) x.drawImage(img, X(0), Y(ph.h), ph.w * sc, ph.h * sc);
+        pend.forEach(s => {
+          const t = s.g * Math.PI / 180;
+          x.strokeStyle = 'rgba(194,65,12,.45)'; x.lineWidth = 1; x.setLineDash([4, 4]); x.beginPath();
+          x.moveTo(X(s.x), Y(s.y)); x.lineTo(X(s.x - Math.cos(t) * 40), Y(s.y - Math.sin(t) * 40)); x.stroke(); x.setLineDash([]);
+          x.strokeStyle = '#9b1c1c'; x.beginPath(); x.arc(X(s.x), Y(s.y), 5, 0, 7); x.stroke();
+        });
         x.strokeStyle = PCOL.line; x.strokeRect(30, 30, W - 60, H - 60);
         P.forEach(s => {
           const t = s.g * Math.PI / 180;

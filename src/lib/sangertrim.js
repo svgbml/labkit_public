@@ -14,3 +14,16 @@ export function trimWindow(qual, win, q) {
   while (!ok(b)) b--;
   return {start: a + 1, end: b + win};
 }
+
+const COMP = {A: 'T', T: 'A', C: 'G', G: 'C', R: 'Y', Y: 'R', K: 'M', M: 'K', B: 'V', V: 'B', D: 'H', H: 'D', S: 'S', W: 'W', N: 'N'};
+export const comp = c => COMP[c] || 'N';
+export const revComp = s => String(s).split('').reverse().map(comp).join('');
+
+/* FASTA van seq[a..b] (0-gebaseerd, inclusief; range = {a, b} of null voor de hele read), optioneel als reverse complement.
+   Kop: >naam[ start-end][ revcomp] met 1-gebaseerde posities van de oorspronkelijke read; regels van 60. */
+export function fasta(name, seq, range, rc) {
+  const a = range ? range.a : 0, b = range ? range.b : seq.length - 1;
+  let s = seq.slice(a, b + 1);
+  if (rc) s = revComp(s);
+  return '>' + (name || 'sequence') + (range ? ' ' + (a + 1) + '-' + (b + 1) : '') + (rc ? ' revcomp' : '') + '\n' + (s.match(/.{1,60}/g) || []).join('\n') + '\n';
+}

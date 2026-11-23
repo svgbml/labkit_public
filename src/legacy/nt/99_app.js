@@ -215,7 +215,7 @@ function reportBtns(){ $$('main canvas').forEach(cv=>{ if(cv.id==='gf-cv') retur
 /* SVG van een grafiek (S82): de tool tekent zichzelf opnieuw, maar met de opnemende tekencontext van 01_pic.js
    in plaats van het canvas; zo komt ook alles mee wat een tool na chart() zelf bijtekent. Zoals reportPng:
    licht thema, schaal 1. Tekeningen met pShow() (cv._p) worden direct opnieuw afgespeeld. */
-const SVGSKIP=['gf-cv','gf-vlcv','sg-cv','k-pcv','r-pcv'];
+const SVGSKIP=['gf-cv','gf-vlcv','sg-cv','k-pcv','r-pcv','al-ovw','al-bg'];   /* al-ovw/al-bg: overzichtsstrook en achtergrond van de alignmentviewer, geen grafiek */
 function chartSvg(cv){ const tool=(cv.closest('section.tool')||{dataset:{}}).dataset.tool, root=document.documentElement, th=root.getAttribute('data-theme'), r=svgRec(0,0); let svg;
   if(cv._p){ r.textBaseline='middle'; cv._p.draw(r,cv._p.W,cv._p.H); svg=r.toSVG('#ffffff',cv._p.W,cv._p.H); }
   else { try{ root.removeAttribute('data-theme'); Object.defineProperty(window,'devicePixelRatio',{get:()=>1,configurable:true}); cv.getContext=()=>r; if(calc[tool]) calc[tool](); svg=r.toSVG('#ffffff',cv.width,cv.height); }
