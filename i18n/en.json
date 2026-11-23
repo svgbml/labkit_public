@@ -5289,5 +5289,21 @@
 "midden": "middle",
 "Tussenruimte": "Spacing",
 "Bezig…": "Working…",
-"Kolombreedtes zoals Nature ze vraagt ({#} en {#} mm); de PNG heeft de gekozen resolutie in het bestand, de SVG houdt grafieken als vector, de PDF is één pagina zo groot als de figuur.": "Column widths as Nature asks for them ({#} and {#} mm); the PNG carries the chosen resolution in the file, the SVG keeps charts as vectors, the PDF is one page the size of the figure."
+"Kolombreedtes zoals Nature ze vraagt ({#} en {#} mm); de PNG heeft de gekozen resolutie in het bestand, de SVG houdt grafieken als vector, de PDF is één pagina zo groot als de figuur.": "Column widths as Nature asks for them ({#} and {#} mm); the PNG carries the chosen resolution in the file, the SVG keeps charts as vectors, the PDF is one page the size of the figure.",
+"Plaatlezer-bestand…": "Plate reader file…",
+"Kies in de plaat welke putjes positief, negatief of monster zijn.": "Pick in the plate which wells are positive, negative or sample.",
+"Plaatlezer-bestand openen": "Open plate reader file",
+"of plak de export hieronder": "or paste the export below",
+"Klik putjes aan als:": "Click wells as:",
+"Negatief": "Negative",
+"Geen plaat gevonden in deze tekst.": "No plate found in this text.",
+"Herkend als {*}.": "Recognised as {*}.",
+"raster met rijletters (Gen5, Multiskan, Excel)": "grid with row letters (Gen5, Multiskan, Excel)",
+"Tecan i-control / Magellan": "Tecan i-control / Magellan",
+"SoftMax Pro": "SoftMax Pro",
+"lijst per putje (BMG)": "list per well (BMG)",
+"{#} putje(s) verzadigd (OVER); die tellen niet mee.": "{#} well(s) saturated (OVER); they are left out.",
+"Plaat:": "Plate:",
+"Plaat overgenomen; kies de kolommen van de standaarden en monsters en klik Importeren.": "Plate taken over; choose the columns of the standards and samples and click Import.",
+"Plaat overgenomen.": "Plate taken over."
 }

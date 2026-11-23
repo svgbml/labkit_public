@@ -1319,6 +1319,33 @@ def _(pg):
     pg.evaluate(f"__go('zprime');__set('zp-pos','{' '.join(str(v).replace('.',',') for v in P)}');__set('zp-neg','{' '.join(str(v).replace('.',',') for v in N)}');__set('zp-s','')")
     return [('Z′', pg.evaluate("__big('#zp-out')"), z, 0.002)]
 
+@case('Assaykwaliteit (Z′-factor)', 'Plaatlezer-venster: putjes aanwijzen', 'Zelftest: de Tecan-export uit tests/fixtures/platereader (waarde = 0,05 + 0,1·rij + 0,013·kolom) in het venster Plaatlezer-bestand; rij B als positief en rij A als negatief aanwijzen geeft dezelfde Z′ als die 24 waarden met de hand (Zhang e.a. 1999, numpy met n − 1). ELISA krijgt hetzelfde bestand als absorptieblok van 8 × 12, Standaardcurve als plaatblok')
+def _(pg):
+    import numpy as np
+    txt = open(ROOT / 'tests' / 'fixtures' / 'platereader' / 'tecan.csv', encoding='utf8').read()
+    P = [round(0.05 + 0.1 + 0.013 * c, 3) for c in range(12)]; N = [round(0.05 + 0.013 * c, 3) for c in range(12)]
+    z = 1 - 3 * (np.std(P, ddof=1) + np.std(N, ddof=1)) / abs(np.mean(P) - np.mean(N))
+    pg.evaluate("__go('zprime'); document.getElementById('zp-pwiz').click()"); pg.wait_for_timeout(200)
+    pg.evaluate(f"__pw.load({txt!r})")
+    fmt = pg.evaluate("__pw.st.res.format")
+    pg.evaluate("""(()=>{ const g=document.querySelector('.lk-modal [data-pw-grid]'), click=id=>g.querySelector('[data-w="'+id+'"]').click();
+      document.querySelector('.lk-modal [data-pw-role="pos"]').click(); for(let c=1;c<=12;c++) click('B'+c);
+      document.querySelector('.lk-modal [data-pw-role="neg"]').click(); for(let c=1;c<=12;c++) click('A'+c);
+      document.querySelector('.lk-modal [data-pw-ok]').click(); })()"""); pg.wait_for_timeout(300)
+    pg.evaluate("document.querySelectorAll('.lk-modal').forEach(m=>m.remove())")
+    got = pg.evaluate("__big('#zp-out')")
+    pg.evaluate("__go('elisa'); document.getElementById('el-pwiz').click()"); pg.wait_for_timeout(200)
+    pg.evaluate(f"__pw.load({txt!r}); document.querySelector('.lk-modal [data-pw-ok]').click()"); pg.wait_for_timeout(300)
+    pg.evaluate("document.querySelectorAll('.lk-modal').forEach(m=>m.remove())")
+    el = pg.evaluate("(()=>{ const l=document.getElementById('el-a').value.split('\\n'); return [l.length, l[0].split('\\t').length, l[1].split('\\t')[0]]; })()")
+    pg.evaluate("__go('curve'); document.getElementById('s-pwiz').click()"); pg.wait_for_timeout(200)
+    pg.evaluate(f"__pw.load({txt!r}); document.querySelector('.lk-modal [data-pw-ok]').click()"); pg.wait_for_timeout(300)
+    pg.evaluate("document.querySelectorAll('.lk-modal').forEach(m=>m.remove())")
+    cv = pg.evaluate("Object.keys(parsePlate(document.getElementById('s-ptxt').value)).length")
+    pg.evaluate("__go('elisa'); document.getElementById('el-a').value=''")
+    return [('herkend als Tecan', int(fmt == 'tecan'), 1, 0), ('Z′', got, z, 0.002), ('ELISA: 8 rijen', el[0], 8, 0), ('ELISA: 12 kolommen', el[1], 12, 0),
+            ('ELISA: B1', float(el[2]), 0.15, 0.001), ('Standaardcurve: 8 rijen', cv, 8, 0)]
+
 @case('Transfectie (Lipofectamine 3000)', '6-well', 'Thermo Fisher MAN0009872: 6-well 2 × 125 µL Opti-MEM, 2,5 µg DNA, 5 µL P3000, 7,5 µL Lipofectamine 3000 (hoog)')
 def _(pg):
     pg.evaluate("__go('transfect');__set('trf-type','dna');__set('trf-fmt','5');__set('trf-dose','hi');__set('trf-n','1');__set('trf-x','0');__set('trf-st','1')")

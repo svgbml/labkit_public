@@ -12,6 +12,7 @@
         <div class="f" style="grid-column:1/-1">
           <label for="zp-pos">{{ t('Positieve controle') }} <span class="example">{{ t('voorbeeld') }}</span></label>
           <textarea id="zp-pos" rows="3" v-model="pos"></textarea>
+          <div class="row" style="margin-top:4px"><button type="button" id="zp-pwiz" @click="wiz">{{ t('Plaatlezer-bestand…') }}</button><span style="font-size:12.5px;color:var(--muted);align-self:center">{{ t('Kies in de plaat welke putjes positief, negatief of monster zijn.') }}</span></div>
         </div>
         <div class="f" style="grid-column:1/-1">
           <label for="zp-neg">{{ t('Negatieve controle') }}</label>
@@ -90,6 +91,7 @@ export default {
   mounted() { this.draw(); },
   updated() { this.draw(); },
   methods: {
+    wiz() { plateWizard('zprime'); },   /* S92 */
     /* de tekening wordt na elke render bijgewerkt; dat is goedkoop en houdt canvas en uitkomst
        bij elkaar zonder dat Vue iets van het canvas hoeft te weten */
     draw() {

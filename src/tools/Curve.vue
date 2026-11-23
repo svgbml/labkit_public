@@ -34,7 +34,7 @@
     <details class="panel" id="s-pdet"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Plaatlezer-export importeren (96-wells)') }}</summary>
       <div class="grid2" style="margin-top:12px">
         <div>
-          <div class="row" style="margin-bottom:8px"><input type="file" id="s-pfile" accept=".csv,.txt,.tsv,.asc" @change="onFile"></div>
+          <div class="row" style="margin-bottom:8px;gap:8px"><input type="file" id="s-pfile" accept=".csv,.txt,.tsv,.asc" @change="onFile"><button type="button" id="s-pwiz" @click="wiz">{{ t('Plaatlezer-bestand…') }}</button></div>
           <div class="f"><label for="s-ptxt">{{ t('Of plak het plaatblok (rij A–H met 12 waarden, uit Excel of de plaatlezer)') }}</label>
             <textarea id="s-ptxt" rows="9" spellcheck="false" :placeholder="ph" v-model="ptxt"></textarea></div>
         </div>
@@ -234,6 +234,7 @@ export default {
   },
   updated() { this.draw(); },
   methods: {
+    wiz() { plateWizard('curve'); },   /* S92: Tecan, SoftMax Pro, Gen5, BMG via het venster */
     /* een voorbeeld laden: de oude sLoad() */
     load(k) {
       const P = SPRE[k]; if (!P) return;

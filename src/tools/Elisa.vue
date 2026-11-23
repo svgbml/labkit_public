@@ -16,6 +16,7 @@
       <div class="fields">
         <div class="f" style="grid-column:1/-1">
           <label for="el-a">{{ t('Absorptie meetgolflengte (bijv. 450 nm), 8 rijen × 12 kolommen') }} <span class="example">{{ t('voorbeeld') }}</span></label>
+          <div class="row" style="margin:4px 0"><button type="button" id="el-pwiz" @click="wiz">{{ t('Plaatlezer-bestand…') }}</button></div>
           <textarea id="el-a" rows="8" class="mono" style="font-size:12px;white-space:pre;overflow-x:auto" v-model="a"></textarea>
         </div>
         <div class="f" style="grid-column:1/-1">
@@ -204,6 +205,7 @@ export default {
     l(v) { if (v === this._echo) { this._echo = null; return; } this.toPlate(); }
   },
   methods: {
+    wiz() { plateWizard('elisa'); },   /* S92 */
     /* plaat -> tekstvak */
     toText() {
       const P = this._pld; if (!P || this._sync) return;

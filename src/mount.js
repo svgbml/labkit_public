@@ -82,6 +82,7 @@ import Rmp from './tools/Rmp.vue';
 import Ystr from './tools/Ystr.vue';
 import Plasmid from './tools/Plasmid.vue';
 import Figuur from './tools/Figuur.vue';
+import './tools/platewiz.js';
 import Aln from './tools/Aln.vue';
 import Seq from './tools/Seq.vue';
 import Sanger from './tools/Sanger.vue';
