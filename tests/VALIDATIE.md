@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-23 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 447 van 447 controles binnen tolerantie.**
+**Resultaat: 453 van 453 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -203,6 +203,12 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Statistiek | One-way ANOVA + Tukey | trt2 − trt1 BI onder | 0,174 | 0,174 | +0.00% | ✅ | R-dataset PlantGrowth (Dobson 1983); R aov/TukeyHSD: F = 4,846, p = 0,01591; trt2 − trt1 = 0,865 [0,174; 1,556], p = 0,012; trt1 − ctrl p = 0,391; trt2 − ctrl p = 0,198 |
 | Statistiek | One-way ANOVA + Tukey | trt2 − trt1 BI boven | 1,556 | 1,56 | +0.26% | ✅ | R-dataset PlantGrowth (Dobson 1983); R aov/TukeyHSD: F = 4,846, p = 0,01591; trt2 − trt1 = 0,865 [0,174; 1,556], p = 0,012; trt1 − ctrl p = 0,391; trt2 − ctrl p = 0,198 |
 | Statistiek | One-way ANOVA + Tukey | trt2 − trt1 p | 0,012 | 0,012 | +0.00% | ✅ | R-dataset PlantGrowth (Dobson 1983); R aov/TukeyHSD: F = 4,846, p = 0,01591; trt2 − trt1 = 0,865 [0,174; 1,556], p = 0,012; trt1 − ctrl p = 0,391; trt2 − ctrl p = 0,198 |
+| Statistiek | Foutbalk SEM en 95%-BI (staafgrafiek) | sd A | 2 | 2 | +0.00% | ✅ | Handberekening: groep A = 10, 12, 14 → gemiddelde 12, SD 2, SEM 2/√3 = 1,1547, t(0,975; 2) = 4,3027 → BI-halfbreedte 4,9683; groep B = 20, 22, 24, 26 → SD 2,5820, SEM 1,2910, t(0,975; 3) = 3,1824 → BI 4,1085 |
+| Statistiek | Foutbalk SEM en 95%-BI (staafgrafiek) | sd B | 2,582 | 2,582 | -0.00% | ✅ | Handberekening: groep A = 10, 12, 14 → gemiddelde 12, SD 2, SEM 2/√3 = 1,1547, t(0,975; 2) = 4,3027 → BI-halfbreedte 4,9683; groep B = 20, 22, 24, 26 → SD 2,5820, SEM 1,2910, t(0,975; 3) = 3,1824 → BI 4,1085 |
+| Statistiek | Foutbalk SEM en 95%-BI (staafgrafiek) | sem A | 1,155 | 1,155 | +0.00% | ✅ | Handberekening: groep A = 10, 12, 14 → gemiddelde 12, SD 2, SEM 2/√3 = 1,1547, t(0,975; 2) = 4,3027 → BI-halfbreedte 4,9683; groep B = 20, 22, 24, 26 → SD 2,5820, SEM 1,2910, t(0,975; 3) = 3,1824 → BI 4,1085 |
+| Statistiek | Foutbalk SEM en 95%-BI (staafgrafiek) | sem B | 1,291 | 1,291 | -0.00% | ✅ | Handberekening: groep A = 10, 12, 14 → gemiddelde 12, SD 2, SEM 2/√3 = 1,1547, t(0,975; 2) = 4,3027 → BI-halfbreedte 4,9683; groep B = 20, 22, 24, 26 → SD 2,5820, SEM 1,2910, t(0,975; 3) = 3,1824 → BI 4,1085 |
+| Statistiek | Foutbalk SEM en 95%-BI (staafgrafiek) | ci A | 4,968 | 4,968 | -0.00% | ✅ | Handberekening: groep A = 10, 12, 14 → gemiddelde 12, SD 2, SEM 2/√3 = 1,1547, t(0,975; 2) = 4,3027 → BI-halfbreedte 4,9683; groep B = 20, 22, 24, 26 → SD 2,5820, SEM 1,2910, t(0,975; 3) = 3,1824 → BI 4,1085 |
+| Statistiek | Foutbalk SEM en 95%-BI (staafgrafiek) | ci B | 4,109 | 4,109 | +0.00% | ✅ | Handberekening: groep A = 10, 12, 14 → gemiddelde 12, SD 2, SEM 2/√3 = 1,1547, t(0,975; 2) = 4,3027 → BI-halfbreedte 4,9683; groep B = 20, 22, 24, 26 → SD 2,5820, SEM 1,2910, t(0,975; 3) = 3,1824 → BI 4,1085 |
 | Statistiek | Tukey, studentized range | q krit k=3, df=27 | 3,506 | 3,506 | -0.00% | ✅ | SciPy studentized_range.ppf(0,95; k, df) als referentie |
 | Statistiek | Tukey, studentized range | q krit k=4, df=12 | 4,199 | 4,199 | -0.00% | ✅ | SciPy studentized_range.ppf(0,95; k, df) als referentie |
 | Statistiek | Tukey, studentized range | q krit k=5, df=30 | 4,102 | 4,102 | -0.00% | ✅ | SciPy studentized_range.ppf(0,95; k, df) als referentie |

@@ -681,6 +681,16 @@ def _(pg):
     return [('F', F, 4.846, 0.001), ('p', p, 0.01591, 0.01), ('trt1 − ctrl p', rows[0][3], 0.391, 0.01), ('trt2 − ctrl p', rows[1][3], 0.198, 0.01),
             ('trt2 − trt1 verschil', rows[2][0], 0.865, 0.001), ('trt2 − trt1 BI onder', rows[2][1], 0.174, 0.01), ('trt2 − trt1 BI boven', rows[2][2], 1.556, 0.005), ('trt2 − trt1 p', rows[2][3], 0.012, 0.03)]
 
+@case('Statistiek', 'Foutbalk SEM en 95%-BI (staafgrafiek)', 'Handberekening: groep A = 10, 12, 14 → gemiddelde 12, SD 2, SEM 2/√3 = 1,1547, t(0,975; 2) = 4,3027 → BI-halfbreedte 4,9683; groep B = 20, 22, 24, 26 → SD 2,5820, SEM 1,2910, t(0,975; 3) = 3,1824 → BI 4,1085')
+def _(pg):
+    pg.evaluate("__go('stat');__set('st-alpha','0.05');__set('st-groups','A: 10 12 14\\nB: 20 22 24 26');__set('st-test','anova')")
+    out = []
+    for e, ha, hb in [('sd', 2, 2.5820), ('sem', 1.1547, 1.2910), ('ci', 4.9683, 4.1085)]:
+        pg.evaluate(f"__set('st-err','{e}')"); pg.wait_for_timeout(200)
+        h = pg.evaluate("document.getElementById('stb-cv')._err.half")
+        out += [(f'{e} A', h[0], ha, 0.001), (f'{e} B', h[1], hb, 0.001)]
+    return out
+
 @case('Statistiek', 'Tukey, studentized range', 'SciPy studentized_range.ppf(0,95; k, df) als referentie')
 def _(pg):
     from scipy.stats import studentized_range

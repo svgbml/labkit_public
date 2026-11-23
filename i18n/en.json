@@ -5186,5 +5186,16 @@
 "Grafiekstijl": "Chart style",
 "Scherm (volgt het thema)": "Screen (follows the theme)",
 "Verslag (zwart op wit, Arial)": "Report (black on white, Arial)",
-"Publicatie (zwart-wit, geen raster)": "Publication (black and white, no grid)"
+"Publicatie (zwart-wit, geen raster)": "Publication (black and white, no grid)",
+"Foutbalk": "Error bar",
+"95%-BI": "95% CI",
+"{#}%-BI": "{#}% CI",
+"gemiddelde ± SEM": "mean ± SEM",
+"gemiddelde ± {#}%-BI": "mean ± {#}% CI",
+"Staaf = gemiddelde, foutbalk = SD (n = {#})": "Bar = mean, error bar = SD (n = {#})",
+"Staaf = gemiddelde, foutbalk = SD (n = {#}–{#})": "Bar = mean, error bar = SD (n = {#}–{#})",
+"Staaf = gemiddelde, foutbalk = SEM (n = {#})": "Bar = mean, error bar = SEM (n = {#})",
+"Staaf = gemiddelde, foutbalk = SEM (n = {#}–{#})": "Bar = mean, error bar = SEM (n = {#}–{#})",
+"Staaf = gemiddelde, foutbalk = {#}%-BI (n = {#})": "Bar = mean, error bar = {#}% CI (n = {#})",
+"Staaf = gemiddelde, foutbalk = {#}%-BI (n = {#}–{#})": "Bar = mean, error bar = {#}% CI (n = {#}–{#})"
 }
