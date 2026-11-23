@@ -18,7 +18,10 @@ URL = (ROOT / 'web' / 'index.html').as_uri()
 BASE = ROOT / 'tests' / 'visual' / sys.platform
 OUT = ROOT / 'tests' / 'visual' / 'out'
 CHAN, MAXFRAC, NB = 24, 0.005, 2  # kanaalverschil per pixel; aandeel afwijkende pixels dat nog mag; omgeving ±NB px
-CSS = ("*{animation:none!important;transition:none!important;caret-color:transparent!important}"
+# canvastekst noemt Segoe UI en Arial bij naam; die bestaan op de ene machine wel (CI: Liberation als Arial) en op de andere niet, dus ook die naar DejaVu
+CSS = ("@font-face{font-family:'Arial';src:local('DejaVu Sans')}@font-face{font-family:'Segoe UI';src:local('DejaVu Sans')}"
+       "@font-face{font-family:'Arial';font-weight:600 700;src:local('DejaVu Sans Bold')}@font-face{font-family:'Segoe UI';font-weight:600 700;src:local('DejaVu Sans Bold')}"
+       "*{animation:none!important;transition:none!important;caret-color:transparent!important}"
        ".lk-valid{visibility:hidden!important}"  # het aantal validatiecontroles groeit met elke batch
        ":root,html[data-theme]{--font-ui:'DejaVu Sans'!important;--font-mono:'DejaVu Sans Mono'!important}"
        "body,input,button,select,textarea{font-family:'DejaVu Sans'!important}")
