@@ -5,14 +5,14 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Status:** ✅ done · 🔨 started, something left (the row says what) · ⏳ planned · ✖ dropped · *(partly there: …)* = earlier releases already cover part of the step; it is still open
 
 **Model** (last column) is the cheapest model that can do the step well, so the shared usage limit lasts longer. Done steps show "—".
-- **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (3 open steps).
-- **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (76 open steps).
-- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (54 open steps).
-- **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (24 open steps).
+- **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (1 open step).
+- **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (14 open steps).
+- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (25 open steps).
+- **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (9 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **113 done, 157 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **221 done, 2 started (S79, S96), 47 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
-## Where it stands (checked 2026-11-21)
+## Where it stands (checked 2026-11-23)
 
 | Phase | Steps | Status |
 |---|---|---|
@@ -20,9 +20,17 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 1 navigation and app shell | S1–S12 | ✅ done |
 | Phase 2 preparation, gels | S13–S20 | ✅ done |
 | Phase 3 picture tools and plates | S21–S36 | ✅ done |
-| Phase 4 recipes and sequences | S37–S47 | **part done:** S37–S40 ✅, S41–S47 open |
-| Phases 5–11 | S48–S146 | ⏳ S48–S55 and S58 done (batches E1 and E2, 2026-11-22); the rest not started (S82, S91, S93 partly there) |
-| Phases 12–14 Sanger, alignment, sequence toolbox | S147–S201 | ⏳ not started |
+| Phase 4 recipes and sequences | S37–S47 | ✅ done (batches P1–P3) |
+| Phase 5 execution | S48–S61 | ✅ done (batches E1–E4) |
+| Phase 6 gel editor rebuild | S62–S79 | **part done:** everything but S79 (multi-gel figure and the agarose link are left) |
+| Phase 7 charts, figures and data | S80–S96 | **part done:** S94, S95 open, S96 started |
+| Phase 8 rework existing tools | S97–S116 | **part done:** S99, S100, S105, S113, S114 open (batch R3) |
+| Phase 9 structure and workflows | S117–S121 | ⏳ not started (batch W1) |
+| Phase 10 performance | S122–S133 | ⏳ not started; F1a re-plans it first |
+| Phase 11 quality, tests and dev | S134–S142 | **part done:** S140, S142 open (batch Q2) |
+| Phase 12 Sanger and SNP analysis | S147–S169 | **part done:** S147–S161 ✅, S162–S169 open |
+| Phase 13 alignment and Clustal Omega | S170–S190 | **part done:** S170–S179 and S181 ✅, S180 and S182–S190 open |
+| Phase 14 sequence toolbox and NCBI | S191–S201 | **part done:** S191–S198 ✅, S199–S201 open |
 | Phase 15 the remaining tools onto Vue | S202–S263 (+S204a) | ✅ done (batches V1a–V7 merged on 2026-11-21, S263 the same day) |
 | Phase 16 one source, one translation path | S264–S272 | ✅ done (batches K1–K3, 2026-11-21; replaces S143–S146) |
 
@@ -69,7 +77,36 @@ lead model.**
 following `CLAUDE.md`."* The session:
 - commits once per step (`S<n>: …`) and marks each step ✅;
 - runs the full `python tools/check.py` at the end of the batch;
-- stops at the end of the batch, or earlier if something it needs isn't done.
+- stops at the end of the batch, or earlier if something it needs isn't done;
+- uses the skills in the batch's *Skills* column (see below), on top of the ones `CLAUDE.md` always asks for.
+
+### Skills per batch
+
+The account has a set of workflow skills, and cloud sessions get them too. `CLAUDE.md` already
+makes every session use **ponytail** for code and **humanizer** plus **clean-user-facing-text**
+for prose such as this file and the changelog. The *Skills* column adds what a batch needs beyond
+that. A dash means the defaults are enough.
+
+- **tdd** for steps that compute or parse: statistics, alignment, sheet formats, file imports,
+  uncertainty. Write the failing check first (a unit test in `tests/unit/` or a case in
+  `tests/validate.py` with its cited source), then the code. The validation suite is what keeps
+  the reference values honest, so a new number without a check doesn't count as done.
+- **diagnosing-bugs** for the performance batches and for every row under *Known bugs*. Its
+  loop starts with a measurement you can repeat, which is how phase 10 should work anyway: no
+  speed-up is ticked off without a before and after number from `tests/perf_budget.py`.
+- **improve-architecture** and **to-tickets** in F1a only. The re-plan of phase 10 starts with
+  an architecture pass over `src/legacy/` and the start-up path, then cuts the new steps with
+  explicit blocking edges. They go into this file as normal `S<n>` rows, so the batch table
+  keeps working.
+- **grilling** and **domain-modeling** for W1, and for any later batch that has to settle what
+  "done" means. Both ask you questions, so run them in a local session before the batch
+  starts. Words like *project*, *workflow run* and *data flow* go into a `GLOSSARY.md`,
+  and a decision that shapes later batches becomes an ADR in `docs/adr/`. The *Decisions* list
+  below stays as the record of everything decided before that.
+- **antislop** for batches that mostly add UI, so new panels match the rest of LabKit.
+- **handoff** has no column because it applies to every batch: when a step turns out too big and gets 🔨, the session
+  writes a handoff note (what is done, what is left, which files) into the step's row before it
+  stops, so the next session can pick it up without reading the whole history.
 
 **Running them side by side.** Every session appends to `i18n/en.json`, rebuilds
 `web/index.html` and `build/app.bundle.js`, and ticks off rows in this file, so parallel sessions
@@ -92,73 +129,74 @@ runs before every other wave, the *any time* batches included. After that the fe
 in order, and the *any time* batches can be slotted in when that is more useful. Within a pair
 (a/b/c) do *a* first unless the row says otherwise.
 
-| Batch | Lead model | Steps (in this order) | Needs | Parallel with |
-|---|---|---|---|---|
-| **Wave 1: finish Vue** | | | | |
-| V1a ✅ | Sonnet | S205–S209 chemistry tools | — | one other V batch |
-| V1b ✅ | Sonnet | S210–S214 analysis tools | — | one other V batch |
-| V2a ✅ | Sonnet | S215–S219 microbiology | — | one other V batch |
-| V2b ✅ | Sonnet | S220–S224 cell culture | — | one other V batch |
-| V3a ✅ | Sonnet | S227–S232 molecular biology, part 1 | — | one other V batch |
-| V3b ✅ | Sonnet | S233–S237 molecular biology, part 2 | — | one other V batch |
-| V4a ✅ | Sonnet | S238–S242 forensics, part 1 | — | one other V batch |
-| V4b ✅ | Sonnet | S243–S247 forensics, part 2 | — | one other V batch |
-| V5a ✅ | Sonnet | S250–S254 statistics tools and quality | — | one other V batch |
-| V5b ✅ | Sonnet | S257–S262 schemes, planner, report, plate, centrifuge, timers | — | one other V batch |
-| V6 ✅ | Opus 5 | S248–S249 *Statistiek*, S255–S256 *Gelplanner*, then S263 the app shell (last) | all other V batches before S263 | one V batch |
-| V7 ✅ | Opus 5 | S225–S226 *Gelfoto-editor* on Vue | — | one V batch |
-| **Wave 2: one source, one translation path (phase 16)** | | | | |
-| K1 ✅ | Opus 5.5 | S264 inventory and target layout, S265 generated `index.html`, S266 (Sonnet) sections and CSS into source files | Wave 1 | — |
-| K2 ✅ | Opus 5.5 | S267 (Opus 5) shared helpers, S268 engines, S269 (Sonnet) `tools/nt/` into `src/` and `insert_tools.py` retired | K1 | — |
-| K3 ✅ | Opus 5.5 | S270 (Opus 5) static text through `t()`, S271 DOM translation layer removed, S272 (Sonnet) rules and docs | K2 | — |
-| **Wave 3: finish phase 4** | | | | |
-| P1 ✅ | Opus 5 | S42, S43 (Sonnet), S44, S45: primers, in-silico PCR and digest | K3 | E2, *any time* batches |
-| P2 ✅ | Sonnet | S41, S47: overage switch, material list and protocol export | K3 | P1 |
-| P3 ✅ | Opus 5.5 | S46 plasmid map (new tool, Vue) | S45 | — |
-| **Wave 4: execution and gel editor** | | | | |
-| E1 ✅ | Opus 5.5 | S48 bench shell, S49 (Opus 5), S50 (Sonnet) | K3 | G1a |
-| E2 ✅ | Sonnet | S51–S55, S58 | E1 | P1, G1a, G1b |
-| E3 ✅ | Opus 5 | S56, S57, S60 | E1 | anything except E4, R1, R2a, R3 |
-| E4 ✅ | Opus 5.5 | S59 colony counting, S61 multi-device sync | E1; S104 for the CFU link | anything except E3, R1 |
-| G1a ✅ | Opus 5 | S62–S65 (S63, S65 by Sonnet) | K3 | anything except Q2 |
-| G1b ✅ | Opus 5 | S66–S68 (S66, S68 by Sonnet) | G1a | anything except Q2 |
-| G2 ✅ | Opus 5.5 | S69–S74 (S71, S72 are Opus 5): guided mode, canvas-first layout, direct manipulation, undo | G1b | anything except Q2 |
-| G3 🔨 (S79 deels) | Opus 5.5 | S75–S79 (S75, S78 are Opus 5) | G2 | anything except Q2, C2 |
-| **Wave 5: charts, data, rework, workflows** | | | | |
-| C1a ✅ | Opus 5.5 | S80 chart style system, then S81–S84 (Opus 5 / Sonnet) | K3 | — |
-| C1b ✅ | Opus 5 | S85–S88 | C1a | anything except R3 |
-| C2 ✅ | Opus 5.5 | S89–S90 figure maker (new tool, Vue) | C1b | anything except G3 |
-| C3 | Opus 5 | S91–S93, S96: imports and core-calculator extras | C1b | anything except R3 |
-| C4 | Sonnet | S94, S95 | C3 | anything |
-| R1 ✅ | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 |
-| R2a ✅ | Sonnet | S106–S110 | K3 | anything except E3 |
-| R2b ✅ | Sonnet | S111, S112, S115, S116 | K3 | anything |
-| R3 | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 |
-| W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — |
-| **Wave 6: performance and quality** | | | | |
-| Q1a ✅ | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything |
-| Q1b ✅ | Sonnet | S138, S139, S141 | K3 (then *any time*) | anything |
-| Q2 | Opus 5 | S140, S142 | K3 | anything except G1a–G3 |
-| F1a | Opus 5.5 | **Re-plan phase 10 first** (lazy init and DOM templates may be largely solved by mounting a component only when its tool opens, which phase 16 makes possible), then S125–S127 | K3 | — |
-| F1b | Opus 5 | S122–S124, S128 | F1a | — |
-| F1c | Opus 5.5 | S129–S133 (S130, S131 are Opus 5) | F1b | — |
-| **Any time (after K3): new tools, built in Vue** | | | | |
-| SQ1 ✅ | Sonnet | S191–S193 sequence toolbox; S194 after S45 | K3 | anything |
-| SQ2 ✅ | Opus 5 | S195, S198, then S196, S197 (Sonnet): NCBI switch, cache, lookups | SQ1 | anything |
-| SA1a ✅ | Opus 5 | S147–S152 chromatogram reader (S149, S151, S152 by Sonnet) | K3 | anything |
-| SA1b ✅ | Opus 5 | S153–S157 (S153, S154, S156, S157 by Sonnet) | SA1a | anything |
-| SA2 ✅ | Opus 5.5 | S158–S161 (S159, S161 are Opus 5): alignment to the reference, assay format | SA1b | anything |
-| SA3 | Sonnet | S162, S164–S168 (S166 by Haiku): batch and HIrisPlex-S sheet | SA2 | anything |
-| SA4 | Opus 5 | S163, S169, then S199 and S200–S201 (Sonnet) | SA3, SQ2 | anything |
-| AL1 ✅ | Opus 5.5 | S170–S171 alignment parsers and viewer | K3 | anything |
-| AL2a ✅ | Sonnet | S172–S176 (S176 by Haiku) | AL1 | anything |
-| AL2b ✅ | Sonnet | S177–S179, S181 (S179 after S42) | AL2a | anything |
-| AL2c | Sonnet | S186–S189 | AL2b | anything |
-| AL3 | Opus 5 | S180 (after S158), S182–S184, S190 | AL2c | anything |
-| AL4 | Opus 5.5 | S185 small progressive alignment | AL3 | anything |
+| Batch | Lead model | Steps (in this order) | Needs | Parallel with | Skills |
+|---|---|---|---|---|---|
+| **Wave 1: finish Vue** | | | | | |
+| V1a ✅ | Sonnet | S205–S209 chemistry tools | — | one other V batch | — |
+| V1b ✅ | Sonnet | S210–S214 analysis tools | — | one other V batch | — |
+| V2a ✅ | Sonnet | S215–S219 microbiology | — | one other V batch | — |
+| V2b ✅ | Sonnet | S220–S224 cell culture | — | one other V batch | — |
+| V3a ✅ | Sonnet | S227–S232 molecular biology, part 1 | — | one other V batch | — |
+| V3b ✅ | Sonnet | S233–S237 molecular biology, part 2 | — | one other V batch | — |
+| V4a ✅ | Sonnet | S238–S242 forensics, part 1 | — | one other V batch | — |
+| V4b ✅ | Sonnet | S243–S247 forensics, part 2 | — | one other V batch | — |
+| V5a ✅ | Sonnet | S250–S254 statistics tools and quality | — | one other V batch | — |
+| V5b ✅ | Sonnet | S257–S262 schemes, planner, report, plate, centrifuge, timers | — | one other V batch | — |
+| V6 ✅ | Opus 5 | S248–S249 *Statistiek*, S255–S256 *Gelplanner*, then S263 the app shell (last) | all other V batches before S263 | one V batch | — |
+| V7 ✅ | Opus 5 | S225–S226 *Gelfoto-editor* on Vue | — | one V batch | — |
+| **Wave 2: one source, one translation path (phase 16)** | | | | | |
+| K1 ✅ | Opus 5.5 | S264 inventory and target layout, S265 generated `index.html`, S266 (Sonnet) sections and CSS into source files | Wave 1 | — | — |
+| K2 ✅ | Opus 5.5 | S267 (Opus 5) shared helpers, S268 engines, S269 (Sonnet) `tools/nt/` into `src/` and `insert_tools.py` retired | K1 | — | — |
+| K3 ✅ | Opus 5.5 | S270 (Opus 5) static text through `t()`, S271 DOM translation layer removed, S272 (Sonnet) rules and docs | K2 | — | — |
+| **Wave 3: finish phase 4** | | | | | |
+| P1 ✅ | Opus 5 | S42, S43 (Sonnet), S44, S45: primers, in-silico PCR and digest | K3 | E2, *any time* batches | — |
+| P2 ✅ | Sonnet | S41, S47: overage switch, material list and protocol export | K3 | P1 | — |
+| P3 ✅ | Opus 5.5 | S46 plasmid map (new tool, Vue) | S45 | — | — |
+| **Wave 4: execution and gel editor** | | | | | |
+| E1 ✅ | Opus 5.5 | S48 bench shell, S49 (Opus 5), S50 (Sonnet) | K3 | G1a | — |
+| E2 ✅ | Sonnet | S51–S55, S58 | E1 | P1, G1a, G1b | — |
+| E3 ✅ | Opus 5 | S56, S57, S60 | E1 | anything except E4, R1, R2a, R3 | — |
+| E4 ✅ | Opus 5.5 | S59 colony counting, S61 multi-device sync | E1; S104 for the CFU link | anything except E3, R1 | — |
+| G1a ✅ | Opus 5 | S62–S65 (S63, S65 by Sonnet) | K3 | anything except Q2 | — |
+| G1b ✅ | Opus 5 | S66–S68 (S66, S68 by Sonnet) | G1a | anything except Q2 | — |
+| G2 ✅ | Opus 5.5 | S69–S74 (S71, S72 are Opus 5): guided mode, canvas-first layout, direct manipulation, undo | G1b | anything except Q2 | — |
+| G3 🔨 (S79 deels) | Opus 5.5 | S75–S79 (S75, S78 are Opus 5) | G2 | anything except Q2, C2 | antislop |
+| **Wave 5: charts, data, rework, workflows** | | | | | |
+| C1a ✅ | Opus 5.5 | S80 chart style system, then S81–S84 (Opus 5 / Sonnet) | K3 | — | — |
+| C1b ✅ | Opus 5 | S85–S88 | C1a | anything except R3 | — |
+| C2 ✅ | Opus 5.5 | S89–S90 figure maker (new tool, Vue) | C1b | anything except G3 | — |
+| C3 🔨 (S96 deels) | Opus 5 | S91–S93, S96: imports and core-calculator extras | C1b | anything except R3 | tdd |
+| C4 | Sonnet | S94, S95 | C3 | anything | tdd |
+| R1 ✅ | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 | — |
+| R2a ✅ | Sonnet | S106–S110 | K3 | anything except E3 | — |
+| R2b ✅ | Sonnet | S111, S112, S115, S116 | K3 | anything | — |
+| R3 | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 | tdd |
+| W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — | grilling + domain-modeling (with you, before the batch), then tdd |
+| **Wave 6: performance and quality** | | | | | |
+| Q1a ✅ | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything | — |
+| Q1b ✅ | Sonnet | S138, S139, S141 | K3 (then *any time*) | anything | — |
+| Q2 | Opus 5 | S140, S142 | K3 | anything except G1a–G3 | — |
+| F1a | Opus 5.5 | **Re-plan phase 10 first** (lazy init and DOM templates may be largely solved by mounting a component only when its tool opens, which phase 16 makes possible), then S125–S127 | K3 | — | diagnosing-bugs (measure first), improve-architecture, to-tickets |
+| F1b | Opus 5 | S122–S124, S128 | F1a | — | diagnosing-bugs |
+| F1c | Opus 5.5 | S129–S133 (S130, S131 are Opus 5) | F1b | — | diagnosing-bugs; tdd for S132 |
+| **Any time (after K3): new tools, built in Vue** | | | | | |
+| SQ1 ✅ | Sonnet | S191–S193 sequence toolbox; S194 after S45 | K3 | anything | — |
+| SQ2 ✅ | Opus 5 | S195, S198, then S196, S197 (Sonnet): NCBI switch, cache, lookups | SQ1 | anything | — |
+| SA1a ✅ | Opus 5 | S147–S152 chromatogram reader (S149, S151, S152 by Sonnet) | K3 | anything | — |
+| SA1b ✅ | Opus 5 | S153–S157 (S153, S154, S156, S157 by Sonnet) | SA1a | anything | — |
+| SA2 ✅ | Opus 5.5 | S158–S161 (S159, S161 are Opus 5): alignment to the reference, assay format | SA1b | anything | tdd |
+| SA3 | Sonnet | S162, S164–S168 (S166 by Haiku): batch and HIrisPlex-S sheet | SA2 | anything | tdd |
+| SA4 | Opus 5 | S163, S169, then S199 and S200–S201 (Sonnet) | SA3, SQ2 | anything | tdd |
+| AL1 ✅ | Opus 5.5 | S170–S171 alignment parsers and viewer | K3 | anything | — |
+| AL2a ✅ | Sonnet | S172–S176 (S176 by Haiku) | AL1 | anything | — |
+| AL2b ✅ | Sonnet | S177–S179, S181 (S179 after S42) | AL2a | anything | tdd |
+| AL2c | Sonnet | S186–S189 | AL2b | anything | tdd |
+| AL3 | Opus 5 | S180 (after S158), S182–S184, S190 | AL2c | anything | tdd |
+| AL4 | Opus 5.5 | S185 small progressive alignment | AL3 | anything | tdd |
 
-**Route through the usage limit:** K1–K3 (phase 16) are done. Next Q1a–Q1b on Sonnet (cheap
-safety nets), then the rest wave by wave.
+**Route through the usage limit:** waves 1–4 are done apart from S79, and most of wave 5 and
+the *any time* batches have landed. *What to pick up next* at the bottom has the order for the
+47 steps that are left.
 
 ## Decisions
 - **Vue 3 (besloten tijdens de run van fase 4).** De app gaat op Vue. Eerst stond Vue als los bestand in `web/vendor/` om een bouwstap te vermijden; dat is **herzien**: Vue komt nu uit npm en Vite bundelt `src/` tot één IIFE in `build/app.bundle.js`, die `tools/insert_tools.py` in `web/index.html` zet. Dus wél een bouwstap (`npm run build:vue`), nog steeds geen CDN, en de app werkt nog steeds vanaf `file://` — daarom één bundel zonder `dist/`, zonder code-splitting en zonder hashnamen, want vanaf `file://` zijn ES-modules geblokkeerd. De omzetting gaat per tool; de rest van de app blijft intussen werken. De vertaallaag van de DOM kan niet in een Vue-boom komen, dus een component vertaalt zelf met `t()` / `tHtml()` tegen dezelfde `i18n/en.json`, en `tests/i18n_vue.py` controleert dat statisch. Een omgezette tool houdt zijn element-id's en zijn validatiegeval, zodat delen, ongedaan maken, de invoeropslag en de validatie blijven werken. Zie `CLAUDE.md`.
@@ -649,17 +687,20 @@ end of each batch with the full check (286/286).
 
 ## What to pick up next
 
-Follow the batch order in *Cloud sessions* above. In short:
-1. ~~**K1, K2, K3**~~ ✅ phase 16 is done (2026-11-21).
-2. **Q1a, Q1b** (Sonnet) when there is room: size budget, error reports and tests are cheap safety nets.
-3. Then wave by wave: **P** (phase 4), **E/G** (bench mode and gel editor), **C/R/W**, **F**.
-4. The *any time* batches (**SQ1**, **AL1**, **SA1a**) after K3, when sequence or SNP work is the nearest practical need; SQ1 is one Sonnet session and immediately useful.
+Checked 2026-11-23. The batch table above still decides what may run together.
+1. AL2b and SA2 are merged (2026-11-23), so AL2c and SA3 can start.
+2. **Finish what is started:** the rest of S79 (G3) and of S96 (C3). Both are rows with a handoff note already, so they are short sessions.
+3. **The cheap and self-contained batches:** C4 (Sonnet), Q2, and R3. R3 merges tools that have validation cases, so tdd matters most there.
+4. **The sequence line**, when it is the nearest practical need: SA3 → SA4, and AL2c → AL3 → AL4. SA4 also needs SQ2, which is done.
+5. **W1** only after a local grilling session has pinned down projects and data flow (see *Skills per batch*). It changes something every tool uses, so it runs alone.
+6. **F1a** last: re-plan phase 10 first, then F1b and F1c as the new rows say.
 
 ## Known bugs (not fixed yet)
 
 Bugs found along the way that fall outside the batch that found them. Fix one in its own commit
-(`fix: …`) and remove its row here; a bug in a tool that is not on Vue yet can also be fixed during
-that tool's conversion.
+(`fix: …`) and remove its row here. Work through one with the **diagnosing-bugs** skill: first a
+way to reproduce it on demand, then the cause, then a check that fails before the fix and passes
+after it.
 
 | Found | Where | Bug | Notes |
 |---|---|---|---|
