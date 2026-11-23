@@ -96,6 +96,24 @@
           <lk-note v-else kind="ok">{{ t('Waar beide reads de referentie dekken, zijn ze het eens.') }}</lk-note>
           <lk-table v-if="frDiff.length" table-id="sg-fr-tbl" :cols="frCols" :rows="frDiff"/>
         </div>
+        <!-- S162: veel bestanden tegelijk, één rij per monster, en het patroon per SNP -->
+        <div v-if="batReads.length" id="sg-bat" style="margin-top:12px">
+          <h3>{{ t('Batch') }}</h3>
+          <lk-note v-if="!refSeq" kind="warn">{{ t('Zet eerst een referentie of een assay in het paneel Referentie en assay; zonder referentie is er niets om tegen uit te lijnen.') }}</lk-note>
+          <lk-note v-else-if="!assayEff.snps.length" kind="warn">{{ t('Kies een assay met SNP-posities; zonder SNP-lijst is er geen genotype per monster.') }}</lk-note>
+          <template v-else>
+            <p style="font-size:13px;margin:4px 0">{{ batCounts }}</p>
+            <lk-note v-if="batBad.length" kind="warn">{{ t('Deze bestanden lijnen niet uit tegen de referentie: ') + batBad.join(', ') }}</lk-note>
+            <lk-note v-if="batConf" kind="bad">{{ t('In ' + batConf + ' monsters zijn de twee reads het oneens over een SNP; die SNP krijgt geen genotype.') }}</lk-note>
+            <div style="max-height:22em;overflow:auto"><lk-table table-id="sg-bat-tbl" :cols="batCols" :rows="batRows"/></div>
+            <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Paars is heterozygoot, rood is geen genotype (niet gedekt of de reads zijn het oneens).') }}</p>
+            <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">
+              <button type="button" id="sg-bat-csv" @click="saveBat">{{ t('Genotypetabel als CSV') }}</button>
+            </div>
+            <h3 style="margin-top:14px">{{ t('Per SNP over alle monsters') }}</h3>
+            <lk-table table-id="sg-bat-ov" :cols="ovCols" :rows="ovRows"/>
+          </template>
+        </div>
       </div>
     </div>
     <div>
@@ -186,6 +204,19 @@
           <button v-if="read2" type="button" id="sg-swap" @click="swap">{{ t('Wissel de reads (trace van de tweede)') }}</button>
         </div>
       </details>
+      <details class="panel" id="sg-batp" :open="batReads.length > 0">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Batch (meerdere bestanden)') }}</summary>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('Kies of sleep de reads van meerdere monsters. Twee bestanden die op _F en _R eindigen horen bij hetzelfde monster; zonder F of R in de naam is elk bestand een eigen monster.') }}</p>
+        <div class="dropzone" :style="batOver ? 'outline:2px dashed var(--accent)' : ''" style="padding:10px"
+             @dragover.prevent="batOver = true" @dragleave="batOver = false" @drop.prevent="batDrop">
+          <input type="file" id="sg-bat-file" multiple accept=".ab1,.abi,.fasta,.fa,.fas,.seq,.txt" :aria-label="t('Bestanden voor de batch kiezen')" @change="batPick">
+        </div>
+        <p v-if="batReads.length" style="font-size:13px;margin:8px 0 0">{{ t(batReads.length + ' bestanden geladen') }}</p>
+        <div class="row" style="gap:6px;margin-top:8px">
+          <button type="button" id="sg-bat-clear" @click="batClear">{{ t('Wissen') }}</button>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('De batch blijft niet bewaard na herladen: het zijn te veel bestanden voor de opslag van de browser.') }}</p>
+      </details>
     </div>
   </div>
 </template>
@@ -199,6 +230,7 @@ import {hetCalls, flags} from '../lib/sangerhet.js';
 import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 import {parseRef, alignRead, variants, parseAssay, assayJson, snpCalls, confirm, TEACH, teachReads, DEC} from '../lib/sangeralign.js';
+import {callBatch, snpOverlay, genoMatrix} from '../lib/sangerbatch.js';
 import {SEQ_TO} from '../lib/seq.js';
 
 /* de referentie kan uit Sequentie komen (ook een sequentie die daar bij NCBI is opgehaald) */
@@ -250,7 +282,8 @@ export default {
       edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1),
       refText: st['sg-ref'] != null ? String(st['sg-ref']) : '', assayKey: st['sg-assay'] != null ? String(st['sg-assay']) : '', own: jget(AKEY, []),
       read2: jget('sg-read2', null) ? markRaw(jget('sg-read2', null)) : null, paste2: st['sg-paste2'] != null ? String(st['sg-paste2']) : '',
-      edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
+      edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false,
+      batReads: [], batOver: false};
   },
   computed: {
     HT() { return HT; },
@@ -442,6 +475,37 @@ export default {
     },
     frCols() { const t = this.t; return [{h: t('Positie') + ' (g.)', num: true}, {h: t('Referentie')}, {h: t('Eerste read')}, {h: t('Tweede read')}]; },
     frDiff() { return this.conf.rows.filter(x => x.st === 'diff').map(x => [this.G + x.r, this.refSeq[x.r], esc(x.a || '–'), esc(x.b || '–')]); },
+    /* ---------- batch (S162) ---------- */
+    /* per monster de genotypes; leeg zolang er geen referentie met SNP's is */
+    batRes() {
+      if (!this.batReads.length || !this.refSeq || this.refBig || !this.assayEff.snps.length) return [];
+      return callBatch(this.batReads, this.refSeq, this.assayEff, {hthr: this.hN, win: this.winN, q: this.qN});
+    },
+    batBad() { return this.batRes.filter(r => !r.aligned).map(r => r.name); },
+    batConf() { return this.batRes.filter(r => r.conflicts).length; },
+    batCounts() {
+      const r = this.batRes, t = this.t, sum = f => r.reduce((a, x) => a + f(x), 0);
+      return [['Monsters', r.length], ['Uitgelijnde reads', sum(x => x.aligned)], ['Heterozygote genotypes', sum(x => x.het)],
+        ['Zonder genotype', sum(x => x.na)]].map(x => t(x[0]) + ': ' + NL(x[1], 0)).join(' · ');
+    },
+    batCols() {
+      const t = this.t;
+      return [{h: t('Monster')}, {h: t('Reads'), num: true}]
+        .concat(this.assayEff.snps.map(s => ({h: esc(s.rs)})))
+        .concat([{h: t('Heterozygoot'), num: true}, {h: t('Zonder genotype'), num: true}]);
+    },
+    batRows() {
+      const cell = g => !g.gt ? '<span style="background:#ffcdd2">NA</span>'
+        : g.het ? '<span style="background:' + HETBG + '">' + esc(g.gt) + '</span>'
+        : esc(g.gt) + (g.ok ? '' : ' <span style="background:#ffe0b2">!</span>');
+      return this.batRes.map(r => [esc(r.name), NL(r.aligned, 0) + '/' + NL(r.files.length, 0)]
+        .concat(r.gts.map(cell)).concat([NL(r.het, 0), NL(r.na, 0)]));
+    },
+    ovCols() { const t = this.t; return [{h: 'SNP'}, {h: t('Positie') + ' (g.)', num: true}, {h: t('Allelen')}, {h: t('Genotypes')}, {h: t('Heterozygoot'), num: true}, {h: t('Zonder genotype'), num: true}]; },
+    ovRows() {
+      return snpOverlay(this.batRes, this.assayEff).map(o => [esc(o.rs), this.G + o.pos - 1, o.alleles,
+        o.counts.map(c => esc(c[0]) + ' ×' + NL(c[1], 0)).join(' · ') || '–', NL(o.het, 0), NL(o.na, 0)]);
+    },
     edCols() { const t = this.t; return [{h: t('SNP (rs)'), t: 'txt', w: 110}, {h: t('Positie'), t: 'num', w: 60}, {h: t('Allelen'), t: 'txt', w: 60}, {h: t('Streng'), t: 'sel', o: ['+', '-']}]; }
   },
   watch: {
@@ -772,6 +836,28 @@ export default {
     alnClick(e) {
       const el = e.target.closest('[data-q]');
       if (el && this.read && this.read.peaks.length) this.goTo(+el.dataset.q);
+    },
+    /* ---------- batch (S162) ---------- */
+    batPick(e) { this.batLoad(e.target.files); },
+    batDrop(e) { this.batOver = false; this.batLoad(e.dataTransfer.files); },
+    /* alle gekozen bestanden inlezen; een bestand dat geen read oplevert wordt gemeld en overgeslagen */
+    async batLoad(files) {
+      const add = [], bad = [];
+      for (const f of Array.from(files || [])) {
+        const x = readFile(await f.arrayBuffer(), f.name);
+        if (x.err) bad.push(f.name); else add.push(markRaw(x.r));
+      }
+      this.batReads = this.batReads.concat(add);
+      this.err = bad.length ? this.t('Deze bestanden konden niet worden gelezen: ') + bad.join(', ') : '';
+    },
+    batClear() {
+      this.batReads = []; this.err = '';
+      const f = document.getElementById('sg-bat-file'); if (f) f.value = '';
+    },
+    saveBat() {
+      const m = genoMatrix(this.batRes, this.assayEff), t = this.t;
+      const tsv = [m.head.map((h, i) => i ? h : t(h))].concat(m.rows).map(r => r.join('\t')).join('\n');
+      saveBlob('genotypes.csv', csvBlob(tsv)).catch(() => {});
     },
     clear() {
       this.read = null; this.edits = {}; this.sel = null; this.rng = null; this.paste = ''; this.err = '';
