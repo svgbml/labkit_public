@@ -88,6 +88,15 @@
           <h3>{{ t('Genotypes van de assay') }}</h3>
           <p style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Allelen op de streng van de assay; een SNP op de andere streng wordt automatisch omgedraaid.') }}</p>
           <lk-table table-id="sg-gt-tbl" :cols="gtCols" :rows="gtRows"/>
+          <!-- S199: allelen en streng uit dbSNP, zodat een SNP op de andere streng vanzelf goed staat -->
+          <details id="sg-gt-dbp" style="margin-top:8px">
+            <summary style="cursor:pointer;font-size:13px">{{ t('Allelen en streng uit dbSNP') }}</summary>
+            <ncbi-switch/>
+            <p style="font-size:13px;color:var(--muted);margin:6px 0">{{ t('LabKit zoekt elk rs-nummer van de assay op in dbSNP, bepaalt zelf op welke streng het amplicon ligt (uit de allelen, en anders uit 20 basen flank) en meldt het genotype in de richting van dbSNP, met het referentie-allel.') }}</p>
+            <button type="button" id="sg-gt-db" :disabled="dbBusy || !dbRs.length" @click="dbLookup">{{ t('Opzoeken in dbSNP') }}</button>
+            <lk-note v-if="dbBusy" kind="info">{{ t('Bezig met opzoeken bij NCBI…') }}</lk-note>
+            <lk-note v-for="(m, i) in dbMsg" :key="i" kind="warn">{{ m }}</lk-note>
+          </details>
         </div>
         <!-- S167: de uitkomsten van de webtool, samengevat en als figuur (staat in .result, dus ook in het rapport) -->
         <div v-if="rsRows.length" id="sg-rs-out" style="margin-top:12px">
@@ -334,6 +343,10 @@ import {callSample, genotypeRows, overlayStrips} from '../lib/sangerbatch.js';
 import {makeCase, parseCase, exampleSample, EXAMPLE_ID} from '../lib/sangercase.js';
 import {RESULT_GROUPS, parseProb, parseResultPaste, summarize, toCsv, PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate, autofill, mergeCalls, naReport} from '../lib/hiris.js';
 import {SEQ_TO} from '../lib/seq.js';
+import NcbiSwitch from './ncbi/NcbiSwitch.vue';
+import {ncbiGet} from '../lib/ncbi.js';
+import {parseSnp, rsId} from '../lib/dbsnp.js';
+import {orientByAlleles, orientByFlank, flankRegion, dbLabel, dbAssay} from '../lib/dblabel.js';
 import {readAbif} from '../lib/abif.js';
 import {parsePanel, sbeChannels, sbeGenotypes, sbeDemo, DEMO_PANEL, DYES} from '../lib/snapshot.js';
 
@@ -362,6 +375,7 @@ const NL = (x, d) => lkNumIn(fmt(x, d));
 
 export default {
   name: 'Sanger',
+  components: {NcbiSwitch},
   data() {
     const st = typeof storeGet === 'function' ? storeGet() : {};
     const saved = jget('sg-read', null);
@@ -370,7 +384,7 @@ export default {
       edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1),
       refText: st['sg-ref'] != null ? String(st['sg-ref']) : '', assayKey: st['sg-assay'] != null ? String(st['sg-assay']) : '', own: jget(AKEY, []),
       read2: jget('sg-read2', null) ? markRaw(jget('sg-read2', null)) : null, paste2: st['sg-paste2'] != null ? String(st['sg-paste2']) : '',
-      caseMsg: '', caseOk: false, hsCopied: '', rsIdx: 0, rsPaste: '', rsMsg: '', rsThr: st['sg-rs-thr'] != null ? String(st['sg-rs-thr']) : NL(0.7, 1), sbe: null, sbeText: st['sg-sbe-panel'] != null ? String(st['sg-sbe-panel']) : '', sbeFileErr: '', batch: [], bsamples: [], bbusy: false, hs: (h => { h.samples = h.samples.map(x => Object.assign({res: {}, notes: {}}, x)); return h; })(Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {}))), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
+      caseMsg: '', caseOk: false, hsCopied: '', rsIdx: 0, rsPaste: '', rsMsg: '', rsThr: st['sg-rs-thr'] != null ? String(st['sg-rs-thr']) : NL(0.7, 1), dbl: {}, dbMsg: [], dbBusy: false, sbe: null, sbeText: st['sg-sbe-panel'] != null ? String(st['sg-sbe-panel']) : '', sbeFileErr: '', batch: [], bsamples: [], bbusy: false, hs: (h => { h.samples = h.samples.map(x => Object.assign({res: {}, notes: {}}, x)); return h; })(Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {}))), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
   },
   computed: {
     HT() { return HT; },
@@ -546,13 +560,23 @@ export default {
     gtCols() {
       const t = this.t, c = [{h: 'SNP'}, {h: t('Positie') + ' (g.)', num: true}, {h: t('Allelen')}, {h: t('Streng')}, {h: t('Eerste read')}];
       if (this.snpc2) c.push({h: t('Tweede read')}, {h: t('Status')});
+      if (this.hasDb) c.push({h: t('Volgens dbSNP')});
       return c;
     },
+    /* ---------- dbSNP (S199) ---------- */
+    dbRs() { return this.assayEff.snps.filter(s => rsId(s.rs)); },
+    hasDb() { return Object.keys(this.dbl).length > 0; },
+    /* de genotypes met streng en allelen uit dbSNP: op de plusstreng van het genoom */
+    snpcDb() { return this.hasDb && this.aln1 ? snpCalls(this.aln1, dbAssay(this.assayEff, this.dbl)) : []; },
     gtRows() {
       const t = this.t, g = c => !c.cov ? t('niet gedekt') : esc(c.gt) + (c.ok ? '' : ' (' + t('hoort niet bij de assay') + ')');
       return this.snpc.map((c, i) => {
         const row = [esc(c.rs), this.G + c.pos - 1, c.alleles, c.strand === '-' ? '−' : '+', g(c)];
         if (this.snpc2) { const d = this.snpc2[i]; row.push(g(d), t(!c.cov || !d.cov ? 'één read' : c.gt === d.gt ? 'bevestigd' : 'oneens')); }
+        if (this.hasDb) {
+          const L = this.dbl[c.rs], d = this.snpcDb[i];
+          row.push(!L ? '–' : g(d) + ' · ' + t('ref') + ' ' + L.ref + (L.strand !== c.strand ? ' · ' + t('streng omgedraaid') : ''));
+        }
         return row;
       });
     },
@@ -630,7 +654,7 @@ export default {
     sel() { this.draw(); this.reveal(); },
     rng() { this.draw(); },
     rc() { this.$nextTick(this.reveal); },
-    assayKey() { this.pickAssay(); },
+    assayKey() { this.pickAssay(); this.dbl = {}; this.dbMsg = []; },
     edits() { this.draw(); },
     het() { this.draw(); },
     trim() { this.draw(); },
@@ -989,6 +1013,32 @@ export default {
       catch (x) { this.sbe = null; this.sbeFileErr = this.t(String(x.message)); }
     },
     sbeDemoLoad() { this.sbe = markRaw(sbeDemo()); this.sbeFileErr = ''; this.sbeText = DEMO_PANEL; this.poke('sg-sbe-panel'); },
+    /* per rs-nummer van de assay: dbSNP (uit de cache, of via de wachtrij als de schakelaar aan staat),
+       de streng uit de allelen of anders uit de flank, en het label */
+    async dbLookup() {
+      const t = this.t, ref = this.refSeq, out = {}, msg = [];
+      this.dbBusy = true;
+      for (const s of this.dbRs) {
+        const id = rsId(s.rs);
+        try {
+          const r = parseSnp(await ncbiGet('esummary', {db: 'snp', id, retmode: 'json'}), id);
+          if (!r.ok) { msg.push(s.rs + ': ' + t('niet gevonden in dbSNP.')); continue; }
+          const base = ref[s.pos - 1];
+          let st = orientByAlleles(r, base);
+          if (!st && r.acc && r.pos) {
+            const f = flankRegion(r);
+            const txt = await ncbiGet('efetch', {db: 'nuccore', id: f.acc, rettype: 'fasta', retmode: 'text', seq_start: f.from, seq_stop: f.to});
+            st = orientByFlank(String(txt).split(/\r?\n/).filter(l => !l.startsWith('>')).join(''), ref, s.pos);
+          }
+          const L = dbLabel(r, st, base, s);
+          if (L) out[s.rs] = L; else msg.push(s.rs + ': ' + t('de streng is niet te bepalen; controleer deze SNP met de hand.'));
+        } catch (e) {
+          msg.push(s.rs + ': ' + t(e && e.kind ? e.message : 'NCBI gaf een onverwacht antwoord. Probeer het later opnieuw.'));
+          if (e && e.kind === 'off') break;
+        }
+      }
+      this.dbl = out; this.dbMsg = msg; this.dbBusy = false;
+    },
     workerMode() { return W ? W.mode : 'none'; },
     bclear() { this.batch = []; const f = document.getElementById('sg-bfiles'); if (f) f.value = ''; },
     saveBatch() {

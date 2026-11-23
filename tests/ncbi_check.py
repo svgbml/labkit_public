@@ -242,6 +242,38 @@ with sync_playwright() as p:
     ck('parseSnp/accOk/regionOk', pg.evaluate("[accOk('NM_002386.4'),accOk('U12345.1'),accOk('NC_000016.10'),accOk('x'),accOk('NM_')]") == [True, True, True, False, False]
        and pg.evaluate("[regionOk('',''),regionOk('1','5'),regionOk('5','1'),regionOk('0','5')].map(r=>r.ok)") == [True, True, False, False])
 
+    # S199: allelen en streng uit dbSNP in het chromatogram; het amplicon ligt op de minstreng
+    region = ''.join(l.strip() for l in nc_fa.splitlines() if not l.startswith('>'))
+    CMP = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
+    rcs = lambda x: ''.join(CMP[c] for c in reversed(x))
+    amp = rcs(region)
+    read = list(amp[20:180]); read[80] = 'R'   # heterozygoot G/A op het amplicon, positie 101
+    flank_fa = '>NC_000016.10:89919689-89919729\n' + region[80:121] + '\n'
+    pg.evaluate("ncbiCacheClear(); __calls=[]; ncbi.on=true")
+    pg.evaluate("(a)=>{ __fx={'db=snp&id=1805007':a[0], 'seq_start=89919689&seq_stop=89919729':a[1]}; }", [snp_json, flank_fa])
+    pg.evaluate("location.hash='sanger'")
+    pg.wait_for_function("window.__sgVm")
+    pg.evaluate("(a)=>{ __sgVm.clear(); __sgVm.importAssay(JSON.stringify({name:'MC1R-omgekeerd', ref:a[0], snps:[{rs:'rs1805007', pos:101, alleles:'G/A', strand:'+'}]})); }", [amp])
+    pg.wait_for_timeout(200)
+    pg.evaluate("(r)=>{ const e=document.getElementById('sg-paste'); e.value='>r\\n'+r; e.dispatchEvent(new Event('input')); }", ''.join(read))
+    pg.wait_for_selector('#sg-gt-db', state='attached')
+    gt_cell = lambda c: pg.evaluate("c=>[...document.querySelectorAll('#sg-gt-tbl tbody tr')].map(r=>r.cells[c]&&r.cells[c].textContent.trim())", c)
+    ck('S199: zonder dbSNP het genotype zoals in de read (G/A)', gt_cell(4) == ['G/A'], gt_cell(4))
+    pg.evaluate("document.getElementById('sg-gt-dbp').open=true")
+    pg.click('#sg-gt-db')
+    pg.wait_for_function("document.querySelectorAll('#sg-gt-tbl thead th').length===6")
+    cl = pg.evaluate('__calls')
+    ck('S199: esummary en de flank opgevraagd', len(cl) == 2 and 'db=snp' in cl[0] and 'seq_start=89919689&seq_stop=89919729' in cl[1] and all('tool=labkit' in u for u in cl), cl)
+    cell = gt_cell(5)[0]
+    ck('S199: minstreng-SNP gemeld als C/T met ref C, zonder omdraaien met de hand', cell.startswith('C/T') and 'ref C' in cell and ('omgedraaid' in cell or 'flipped' in cell), cell)
+    pg.click('#sg-gt-db'); pg.wait_for_timeout(300)
+    ck('S199: tweede keer uit de cache', pg.evaluate('__calls.length') == 2)
+    pg.evaluate("ncbiCacheClear(); __calls=[]; ncbi.on=false")
+    pg.click('#sg-gt-db')
+    pg.wait_for_function("document.querySelector('#sg-gt-dbp .note.warn')")
+    ck('S199: schakelaar uit: melding, geen verzoek', pg.evaluate('__calls.length') == 0 and ('staat uit' in pg.inner_text('#sg-gt-dbp') or 'switched off' in pg.inner_text('#sg-gt-dbp')), pg.inner_text('#sg-gt-dbp')[-300:])
+    pg.evaluate("ncbi.on=true; __sgVm.delAssay(); __sgVm.clear()")
+
     ck('geen paginafouten', not errs, errs)
     b.close()
 

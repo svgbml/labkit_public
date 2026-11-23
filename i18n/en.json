@@ -5989,5 +5989,13 @@
 "Onbekende kleur of allel (blauw, groen, zwart, rood = A, C, G of T).": "Unknown dye or allele (blue, green, black, red = A, C, G or T).",
 "Dit bestand heeft geen vier kleurkanalen.": "This file does not have four dye channels.",
 "Dit bestand heeft geen kanaal met de lengtestandaard.": "This file has no size standard channel.",
-"Geen ABIF-bestand (.ab1 of .fsa).": "Not an ABIF file (.ab1 or .fsa)."
+"Geen ABIF-bestand (.ab1 of .fsa).": "Not an ABIF file (.ab1 or .fsa).",
+"Allelen en streng uit dbSNP": "Alleles and strand from dbSNP",
+"LabKit zoekt elk rs-nummer van de assay op in dbSNP, bepaalt zelf op welke streng het amplicon ligt (uit de allelen, en anders uit {#} basen flank) en meldt het genotype in de richting van dbSNP, met het referentie-allel.": "LabKit looks up each rs number of the assay in dbSNP, works out which strand the amplicon is on (from the alleles, otherwise from {#} bases of flank) and reports the genotype in dbSNP orientation, with the reference allele.",
+"Opzoeken in dbSNP": "Look up in dbSNP",
+"Volgens dbSNP": "According to dbSNP",
+"ref": "ref",
+"streng omgedraaid": "strand flipped",
+"niet gevonden in dbSNP.": "not found in dbSNP.",
+"de streng is niet te bepalen; controleer deze SNP met de hand.": "the strand cannot be determined; check this SNP by hand."
 }
