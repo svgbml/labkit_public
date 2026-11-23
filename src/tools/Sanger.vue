@@ -66,6 +66,36 @@
           <div v-if="snp.rows.length" style="max-height:24em;overflow:auto"><lk-table table-id="sg-snp-tbl" :cols="snpCols" :rows="snp.rows"/></div>
           <button v-if="snp.rows.length" type="button" id="sg-snp-csv" style="margin-top:8px" @click="saveSnp">{{ t('SNP-tabel als CSV') }}</button>
         </div>
+        <!-- S158–S161: uitlijning tegen de referentie, variantenlijst, genotypes van de assay en forward/reverse -->
+        <div v-if="m.ok && refSeq" id="sg-aln" style="margin-top:12px">
+          <h3>{{ t('Uitlijning tegen de referentie') }}</h3>
+          <lk-note v-if="refBig" kind="warn">{{ t('De referentie is langer dan 200 000 basen; neem alleen het stuk rond je amplicon.') }}</lk-note>
+          <lk-note v-else-if="!aln1" kind="warn">{{ t('De eerste read lijkt niet op de referentie (te weinig gedeelde stukjes van 11 basen op beide strengen).') }}</lk-note>
+          <template v-else>
+            <lk-kv :rows="alnKv"/>
+            <lk-note v-if="read2Ok && !aln2" kind="warn">{{ t('De tweede read lijkt niet op de referentie.') }}</lk-note>
+            <p style="font-size:13px;color:var(--muted);margin:6px 0 4px">{{ t('Ref = referentie, R1 = eerste read, R2 = tweede read (beide op de referentiestreng). Rood: anders dan de referentie, paars: heterozygoot, onderstreept: er volgt een insertie. Op de regel eronder: ! = de reads zijn het oneens, · = maar één read dekt de positie. Klik op een base van R1 om hem in de trace te zien.') }}</p>
+            <pre id="sg-aln-view" class="mono" style="white-space:pre;overflow:auto;max-height:22em;margin:0;font-size:12px" @click="alnClick"><template v-for="(bl, bi) in alnView" :key="bi"><template v-for="ln in bl" :key="ln.k">{{ ln.lab }}<span v-for="(c, ci) in ln.cells" :key="ci" :data-q="c.q" :title="c.tip" :style="c.st">{{ c.c }}</span>{{ '\n' }}</template>{{ '\n' }}</template></pre>
+          </template>
+        </div>
+        <div v-if="aln1" id="sg-var" style="margin-top:12px">
+          <h3>{{ t('Variantenlijst') }}</h3>
+          <p style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Een overzicht om te leren, geen klinisch rapport. Posities in de nummering van de referentie (g.), volgens de HGVS-regels; een gat in een herhaling staat op de meest 3′-positie.') }}</p>
+          <lk-note v-if="!vars.length" kind="info">{{ t('Geen verschillen met de referentie in het uitgelijnde stuk.') }}</lk-note>
+          <div v-else style="max-height:20em;overflow:auto"><lk-table table-id="sg-var-tbl" :cols="varCols" :rows="varRows"/></div>
+        </div>
+        <div v-if="aln1 && snpc.length" id="sg-gt" style="margin-top:12px">
+          <h3>{{ t('Genotypes van de assay') }}</h3>
+          <p style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Allelen op de streng van de assay; een SNP op de andere streng wordt automatisch omgedraaid.') }}</p>
+          <lk-table table-id="sg-gt-tbl" :cols="gtCols" :rows="gtRows"/>
+        </div>
+        <div v-if="aln1 && aln2" id="sg-fr" style="margin-top:12px">
+          <h3>{{ t('Forward/reverse-bevestiging') }}</h3>
+          <p style="font-size:13px;margin:4px 0">{{ frCounts }}</p>
+          <lk-note v-if="frDiff.length" kind="bad">{{ t('De reads zijn het oneens op ' + frDiff.length + ' posities. Kijk beide traces na voordat je een genotype noemt.') }}</lk-note>
+          <lk-note v-else kind="ok">{{ t('Waar beide reads de referentie dekken, zijn ze het eens.') }}</lk-note>
+          <lk-table v-if="frDiff.length" table-id="sg-fr-tbl" :cols="frCols" :rows="frDiff"/>
+        </div>
       </div>
     </div>
     <div>
@@ -114,6 +144,48 @@
         </table>
         <button v-if="nEd" type="button" style="margin-top:8px" @click="undoAll">{{ t('Alle bewerkingen terugzetten') }}</button>
       </div>
+      <details class="panel" id="sg-refp" :open="refOpen">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Referentie en assay') }}</summary>
+        <div class="f" style="margin-top:10px"><label for="sg-assay">{{ t('Assay') }}</label>
+          <select id="sg-assay" v-model="assayKey">
+            <option value="">{{ t('Geen (alleen een referentie)') }}</option>
+            <option value="oefen">{{ t(TEACH.name) }}</option>
+            <option v-for="a in own" :key="a.name" :value="'eigen:' + a.name">{{ a.name }}</option>
+          </select></div>
+        <lk-note v-if="assayKey === 'oefen'" kind="info">{{ t('Dit oefenpanel is verzonnen: de sequentie en de SNP-namen bestaan niet echt.') }}</lk-note>
+        <button v-if="assayKey === 'oefen'" type="button" id="sg-teach" style="margin-top:6px" @click="teach">{{ t('Oefenreads laden') }}</button>
+        <lk-note v-if="assay && !assayOn" kind="warn">{{ t('De referentie wijkt af van die van de assay; de SNP-posities van de assay doen niet mee.') }}</lk-note>
+        <div class="f" style="margin-top:10px"><label for="sg-ref">{{ t('Referentiesequentie (FASTA of kale basen)') }}</label>
+          <textarea id="sg-ref" class="mono" rows="4" v-model="refText" spellcheck="false"></textarea></div>
+        <input type="file" id="sg-ref-file" accept=".fasta,.fa,.fas,.txt,.seq,.json" :aria-label="t('Referentie of assay kiezen')" style="margin-top:6px" @change="pickRef">
+        <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Een FASTA-bestand, of een assay als JSON. Een sequentie uit Sequentie (ook een die je bij NCBI ophaalt) kan hierheen met Stuur door naar.') }}</p>
+        <h3 style="margin-top:14px">{{ t('Eigen panel') }}</h3>
+        <p style="font-size:13px;color:var(--muted);margin:4px 0 8px">{{ t('Het amplicon is de referentie hierboven. Positie telt vanaf base 1 van het amplicon; streng − betekent dat de allelen op de andere streng staan (zoals vaak in dbSNP).') }}</p>
+        <div class="grid2">
+          <lk-field v-model="edName" :label="t('Naam')" for-id="sg-ed-name"/>
+          <lk-field v-model="edStart" :label="t('Coördinaat van base 1')" for-id="sg-ed-start" inputmode="numeric"/>
+        </div>
+        <lk-etable table-id="sg-ed-tbl" :cols="edCols" v-model:rows="edRows" add-id="sg-ed-add"/>
+        <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button type="button" id="sg-ed-add" @click="edRows = edRows.concat([['', '', '', '+']])">{{ t('+ SNP') }}</button>
+          <button type="button" id="sg-ed-save" @click="saveAssay">{{ t('Panel bewaren') }}</button>
+          <button type="button" id="sg-ed-export" @click="exportAssay">{{ t('Exporteren als JSON') }}</button>
+          <button v-if="assayKey.startsWith('eigen:')" type="button" id="sg-ed-del" @click="delAssay">{{ t('Panel verwijderen') }}</button>
+        </div>
+        <lk-note v-for="(e, i) in edErr" :key="i" :kind="edOk ? 'ok' : 'bad'">{{ e }}</lk-note>
+      </details>
+      <details class="panel" id="sg-r2p" :open="read2Ok">
+        <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Tweede read (forward/reverse)') }}</summary>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0">{{ t('De andere read van hetzelfde monster. Beide worden tegen de referentie uitgelijnd en per positie vergeleken.') }}</p>
+        <input type="file" id="sg-file2" accept=".ab1,.abi,.fasta,.fa,.fas,.seq,.txt" :aria-label="t('Tweede read kiezen')" @change="pick2">
+        <div class="f" style="margin-top:10px"><label for="sg-paste2">{{ t('Of plak de tweede read') }}</label>
+          <textarea id="sg-paste2" class="mono" rows="3" v-model="paste2" spellcheck="false"></textarea></div>
+        <p v-if="read2" style="font-size:13px;margin:6px 0 0">{{ t('Geladen') }}: {{ read2.name }}</p>
+        <div class="row" style="gap:6px;margin-top:8px">
+          <button type="button" id="sg-clear2" @click="clear2">{{ t('Wissen') }}</button>
+          <button v-if="read2" type="button" id="sg-swap" @click="swap">{{ t('Wissel de reads (trace van de tweede)') }}</button>
+        </div>
+      </details>
     </div>
   </div>
 </template>
@@ -126,6 +198,26 @@ import {trimWindow, comp, fasta} from '../lib/sangertrim.js';
 import {hetCalls, flags} from '../lib/sangerhet.js';
 import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
+import {parseRef, alignRead, variants, parseAssay, assayJson, snpCalls, confirm, TEACH, teachReads, DEC} from '../lib/sangeralign.js';
+import {SEQ_TO} from '../lib/seq.js';
+
+/* de referentie kan uit Sequentie komen (ook een sequentie die daar bij NCBI is opgehaald) */
+SEQ_TO.push({label: 'Chromatogram (referentie)', tool: 'sanger', id: 'sg-ref'});
+const AKEY = 'labkit:v1:sg-assays', REFMAX = 200000;
+const VTYPE = {sub: 'Substitutie', del: 'Deletie', dup: 'Duplicatie', ins: 'Insertie'};
+/* een read uit een bestand (ABIF of FASTA) of null met een foutzin */
+function readFile(buf, fname) {
+  try {
+    const ab = readAbif(buf), d = abifRead(ab);
+    if (!d.bases) return {err: 'Dit ABIF-bestand bevat geen basecalls.'};
+    return {r: {name: fname, meta: ab.meta, order: d.order, traces: d.traces, bases: d.bases, peaks: d.peaks, qual: d.qual, mismatch: d.mismatch}};
+  } catch (x) {
+    if (!String(x.message).startsWith('Geen ABIF')) return {err: 'Het ABIF-bestand is afgebroken.'};
+    const p = parseSeq(new TextDecoder().decode(buf));
+    if (!p.bases) return {err: 'Geen ABIF-bestand en geen sequentie gevonden.'};
+    return {r: {name: p.name || fname, meta: null, order: '', traces: null, bases: p.bases, peaks: [], qual: []}};
+  }
+}
 
 const LB = 18, TH = 190, QB = 28, OV = 40, GAP = 20;   // hoogte trace, kwaliteitsstrook, overzichtsstrook en de strook met posities (CSS-pixels); LB = strook met de baseletters bovenaan
 const Y1 = LB + TH + QB;   // onderkant van trace + kwaliteitsstrook
@@ -155,7 +247,10 @@ export default {
     const saved = jget('sg-read', null);
     return {win: st['sg-win'] != null ? String(st['sg-win']) : '10', qthr: st['sg-q'] != null ? String(st['sg-q']) : '20',
       read: saved ? markRaw(saved) : null, paste: st['sg-paste'] != null ? String(st['sg-paste']) : '', err: '', over: false,
-      edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1)};
+      edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1),
+      refText: st['sg-ref'] != null ? String(st['sg-ref']) : '', assayKey: st['sg-assay'] != null ? String(st['sg-assay']) : '', own: jget(AKEY, []),
+      read2: jget('sg-read2', null) ? markRaw(jget('sg-read2', null)) : null, paste2: st['sg-paste2'] != null ? String(st['sg-paste2']) : '',
+      edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
   },
   computed: {
     HT() { return HT; },
@@ -244,7 +339,110 @@ export default {
         gs[gs.length - 1].push({i, c: rc ? comp(q[i]) : q[i], o: o && (rc ? comp(o) : o), g: !!tr && (i + 1 < tr.start || i + 1 > tr.end), hz});
       }
       return rows;
-    }
+    },
+    /* ---------- referentie, assay en uitlijning (S158–S161) ---------- */
+    TEACH() { return TEACH; },
+    refSeq() { return parseRef(this.refText).seq; },
+    refBig() { return this.refSeq.length > REFMAX; },
+    refOpen() { return !!this.refText.trim() || !!this.assayKey; },
+    assay() { return this.assayKey === 'oefen' ? TEACH : this.own.find(a => 'eigen:' + a.name === this.assayKey) || null; },
+    /* de SNP's van een assay tellen alleen als zijn amplicon de referentie is */
+    assayOn() { return !!this.assay && this.assay.ref === this.refSeq; },
+    assayEff() { return this.assayOn ? this.assay : {start: 1, snps: []}; },
+    G() { return +this.assayEff.start || 1; },
+    /* de eerste read (met heterozygoten en bewerkingen), alleen het getrimde stuk */
+    aln1() {
+      if (!this.m.ok || !this.refSeq || this.refBig) return null;
+      const t = this.trim;
+      return alignRead(this.seq, this.refSeq, t ? {from: t.start - 1, to: t.end} : {});
+    },
+    /* de tweede read: bestand of geplakte tekst, met dezelfde drempel voor heterozygoten en hetzelfde trimvenster */
+    m2() {
+      let r = this.read2;
+      if (!r) { const p = parseSeq(this.paste2); r = {name: p.name, traces: null, bases: p.bases, peaks: [], qual: []}; }
+      let a = r.bases.split('');
+      if (r.traces) {
+        const h = hetCalls(r.traces, r.peaks, Math.min(r.peaks.length, r.bases.length), this.hN);
+        a = a.map((c, i) => !h[i] ? c : h[i].code || (MIX.includes(c) ? h[i].top : c));
+      }
+      if (r.edits) for (const i in r.edits) if (i < a.length) a[i] = r.edits[i];
+      return {r, seq: a.join(''), trim: r.qual && r.qual.length ? trimWindow(r.qual, this.winN, this.qN) : null};
+    },
+    read2Ok() { return this.m2.seq.length > 0; },
+    aln2() {
+      if (!this.aln1 || !this.read2Ok) return null;
+      const t = this.m2.trim;
+      return alignRead(this.m2.seq, this.refSeq, t ? {from: t.start - 1, to: t.end} : {});
+    },
+    vars() { return this.aln1 ? variants(this.aln1, this.refSeq, this.assayEff) : []; },
+    conf() { return this.aln1 ? confirm(this.aln1, this.aln2, this.refSeq.length) : {rows: [], counts: {}}; },
+    alnKv() {
+      const t = this.t, one = a => (a.strand === '+' ? t('forward') : t('reverse, omgekeerd en gecomplementeerd')) + ' · offset ' + NL(a.offset, 0)
+        + ' · ' + t('referentie') + ' ' + NL(this.G + a.rFrom, 0) + '–' + NL(this.G + a.rTo, 0) + ' · ' + NL(a.ident * 100, 1) + '% ' + t('identiek')
+        + ' · ' + t('mismatches') + ': ' + NL(a.mism, 0) + ' · ' + t('gaten') + ': ' + NL(a.ins + a.del, 0);
+      const out = [[t('Eerste read'), one(this.aln1)]];
+      if (this.aln2) out.push([t('Tweede read'), one(this.aln2)]);
+      return out;
+    },
+    /* de uitlijning in blokken van 60 referentieposities: Ref, R1, (R2 en een regel met ! en ·) */
+    alnView() {
+      const rows = this.conf.rows, ref = this.refSeq, two = !!this.aln2, out = [], W = 60;
+      if (!rows.length) return out;
+      const w = String(this.G + rows[rows.length - 1].r).length, pad = ' '.repeat(w + 3);
+      const cell = (b, rb, q) => {
+        if (!b) return {c: ' ', q: null};
+        const c = b[0], ins = b.includes('+'), het = (DEC[c] || '').length === 2;
+        return {c, q: q >= 0 ? q : null, tip: ins ? '+' + b.split('+')[1] : null,
+          st: {background: c !== rb && !het ? '#ffcdd2' : het ? HETBG : null, textDecoration: ins ? 'underline' : null, cursor: q >= 0 ? 'pointer' : null}};
+      };
+      for (let k = 0; k < rows.length; k += W) {
+        const bl = rows.slice(k, k + W);
+        const lines = [{k: 'ref', lab: 'Ref ' + String(this.G + bl[0].r).padStart(w) + ' ', cells: bl.map(x => ({c: ref[x.r], q: null}))},
+          {k: 'a', lab: 'R1' + pad, cells: bl.map(x => cell(x.a, ref[x.r], x.qa))}];
+        if (two) {
+          lines.push({k: 'b', lab: 'R2' + pad, cells: bl.map(x => cell(x.b, ref[x.r], -1))});
+          lines.push({k: 'm', lab: '  ' + pad, cells: bl.map(x => ({c: x.st === 'diff' ? '!' : x.st === 'same' ? ' ' : '·', q: null,
+            st: x.st === 'diff' ? {background: '#ffe0b2', fontWeight: 700} : null}))});
+        }
+        out.push(lines);
+      }
+      return out;
+    },
+    varCols() {
+      const t = this.t, c = [{h: 'HGVS'}, {h: t('Type')}, {h: t('Zygotie')}, {h: t('Readpositie'), num: true}, {h: t('rs-nummer')}];
+      if (this.aln2) c.push({h: t('Tweede read')});
+      return c;
+    },
+    varRows() {
+      const t = this.t, byR = new Map(this.conf.rows.map(x => [x.r, x]));
+      return this.vars.map(v => {
+        const row = [esc(v.hgvs), t(VTYPE[v.type]), t(v.zyg === 'het' ? 'heterozygoot' : 'homozygoot'), v.q >= 0 ? v.q + 1 : '–', v.rs ? esc(v.rs) : '–'];
+        if (this.aln2) { const x = byR.get(v.p); row.push(t(!x || x.st === 'one1' ? 'niet gedekt' : x.st === 'diff' ? 'oneens' : 'bevestigd')); }
+        return row;
+      });
+    },
+    snpc() { return this.aln1 ? snpCalls(this.aln1, this.assayEff) : []; },
+    snpc2() { return this.aln2 ? snpCalls(this.aln2, this.assayEff) : null; },
+    gtCols() {
+      const t = this.t, c = [{h: 'SNP'}, {h: t('Positie') + ' (g.)', num: true}, {h: t('Allelen')}, {h: t('Streng')}, {h: t('Eerste read')}];
+      if (this.snpc2) c.push({h: t('Tweede read')}, {h: t('Status')});
+      return c;
+    },
+    gtRows() {
+      const t = this.t, g = c => !c.cov ? t('niet gedekt') : esc(c.gt) + (c.ok ? '' : ' (' + t('hoort niet bij de assay') + ')');
+      return this.snpc.map((c, i) => {
+        const row = [esc(c.rs), this.G + c.pos - 1, c.alleles, c.strand === '-' ? '−' : '+', g(c)];
+        if (this.snpc2) { const d = this.snpc2[i]; row.push(g(d), t(!c.cov || !d.cov ? 'één read' : c.gt === d.gt ? 'bevestigd' : 'oneens')); }
+        return row;
+      });
+    },
+    frCounts() {
+      const c = this.conf.counts, t = this.t;
+      return [['Gelijk', c.same], ['Oneens', c.diff], ['Alleen eerste read', c.one1], ['Alleen tweede read', c.one2]].map(x => t(x[0]) + ': ' + NL(x[1] || 0, 0)).join(' · ');
+    },
+    frCols() { const t = this.t; return [{h: t('Positie') + ' (g.)', num: true}, {h: t('Referentie')}, {h: t('Eerste read')}, {h: t('Tweede read')}]; },
+    frDiff() { return this.conf.rows.filter(x => x.st === 'diff').map(x => [this.G + x.r, this.refSeq[x.r], esc(x.a || '–'), esc(x.b || '–')]); },
+    edCols() { const t = this.t; return [{h: t('SNP (rs)'), t: 'txt', w: 110}, {h: t('Positie'), t: 'num', w: 60}, {h: t('Allelen'), t: 'txt', w: 60}, {h: t('Streng'), t: 'sel', o: ['+', '-']}]; }
   },
   watch: {
     /* een andere read: begin links, ingezoomd tot ongeveer 1 scanpunt per pixel (±70 basen) */
@@ -252,6 +450,7 @@ export default {
     sel() { this.draw(); this.reveal(); },
     rng() { this.draw(); },
     rc() { this.$nextTick(this.reveal); },
+    assayKey() { this.pickAssay(); },
     edits() { this.draw(); },
     het() { this.draw(); },
     trim() { this.draw(); },
@@ -271,18 +470,9 @@ export default {
     async load(file) {
       if (!file) return;
       this.err = '';
-      const buf = await file.arrayBuffer();
-      let r;
-      try {
-        const ab = readAbif(buf), d = abifRead(ab);
-        r = {name: file.name, meta: ab.meta, order: d.order, traces: d.traces, bases: d.bases, peaks: d.peaks, qual: d.qual, mismatch: d.mismatch};
-        if (!r.bases) { this.err = this.t('Dit ABIF-bestand bevat geen basecalls.'); return; }
-      } catch (x) {
-        if (!String(x.message).startsWith('Geen ABIF')) { this.err = this.t('Het ABIF-bestand is afgebroken.'); return; }
-        const p = parseSeq(new TextDecoder().decode(buf));
-        if (!p.bases) { this.err = this.t('Geen ABIF-bestand en geen sequentie gevonden.'); return; }
-        r = {name: p.name || file.name, meta: null, order: '', traces: null, bases: p.bases, peaks: [], qual: []};
-      }
+      const x = readFile(await file.arrayBuffer(), file.name);
+      if (x.err) { this.err = this.t(x.err); return; }
+      const r = x.r;
       this.edits = {}; this.sel = null; this.rng = null;
       this.read = markRaw(r);
       jset('sg-read', r);
@@ -505,6 +695,83 @@ export default {
         '+': () => this.zoom(1 / 1.5), '=': () => this.zoom(1 / 1.5), '-': () => this.zoom(1.5), Home: () => this.set({x0: 0, spp: this.view.spp}),
         End: () => this.set({x0: 1e9, spp: this.view.spp})}[e.key];
       if (k) { e.preventDefault(); k(); }
+    },
+    /* ---------- referentie, assay en tweede read ---------- */
+    /* een veld dat de code zette ook in de invoeropslag (die luistert naar input-events) */
+    poke(...ids) { this.$nextTick(() => ids.forEach(id => { const el = document.getElementById(id); if (el) el.dispatchEvent(new Event('input', {bubbles: true})); })); },
+    /* een assay kiezen zet zijn amplicon als referentie en laadt hem in de editor */
+    pickAssay() {
+      const a = this.assay;
+      if (a) {
+        this.refText = '>' + a.name + '\n' + a.ref;
+        this.edName = a === TEACH ? '' : a.name; this.edStart = String(a.start);
+        this.edRows = a.snps.map(s => [s.rs, String(s.pos), s.alleles, s.strand]);
+        this.poke('sg-ref');
+      }
+    },
+    teach() {
+      const r = teachReads();
+      this.clear(); this.paste = r.f; this.paste2 = r.r; this.read2 = null; jset('sg-read2', null);
+      this.poke('sg-paste', 'sg-paste2');
+    },
+    async pickRef(e) {
+      const f = e.target.files[0]; if (!f) return;
+      const txt = await f.text(); e.target.value = '';
+      if (/^\s*\{/.test(txt)) { this.importAssay(txt); return; }
+      this.refText = txt; this.poke('sg-ref');
+    },
+    errText(err) { return err.map(e => (e[1] ? e[1] + ': ' : '') + this.t(e[0])); },
+    importAssay(txt) {
+      const {assay, err} = parseAssay(txt);
+      if (err.length) { this.edOk = false; this.edErr = this.errText(err); return; }
+      this.storeAssay(assay); this.edOk = true; this.edErr = [this.t('Panel ingelezen en bewaard.')];
+    },
+    storeAssay(a) {
+      this.own = this.own.filter(x => x.name !== a.name).concat([a]); jset(AKEY, this.own);
+      this.assayKey = 'eigen:' + a.name; this.poke('sg-assay');
+    },
+    /* het panel in de editor, met de referentie hierboven als amplicon */
+    draft() {
+      const snps = this.edRows.filter(r => r.slice(0, 3).some(v => String(v).trim()))
+        .map(r => ({rs: r[0], pos: Number(String(r[1]).replace(/\s/g, '').replace(',', '.')), alleles: r[2], strand: r[3]}));
+      const st = String(this.edStart).replace(/[\s.]/g, '');
+      return parseAssay({name: this.edName, start: st === '' ? 1 : Number(st), ref: this.refSeq, snps});
+    },
+    saveAssay() {
+      if (this.edName.trim() === TEACH.name) { this.edOk = false; this.edErr = [this.t('Kies een eigen naam voor je panel.')]; return; }
+      const {assay, err} = this.draft();
+      if (err.length) { this.edOk = false; this.edErr = this.errText(err); return; }
+      this.storeAssay(assay); this.edOk = true; this.edErr = [this.t('Panel bewaard.')];
+    },
+    exportAssay() {
+      const {assay, err} = this.draft();
+      if (err.length) { this.edOk = false; this.edErr = this.errText(err); return; }
+      saveBlob(safeName(assay.name) + '.json', new Blob([assayJson(assay)], {type: 'application/json'})).catch(() => {});
+    },
+    delAssay() {
+      this.own = this.own.filter(x => 'eigen:' + x.name !== this.assayKey); jset(AKEY, this.own);
+      this.assayKey = ''; this.edErr = []; this.poke('sg-assay');
+    },
+    async pick2(e) {
+      const f = e.target.files[0]; if (!f) return;
+      const x = readFile(await f.arrayBuffer(), f.name);
+      if (x.err) { this.err = this.t(x.err); return; }
+      this.err = ''; this.read2 = markRaw(x.r); jset('sg-read2', x.r);
+    },
+    clear2() {
+      this.read2 = null; this.paste2 = ''; jset('sg-read2', null); this.poke('sg-paste2');
+      const f = document.getElementById('sg-file2'); if (f) f.value = '';
+    },
+    /* de tweede read in de trace: de reads wisselen van plaats, elk met zijn eigen bewerkingen */
+    swap() {
+      const a = this.read ? Object.assign({}, this.read, {edits: this.edits}) : null, b = this.read2;
+      this.edits = b.edits || {}; this.sel = null; this.rng = null;
+      this.read = markRaw(b); this.read2 = a ? markRaw(a) : null;
+      jset('sg-read', Object.assign({}, b, {edits: this.edits})); jset('sg-read2', a);
+    },
+    alnClick(e) {
+      const el = e.target.closest('[data-q]');
+      if (el && this.read && this.read.peaks.length) this.goTo(+el.dataset.q);
     },
     clear() {
       this.read = null; this.edits = {}; this.sel = null; this.rng = null; this.paste = ''; this.err = '';
