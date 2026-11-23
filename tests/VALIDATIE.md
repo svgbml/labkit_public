@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-23 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 463 van 463 controles binnen tolerantie.**
+**Resultaat: 468 van 468 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -162,6 +162,11 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Instellingen | Grafiekstijl | Verslag: wit | 1 | 1 | +0.00% | ✅ | Zelftest: met het donkere thema heeft de standaardlijn (Scherm) een doorzichtige achtergrond; Verslag en Publicatie tekenen een witte achtergrond met zwarte (Publicatie) of bijna zwarte (Verslag) tekst, en Publicatie zonder rasterlijnen |
 | Instellingen | Grafiekstijl | Publicatie: wit | 1 | 1 | +0.00% | ✅ | Zelftest: met het donkere thema heeft de standaardlijn (Scherm) een doorzichtige achtergrond; Verslag en Publicatie tekenen een witte achtergrond met zwarte (Publicatie) of bijna zwarte (Verslag) tekst, en Publicatie zonder rasterlijnen |
 | Instellingen | Grafiekstijl | Publicatie: zwart, geen raster | 1 | 1 | +0.00% | ✅ | Zelftest: met het donkere thema heeft de standaardlijn (Scherm) een doorzichtige achtergrond; Verslag en Publicatie tekenen een witte achtergrond met zwarte (Publicatie) of bijna zwarte (Verslag) tekst, en Publicatie zonder rasterlijnen |
+| Standaardcurve | Grafiek aanpassen (bewaard per grafiek) | opgeslagen | 1 | 1 | +0.00% | ✅ | Zelftest: in het venster ✎ van de standaardcurve titel, logaritmische x-as, y-bereik 0–2 en legenda rechtsonder kiezen; de keuze staat per canvas-id in lkChartEd, blijft na herladen gelden (de grafiek tekent anders dan zonder), en "Terug naar standaard" haalt hem weg |
+| Standaardcurve | Grafiek aanpassen (bewaard per grafiek) | na herladen anders getekend | 1 | 1 | +0.00% | ✅ | Zelftest: in het venster ✎ van de standaardcurve titel, logaritmische x-as, y-bereik 0–2 en legenda rechtsonder kiezen; de keuze staat per canvas-id in lkChartEd, blijft na herladen gelden (de grafiek tekent anders dan zonder), en "Terug naar standaard" haalt hem weg |
+| Standaardcurve | Grafiek aanpassen (bewaard per grafiek) | opties toegepast | 1 | 1 | +0.00% | ✅ | Zelftest: in het venster ✎ van de standaardcurve titel, logaritmische x-as, y-bereik 0–2 en legenda rechtsonder kiezen; de keuze staat per canvas-id in lkChartEd, blijft na herladen gelden (de grafiek tekent anders dan zonder), en "Terug naar standaard" haalt hem weg |
+| Standaardcurve | Grafiek aanpassen (bewaard per grafiek) | standaard: weg | 1 | 1 | +0.00% | ✅ | Zelftest: in het venster ✎ van de standaardcurve titel, logaritmische x-as, y-bereik 0–2 en legenda rechtsonder kiezen; de keuze staat per canvas-id in lkChartEd, blijft na herladen gelden (de grafiek tekent anders dan zonder), en "Terug naar standaard" haalt hem weg |
+| Standaardcurve | Grafiek aanpassen (bewaard per grafiek) | standaard: zoals eerst | 1 | 1 | +0.00% | ✅ | Zelftest: in het venster ✎ van de standaardcurve titel, logaritmische x-as, y-bereik 0–2 en legenda rechtsonder kiezen; de keuze staat per canvas-id in lkChartEd, blijft na herladen gelden (de grafiek tekent anders dan zonder), en "Terug naar standaard" haalt hem weg |
 | Centrifuge | rpm → × g | × g | 1957 | 1957 | +0.00% | ✅ | Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g |
 | Centrifuge | × g → rpm | rpm | 5837 | 5837 | +0.00% | ✅ | CASRAI: 4000 × g, r = 10,5 cm → 5837 rpm |
 | Centrifuge | Rotorbalans | n=12 k=5 gebalanceerd | 1 | 1 | +0.00% | ✅ | Som van de plaatsvectoren = 0: opgebouwd uit gelijkmatige p-hoeken met p | n (n = 12, k = 5 → 2 + 3; n = 6, k = 1 en k = 5 kunnen niet) |

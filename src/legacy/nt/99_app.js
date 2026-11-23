@@ -207,7 +207,8 @@ function reportPng(cv,noTitle){ const tool=(cv.closest('section.tool')||{dataset
   else { try{ root.removeAttribute('data-theme'); Object.defineProperty(window,'devicePixelRatio',{get:()=>S,configurable:true}); if(calc[tool]) calc[tool](); const c=document.createElement('canvas'); c.width=cv.width; c.height=cv.height; const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(cv,0,0); img=c; } finally { delete window.devicePixelRatio; if(th) root.setAttribute('data-theme',th); try{ if(calc[tool]) calc[tool](); }catch(e){} } }
   if(noTitle&&cv._p){ const cut=34*S, c2=document.createElement('canvas'); c2.width=img.width; c2.height=img.height-cut; c2.getContext('2d').drawImage(img,0,-cut); img=c2; }
   return new Promise(res=>img.toBlob(b=>b.arrayBuffer().then(ab=>res(new Blob([pngDpi(new Uint8Array(ab),300)],{type:'image/png'}))),'image/png')); }
-function reportBtns(){ $$('main canvas').forEach(cv=>{ if(cv.id==='gf-cv') return; const bar=cv.nextElementSibling; if(!bar||!bar.classList.contains('xlbar')) return; if(!bar.querySelector('[data-rep]')) bar.insertAdjacentHTML('afterbegin',`<button type="button" class="xlbtn" data-rep title="${esc(trPlain('PNG op een witte achtergrond met donkere assen, drie keer de schermresolutie (300 dpi), ook in het donkere thema'))}">${trPlain('Download voor verslag (wit, 300 dpi)')}</button>`); const nx=bar.nextElementSibling; if(!SVGSKIP.includes(cv.id)&&!(nx&&nx.classList.contains('pic-bar'))&&!bar.querySelector('[data-xl-svg]')) bar.insertAdjacentHTML('beforeend',`<button type="button" class="xlbtn" data-xl-svg title="${esc(trPlain('Vectorgrafiek op een witte achtergrond, te openen in Inkscape of Illustrator'))}">SVG</button>`); if(cv._p&&!bar.querySelector('[data-rep-nt]')) bar.insertAdjacentHTML('afterbegin',`<label class="chk" style="font-size:12px;margin-right:auto" title="${esc(trPlain('Figuurtitels horen in het onderschrift onder de figuur'))}"><input type="checkbox" data-rep-nt> ${trPlain('zonder titel')}</label>`); }); }
+function reportBtns(){ $$('main canvas').forEach(cv=>{ if(cv.id==='gf-cv') return; const bar=cv.nextElementSibling; if(!bar||!bar.classList.contains('xlbar')) return;
+  if(cv._chart&&cv.id&&!bar.querySelector('[data-ched]')) bar.insertAdjacentHTML('beforeend',`<button type="button" class="xlbtn" data-ched title="${esc(trPlain('Titels, bereik, logaritmische as, legenda en kleuren van deze grafiek; blijft bewaard'))}">✎ ${trPlain('Aanpassen')}</button>`); if(!bar.querySelector('[data-rep]')) bar.insertAdjacentHTML('afterbegin',`<button type="button" class="xlbtn" data-rep title="${esc(trPlain('PNG op een witte achtergrond met donkere assen, drie keer de schermresolutie (300 dpi), ook in het donkere thema'))}">${trPlain('Download voor verslag (wit, 300 dpi)')}</button>`); const nx=bar.nextElementSibling; if(!SVGSKIP.includes(cv.id)&&!(nx&&nx.classList.contains('pic-bar'))&&!bar.querySelector('[data-xl-svg]')) bar.insertAdjacentHTML('beforeend',`<button type="button" class="xlbtn" data-xl-svg title="${esc(trPlain('Vectorgrafiek op een witte achtergrond, te openen in Inkscape of Illustrator'))}">SVG</button>`); if(cv._p&&!bar.querySelector('[data-rep-nt]')) bar.insertAdjacentHTML('afterbegin',`<label class="chk" style="font-size:12px;margin-right:auto" title="${esc(trPlain('Figuurtitels horen in het onderschrift onder de figuur'))}"><input type="checkbox" data-rep-nt> ${trPlain('zonder titel')}</label>`); }); }
 /* SVG van een grafiek (S82): de tool tekent zichzelf opnieuw, maar met de opnemende tekencontext van 01_pic.js
    in plaats van het canvas; zo komt ook alles mee wat een tool na chart() zelf bijtekent. Zoals reportPng:
    licht thema, schaal 1. Tekeningen met pShow() (cv._p) worden direct opnieuw afgespeeld. */
@@ -221,10 +222,33 @@ document.addEventListener('click',e=>{ const b=e.target.closest('[data-xl-svg]')
   try{ saveBlob(`${(cv.closest('section.tool')||{dataset:{}}).dataset.tool||'grafiek'}.svg`,new Blob([chartSvg(cv)],{type:'image/svg+xml'})).catch(()=>{}); }
   catch(err){ alertBox(trPlain('Deze tekening kan niet als SVG worden opgeslagen; gebruik PNG.')); } });
 lkMainWatch(reportBtns,150); setTimeout(reportBtns,300);
+/* ================= GRAFIEK AANPASSEN (S83) =================
+   Het venster bij ✎: de keuzes gaan per canvas-id naar localStorage 'lkChartEd' (src/lib/chart.js legt ze
+   over de opties van de tool); daarna tekent de tool zichzelf opnieuw. Leeg = wat de tool zelf kiest. */
+function chEdOpen(cv){ const tool=(cv.closest('section.tool')||{dataset:{}}).dataset.tool, all=jget('lkChartEd',{}), e=all[cv.id]||{}, info=cv._chart||{series:[]}, bar=!!info.bar;
+  const v=k=>esc(e[k]==null?'':String(e[k])), sel=(k,opts)=>`<select data-k="${k}">${opts.map(([val,lab])=>`<option value="${val}"${(e[k]||'')===val?' selected':''}>${lab}</option>`).join('')}</select>`;
+  const cs=getComputedStyle(document.documentElement), hex=c=>{ const s=(c||'').startsWith('--')?cs.getPropertyValue(c).trim():c; return /^#[0-9a-f]{6}$/i.test(s)?s:'#1558b0'; };
+  const fld=(k,lab,ph)=>`<div class="f"><label>${lab}</label><input class="txt" data-k="${k}" value="${v(k)}" placeholder="${ph||''}"></div>`;
+  const m=appModal(`<h3 style="margin:0 0 10px;font-size:16px">Grafiek aanpassen</h3>
+    <div class="fields">${fld('ti','Titel boven de grafiek')}${bar?'':fld('xl','Titel x-as','zoals de tool')}${fld('yl','Titel y-as','zoals de tool')}</div>
+    ${bar?`<div class="fields">${fld('ymax','Y-as tot','automatisch')}</div>`:`<div class="fields">${fld('xmin','X-as van','automatisch')}${fld('xmax','X-as tot','automatisch')}${fld('ymin','Y-as van','automatisch')}${fld('ymax','Y-as tot','automatisch')}</div>
+    <div class="fields"><div class="f"><label>X-as</label>${sel('lx',[['','zoals de tool'],['lin','lineair'],['log','logaritmisch']])}</div><div class="f"><label>Y-as</label>${sel('ly',[['','zoals de tool'],['lin','lineair'],['log','logaritmisch']])}</div>
+    <div class="f"><label>Legenda</label>${sel('lg',[['','zoals de tool'],['tl','linksboven'],['tr','rechtsboven'],['bl','linksonder'],['br','rechtsonder'],['none','verbergen']])}</div></div>`}
+    <div class="row" style="gap:10px;margin-top:8px;flex-wrap:wrap">${info.series.slice(0,8).map((s,i)=>`<label class="chk" style="gap:6px"><input type="color" data-col="${i}" value="${hex((e.col||[])[i]||s.color)}" style="width:40px;height:26px;padding:1px"><span data-notr>${esc(trPlain(s.name))}</span></label>`).join('')}</div>
+    <div class="row" style="margin-top:14px;gap:6px"><button type="button" class="primary" data-ok>Toepassen</button><button type="button" data-reset>Terug naar standaard</button><button type="button" data-no>Annuleren</button></div>`);
+  const redraw=()=>{ try{ if(calc[tool]) calc[tool](); }catch(err){} }, B=m.box, touched=new Set();
+  B.querySelectorAll('[data-col]').forEach(el=>el.addEventListener('input',()=>touched.add(+el.dataset.col)));
+  B.querySelector('[data-no]').addEventListener('click',m.close);
+  B.querySelector('[data-reset]').addEventListener('click',()=>{ const a=jget('lkChartEd',{}); delete a[cv.id]; jset('lkChartEd',a); m.close(); redraw(); });
+  B.querySelector('[data-ok]').addEventListener('click',()=>{ const n={}; B.querySelectorAll('[data-k]').forEach(el=>{ if(el.value.trim()) n[el.dataset.k]=el.value.trim(); });
+    const col=(e.col||[]).slice(); B.querySelectorAll('[data-col]').forEach(el=>{ const i=+el.dataset.col; if(touched.has(i)) col[i]=el.value; }); if(col.some(Boolean)) n.col=col;
+    const a=jget('lkChartEd',{}); if(Object.keys(n).length) a[cv.id]=n; else delete a[cv.id]; jset('lkChartEd',a); m.close(); redraw(); }); }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-ched]'); if(!b) return; const cv=b.parentNode.previousElementSibling; if(cv&&cv.tagName==='CANVAS') chEdOpen(cv); });
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-rep]'); if(!b) return; const bar=b.parentNode, cv=bar.previousElementSibling; if(!cv||cv.tagName!=='CANVAS'||!cv.width) return; const nt=bar.querySelector('[data-rep-nt]'); reportPng(cv,nt&&nt.checked).then(blob=>saveBlob(`${(cv.closest('section.tool')||{dataset:{}}).dataset.tool||'grafiek'}-verslag.png`,blob)).catch(()=>{}); });
 
 /* alles hierboven ook als globale naam, live (zie src/lib/global.js) */
 live({
+  chEdOpen: [() => chEdOpen, v => { chEdOpen = v; }],
   QR_ECC: () => QR_ECC,
   QR_BLK: () => QR_BLK,
   qrRaw: [() => qrRaw, v => { qrRaw = v; }],

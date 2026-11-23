@@ -578,6 +578,25 @@ def _(pg):
     return [('Scherm: doorzichtig', int(out['scherm'][0].endswith(',0')), 1, 0), ('Verslag: wit', int(out['verslag'][0] == '255,255,255,255'), 1, 0),
             ('Publicatie: wit', int(out['publicatie'][0] == '255,255,255,255'), 1, 0), ('Publicatie: zwart, geen raster', int(out['publicatie'][1] == '["#000000",""]'), 1, 0)]
 
+@case('Standaardcurve', 'Grafiek aanpassen (bewaard per grafiek)', 'Zelftest: in het venster ✎ van de standaardcurve titel, logaritmische x-as, y-bereik 0–2 en legenda rechtsonder kiezen; de keuze staat per canvas-id in lkChartEd, blijft na herladen gelden (de grafiek tekent anders dan zonder), en "Terug naar standaard" haalt hem weg')
+def _(pg):
+    pg.evaluate("localStorage.removeItem('lkChartEd'); __go('curve')"); pg.wait_for_timeout(400)
+    img0 = pg.evaluate("document.getElementById('s-cv').toDataURL()")
+    pg.evaluate("document.querySelector('#t-curve [data-ched]').click()"); pg.wait_for_timeout(200)
+    pg.evaluate("""(()=>{ const B=document.querySelector('.lk-modal'); const set=(k,v)=>{ const el=B.querySelector('[data-k='+k+']'); el.value=v; };
+      set('ti','Mijn ijklijn'); set('lx','log'); set('ymin','0'); set('ymax','2'); set('lg','br'); B.querySelector('[data-ok]').click(); })()"""); pg.wait_for_timeout(300)
+    saved = pg.evaluate("JSON.stringify(JSON.parse(localStorage.getItem('lkChartEd'))['s-cv'])")
+    pg.wait_for_timeout(800)
+    pg.goto('about:blank'); pg.goto(URL + '#curve'); pg.wait_for_timeout(900); pg.evaluate(HELPERS)
+    img1 = pg.evaluate("document.getElementById('s-cv').toDataURL()")
+    o = pg.evaluate("JSON.stringify((()=>{ const r=chEdApply(document.getElementById('s-cv'),{xmin:0,xmax:10,ymin:0,ymax:1,series:[{pts:[[1,0.1],[8,0.9]]}]}); return [r.title,r.logx,r.xmin,r.ymin,r.ymax,r.legendPos]; })())")
+    pg.evaluate("document.querySelector('#t-curve [data-ched]').click()"); pg.wait_for_timeout(200)
+    pg.evaluate("document.querySelector('.lk-modal [data-reset]').click()"); pg.wait_for_timeout(300)
+    gone = pg.evaluate("!(JSON.parse(localStorage.getItem('lkChartEd')||'{}')['s-cv'])")
+    img2 = pg.evaluate("document.getElementById('s-cv').toDataURL()")
+    return [('opgeslagen', int(saved == '{"ti":"Mijn ijklijn","ymin":"0","ymax":"2","lx":"log","lg":"br"}'), 1, 0), ('na herladen anders getekend', int(img1 != img0), 1, 0),
+            ('opties toegepast', int(o == '["Mijn ijklijn",true,0.5,0,2,"br"]'), 1, 0), ('standaard: weg', int(gone), 1, 0), ('standaard: zoals eerst', int(img2 == img0), 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")
