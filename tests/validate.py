@@ -1904,6 +1904,38 @@ def _(pg):
     pg.evaluate("__set('al-raw','')")
     return out
 
+@case('Alignment bekijken', 'Omzetten: Clustal → FASTA → Clustal zonder verlies', 'tests/fixtures/aln/hedgehog.aln (Biopython-testsuite, geschreven door Clustal); in Python gelezen: namen, rijen en de * : . -regel van Clustal zelf. LabKit schrijft de uitlijning als FASTA, leest die in, schrijft hem als Clustal en leest die weer in; daarna ook via NEXUS, GCG MSF (controlegetal volgens GCG, nagerekend in Python) en PIR')
+def _(pg):
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'hedgehog.aln'
+    rows = _aln_rows(f); n = len(rows); src = f.read_text(encoding='utf-8')
+    lines = src.splitlines(); cons = ''
+    for i, ln in enumerate(lines[1:], 1):
+        if ln.strip() and not ln[0].isspace() and (i + 1 >= len(lines) or not lines[i + 1][:1].strip()):
+            name, chunk = ln.split()[:2]; off = ln.index(chunk, len(name)); w = len(chunk)
+            nx = lines[i + 1] if i + 1 < len(lines) else ''
+            cons += (nx[off:] + ' ' * w)[:w]
+    def via(*fmts):
+        pg.evaluate("t=>__set('al-in',t)", src); pg.wait_for_timeout(150); pg.evaluate(ALN_RESET)
+        for fm in fmts:
+            pg.evaluate("v=>__set('al-xf',v)", fm); pg.wait_for_timeout(80)
+            pg.evaluate("t=>__set('al-in',t)", pg.evaluate("__alnVm.outText")); pg.wait_for_timeout(150)
+        return pg.evaluate("[__alnVm.m.seqs, __alnVm.m.names.length, __alnVm.m.cons, __alnVm.parsed.format]")
+    pg.evaluate("__go('aln')")
+    seqs, k, c, fm = via('fasta', 'clustal')
+    out = [('Clustal → FASTA → Clustal: rijen gelijk', sum(a == b for a, b in zip(seqs, rows)), n, 0),
+           ('aantal sequenties', k, n, 0), ('formaat is weer Clustal', 1 if fm == 'clustal' else 0, 1, 0),
+           ('de * : . -regel van Clustal komt terug', 1 if c.rstrip() == cons.rstrip() else 0, 1, 0)]
+    for fmts in (('nexus', 'clustal'), ('msf', 'clustal'), ('pir', 'clustal')):
+        seqs = via(*fmts)[0]
+        out.append((f'via {fmts[0]}: rijen gelijk', sum(a == b for a, b in zip(seqs, rows)), n, 0))
+    pg.evaluate("t=>__set('al-in',t)", src); pg.wait_for_timeout(150); pg.evaluate(ALN_RESET); pg.evaluate("__set('al-xf','msf')"); pg.wait_for_timeout(150)
+    ck = lambda s: sum((i % 57 + 1) * ord(ch.upper()) for i, ch in enumerate(s)) % 10000
+    msf = pg.evaluate("__alnVm.outText")
+    got = [int(l.split('Check:')[1].split()[0]) for l in msf.splitlines() if l.lstrip().startswith('Name:')]
+    out.append(('MSF: controlegetallen per sequentie', sum(a == ck(r.replace('-', '.')) for a, r in zip(got, rows)), n, 0))
+    pg.evaluate(ALN_RESET); pg.evaluate("__set('al-xf','fasta')"); pg.evaluate("__set('al-in','')")
+    return out
+
 @case('Chromatogram', 'ABIF-bestand 3730.ab1 inlezen', 'Biopython 1.84, Tests/test_SeqIO_AbiIO.py (data_3730) en het bestand zelf (tests/fixtures/3730.ab1, Applied Biosystems 3730): monster 226032_C-ME-18_pCAGseqF, 1165 basen, eerste 12 basen GGGCGAGCKYYA; ABIF-indeling volgens de Applied Biosystems ABIF File Format Specification (2009)')
 def _(pg):
     pg.evaluate("__go('sanger')")

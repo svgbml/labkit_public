@@ -30,13 +30,18 @@
         </template>
       </div>
     </div>
+    <!-- S187: zo gaat het naar EBI en wat je terugbrengt -->
+    <div id="al-ebi" style="margin-top:12px">
+      <lk-steps :steps="ebiSteps"/>
+      <div class="row" style="margin-top:8px"><button type="button" id="al-ebi-go" @click="openExt(EBI)">{{ t('Clustal Omega bij EBI openen') }}</button></div>
+    </div>
   </details>
   <div class="grid2">
     <div class="panel">
       <div class="f"><label for="al-in">{{ t('Uitlijning (Clustal, FASTA, PHYLIP, NEXUS, MSF of PIR)') }}</label>
         <textarea id="al-in" class="mono" rows="8" v-model="txt" spellcheck="false" wrap="off"></textarea></div>
       <div class="row" style="margin-top:8px">
-        <input type="file" id="al-file" accept=".aln,.clustal,.fa,.fasta,.fas,.afa,.phy,.phylip,.nex,.nexus,.msf,.pir,.txt" :aria-label="t('Bestand openen')" @change="onFile">
+        <input type="file" id="al-file" accept=".aln,.aln-clustal_num,.clustal_num,.clustal,.fa,.fasta,.fas,.afa,.phy,.phylip,.nex,.nexus,.msf,.pir,.txt" :aria-label="t('Bestand openen')" @change="onFile">
       </div>
       <div class="fields" style="margin-top:12px">
         <div class="f"><label for="al-col">{{ t('Kleuren') }}</label>
@@ -176,6 +181,7 @@ import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile
   alnTrim, alnWrite, ALN_OUT, alnPair, alnPim, pimWrite, alnConserved, alnTranslate, fastaCheck, NAMEMAX} from '../lib/alignment.js';
 import {CODES, SEQ_TO, seqSend} from '../lib/seq.js';
 
+const EBI = 'https://www.ebi.ac.uk/jdispatcher/msa/clustalo';  /* Job Dispatcher, sinds 2024 het adres van de EBI-tools */
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
 const PIMMAX = 60;  /* sequenties in de matrix: 60 x 60 cellen is wat een scherm nog toont */
@@ -192,7 +198,7 @@ export default {
       gap: st['al-gap'] != null ? String(st['al-gap']) : '', from: st['al-from'] != null ? String(st['al-from']) : '', to: st['al-to'] != null ? String(st['al-to']) : '',
       xf: st['al-xf'] != null ? String(st['al-xf']) : 'fasta', gm: st['al-gm'] != null ? String(st['al-gm']) : 'ign',
       pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false,
-      ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
+      ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, EBI, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
   },
   computed: {
     parsed() { return parseAlignment(this.txt); },
@@ -201,6 +207,13 @@ export default {
     prepRows() {
       const p = this.prep, t = this.t;
       return [[t('Sequenties in de schone FASTA'), N(p.n)], [t('Type'), p.type === 'nt' ? t('DNA/RNA') : p.type === 'aa' ? t('eiwit') : '–']];
+    },
+    ebiSteps() {
+      const h = this.tHtml;
+      return [h('Kopieer de schone FASTA en open Clustal Omega bij EBI.'),
+        h('Plak de sequenties, kies DNA of eiwit en laat het uitvoerformaat op <b>ClustalW with character counts</b> staan.'),
+        h('Download na afloop de uitlijning (<b>.aln-clustal_num</b>) en open die hieronder; LabKit rekent de identiteitsmatrix zelf uit.'),
+        h('Bewaar ook de <b>.pim</b> (identiteitsmatrix) en de <b>.dnd</b> (gidsboom, Newick) bij je resultaten.')];
     },
     /* per controle een of twee zinnen, elk een eigen sleutel; namen en tekens van de gebruiker via uv() */
     prepNotes() {
@@ -473,6 +486,7 @@ export default {
     async copyPrep() {
       try { await navigator.clipboard.writeText(this.prep.clean); this.copied = this.t('Gekopieerd.'); } catch (e) { this.copied = this.t('Kopiëren geblokkeerd.'); }
     },
+    openExt(u) { openExt(u); },
     savePrep() { saveBlob('sequenties.fasta', new Blob([this.prep.clean], {type: 'text/plain'})).catch(() => {}); },
     onFile(e) { this.readFile(e, 'txt'); },
     readFile(e, k) {

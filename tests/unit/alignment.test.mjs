@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import '../../src/lib/helpers.js';
-import {parseAlignment, alnTrim, alnWrite, alnPim, alnPair, pimParse, pimWrite, alnProfile, alnConserved, alnTranslate, fastaCheck, ALN_OUT} from '../../src/lib/alignment.js';
+import {parseAlignment, alnTrim, alnWrite, alnPim, alnPair, pimParse, pimWrite, alnProfile, alnConserved, alnTranslate, fastaCheck, gcgCheck, ALN_OUT} from '../../src/lib/alignment.js';
 
 const fx = f => readFileSync(new URL('../fixtures/aln/' + f, import.meta.url), 'utf8');
 
@@ -96,4 +96,39 @@ test('FASTA klaarmaken: de schone FASTA', () => {
   assert.equal(r.n, 2);
   assert.equal(fastaCheck('>x\n' + 'A'.repeat(130) + '\n').clean.split('\n')[1].length, 60);
   assert.equal(fastaCheck('>a\nACGT\n>b\nACGA\n').type, 'nt');
+});
+
+test('omzetten: Clustal → FASTA → Clustal is verliesvrij, ook de * : . -regel', () => {
+  for (const f of ['hedgehog.aln', 'opuntia.aln', 'clustalw.aln', 'small_pim.aln']) {
+    const a = parseAlignment(fx(f)), b = parseAlignment(alnWrite(parseAlignment(alnWrite(a, 'fasta')), 'clustal'));
+    assert.equal(b.format, 'clustal');
+    assert.deepEqual([b.names, b.seqs, b.len], [a.names, a.seqs, a.len], f);
+    if (f !== 'small_pim.aln') assert.equal(b.cons, a.cons, f);  /* Clustal's eigen regel komt terug */
+  }
+});
+
+test('omzetten: elk formaat naar elk formaat', () => {
+  const fmts = Object.keys(ALN_OUT);
+  assert.deepEqual(fmts.sort(), ['clustal', 'fasta', 'msf', 'nexus', 'phylip', 'pir']);
+  /* one.phy niet: twee rijen heten B_subtilis, en Clustal, MSF en NEXUS kennen een rij aan zijn naam */
+  for (const f of ['opuntia.aln', 'W_prot.msf', 'clustalw.pir', 'test_Nexus_input.nex', 'opuntia.fasta']) {
+    const a = parseAlignment(fx(f));
+    for (const x of fmts) for (const y of fmts) {
+      const b = parseAlignment(alnWrite(parseAlignment(alnWrite(a, x)), y));
+      assert.equal(b.format, y);
+      assert.deepEqual(b.seqs, a.seqs, f + ' ' + x + ' ' + y);
+      assert.deepEqual(b.names, a.names.map(n => n.replace(/\s+/g, '_')), f + ' ' + x + ' ' + y);
+      assert.deepEqual(b.warn, [], f + ' ' + x + ' ' + y);
+    }
+  }
+});
+
+test('MSF: GCG-controlegetal zoals in W_prot.msf', () => {
+  const a = parseAlignment(fx('W_prot.msf'));
+  assert.equal(gcgCheck(a.seqs[0]), 7236);
+  assert.equal(gcgCheck(a.seqs[10]), 7331);
+  assert.match(alnWrite(a, 'msf'), /Name: W\*01:01:01:01 +Len: +99 +Check: +7236/);
+  /* NEXUS: een naam met een _ of een spatie blijft hetzelfde (tussen aanhalingstekens) */
+  const n = parseAlignment(alnWrite({names: ["a_b", "c'd"], seqs: ['AC', 'AG'], len: 2}, 'nexus'));
+  assert.deepEqual(n.names, ['a_b', "c'd"]);
 });

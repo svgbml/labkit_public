@@ -360,15 +360,45 @@ export function alnTrim(a, o) {
 }
 
 /* ---------- Schrijven (S177): FASTA, Clustal en PHYLIP ---------- */
-export const ALN_OUT = {fasta: ['FASTA', 'fasta'], clustal: ['Clustal', 'aln'], phylip: ['PHYLIP', 'phy']};
+export const ALN_OUT = {fasta: ['FASTA', 'fasta'], clustal: ['Clustal', 'aln'], phylip: ['PHYLIP', 'phy'],
+  nexus: ['NEXUS', 'nex'], msf: ['GCG MSF', 'msf'], pir: ['PIR/NBRF', 'pir']};
 const nm = n => n.replace(/\s+/g, '_');
+/* GCG-controlegetal van één sequentie (GCG Wisconsin Package; zoals Bio.SeqUtils.CheckSum.gcg) */
+export function gcgCheck(s) {
+  let t = 0;
+  for (let i = 0; i < s.length; i++) t += (i % 57 + 1) * s.toUpperCase().charCodeAt(i);
+  return t % 10000;
+}
+/* NEXUS-naam: tussen aanhalingstekens zodra er iets anders dan letters, cijfers of een punt in zit
+   (de lezer maakt van een kale _ een spatie) */
+const nxQ = n => (/^[A-Za-z0-9.]+$/.test(n) ? n : "'" + n.replace(/'/g, "''") + "'");
+/* S177, S187: wegschrijven in elk formaat dat parseAlignment leest; terug inlezen geeft dezelfde
+   namen (spaties worden _) en sequenties */
 export function alnWrite(a, fmt) {
-  const names = a.names.map(nm), NL = '\n';
-  if (fmt === 'fasta') return a.names.map((n, i) => '>' + n + NL + (a.seqs[i].match(/.{1,60}/g) || ['']).join(NL)).join(NL) + NL;
+  const names = a.names.map(nm), NL = '\n', nt = alnType(a) === 'nt';
+  const blocks = (s, n) => s.match(new RegExp('.{1,' + n + '}', 'g')) || [''];
+  if (fmt === 'fasta') return names.map((n, i) => '>' + n + NL + blocks(a.seqs[i], 60).join(NL)).join(NL) + NL;
+  if (fmt === 'pir') return names.map((n, i) => '>' + (nt ? 'DL' : 'P1') + ';' + n + NL + n + NL + blocks(a.seqs[i] + '*', 60).join(NL)).join(NL) + NL;
   const w = Math.max(10, ...names.map(n => n.length)) + 1;
   if (fmt === 'phylip') return ' ' + a.seqs.length + ' ' + a.len + NL + names.map((n, i) => n.padEnd(w) + a.seqs[i]).join(NL) + NL;
+  if (fmt === 'nexus') {
+    const q = names.map(nxQ), qw = Math.max(...q.map(n => n.length)) + 1;
+    return '#NEXUS' + NL + NL + 'BEGIN DATA;' + NL + '  DIMENSIONS NTAX=' + a.seqs.length + ' NCHAR=' + a.len + ';' + NL
+      + '  FORMAT DATATYPE=' + (nt ? 'DNA' : 'PROTEIN') + ' MISSING=? GAP=-;' + NL + '  MATRIX' + NL
+      + q.map((n, i) => '    ' + n.padEnd(qw) + a.seqs[i]).join(NL) + NL + '  ;' + NL + 'END;' + NL;
+  }
+  if (fmt === 'msf') {
+    /* gaten als '.', blokken van 50 in groepjes van 10, zoals GCG */
+    const g = a.seqs.map(s => s.replace(/-/g, '.')), ck = g.map(gcgCheck), tot = ck.reduce((x, y) => x + y, 0) % 10000;
+    let o = '!!' + (nt ? 'NA' : 'AA') + '_MULTIPLE_ALIGNMENT 1.0' + NL + NL + '  uitlijning.msf  MSF: ' + a.len + '  Type: ' + (nt ? 'N' : 'P') + '  Check: ' + tot + ' ..' + NL + NL
+      + names.map((n, i) => ' Name: ' + n.padEnd(w) + 'Len: ' + String(a.len).padStart(6) + '  Check: ' + String(ck[i]).padStart(4) + '  Weight: 1.00').join(NL) + NL + NL + '//' + NL;
+    for (let c = 0; c < a.len; c += 50) o += NL + names.map((n, i) => '  ' + n.padEnd(w) + blocks(g[i].slice(c, c + 50), 10).join(' ')).join(NL) + NL;
+    return o;
+  }
+  /* Clustal, met de * : . -regel onder elk blok zoals Clustal hem schrijft (alnConservation) */
+  const cons = alnConservation(a);
   let o = 'CLUSTAL multiple sequence alignment' + NL + NL;
-  for (let c = 0; c < a.len || !c; c += 60) o += names.map((n, i) => n.padEnd(w) + a.seqs[i].slice(c, c + 60)).join(NL) + NL + NL;
+  for (let c = 0; c < a.len || !c; c += 60) o += names.map((n, i) => n.padEnd(w) + a.seqs[i].slice(c, c + 60)).join(NL) + NL + (' '.repeat(w) + cons.slice(c, c + 60)).trimEnd() + NL + NL;
   return o;
 }
 

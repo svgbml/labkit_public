@@ -5857,5 +5857,10 @@
 "Sommige programma's en formaten kappen ze af (PHYLIP al na {#} tekens).": "Some programs and formats cut them short (PHYLIP after only {#} characters).",
 "Kopregel zonder sequentie: {*}.": "Header line without a sequence: {*}.",
 "Die is weggelaten.": "It was left out.",
-"Tekst vóór de eerste kopregel is weggelaten.": "Text before the first header line was left out."
+"Tekst vóór de eerste kopregel is weggelaten.": "Text before the first header line was left out.",
+"Clustal Omega bij EBI openen": "Open Clustal Omega at EBI",
+"Kopieer de schone FASTA en open Clustal Omega bij EBI.": "Copy the clean FASTA and open Clustal Omega at EBI.",
+"Plak de sequenties, kies DNA of eiwit en laat het uitvoerformaat op <b>ClustalW with character counts</b> staan.": "Paste the sequences, choose DNA or protein and leave the output format at <b>ClustalW with character counts</b>.",
+"Download na afloop de uitlijning (<b>.aln-clustal_num</b>) en open die hieronder; LabKit rekent de identiteitsmatrix zelf uit.": "When the job is done, download the alignment (<b>.aln-clustal_num</b>) and open it below; LabKit computes the identity matrix itself.",
+"Bewaar ook de <b>.pim</b> (identiteitsmatrix) en de <b>.dnd</b> (gidsboom, Newick) bij je resultaten.": "Also keep the <b>.pim</b> (identity matrix) and the <b>.dnd</b> (guide tree, Newick) with your results."
 }
