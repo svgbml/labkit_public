@@ -126,7 +126,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | G3 🔨 (S79 deels) | Opus 5.5 | S75–S79 (S75, S78 are Opus 5) | G2 | anything except Q2, C2 |
 | **Wave 5: charts, data, rework, workflows** | | | | |
 | C1a ✅ | Opus 5.5 | S80 chart style system, then S81–S84 (Opus 5 / Sonnet) | K3 | — |
-| C1b | Opus 5 | S85–S88 | C1a | anything except R3 |
+| C1b ✅ | Opus 5 | S85–S88 | C1a | anything except R3 |
 | C2 | Opus 5.5 | S89–S90 figure maker (new tool, Vue) | C1b | anything except G3 |
 | C3 | Opus 5 | S91–S93, S96: imports and core-calculator extras | C1b | anything except R3 |
 | C4 | Sonnet | S94, S95 | C3 | anything |
