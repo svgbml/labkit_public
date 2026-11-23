@@ -61,6 +61,24 @@
         <div class="row" style="margin-top:10px"><button type="button" class="primary" id="al-exp" :disabled="!m.names.length" @click="exportAln">{{ t('Uitlijning opslaan') }}</button>
           <button type="button" id="al-cpy" :disabled="!m.names.length" @click="copyAln">{{ t('Kopieer') }}</button></div>
       </details>
+      <!-- S188: figuur van de uitlijning of een stuk ervan, en een afdrukweergave -->
+      <details class="panel" id="al-fig-d" style="margin-top:12px" @toggle="figOpen = $event.target.open"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Figuur en afdrukken') }}</summary>
+        <div class="fields" style="margin-top:12px">
+          <lk-field v-model="fgFrom" :label="t('Vanaf kolom')" for-id="al-fg-from" inputmode="numeric"/>
+          <lk-field v-model="fgTo" :label="t('Tot en met kolom')" for-id="al-fg-to" inputmode="numeric"/>
+          <lk-field v-model="fgPer" :label="t('Residuen per regel')" for-id="al-fg-per" inputmode="numeric"/>
+          <lk-field v-model="fgTitle" :label="t('Titel')" for-id="al-fg-title"/>
+          <label class="chk" for="al-fg-cons"><input type="checkbox" id="al-fg-cons" v-model="fgCons"> {{ t('Conserveringsregel meenemen') }}</label>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('De figuur gebruikt het gekozen kleurenschema, de volgorde en het verschil met een referentie zoals de viewer ze nu toont; leeg bij Vanaf en Tot is alles.') }}</p>
+        <lk-kv v-if="fig.W" :rows="figRows" style="margin-top:10px"/>
+        <lk-note v-else kind="warn">{{ t('Er is niets om te tekenen; controleer de kolommen.') }}</lk-note>
+        <div class="row" style="margin-top:10px">
+          <button type="button" class="primary" id="al-fg-png" :disabled="!fig.W" @click="figPng">{{ t('PNG opslaan') }}</button>
+          <button type="button" id="al-fg-svg" :disabled="!fig.W" @click="figSvgSave">{{ t('SVG opslaan') }}</button>
+          <button type="button" id="al-fg-print" :disabled="!fig.W" @click="figPrint">{{ t('Afdrukken') }}</button>
+        </div>
+      </details>
       <!-- S186: reeksen controleren voordat ze naar Clustal Omega bij EBI gaan -->
       <details class="panel" id="al-prep-d" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Invoer voor Clustal Omega klaarmaken') }}</summary>
         <div class="f" style="margin-top:12px"><label for="al-fb">{{ t('Reeksen (FASTA, nog niet uitgelijnd)') }}</label>
@@ -188,6 +206,7 @@ import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile
 import {CODES, SEQ_TO, seqSend} from '../lib/seq.js';
 import {fastaCheck, NAMEMAX} from '../lib/alnprep.js';
 import {alnUngapped, EBI_URL} from '../lib/alnhand.js';
+import {alnFigure, figSvg, figPaint} from '../lib/alnfig.js';
 
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
@@ -204,7 +223,8 @@ export default {
       tr: st['al-tr'] != null ? String(st['al-tr']) : '0', code: st['al-code'] != null ? String(st['al-code']) : '1',
       gap: st['al-gap'] != null ? String(st['al-gap']) : '', from: st['al-from'] != null ? String(st['al-from']) : '', to: st['al-to'] != null ? String(st['al-to']) : '',
       xf: st['al-xf'] != null ? String(st['al-xf']) : 'fasta', gm: st['al-gm'] != null ? String(st['al-gm']) : 'ign',
-      pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false, dnd: st['al-dnd'] != null ? String(st['al-dnd']) : '',
+      pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false, figOpen: false, fgFrom: st['al-fg-from'] != null ? String(st['al-fg-from']) : '', fgTo: st['al-fg-to'] != null ? String(st['al-fg-to']) : '', fgPer: st['al-fg-per'] != null ? String(st['al-fg-per']) : '60',
+      fgTitle: st['al-fg-title'] != null ? String(st['al-fg-title']) : '', fgCons: st['al-fg-cons'] != null ? !!st['al-fg-cons'] : true, dnd: st['al-dnd'] != null ? String(st['al-dnd']) : '',
       fb: st['al-fb'] != null ? String(st['al-fb']) : '', fbt: st['al-fbt'] != null ? String(st['al-fbt']) : 'auto', NAMEMAX, EBI_URL,
       ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
   },
@@ -227,7 +247,15 @@ export default {
         ['<span class="mono">.pim</span>', t('identiteit per paar'), t('Niet nodig: de Identiteitsmatrix hieronder rekent hetzelfde uit en slaat hem op als .pim.')],
         ['<span class="mono">.dnd</span>', t('de gidsboom (Newick)'), t('Bij Gidsboom (.dnd), hieronder: hij wordt bewaard; tekenen kan nog niet.')]];
     },
+    /* S188: de figuur van wat de viewer toont (bijgesneden, vertaald, in de gekozen volgorde en kleuren) */
+    fig() { return this.figOpen ? this.makeFig() : {W: 0}; },
+    figRows() {
+      const f = this.fig;
+      return [[this.t('Kolommen'), N(f.from) + ' – ' + N(f.to)], [this.t('Blokken'), N(f.blocks) + ' × ' + N(f.per) + ' ' + this.t('residuen')],
+        [this.t('Afmeting'), N(f.W) + ' × ' + N(f.H) + ' px']];
+    },
     codes() { return CODES; },
+
     outFmts() { return ALN_OUT; },
     outText() { return alnWrite(this.m, this.xf in ALN_OUT ? this.xf : 'fasta'); },
     /* S178: identiteit van alle paren; alleen als het blok open staat */
@@ -467,6 +495,44 @@ export default {
     copy(x) {
       const done = () => window.lkToast && window.lkToast(this.t('Gekopieerd.'));
       try { navigator.clipboard.writeText(x).then(done, () => window.lkToast && window.lkToast(this.t('Geblokkeerd'))); } catch (e) { if (window.lkToast) window.lkToast(this.t('Geblokkeerd')); }
+    },
+    /* S188: de figuur van wat de viewer toont (bijgesneden, vertaald, in de gekozen volgorde en kleuren); vers gebouwd, want de kleuren hangen aan het thema */
+    makeFig() {
+      const m = this.m, f = Math.round(num(this.fgFrom)), l = Math.round(num(this.fgTo)), per = Math.round(num(this.fgPer)), tab = this.tab;
+      if (!m.names.length || !m.len) return {W: 0};
+      return alnFigure(m, {from: f >= 1 ? f : 1, to: l >= 1 ? l : m.len, per: per >= 1 ? per : 60, order: this.order, seqs: this.disp, title: this.fgTitle.trim(),
+        cls: tab === undefined ? null : (i, c) => alnCls(tab, c, this.disp[i][c]), fill: k => this.figFill(k),
+        cons: this.fgCons ? this.cons : '', consName: this.t('Conservering')});
+    },
+    /* de kleur van een klasse op wit papier: de tint uit de viewer, in een donker thema opgelicht zodat zwarte letters leesbaar blijven */
+    figFill(k) {
+      const memo = this.fm || (this.fm = {}), key = (document.documentElement.getAttribute('data-theme') || '') + this.cbs + k;
+      if (key in memo) return memo[key];
+      const c = this.fcv || (this.fcv = document.createElement('canvas')), x = c.getContext('2d', {willReadFrequently: true});
+      c.width = c.height = 1; x.clearRect(0, 0, 1, 1); x.fillStyle = this.shade(k); x.fillRect(0, 0, 1, 1);
+      let [r, g, b] = x.getImageData(0, 0, 1, 1).data;
+      const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+      if (lum < 0.55) { const w = (0.8 - lum) / (1 - lum); r += (255 - r) * w; g += (255 - g) * w; b += (255 - b) * w; }
+      return memo[key] = 'rgb(' + Math.round(r) + ',' + Math.round(g) + ',' + Math.round(b) + ')';
+    },
+    figPng() {
+      const f = this.makeFig(), cv = document.createElement('canvas');   /* alleen voor het bestand, nooit in de pagina */
+      figPaint(cv, f, Math.min(2, 16000 / Math.max(f.W, f.H)));
+      cv.toBlob(bl => { if (bl) saveBlob('uitlijning.png', bl).catch(() => {}); }, 'image/png');
+    },
+    figSvgSave() { saveBlob('uitlijning.svg', new Blob([figSvg(this.makeFig())], {type: 'image/svg+xml'})).catch(() => {}); },
+    /* afdrukken: de figuur komt in een los vak op <body>, de rest van de pagina is dan verborgen (app.css, @media print) */
+    printSetup() {
+      let b = document.getElementById('al-printbox');
+      if (!b) { b = document.createElement('div'); b.id = 'al-printbox'; b.setAttribute('data-notr', ''); document.body.appendChild(b); }
+      b.innerHTML = figSvg(this.makeFig());
+      document.body.classList.add('al-printing');
+    },
+    figPrint() {
+      this.printSetup();
+      const done = () => { document.body.classList.remove('al-printing'); window.removeEventListener('afterprint', done); };
+      window.addEventListener('afterprint', done);
+      window.print();
     },
     exportAln() {
       const f = ALN_OUT[this.xf] || ALN_OUT.fasta;

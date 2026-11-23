@@ -5873,5 +5873,16 @@
 "Geblokkeerd": "Blocked",
 "Gidsboom (.dnd)": "Guide tree (.dnd)",
 "Newick-tekst van de boom": "Newick text of the tree",
-"De boom wordt bewaard en gaat mee in het projectbestand; hier tekenen kan nog niet.": "The tree is kept and goes into the project file; drawing it here is not possible yet."
+"De boom wordt bewaard en gaat mee in het projectbestand; hier tekenen kan nog niet.": "The tree is kept and goes into the project file; drawing it here is not possible yet.",
+"Figuur en afdrukken": "Figure and print",
+"Residuen per regel": "Residues per line",
+"Conserveringsregel meenemen": "Include the conservation line",
+"De figuur gebruikt het gekozen kleurenschema, de volgorde en het verschil met een referentie zoals de viewer ze nu toont; leeg bij Vanaf en Tot is alles.": "The figure uses the colour scheme, order and difference with a reference as the viewer shows them now; leaving From and To empty means everything.",
+"Er is niets om te tekenen; controleer de kolommen.": "There is nothing to draw; check the columns.",
+"PNG opslaan": "Save PNG",
+"SVG opslaan": "Save SVG",
+"Kolommen": "Columns",
+"Blokken": "Blocks",
+"residuen": "residues",
+"Afmeting": "Size"
 }

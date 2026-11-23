@@ -2158,5 +2158,27 @@ def _(pg):
     return out
 
 
+@case('Alignment bekijken', 'Figuur: blokken, residuen en één afgedrukte pagina', "tests/fixtures/aln/hedgehog.aln (Biopython-testsuite, 5 sequenties × 447 kolommen): bij n residuen per regel zijn het ceil(447/n) blokken en staat elke kolom van elke sequentie en van de conserveringsregel precies één keer in de figuur; afdrukken (print-CSS, A4) geeft één pagina; het eigen telwerk is de wet, geen externe referentie")
+def _(pg):
+    import re, math
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'hedgehog.aln'
+    pg.evaluate("__go('aln')"); pg.evaluate("t=>{__set('al-in',t);__set('al-fg-from','');__set('al-fg-to','')}", f.read_text(encoding='utf-8'))
+    pg.evaluate("document.getElementById('al-fig-d').open=true"); pg.wait_for_timeout(300)
+    n, L = pg.evaluate("[__alnVm.m.names.length, __alnVm.m.len]")
+    out = []
+    for per in (50, 100):
+        pg.evaluate("p=>__set('al-fg-per',p)", str(per)); pg.wait_for_timeout(150)
+        r = pg.evaluate("()=>{const f=__alnVm.makeFig(); return [f.blocks, f.texts.filter(t=>t[3].mono).reduce((s,t)=>s+t[2].length,0)]}")
+        out += [(f'{per} per regel: blokken', r[0], math.ceil(L / per), 0), (f'{per} per regel: residuen in de figuur', r[1], (n + 1) * L, 0)]
+    pg.evaluate("__set('al-fg-from','101');__set('al-fg-to','300');__set('al-fg-per','50')"); pg.wait_for_timeout(150)
+    out.append(('deel 101-300: residuen', pg.evaluate("__alnVm.makeFig().texts.filter(t=>t[3].mono).reduce((s,t)=>s+t[2].length,0)"), (n + 1) * 200, 0))
+    pg.evaluate("__set('al-fg-from','');__set('al-fg-to','');__set('al-fg-per','60')"); pg.wait_for_timeout(150)
+    pg.evaluate("__alnVm.printSetup()"); pg.emulate_media(media='print')
+    pdf = pg.pdf(format='A4', print_background=True)
+    out.append(('afdruk: pagina\'s', len(re.findall(rb'/Type\s*/Page[^s]', pdf)), 1, 0))
+    pg.emulate_media(media='screen'); pg.evaluate("document.body.classList.remove('al-printing');__set('al-in','');__set('al-fg-per','60')")
+    return out
+
+
 if __name__ == '__main__':
     main()
