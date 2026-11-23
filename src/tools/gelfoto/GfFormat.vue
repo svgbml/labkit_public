@@ -89,6 +89,7 @@
         <button type="button" class="primary" id="gf-dl" v-if="dlOn" @click="download">{{ t('Downloaden') }}</button>
         <button type="button" id="gf-copy" @click="copy">{{ t('Kopieer afbeelding') }}</button>
         <button type="button" id="gf-copycap" :title="t('Afbeelding met de figuurlegenda eronder, om in je labjournaal te plakken')" @click="copyCap">{{ t('Kopieer met onderschrift') }}</button>
+        <button type="button" id="gf-tofig" :title="t('Zet de gel in de Figuurmaker, om er met andere uitkomsten één figuur van te maken')" @click="toFig">→ {{ t('Figuur') }}</button>
         <button type="button" id="gf-svg" :title="t('De gel als afbeelding, de tekst als bewerkbare tekst (Inkscape, Illustrator)')" @click="svg">SVG</button>
       </div>
       <p id="gf-exmsg" style="font-size:12.5px;color:var(--muted);margin:8px 0 0">{{ msg || t('De gel zelf blijft onbewerkt: tekst, streepjes en metingen staan altijd in de witte marge eromheen. De blauwe en oranje markeringen in de editor komen niet in de export.') }}</p>
@@ -195,6 +196,12 @@ export default {
       catch (err) { this.msg = this.t(err && err.code === 'declined' ? 'Download geannuleerd.' : 'Downloaden lukte niet hier.'); }
     },
     /* afbeelding plus legenda (S79): HTML voor Word en OneNote, platte tekst als terugval */
+    /* naar de Figuurmaker (S89): de export op 3× (300 dpi) en de SVG */
+    async toFig() {
+      if (!gf.src) return;
+      await figAddCanvas(gfRender(true, 3), 3, gf.title || this.t('Gelfoto'), gfSvg());
+      this.msg = this.t('Toegevoegd aan de Figuurmaker.');
+    },
     async copyCap() {
       if (!gf.src) return;
       const c = gfRender(true, +this.f['gx-scale']), url = c.toDataURL('image/png'), cap = (document.getElementById('gf-legend') || {}).textContent || '';

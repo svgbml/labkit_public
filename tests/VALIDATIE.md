@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-23 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 496 van 496 controles binnen tolerantie.**
+**Resultaat: 500 van 500 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -186,6 +186,10 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Statistiek | Boxplot, viool en punten | bovenste snorhaar | 6,11 | 6,11 | +0.00% | ✅ | R 4.x, datasets::PlantGrowth (ctrl): quantile(weight[group=="ctrl"]) geeft 25 % 4,5500, 50 % 5,1550, 75 % 5,2925 (type 7); bw.nrd0 = 0,9·min(SD 0,5831, IQR/1,34 0,5541)·10^(−1/5) = 0,3147; geen uitschieters: de bovengrens 5,2925 + 1,5 × 0,7425 = 6,4063 ligt boven 6,11 |
 | Statistiek | Boxplot, viool en punten | bandbreedte viool | 0,3146 | 0,3147 | +0.00% | ✅ | R 4.x, datasets::PlantGrowth (ctrl): quantile(weight[group=="ctrl"]) geeft 25 % 4,5500, 50 % 5,1550, 75 % 5,2925 (type 7); bw.nrd0 = 0,9·min(SD 0,5831, IQR/1,34 0,5541)·10^(−1/5) = 0,3147; geen uitschieters: de bovengrens 5,2925 + 1,5 × 0,7425 = 6,4063 ligt boven 6,11 |
 | Statistiek | Boxplot, viool en punten | vier grafiektypen getekend | 1 | 1 | +0.00% | ✅ | R 4.x, datasets::PlantGrowth (ctrl): quantile(weight[group=="ctrl"]) geeft 25 % 4,5500, 50 % 5,1550, 75 % 5,2925 (type 7); bw.nrd0 = 0,9·min(SD 0,5831, IQR/1,34 0,5541)·10^(−1/5) = 0,3147; geen uitschieters: de bovengrens 5,2925 + 1,5 × 0,7425 = 6,4063 ligt boven 6,11 |
+| Figuurmaker | Uitkomsten in panelen | twee uitkomsten in de bak | 2 | 2 | +0.00% | ✅ | Zelftest: de standaardcurve (knop → Figuur onder de grafiek) en de demo-gel (→ Figuur in de Gelfoto-editor) komen in de bak (IndexedDB) als PNG van 300 dpi met SVG; het eerste paneel krijgt de curve door aanklikken, het tweede de gel; na herladen staan beide nog in hun paneel |
+| Figuurmaker | Uitkomsten in panelen | elk met SVG | 1 | 1 | +0.00% | ✅ | Zelftest: de standaardcurve (knop → Figuur onder de grafiek) en de demo-gel (→ Figuur in de Gelfoto-editor) komen in de bak (IndexedDB) als PNG van 300 dpi met SVG; het eerste paneel krijgt de curve door aanklikken, het tweede de gel; na herladen staan beide nog in hun paneel |
+| Figuurmaker | Uitkomsten in panelen | PNG op 300 dpi | 300 | 300 | +0.00% | ✅ | Zelftest: de standaardcurve (knop → Figuur onder de grafiek) en de demo-gel (→ Figuur in de Gelfoto-editor) komen in de bak (IndexedDB) als PNG van 300 dpi met SVG; het eerste paneel krijgt de curve door aanklikken, het tweede de gel; na herladen staan beide nog in hun paneel |
+| Figuurmaker | Uitkomsten in panelen | na herladen in de panelen | 2 | 2 | +0.00% | ✅ | Zelftest: de standaardcurve (knop → Figuur onder de grafiek) en de demo-gel (→ Figuur in de Gelfoto-editor) komen in de bak (IndexedDB) als PNG van 300 dpi met SVG; het eerste paneel krijgt de curve door aanklikken, het tweede de gel; na herladen staan beide nog in hun paneel |
 | Centrifuge | rpm → × g | × g | 1957 | 1957 | +0.00% | ✅ | Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g |
 | Centrifuge | × g → rpm | rpm | 5837 | 5837 | +0.00% | ✅ | CASRAI: 4000 × g, r = 10,5 cm → 5837 rpm |
 | Centrifuge | Rotorbalans | n=12 k=5 gebalanceerd | 1 | 1 | +0.00% | ✅ | Som van de plaatsvectoren = 0: opgebouwd uit gelijkmatige p-hoeken met p | n (n = 12, k = 5 → 2 + 3; n = 6, k = 1 en k = 5 kunnen niet) |

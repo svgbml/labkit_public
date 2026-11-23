@@ -91,5 +91,6 @@
  "plasmid": "plasmid",
  "aln": "alignment",
  "seq": "strands",
- "sanger": "chromatogram"
+ "sanger": "chromatogram",
+ "figuur": "figuur"
 }

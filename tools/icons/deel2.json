@@ -30,5 +30,6 @@
  "step-curve": "<path d=\"M4 4v16h16\"/><path d=\"M5 6h4v4h4v4h4v3h3\"/><path d=\"M7 4.5v3M15 12.5v3\"/>",
  "rounding": "<path d=\"M3 16h18\"/><path d=\"M4 14v4M12 14v4M20 14v4\"/><path d=\"M5 11C6 6 12 6 12 11\"/><path d=\"M10 9l2 2 2-2\"/>",
  "plasmid": "<circle cx=\"12\" cy=\"12\" r=\"8\"/><path d=\"M12 4a8 8 0 0 1 6.9 4\"/><path d=\"M18.2 6.6l1.6 1.9-2.5.2\"/>",
- "alignment": "<path d=\"M4 6h6M13 6h7\"/><path d=\"M4 12h9M16 12h4\"/><path d=\"M4 18h3M10 18h10\"/>"
+ "alignment": "<path d=\"M4 6h6M13 6h7\"/><path d=\"M4 12h9M16 12h4\"/><path d=\"M4 18h3M10 18h10\"/>",
+ "figuur": "<rect x=\"3\" y=\"3\" width=\"8\" height=\"8\" rx=\"1\"/><rect x=\"13\" y=\"3\" width=\"8\" height=\"8\" rx=\"1\"/><rect x=\"3\" y=\"13\" width=\"8\" height=\"8\" rx=\"1\"/><rect x=\"13\" y=\"13\" width=\"8\" height=\"8\" rx=\"1\"/>"
 }

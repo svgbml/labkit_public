@@ -28,7 +28,7 @@ const STAGES={
   /* Protocollen */
   pverd:'v',ppip:'v',pprog:'v',stain:'vu',gplan:'v',
   /* Bench */
-  centrifuge:'u',timers:'u',plaat:'v',plan:'v',report:'a',pipkeus:'vu'
+  centrifuge:'u',timers:'u',plaat:'v',plan:'v',report:'a',figuur:'a',pipkeus:'vu'
 };
 const STAGE_NAME={}; STAGE_DEF.forEach(([k,n])=>{ STAGE_NAME[k]=n; });
 const stagesOf=id=>[...(STAGES[id]||'')];

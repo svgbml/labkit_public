@@ -210,6 +210,7 @@ function reportPng(cv,noTitle,poster){ const tool=(cv.closest('section.tool')||{
   if(noTitle&&cv._p){ const cut=34*S, c2=document.createElement('canvas'); c2.width=img.width; c2.height=img.height-cut; c2.getContext('2d').drawImage(img,0,-cut); img=c2; }
   return new Promise(res=>img.toBlob(b=>b.arrayBuffer().then(ab=>res(new Blob([pngDpi(new Uint8Array(ab),300)],{type:'image/png'}))),'image/png')); }
 function reportBtns(){ $$('main canvas').forEach(cv=>{ if(cv.id==='gf-cv') return; const bar=cv.nextElementSibling; if(!bar||!bar.classList.contains('xlbar')) return;
+  if(!bar.querySelector('[data-fig]')) bar.insertAdjacentHTML('beforeend',`<button type="button" class="xlbtn" data-fig title="${esc(trPlain('Zet deze grafiek in de Figuurmaker, om er met andere uitkomsten één figuur van te maken'))}">→ ${trPlain('Figuur')}</button>`);
   if(cv._chart&&cv.id&&!bar.querySelector('[data-ched]')) bar.insertAdjacentHTML('beforeend',`<button type="button" class="xlbtn" data-ched title="${esc(trPlain('Titels, bereik, logaritmische as, legenda en kleuren van deze grafiek; blijft bewaard'))}">✎ ${trPlain('Aanpassen')}</button>`); if(cv._data&&!bar.querySelector('[data-tbl-tog]')) bar.insertAdjacentHTML('beforeend',`<button type="button" class="xlbtn" data-tbl-tog title="${esc(trPlain('Toont of verbergt de getallen achter de grafiek als tabel onder de grafiek'))}">${trPlain(cv._tblOn?'Tabel verbergen':'Tabel tonen')}</button>`); if(cv._tblOn) dataTable(cv); if(!bar.querySelector('[data-poster]')) bar.insertAdjacentHTML('afterbegin',`<button type="button" class="xlbtn" data-poster title="${esc(trPlain('PNG voor een poster: grote letters en dikke lijnen op wit, zes keer de schermresolutie'))}">${trPlain('Poster')}</button>`); if(!bar.querySelector('[data-rep]')) bar.insertAdjacentHTML('afterbegin',`<button type="button" class="xlbtn" data-rep title="${esc(trPlain('PNG op een witte achtergrond met donkere assen, drie keer de schermresolutie (300 dpi), ook in het donkere thema'))}">${trPlain('Download voor verslag (wit, 300 dpi)')}</button>`); const nx=bar.nextElementSibling; if(!SVGSKIP.includes(cv.id)&&!(nx&&nx.classList.contains('pic-bar'))&&!bar.querySelector('[data-xl-svg]')) bar.insertAdjacentHTML('beforeend',`<button type="button" class="xlbtn" data-xl-svg title="${esc(trPlain('Vectorgrafiek op een witte achtergrond, te openen in Inkscape of Illustrator'))}">SVG</button>`); if(cv._p&&!bar.querySelector('[data-rep-nt]')) bar.insertAdjacentHTML('afterbegin',`<label class="chk" style="font-size:12px;margin-right:auto" title="${esc(trPlain('Figuurtitels horen in het onderschrift onder de figuur'))}"><input type="checkbox" data-rep-nt> ${trPlain('zonder titel')}</label>`); }); }
 /* SVG van een grafiek (S82): de tool tekent zichzelf opnieuw, maar met de opnemende tekencontext van 01_pic.js
    in plaats van het canvas; zo komt ook alles mee wat een tool na chart() zelf bijtekent. Zoals reportPng:
@@ -270,6 +271,13 @@ function chEdOpen(cv){ const tool=(cv.closest('section.tool')||{dataset:{}}).dat
   B.querySelector('[data-ok]').addEventListener('click',()=>{ const n={}; B.querySelectorAll('[data-k]').forEach(el=>{ if(el.value.trim()) n[el.dataset.k]=el.value.trim(); });
     const col=(e.col||[]).slice(); B.querySelectorAll('[data-col]').forEach(el=>{ const i=+el.dataset.col; if(touched.has(i)) col[i]=el.value; }); if(col.some(Boolean)) n.col=col; if(ann.length) n.ann=ann; if(runs.length) n.runs=runs;
     const a=jget('lkChartEd',{}); if(Object.keys(n).length) a[cv.id]=n; else delete a[cv.id]; jset('lkChartEd',a); m.close(); redraw(); }); }
+/* naar de Figuurmaker (S89): de PNG zoals "Download voor verslag" (wit, 300 dpi) en waar het kan de SVG */
+async function figFromCanvas(cv){ const sec=cv.closest('section.tool'), name=sec?(sec.querySelector('.tool-head h2')||{}).textContent||'':''; let svg='';
+  if(!SVGSKIP.includes(cv.id)) try{ svg=chartSvg(cv); }catch(x){}
+  const png=await reportPng(cv,false,false), dpr=window.devicePixelRatio||1;
+  return figAdd({png,svg,w:cv._p?cv._p.W:Math.round(cv.width/dpr),h:cv._p?cv._p.H:Math.round(cv.height/dpr),name}); }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-fig]'); if(!b) return; const cv=b.parentNode.previousElementSibling; if(!cv||cv.tagName!=='CANVAS') return;
+  figFromCanvas(cv).then(()=>flashBtn(b,'Toegevoegd')).catch(()=>flashBtn(b,'Lukte niet')); });
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-ched]'); if(!b) return; const cv=b.parentNode.previousElementSibling; if(cv&&cv.tagName==='CANVAS') chEdOpen(cv); });
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-poster]'); if(!b) return; const cv=b.parentNode.previousElementSibling; if(!cv||cv.tagName!=='CANVAS'||!cv.width) return; reportPng(cv,false,true).then(blob=>saveBlob(`${(cv.closest('section.tool')||{dataset:{}}).dataset.tool||'grafiek'}-poster.png`,blob)).catch(()=>{}); });
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-rep]'); if(!b) return; const bar=b.parentNode, cv=bar.previousElementSibling; if(!cv||cv.tagName!=='CANVAS'||!cv.width) return; const nt=bar.querySelector('[data-rep-nt]'); reportPng(cv,nt&&nt.checked).then(blob=>saveBlob(`${(cv.closest('section.tool')||{dataset:{}}).dataset.tool||'grafiek'}-verslag.png`,blob)).catch(()=>{}); });
@@ -277,6 +285,7 @@ document.addEventListener('click',e=>{ const b=e.target.closest('[data-rep]'); i
 /* alles hierboven ook als globale naam, live (zie src/lib/global.js) */
 live({
   chEdOpen: [() => chEdOpen, v => { chEdOpen = v; }],
+  figFromCanvas: [() => figFromCanvas, v => { figFromCanvas = v; }],
   QR_ECC: () => QR_ECC,
   QR_BLK: () => QR_BLK,
   qrRaw: [() => qrRaw, v => { qrRaw = v; }],

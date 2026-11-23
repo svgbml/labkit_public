@@ -325,7 +325,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S86 | 126, 131 | Plate heatmaps and toggleable data tables under charts | ✅ Plaatheatmap met uitschieters (Tukey) onder de ELISA-grafiek (`plateHeat`/`plateOut`) en knop Tabel tonen onder elke grafiek; qPCR-plaat heeft geen meetwaarden, dus daar geen heatmap | — |
 | S87 | 132, 133 | Chart annotations and overlaying several runs | ✅ Aantekeningen (tekst, pijl, lijnen) en eerdere runs in het venster Grafiek aanpassen; ook in PNG en SVG. | — |
 | S88 | 134, 135 | Colour-blind preview and poster export | ✅ Kleurenblindheid nabootsen in Instellingen (CSS-filter) en een Poster-knop bij elke grafiek. | — |
-| S89 | 121 | Figure maker part 1: canvas, drop outputs from tools | Panels placed | Opus 5.5 |
+| S89 | 121 | Figure maker part 1: canvas, drop outputs from tools | ✅ Nieuwe tool *Figuurmaker* (`figuur`, `Figuur.vue`): knop *→ Figuur* onder elke grafiek (`figFromCanvas`: PNG zoals *Download voor verslag*, 300 dpi, plus SVG) en in de Gelfoto-editor (`gf-tofig`); de uitkomsten staan in een bak in IndexedDB (`src/tools/figuur/store.js`, laatste 24). Raster 1×2, 2×1, 2×2, 1×3, 3×1 of 2×3 (`fig-lay`); een uitkomst in een paneel slepen of eerst aanklikken en dan het paneel; de indeling blijft bewaard (`lkFig`). Getest in `tests/validate.py` | — |
 | S90 | 121 | Figure maker part 2: A–D lettering, alignment, PNG/PDF/SVG export | 600 dpi export | Opus 5 |
 | S91 | 136 | Plate-reader import wizard part 1: parser for 3 formats *(partly there: Standaardcurve reads a pasted plate grid)* | Test files parse | Opus 5 |
 | S92 | 136 | Import wizard part 2: map wells → standard curve, ELISA, Z′ | Data lands in the tool | Opus 5 |

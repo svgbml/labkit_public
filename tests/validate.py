@@ -644,6 +644,20 @@ def _(pg):
             ('uitschieters', len(b['out']), 0, 0), ('bovenste snorhaar', b['hi'], 6.11, 0.0005), ('bandbreedte viool', h, 0.31465, 0.001)] + \
            [('vier grafiektypen getekend', int(kinds == 'box:true,violin:true,dots:true,bar:true'), 1, 0)]
 
+@case('Figuurmaker', 'Uitkomsten in panelen', 'Zelftest: de standaardcurve (knop → Figuur onder de grafiek) en de demo-gel (→ Figuur in de Gelfoto-editor) komen in de bak (IndexedDB) als PNG van 300 dpi met SVG; het eerste paneel krijgt de curve door aanklikken, het tweede de gel; na herladen staan beide nog in hun paneel')
+def _(pg):
+    pg.evaluate("(async()=>{ for(const e of await figList()) await figDel(e.id); localStorage.removeItem('lkFig'); })()"); pg.wait_for_timeout(300)
+    pg.evaluate("__go('curve')"); pg.wait_for_timeout(400)
+    pg.evaluate("document.querySelector('#t-curve [data-fig]').click()"); pg.wait_for_timeout(1500)
+    pg.evaluate("__go('gelfoto'); gfDemo(); document.getElementById('gf-tofig').click()"); pg.wait_for_timeout(1500)
+    info = pg.evaluate("(async()=>{ const a=await figList(); const dpi=async b=>{ const u=new Uint8Array(await b.arrayBuffer()); for(let i=8;i<u.length-21;i++) if(u[i]===0x70&&u[i+1]===0x48&&u[i+2]===0x59&&u[i+3]===0x73) return Math.round(((u[i+4]<<24)|(u[i+5]<<16)|(u[i+6]<<8)|u[i+7])*0.0254); return 0; }; return [a.length, a.every(e=>/<svg[\\s>]/.test(e.svg||'')), await dpi(a[0].png)]; })()")
+    pg.evaluate("__go('figuur')"); pg.wait_for_timeout(500)
+    pg.evaluate("(()=>{ const it=document.querySelectorAll('#fig-tray .fig-item'), sl=document.querySelectorAll('.fig-slot'); it[0].click(); sl[0].click(); it[1].click(); sl[1].click(); })()"); pg.wait_for_timeout(300)
+    pg.reload(); pg.wait_for_timeout(1200); pg.evaluate(HELPERS)
+    placed = pg.evaluate("document.querySelectorAll('.fig-slot img').length")
+    pg.evaluate("(async()=>{ for(const e of await figList()) await figDel(e.id); localStorage.removeItem('lkFig'); })()"); pg.wait_for_timeout(300)
+    return [('twee uitkomsten in de bak', info[0], 2, 0), ('elk met SVG', int(info[1]), 1, 0), ('PNG op 300 dpi', info[2], 300, 0.01), ('na herladen in de panelen', placed, 2, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

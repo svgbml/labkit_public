@@ -81,6 +81,7 @@ import Hwe from './tools/Hwe.vue';
 import Rmp from './tools/Rmp.vue';
 import Ystr from './tools/Ystr.vue';
 import Plasmid from './tools/Plasmid.vue';
+import Figuur from './tools/Figuur.vue';
 import Aln from './tools/Aln.vue';
 import Seq from './tools/Seq.vue';
 import Sanger from './tools/Sanger.vue';
@@ -132,6 +133,8 @@ export function start() {
   mountTool('#dg-app', Digest);
   mountTool('#pl-app', Plasmid);
   calc.plasmid = () => {};
+  mountTool('#fig-app', Figuur);
+  calc.figuur = () => {};
   mountTool('#al-app', Aln);
   calc.aln = () => {};
   mountTool('#sg-app', Sanger);
