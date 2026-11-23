@@ -147,7 +147,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | SQ2 ✅ | Opus 5 | S195, S198, then S196, S197 (Sonnet): NCBI switch, cache, lookups | SQ1 | anything |
 | SA1a ✅ | Opus 5 | S147–S152 chromatogram reader (S149, S151, S152 by Sonnet) | K3 | anything |
 | SA1b ✅ | Opus 5 | S153–S157 (S153, S154, S156, S157 by Sonnet) | SA1a | anything |
-| SA2 | Opus 5.5 | S158–S161 (S159, S161 are Opus 5): alignment to the reference, assay format | SA1b | anything |
+| SA2 ✅ | Opus 5.5 | S158–S161 (S159, S161 are Opus 5): alignment to the reference, assay format | SA1b | anything |
 | SA3 | Sonnet | S162, S164–S168 (S166 by Haiku): batch and HIrisPlex-S sheet | SA2 | anything |
 | SA4 | Opus 5 | S163, S169, then S199 and S200–S201 (Sonnet) | SA3, SQ2 | anything |
 | AL1 ✅ | Opus 5.5 | S170–S171 alignment parsers and viewer | K3 | anything |
