@@ -578,7 +578,7 @@ def _(pg):
     return [('Scherm: doorzichtig', int(out['scherm'][0].endswith(',0')), 1, 0), ('Verslag: wit', int(out['verslag'][0] == '255,255,255,255'), 1, 0),
             ('Publicatie: wit', int(out['publicatie'][0] == '255,255,255,255'), 1, 0), ('Publicatie: zwart, geen raster', int(out['publicatie'][1] == '["#000000",""]'), 1, 0)]
 
-@case('Standaardcurve', 'Grafiek aanpassen (bewaard per grafiek)', 'Zelftest: in het venster ✎ van de standaardcurve titel, logaritmische x-as, y-bereik 0–2 en legenda rechtsonder kiezen; de keuze staat per canvas-id in lkChartEd, blijft na herladen gelden (de grafiek tekent anders dan zonder), en "Terug naar standaard" haalt hem weg')
+@case('Standaardcurve', 'Grafiek aanpassen (bewaard per grafiek)', 'Zelftest: in het venster ✎ van de standaardcurve titel, logaritmische x-as, y-bereik 0–2 en legenda rechtsonder kiezen; de keuze staat per canvas-id in lkChartEd, geldt ook bij opnieuw tekenen (de grafiek tekent anders dan zonder), en "Terug naar standaard" haalt hem weg')
 def _(pg):
     pg.evaluate("localStorage.removeItem('lkChartEd'); __go('curve')"); pg.wait_for_timeout(400)
     img0 = pg.evaluate("document.getElementById('s-cv').toDataURL()")
@@ -586,16 +586,26 @@ def _(pg):
     pg.evaluate("""(()=>{ const B=document.querySelector('.lk-modal'); const set=(k,v)=>{ const el=B.querySelector('[data-k='+k+']'); el.value=v; };
       set('ti','Mijn ijklijn'); set('lx','log'); set('ymin','0'); set('ymax','2'); set('lg','br'); B.querySelector('[data-ok]').click(); })()"""); pg.wait_for_timeout(300)
     saved = pg.evaluate("JSON.stringify(JSON.parse(localStorage.getItem('lkChartEd'))['s-cv'])")
-    pg.wait_for_timeout(800)
-    pg.goto('about:blank'); pg.goto(URL + '#curve'); pg.wait_for_timeout(900); pg.evaluate(HELPERS)
+    pg.evaluate("__go('verdunning')"); pg.wait_for_timeout(200); pg.evaluate("__go('curve')"); pg.wait_for_timeout(400)  # de tool tekent opnieuw en leest de keuze uit localStorage
     img1 = pg.evaluate("document.getElementById('s-cv').toDataURL()")
     o = pg.evaluate("JSON.stringify((()=>{ const r=chEdApply(document.getElementById('s-cv'),{xmin:0,xmax:10,ymin:0,ymax:1,series:[{pts:[[1,0.1],[8,0.9]]}]}); return [r.title,r.logx,r.xmin,r.ymin,r.ymax,r.legendPos]; })())")
     pg.evaluate("document.querySelector('#t-curve [data-ched]').click()"); pg.wait_for_timeout(200)
     pg.evaluate("document.querySelector('.lk-modal [data-reset]').click()"); pg.wait_for_timeout(300)
     gone = pg.evaluate("!(JSON.parse(localStorage.getItem('lkChartEd')||'{}')['s-cv'])")
     img2 = pg.evaluate("document.getElementById('s-cv').toDataURL()")
-    return [('opgeslagen', int(saved == '{"ti":"Mijn ijklijn","ymin":"0","ymax":"2","lx":"log","lg":"br"}'), 1, 0), ('na herladen anders getekend', int(img1 != img0), 1, 0),
+    return [('opgeslagen', int(saved == '{"ti":"Mijn ijklijn","ymin":"0","ymax":"2","lx":"log","lg":"br"}'), 1, 0), ('opnieuw getekend: anders', int(img1 != img0), 1, 0),
             ('opties toegepast', int(o == '["Mijn ijklijn",true,0.5,0,2,"br"]'), 1, 0), ('standaard: weg', int(gone), 1, 0), ('standaard: zoals eerst', int(img2 == img0), 1, 0)]
+
+@case('Statistiek', 'Boxplot, viool en punten', 'R 4.x, datasets::PlantGrowth (ctrl): quantile(weight[group=="ctrl"]) geeft 25 % 4,5500, 50 % 5,1550, 75 % 5,2925 (type 7); bw.nrd0 = 0,9·min(SD 0,5831, IQR/1,34 0,5541)·10^(−1/5) = 0,3147; geen uitschieters: de bovengrens 5,2925 + 1,5 × 0,7425 = 6,4063 ligt boven 6,11')
+def _(pg):
+    v = [4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14]
+    b = pg.evaluate(f"stBox({v})")
+    h = pg.evaluate(f"stKde({v}).h")
+    kinds = pg.evaluate(f"""(()=>{{ const c=document.createElement('canvas'); document.body.appendChild(c); const G=[{{name:'ctrl',v:{v}}},{{name:'b',v:[4.8,5.2,5.6,5.0,4.9]}}], out=[];
+      for(const k of ['box','violin','dots','bar']){{ stBars(c,G,{{pairs:[{{a:'ctrl',b:'b',p:0.01}}]}},0.05,'sd',false,k); out.push(c._kind+':'+(c.width>0)); }} c.remove(); return out.join(); }})()""")
+    return [('Q1', b['q1'], 4.55, 0.0005), ('mediaan', b['med'], 5.155, 0.0005), ('Q3', b['q3'], 5.2925, 0.0005),
+            ('uitschieters', len(b['out']), 0, 0), ('bovenste snorhaar', b['hi'], 6.11, 0.0005), ('bandbreedte viool', h, 0.31465, 0.001)] + \
+           [('vier grafiektypen getekend', int(kinds == 'box:true,violin:true,dots:true,bar:true'), 1, 0)]
 
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):

@@ -5221,5 +5221,20 @@
 "rechtsonder": "bottom right",
 "verbergen": "hide",
 "Terug naar standaard": "Reset to default",
-"Ook niet-significante paren (ns)": "Also non-significant pairs (ns)"
+"Ook niet-significante paren (ns)": "Also non-significant pairs (ns)",
+"Grafiektype": "Chart type",
+"Staaf met punten": "Bar with points",
+"Boxplot": "Box plot",
+"Viool": "Violin",
+"Punten met gemiddelde": "Points with mean",
+"Doos = kwartielen, lijn = mediaan, snorharen tot anderhalf keer de IQR, cirkels = uitschieters (n = {#})": "Box = quartiles, line = median, whiskers to one and a half times the IQR, circles = outliers (n = {#})",
+"Doos = kwartielen, lijn = mediaan, snorharen tot anderhalf keer de IQR, cirkels = uitschieters (n = {#}–{#})": "Box = quartiles, line = median, whiskers to one and a half times the IQR, circles = outliers (n = {#}–{#})",
+"Viool = kerndichtheid, streep = mediaan, lijn = kwartielen (n = {#})": "Violin = kernel density, bar = median, line = quartiles (n = {#})",
+"Viool = kerndichtheid, streep = mediaan, lijn = kwartielen (n = {#}–{#})": "Violin = kernel density, bar = median, line = quartiles (n = {#}–{#})",
+"Punt = meting, streep = gemiddelde, foutbalk = SD (n = {#})": "Point = measurement, bar = mean, error bar = SD (n = {#})",
+"Punt = meting, streep = gemiddelde, foutbalk = SD (n = {#}–{#})": "Point = measurement, bar = mean, error bar = SD (n = {#}–{#})",
+"Punt = meting, streep = gemiddelde, foutbalk = SEM (n = {#})": "Point = measurement, bar = mean, error bar = SEM (n = {#})",
+"Punt = meting, streep = gemiddelde, foutbalk = SEM (n = {#}–{#})": "Point = measurement, bar = mean, error bar = SEM (n = {#}–{#})",
+"Punt = meting, streep = gemiddelde, foutbalk = {#}%-BI (n = {#})": "Point = measurement, bar = mean, error bar = {#}% CI (n = {#})",
+"Punt = meting, streep = gemiddelde, foutbalk = {#}%-BI (n = {#}–{#})": "Point = measurement, bar = mean, error bar = {#}% CI (n = {#}–{#})"
 }

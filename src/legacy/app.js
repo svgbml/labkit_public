@@ -443,6 +443,14 @@ function meltPeaks(T,F,k){ const n=T.length; const s=smooth(Float32Array.from(F)
 calc.melt=function(){};   /* src/main.js zet de echte: de component tekent de curve zelf */
 
 /* ================= STATISTIEK: TWEEWEG-ANOVA, REGRESSIE, POWER, STAAFDIAGRAM ================= */
+/* boxplot (S85): kwartielen zoals R quantile() type 7 (lineair tussen de geordende waarden), snorharen tot de
+   verste waarde binnen 1,5 × IQR (Tukey 1977), wat daarbuiten valt is een uitschieter */
+function stQ(s,p){ const h=(s.length-1)*p, lo=Math.floor(h); return s[lo]+(h-lo)*((s[Math.min(s.length-1,lo+1)])-s[lo]); }
+function stBox(v){ const s=v.filter(isFinite).sort((a,b)=>a-b); if(!s.length) return null; const q1=stQ(s,0.25), med=stQ(s,0.5), q3=stQ(s,0.75), r=1.5*(q3-q1), inn=s.filter(x=>x>=q1-r&&x<=q3+r);
+  return {q1,med,q3,lo:Math.min(...inn),hi:Math.max(...inn),out:s.filter(x=>x<q1-r||x>q3+r)}; }
+/* viool (S85): gaussische kerndichtheid met de bandbreedte van Silverman, 0,9·min(SD, IQR/1,34)·n^(−1/5) (R bw.nrd0) */
+function stKde(v){ const s=v.filter(isFinite), n=s.length; if(n<2) return null; const S=sd(s), b=stBox(s), iq=(b.q3-b.q1)/1.34; let h=0.9*Math.min(S,iq>0?iq:S)*n**-0.2; if(!(h>0)) h=Math.abs(s[0])*0.1||1;
+  const lo=Math.min(...s)-2*h, hi=Math.max(...s)+2*h, y=[], d=[]; for(let j=0;j<=60;j++){ const t=lo+(hi-lo)*j/60; let a=0; s.forEach(x=>{ a+=Math.exp(-0.5*((t-x)/h)**2); }); y.push(t); d.push(a/(n*h*Math.sqrt(2*Math.PI))); } return {y,d,lo,hi,h}; }
 function nctcdf(t,df,ncp){ const lg=Math.log(df)*df/2-gammaln(df/2)-(df/2-1)*Math.log(2); const hi=1+14/Math.sqrt(df)+(df<4?6:0), N=400, h=hi/N; let s=0;
   for(let i=0;i<=N;i++){ const x=i*h; if(x<=0) continue; const g=Math.exp(lg+(df-1)*Math.log(x)-df*x*x/2); s+=g*PhiF(t*x-ncp)*(i===N?1:i%2?4:2); } return Math.min(1,Math.max(0,s*h/3)); }
 function powerT(n,d,alpha,two,type){ const df=type==='2'?2*n-2:n-1, ncp=type==='2'?d*Math.sqrt(n/2):d*Math.sqrt(n), tc=tinv(1-(two?alpha/2:alpha),df); return two?1-nctcdf(tc,df,ncp)+nctcdf(-tc,df,ncp):1-nctcdf(tc,df,ncp); }
@@ -456,19 +464,29 @@ function anova2(cells){ const A=[...new Set(cells.map(c=>c.a))], B=[...new Set(c
   return {A,B,n,a:row(SSA,dfA),b:row(SSB,dfB),ab:row(SSAB,dfAB),e:{ss:SSE,df:dfE,ms:MSE},cm:A.map((_,i)=>B.map((_,j)=>cm(i,j)))}; }
 /* sterren volgens GraphPad Prism: asterisks (* p<0,05, ** p<0,01, *** p<0,001, **** p<0,0001); niet significant = ns */
 function stStars(p,alpha){ return p>=alpha?'ns':p<0.0001?'****':p<0.001?'***':p<0.01?'**':'*'; }
-function stBars(cv,G,R,alpha,err,showNs){ err=err||'sd';   /* foutbalk (S81): sd | sem | ci */ const chs=chStyle(), K=chs.key==='scherm'?PCOL:{...PCOL,ink:chs.ink,muted:chs.muted,line:chs.grid||PCOL.line};   /* grafiekstijl (S80) */
+function stBars(cv,G,R,alpha,err,showNs,kind){ err=err||'sd'; kind=kind||'bar';   /* grafiektype (S85): bar | box | violin | dots */   /* foutbalk (S81): sd | sem | ci */ const chs=chStyle(), K=chs.key==='scherm'?PCOL:{...PCOL,ink:chs.ink,muted:chs.muted,line:chs.grid||PCOL.line};   /* grafiekstijl (S80) */
   const names=G.map(g=>g.name), ms=G.map(g=>mean(g.v)), sds=G.map(g=>{ const n=g.v.length; if(n<2) return 0; const s=sd(g.v); return err==='sd'?s:err==='sem'?s/Math.sqrt(n):tinv(0.975,n-1)*s/Math.sqrt(n); }), sig_=R.pairs.filter(q=>showNs||q.p<alpha).map(q=>({a:q.a,b:q.b,p:q.p,label:stStars(q.p,alpha)}));
   const W=Math.max(420,100+names.length*110), H=340+sig_.length*22; const top0=20+sig_.length*22;
-  const ymax=Math.max(...ms.map((m,i)=>m+sds[i]))*1.08, ymin=Math.min(0,...ms.map((m,i)=>m-sds[i]));
+  const all=G.flatMap(g=>g.v), bx=G.map(g=>stBox(g.v)), kd=kind==='violin'?G.map(g=>stKde(g.v)):null;
+  /* staaf: vanaf 0 tot gemiddelde + foutbalk; box, viool en punten: het bereik van de gegevens zelf (de y-as hoeft dan niet bij 0 te beginnen) */
+  const lo0=kind==='bar'?Math.min(0,...ms.map((m,i)=>m-sds[i])):Math.min(...all,...(kd?kd.map(k=>k.lo):[])), hi0=kind==='bar'?Math.max(...ms.map((m,i)=>m+sds[i])):Math.max(...all,...ms.map((m,i)=>m+sds[i]),...(kd?kd.map(k=>k.hi):[]));
+  const ymax=hi0+(kind==='bar'?hi0*0.08:(hi0-lo0)*0.08), ymin=kind==='bar'?lo0:lo0-(hi0-lo0)*0.08;
   pShow(cv,W,H,(x)=>{ const L=64, B=H-48, T=top0+10, Y=v=>B-(v-ymin)/(ymax-ymin)*(B-T), bw=56, X=i=>L+30+i*((W-L-40)/names.length)+bw/2;
     x.strokeStyle=K.ink; x.lineWidth=1.2; x.beginPath(); x.moveTo(L,T-6); x.lineTo(L,B); x.lineTo(W-14,B); x.stroke();
     const st=niceStep(ymax-ymin,5); x.font='11px '+chs.font; x.textAlign='right'; x.fillStyle=K.muted; for(let v=Math.ceil(ymin/st)*st;v<=ymax+1e-9;v+=st){ x.fillText(tickLabel(v),L-6,Y(v)); x.strokeStyle=K.soft; x.beginPath(); x.moveTo(L+1,Y(v)); x.lineTo(W-14,Y(v)); x.stroke(); }
-    names.forEach((nm,i)=>{ const cx=X(i); x.fillStyle=SERCOL[i%SERCOL.length]+'cc'; x.fillRect(cx-bw/2,Y(ms[i]),bw,Y(ymin<0?0:ymin)-Y(ms[i])); if(G[i].v.length>1){ x.strokeStyle=K.ink; x.lineWidth=1.4; x.beginPath(); x.moveTo(cx,Y(ms[i]-sds[i])); x.lineTo(cx,Y(ms[i]+sds[i])); x.moveTo(cx-8,Y(ms[i]+sds[i])); x.lineTo(cx+8,Y(ms[i]+sds[i])); x.moveTo(cx-8,Y(ms[i]-sds[i])); x.lineTo(cx+8,Y(ms[i]-sds[i])); x.stroke(); }
-      x.fillStyle=K.ink; x.font='12px '+chs.font; x.textAlign='center'; x.fillText(nm,cx,B+16); G[i].v.forEach((v,k)=>{ x.fillStyle='rgba(31,41,51,.55)'; x.beginPath(); x.arc(cx-12+24*((k*0.618)%1),Y(v),2.4,0,7); x.fill(); }); });
+    names.forEach((nm,i)=>{ const cx=X(i), col=SERCOL[i%SERCOL.length], whisk=(a,b)=>{ x.beginPath(); x.moveTo(cx,Y(a)); x.lineTo(cx,Y(b)); x.moveTo(cx-8,Y(b)); x.lineTo(cx+8,Y(b)); x.moveTo(cx-8,Y(a)); x.lineTo(cx+8,Y(a)); x.stroke(); };
+      if(kind==='box'){ const q=bx[i]; if(q){ x.fillStyle=col+'55'; x.strokeStyle=K.ink; x.lineWidth=1.4; x.fillRect(cx-bw/2,Y(q.q3),bw,Y(q.q1)-Y(q.q3)); x.strokeRect(cx-bw/2,Y(q.q3),bw,Y(q.q1)-Y(q.q3)); x.lineWidth=2.4; x.beginPath(); x.moveTo(cx-bw/2,Y(q.med)); x.lineTo(cx+bw/2,Y(q.med)); x.stroke(); x.lineWidth=1.4;
+          x.beginPath(); x.moveTo(cx,Y(q.q3)); x.lineTo(cx,Y(q.hi)); x.moveTo(cx-10,Y(q.hi)); x.lineTo(cx+10,Y(q.hi)); x.moveTo(cx,Y(q.q1)); x.lineTo(cx,Y(q.lo)); x.moveTo(cx-10,Y(q.lo)); x.lineTo(cx+10,Y(q.lo)); x.stroke();
+          q.out.forEach(v=>{ x.strokeStyle=K.ink; x.beginPath(); x.arc(cx,Y(v),3.2,0,7); x.stroke(); }); } }
+      else if(kind==='violin'){ const k=kd[i]; if(k){ const wmax=Math.max(...k.d)||1; x.fillStyle=col+'66'; x.strokeStyle=col; x.lineWidth=1.4; x.beginPath(); k.y.forEach((y,j)=>{ const dx=k.d[j]/wmax*bw*0.6; j?x.lineTo(cx+dx,Y(y)):x.moveTo(cx+dx,Y(y)); }); for(let j=k.y.length-1;j>=0;j--) x.lineTo(cx-k.d[j]/wmax*bw*0.6,Y(k.y[j])); x.closePath(); x.fill(); x.stroke();
+          const q=bx[i]; if(q){ x.strokeStyle=K.ink; x.lineWidth=2.4; x.beginPath(); x.moveTo(cx-10,Y(q.med)); x.lineTo(cx+10,Y(q.med)); x.stroke(); x.lineWidth=1.4; x.beginPath(); x.moveTo(cx,Y(q.q1)); x.lineTo(cx,Y(q.q3)); x.stroke(); } } }
+      else if(kind==='dots'){ if(G[i].v.length>1){ x.strokeStyle=K.ink; x.lineWidth=1.4; whisk(ms[i]-sds[i],ms[i]+sds[i]); } x.lineWidth=2.4; x.strokeStyle=K.ink; x.beginPath(); x.moveTo(cx-16,Y(ms[i])); x.lineTo(cx+16,Y(ms[i])); x.stroke(); x.lineWidth=1.4; }
+      if(kind==='bar'){ x.fillStyle=col+'cc'; x.fillRect(cx-bw/2,Y(ms[i]),bw,Y(ymin<0?0:ymin)-Y(ms[i])); } if(kind==='bar'&&G[i].v.length>1){ x.strokeStyle=K.ink; x.lineWidth=1.4; x.beginPath(); x.moveTo(cx,Y(ms[i]-sds[i])); x.lineTo(cx,Y(ms[i]+sds[i])); x.moveTo(cx-8,Y(ms[i]+sds[i])); x.lineTo(cx+8,Y(ms[i]+sds[i])); x.moveTo(cx-8,Y(ms[i]-sds[i])); x.lineTo(cx+8,Y(ms[i]-sds[i])); x.stroke(); }
+      x.fillStyle=K.ink; x.font='12px '+chs.font; x.textAlign='center'; x.fillText(nm,cx,B+16); if(kind!=='box') G[i].v.forEach((v,k)=>{ x.fillStyle=kind==='dots'?col:'rgba(31,41,51,.55)'; x.beginPath(); x.arc(cx-(kind==='dots'?18:12)+(kind==='dots'?36:24)*((k*0.618)%1),Y(v),kind==='dots'?3.4:2.4,0,7); x.fill(); }); });
     sig_.forEach((q,k)=>{ const i=names.indexOf(q.b), j=names.indexOf(q.a), y=top0-k*22, xa=X(Math.min(i,j)), xb=X(Math.max(i,j)); x.strokeStyle=K.ink; x.lineWidth=1.2; x.beginPath(); x.moveTo(xa,y+6); x.lineTo(xa,y); x.lineTo(xb,y); x.lineTo(xb,y+6); x.stroke(); x.fillStyle=K.ink; x.font='600 13px '+chs.font; x.textAlign='center'; x.fillText(q.label,(xa+xb)/2,y-7); });
-    x.save(); x.translate(16,(T+B)/2); x.rotate(-Math.PI/2); x.textAlign='center'; x.fillStyle=K.muted; x.font='12px '+chs.font; x.fillText(err==='sd'?'gemiddelde ± SD':err==='sem'?'gemiddelde ± SEM':'gemiddelde ± 95%-BI',0,0); x.restore();
-    { const ns=G.map(g=>g.v.length), a=Math.min(...ns), b=Math.max(...ns), lab=err==='sd'?'SD':err==='sem'?'SEM':'95%-BI'; x.fillStyle=K.muted; x.font='11px '+chs.font; x.textAlign='center'; x.fillText('Staaf = gemiddelde, foutbalk = '+lab+' (n = '+(a===b?a:a+'–'+b)+')',(L+W-14)/2,H-8); } });
-  cv._sig=sig_; cv._err={kind:err,half:sds.slice()}; cv._data={head:['groep','gemiddelde',err==='sd'?'SD':err==='sem'?'SEM':'95%-BI','n'],rows:names.map((n,i)=>[n,ms[i],sds[i],G[i].v.length])}; }
+    x.save(); x.translate(16,(T+B)/2); x.rotate(-Math.PI/2); x.textAlign='center'; x.fillStyle=K.muted; x.font='12px '+chs.font; x.fillText(kind==='box'||kind==='violin'?'waarde':err==='sd'?'gemiddelde ± SD':err==='sem'?'gemiddelde ± SEM':'gemiddelde ± 95%-BI',0,0); x.restore();
+    { const ns=G.map(g=>g.v.length), a=Math.min(...ns), b=Math.max(...ns), lab=err==='sd'?'SD':err==='sem'?'SEM':'95%-BI'; x.fillStyle=K.muted; x.font='11px '+chs.font; x.textAlign='center'; const nn=' (n = '+(a===b?a:a+'–'+b)+')'; x.fillText(kind==='box'?'Doos = kwartielen, lijn = mediaan, snorharen tot anderhalf keer de IQR, cirkels = uitschieters'+nn:kind==='violin'?'Viool = kerndichtheid, streep = mediaan, lijn = kwartielen'+nn:kind==='dots'?'Punt = meting, streep = gemiddelde, foutbalk = '+lab+nn:'Staaf = gemiddelde, foutbalk = '+lab+nn,(L+W-14)/2,H-8); } });
+  cv._sig=sig_; cv._box=bx; cv._kind=kind; cv._err={kind:err,half:sds.slice()}; cv._data={head:['groep','gemiddelde',err==='sd'?'SD':err==='sem'?'SEM':'95%-BI','n'],rows:names.map((n,i)=>[n,ms[i],sds[i],G[i].v.length])}; }
 /* ================= SPECTROFOTOMETRIE ================= */
 const AAM={A:71.0788,R:156.1875,N:114.1038,D:115.0886,C:103.1388,E:129.1155,Q:128.1307,G:57.0519,H:137.1411,I:113.1594,L:113.1594,K:128.1741,M:131.1926,F:147.1766,P:97.1167,S:87.0782,T:101.1051,W:186.2132,Y:163.1760,V:99.1326};
 /* ================= EENHEDEN ================= */
@@ -694,6 +712,9 @@ live({
   powerT: [() => powerT, v => { powerT = v; }],
   anova2: [() => anova2, v => { anova2 = v; }],
   stStars: [() => stStars, v => { stStars = v; }],
+  stQ: [() => stQ, v => { stQ = v; }],
+  stBox: [() => stBox, v => { stBox = v; }],
+  stKde: [() => stKde, v => { stKde = v; }],
   stBars: [() => stBars, v => { stBars = v; }],
   AAM: () => AAM,
   PALS: () => PALS,
