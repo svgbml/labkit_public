@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-23 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 542 van 542 controles binnen tolerantie.**
+**Resultaat: 548 van 548 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -374,6 +374,12 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Pipetkalibratie | INTEGRA-rekenvoorbeeld | gemiddeld volume (µL) | 100,5 | 100,5 | +0.00% | ✅ | INTEGRA, Calibration check: volumes 100,40/100,42/100,43/100,54/100,47 µL → V̄ 100,452 µL, e_s 0,45% |
 | Pipetkalibratie | INTEGRA-rekenvoorbeeld | e_s (%) | 0,45 | 0,45 | +0.00% | ✅ | INTEGRA, Calibration check: volumes 100,40/100,42/100,43/100,54/100,47 µL → V̄ 100,452 µL, e_s 0,45% |
 | Dosis-respons (IC50/EC50) | 4PL zonder ruis | IC50 | 3 | 3 | +0.00% | ✅ | Data berekend uit y = 0,05 + 0,95/(1 + (x/3)^1,2): de fit moet IC50 = 3 teruggeven |
+| Dosis-respons (IC50/EC50) | Twee stoffen: IC50 met 95%-interval en F-toets | IC50 A | 6,111 | 6,11 | -0.02% | ✅ | Zelfde 4PL-fit per stof (scipy.optimize.curve_fit; t-kwantiel scipy.stats.t) en extra-som-van-kwadraten-F-toets van gedeelde tegen aparte log-IC50 (Motulsky & Christopoulos, Fitting models to biological data, 2004, hfst. 22; scipy.optimize.least_squares en scipy.stats.f) voor verzonnen data |
+| Dosis-respons (IC50/EC50) | Twee stoffen: IC50 met 95%-interval en F-toets | ondergrens A | 5,092 | 5,09 | -0.03% | ✅ | Zelfde 4PL-fit per stof (scipy.optimize.curve_fit; t-kwantiel scipy.stats.t) en extra-som-van-kwadraten-F-toets van gedeelde tegen aparte log-IC50 (Motulsky & Christopoulos, Fitting models to biological data, 2004, hfst. 22; scipy.optimize.least_squares en scipy.stats.f) voor verzonnen data |
+| Dosis-respons (IC50/EC50) | Twee stoffen: IC50 met 95%-interval en F-toets | bovengrens A | 7,336 | 7,34 | +0.06% | ✅ | Zelfde 4PL-fit per stof (scipy.optimize.curve_fit; t-kwantiel scipy.stats.t) en extra-som-van-kwadraten-F-toets van gedeelde tegen aparte log-IC50 (Motulsky & Christopoulos, Fitting models to biological data, 2004, hfst. 22; scipy.optimize.least_squares en scipy.stats.f) voor verzonnen data |
+| Dosis-respons (IC50/EC50) | Twee stoffen: IC50 met 95%-interval en F-toets | IC50 B | 14,44 | 14,4 | -0.24% | ✅ | Zelfde 4PL-fit per stof (scipy.optimize.curve_fit; t-kwantiel scipy.stats.t) en extra-som-van-kwadraten-F-toets van gedeelde tegen aparte log-IC50 (Motulsky & Christopoulos, Fitting models to biological data, 2004, hfst. 22; scipy.optimize.least_squares en scipy.stats.f) voor verzonnen data |
+| Dosis-respons (IC50/EC50) | Twee stoffen: IC50 met 95%-interval en F-toets | F | 52,81 | 52,81 | -0.00% | ✅ | Zelfde 4PL-fit per stof (scipy.optimize.curve_fit; t-kwantiel scipy.stats.t) en extra-som-van-kwadraten-F-toets van gedeelde tegen aparte log-IC50 (Motulsky & Christopoulos, Fitting models to biological data, 2004, hfst. 22; scipy.optimize.least_squares en scipy.stats.f) voor verzonnen data |
+| Dosis-respons (IC50/EC50) | Twee stoffen: IC50 met 95%-interval en F-toets | p | 4,976e-07 | 4,98e-07 | +0.09% | ✅ | Zelfde 4PL-fit per stof (scipy.optimize.curve_fit; t-kwantiel scipy.stats.t) en extra-som-van-kwadraten-F-toets van gedeelde tegen aparte log-IC50 (Motulsky & Christopoulos, Fitting models to biological data, 2004, hfst. 22; scipy.optimize.least_squares en scipy.stats.f) voor verzonnen data |
 | Sterilisatie (D, z, F₀) | F₀ van 15 min op 121,1 °C | F₀ (min) | 15 | 15 | +0.00% | ✅ | Ph. Eur. 5.1.5: F₀ = Δt·Σ10^((T−121,1)/10) = 15 min; D uit log-lineaire overleving met D = 2,5 min |
 | Sterilisatie (D, z, F₀) | F₀ van 15 min op 121,1 °C | D-waarde (min) | 2,5 | 2,5 | +0.00% | ✅ | Ph. Eur. 5.1.5: F₀ = Δt·Σ10^((T−121,1)/10) = 15 min; D uit log-lineaire overleving met D = 2,5 min |
 | RNA-kwaliteit | Concentratie | ng/µL | 400 | 400 | +0.00% | ✅ | Thermo Fisher T042: c = A260 × 40 × verdunning = 0,5 × 40 × 20 = 400 ng/µL |

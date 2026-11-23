@@ -1251,6 +1251,18 @@ def _(pg):
     pg.evaluate(f"__go('ic50');__set('ic-norm','raw');__tbl('ic-tbl',{rows},'ic50')")
     return [('IC50', pg.evaluate("__big('#ic-out')"), 3.0, 0.005)]
 
+@case('Dosis-respons (IC50/EC50)', 'Twee stoffen: IC50 met 95%-interval en F-toets', 'Zelfde 4PL-fit per stof (scipy.optimize.curve_fit; t-kwantiel scipy.stats.t) en extra-som-van-kwadraten-F-toets van gedeelde tegen aparte log-IC50 (Motulsky & Christopoulos, Fitting models to biological data, 2004, hfst. 22; scipy.optimize.least_squares en scipy.stats.f) voor verzonnen data')
+def _(pg):
+    conc = [0.1, 0.3, 1, 3, 10, 30, 100]
+    A = [[1.00, 0.98], [0.97, 0.99], [0.90, 0.93], [0.70, 0.66], [0.38, 0.42], [0.15, 0.12], [0.07, 0.06]]
+    B = [[1.01, 0.99], [1.00, 0.98], [0.95, 0.97], [0.88, 0.84], [0.62, 0.58], [0.30, 0.34], [0.12, 0.10]]
+    txt = 'Concentratie;A;B\n' + '\n'.join(f"{c};{a[k]};{b[k]}".replace('.', ',') for c, a, b in zip(conc, A, B) for k in (0, 1))
+    pg.evaluate("__go('ic50');__set('ic-norm','raw')")
+    pg.evaluate("t=>__set('ic-multi',t)", txt)
+    row = lambda i, j: pg.evaluate(f"__n(__el(document.querySelectorAll('#ic-multi-box table tbody tr')[{i}].cells[{j}]))")
+    return [('IC50 A', row(0, 1), 6.1114, 0.005), ('ondergrens A', row(0, 2), 5.0916, 0.005), ('bovengrens A', pg.evaluate("__n(__el(document.querySelectorAll('#ic-multi-box table tbody tr')[0].cells[2]).split('–')[1])"), 7.3356, 0.005),
+            ('IC50 B', row(1, 1), 14.435, 0.05), ('F', pg.evaluate("__kv('#ic-cmp-out','F')"), 52.811, 0.01), ('p', pg.evaluate("__kv('#ic-cmp-out','p')"), 4.9755e-7, 1e-9)]
+
 @case('Sterilisatie (D, z, F₀)', 'F₀ van 15 min op 121,1 °C', 'Ph. Eur. 5.1.5: F₀ = Δt·Σ10^((T−121,1)/10) = 15 min; D uit log-lineaire overleving met D = 2,5 min')
 def _(pg):
     pg.evaluate("__go('steril');__set('ste-dt','1');__set('ste-z','10');__set('ste-log','"+' '.join(['121,1']*15)+"');__set('ste-t','0 2,5 5 7,5');__set('ste-n','1e6 1e5 1e4 1e3')")
