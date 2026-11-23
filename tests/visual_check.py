@@ -34,6 +34,8 @@ def shoot(pg, tool, js):
         pg.set_input_files('#gf-file', str(ROOT / 'tests' / 'fixtures' / 'gel_realistic.png')); pg.wait_for_timeout(700)
         pg.evaluate("$('#gf-n').value=''; document.getElementById('gf-auto').click()"); pg.wait_for_timeout(1500)
     elif js: pg.evaluate(js)
+    if tool == 'gelfoto':  # de geschiedenis (S74) noteert de eerste stap 350 ms na de laatste tekening; op een trage CI-machine anders nog niet zichtbaar
+        pg.wait_for_function("gf.src && gfHist.list.length > 0", timeout=10000)
     pg.wait_for_timeout(500)
     return pg.locator('#t-' + tool).screenshot(animations='disabled')
 
