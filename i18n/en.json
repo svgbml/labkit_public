@@ -5316,5 +5316,14 @@
 "Niet goed: het antwoord is {*}.": "Not correct: the answer is {*}.",
 "De stock ({*}) werd verdund tot {*} door {*} stock aan te vullen tot {*} (C₁V₁ = C₂V₂).": "The stock ({*}) was diluted to {*} by making {*} of stock up to {*} (C₁V₁ = C₂V₂).",
 "Er werd gecentrifugeerd bij {*} × g ({*} rpm, rotorstraal {*} cm; RCF berekend uit rpm en rotorstraal).": "Samples were centrifuged at {*} × g ({*} rpm, rotor radius {*} cm; RCF calculated from rpm and rotor radius).",
-"Voor {*} oplossing werd afgewogen: {*}; daarna werd aangevuld met gedemineraliseerd water tot het eindvolume.": "For {*} of solution the following was weighed: {*}; it was then made up to the final volume with demineralised water."
+"Voor {*} oplossing werd afgewogen: {*}; daarna werd aangevuld met gedemineraliseerd water tot het eindvolume.": "For {*} of solution the following was weighed: {*}; it was then made up to the final volume with demineralised water.",
+"Soort berekening": "Type of calculation",
+"Eén verdunning": "Single dilution",
+"Verdunningsreeks": "Dilution series",
+"Aantal stappen": "Number of steps",
+"Voor een tekening met labels, uitplaten en een afdrukbaar schema: zie Verdunningsschema.": "For a drawing with labels, plating and a printable schedule, see Dilution scheme.",
+"Stock en eindverdunning": "Stock and final dilution",
+"Twee kanten op omrekenen": "Convert both ways",
+"Stof (vult de molmassa in)": "Substance (fills in the molar mass)",
+"Typ in een vak; de andere vakken rekenen mee. Tussen molair en massa is de molmassa hierboven nodig.": "Type in a box and the other boxes follow. Between molar and mass units the molar mass above is needed."
 }

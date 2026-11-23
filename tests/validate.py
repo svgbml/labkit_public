@@ -1461,6 +1461,26 @@ def _(pg):
     pg.evaluate("__set('d-c1u','X');__set('d-c2u','X');__set('d-c1','50');__set('d-c2','1');__set('d-v2','500')")
     return [('V₁ (µL)', v, 1.25, 0.001), ('foutmelding bij C₂ > C₁', 1 if bad else 0, 1, 0)]
 
+@case('Verdunning', 'Verdunningsreeks 1:10 × 5', 'Seriële verdunning (Harris, Quantitative Chemical Analysis): 1000 µL per buis, factor 10 → 100 µL over, 900 µL verdunningsmiddel; 10⁹ → buis 5 = 10⁴')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('d-mode','reeks')")
+    pg.wait_for_timeout(100)
+    pg.evaluate("__set('d-c1u','X');__set('d-c1','1000000000');__set('ds-f','10');__set('ds-n','5');__set('ds-v','1000')")
+    pg.wait_for_timeout(100)
+    r = pg.evaluate("[...document.querySelectorAll('#d-out tbody tr')].map(tr=>[...tr.cells].map(c=>c.textContent))")
+    pg.evaluate("__set('d-mode','een')")
+    num = lambda x: float(''.join(ch for ch in x.split()[0] if ch.isdigit()))  # whole numbers only: separators dropped
+    return [('buis 5 (X)', num(r[5][3]), 1e4, 0.001), ('overdracht (µL)', num(r[1][1]), 100, 0), ('verdunningsmiddel (µL)', num(r[1][2]), 900, 0)]
+
+@case('Eenheden omrekenen', 'Tweewegomrekening', '0,9% NaCl (58,44 g/mol) = 9 g/L = 154 mmol/L; typen in het mM-vak geeft 0,9% terug')
+def _(pg):
+    pg.evaluate("__go('units');__set('un-mw','58,44');__set('un2-pct','0,9')"); pg.wait_for_timeout(100)
+    mm = pg.evaluate("document.getElementById('un2-mM').value")
+    pg.evaluate("__set('un2-mM','154')"); pg.wait_for_timeout(100)
+    pc = pg.evaluate("document.getElementById('un2-pct').value")
+    f = lambda x: float(x.replace(',', '.'))
+    return [('mM', f(mm), 154.0, 0.002), ('% w/v', f(pc), 0.9, 0.002)]
+
 @case('Verdunning', 'Antistofverdunning met overmaat', 'Onafhankelijk berekend: 1:1000, 2 blots × 10 mL + 10% = 22 mL → 22 µL antistof en 21,978 mL buffer; met +1 reactie 3 × 10 mL → 30 µL')
 def _(pg):
     pg.evaluate("__go('verdunning');__set('ab-d','1000');__set('ab-u','mL');__set('ab-v','10');__set('ab-k','2');__set('ab-ov','pct');__set('ab-x','10')")

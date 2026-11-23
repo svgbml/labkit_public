@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-23 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 532 van 532 controles binnen tolerantie.**
+**Resultaat: 537 van 537 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -434,6 +434,11 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | QR-code (delen) | QR-code leesbaar | decodeert (300 tekens) | 1 | 1 | +0.00% | ✅ | QR-code volgens ISO/IEC 18004, gecontroleerd door de QR-decoder van OpenCV |
 | Verdunning | Eigen eenheid per concentratie | V₁ (µL) | 1,25 | 1,25 | +0.00% | ✅ | 50 mM naar 2,5 µM in 25 mL: V₁ = 2,5 × 10⁻⁶ × 25 mL / 0,050 = 1,25 µL; C₂ > C₁ geeft een foutmelding |
 | Verdunning | Eigen eenheid per concentratie | foutmelding bij C₂ > C₁ | 1 | 1 | +0.00% | ✅ | 50 mM naar 2,5 µM in 25 mL: V₁ = 2,5 × 10⁻⁶ × 25 mL / 0,050 = 1,25 µL; C₂ > C₁ geeft een foutmelding |
+| Verdunning | Verdunningsreeks 1:10 × 5 | buis 5 (X) | 1e+04 | 1e+04 | +0.00% | ✅ | Seriële verdunning (Harris, Quantitative Chemical Analysis): 1000 µL per buis, factor 10 → 100 µL over, 900 µL verdunningsmiddel; 10⁹ → buis 5 = 10⁴ |
+| Verdunning | Verdunningsreeks 1:10 × 5 | overdracht (µL) | 100 | 100 | +0.00% | ✅ | Seriële verdunning (Harris, Quantitative Chemical Analysis): 1000 µL per buis, factor 10 → 100 µL over, 900 µL verdunningsmiddel; 10⁹ → buis 5 = 10⁴ |
+| Verdunning | Verdunningsreeks 1:10 × 5 | verdunningsmiddel (µL) | 900 | 900 | +0.00% | ✅ | Seriële verdunning (Harris, Quantitative Chemical Analysis): 1000 µL per buis, factor 10 → 100 µL over, 900 µL verdunningsmiddel; 10⁹ → buis 5 = 10⁴ |
+| Eenheden omrekenen | Tweewegomrekening | mM | 154 | 154 | +0.00% | ✅ | 0,9% NaCl (58,44 g/mol) = 9 g/L = 154 mmol/L; typen in het mM-vak geeft 0,9% terug |
+| Eenheden omrekenen | Tweewegomrekening | % w/v | 0,9 | 0,9 | -0.00% | ✅ | 0,9% NaCl (58,44 g/mol) = 9 g/L = 154 mmol/L; typen in het mM-vak geeft 0,9% terug |
 | Verdunning | Antistofverdunning met overmaat | antistof (µL) | 22 | 22 | +0.00% | ✅ | Onafhankelijk berekend: 1:1000, 2 blots × 10 mL + 10% = 22 mL → 22 µL antistof en 21,978 mL buffer; met +1 reactie 3 × 10 mL → 30 µL |
 | Verdunning | Antistofverdunning met overmaat | buffer (mL) | 21,98 | 21,98 | +0.00% | ✅ | Onafhankelijk berekend: 1:1000, 2 blots × 10 mL + 10% = 22 mL → 22 µL antistof en 21,978 mL buffer; met +1 reactie 3 × 10 mL → 30 µL |
 | Verdunning | Antistofverdunning met overmaat | antistof met +1 reactie (µL) | 30 | 30 | +0.00% | ✅ | Onafhankelijk berekend: 1:1000, 2 blots × 10 mL + 10% = 22 mL → 22 µL antistof en 21,978 mL buffer; met +1 reactie 3 × 10 mL → 30 µL |

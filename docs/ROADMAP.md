@@ -337,7 +337,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 ## Phase 8: rework existing tools (20 steps)
 | Step | Ideas | What | Model |
 |---|---|---|---|
-| S97 | 151, 152, 155 | Dilution: tube visual, serial mode; live two-way unit converter | Sonnet |
+| S97 | 151, 152, 155 | Dilution: tube visual, serial mode; live two-way unit converter ✅ the tool already solved the one empty field; serial mode reuses `serie()` from *Verdunningsschema*, which stays as its own tool | Sonnet |
 | S98 | 156, 157, 158 | Molar mass name lookup; buffer picker; Tris temperature correction | Sonnet |
 | S99 | 159, 160, 161 | Interactive titration curve; osmolarity presets; merge chemistry calculators into one tool | Opus 5 |
 | S100 | 162, 163 | Standard curve: compare models (AIC) and residual plot with click-to-exclude | Opus 5 |
