@@ -14,7 +14,7 @@ const SVGFONT = /^\s*(?:(bold|[1-9]00)\s+)?(?:(italic|oblique)\s+)?([\d.]+)px\s+
 const svgEsc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const svgN = v => Number.isFinite(v) ? String(Math.round(v * 100) / 100) : '0';
 
-function svgRec(W, H) {
+function svgRec(W0, H0) {
   const body = [], defs = [];
   const meas = document.createElement('canvas').getContext('2d');
   let st = {fill: '#000', stroke: '#000', lw: 1, font: '10px sans-serif', align: 'start',
@@ -105,7 +105,7 @@ function svgRec(W, H) {
       put(`<image x="${svgN(dx)}" y="${svgN(dy)}" width="${svgN(dw)}" height="${svgN(dh)}" href="${url}" preserveAspectRatio="none"${common()}/>`);
     },
     createLinearGradient() { return {addColorStop() {}}; },
-    toSVG(bg) {
+    toSVG(bg, W = W0, H = H0) {
       return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" ` +
         `width="${svgN(W)}" height="${svgN(H)}" viewBox="0 0 ${svgN(W)} ${svgN(H)}">` +
         (defs.length ? `<defs>${defs.join('')}</defs>` : '') +

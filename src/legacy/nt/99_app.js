@@ -207,7 +207,19 @@ function reportPng(cv,noTitle){ const tool=(cv.closest('section.tool')||{dataset
   else { try{ root.removeAttribute('data-theme'); Object.defineProperty(window,'devicePixelRatio',{get:()=>S,configurable:true}); if(calc[tool]) calc[tool](); const c=document.createElement('canvas'); c.width=cv.width; c.height=cv.height; const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(cv,0,0); img=c; } finally { delete window.devicePixelRatio; if(th) root.setAttribute('data-theme',th); try{ if(calc[tool]) calc[tool](); }catch(e){} } }
   if(noTitle&&cv._p){ const cut=34*S, c2=document.createElement('canvas'); c2.width=img.width; c2.height=img.height-cut; c2.getContext('2d').drawImage(img,0,-cut); img=c2; }
   return new Promise(res=>img.toBlob(b=>b.arrayBuffer().then(ab=>res(new Blob([pngDpi(new Uint8Array(ab),300)],{type:'image/png'}))),'image/png')); }
-function reportBtns(){ $$('main canvas').forEach(cv=>{ if(cv.id==='gf-cv') return; const bar=cv.nextElementSibling; if(!bar||!bar.classList.contains('xlbar')) return; if(!bar.querySelector('[data-rep]')) bar.insertAdjacentHTML('afterbegin',`<button type="button" class="xlbtn" data-rep title="${esc(trPlain('PNG op een witte achtergrond met donkere assen, drie keer de schermresolutie (300 dpi), ook in het donkere thema'))}">${trPlain('Download voor verslag (wit, 300 dpi)')}</button>`); if(cv._p&&!bar.querySelector('[data-rep-nt]')) bar.insertAdjacentHTML('afterbegin',`<label class="chk" style="font-size:12px;margin-right:auto" title="${esc(trPlain('Figuurtitels horen in het onderschrift onder de figuur'))}"><input type="checkbox" data-rep-nt> ${trPlain('zonder titel')}</label>`); }); }
+function reportBtns(){ $$('main canvas').forEach(cv=>{ if(cv.id==='gf-cv') return; const bar=cv.nextElementSibling; if(!bar||!bar.classList.contains('xlbar')) return; if(!bar.querySelector('[data-rep]')) bar.insertAdjacentHTML('afterbegin',`<button type="button" class="xlbtn" data-rep title="${esc(trPlain('PNG op een witte achtergrond met donkere assen, drie keer de schermresolutie (300 dpi), ook in het donkere thema'))}">${trPlain('Download voor verslag (wit, 300 dpi)')}</button>`); const nx=bar.nextElementSibling; if(!SVGSKIP.includes(cv.id)&&!(nx&&nx.classList.contains('pic-bar'))&&!bar.querySelector('[data-xl-svg]')) bar.insertAdjacentHTML('beforeend',`<button type="button" class="xlbtn" data-xl-svg title="${esc(trPlain('Vectorgrafiek op een witte achtergrond, te openen in Inkscape of Illustrator'))}">SVG</button>`); if(cv._p&&!bar.querySelector('[data-rep-nt]')) bar.insertAdjacentHTML('afterbegin',`<label class="chk" style="font-size:12px;margin-right:auto" title="${esc(trPlain('Figuurtitels horen in het onderschrift onder de figuur'))}"><input type="checkbox" data-rep-nt> ${trPlain('zonder titel')}</label>`); }); }
+/* SVG van een grafiek (S82): de tool tekent zichzelf opnieuw, maar met de opnemende tekencontext van 01_pic.js
+   in plaats van het canvas; zo komt ook alles mee wat een tool na chart() zelf bijtekent. Zoals reportPng:
+   licht thema, schaal 1. Tekeningen met pShow() (cv._p) worden direct opnieuw afgespeeld. */
+const SVGSKIP=['gf-cv','gf-vlcv','sg-cv','k-pcv'];
+function chartSvg(cv){ const tool=(cv.closest('section.tool')||{dataset:{}}).dataset.tool, root=document.documentElement, th=root.getAttribute('data-theme'), r=svgRec(0,0); let svg;
+  if(cv._p){ r.textBaseline='middle'; cv._p.draw(r,cv._p.W,cv._p.H); svg=r.toSVG('#ffffff',cv._p.W,cv._p.H); }
+  else { try{ root.removeAttribute('data-theme'); Object.defineProperty(window,'devicePixelRatio',{get:()=>1,configurable:true}); cv.getContext=()=>r; if(calc[tool]) calc[tool](); svg=r.toSVG('#ffffff',cv.width,cv.height); }
+    finally{ delete cv.getContext; delete window.devicePixelRatio; if(th) root.setAttribute('data-theme',th); try{ if(calc[tool]) calc[tool](); }catch(e){} } }
+  if(!/<(path|text)\b/.test(svg)) throw new Error('lege tekening'); return svg; }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-xl-svg]'); if(!b) return; const cv=b.parentNode.previousElementSibling; if(!cv||cv.tagName!=='CANVAS') return;
+  try{ saveBlob(`${(cv.closest('section.tool')||{dataset:{}}).dataset.tool||'grafiek'}.svg`,new Blob([chartSvg(cv)],{type:'image/svg+xml'})).catch(()=>{}); }
+  catch(err){ alertBox(trPlain('Deze tekening kan niet als SVG worden opgeslagen; gebruik PNG.')); } });
 lkMainWatch(reportBtns,150); setTimeout(reportBtns,300);
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-rep]'); if(!b) return; const bar=b.parentNode, cv=bar.previousElementSibling; if(!cv||cv.tagName!=='CANVAS'||!cv.width) return; const nt=bar.querySelector('[data-rep-nt]'); reportPng(cv,nt&&nt.checked).then(blob=>saveBlob(`${(cv.closest('section.tool')||{dataset:{}}).dataset.tool||'grafiek'}-verslag.png`,blob)).catch(()=>{}); });
 
@@ -266,5 +278,7 @@ live({
   pipScan: [() => pipScan, v => { pipScan = v; }],
   pngDpi: [() => pngDpi, v => { pngDpi = v; }],
   reportPng: [() => reportPng, v => { reportPng = v; }],
+  SVGSKIP: () => SVGSKIP,
+  chartSvg: [() => chartSvg, v => { chartSvg = v; }],
   reportBtns: [() => reportBtns, v => { reportBtns = v; }]
 });

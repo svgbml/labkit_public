@@ -546,6 +546,26 @@ def _(pg):
     return [('vergelijking per slotje', int(r == '["650+","650+ 300-","350-"]'), 1, 0), ('5 lanen naar WB', n, 5, 0), ('WB-tabel gevuld', wb, 5, 0),
             ('SVG is geldige XML', int(svg[0] == 0), 1, 0), ('lanelabel als SVG-tekst', int('NTC' in svg[1]), 1, 0)]
 
+@case('Standaardcurve', 'SVG-export van een grafiek', 'Zelftest: de SVG van een standaardcurve (chart), een staafgrafiek (pShow), het PCR-programma (drawProfile) en de gelcurve is geldige XML (geen parsererror) met tekst of paden, en elke grafiek-canvas die niet al een tekenbalk of eigen export heeft, heeft de SVG-knop')
+def _(pg):
+    keep = pg.evaluate("[document.getElementById('st-groups').value, document.getElementById('st-test').value]")
+    pg.evaluate("__go('stat');__set('st-groups','A: 10 12 14\\nB: 20 22 24 26');__set('st-test','anova')"); pg.wait_for_timeout(300)
+    pg.evaluate("__go('curve');__set('s-preset','bradford')"); pg.wait_for_timeout(300)
+    pg.evaluate("__go('pcrcyclus')"); pg.wait_for_timeout(300)
+    pg.evaluate("__go('gel')"); pg.wait_for_timeout(300)
+    js = """id=>{ try{ const svg=chartSvg(document.getElementById(id)), d=new DOMParser().parseFromString(svg,'image/svg+xml');
+      return [d.getElementsByTagName('parsererror').length, d.getElementsByTagName('text').length+d.getElementsByTagName('path').length]; }catch(e){ return [-1,0]; } }"""
+    out = []
+    for cid in ('s-cv', 'stb-cv', 'y-cv', 'b-cv'):
+        r = pg.evaluate(js, cid)
+        out += [(f'{cid}: geldige XML', int(r[0] == 0), 1, 0), (f'{cid}: bevat tekst of paden', int(r[1] > 0), 1, 0)]
+    miss = pg.evaluate("""[...document.querySelectorAll('main canvas')].filter(c=>{ const bar=c.nextElementSibling, nx=bar&&bar.nextElementSibling;
+      return !SVGSKIP.includes(c.id) && !(nx&&nx.classList.contains('pic-bar')) && !(bar&&bar.querySelector('[data-xl-svg]')); }).map(c=>c.id)""")
+    n = pg.evaluate("document.querySelectorAll('main .xlbar [data-xl-svg]').length")
+    pg.evaluate("k=>{__go('stat');__set('st-groups',k[0]);__set('st-test',k[1])}", keep)
+    out += [('canvassen zonder SVG-knop', len(miss), 0, 0), ('canvassen met SVG-knop', int(n >= 30), 1, 0)]
+    return out
+
 @case('Instellingen', 'Grafiekstijl', 'Zelftest: met het donkere thema heeft de standaardlijn (Scherm) een doorzichtige achtergrond; Verslag en Publicatie tekenen een witte achtergrond met zwarte (Publicatie) of bijna zwarte (Verslag) tekst, en Publicatie zonder rasterlijnen')
 def _(pg):
     px = "(()=>{ const c=document.querySelector('#t-curve canvas'), x=c.getContext('2d'); return Array.from(x.getImageData(2,2,1,1).data).join(); })()"

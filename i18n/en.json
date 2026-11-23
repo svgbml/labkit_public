@@ -5197,5 +5197,6 @@
 "Staaf = gemiddelde, foutbalk = SEM (n = {#})": "Bar = mean, error bar = SEM (n = {#})",
 "Staaf = gemiddelde, foutbalk = SEM (n = {#}–{#})": "Bar = mean, error bar = SEM (n = {#}–{#})",
 "Staaf = gemiddelde, foutbalk = {#}%-BI (n = {#})": "Bar = mean, error bar = {#}% CI (n = {#})",
-"Staaf = gemiddelde, foutbalk = {#}%-BI (n = {#}–{#})": "Bar = mean, error bar = {#}% CI (n = {#}–{#})"
+"Staaf = gemiddelde, foutbalk = {#}%-BI (n = {#}–{#})": "Bar = mean, error bar = {#}% CI (n = {#}–{#})",
+"Vectorgrafiek op een witte achtergrond, te openen in Inkscape of Illustrator": "Vector graphic on a white background, opens in Inkscape or Illustrator"
 }
