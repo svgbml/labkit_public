@@ -490,6 +490,23 @@ def _(pg):
             ('lanen na rechttrekken', n, 9, 0), ('650 bp (gem.)', sum(b650) / max(1, len(b650)), 650, 0.02), ('350 bp (gem.)', sum(b350) / max(1, len(b350)), 350, 0.03),
             ('putjes net onder de bovenrand (< 8 %)', int(wy < 0.08), 1, 0)]
 
+@case('Gelfoto-editor', 'Gebogen lanen en laneprofielen', 'Rekentest: 5 lanen op 110 px met 12 gelijke banden (40 × 6 px), het lanemidden volgt x = x₀ + 0,0004·(y − 260)²·(i − 2): de buitenste lanen buigen 38,7 px uit op y = 480. Met "Gebogen lanen volgen" ligt het gevonden pad binnen 1,5 px van de echte bocht en zijn de bandintensiteiten van alle lanen gelijk; recht gemeten zien de gebogen lanen de bovenste band niet')
+def _(pg):
+    pg.evaluate("__go('gelfoto')")
+    pg.evaluate("""(()=>{ if(gf.curve) document.getElementById('gf-curve').click(); const c=document.createElement('canvas'); c.width=620; c.height=520; const x=c.getContext('2d'); x.fillStyle='#101010'; x.fillRect(0,0,620,520);
+      const X=(i,y)=>90+i*110+0.0004*(y-260)**2*(i-2); for(let i=0;i<5;i++) for(let y=40;y<=480;y+=40){ x.fillStyle='rgb(230,230,230)'; x.fillRect(X(i,y)-20,y-3,40,6); }
+      gfLoadCanvas(c); gf.lanes=[0,1,2,3,4].map(i=>({x:90+i*110,label:String(i+1)})); gfSetIn('gf-lw',40); gf.lw=40; })()"""); pg.wait_for_timeout(300)
+    i0 = pg.evaluate("gf.lanes.map(l=>gfIntensity(l.x,40))")
+    pg.evaluate("document.getElementById('gf-curve').click()"); pg.wait_for_timeout(400)
+    off = pg.evaluate("gf.lanes.map(l=>l.path?gfLaneOff(l.x,gfProc().h)[480]:NaN)")
+    i1 = pg.evaluate("gf.lanes.map(l=>gfIntensity(l.x,40))")
+    pg.evaluate("document.getElementById('gf-prof').click()"); pg.wait_for_timeout(300)
+    pg.evaluate("document.getElementById('gf-prof').click(); document.getElementById('gf-curve').click()"); pg.wait_for_timeout(200)
+    true = [0.0004 * 220 ** 2 * (i - 2) for i in range(5)]
+    err = max(abs(o - t) for o, t in zip(off, true)) if all(o == o for o in off) else float('nan')
+    return [('pad binnen 1,5 px van de bocht', int(err < 1.5), 1, 0), ('gelijke intensiteit (min/max)', min(i1) / max(i1), 1, 0.03),
+            ('recht: buitenste lane mist de band', int(i0[0] < 0.2 * max(i0)), 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

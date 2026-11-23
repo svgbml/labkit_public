@@ -10,7 +10,7 @@ import {lkNumIn} from '../lib/bridge.js';
 import {libPut} from '../tools/gelfoto/library.js';
 
 /* ================= GELFOTO-EDITOR ================= */
-const gf={unit:'bp',disp:'bp',angAuto:true,src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null,persp:null};
+const gf={unit:'bp',disp:'bp',angAuto:true,src:null,rot90:0,fine:0,flip:false,crop:null,inv:false,gray:true,bri:0,con:1,lanes:[],lw:40,ladder:0,ladKey:'100',bands:[],marks:[],mode:null,title:'',fs:18,ang:0,showBp:true,showMk:true,cache:{},drag:null,pend:null,layout:null,persp:null,curve:false,prof:false};
 const gcv=$('#gf-cv');
 /* Elke zin is een eigen vertaalsleutel (S270); een lege zin valt weg. #gf-status staat in een Vue-boom,
    dus de DOM-vertaallaag kwam er nooit: in het Engels bleven deze meldingen eerst Nederlands. */
@@ -151,9 +151,10 @@ function gfDetectLanes(){
   gf.ladder=Math.min(gf.ladder,Math.max(0,gf.lanes.length-1));
   const nW=cand.filter(c=>c.well).length;
   gfStatus(`${gf.lanes.length} lanen gevonden${nW?` (${nW} via de putjes van de kam)`:''}${filledN?` (waarvan ${filledN} lege lane${filledN>1?'n':''} aangevuld op basis van de vaste tussenafstand)`:''}.`, N>0?'':'Klopt het aantal niet? Vul het verwachte aantal in en detecteer opnieuw.');
+  if(gf.curve) gfTrackLanes();
   gfLanesTable(); gfRender();
 }
-function laneProfile(cx){ const P=gfProc(), {w,h,sig}=P; const half=Math.max(1,Math.round(gf.lw*0.3)); const x0=Math.max(0,Math.round(cx-half)), x1=Math.min(w-1,Math.round(cx+half)); const pr=new Float32Array(h); for(let y=0;y<h;y++){ let s=0; for(let x=x0;x<=x1;x++) s+=sig[y*w+x]; pr[y]=s/(x1-x0+1); }
+function laneProfile(cx){ const P=gfProc(), {w,h,sig}=P; const half=Math.max(1,Math.round(gf.lw*0.3)); const off=gfLaneOff(cx,h); const pr=new Float32Array(h); for(let y=0;y<h;y++){ const c=off?cx+off[y]:cx, x0=Math.max(0,Math.round(c-half)), x1=Math.min(w-1,Math.round(c+half)); let s=0; for(let x=x0;x<=x1;x++) s+=sig[y*w+x]; pr[y]=s/Math.max(1,x1-x0+1); }
   const win=Math.max(5,Math.round(h/12)); const base=new Float32Array(h); for(let y=0;y<h;y++){ let m=Infinity; for(let k=Math.max(0,y-win);k<=Math.min(h-1,y+win);k++) m=Math.min(m,pr[k]); base[y]=m; } const bs=smooth(base,win/2); return smooth(pr.map((v,i)=>v-bs[i]),Math.max(1,h/300)); }
 function gfPeakNear(cx,y){ const pr=laneProfile(cx); const r=Math.round(gfProc().h/40); let best=Math.round(y); for(let k=Math.max(0,Math.round(y)-r);k<=Math.min(pr.length-1,Math.round(y)+r);k++) if(pr[k]>pr[best]) best=k; return best; }
 function gfLadder(){ if(gf.ladKey==='custom'){ const el=$('#gf-ladc'); return nums((el?el.value:'').replace(/;/g,' ')).filter(v=>v>0).sort((a,b)=>b-a); } return LADDERS[gf.ladKey]; }
@@ -386,7 +387,14 @@ function gfRender(exportMode,scale=1){
   if(edit){
     /* lanegrenzen (S72): gestippeld over de gel; versleep er een om de lanebreedte te zetten */
     x.save(); x.strokeStyle='rgba(110,160,240,.5)'; x.lineWidth=Math.max(1,hs/9); x.setLineDash([hs*0.5,hs*0.4]);
-    gf.lanes.forEach(l=>[l.x-gf.lw/2,l.x+gf.lw/2].forEach(bx=>{ x.beginPath(); x.moveTo(Lm+bx,T); x.lineTo(Lm+bx,T+P.h); x.stroke(); })); x.restore();
+    gf.lanes.forEach(l=>{ const off=gfLaneOff(l.x,P.h); [-gf.lw/2,gf.lw/2].forEach(d=>{ x.beginPath(); if(off){ for(let y=0;y<=P.h;y+=6){ const yy=Math.min(P.h-1,y); x[y?'lineTo':'moveTo'](Lm+l.x+off[yy]+d,T+yy); } } else { x.moveTo(Lm+l.x+d,T); x.lineTo(Lm+l.x+d,T+P.h); } x.stroke(); }); }); x.restore();
+    /* laneprofielen (S77): naast elke lane, op dezelfde hoogte als de banden; stippen = ladderbanden en metingen */
+    if(gf.prof&&gf.lanes.length){ const pr=gf.lanes.map(l=>laneProfile(l.x)), mx=Math.max(1e-6,...pr.map(a=>Math.max(...a))), ls=gf.lanes.slice().sort((a,b)=>a.x-b.x), pitch=ls.length>1?(ls[ls.length-1].x-ls[0].x)/(ls.length-1):gf.lw*2, Wp=Math.max(14,Math.min(pitch-gf.lw*0.5,pitch*0.45));
+      gf.lanes.forEach((l,i)=>{ const a=pr[i], off=gfLaneOff(l.x,P.h), X=y=>Lm+l.x+(off?off[y]:0)+gf.lw/2+2, V=y=>Math.max(0,a[y])/mx*Wp;
+        x.save(); x.fillStyle='rgba(79,195,247,.18)'; x.strokeStyle='#4fc3f7'; x.lineWidth=Math.max(1,hs/8); x.beginPath(); x.moveTo(X(0),T);
+        for(let y=0;y<P.h;y+=2) x.lineTo(X(y)+V(y),T+y); x.lineTo(X(P.h-1),T+P.h); x.closePath(); x.fill(); x.beginPath(); for(let y=0;y<P.h;y+=2) x[y?'lineTo':'moveTo'](X(y)+V(y),T+y); x.stroke();
+        const dot=(y,col)=>{ const yy=Math.max(0,Math.min(P.h-1,Math.round(y))); x.fillStyle=col; x.beginPath(); x.arc(X(yy)+V(yy),T+yy,Math.max(2.5,hs/3),0,Math.PI*2); x.fill(); };
+        if(l.lad) (l.bands||[]).forEach(b=>dot(b.y,'#d98a00')); gf.marks.filter(m=>Math.abs(m.x-l.x)<gf.lw/2).forEach(m=>dot(m.y,o.mcol)); x.restore(); }); }
     /* metingen (S73): haakjes links en rechts van de band, versleepbaar langs de lane */
     x.strokeStyle=o.mcol; x.lineWidth=Math.max(1.5,hs/4); gf.marks.forEach(m=>[-1,1].forEach(d=>{ const e=Lm+m.x+d*gf.lw/2; x.beginPath(); x.moveTo(e,T+m.y); x.lineTo(e+d*hs*0.7,T+m.y); x.stroke(); }));
     const tri=(cx,cy,dir,col)=>{ x.fillStyle=col; x.beginPath(); if(dir==='up'){ x.moveTo(cx,cy); x.lineTo(cx-hs*0.6,cy+hs); x.lineTo(cx+hs*0.6,cy+hs); } else if(dir==='right'){ x.moveTo(cx,cy); x.lineTo(cx-hs,cy-hs*0.6); x.lineTo(cx-hs,cy+hs*0.6); } else { x.moveTo(cx,cy); x.lineTo(cx+hs,cy-hs*0.6); x.lineTo(cx+hs,cy+hs*0.6); } x.closePath(); x.fill(); };
@@ -498,7 +506,7 @@ function gfMeasAll(){
 function gfClearMarks(){ gf.marks=[]; gfMarksTable(); gfRender(); }
 
 /* ================= GELFOTO: ACHTERGROND EN Rf ================= */
-function laneProfileRaw(cx){ const P=gfProc(), {w,h,sig}=P; const half=Math.max(1,Math.round(gf.lw*0.3)); const x0=Math.max(0,Math.round(cx-half)), x1=Math.min(w-1,Math.round(cx+half)); const pr=new Float32Array(h); for(let y=0;y<h;y++){ let s=0; for(let x=x0;x<=x1;x++) s+=sig[y*w+x]; pr[y]=s/(x1-x0+1); } return smooth(pr,Math.max(1,h/300)); }
+function laneProfileRaw(cx){ const P=gfProc(), {w,h,sig}=P; const half=Math.max(1,Math.round(gf.lw*0.3)); const off=gfLaneOff(cx,h); const pr=new Float32Array(h); for(let y=0;y<h;y++){ const c=off?cx+off[y]:cx, x0=Math.max(0,Math.round(c-half)), x1=Math.min(w-1,Math.round(c+half)); let s=0; for(let x=x0;x<=x1;x++) s+=sig[y*w+x]; pr[y]=s/Math.max(1,x1-x0+1); } return smooth(pr,Math.max(1,h/300)); }
 /* rolling ball: grijswaarde-opening met een bol van straal r (px); hoogte van de bol in dezelfde eenheid geschaald op het signaalbereik */
 function rollingBall(pr,r){ const n=pr.length, R=Math.max(2,Math.round(r)); let lo=Infinity, hi=-Infinity; for(const v of pr){ if(v<lo) lo=v; if(v>hi) hi=v; } const sc=((hi-lo)/n||1)*0.25; const sh=[]; for(let d=-R;d<=R;d++) sh.push(sc*Math.sqrt(R*R-d*d));
   const er=new Float64Array(n); for(let i=0;i<n;i++){ let m=Infinity; for(let d=-R;d<=R;d++){ const k=i+d; if(k<0||k>=n) continue; const v=pr[k]-sh[d+R]; if(v<m) m=v; } er[i]=m; }
@@ -528,6 +536,29 @@ function gfAutoStraighten(){
   best=Math.round(best*4)/4; $('#gf-rot').value=best; $('#gf-rot').dispatchEvent(new Event('input',{bubbles:true}));
   gfStatus(`Rechtgezet met ${fmt(best,2)}°. Lanen en ladder worden opnieuw gedetecteerd.`);
 }
+
+/* ================= GELFOTO: GEBOGEN LANEN (S77) =================
+   Een lane die krom loopt (smile, een scheve kam, een gel die trok) volgt een parabool
+   x(y) = l.x + a·t + b·t² met t = y − yc. gfTrackLanes zoekt per lane in 20 horizontale stroken
+   waar het signaal zwaartepunt ligt, en past de parabool gewogen naar de hoeveelheid signaal
+   (lege stroken tellen dus nauwelijks). Met gf.curve volgen laneProfile en laneProfileRaw dat pad. */
+function gfLaneOff(cx,h){ if(!gf.curve) return null; const l=gf.lanes.find(q=>q.path&&Math.abs(q.x-cx)<0.5); if(!l) return null; const {a,b,yc}=l.path, k='o'+h+'|'+a+'|'+b+'|'+yc;
+  if(l.__ok===k) return l.__off; const o=new Float32Array(h); for(let y=0;y<h;y++){ const t=y-yc; o[y]=a*t+b*t*t; } Object.defineProperty(l,'__off',{value:o,writable:true,configurable:true,enumerable:false}); Object.defineProperty(l,'__ok',{value:k,writable:true,configurable:true,enumerable:false}); return o; }
+function gfTrackLanes(){ const P=gfProc(), {w,h,sig}=P; if(!gf.lanes.length) return 0; const ls=gf.lanes.slice().sort((a,b)=>a.x-b.x), pitch=ls.length>1?(ls[ls.length-1].x-ls[0].x)/(ls.length-1):gf.lw*2, R=Math.max(4,Math.round(pitch*0.45)), yc=h/2, K=20, y0=Math.round(h*0.03), y1=Math.round(h*0.97);
+  let n=0; gf.lanes.forEach(l=>{ let a=0,b=0,c=0; for(let it=0;it<4;it++){ const pts=[];
+      for(let k=0;k<K;k++){ const ya=Math.round(y0+(y1-y0)*k/K), yb=Math.round(y0+(y1-y0)*(k+1)/K), ym=(ya+yb)/2, t=ym-yc, cx=l.x+c+a*t+b*t*t, xa=Math.max(0,Math.round(cx-R)), xb=Math.min(w-1,Math.round(cx+R)); if(xb-xa<4) continue;
+        const v=new Float64Array(xb-xa+1); for(let y=ya;y<yb;y++) for(let x=xa;x<=xb;x++) v[x-xa]+=sig[y*w+x]; let mn=Infinity; for(const q of v) mn=Math.min(mn,q); let sw=0,sx=0; v.forEach((q,i)=>{ const z=q-mn; sw+=z; sx+=z*(xa+i); });
+        if(sw>0) pts.push({t,x:sx/sw-l.x,wt:sw}); }
+      const mw=Math.max(0,...pts.map(q=>q.wt)), use=pts.filter(q=>q.wt>0.25*mw); if(use.length<4) return;
+      /* gewogen kleinste kwadraten voor x − l.x = c + a·t + b·t² (gewicht = signaal²: banden tellen, achtergrond niet) */
+      const S=[[0,0,0],[0,0,0],[0,0,0]], r=[0,0,0]; use.forEach(q=>{ const f=[1,q.t,q.t*q.t], W=(q.wt/mw)**2; for(let i=0;i<3;i++){ r[i]+=W*f[i]*q.x; for(let j=0;j<3;j++) S[i][j]+=W*f[i]*f[j]; } });
+      const M=invMat(S); if(!M) return; [c,a,b]=M.map(row=>row.reduce((s2,m,k)=>s2+m*r[k],0)); }
+    const end=Math.max(Math.abs(a*(y0-yc)+b*(y0-yc)**2),Math.abs(a*(y1-yc)+b*(y1-yc)**2));
+    if(!isFinite(end)||end>pitch*0.5||Math.abs(c)>pitch*0.3){ delete l.path; return; }
+    l.x+=c; l.path={a:Math.round(a*1e6)/1e6,b:Math.round(b*1e8)/1e8,yc}; n++; });
+  return n; }
+function gfCurve(on){ gf.curve=!!on; if(gf.curve&&gf.src){ const n=gfTrackLanes(); gfStatus(n?`${n} lanen gevolgd.`:'Geen gebogen lanen gevonden.'); } gfLanesTable(); gfMarksTable(); gfRender(); }
+function gfProf(on){ gf.prof=!!on; gfRender(); }
 
 /* ================= GELFOTO: PERSPECTIEF EN SLIM BIJSNIJDEN (S76) =================
    gf.persp: vier punten (linksboven, rechtsboven, rechtsonder, linksonder) in de oorspronkelijke foto.
@@ -633,7 +664,7 @@ function gfLabEdit(i){ const old=$('#gf-labed'); if(old) old.remove(); const l=g
 /* ================= PROJECTBESTAND .labkitgel (S62) =================
    De foto als PNG plus de toestand van de editor (lanen met hun banden, ladder, metingen, beeldwerk)
    en de waarden van de velden. De virtuele ladder (een tweede foto) en de zoom gaan niet mee. */
-const GF_PROJ=['persp','rot90','fine','flip','crop','inv','gray','bri','con','lanes','lw','ladder','ladKey','marks','title','fs','ang','angAuto','unit','disp','wells','autoLadder'];
+const GF_PROJ=['persp','curve','rot90','fine','flip','crop','inv','gray','bri','con','lanes','lw','ladder','ladKey','marks','title','fs','ang','angAuto','unit','disp','wells','autoLadder'];
 /* het veld-id's van de tool; de lanelabels staan in gf.lanes, de virtuele ladder gaat niet mee */
 const gfProjFields=()=>[...$$('#t-gelfoto input[id],#t-gelfoto select[id],#t-gelfoto textarea[id]')].filter(el=>el.type!=='file'&&!el.closest('table')&&!/^gf-(vl|ll|labed|expert|ba$)/.test(el.id));
 /* geeft verwijzingen naar gf terug: wie bewaart, kopieert (JSON of IndexedDB doen dat zelf) */
@@ -822,6 +853,10 @@ live({
   LMASS: () => LMASS,
   gfRawCrop: [() => gfRawCrop, v => { gfRawCrop = v; }],
   gfHomog: [() => gfHomog, v => { gfHomog = v; }],
+  gfLaneOff: [() => gfLaneOff, v => { gfLaneOff = v; }],
+  gfTrackLanes: [() => gfTrackLanes, v => { gfTrackLanes = v; }],
+  gfCurve: [() => gfCurve, v => { gfCurve = v; }],
+  gfProf: [() => gfProf, v => { gfProf = v; }],
   gfWarp: [() => gfWarp, v => { gfWarp = v; }],
   gfWarped: [() => gfWarped, v => { gfWarped = v; }],
   gfQuadDefault: () => gfQuadDefault,

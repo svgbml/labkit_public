@@ -5130,5 +5130,11 @@
 "Perspectief": "Perspective",
 "Sleep de vier oranje hoeken naar de hoeken van de gel en kies Toepassen.": "Drag the four orange corners to the corners of the gel and choose Apply.",
 "Hoeken zoeken": "Find corners",
-"Zonder perspectief": "Without perspective"
+"Zonder perspectief": "Without perspective",
+"Voor kromme lanen (smile, scheve kam): elke lane volgt een gebogen lijn": "For curved lanes (smile, a skewed comb): each lane follows a curved line",
+"Gebogen lanen volgen": "Follow curved lanes",
+"Het intensiteitsprofiel naast elke lane, op de hoogte van de banden": "The intensity profile next to each lane, level with the bands",
+"Profielen tonen": "Show profiles",
+"{#} lanen gevolgd.": "{#} lanes followed.",
+"Geen gebogen lanen gevonden.": "No curved lanes found."
 }

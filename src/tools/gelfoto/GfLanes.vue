@@ -26,6 +26,10 @@
       <input type="range" id="gf-lw" min="4" max="200" v-model="lw" @change="syncLw">
       <span id="gf-lwv">{{ lwTxt }}</span>
     </div>
+    <div class="row" style="margin-top:8px;gap:14px">
+      <label class="chk" :title="t('Voor kromme lanen (smile, scheve kam): elke lane volgt een gebogen lijn')"><input type="checkbox" id="gf-curve" v-model="curve"> {{ t('Gebogen lanen volgen') }}</label>
+      <label class="chk" :title="t('Het intensiteitsprofiel naast elke lane, op de hoogte van de banden')"><input type="checkbox" id="gf-prof" v-model="prof"> {{ t('Profielen tonen') }}</label>
+    </div>
     <div class="tbl-wrap" style="margin-top:8px;max-height:240px;overflow-y:auto">
       <table class="mini" id="gf-lanes">
         <thead>
@@ -68,7 +72,12 @@ export default {
   name: 'GfLanes',
   mixins: [gfMix],
   data() {
-    return {n: '', lw: '40'};
+    return {n: '', lw: '40', curve: false, prof: false};
+  },
+  /* gebogen lanen en profielen (S77): de motor rekent, de vinkjes zetten gf.curve en gf.prof */
+  watch: {
+    curve(v) { if (!!v !== gf.curve) gfCurve(v); },
+    prof(v) { gfProf(v); }
   },
   computed: {
     /* gf.lanes is een gewone lijst in src/engines/gelfoto.js; de motor tikt na elke verandering op.
