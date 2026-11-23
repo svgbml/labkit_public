@@ -2180,5 +2180,37 @@ def _(pg):
     return out
 
 
+@case('Alignment bekijken', 'Projectbestand: opslaan, wissen, openen', "tests/fixtures/aln/hedgehog.aln met een boom en instellingen van elk blok (kleur, drempel, motief, volgorde met de hand, referentie, bijsnijden, vertaling-uit, figuur); het opgeslagen JSON-bestand terugladen moet elke waarde, de boom en de handmatige volgorde teruggeven; gelijkheid is de wet")
+def _(pg):
+    import json, tempfile, os
+    f = ROOT / 'tests' / 'fixtures' / 'aln' / 'hedgehog.aln'
+    pg.evaluate("__go('aln')")
+    pg.evaluate("t=>__set('al-in',t)", f.read_text(encoding='utf-8')); pg.wait_for_timeout(300)
+    pg.evaluate("()=>{__set('al-col','ident');__set('al-cbs',true);__set('al-thr','70');__set('al-motif','C');__set('al-gap','30');__set('al-from','10');__set('al-to','300');"
+                "__set('al-xf','clustal');__set('al-gm','mis');__set('al-ct','80');__set('al-cl','8');__set('al-fg-per','40');__set('al-fg-title','Proef');__set('al-fg-cons',false);__set('al-dnd','(a:0.1,b:0.2);')}")
+    pg.wait_for_timeout(200)
+    pg.evaluate("()=>{__set('al-ref','1');const v=__alnVm; v.hand=v.m.names.map((_,i)=>v.m.names.length-1-i); __set('al-ord','hand')}"); pg.wait_for_timeout(200)
+    snap = "()=>{const v=__alnVm; return JSON.stringify([v.txt,v.dnd,v.col,v.cbs,v.thr,v.motif,v.ord,v.hand,v.ref,v.tr,v.gap,v.from,v.to,v.xf,v.gm,v.ct,v.cl,v.fgPer,v.fgTitle,v.fgCons,v.m.len,v.m.names])}"
+    before = pg.evaluate(snap)
+    pg.evaluate("document.getElementById('al-proj-d').open=true")
+    with pg.expect_download() as d: pg.evaluate("document.getElementById('al-proj-save').click()")
+    path = d.value.path()
+    j = json.loads(open(path, encoding='utf-8').read())
+    out = [('bestand: app en tool', int(j['app'] == 'Labkit BML' and j['tool'] == 'aln'), 1, 0), ('bestand: boom', int(j['boom'] == '(a:0.1,b:0.2);'), 1, 0)]
+    pg.evaluate("()=>{for (const k of ['al-dnd','al-motif','al-gap','al-from','al-to','al-fg-title']) __set(k,''); __set('al-col','auto');__set('al-cbs',false);__set('al-ord','file');__set('al-ref','');__set('al-thr','50');__set('al-fg-per','60');__set('al-fg-cons',true);__set('al-xf','fasta');__set('al-gm','ign');__set('al-ct','90');__set('al-cl','20');__set('al-in','')}")
+    pg.wait_for_timeout(200)
+    out.append(('na wissen: anders', int(pg.evaluate(snap) != before), 1, 0))
+    pg.set_input_files('#al-proj-file', path); pg.wait_for_timeout(600)
+    out.append(('na openen: alles gelijk', int(pg.evaluate(snap) == before), 1, 0))
+    # de invoeropslag heeft de nieuwe waarden: na herladen staan ze er nog (de handmatige volgorde zit alleen in het projectbestand)
+    pg.reload(); pg.wait_for_timeout(1200); pg.evaluate(HELPERS); pg.evaluate("__go('aln')"); pg.wait_for_timeout(300)
+    out.append(('na herladen: instellingen en boom', int(pg.evaluate("()=>{const v=__alnVm; return JSON.stringify([v.txt,v.dnd,v.col,v.thr,v.motif,v.gap,v.from,v.to,v.xf,v.fgPer,v.fgTitle])}") == json.dumps([j['uitlijning'], j['boom'], 'ident', '70', 'C', '30', '10', '300', 'clustal', '40', 'Proef'], separators=(',', ':'), ensure_ascii=False)), 1, 0))
+    bad = os.path.join(tempfile.gettempdir(), 'labkit_bad_proj.json'); open(bad, 'w').write('{"app":"Labkit BML","data":{}}')
+    pg.evaluate("document.getElementById('al-proj-d').open=true"); pg.set_input_files('#al-proj-file', bad); pg.wait_for_timeout(300)
+    out.append(('sessiebestand wordt geweigerd', pg.evaluate("document.querySelectorAll('#al-proj-d .note.bad, #al-proj-d [class*=bad]').length>0?1:0"), 1, 0))
+    pg.evaluate("()=>{for (const k of ['al-dnd','al-motif','al-gap','al-from','al-to','al-fg-title']) __set(k,''); __set('al-col','auto');__set('al-ord','file');__set('al-thr','50');__set('al-fg-per','60');__set('al-xf','fasta');__set('al-gm','ign');__set('al-ct','90');__set('al-cl','20');__set('al-cbs',false);__set('al-fg-cons',true);__set('al-in','')}")
+    return out
+
+
 if __name__ == '__main__':
     main()

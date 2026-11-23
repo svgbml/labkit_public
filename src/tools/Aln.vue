@@ -61,6 +61,15 @@
         <div class="row" style="margin-top:10px"><button type="button" class="primary" id="al-exp" :disabled="!m.names.length" @click="exportAln">{{ t('Uitlijning opslaan') }}</button>
           <button type="button" id="al-cpy" :disabled="!m.names.length" @click="copyAln">{{ t('Kopieer') }}</button></div>
       </details>
+      <!-- S189: alles in één projectbestand -->
+      <details class="panel" id="al-proj-d" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Project opslaan en openen') }}</summary>
+        <p style="font-size:13px;color:var(--muted);margin:12px 0 0">{{ t('Eén bestand met de uitlijning, de boom (.dnd) en alle instellingen: kleuren, drempels, bijsnijden, vertaling, volgorde en figuur.') }}</p>
+        <div class="row" style="margin-top:10px">
+          <button type="button" class="primary" id="al-proj-save" :disabled="!txt.trim()" @click="projSave">{{ t('Project opslaan') }}</button>
+          <input type="file" id="al-proj-file" accept=".json,.labkit-aln" :aria-label="t('Project openen')" @change="projOpen">
+        </div>
+        <lk-note v-if="projMsg" :kind="projMsg[0]">{{ t(projMsg[1]) }}</lk-note>
+      </details>
       <!-- S188: figuur van de uitlijning of een stuk ervan, en een afdrukweergave -->
       <details class="panel" id="al-fig-d" style="margin-top:12px" @toggle="figOpen = $event.target.open"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Figuur en afdrukken') }}</summary>
         <div class="fields" style="margin-top:12px">
@@ -207,9 +216,13 @@ import {CODES, SEQ_TO, seqSend} from '../lib/seq.js';
 import {fastaCheck, NAMEMAX} from '../lib/alnprep.js';
 import {alnUngapped, EBI_URL} from '../lib/alnhand.js';
 import {alnFigure, figSvg, figPaint} from '../lib/alnfig.js';
+import {alnProjectWrite, alnProjectRead, PROJ_KEYS} from '../lib/alnproj.js';
 
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
+const PROJ_IDS = {txt: 'al-in', dnd: 'al-dnd', col: 'al-col', cbs: 'al-cbs', thr: 'al-thr', motif: 'al-motif', ord: 'al-ord', ref: 'al-ref', tr: 'al-tr', code: 'al-code',
+  gap: 'al-gap', from: 'al-from', to: 'al-to', xf: 'al-xf', gm: 'al-gm', pa: 'al-pa', pb: 'al-pb', ct: 'al-ct', cl: 'al-cl',
+  fgFrom: 'al-fg-from', fgTo: 'al-fg-to', fgPer: 'al-fg-per', fgTitle: 'al-fg-title', fgCons: 'al-fg-cons'};
 const PIMMAX = 60;  /* sequenties in de matrix: 60 x 60 cellen is wat een scherm nog toont */
 const CH = 18, RH = 22, PH = 32, MAXNAME = 24; /* rijhoogte, hoogte van de liniaal en van de plot, naamkolom in tekens */
 
@@ -223,7 +236,7 @@ export default {
       tr: st['al-tr'] != null ? String(st['al-tr']) : '0', code: st['al-code'] != null ? String(st['al-code']) : '1',
       gap: st['al-gap'] != null ? String(st['al-gap']) : '', from: st['al-from'] != null ? String(st['al-from']) : '', to: st['al-to'] != null ? String(st['al-to']) : '',
       xf: st['al-xf'] != null ? String(st['al-xf']) : 'fasta', gm: st['al-gm'] != null ? String(st['al-gm']) : 'ign',
-      pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false, figOpen: false, fgFrom: st['al-fg-from'] != null ? String(st['al-fg-from']) : '', fgTo: st['al-fg-to'] != null ? String(st['al-fg-to']) : '', fgPer: st['al-fg-per'] != null ? String(st['al-fg-per']) : '60',
+      pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false, projMsg: null, figOpen: false, fgFrom: st['al-fg-from'] != null ? String(st['al-fg-from']) : '', fgTo: st['al-fg-to'] != null ? String(st['al-fg-to']) : '', fgPer: st['al-fg-per'] != null ? String(st['al-fg-per']) : '60',
       fgTitle: st['al-fg-title'] != null ? String(st['al-fg-title']) : '', fgCons: st['al-fg-cons'] != null ? !!st['al-fg-cons'] : true, dnd: st['al-dnd'] != null ? String(st['al-dnd']) : '',
       fb: st['al-fb'] != null ? String(st['al-fb']) : '', fbt: st['al-fbt'] != null ? String(st['al-fbt']) : 'auto', NAMEMAX, EBI_URL,
       ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
@@ -533,6 +546,33 @@ export default {
       const done = () => { document.body.classList.remove('al-printing'); window.removeEventListener('afterprint', done); };
       window.addEventListener('afterprint', done);
       window.print();
+    },
+    /* S189: projectbestand. Eerst wat de uitlijning verandert (tekst, vertaling, bijsnijden), dan na de watchers de rest: m() wist anders de
+       handmatige volgorde en de referentie. Daarna krijgen de velden een input-gebeurtenis, zodat de invoeropslag de nieuwe waarden bewaart. */
+    projState() { const o = {txt: this.txt, dnd: this.dnd}; for (const k of PROJ_KEYS) o[k] = this[k]; return o; },
+    projSave() {
+      const d = new Date(), z = n => String(n).padStart(2, '0');
+      saveBlob('alignment-project-' + d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + '.json',
+        new Blob([alnProjectWrite(this.projState(), typeof APPVER === 'string' ? APPVER : '')], {type: 'application/json'})).catch(() => {});
+    },
+    async projOpen(e) {
+      const f = e.target.files[0]; e.target.value = '';
+      if (!f) return;
+      this.projApply(alnProjectRead(await f.text()));
+    },
+    async projApply(r) {
+      if (r.error) { this.projMsg = ['bad', r.error]; return; }
+      const S = r.settings, first = ['tr', 'code', 'gap', 'from', 'to'];
+      this.txt = r.txt; this.dnd = r.dnd;
+      for (const k of first) if (k in S) this[k] = S[k];
+      await this.$nextTick();
+      for (const k of PROJ_KEYS) if (!first.includes(k) && k in S) this[k] = S[k];
+      await this.$nextTick();
+      for (const [k, id] of Object.entries(PROJ_IDS)) {
+        const el = document.getElementById(id);
+        if (el) { el.dispatchEvent(new Event('input', {bubbles: true})); el.dispatchEvent(new Event('change', {bubbles: true})); }
+      }
+      this.projMsg = ['ok', 'Project geopend.'];
     },
     exportAln() {
       const f = ALN_OUT[this.xf] || ALN_OUT.fasta;
