@@ -76,3 +76,9 @@ test('van read naar blad, forward en reverse samen, streng omgedraaid', () => {
   assert.deepEqual(vals, hand);
   assert.equal(notes.rs1800407, 'conflict'); assert.equal(notes.rs885479, 'flip');
 });
+
+test('het geëxporteerde bestand begint met de koptekst van het sjabloon', () => {
+  const t = toCsv('hirisplexs', [{id: 'x', vals: Object.fromEntries(SNPS.map(s => [s.rs, '1']))}]).split('\n');
+  assert.equal(t[0], HEAD41);
+  assert.equal(t[1].split(',').length, 42); assert.equal(t[2], '');
+});

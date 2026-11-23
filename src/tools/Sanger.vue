@@ -142,6 +142,16 @@
         </div>
         <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Het genotype van de assay wordt omgezet naar het aantal kopieën van het allel dat de webtool telt; staat een SNP op de andere streng, dan wordt hij omgedraaid. Een ⚠ bij een cel zegt waarom je hem moet nakijken.') }}</p>
         <lk-note v-for="(m, i) in hsMsgs" :key="i" :kind="m[0]">{{ m[1] }}</lk-note>
+        <h3 style="margin-top:14px">{{ t('Naar de webtool') }}</h3>
+        <div class="row" style="gap:6px;flex-wrap:wrap">
+          <button type="button" id="sg-hs-csv" :disabled="!hs.samples.length" @click="saveSheet">{{ t('Exporteer als .csv') }}</button>
+          <button type="button" id="sg-hs-copy" :disabled="!hs.samples.length" @click="copySheet">{{ t('Kopieer het .csv') }}</button>
+          <span v-if="hsCopied" role="status">{{ hsCopied }}</span>
+        </div>
+        <p style="font-size:13px;margin:8px 0 0">{{ t('Upload het .csv-bestand op de webtool van het Erasmus MC:') }}
+          <a id="sg-hs-link" href="https://hirisplex.erasmusmc.nl/" target="_blank" rel="noopener">hirisplex.erasmusmc.nl</a>.
+          {{ t('Je krijgt per monster de kans op elke categorie van oog-, haar- en huidskleur terug; die kun je hieronder bij Uitkomsten van de webtool invullen. Een lege cel wordt NA in het bestand.') }}</p>
+        <lk-note kind="info">{{ t('LabKit voorspelt zelf geen kleuren en vervangt de webtool niet: de regressiecoëfficiënten van het model zijn niet openbaar, en geraden getallen zouden officieel lijken maar fout zijn.') }}</lk-note>
       </details>
     </div>
     <div>
@@ -256,7 +266,7 @@ import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 import {parseRef, alignRead, variants, parseAssay, assayJson, snpCalls, confirm, TEACH, teachReads, DEC} from '../lib/sangeralign.js';
 import {callSample, genotypeRows, overlayStrips} from '../lib/sangerbatch.js';
-import {PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate, autofill, mergeCalls, naReport} from '../lib/hiris.js';
+import {toCsv, PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate, autofill, mergeCalls, naReport} from '../lib/hiris.js';
 import {SEQ_TO} from '../lib/seq.js';
 
 /* de referentie kan uit Sequentie komen (ook een sequentie die daar bij NCBI is opgehaald) */
@@ -309,7 +319,7 @@ export default {
       edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1),
       refText: st['sg-ref'] != null ? String(st['sg-ref']) : '', assayKey: st['sg-assay'] != null ? String(st['sg-assay']) : '', own: jget(AKEY, []),
       read2: jget('sg-read2', null) ? markRaw(jget('sg-read2', null)) : null, paste2: st['sg-paste2'] != null ? String(st['sg-paste2']) : '',
-      batch: [], hs: Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {})), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
+      hsCopied: '', batch: [], hs: Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {})), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
   },
   computed: {
     HT() { return HT; },
@@ -910,6 +920,12 @@ export default {
     putSample(id, calls) {
       const {vals, notes} = autofill(calls), i = this.hs.samples.findIndex(x => x.id === id);
       if (i >= 0) this.hs.samples.splice(i, 1, {id, vals, notes}); else this.hs.samples.push({id, vals, notes});
+    },
+    /* het .csv zoals de webtool het wil: komma's, SampleID en een kolom per SNP; zonder BOM, anders is de eerste kolomnaam niet SampleID */
+    sheetCsv() { return toCsv(this.hs.panel, this.hs.samples); },
+    saveSheet() { saveBlob('hirisplex-' + this.hs.panel + '.csv', new Blob([this.sheetCsv()], {type: 'text/csv'})).catch(() => {}); },
+    async copySheet() {
+      try { await navigator.clipboard.writeText(this.sheetCsv()); this.hsCopied = this.t('Gekopieerd.'); } catch (e) { this.hsCopied = this.t('Kopiëren geblokkeerd.'); }
     },
     fillRead() { this.putSample(this.m.r.name || this.t('Monster'), mergeCalls(this.snpc, this.snpc2)); },
     fillBatch() { for (const x of this.bsamples) this.putSample(x.name, x.calls); },
