@@ -160,6 +160,16 @@
         </div>
         <p style="font-size:13px;color:var(--muted);margin:6px 0 0">{{ t('Het genotype van de assay wordt omgezet naar het aantal kopieën van het allel dat de webtool telt; staat een SNP op de andere streng, dan wordt hij omgedraaid. Een ⚠ bij een cel zegt waarom je hem moet nakijken.') }}</p>
         <lk-note v-for="(m, i) in hsMsgs" :key="i" :kind="m[0]">{{ m[1] }}</lk-note>
+        <!-- S200: alle SNP's van het paneel tegen dbSNP -->
+        <details id="sg-hs-vp" style="margin-top:10px">
+          <summary style="cursor:pointer;font-size:13px">{{ t('Controleer het paneel in dbSNP') }}</summary>
+          <ncbi-switch/>
+          <p style="font-size:13px;color:var(--muted);margin:6px 0">{{ t('Per SNP van het gekozen paneel: gen, positie en allelen volgens dbSNP, en of het allel dat de webtool telt daarbij hoort. Andere streng betekent: de webtool telt het complement van een allel van dbSNP (dbSNP geeft de plusstreng).') }}</p>
+          <button type="button" id="sg-hs-verify" :disabled="hvBusy" @click="verifyPanel">{{ t('Controleer in dbSNP') }}</button>
+          <lk-note v-if="hvBusy" kind="info">{{ t('Bezig met opzoeken bij NCBI…') + ' ' + hvRows.length + '/' + hsSnps.length }}</lk-note>
+          <lk-note v-if="hvSum" :kind="hvSum[0]">{{ hvSum[1] }}</lk-note>
+          <div v-if="hvRows.length" style="overflow:auto;max-height:24em"><lk-table table-id="sg-hs-vtbl" :cols="hvCols" :rows="hvView"/></div>
+        </details>
         <h3 style="margin-top:14px">{{ t('Naar de webtool') }}</h3>
         <div class="row" style="gap:6px;flex-wrap:wrap">
           <button type="button" id="sg-hs-csv" :disabled="!hs.samples.length" @click="saveSheet">{{ t('Exporteer als .csv') }}</button>
@@ -270,6 +280,17 @@
           <button v-if="assayKey.startsWith('eigen:')" type="button" id="sg-ed-del" @click="delAssay">{{ t('Panel verwijderen') }}</button>
         </div>
         <lk-note v-for="(e, i) in edErr" :key="i" :kind="edOk ? 'ok' : 'bad'">{{ e }}</lk-note>
+        <!-- S200: het panel vullen uit een lijst rs-nummers -->
+        <details id="sg-ed-rsp" style="margin-top:10px">
+          <summary style="cursor:pointer;font-size:13px">{{ t('Panel vullen uit rs-nummers (dbSNP)') }}</summary>
+          <ncbi-switch/>
+          <div class="f" style="margin-top:8px"><label for="sg-ed-rslist">{{ t('rs-nummers, per regel of met komma\'s') }}</label>
+            <textarea id="sg-ed-rslist" class="mono" rows="3" v-model="rsListText" spellcheck="false" placeholder="rs1805007, rs12913832"></textarea></div>
+          <p style="font-size:13px;color:var(--muted);margin:6px 0">{{ t('Per rs-nummer haalt LabKit de allelen en 20 basen flank bij dbSNP en zoekt de SNP in de referentie hierboven op; positie, allelen en streng komen zo in de tabel. Bewaar het panel daarna zelf.') }}</p>
+          <button type="button" id="sg-ed-rsgo" :disabled="rsBusy" @click="fillFromRs">{{ t('Vul het panel uit dbSNP') }}</button>
+          <lk-note v-if="rsBusy" kind="info">{{ t('Bezig met opzoeken bij NCBI…') }}</lk-note>
+          <lk-note v-for="(m, i) in rsMsgs" :key="i" :kind="m[0]">{{ m[1] }}</lk-note>
+        </details>
       </details>
       <details class="panel" id="sg-casep">
         <summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Voorbeeld en case bewaren') }}</summary>
@@ -341,12 +362,12 @@ import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 import {parseRef, alignRead, variants, parseAssay, assayJson, snpCalls, confirm, TEACH, teachReads, DEC} from '../lib/sangeralign.js';
 import {callSample, genotypeRows, overlayStrips} from '../lib/sangerbatch.js';
 import {makeCase, parseCase, exampleSample, EXAMPLE_ID} from '../lib/sangercase.js';
-import {RESULT_GROUPS, parseProb, parseResultPaste, summarize, toCsv, PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate, autofill, mergeCalls, naReport} from '../lib/hiris.js';
+import {RESULT_GROUPS, parseProb, parseResultPaste, summarize, toCsv, PANEL_NAME, panelSnps, VALUES as HS_VALUES, validate as hsValidate, autofill, mergeCalls, naReport, verifySnp} from '../lib/hiris.js';
 import {SEQ_TO} from '../lib/seq.js';
 import NcbiSwitch from './ncbi/NcbiSwitch.vue';
 import {ncbiGet} from '../lib/ncbi.js';
 import {parseSnp, rsId} from '../lib/dbsnp.js';
-import {orientByAlleles, orientByFlank, flankRegion, dbLabel, dbAssay} from '../lib/dblabel.js';
+import {orientByAlleles, orientByFlank, flankRegion, dbLabel, dbAssay, rsList, locateSnp} from '../lib/dblabel.js';
 import {readAbif} from '../lib/abif.js';
 import {parsePanel, sbeChannels, sbeGenotypes, sbeDemo, DEMO_PANEL, DYES} from '../lib/snapshot.js';
 
@@ -384,7 +405,7 @@ export default {
       edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1),
       refText: st['sg-ref'] != null ? String(st['sg-ref']) : '', assayKey: st['sg-assay'] != null ? String(st['sg-assay']) : '', own: jget(AKEY, []),
       read2: jget('sg-read2', null) ? markRaw(jget('sg-read2', null)) : null, paste2: st['sg-paste2'] != null ? String(st['sg-paste2']) : '',
-      caseMsg: '', caseOk: false, hsCopied: '', rsIdx: 0, rsPaste: '', rsMsg: '', rsThr: st['sg-rs-thr'] != null ? String(st['sg-rs-thr']) : NL(0.7, 1), dbl: {}, dbMsg: [], dbBusy: false, sbe: null, sbeText: st['sg-sbe-panel'] != null ? String(st['sg-sbe-panel']) : '', sbeFileErr: '', batch: [], bsamples: [], bbusy: false, hs: (h => { h.samples = h.samples.map(x => Object.assign({res: {}, notes: {}}, x)); return h; })(Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {}))), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
+      caseMsg: '', caseOk: false, hsCopied: '', rsIdx: 0, rsPaste: '', rsMsg: '', rsThr: st['sg-rs-thr'] != null ? String(st['sg-rs-thr']) : NL(0.7, 1), dbl: {}, dbMsg: [], dbBusy: false, rsListText: '', rsBusy: false, rsMsgs: [], hvRows: [], hvBusy: false, sbe: null, sbeText: st['sg-sbe-panel'] != null ? String(st['sg-sbe-panel']) : '', sbeFileErr: '', batch: [], bsamples: [], bbusy: false, hs: (h => { h.samples = h.samples.map(x => Object.assign({res: {}, notes: {}}, x)); return h; })(Object.assign({panel: 'hirisplexs', samples: []}, jget(HKEY, {}))), bover: false, ovSnp: '0', edName: '', edStart: '1', edRows: [['', '', '', '+']], edErr: [], edOk: false};
   },
   computed: {
     HT() { return HT; },
@@ -567,6 +588,19 @@ export default {
     dbRs() { return this.assayEff.snps.filter(s => rsId(s.rs)); },
     hasDb() { return Object.keys(this.dbl).length > 0; },
     /* de genotypes met streng en allelen uit dbSNP: op de plusstreng van het genoom */
+    /* ---------- het paneel tegen dbSNP (S200) ---------- */
+    hvCols() { const t = this.t; return [{h: '#', num: true}, {h: 'SNP'}, {h: t('Telt')}, {h: t('Gen')}, {h: t('Positie')}, {h: t('Allelen (dbSNP)')}, {h: t('Uitslag')}]; },
+    hvView() {
+      const t = this.t, ST = {ok: 'klopt', complement: 'andere streng', mismatch: 'past niet', notfound: 'niet gevonden', err: 'fout'};
+      return this.hvRows.map((v, i) => ({cls: v.status === 'mismatch' || v.status === 'notfound' || v.status === 'err' ? 'bad' : '',
+        cells: [i + 1, esc(v.rs), v.allele, esc((v.genes || []).join(', ') || '–'), v.pos ? esc(v.acc) + ':' + v.pos + ' (chr ' + esc(v.chr) + ')' : '–',
+          v.ref ? esc(v.ref) + ' > ' + esc(v.alts.join(', ')) : '–', t(ST[v.status]) + (v.why ? ': ' + v.why : '')]}));
+    },
+    hvSum() {
+      if (this.hvBusy || !this.hvRows.length) return null;
+      const n = this.hvRows.filter(v => v.pos && v.ref).length, N = this.hsSnps.length, bad = this.hvRows.filter(v => v.status === 'mismatch').length;
+      return [n === N && !bad ? 'ok' : 'warn', this.t(n + ' van de ' + N + ' SNP\'s gevonden met positie en allelen') + (bad ? '; ' + this.t(bad + ' passen niet bij het allel dat de webtool telt') : '') + '.'];
+    },
     snpcDb() { return this.hasDb && this.aln1 ? snpCalls(this.aln1, dbAssay(this.assayEff, this.dbl)) : []; },
     gtRows() {
       const t = this.t, g = c => !c.cov ? t('niet gedekt') : esc(c.gt) + (c.ok ? '' : ' (' + t('hoort niet bij de assay') + ')');
@@ -1038,6 +1072,48 @@ export default {
         }
       }
       this.dbl = out; this.dbMsg = msg; this.dbBusy = false;
+    },
+    /* het panel vullen: per rs-nummer de allelen en de flank bij dbSNP, en de plek in de referentie */
+    async fillFromRs() {
+      const t = this.t, ref = this.refSeq, {ids, bad} = rsList(this.rsListText), msgs = bad.map(w => ['bad', uv(w) + ': ' + t('geen rs-nummer.')]);
+      if (!ref) { this.rsMsgs = [['bad', t('Zet eerst het amplicon bij Referentiesequentie.')]]; return; }
+      if (!ids.length) { this.rsMsgs = msgs.length ? msgs : [['bad', t('Typ een of meer rs-nummers.')]]; return; }
+      this.rsBusy = true;
+      const rows = this.edRows.filter(r => r.slice(0, 3).some(v => String(v).trim()));
+      for (const rs of ids) {
+        try {
+          const id = rsId(rs), r = parseSnp(await ncbiGet('esummary', {db: 'snp', id, retmode: 'json'}), id);
+          if (!r.ok) { msgs.push(['bad', rs + ': ' + t('niet gevonden in dbSNP.')]); continue; }
+          const f = flankRegion(r);
+          const txt = await ncbiGet('efetch', {db: 'nuccore', id: f.acc, rettype: 'fasta', retmode: 'text', seq_start: f.from, seq_stop: f.to});
+          const loc = locateSnp(String(txt).split(/\r?\n/).filter(l => !l.startsWith('>')).join(''), ref);
+          if (!loc) { msgs.push(['bad', rs + ': ' + t('niet gevonden in de referentie; staat de SNP in dit amplicon?')]); continue; }
+          const L = dbLabel(r, loc.strand, ref[loc.pos - 1]);
+          if (!L) { msgs.push(['bad', rs + ': ' + t('dbSNP geeft geen enkel-base-allelen voor deze SNP.')]); continue; }
+          if (L.multi) msgs.push(['warn', rs + ': ' + t('dbSNP kent meer dan één alternatief allel; ingevuld is') + ' ' + L.alleles + '.']);
+          const row = [rs, String(loc.pos), L.alleles, L.strand], k = rows.findIndex(x => String(x[0]).toLowerCase() === rs);
+          if (k >= 0) rows.splice(k, 1, row); else rows.push(row);
+        } catch (e) {
+          msgs.push(['bad', rs + ': ' + t(e && e.kind ? e.message : 'NCBI gaf een onverwacht antwoord. Probeer het later opnieuw.')]);
+          if (e && e.kind === 'off') break;
+        }
+      }
+      this.edRows = rows.length ? rows : [['', '', '', '+']];
+      this.rsMsgs = msgs.concat(msgs.some(m => m[0] === 'bad') ? [] : [['ok', t('Panel ingevuld; bewaar het met Panel bewaren.')]]);
+      this.rsBusy = false;
+    },
+    /* alle SNP's van het gekozen paneel tegen dbSNP, één voor één door de wachtrij */
+    async verifyPanel() {
+      this.hvBusy = true; this.hvRows = [];
+      for (const s of this.hsSnps) {
+        const id = rsId(s.rs);
+        try { this.hvRows.push(verifySnp(s, parseSnp(await ncbiGet('esummary', {db: 'snp', id, retmode: 'json'}), id))); }
+        catch (e) {
+          this.hvRows.push({rs: s.rs, allele: s.allele, status: 'err', why: this.t(e && e.kind ? e.message : 'NCBI gaf een onverwacht antwoord. Probeer het later opnieuw.')});
+          if (e && e.kind === 'off') break;
+        }
+      }
+      this.hvBusy = false;
     },
     workerMode() { return W ? W.mode : 'none'; },
     bclear() { this.batch = []; const f = document.getElementById('sg-bfiles'); if (f) f.value = ''; },

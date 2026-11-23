@@ -58,3 +58,31 @@ export function dbLabel(r, strand, ampBase, s) {
 export function dbAssay(assay, labels) {
   return Object.assign({}, assay, {snps: assay.snps.map(s => labels[s.rs] ? Object.assign({}, s, {strand: labels[s.rs].strand, alleles: labels[s.rs].alleles}) : s)});
 }
+
+/* ---------- een panel uit een lijst rs-nummers (S200, idee #387) ---------- */
+/* tekst → {ids: ['rs…'] zonder dubbele, bad: wat geen rs-nummer is} */
+export function rsList(text) {
+  const ids = [], bad = [];
+  for (const w of String(text || '').split(/[\s,;]+/).filter(Boolean)) {
+    const m = /^(?:rs)?(\d{1,12})$/i.exec(w);
+    if (!m) { bad.push(w); continue; }
+    const id = 'rs' + (+m[1]);
+    if (!ids.includes(id)) ids.push(id);
+  }
+  return {ids, bad};
+}
+
+/* de SNP in het amplicon terugvinden met de flank (plusstreng, SNP in het midden): {pos (1-gebaseerd), strand} of null.
+   Eerst het stuk links van de SNP, anders het stuk rechts; op het amplicon recht en omgekeerd. */
+export function locateSnp(flank, amp) {
+  const f = String(flank || '').toUpperCase().replace(/[^ACGTN]/g, ''), k = (f.length - 1) >> 1, A = String(amp || '').toUpperCase();
+  if (k < 10) return null;
+  for (const [s, strand] of [[f, '+'], [rc(f), '-']]) {
+    const L = s.slice(0, k), R = s.slice(k + 1);
+    let i = A.indexOf(L);
+    if (i >= 0 && A.indexOf(L, i + 1) < 0) return {pos: i + k + 1, strand};
+    i = A.indexOf(R);
+    if (i >= 0 && A.indexOf(R, i + 1) < 0) return {pos: i, strand};
+  }
+  return null;
+}

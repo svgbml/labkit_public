@@ -10,5 +10,6 @@ internet nodig heeft.
 | `esummary_nuccore_notfound.json` | `esummary.fcgi?db=nuccore&id=NM_999999999.1&retmode=json` |
 | `efetch_NM_002386.4.fasta` | `efetch.fcgi?db=nuccore&id=NM_002386.4&rettype=fasta&retmode=text` |
 | `efetch_NC_000016.10_89919609-89919809.fasta` | dezelfde met `id=NC_000016.10&seq_start=89919609&seq_stop=89919809` (±100 bp rond rs1805007; base 101 is de C van de SNP) |
+| `dbsnp_hirisplexs41.json` | samenvatting van `esummary.fcgi?db=snp&id=…&retmode=json` voor de 41 SNP's van HIrisPlex-S (opgehaald 2026-11-23, S200): per rs chr, accessie, positie (1-gebaseerd), ref, alts en genen uit `spdi`; de test bouwt er weer esummary-antwoorden van |
 
 Een onbekend accessienummer bij efetch geeft HTTP 400.

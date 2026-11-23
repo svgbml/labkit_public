@@ -51,3 +51,27 @@ test('een gewone plus-SNP blijft zoals hij is; het alt-allel volgt de assay', ()
   assert.deepEqual(dbLabel(rec, '+', 'C', {alleles: 'C/T', strand: '+'}), {strand: '+', ref: 'C', alleles: 'C/T', multi: true});
   assert.deepEqual(dbLabel(ct, '+', 'C'), {strand: '+', ref: 'C', alleles: 'C/T', multi: false});
 });
+
+/* S200: een panel uit een lijst rs-nummers */
+import {rsList, locateSnp} from '../../src/lib/dblabel.js';
+import {verifySnp, SNPS} from '../../src/lib/hiris.js';
+
+test('een lijst rs-nummers: regels, komma\'s en spaties; dubbele en ongeldige apart', () => {
+  assert.deepEqual(rsList('rs1805007, rs12913832\nRS1805007 x12  885479'), {ids: ['rs1805007', 'rs12913832', 'rs885479'], bad: ['x12']});
+});
+
+test('de plek van de SNP in het amplicon uit de flank, op beide strengen', () => {
+  const flank = region.slice(80, 121);
+  assert.deepEqual(locateSnp(flank, region), {pos: 101, strand: '+'});
+  assert.deepEqual(locateSnp(flank, rc(region)), {pos: 101, strand: '-'});
+  assert.deepEqual(locateSnp(flank, 'xx' + region.slice(60, 140)), {pos: 43, strand: '+'});
+  assert.equal(locateSnp(flank, 'ACGT'.repeat(50)), null);
+});
+
+test('HIrisPlex-S controleren: het getelde allel tegen de allelen van dbSNP', () => {
+  const s = SNPS.find(x => x.rs === 'rs1805007');   /* telt T; dbSNP C>A,G,T */
+  assert.deepEqual(verifySnp(s, rec), {rs: 'rs1805007', allele: 'T', found: true, chr: '16', acc: 'NC_000016.10', pos: 89919709, ref: 'C', alts: ['A', 'G', 'T'], genes: ['MC1R'], status: 'ok'});
+  assert.equal(verifySnp(Object.assign({}, s, {allele: 'X'}), rec).status, 'mismatch');
+  assert.equal(verifySnp(s, Object.assign({}, rec, {ref: 'G', alts: ['A']})).status, 'complement');
+  assert.equal(verifySnp(s, {ok: false, notFound: true}).status, 'notfound');
+});

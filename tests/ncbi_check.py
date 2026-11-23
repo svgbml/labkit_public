@@ -274,6 +274,43 @@ with sync_playwright() as p:
     ck('S199: schakelaar uit: melding, geen verzoek', pg.evaluate('__calls.length') == 0 and ('staat uit' in pg.inner_text('#sg-gt-dbp') or 'switched off' in pg.inner_text('#sg-gt-dbp')), pg.inner_text('#sg-gt-dbp')[-300:])
     pg.evaluate("ncbi.on=true; __sgVm.delAssay(); __sgVm.clear()")
 
+    # S200: een panel uit een lijst rs-nummers, en het hele HIrisPlex-S-paneel tegen dbSNP
+    pg.evaluate("ncbiCacheClear(); __calls=[]; ncbi.on=true")
+    pg.evaluate("(a)=>{ __fx={'db=snp&id=1805007&':a[0], 'db=snp&id=999999999999&':a[1], 'seq_start=89919689&seq_stop=89919729':a[2]}; }", [snp_json, nf_json, flank_fa])
+    pg.evaluate("(r)=>{ __sgVm.assayKey=''; const e=document.getElementById('sg-ref'); e.value='>amplicon\\n'+r; e.dispatchEvent(new Event('input')); }", region)
+    pg.evaluate("document.getElementById('sg-refp').open=true; document.getElementById('sg-ed-rsp').open=true")
+    pg.fill('#sg-ed-rslist', 'rs1805007, abc\nrs999999999999 RS1805007')
+    pg.click('#sg-ed-rsgo')
+    pg.wait_for_function("!__sgVm.rsBusy && __sgVm.rsMsgs.length")
+    rows = pg.evaluate("__sgVm.edRows")
+    ck('S200: rs1805007 in het panel: positie 101, C/A, streng +', rows == [['rs1805007', '101', 'C/A', '+']], rows)
+    msgs = pg.evaluate("__sgVm.rsMsgs.map(m=>m[0]+' '+m[1])")
+    ck('S200: abc geen rs-nummer, rs999999999999 niet gevonden, meer alt-allelen gemeld', any('abc' in m for m in msgs) and any('999999999999' in m and m.startswith('bad') for m in msgs) and any(m.startswith('warn') for m in msgs), msgs)
+    ck('S200: twee esummary en één flank, dubbele maar één keer', len(pg.evaluate('__calls')) == 3, pg.evaluate('__calls'))
+
+    H = json.loads((FX / 'dbsnp_hirisplexs41.json').read_text(encoding='utf8'))
+    def summ(rs, r):
+        i = rs[2:]
+        return json.dumps({'result': {'uids': [i], i: {'uid': i, 'snp_id': int(i), 'chr': r['chr'], 'genes': [{'name': g} for g in r['genes']],
+                'spdi': ','.join(f"{r['acc']}:{r['pos'] - 1}:{r['ref']}:{a}" for a in r['alts'])}}})
+    pg.evaluate("(m)=>{ __fx=m; ncbiCacheClear(); __calls=[]; ncbi.key='test'; }", {f'db=snp&id={rs[2:]}&': summ(rs, r) for rs, r in H.items()})
+    pg.evaluate("__sgVm.hs.panel='hirisplexs'; document.getElementById('sg-hsp').open=true; document.getElementById('sg-hs-vp').open=true")
+    pg.click('#sg-hs-verify')
+    pg.wait_for_function("!__sgVm.hvBusy && __sgVm.hvRows.length===41", timeout=60000)
+    v = pg.evaluate("__sgVm.hvRows")
+    ck('S200: alle 41 terug met positie en allelen', len(v) == 41 and all(x.get('pos') and x.get('ref') and x.get('alts') for x in v), [x['rs'] for x in v if not x.get('pos')])
+    ck('S200: 41 verzoeken door de wachtrij', len(pg.evaluate('__calls')) == 41)
+    st = [x['status'] for x in v]
+    ck('S200: geen getelde allelen die niet passen; 11 op de andere streng', 'mismatch' not in st and st.count('complement') == 11, st)
+    ck('S200: tabel met 41 rijen en een samenvatting', pg.locator('#sg-hs-vtbl tbody tr').count() == 41 and pg.locator('#sg-hs-vp .note.ok').count() == 1, pg.inner_text('#sg-hs-vp')[:300])
+    pg.evaluate("ncbi.key=''; __fx={}")
+
+    # S200: een 429 van NCBI wordt één keer opnieuw geprobeerd
+    pg.evaluate("ncbiCacheClear(); __fx={}; __reply={status:200, body:'{\"r\":9}'}; window.__n429=0; window.__f0=window.fetch; window.fetch=async(u,o)=>{ if(window.__n429++===0){ return new Response('',{status:429}); } return window.__f0(u,o); }")
+    r = pg.evaluate(GET, ['esummary', {'db': 'snp', 'id': '429429', 'retmode': 'json'}])
+    ck('S200: na een 429 lukt de tweede poging', r.get('ok') and r['v'] == {'r': 9} and pg.evaluate('__n429') == 2, r)
+    pg.evaluate("window.fetch=window.__f0")
+
     ck('geen paginafouten', not errs, errs)
     b.close()
 

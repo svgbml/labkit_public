@@ -74,7 +74,9 @@ export function ncbiGet(util, params) {
   const k = cacheKey(util, params), c = ncbiCache();
   if (k in c) return Promise.resolve(c[k].v);
   if (!ncbi.on) return Promise.reject(new NcbiError('off', 'Online opzoeken staat uit. Zet het aan bij Instellingen.'));
-  if (!pending.has(k)) pending.set(k, slot().then(() => request(util, params)).then(v => { if (!(v && v.error)) cachePut(k, v); return v; }).finally(() => pending.delete(k)));
+  /* een 429 (te veel verzoeken; NCBI doet dat soms al onder 3 per seconde) wordt één keer opnieuw geprobeerd, na 1,5 s (S200) */
+  const once = () => slot().then(() => request(util, params));
+  if (!pending.has(k)) pending.set(k, once().catch(e => e.busy ? new Promise(r => setTimeout(r, 1500)).then(once) : Promise.reject(e)).then(v => { if (!(v && v.error)) cachePut(k, v); return v; }).finally(() => pending.delete(k)));
   return pending.get(k);
 }
 
@@ -84,7 +86,7 @@ async function request(util, params) {
   try { r = await fetch(ncbiUrl(util, params), {signal: ac.signal, credentials: 'omit', referrerPolicy: 'no-referrer'}); }
   catch (e) { throw failed(e && e.name === 'AbortError'); }
   finally { clearTimeout(timer); }
-  if (r.status === 429) throw new NcbiError('down', 'NCBI krijgt te veel verzoeken tegelijk. Wacht even en probeer het opnieuw.');
+  if (r.status === 429) throw Object.assign(new NcbiError('down', 'NCBI krijgt te veel verzoeken tegelijk. Wacht even en probeer het opnieuw.'), {busy: true});
   if (!r.ok) throw new NcbiError('down', 'NCBI gaf een fout (HTTP ' + r.status + '). Probeer het later opnieuw, of plak de sequentie zelf.');
   const txt = await r.text();
   if (params.retmode !== 'json') return txt;
