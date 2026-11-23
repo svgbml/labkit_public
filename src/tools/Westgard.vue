@@ -30,6 +30,7 @@
           <lk-kv :rows="kv"/>
           <lk-table v-if="rows.length" :cols="cols" :rows="rows"/>
           <lk-note v-else kind="ok">{{ t('Geen overtredingen van de Westgard-regels.') }}</lk-note>
+          <lk-table v-if="uitleg.length" :cols="uitlegCols" :rows="uitleg"/>
           <lk-formula :html="formula"/>
         </template>
       </div>
@@ -40,6 +41,14 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 
+const RULES = [
+  ['1₂ₛ', 'Eén meting ligt meer dan 2s van het gemiddelde.', true, 'Controleer de reeks op de overige regels.'],
+  ['1₃ₛ', 'Eén meting wijkt meer dan 3s af van het gemiddelde.', false, 'Toevallige fout (of een grote systematische fout).'],
+  ['2₂ₛ', 'Twee opeenvolgende metingen liggen meer dan 2s van het gemiddelde, aan dezelfde kant.', false, 'Systematische fout.'],
+  ['R₄ₛ', 'Twee opeenvolgende metingen liggen meer dan 4s uit elkaar, aan weerszijden van het gemiddelde.', false, 'Toevallige fout.'],
+  ['4₁ₛ', 'Vier opeenvolgende metingen liggen meer dan 1s van het gemiddelde, aan dezelfde kant.', false, 'Systematische fout.'],
+  ['10ₓ', 'Tien opeenvolgende metingen liggen aan dezelfde kant van het gemiddelde.', false, 'Systematische fout.']
+];
 const F = (x, d) => lkNumIn(fmt(x, d)), G = (x, d) => lkNumIn(sig(x, d));
 
 export default {
@@ -63,6 +72,13 @@ export default {
         [t('Waarschuwingen (alleen 1₂ₛ)'), warnOnly.filter(Boolean).length],
         [t('CV'), F(s / m * 100, 1) + '%']];
     },
+    /* alleen de regels die voorkomen, met wat ze betekenen en waar ze op wijzen (Westgard e.a. 1981) */
+    uitlegCols() { const t = this.t; return [{h: t('Regel')}, {h: t('Betekenis')}, {h: t('Soort')}, {h: t('Wijst op')}]; },
+    uitleg() {
+      const t = this.t, seen = new Set(this.W.V.flat());
+      return RULES.filter(r => seen.has(r[0])).map(([n, mean, warn, err]) =>
+        [`<span class="chip ${warn ? 'warn' : 'bad'}">${n}</span>`, t(mean), t(warn ? 'Waarschuwing' : 'Afkeuring'), t(err)]);
+    },
     cols() { const t = this.t; return [{h: '#', num: true}, {h: t('Waarde'), num: true}, {h: 'z', num: true}, {h: t('Regels')}]; },
     rows() {
       const {z, V} = this.W;
@@ -85,6 +101,18 @@ export default {
         {pts: xs.map((x, i) => [i + 1, x]).filter((p, i) => rej[i]), color: '--bad', r: 5}]});
       const ctx = cv.getContext('2d'); ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted'); ctx.lineWidth = 1; ctx.beginPath();
       xs.forEach((x, i) => { i ? ctx.lineTo(C.X(i + 1), C.Y(x)) : ctx.moveTo(C.X(i + 1), C.Y(x)); }); ctx.stroke();
+      /* de regelnamen boven het punt (eronder als het punt bovenaan de kaart zit) */
+      ctx.font = '10px ' + getComputedStyle(document.documentElement).getPropertyValue('--font-ui'); ctx.textAlign = 'center';
+      const used = [];  // al getekende labels [x0, x1, y0, y1]; buurpunten met een label schuiven een regel op
+      xs.forEach((x, i) => {
+        const V = this.W.V[i]; if (!V.length) return;
+        const s = V.join(' '), w = ctx.measureText(s).width, cx = C.X(i + 1), y = C.Y(x), up = y > 30;
+        let ty = up ? y - 18 : y + 8;  // bovenkant van het label
+        while (used.some(r => cx - w / 2 < r[1] && cx + w / 2 > r[0] && ty < r[3] && ty + 10 > r[2])) ty += up ? -11 : 11;
+        used.push([cx - w / 2, cx + w / 2, ty, ty + 10]);
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(rej[i] ? '--bad' : '--warn');
+        ctx.textBaseline = 'top'; ctx.fillText(s, cx, ty);
+      });
     }
   }
 };

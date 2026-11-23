@@ -39,6 +39,8 @@
       <div class="row" style="margin-top:10px">
         <button type="button" id="rm-add" @click="addRow">{{ t('+ Locus') }}</button>
       </div>
+      <allele-freq :fill="fillFreq"/>
+      <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Voor "Vul frequenties in": zet de allelen na de locusnaam, gescheiden door een spatie (één allel = homozygoot).') }}</p>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Homozygoot: laat allel 2 leeg. Gebruik allelfrequenties uit de populatiedatabase van je opdracht; de voorbeeldfrequenties zijn verzonnen.') }}</p>
     </div>
     <div class="result" id="rm-out">
@@ -56,6 +58,8 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import AlleleFreq from './AlleleFreq.vue';
+import {afAllele, afLookup} from '../lib/afreq.js';
 
 const S = (x, d) => lkNumIn(sci(x, d)), G = (x, d) => lkNumIn(sig(x, d));
 /* een waarde van buiten (tblRestore, addRow, een test) is een getal of een string met een
@@ -65,9 +69,10 @@ const norm = r => [r[0] == null ? '' : String(r[0]), dec(r[1]), dec(r[2])];
 
 export default {
   name: 'Rmp',
+  components: {AlleleFreq},
   data() {
     return {th: '0.01',
-      rows: [['D3S1358', 0.25, 0.15], ['vWA', 0.10, 0.20], ['FGA', 0.18, ''], ['TH01', 0.22, 0.31]].map(norm)};
+      rows: [['D3S1358 15 16', 0.25, 0.15], ['vWA 16 17', 0.10, 0.20], ['FGA 21', 0.18, ''], ['TH01 6 9.3', 0.22, 0.31]].map(norm)};
   },
   computed: {
     /* het rekenwerk van calc.rmp, per rij een cel voor de genotypefrequentie */
@@ -110,6 +115,21 @@ export default {
     sci(x, d) { return sci(x, d); },
     setCell(i, j, v) { const next = this.rows.map(r => r.slice()); next[i][j] = v; this.rows = next; },
     delRow(i) { this.rows = this.rows.filter((_, k) => k !== i); },
+    /* de locuscel mag na de naam de allelen bevatten ("vWA 16 17"); één allel = homozygoot */
+    fillFreq(map) {
+      const miss = [], next = this.rows.map(r => r.slice());
+      next.forEach(r => {
+        const [l, ...al] = String(r[0]).trim().split(/\s+/), A = al.map(afAllele);
+        if (!l || !A.length) { if (l) miss.push(l + ' (' + this.t('allelen ontbreken') + ')'); return; }
+        const f = A.map(a => afLookup(map, l, a));
+        A.forEach((a, i) => { if (f[i] == null) miss.push(l + ' ' + a); });
+        if (f.some(x => x == null)) return;
+        r[1] = lkNumIn(String(f[0]).replace('.', ','));
+        r[2] = A.length > 1 ? lkNumIn(String(f[1]).replace('.', ',')) : '';
+      });
+      this.rows = next;
+      return miss;
+    },
     addRow() { this.rows = [...this.rows, ['', '', '']]; }
   }
 };

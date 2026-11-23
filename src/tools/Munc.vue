@@ -26,6 +26,20 @@
         <template v-else>
           <lk-big :label="bigLabel" :value="bigValue" :sub="bigSub"/>
           <lk-kv :rows="kvRows"/>
+          <div class="pie-wrap" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:10px 0">
+            <svg viewBox="0 0 160 160" width="160" height="160" role="img" :aria-label="t('Aandeel van elke bron in de gecombineerde variantie')">
+              <template v-for="s in slices" :key="s.i">
+                <circle v-if="s.full" cx="80" cy="80" r="55" fill="none" :stroke="s.col" stroke-width="30"/>
+                <path v-else :d="s.d" fill="none" :stroke="s.col" :stroke-width="s.top ? 34 : 30" stroke-linecap="butt"/>
+              </template>
+              <text x="80" y="86" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor">{{ F(M.top.c * 100, 0) }}%</text>
+            </svg>
+            <ul style="list-style:none;margin:0;padding:0;font-size:13px">
+              <li v-for="s in slices" :key="s.i" :style="s.top ? 'font-weight:700' : ''">
+                <span :style="'display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;background:' + s.col"></span>{{ s.n }} ({{ F(s.c * 100, 1) }}%)
+              </li>
+            </ul>
+          </div>
           <lk-table :cols="outCols" :rows="outRows"/>
           <lk-formula :html="formula"/>
         </template>
@@ -70,6 +84,17 @@ export default {
         [this.tHtml('Gecombineerde standaardonzekerheid u<sub>c</sub>'), isFinite(uc) ? G(uc, 3) + ' ' + un : '–'],
         [t('Grootste bijdrage'), `${esc(top.n)} (${F(top.c * 100, 0)}%)`]];
     },
+    /* taartpunten van u_i²/Σu²: dikke boogjes op een cirkel (een donut); de grootste valt op door --warn */
+    slices() {
+      const {R, top} = this.M, r = 55, pal = ['#4c78a8', '#59a14f', '#b07aa1', '#76b7b2', '#9c755f', '#bab0ac', '#af7aa1', '#edc948'];
+      let a = -Math.PI / 2;
+      return R.map((q, i) => {
+        const a0 = a; a += q.c * 2 * Math.PI;
+        const pt = x => (80 + r * Math.cos(x)).toFixed(2) + ' ' + (80 + r * Math.sin(x)).toFixed(2);
+        return {i, n: q.n, c: q.c, top: q === top, full: q.c > 0.9999, col: q === top ? 'var(--warn)' : pal[i % pal.length],
+          d: `M${pt(a0)} A${r} ${r} 0 ${q.c > 0.5 ? 1 : 0} 1 ${pt(a)}`};
+      });
+    },
     outCols() {
       const t = this.t;
       return [{h: t('Bron')}, {h: 'u', num: true}, {h: 'u/x (%)', num: true}, {h: t('Bijdrage'), num: true}];
@@ -82,6 +107,7 @@ export default {
   mounted() { this.draw(); },
   updated() { this.draw(); },
   methods: {
+    F,
     addRow() { this.rows = [...this.rows, ['', '', '', MUT[0]]]; },
     /* de balken worden na elke render bijgewerkt; dat houdt canvas en uitkomst bij elkaar */
     draw() {

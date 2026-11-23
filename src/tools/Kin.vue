@@ -22,6 +22,7 @@
       <div class="row" style="margin-top:8px">
         <button type="button" id="kn-tbl-add" @click="addRow">{{ t('+ Locus') }}</button>
       </div>
+      <allele-freq :fill="fillFreq"/>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Per locus de allelen van kind, moeder en vermeende vader, plus de allelfrequenties van de twee allelen van het kind uit de populatiedatabase van je opdracht. Homozygoot: vul twee keer hetzelfde allel in. Voorbeelddata en frequenties zijn verzonnen.') }}</p>
     </div>
     <div class="result" id="kn-out">
@@ -45,11 +46,14 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import AlleleFreq from './AlleleFreq.vue';
+import {afAllele, afLookup} from '../lib/afreq.js';
 
 const F = (x, d) => lkNumIn(fmt(x, d));
 
 export default {
   name: 'Kin',
+  components: {AlleleFreq},
   data() {
     return {
       mo: '1', pr: '50',
@@ -104,6 +108,21 @@ export default {
   methods: {
     lkNumIn,
     sci(x, d) { return sci(x, d); },
+    /* p(a1) en p(a2) (kolom 4, 5) uit de allelen van het kind (kolom 2, 3) */
+    fillFreq(map) {
+      const miss = [], next = this.rows.map(r => r.slice());
+      next.forEach(r => {
+        const l = String(r[0]).trim();
+        if (!l) return;
+        [1, 2].forEach(j => {
+          const a = afAllele(r[j]), f = a === '' ? undefined : afLookup(map, l, a);
+          if (f == null) { if (a !== '') miss.push(l + ' ' + a); return; }
+          r[j + 2] = lkNumIn(String(f).replace('.', ','));
+        });
+      });
+      this.rows = next;
+      return miss;
+    },
     addRow() { this.rows = [...this.rows, ['', '', '', '', '', '', '', '', '']]; }
   }
 };

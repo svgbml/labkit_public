@@ -39,6 +39,9 @@
           <div class="row" style="gap:8px;flex-wrap:nowrap">
             <select id="pp-preset" style="flex:1;min-width:0">
               <option v-for="p in presets" :key="p.v" :value="p.v" :selected="p.v === 'pcr'">{{ t(p.n) }}</option>
+              <optgroup :label="t('PCR-mastermix (kits)')">
+                <option v-for="p in kits" :key="p.v" :value="'kit:' + p.v">{{ t(p.n) }}</option>
+              </optgroup>
             </select>
             <button type="button" id="pp-load" @click="load">{{ t('Laden') }}</button>
           </div>
@@ -74,7 +77,7 @@
         <table id="pp-tbl" class="mini" @paste="onPaste">
           <thead>
             <tr>
-              <th>{{ t('Component') }}</th><th>{{ t('Soort') }}</th>
+              <th><span class="sr-only" style="position:absolute;left:-9999px">{{ t('Volgorde') }}</span></th><th>{{ t('Component') }}</th><th>{{ t('Soort') }}</th>
               <th class="num">{{ t('Stock') }}</th><th>{{ t('Conc.-eenheid') }}</th>
               <th v-for="(c, j) in S.cols" :key="'c' + j">
                 <input class="txt" :data-cn="j" v-model="c.n" style="width:96px;font-weight:600">
@@ -83,7 +86,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(r, i) in S.rows" :key="i">
+            <tr v-for="(r, i) in S.rows" :key="rowKey(r)" :class="{'pp-over': over === i}"
+                @dragover.prevent="over = i" @dragleave="over = -1" @drop.prevent="drop(i)">
+              <td style="white-space:nowrap">
+                <span draggable="true" :title="t('Sleep om de volgorde te wijzigen')" style="cursor:grab;color:var(--muted);user-select:none"
+                      @dragstart="drag = i; $event.dataTransfer.effectAllowed = 'move'; $event.dataTransfer.setData('text/plain', String(i))"
+                      @dragend="drag = -1; over = -1">⋮⋮</span>
+                <button type="button" class="ghost" :data-pup="i" :aria-label="t('Omhoog')" :disabled="i === 0" @click="move(i, i - 1)">↑</button>
+                <button type="button" class="ghost" :data-pdn="i" :aria-label="t('Omlaag')" :disabled="i === S.rows.length - 1" @click="move(i, i + 1)">↓</button>
+              </td>
               <td><input class="txt" data-f="n" :data-r="i" v-model="r.n" style="width:170px"></td>
               <td>
                 <select data-f="mode" :data-r="i" v-model="r.mode" @change="onMode(r)">
@@ -126,6 +137,8 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 import {overage} from '../lib/overage.js';
+/* de recepten van de PCR-mastermix; elke kit die daar bijkomt staat zo ook hier */
+import {QPRE, PRESETS as PCR_PRESETS} from './Pcr.vue';
 
 const PRESETS = [{v: 'leeg', n: 'Leeg'}, {v: 'pcr', n: 'PCR (Taq, 25 µL)'},
   {v: 'qpcr', n: 'qPCR (SYBR Green, 20 µL)'}, {v: 'digest', n: 'Restrictiedigest (50 µL)'},
@@ -140,6 +153,23 @@ const locState = S => {
   S.rows.forEach(r => { r.n = loc(r.n); r.st = loc(r.st); r.cu = loc(r.cu); r.v = r.v.map(loc); });
   return S;
 };
+/* een kit uit de PCR-mastermix als schema: dezelfde opbouw als PPRE.pcr in ppFromPreset().
+   Een eenheid die geen concentratie is (U/50 µL, of een vast volume in µL) wordt een volume-rij */
+const kitState = k => {
+  const P = PCR_PRESETS.find(p => p.v === k), tot = 25, d = x => String(+x.toPrecision(4)).replace('.', ',');
+  if (!P) return null;
+  const rows = [{n: 'Water', mode: 'fill', st: '', cu: '', mm: true, v: ['', '', '', '']}];
+  QPRE[k].forEach(([n, st, f, u]) => {
+    const m = /^U\/(\d+)\s*µL$/.exec(u);
+    if (u === 'µL') rows.push({n, mode: 'vol', st: '', cu: '', mm: true, v: Array(4).fill(d(f))});
+    else if (m) rows.push({n, mode: 'vol', st: '', cu: '', mm: true, v: Array(4).fill(d(f * (tot / +m[1]) / st))});
+    else rows.push({n, mode: 'conc', st: d(st), cu: u, mm: true, v: Array(4).fill(d(f))});
+  });
+  rows.push({n: 'Template', mode: 'vol', st: '', cu: '', mm: false, v: ['1', '1', '1', '0']});
+  return {P, tot, S: {cols: ['Monster 1', 'Monster 2', 'Monster 3', 'NTC'].map(n => ({n})), rows}};
+};
+let seq = 0;
+const keys = new WeakMap();
 const blankRow = nc => ({n: '', mode: 'vol', st: '', cu: '', mm: true, v: Array(nc).fill('')});
 
 /* de invoer die storeGet() eerder bewaarde onder de id's van deze velden */
@@ -153,11 +183,13 @@ export default {
       S,
       title: stored('pp-title', loc('Pipetteerschema PCR (25 µL per reactie)')),
       tot: stored('pp-tot', '25'), unit: stored('pp-unit', 'µL'), mm: stored('pp-mm', '1'),
+      drag: -1, over: -1,
       marge: stored('pp-marge', '10'), ov: stored('pp-ov', 'pct'), note: stored('pp-note', ''), auto: stored('pp-auto', true)
     };
   },
   computed: {
     presets() { return PRESETS; },
+    kits() { return PCR_PRESETS; },
     hint() {
       return this.tHtml('<b>Soort</b>: bij <i>volume</i> typ je per buis het volume; bij <i>eindconc.</i> vul je de stockconcentratie in en per buis de gewenste eindconcentratie (zelfde eenheid), dan volgt het volume uit C₁V₁ = C₂V₂; <i>aanvullen</i> vult de buis aan tot het eindvolume (laat de cellen leeg). Componenten met "nee" bij <i>In mix</i> pipetteer je per buis apart. Je kunt een blok uit Excel plakken.');
     },
@@ -222,6 +254,15 @@ export default {
       return steps;
     },
     bench() { openBench({title: this.title.trim() || this.t('Pipetteerschema'), steps: this.m.steps}); },
+    /* rijen hebben geen id; een sleutel per rij-object laat Vue de rij zelf verplaatsen */
+    rowKey(r) { if (!keys.has(r)) keys.set(r, ++seq); return keys.get(r); },
+    move(i, j) {
+      const rows = this.S.rows; if (j < 0 || j >= rows.length || i === j) return;
+      rows.splice(j, 0, rows.splice(i, 1)[0]);
+      /* de focus volgt de knop die je indrukte, ook als de browser het element verplaatst */
+      this.$nextTick(() => { const b = document.querySelector(`[data-${j > i ? 'pdn' : 'pup'}="${j}"]`); if (b && !b.disabled) b.focus(); });
+    },
+    drop(i) { const f = this.drag; this.drag = this.over = -1; if (f >= 0) this.move(f, i); },
     onMode(r) { if (r.mode === 'fill') r.v = r.v.map(() => ''); },
     addRow() { this.S.rows.push(blankRow(this.S.cols.length)); },
     addCol() {
@@ -233,8 +274,8 @@ export default {
     /* het sjabloon staat in een keuzelijst zonder model: tests/validate.py zet de waarde van
        #pp-preset en klikt dan op Laden, zonder event */
     load() {
-      const k = document.getElementById('pp-preset').value, P = PPRE[k]; if (!P) return;
-      this.S = locState(ppFromPreset(k)); this.title = loc(P.t); this.tot = lkNumIn(P.tot);
+      const k = document.getElementById('pp-preset').value, kit = k.startsWith('kit:') ? kitState(k.slice(4)) : null, P = kit ? {t: kit.P.n, tot: '25', u: 'µL', mm: '1'} : PPRE[k]; if (!P) return;
+      this.S = locState(kit ? kit.S : ppFromPreset(k)); this.title = loc(P.t); this.tot = lkNumIn(P.tot);
       this.unit = P.u; this.mm = P.mm;
       /* de invoeropslag luistert naar events op de velden, dus die sturen we na de render */
       this.$nextTick(() => {

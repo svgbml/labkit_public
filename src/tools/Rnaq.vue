@@ -22,6 +22,15 @@
       <template v-else>
         <lk-big :label="t('RNA-concentratie')" :value="F(m.conc, 1)" sub="ng/µL"/>
         <lk-kv :rows="rows"/>
+        <template v-if="eg">
+          <svg class="rq-eg" viewBox="0 0 300 110" width="100%" role="img" :aria-label="t('Virtueel elektroferogram van 18S en 28S')" style="max-width:420px;display:block;margin:8px 0 2px">
+            <line x1="20" y1="90" x2="290" y2="90" stroke="var(--line)"/>
+            <path :d="eg.path" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+            <text v-for="l in eg.labels" :key="l.x" :x="l.x" y="104" text-anchor="middle" font-size="8" fill="var(--muted)">{{ l.txt }}</text>
+          </svg>
+          <lk-big :label="t('RIN-achtige schatting')" :value="F(eg.rin, 1)" sub="/ 10" :chip="t(eg.rin >= 7 ? 'goed' : eg.rin >= 5 ? 'matig' : 'slecht')" :chip-kind="eg.rin >= 7 ? 'ok' : eg.rin >= 5 ? 'warn' : 'bad'"/>
+          <lk-note kind="info">{{ t('Een indicatie op basis van alleen de 28S:18S-verhouding; de echte RIN (Agilent-algoritme) kun je niet uit een verhouding berekenen. Het elektroferogram is een illustratie, geen meting.') }}</lk-note>
+        </template>
         <lk-note v-if="m.a < 0.1 || m.a > 1" kind="warn">{{ t('A₂₆₀ buiten 0,1–1,0: de meting is minder betrouwbaar; pas de verdunning aan.') }}</lk-note>
         <lk-note v-if="isFinite(m.r1) && m.r1 < 1.8" kind="warn">{{ t('Lage A₂₆₀/A₂₈₀: mogelijk eiwit of fenol in het extract.') }}</lk-note>
         <lk-note v-if="isFinite(m.r2) && m.r2 < 1.8" kind="warn">{{ t('Lage A₂₆₀/A₂₃₀: mogelijk guanidinezouten, fenol of koolhydraten van de extractie.') }}</lk-note>
@@ -71,6 +80,28 @@ export default {
         rows.push(['28S:18S', F(r, 2) + chip(r >= 1.6, t(r >= 1.6 ? 'intact' : r >= 1 ? 'deels afgebroken' : 'afgebroken'))]);
       }
       return rows;
+    },
+    /* virtueel elektroferogram + RIN-achtige schatting; alleen met beide bandintensiteiten */
+    eg() {
+      const m = this.m;
+      if (!m || !(m.s28 > 0 && m.s18 > 0)) return null;
+      const r = m.s28 / m.s18, mx = Math.max(m.s28, m.s18);
+      const h28 = 70 * m.s28 / mx, h18 = 70 * m.s18 / mx;
+      const k = Math.min(1, Math.max(0, (2 - r) / 2));  // 0 = intact, 1 = sterk afgebroken
+      const X = nt => 20 + nt / 6000 * 270, g = (x, c, w) => Math.exp(-(((x - c) / w) ** 2) / 2);
+      let d = '';
+      for (let nt = 0; nt <= 6000; nt += 50) {
+        let y = 14 * g(nt, 25, 60) + h18 * g(nt, 1900, 90) + h28 * g(nt, 4700, 140);
+        /* afbraaksmeer: verhoogd tussen marker en 18S, groter bij lagere verhouding */
+        if (nt > 100 && nt < 1900) y += k * 0.3 * h18 * Math.sin((nt - 100) / 1800 * Math.PI / 2 + 0.3) ** 2;
+        d += (d ? 'L' : 'M') + X(nt).toFixed(1) + ' ' + (90 - y).toFixed(1);
+      }
+      /* shortcut: ruwe lineaire tabel van 28S:18S naar 1–10, niet de Agilent-RIN; upgraden bij een echte RIN-invoer of kalibratie op meetdata */
+      const T = [[0, 1], [0.5, 3], [1, 6], [1.6, 8], [2, 9.5], [2.5, 10]];
+      let rin = 10;
+      for (let i = 1; i < T.length; i++) if (r <= T[i][0]) { rin = T[i - 1][1] + (T[i][1] - T[i - 1][1]) * (r - T[i - 1][0]) / (T[i][0] - T[i - 1][0]); break; }
+      return {path: d, rin: Math.min(10, Math.max(1, rin)),
+        labels: [{x: X(25), txt: 'marker'}, {x: X(1900), txt: '18S'}, {x: X(4700), txt: '28S'}]};
     }
   },
   methods: {F}

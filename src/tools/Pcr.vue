@@ -80,7 +80,7 @@ import {overage} from '../lib/overage.js';
 const dec = x => (isFinite(x) ? lkNumIn(String(x).replace('.', ',')) : '');
 
 /* [naam, stock, eind, eenheid]; de namen staan in het Nederlands, de weergave vertaalt ze */
-const QPRE = {
+export const QPRE = {
   taq: [['10X reactiebuffer', 10, 1, 'X'], ['dNTP-mix', 10, 0.2, 'mM'], ['Primer F', 10, 0.2, 'µM'],
     ['Primer R', 10, 0.2, 'µM'], ['Taq-polymerase', 5, 1.25, 'U/50 µL']],
   taqmg: [['10X buffer (Mg-vrij)', 10, 1, 'X'], ['MgCl₂', 25, 1.5, 'mM'], ['dNTP-mix', 10, 0.2, 'mM'],
@@ -98,7 +98,7 @@ const QPRE = {
   dreamtaq: [['10X DreamTaq-buffer', 10, 1, 'X'], ['dNTP-mix', 10, 0.2, 'mM'], ['Primer F', 10, 0.5, 'µM'],
     ['Primer R', 10, 0.5, 'µM'], ['DreamTaq-polymerase', 5, 1.25, 'U/50 µL']]
 };
-const PRESETS = [{v: 'taq', n: 'Taq, losse componenten'}, {v: 'taqmg', n: 'Taq, Mg-vrije buffer + MgCl₂'},
+export const PRESETS = [{v: 'taq', n: 'Taq, losse componenten'}, {v: 'taqmg', n: 'Taq, Mg-vrije buffer + MgCl₂'},
   {v: 'mm2x', n: '2X kant-en-klare mastermix'},
   /* mg = mM MgCl₂ die al in 1X buffer zit. Bronnen: NEB M0273 (Taq), M0491 (Q5: 2 mM Mg), M0530 (Phusion HF:
      1,5 mM Mg; Thermo F530 idem), M0480 (OneTaq Standard: 1,8 mM Mg), Thermo EP0701 (DreamTaq: 2 mM Mg) */

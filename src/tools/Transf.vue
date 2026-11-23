@@ -28,6 +28,21 @@
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Platen met dezelfde naam bij Experiment worden samen verwerkt. Heb je de rest geconcentreerd (centrifugeren, pellet in ±200 µL), vul dan het oorspronkelijke volume in dat op die plaat terechtkwam, bijvoorbeeld 930 µL.') }}</p>
       </div>
       <div class="panel">
+        <h3>{{ t('Plaatfoto: tel kolonies') }}</h3>
+        <div class="row" style="margin-bottom:8px">
+          <button type="button" :class="{on: dotC === 'b'}" @click="dotC = 'b'">{{ t('Blauw') }}</button>
+          <button type="button" :class="{on: dotC === 'w'}" @click="dotC = 'w'">{{ t('Wit') }}</button>
+          <button type="button" @click="dots = []">{{ t('Wissen') }}</button>
+        </div>
+        <svg viewBox="0 0 200 200" width="100%" style="max-width:280px;display:block;touch-action:manipulation;cursor:crosshair" role="img" :aria-label="t('Petrischaal: tik om een kolonie toe te voegen of te verwijderen')" @click="tap">
+          <circle cx="100" cy="100" r="96" fill="var(--surface)" stroke="var(--line)" stroke-width="3"/>
+          <circle v-for="(d, i) in dots" :key="i" :cx="d.x" :cy="d.y" r="5" :fill="d.c === 'b' ? '#2f6fdb' : '#f4f4f0'" stroke="var(--muted)" stroke-width="1" @click.stop="dots.splice(i, 1)"/>
+        </svg>
+        <lk-kv :rows="dotRows"/>
+        <div class="row" style="margin-top:10px"><button type="button" @click="toTable">{{ t('Zet in tabel') }}</button></div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Zet de tellingen in de eerste rij van de tabel.') }}</p>
+      </div>
+      <div class="panel">
         <h3>{{ t('Transformatiekaart') }}</h3>
         <div class="fields">
           <lk-field v-model="cn" :label="t('Aantal transformaties')" for-id="tf-n" inputmode="numeric"/>
@@ -42,7 +57,7 @@
       <lk-note v-if="m.empty" kind="info">{{ t('Vul de tellingen per plaat in.') }}</lk-note>
       <lk-note v-else-if="m.bad" kind="bad">{{ t('Vul ligatievolume, hoeveelheid vector, getransformeerd volume en totaalvolume in.') }}</lk-note>
       <template v-else>
-        <lk-big :label="bigLabel" :html="bigHtml"/>
+        <lk-big :label="bigLabel" :html="bigHtml" :chip="eff.txt" :chip-kind="eff.kind"/>
         <lk-kv :rows="kvRows"/>
         <lk-table :cols="outCols" :rows="outRows"/>
         <lk-note v-for="(w, i) in warnings" :key="i" kind="warn" :html="w"/>
@@ -63,7 +78,7 @@ export default {
   name: 'Transf',
   data() {
     return {
-      cn: '3', cells: lkNumIn('50'), lv: '10', vng: '50', used: '1', tot: '1040', range: '30-300',
+      cn: '3', cells: lkNumIn('50'), lv: '10', vng: '50', used: '1', tot: '1040', range: '30-300', dots: [], dotC: 'b',
       rows: [[trPlain('Eigen ligatie'), '10', '3', '19'], [trPlain('Eigen ligatie'), '100', '31', '176'],
         [trPlain('Eigen ligatie'), '930', 'TNTC', 'TNTC'], [trPlain('Controle-insert'), '100', '72', '118']]
     };
@@ -103,6 +118,20 @@ export default {
     main() { return this.m.res[0]; },
     bigLabel() { return this.t(uv(this.main.n) + ': transformatiefrequentie'); },
     bigHtml() { return this.tHtml(sci(this.main.freq, 2) + ' <small>transformanten/µg vector</small>'); },
+    /* indicatie voor chemisch competente cellen (transformanten/µg); drempels zijn vuistregels */
+    eff() {
+      const f = this.main.freq;
+      return !(f >= 0) ? {txt: '', kind: 'info'} : f < 1e5 ? {txt: this.t('laag'), kind: 'bad'}
+        : f < 1e7 ? {txt: this.t('matig'), kind: 'warn'} : f < 1e8 ? {txt: this.t('goed'), kind: 'ok'} : {txt: this.t('hoog'), kind: 'ok'};
+    },
+    dotN() {
+      const b = this.dots.filter(d => d.c === 'b').length, w = this.dots.length - b;
+      return {b, w, pw: b + w ? w / (b + w) * 100 : NaN};
+    },
+    dotRows() {
+      const n = this.dotN;
+      return [[this.t('Blauw'), n.b], [this.t('Wit'), n.w], [this.t('% wit'), isFinite(n.pw) ? F(n.pw, 1) + ' %' : '–']];
+    },
     kvRows() {
       const t = this.t, {ng} = this.m, r = this.main;
       return [[t('Vector per transformatie'), F(ng, 3) + ' ng'],
@@ -151,6 +180,16 @@ export default {
     /* ---------- de transformatiekaart (S41) ----------
        NEB High Efficiency Transformation Protocol (C2987H), chemisch competente E. coli. Alleen
        de totalen volgen uit het aantal transformaties; de stappen zelf staan vast. */
+    /* tik op de schaal: nieuwe kolonie op die plek (de bestaande stippen vangen hun eigen tik op) */
+    tap(e) {
+      const r = e.currentTarget.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 200, y = (e.clientY - r.top) / r.height * 200;
+      if ((x - 100) ** 2 + (y - 100) ** 2 <= 92 ** 2) this.dots.push({x, y, c: this.dotC});
+    },
+    toTable() {
+      const r = this.rows.length ? this.rows.slice() : [['', '100', '', '']];
+      r[0] = [r[0][0], r[0][1], String(this.dotN.b), String(this.dotN.w)];
+      this.rows = r;
+    },
     addRow() { this.rows = [...this.rows, ['', '100', '', '']]; },
     /* een A4 om bij de bank te leggen: per stap een hokje, de temperatuur en de tijd */
     card() {

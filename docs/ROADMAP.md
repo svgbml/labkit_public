@@ -351,12 +351,12 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S108 | 188, 189, 190 | DNA quant batch + purity badge + "make it X ng/µL"; read primer synthesis report ✅ the report reader (`src/lib/oligoreport.js`, unit-tested) reads tables with a header, lines with units and name/yield/MW blocks, but not a comma-separated table with decimal commas | Sonnet |
 | S109 | 191, 200 | PCR mastermix and cDNA kit presets ✅ five PCR kits in `QPRE`/`PRESETS` (each with the Mg already in its buffer) and four cDNA kits; the optional Q5 GC enhancer is not a row | Sonnet |
 | S110 | 196, 197, 198 | qPCR efficiency from standard curve; fold-change chart; melt curve overlay ✅ the fold-change chart and the melt overlay with a per-well verdict already existed; added the standard curve (feeds Pfaffl) and a Welch t-test on ΔCt against the calibrator, shown as p and stars above the bars | Sonnet |
-| S111 | 201, 205, 206 | Virtual electropherogram; ligation ratio picture; transformation plate tap-count | Sonnet |
-| S112 | 208, 209, 210 | STR electropherogram view; shared allele frequency table; bloodstain drawing | Sonnet |
+| S111 | 201, 205, 206 | Virtual electropherogram; ligation ratio picture; transformation plate tap-count ✅ RIN-like estimate is a rough heuristic from 28S:18S; dish taps are not kept in links/undo | Sonnet |
+| S112 | 208, 209, 210 | STR electropherogram view; shared allele frequency table; bloodstain drawing ✅ frequency table (`afreq`, `AlleleFreq.vue`) holds invented example data only; in *Matchkans* the alleles go after the locus name for the fill; no live preview while dragging a stain | Sonnet |
 | S113 | 213, 215, 216 | Statistics "which test?" wizard, inline assumption checks, long-format paste | Opus 5 |
 | S114 | 214, 217, 218, 219, 220 | APA sentence; Bland-Altman bias; ROC cut-off; Kaplan-Meier risk table; sig-fig practice | Opus 5 |
-| S115 | 221, 222 | Pipette profiles + certificate; Westgard violations on the chart | Sonnet |
-| S116 | 223, 224, 226 | Uncertainty pie chart; validation report template; pipetting scheme drag rows + kit templates | Sonnet |
+| S115 | 221, 222 | Pipette profiles + certificate; Westgard violations on the chart ✅ profiles (`pipettes`) live in localStorage only, not in shared links; history chart spaces entries evenly, not by date | Sonnet |
+| S116 | 223, 224, 226 | Uncertainty pie chart; validation report template; pipetting scheme drag rows + kit templates ✅ kit templates read `QPRE`/`PRESETS` exported from `Pcr.vue`, so the S109 kits show up by themselves; rows move by drag or ↑/↓ buttons (no Alt+arrow keys) | Sonnet |
 
 ## Phase 9: structure and workflows (5 steps)
 | Step | Ideas | What | Model |
