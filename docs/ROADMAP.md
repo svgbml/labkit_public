@@ -191,7 +191,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | AL2a ✅ | Sonnet | S172–S176 (S176 by Haiku) | AL1 | anything | — |
 | AL2b ✅ | Sonnet | S177–S179, S181 (S179 after S42) | AL2a | anything | tdd |
 | AL2c ✅ | Sonnet | S186–S189 | AL2b | anything | tdd |
-| AL3 | Opus 5 | S180 (after S158), S182–S184, S190 | AL2c | anything | tdd |
+| AL3 🔨 (S190 nog open: worker en lazy laden, met `inworker.js` uit SA4) | Opus 5 | S180 (after S158), S182–S184, S190 | AL2c | anything | tdd |
 | AL4 | Opus 5.5 | S185 small progressive alignment | AL3 | anything | tdd |
 
 **Route through the usage limit:** waves 1–4 are done apart from S79, and most of wave 5 and
