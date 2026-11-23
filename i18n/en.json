@@ -5346,5 +5346,21 @@
 "Contacttijd (min)": "Contact time (min)",
 "eis": "requirement",
 "contacttijd (min)": "contact time (min)",
-"log-reductie (lg)": "log reduction (lg)"
+"log-reductie (lg)": "log reduction (lg)",
+"Eén monster": "One sample",
+"Meerdere monsters": "Several samples",
+"Doelconcentratie": "Target concentration",
+"te laag": "too low",
+"iets laag": "slightly low",
+"Maak het {#} ng/µL: monster": "Make it {#} ng/µL: sample",
+"Maak het {#} ng/µL: water / TE": "Make it {#} ng/µL: water / TE",
+"Doelconcentratie hoger dan het extract: verdunnen kan niet.": "Target concentration is higher than the extract: it cannot be diluted to that.",
+"Minder dan {#} µL monster: verdun het extract eerst of maak een groter eindvolume.": "Less than 0.5 µL of sample: dilute the extract first or make a larger final volume.",
+"Syntheserapport plakken": "Paste synthesis report",
+"Tekst van het specificatieblad (naam, nmol en MW per oligo)": "Text of the datasheet (name, nmol and MW per oligo)",
+"Naar de tabel (stock {#} µM)": "To the table ({#} µM stock)",
+"Plak het rapport van IDT, Sigma, Eurofins of Thermo.": "Paste the report from IDT, Sigma, Eurofins or Thermo.",
+"Geen oligo herkend: er is geen naam met nmol en MW gevonden.": "No oligo recognised: no name with nmol and MW was found.",
+"Regel niet gelezen:": "Line not read:",
+"Water of TE voor {#} µM": "Water or TE for 100 µM"
 }

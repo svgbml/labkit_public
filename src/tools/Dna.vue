@@ -10,9 +10,16 @@
       <div class="panel">
         <h3>{{ t('A₂₆₀ → concentratie') }}</h3>
         <div class="fields">
-          <lk-field v-model="a260" label="A₂₆₀" for-id="n-a260"/>
-          <lk-field v-model="a280" label="A₂₈₀" for-id="n-a280"/>
-          <lk-field v-model="a230" label="A₂₃₀" for-id="n-a230"/>
+          <div class="f"><label for="n-mode">{{ t('Aantal monsters') }}</label>
+            <select id="n-mode" v-model="mode" style="width:100%">
+              <option value="one">{{ t('Eén monster') }}</option>
+              <option value="multi">{{ t('Meerdere monsters') }}</option>
+            </select></div>
+          <template v-if="mode === 'one'">
+            <lk-field v-model="a260" label="A₂₆₀" for-id="n-a260"/>
+            <lk-field v-model="a280" label="A₂₈₀" for-id="n-a280"/>
+            <lk-field v-model="a230" label="A₂₃₀" for-id="n-a230"/>
+          </template>
           <div class="f" data-expert=""><label for="n-a320">{{ t('A₃₂₀ (achtergrond)') }}</label>
             <input id="n-a320" v-model="a320" inputmode="decimal" :placeholder="t('optioneel')"></div>
           <div class="f"><label for="n-type">{{ t('Type') }}</label>
@@ -24,9 +31,22 @@
           <lk-field v-model="df" :label="t('Verdunningsfactor')" for-id="n-df"/>
           <lk-field v-model="pl" :label="t('Weglengte')" for-id="n-pl" unit="cm" data-expert=""/>
           <lk-field v-model="vol" :label="t('Elutievolume')" for-id="n-vol" unit="µL"/>
+          <lk-field v-model="tc" :label="t('Doelconcentratie')" for-id="n-tc" unit="ng/µL"/>
+          <lk-field v-model="tv" :label="t('Eindvolume')" for-id="n-tv" unit="µL"/>
         </div>
+        <template v-if="mode === 'multi'">
+          <lk-etable table-id="nb-tbl" :cols="cols" v-model:rows="rows" add-id="nb-tbl-add"/>
+          <div class="row" style="margin-top:8px"><button type="button" id="nb-tbl-add" @click="rows.push(['', '', '', ''])">{{ t('+ Monster') }}</button></div>
+        </template>
       </div>
-      <div class="result" id="n-out">
+      <div v-if="mode === 'multi'" class="result" id="nb-out">
+        <lk-note v-if="!b.rows.length" kind="info">{{ t('Vul A₂₆₀ in.') }}</lk-note>
+        <template v-else>
+          <lk-table :cols="b.cols" :rows="b.rows" :wrap="true"/>
+          <lk-note v-for="(w, i) in b.warn" :key="i" kind="warn" :html="w"/>
+        </template>
+      </div>
+      <div v-else class="result" id="n-out">
         <lk-note v-if="a.note" :kind="a.note[0]">{{ t(a.note[1]) }}</lk-note>
         <template v-else>
           <lk-big :label="t('Concentratie')" :value="G(a.c, 3)" sub="ng/µL"/>
@@ -117,6 +137,7 @@ export default {
   name: 'Dna',
   data() {
     return {
+      mode: 'one', tc: '', tv: '20', rows: [[trPlain('Monster 1'), lkNumIn('0,85'), lkNumIn('0,46'), lkNumIn('0,41')], [trPlain('Monster 2'), lkNumIn('0,40'), lkNumIn('0,22'), lkNumIn('0,15')]],
       a260: lkNumIn('0,85'), a280: lkNumIn('0,46'), a230: lkNumIn('0,41'), a320: '', type: '50', df: '10', pl: '1', vol: '50',
       mc: lkNumIn('0,35'), mng: '1', mv: '15',
       png: '50', bp: '1000', pt: '660', pvol: '10',
@@ -127,30 +148,22 @@ export default {
     /* de knoppen van "Stuur door naar"; SEND staat in tools/nt/99_app.js, de klik wordt daar afgehandeld */
     sendTo() { return SEND.dna.to.map(x => x[0]); },
     /* A260 → concentratie en zuiverheid */
-    a() {
-      const a260 = num(this.a260), a280 = num(this.a280), a230 = num(this.a230), a320 = num(this.a320) || 0;
-      const f = num(this.type), df = num(this.df) || 1, pl = num(this.pl) || 1, v = num(this.vol);
-      if (!isFinite(a260)) return {note: ['info', 'Vul A₂₆₀ in.']};
-      const c = (a260 - a320) * f * df / pl;
-      if (a260 - a320 < 0) return {note: ['warn', 'A₂₆₀ is lager dan A₃₂₀; controleer de blanco en de meting.']};
-      const t = this.t, rows = [], notes = [];
-      const isRNA = f === 40, lo = isRNA ? 1.9 : 1.8, hi = isRNA ? 2.2 : 2.0;
-      if (isFinite(a280) && a280 > 0 && !(a280 - a320 > 0)) notes.push(['warn', 'A₂₈₀ is niet groter dan A₃₂₀: de verhouding 260/280 is niet te berekenen.']);
-      if (isFinite(a280) && a280 - a320 > 0) {
-        const r = (a260 - a320) / (a280 - a320), ok = r >= lo && r <= hi;
-        rows.push(['A₂₆₀/A₂₈₀', chip(ok ? 'ok' : r < lo ? 'bad' : 'warn', F(r, 2))]);
-        if (r < lo) notes.push(['bad', '260/280 te laag: wijst op eiwit- of fenolverontreiniging.']);
-        else if (r > hi) notes.push(['warn', isRNA ? '260/280 hoger dan verwacht.' : '260/280 hoog: mogelijk RNA in je DNA-extract.']);
-      }
-      if (isFinite(a230) && a230 > 0 && !(a230 - a320 > 0)) notes.push(['warn', 'A₂₃₀ is niet groter dan A₃₂₀: de verhouding 260/230 is niet te berekenen.']);
-      if (isFinite(a230) && a230 - a320 > 0) {
-        const r = (a260 - a320) / (a230 - a320), ok = r >= 2.0;
-        rows.push(['A₂₆₀/A₂₃₀', chip(ok ? 'ok' : r >= 1.8 ? 'warn' : 'bad', F(r, 2))]);
-        if (!ok) notes.push([r >= 1.8 ? 'warn' : 'bad', '260/230 lager dan 2,0: mogelijk zouten (guanidine), koolhydraten of fenol van de extractie.']);
-      }
-      if (isFinite(v)) rows.push([t('Opbrengst in ' + fmt(v, 0) + ' µL'), t(sig(c * v / 1000, 3) + ' µg')]);
-      return {c, rows, notes,
-        formula: t(`c = (A₂₆₀ − A₃₂₀) × ${f} × ${fmt(df, 1)} / ${fmt(pl, 2)} cm · ratio's: (A₂₆₀ − A₃₂₀) / (A₂ₓ₀ − A₃₂₀)`)};
+    a() { return this.one(this.a260, this.a280, this.a230); },
+    cols() { return [{h: this.t('Monster'), t: 'txt', w: 110}, {h: 'A₂₆₀', t: 'num', w: 60}, {h: 'A₂₈₀', t: 'num', w: 60}, {h: 'A₂₃₀', t: 'num', w: 60}]; },
+    /* meerdere monsters: dezelfde berekening (one) per rij, met de instellingen van het paneel */
+    b() {
+      const t = this.t, th = this.tHtml, dil = this.tc !== '' && num(this.tc) > 0, warn = [], rows = [];
+      this.rows.forEach(r => {
+        const x = this.one(r[1], r[2], r[3]), n = esc(r[0] || '');
+        if (x.note) { if (isFinite(num(r[1])) || r[0]) rows.push([n, '–', '–', '–'].concat(dil ? ['–', '–'] : [])); return; }
+        const d = this.dil(x.c), cell = k => (d && !d.bad ? [t(vol(d[k])) + pipHtml(d[k])] : ['–']);
+        if (d && d.bad) warn.push(th(ud(r[0] || '') + ': doelconcentratie hoger dan het extract; verdunnen kan niet.'));
+        else if (d && d.vs < 0.5) warn.push(th(ud(r[0] || '') + ': minder dan 0,5 µL monster; verdun het extract eerst of maak een groter eindvolume.'));
+        rows.push([n, G(x.c, 3), x.r28 == null ? '–' : x.chip28, x.r23 == null ? '–' : x.chip23].concat(dil ? cell('vs').concat(cell('vw')) : []));
+      });
+      const cols = [{h: t('Monster')}, {h: 'ng/µL', num: true}, {h: 'A₂₆₀/A₂₈₀', num: true}, {h: 'A₂₆₀/A₂₃₀', num: true}]
+        .concat(dil ? [{h: t('Monster (µL)'), num: true}, {h: t('Water / TE') + ' (µL)', num: true}] : []);
+      return {rows, cols, warn};
     },
     /* normaliseren naar een vaste input */
     nm() {
@@ -206,6 +219,48 @@ export default {
       return {di, cls, notes, rows, dis: di == null ? '' : fmt(di, 2)};
     }
   },
-  methods: {F, G}
+  methods: {F, G,
+    /* A260 → concentratie en zuiverheid van één monster (de oude berekening, ongewijzigd + oordeel en verdunning) */
+    one(s260, s280, s230) {
+      const a260 = num(s260), a280 = num(s280), a230 = num(s230), a320 = num(this.a320) || 0;
+      const f = num(this.type), df = num(this.df) || 1, pl = num(this.pl) || 1, v = num(this.vol);
+      if (!isFinite(a260)) return {note: ['info', 'Vul A₂₆₀ in.']};
+      const c = (a260 - a320) * f * df / pl;
+      if (a260 - a320 < 0) return {note: ['warn', 'A₂₆₀ is lager dan A₃₂₀; controleer de blanco en de meting.']};
+      const t = this.t, rows = [], notes = [], out = {};
+      const isRNA = f === 40, lo = isRNA ? 1.9 : 1.8, hi = isRNA ? 2.2 : 2.0;
+      if (isFinite(a280) && a280 > 0 && !(a280 - a320 > 0)) notes.push(['warn', 'A₂₈₀ is niet groter dan A₃₂₀: de verhouding 260/280 is niet te berekenen.']);
+      if (isFinite(a280) && a280 - a320 > 0) {
+        const r = (a260 - a320) / (a280 - a320), ok = r >= lo && r <= hi;
+        out.r28 = r; out.chip28 = chip(ok ? 'ok' : r < lo ? 'bad' : 'warn', F(r, 2) + ' · ' + t(ok ? 'zuiver' : r < lo ? 'te laag' : 'te hoog'));
+        rows.push(['A₂₆₀/A₂₈₀', out.chip28]);
+        if (r < lo) notes.push(['bad', '260/280 te laag: wijst op eiwit- of fenolverontreiniging.']);
+        else if (r > hi) notes.push(['warn', isRNA ? '260/280 hoger dan verwacht.' : '260/280 hoog: mogelijk RNA in je DNA-extract.']);
+      }
+      if (isFinite(a230) && a230 > 0 && !(a230 - a320 > 0)) notes.push(['warn', 'A₂₃₀ is niet groter dan A₃₂₀: de verhouding 260/230 is niet te berekenen.']);
+      if (isFinite(a230) && a230 - a320 > 0) {
+        const r = (a260 - a320) / (a230 - a320), ok = r >= 2.0;
+        out.r23 = r; out.chip23 = chip(ok ? 'ok' : r >= 1.8 ? 'warn' : 'bad', F(r, 2) + ' · ' + t(ok ? 'zuiver' : r >= 1.8 ? 'iets laag' : 'te laag'));
+        rows.push(['A₂₆₀/A₂₃₀', out.chip23]);
+        if (!ok) notes.push([r >= 1.8 ? 'warn' : 'bad', '260/230 lager dan 2,0: mogelijk zouten (guanidine), koolhydraten of fenol van de extractie.']);
+      }
+      if (isFinite(v)) rows.push([t('Opbrengst in ' + fmt(v, 0) + ' µL'), t(sig(c * v / 1000, 3) + ' µg')]);
+      const d = this.dil(c);
+      if (d && d.bad) notes.push(['bad', 'Doelconcentratie hoger dan het extract: verdunnen kan niet.']);
+      else if (d) {
+        const g = num(this.tc);
+        rows.push([t('Maak het ' + sig(g, 3) + ' ng/µL: monster'), t(vol(d.vs)) + pipHtml(d.vs)], [t('Maak het ' + sig(g, 3) + ' ng/µL: water / TE'), t(vol(d.vw)) + pipHtml(d.vw)]);
+        if (d.vs < 0.5) notes.push(['warn', 'Minder dan 0,5 µL monster: verdun het extract eerst of maak een groter eindvolume.']);
+      }
+      return {...out, c, rows, notes,
+        formula: t(`c = (A₂₆₀ − A₃₂₀) × ${f} × ${fmt(df, 1)} / ${fmt(pl, 2)} cm · ratio's: (A₂₆₀ − A₃₂₀) / (A₂ₓ₀ − A₃₂₀)`)};
+    },
+    /* C1V1 = C2V2: monster- en watervolume voor de doelconcentratie (tc) in het eindvolume (tv) */
+    dil(c) {
+      const g = num(this.tc), V = num(this.tv);
+      if (!(g > 0 && V > 0 && c > 0)) return null;
+      return g > c ? {bad: true} : {vs: g * V / c, vw: V - g * V / c};
+    }
+  }
 };
 </script>
