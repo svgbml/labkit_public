@@ -60,6 +60,24 @@
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Bijsnijden en vertalen werken op wat de viewer toont; opslaan schrijft precies die kolommen weg.') }}</p>
         <div class="row" style="margin-top:10px"><button type="button" class="primary" id="al-exp" :disabled="!m.names.length" @click="exportAln">{{ t('Uitlijning opslaan') }}</button></div>
       </details>
+      <!-- S186: reeksen controleren voordat ze naar Clustal Omega bij EBI gaan -->
+      <details class="panel" id="al-prep-d" style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Invoer voor Clustal Omega klaarmaken') }}</summary>
+        <div class="f" style="margin-top:12px"><label for="al-fb">{{ t('Reeksen (FASTA, nog niet uitgelijnd)') }}</label>
+          <textarea id="al-fb" class="mono" rows="7" v-model="fb" spellcheck="false" wrap="off"></textarea></div>
+        <div class="row" style="margin-top:8px"><input type="file" id="al-fb-file" accept=".fa,.fasta,.fas,.txt" :aria-label="t('Bestand openen')" @change="onFb"></div>
+        <div class="fields" style="margin-top:8px">
+          <div class="f"><label for="al-fbt">{{ t('Soort') }}</label>
+            <select id="al-fbt" v-model="fbt"><option value="auto">{{ t('Automatisch') }}</option><option value="nt">{{ t('DNA/RNA') }}</option><option value="aa">{{ t('eiwit') }}</option></select></div>
+        </div>
+        <div id="al-fb-chk" style="margin-top:10px">
+          <lk-note v-if="!fc.recs.length && !fc.issues.length" kind="info">{{ t('Plak hier de reeksen die je wilt uitlijnen.') }}</lk-note>
+          <lk-note v-for="i in fc.issues" :key="i.id" :kind="i.kind" :data-chk="i.id">{{ t(i.msg) }} <b v-if="i.detail" style="overflow-wrap:anywhere">{{ i.detail }}</b></lk-note>
+          <lk-note v-if="fc.recs.length && !fc.issues.some(i => i.kind === 'bad')" kind="ok">{{ t('Klaar voor Clustal Omega:') }} {{ fc.recs.length }} {{ t('sequenties') }}</lk-note>
+        </div>
+        <div class="f" v-if="fc.text" style="margin-top:10px"><label for="al-fb-out">{{ t('Schone FASTA') }}</label>
+          <textarea id="al-fb-out" class="mono" rows="5" readonly :value="fc.text" spellcheck="false" wrap="off"></textarea></div>
+        <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Namen kunnen tot ' + NAMEMAX + ' tekens; de naam is het eerste woord van de kopregel.') }}</p>
+      </details>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Het formaat wordt aan de eerste regel herkend. Uitlijnen doe je met Clustal Omega bij EBI; download daar de uitkomst als .aln en open die hier.') }}</p>
     </div>
     <div class="result">
@@ -153,6 +171,7 @@ import {lkNumIn} from '../lib/bridge.js';
 import {parseAlignment, alnType, alnColours, alnCls, alnConservation, alnProfile, alnConsensus, alnMotif, alnIdentity, alnDiff,
   alnTrim, alnWrite, ALN_OUT, alnPair, alnPim, pimWrite, alnConserved, alnTranslate} from '../lib/alignment.js';
 import {CODES, SEQ_TO, seqSend} from '../lib/seq.js';
+import {fastaCheck, NAMEMAX} from '../lib/alnprep.js';
 
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
@@ -170,6 +189,7 @@ export default {
       gap: st['al-gap'] != null ? String(st['al-gap']) : '', from: st['al-from'] != null ? String(st['al-from']) : '', to: st['al-to'] != null ? String(st['al-to']) : '',
       xf: st['al-xf'] != null ? String(st['al-xf']) : 'fasta', gm: st['al-gm'] != null ? String(st['al-gm']) : 'ign',
       pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false,
+      fb: st['al-fb'] != null ? String(st['al-fb']) : '', fbt: st['al-fbt'] != null ? String(st['al-fbt']) : 'auto', NAMEMAX,
       ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
   },
   computed: {
@@ -183,6 +203,7 @@ export default {
       if (!a.names.length || (!gOk && !(f > 1) && !(l >= 1 && l < a.len))) return a;
       return alnTrim(a, {maxGap: gOk ? g : null, from: f > 1 ? f : 1, to: l >= 1 ? l : a.len});
     },
+    fc() { return fastaCheck(this.fb, this.fbt === 'auto' ? undefined : this.fbt); },
     codes() { return CODES; },
     outFmts() { return ALN_OUT; },
     outText() { return alnWrite(this.m, this.xf in ALN_OUT ? this.xf : 'fasta'); },
@@ -428,6 +449,8 @@ export default {
       const r = this.regs[+b.dataset.reg];
       seqSend(t, trPlain('Stuk', true) + '_' + r.from + '-' + r.to, r.seq);
     },
+    /* een bestand houdt zijn regeleinden (CRLF, CR); een tekstvak zou ze al platslaan */
+    onFb(e) { const f = e.target.files[0]; if (f) f.text().then(x => { this.fb = x; }); },
     onFile(e) {
       const f = e.target.files[0];
       if (f) f.text().then(x => { this.txt = x; });

@@ -2122,6 +2122,25 @@ def _(pg):
     pg.evaluate("__set('dg-seq','');__set('sq-in','')")
     return out
 
+@case('Alignment bekijken', 'Invoercontrole voor Clustal Omega', "Eisen van Clustal Omega aan zijn invoer (EBI-handleiding; leesbibliotheek squid: naam tot 64 tekens, daarom hier de strengere grens van 30 voor vervolgprogramma's): unieke namen, IUPAC-tekens voor het soort, één soort per run, geen lege reeksen; elke controle krijgt één kapotte invoer en moet precies die ene melding geven")
+def _(pg):
+    pg.evaluate("__go('aln');document.getElementById('al-prep-d').open=true")
+    cases = {'dup': '>a\nACGT\n>a\nACGA\n', 'chars': '>a\nACGT1\n>b\nACGA\n', 'mixed': '>a\nACGTACGT\n>b\nMKVLAAGIVGLLLAQ\n',
+             'long': '>' + 'x' * 31 + '\nACGT\n>b\nACGA\n', 'empty': '>a\n>b\nACGA\n'}
+    out = []
+    chk = "[...document.querySelectorAll('#al-fb-chk [data-chk]')].map(e=>e.dataset.chk).join()"
+    for k, t in cases.items():
+        pg.evaluate("t=>__set('al-fb',t)", t); pg.wait_for_timeout(150)
+        out.append((k + ': precies die melding', int(pg.evaluate(chk) == k), 1, 0))
+    # regeleinden via een bestand (een tekstvak slaat CR al plat)
+    for name, buf in (('CRLF', b'>a\r\nACGT\r\n>b\r\nACGA\r\n'), ('CR', b'>a\rACGT\r>b\rACGA\r')):
+        pg.set_input_files('#al-fb-file', files=[{'name': 'x.fa', 'mimeType': 'text/plain', 'buffer': buf}]); pg.wait_for_timeout(250)
+        out.append((name + ': melding en schone uitvoer', pg.evaluate("()=>+(" + chk + "==='eol'&&document.getElementById('al-fb-out').value===['>a','ACGT','>b','ACGA',''].join(String.fromCharCode(10)))"), 1, 0))
+    pg.evaluate("__set('al-fb','>a'+String.fromCharCode(10)+'ACGT'+String.fromCharCode(10)+'>b'+String.fromCharCode(10)+'ACGA')"); pg.wait_for_timeout(150)
+    out.append(('goede invoer: geen melding', pg.evaluate("document.querySelectorAll('#al-fb-chk [data-chk]').length"), 0, 0))
+    pg.evaluate("__set('al-fb','')")
+    return out
+
 
 if __name__ == '__main__':
     main()
