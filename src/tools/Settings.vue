@@ -83,6 +83,9 @@
         <p style="margin:0 0 10px;color:var(--muted);font-size:13px">{{ t('Eén bestand met alles van dit apparaat: invoer, instellingen, geschiedenis, tabellen, protocollen en de gelbibliotheek. Open het op een ander apparaat om verder te werken.') }}</p>
         <div class="row"><button type="button" id="all-export" @click="exportAll">{{ t('Alles exporteren') }}</button>
           <button type="button" id="all-import" @click="importAll">{{ t('Alles importeren') }}</button></div></div>
+      <div class="panel"><h3>{{ t('Koppelen met een ander apparaat') }}</h3>
+        <p style="margin:0 0 10px;color:var(--muted);font-size:13px">{{ t('Volg een run van de bench-modus op dit apparaat: tik op het apparaat met de run op "Koppel een apparaat" (onderaan de bench-modus) en scan hier de code. Werkt als beide apparaten op hetzelfde netwerk zitten.') }}</p>
+        <div class="row"><button type="button" id="sync-join" @click="pair">{{ t('Koppelen met een ander apparaat') }}</button></div></div>
       <div class="panel"><h3>{{ t('Herstellen') }}</h3>
         <div class="row"><button type="button" id="ui-reset" @click="reset">{{ t('Uiterlijk terug naar standaard') }}</button></div></div>
     </div>
@@ -117,6 +120,8 @@ export default {
     /* hetzelfde bestand als "Sessie opslaan/openen" onderaan de navigatie (src/legacy/app.js) */
     exportAll() { allExport(); },
     importAll() { document.getElementById('sess-file').click(); },
+    /* de koppeldialoog hoort bij de bench-modus (src/tools/Bench.vue, S61) */
+    pair() { benchPair(); },
     reset() {
       Object.assign(this, DEF);
       /* de invoeropslag luistert naar input/change op de velden zelf, dus die krijgen ze na de render */
