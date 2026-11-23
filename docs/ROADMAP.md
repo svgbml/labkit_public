@@ -131,7 +131,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | C3 | Opus 5 | S91–S93, S96: imports and core-calculator extras | C1b | anything except R3 |
 | C4 | Sonnet | S94, S95 | C3 | anything |
 | R1 | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 |
-| R2a | Sonnet | S106–S110 | K3 | anything except E3 |
+| R2a ✅ | Sonnet | S106–S110 | K3 | anything except E3 |
 | R2b | Sonnet | S111, S112, S115, S116 | K3 | anything |
 | R3 | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 |
 | W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — |
