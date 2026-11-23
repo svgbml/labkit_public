@@ -120,6 +120,28 @@
         <div class="row" style="margin-top:8px"><input type="file" id="al-dnd-file" accept=".dnd,.nwk,.newick,.tree,.txt" :aria-label="t('Bestand openen')" @change="onDnd"></div>
         <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('De boom wordt bewaard en gaat mee in het projectbestand; hier tekenen kan nog niet.') }}</p>
       </details>
+      <!-- S180: varianten in de nummering van een referentie, en een eigen Sanger-read als extra rij -->
+      <details class="panel" id="al-var-d" style="margin-top:12px" @toggle="varOpen = $event.target.open"><summary style="cursor:pointer;font-weight:600;font-size:14px">{{ t('Varianten en eigen read') }}</summary>
+        <div class="fields" style="margin-top:12px">
+          <div class="f"><label for="al-vref">{{ t('Referentie') }}</label>
+            <select id="al-vref" v-model="vref"><option v-for="(n, i) in parsed.names" :key="i" :value="String(i)">{{ n }}</option></select></div>
+        </div>
+        <div class="f" style="margin-top:8px"><label for="al-read">{{ t('Eigen Sanger-read (FASTA of basen)') }}</label>
+          <textarea id="al-read" class="mono" rows="4" v-model="rd" spellcheck="false" wrap="off"></textarea></div>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('Vanuit het Chromatogram: knop Naar Alignment bekijken. De read wordt tegen de referentie uitgelijnd (beide strengen) en komt als laatste rij in de uitlijning.') }}</p>
+        <template v-if="rd.trim() && parsed.names.length">
+          <lk-kv v-if="base.hit" :rows="readRows" style="margin-top:10px"/>
+          <lk-note v-else kind="warn">{{ t('De read past niet op de referentie; kies een andere referentie of controleer de read.') }}</lk-note>
+        </template>
+        <template v-if="varOpen && src.names.length > 1">
+          <lk-note v-if="!vars.length" kind="info">{{ t('Geen verschillen met de referentie.') }}</lk-note>
+          <template v-else>
+            <lk-table id="al-var" data-xl="1" :cols="varCols" :rows="varRows" style="margin-top:10px"/>
+            <lk-note v-if="vars.length > VARMAX" kind="warn">{{ t('Alleen de eerste ' + VARMAX + ' varianten staan in de tabel.') }}</lk-note>
+          </template>
+          <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t("Posities tellen op de referentie zonder gaten; DNA in HGVS g.-notatie met de 3'-regel, zoals in het Chromatogram, eiwit als p. met één letter. Gaten aan het begin of eind van een rij tellen niet.") }}</p>
+        </template>
+      </details>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Het formaat wordt aan de eerste regel herkend. Uitlijnen doe je met Clustal Omega bij EBI; download daar de uitkomst als .aln en open die hier.') }}</p>
     </div>
     <div class="result">
@@ -217,12 +239,17 @@ import {fastaCheck, NAMEMAX} from '../lib/alnprep.js';
 import {alnUngapped, EBI_URL} from '../lib/alnhand.js';
 import {alnFigure, figSvg, figPaint} from '../lib/alnfig.js';
 import {alnProjectWrite, alnProjectRead, PROJ_KEYS} from '../lib/alnproj.js';
+import {alnVariants, alnAddRead} from '../lib/alnvar.js';
+
+/* S180: een read uit het Chromatogram (of Sequentie) komt als eigen rij in de uitlijning */
+SEQ_TO.push({label: 'Alignment bekijken (eigen read)', tool: 'aln', id: 'al-read'});
 
 const FMT = {clustal: 'Clustal', fasta: 'FASTA', phylip: 'PHYLIP', nexus: 'NEXUS', msf: 'GCG MSF', pir: 'PIR/NBRF'};
 const N = x => lkNumIn(fmt(x, 0)), P = f => lkNumIn(fmt(f * 100, 1)) + '%';
 const PROJ_IDS = {txt: 'al-in', dnd: 'al-dnd', col: 'al-col', cbs: 'al-cbs', thr: 'al-thr', motif: 'al-motif', ord: 'al-ord', ref: 'al-ref', tr: 'al-tr', code: 'al-code',
   gap: 'al-gap', from: 'al-from', to: 'al-to', xf: 'al-xf', gm: 'al-gm', pa: 'al-pa', pb: 'al-pb', ct: 'al-ct', cl: 'al-cl',
-  fgFrom: 'al-fg-from', fgTo: 'al-fg-to', fgPer: 'al-fg-per', fgTitle: 'al-fg-title', fgCons: 'al-fg-cons'};
+  fgFrom: 'al-fg-from', fgTo: 'al-fg-to', fgPer: 'al-fg-per', fgTitle: 'al-fg-title', fgCons: 'al-fg-cons', vref: 'al-vref', rd: 'al-read'};
+const VARMAX = 500;  /* rijen in de variantentabel */
 const PIMMAX = 60;  /* sequenties in de matrix: 60 x 60 cellen is wat een scherm nog toont */
 const CH = 18, RH = 22, PH = 32, MAXNAME = 24; /* rijhoogte, hoogte van de liniaal en van de plot, naamkolom in tekens */
 
@@ -238,14 +265,27 @@ export default {
       xf: st['al-xf'] != null ? String(st['al-xf']) : 'fasta', gm: st['al-gm'] != null ? String(st['al-gm']) : 'ign',
       pa: st['al-pa'] != null ? String(st['al-pa']) : '0', pb: st['al-pb'] != null ? String(st['al-pb']) : '1', pimOpen: false, projMsg: null, figOpen: false, fgFrom: st['al-fg-from'] != null ? String(st['al-fg-from']) : '', fgTo: st['al-fg-to'] != null ? String(st['al-fg-to']) : '', fgPer: st['al-fg-per'] != null ? String(st['al-fg-per']) : '60',
       fgTitle: st['al-fg-title'] != null ? String(st['al-fg-title']) : '', fgCons: st['al-fg-cons'] != null ? !!st['al-fg-cons'] : true, dnd: st['al-dnd'] != null ? String(st['al-dnd']) : '',
+      rd: st['al-read'] != null ? String(st['al-read']) : '', vref: st['al-vref'] != null ? String(st['al-vref']) : '0', varOpen: false, VARMAX,
       fb: st['al-fb'] != null ? String(st['al-fb']) : '', fbt: st['al-fbt'] != null ? String(st['al-fbt']) : 'auto', NAMEMAX, EBI_URL,
       ct: st['al-ct'] != null ? String(st['al-ct']) : '90', cl: st['al-cl'] != null ? String(st['al-cl']) : '20', PIMMAX, RH, sx: 0, sy: 0, vw: 0, vh: 0, cw: 8};
   },
   computed: {
     parsed() { return parseAlignment(this.txt); },
     isNt() { return alnType(this.parsed) === 'nt'; },
+    /* S180: de ingelezen uitlijning, met de eigen read als laatste rij als die er is */
+    base() { return this.rd.trim() && this.parsed.names.length ? alnAddRead(this.parsed, this.vrefI, this.rd, trPlain('Eigen read')) : {aln: this.parsed, hit: null}; },
+    src() { return this.base.aln; },
+    vrefI() { const i = +this.vref; return i >= 0 && i < this.parsed.names.length ? i : 0; },
+    readRows() {
+      const h = this.base.hit, t = this.t;
+      return [[t('Streng'), h.strand === '+' ? t('zoals de referentie') : t('reverse complement')], [t('Op de referentie'), N(h.rFrom + 1) + ' – ' + N(h.rTo + 1)],
+        [t('Identiteit'), P(h.ident) + ' (' + N(h.mism) + ' ' + t('verschillen') + ', ' + N(h.ins + h.del) + ' ' + t('gaten') + ')']];
+    },
+    vars() { return this.varOpen ? alnVariants(this.src, this.vrefI) : []; },
+    varCols() { const t = this.t; return [{h: t('Sequentie')}, {h: t('Variant')}, {h: t('Positie'), num: true}, {h: t('Kolom'), num: true}]; },
+    varRows() { return this.vars.slice(0, VARMAX).map(v => [esc(v.name), '<span class="mono">' + esc(v.hgvs) + '</span>', N(v.pos), N(v.col)]); },
     /* wat de viewer toont: de uitlijning, eventueel vertaald (S181) en dan bijgesneden (S177); zonder dat is het het ingelezen model zelf */
-    tl() { return this.tr !== '0' && this.isNt && this.parsed.names.length ? alnTranslate(this.parsed, +this.tr, +this.code) : this.parsed; },
+    tl() { return this.tr !== '0' && this.isNt && this.src.names.length ? alnTranslate(this.src, +this.tr, +this.code) : this.src; },
     m() {
       const a = this.tl, g = num(this.gap), f = Math.round(num(this.from)), l = Math.round(num(this.to));
       const gOk = g >= 0 && g < 100;
@@ -338,7 +378,7 @@ export default {
       const m = this.m, t = this.t, ty = alnType(m), base = this.tl.len;
       return [[t('Formaat'), FMT[m.format]], [t('Sequenties'), N(m.names.length)],
         [t('Lengte'), N(m.len) + ' ' + t('kolommen')],
-        this.tl !== this.parsed && [t('Vertaald'), this.t('leesraam ' + this.tr)],
+        this.tl !== this.src && [t('Vertaald'), this.t('leesraam ' + this.tr)],
         m !== this.tl && [t('Bijgesneden'), N(base) + ' → ' + N(m.len) + ' ' + t('kolommen')],
         [t('Kolommen met gaten'), N(this.prof.gaps.filter(Boolean).length) + ' ' + t('kolommen')],
         this.mot && [t('Motief gevonden in'), this.t(this.mot.hits.filter(h => h.length).length + ' van ' + m.names.length + ' sequenties')],
@@ -562,7 +602,7 @@ export default {
     },
     async projApply(r) {
       if (r.error) { this.projMsg = ['bad', r.error]; return; }
-      const S = r.settings, first = ['tr', 'code', 'gap', 'from', 'to'];
+      const S = r.settings, first = ['rd', 'vref', 'tr', 'code', 'gap', 'from', 'to'];
       this.txt = r.txt; this.dnd = r.dnd;
       for (const k of first) if (k in S) this[k] = S[k];
       await this.$nextTick();

@@ -5971,5 +5971,20 @@
 "Project opslaan en openen": "Save and open a project",
 "Eén bestand met de uitlijning, de boom (.dnd) en alle instellingen: kleuren, drempels, bijsnijden, vertaling, volgorde en figuur.": "One file with the alignment, the tree (.dnd) and all settings: colours, thresholds, trimming, translation, order and figure.",
 "Dit bestand is geen geldige JSON.": "This file is not valid JSON.",
-"Dit bestand is geen alignment-project van LabKit.": "This file is not a LabKit alignment project."
+"Dit bestand is geen alignment-project van LabKit.": "This file is not a LabKit alignment project.",
+"Varianten en eigen read": "Variants and own read",
+"Eigen Sanger-read (FASTA of basen)": "Own Sanger read (FASTA or bases)",
+"Vanuit het Chromatogram: knop Naar Alignment bekijken. De read wordt tegen de referentie uitgelijnd (beide strengen) en komt als laatste rij in de uitlijning.": "From the Chromatogram: button To View alignment. The read is aligned to the reference (both strands) and added as the last row of the alignment.",
+"De read past niet op de referentie; kies een andere referentie of controleer de read.": "The read does not match the reference; pick another reference or check the read.",
+"Geen verschillen met de referentie.": "No differences from the reference.",
+"Posities tellen op de referentie zonder gaten; DNA in HGVS g.-notatie met de {#}'-regel, zoals in het Chromatogram, eiwit als p. met één letter. Gaten aan het begin of eind van een rij tellen niet.": "Positions count on the reference without gaps; DNA in HGVS g. notation with the {#}' rule, as in the Chromatogram, protein as p. with one-letter codes. Gaps at the start or end of a row do not count.",
+"Alleen de eerste {#} varianten staan in de tabel.": "Only the first {#} variants are in the table.",
+"zoals de referentie": "same as the reference",
+"reverse complement": "reverse complement",
+"Op de referentie": "On the reference",
+"verschillen": "differences",
+"Variant": "Variant",
+"Eigen read": "Own read",
+"Alignment bekijken (eigen read)": "View alignment (own read)",
+"Naar Alignment bekijken": "To View alignment"
 }

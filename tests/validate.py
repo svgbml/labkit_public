@@ -2229,6 +2229,35 @@ def _(pg):
     pg.evaluate("()=>{for (const k of ['al-dnd','al-motif','al-gap','al-from','al-to','al-fg-title']) __set(k,''); __set('al-col','auto');__set('al-ord','file');__set('al-thr','50');__set('al-fg-per','60');__set('al-xf','fasta');__set('al-gm','ign');__set('al-ct','90');__set('al-cl','20');__set('al-cbs',false);__set('al-fg-cons',true);__set('al-in','')}")
     return out
 
+@case('Alignment bekijken', 'Eigen Sanger-read in de uitlijning: de variant staat in referentienummering', 'Verzonnen referentie van 150 basen (vaste pseudo-willekeurige reeks) en een tweede rij met een insertie, zodat de referentie een gat heeft; de read is basen 21-130 met één substitutie op referentiepositie 71 en gaat via de knop Naar Alignment bekijken in het Chromatogram. Verwacht: HGVS g.-notatie (den Dunnen e.a. 2016, Hum Mutat 37:564) g.71X>Y op de referentie zonder gaten, de read als derde rij met de gewijzigde base in de kolom van referentiepositie 71')
+def _(pg):
+    s = 5; ref = ''
+    for _ in range(150):
+        s = (s * 1103515245 + 12345) % 2147483648; ref += 'ACGT'[s * 4 // 2147483648]
+    oth = {'A': 'C', 'C': 'G', 'G': 'T', 'T': 'A'}
+    rrow = ref[:40] + '-' + ref[40:]; orow = ref[:40] + 'G' + ref[40:]
+    read = ref[20:70] + oth[ref[70]] + ref[71:130]
+    hg = 'g.71' + ref[70] + '>' + oth[ref[70]]
+    pg.evaluate("__go('aln')")
+    pg.evaluate("t=>{__set('al-read','');__set('al-in',t)}", '>ref\n' + rrow + '\n>ander\n' + orow + '\n'); pg.wait_for_timeout(200)
+    pg.evaluate(ALN_RESET); pg.evaluate("__set('al-vref','0')")
+    pg.evaluate("__go('sanger')"); pg.wait_for_timeout(200)
+    pg.evaluate("r=>{__sgVm.clear();__set('sg-paste','>mijnread\\n'+r)}", read); pg.wait_for_timeout(300)
+    pg.evaluate("document.getElementById('sg-to-aln').click()"); pg.wait_for_timeout(400)
+    pg.evaluate(ALN_OPEN, 'al-var-d'); pg.wait_for_timeout(250)
+    rows = pg.evaluate("[...document.querySelectorAll('#al-var tbody tr')].map(r=>[...r.cells].map(c=>c.textContent.trim()))")
+    mine = [r for r in rows if r[0] == 'mijnread']
+    m = pg.evaluate("({names: __alnVm.m.names, seqs: __alnVm.m.seqs})")
+    col = 71  # referentiepositie 71 staat na het gat in kolom 41 in kolom 72 (0-gebaseerd 71)
+    out = [('tool gewisseld naar de uitlijning', 1 if pg.evaluate("location.hash") == '#aln' else 0, 1, 0),
+           ('read als derde rij', 1 if m['names'][2:] == ['mijnread'] else 0, 1, 0),
+           ('variant van de read ' + hg, 1 if len(mine) == 1 and mine[0][1] == hg else 0, 1, 0),
+           ('positie op de referentie', int(mine[0][2]) if mine else -1, 71, 0),
+           ('gewijzigde base in de kolom van positie 71', 1 if m['seqs'][2][col] == oth[ref[70]] and m['seqs'][0][col] == ref[70] else 0, 1, 0),
+           ('read zonder gaten gelijk aan de ingevoerde read', 1 if m['seqs'][2].replace('-', '') == read else 0, 1, 0)]
+    pg.evaluate("()=>{__set('al-read','');__set('al-in','')}"); pg.evaluate("()=>{__go('sanger');__sgVm.clear();__go('aln')}")
+    return out
+
 
 if __name__ == '__main__':
     main()
