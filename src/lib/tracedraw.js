@@ -6,24 +6,30 @@
 
 export const DYE = {A: '#1a9641', C: '#2166ac', G: '#1f2933', T: '#d7301f'};
 
-/* teken kanaal tr tussen scan x0 en x0 + w·spp in een vak (x, y, w, h); ymax = hoogste waarde */
-function channel(ctx, tr, x0, spp, x, y, w, h, ymax) {
-  const Y = v => y + h - Math.max(0, Math.min(1, v / ymax)) * h;
-  ctx.beginPath();
-  if (spp <= 1) {   // ingezoomd: elk scanpunt, verbonden
+/* de punten [px, waarde] van kanaal tr voor het venster x0, spp over w pixels (px 0 = x0): ingezoomd elk scanpunt,
+   uitgezoomd per pixelkolom het minimum en het maximum. Gebruikt door canvas en SVG. */
+export function chanPoints(tr, x0, spp, w) {
+  const pts = [];
+  if (spp <= 1) {
     const s0 = Math.max(0, Math.floor(x0)), s1 = Math.min(tr.length - 1, Math.ceil(x0 + w * spp));
-    for (let s = s0; s <= s1; s++) { const px = x + (s - x0) / spp; s === s0 ? ctx.moveTo(px, Y(tr[s])) : ctx.lineTo(px, Y(tr[s])); }
-  } else {          // uitgezoomd: min en max per kolom
-    let first = true;
+    for (let s = s0; s <= s1; s++) pts.push([(s - x0) / spp, tr[s]]);
+  } else {
     for (let c = 0; c < w; c++) {
       const s0 = Math.max(0, Math.floor(x0 + c * spp)), s1 = Math.min(tr.length, Math.floor(x0 + (c + 1) * spp));
       if (s1 <= s0) continue;
       let lo = tr[s0], hi = lo;
       for (let s = s0 + 1; s < s1; s++) { const v = tr[s]; if (v < lo) lo = v; else if (v > hi) hi = v; }
-      if (first) { ctx.moveTo(x + c, Y(lo)); first = false; } else ctx.lineTo(x + c, Y(lo));
-      if (hi !== lo) ctx.lineTo(x + c, Y(hi));
+      pts.push([c, lo]); if (hi !== lo) pts.push([c, hi]);
     }
   }
+  return pts;
+}
+
+/* teken kanaal tr tussen scan x0 en x0 + w·spp in een vak (x, y, w, h); ymax = hoogste waarde */
+function channel(ctx, tr, x0, spp, x, y, w, h, ymax) {
+  const Y = v => y + h - Math.max(0, Math.min(1, v / ymax)) * h;
+  ctx.beginPath();
+  chanPoints(tr, x0, spp, w).forEach(([px, v], i) => i ? ctx.lineTo(x + px, Y(v)) : ctx.moveTo(x + px, Y(v)));
   ctx.stroke();
 }
 

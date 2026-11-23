@@ -34,8 +34,9 @@
             <template v-if="sel != null">
               <b>{{ t('Base ' + (sel + 1)) }}</b>
               <span>{{ t('Origineel') }}: {{ read.bases[sel] }}</span>
+              <span v-if="het && het[sel]">{{ t('Automatisch') }}: {{ auto[sel] }} ({{ t('verhouding') }} {{ fmtR(het[sel].ratio) }})</span>
               <input id="sg-base" class="mono" maxlength="1" :value="seq[sel]" :aria-label="t('Base')" style="width:3em;text-align:center;text-transform:uppercase" @input="onBase">
-              <button type="button" id="sg-undo-base" :disabled="edits[sel] == null" @click="setBase(sel, read.bases[sel])">{{ t('Origineel terugzetten') }}</button>
+              <button type="button" id="sg-undo-base" :disabled="edits[sel] == null" @click="setBase(sel, auto[sel])">{{ t('Origineel terugzetten') }}</button>
             </template>
             <template v-if="nEd">
               <span>{{ t(nEd + ' bewerkt') }}</span>
@@ -43,7 +44,28 @@
             </template>
           </div>
         </div>
-        <pre id="sg-seq" class="mono" v-if="m.ok" style="white-space:pre-wrap;overflow-x:auto;margin-top:12px"><template v-for="(k, i) in seqTokens" :key="i"><mark v-if="k.o" class="sg-ed" :title="t('Origineel') + ': ' + k.o" :style="{background: '#ffe0b2', color: k.g ? 'var(--muted)' : 'inherit'}">{{ k.text }}</mark><span v-else-if="k.g" style="color:var(--muted)">{{ k.text }}</span><template v-else>{{ k.text }}</template></template></pre>
+        <div v-if="m.ok" class="row" style="gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap">
+          <label class="chk" for="sg-rc"><input type="checkbox" id="sg-rc" v-model="rc"> {{ t('Reverse complement') }}</label>
+          <button type="button" id="sg-copy" @click="copy">{{ t('Kopieer als FASTA') }}</button>
+          <button type="button" id="sg-fasta" @click="saveFasta">{{ t('FASTA van de getrimde read') }}</button>
+          <template v-if="m.r.traces">
+            <button type="button" id="sg-png" @click="savePng">{{ t('PNG van het venster') }}</button>
+            <button type="button" id="sg-svg" @click="saveSvg">{{ t('SVG van het venster') }}</button>
+            <button type="button" id="sg-print" @click="print">{{ t('Afdrukken in rijen van 60') }}</button>
+          </template>
+          <span v-if="rng">{{ t('Bereik') }}: {{ rng.a + 1 }}–{{ rng.b + 1 }} ({{ rng.b - rng.a + 1 }} {{ t('basen') }})</span>
+          <span v-if="copied" role="status">{{ copied }}</span>
+        </div>
+        <p v-if="m.ok" style="font-size:13px;color:var(--muted);margin:4px 0 0">{{ t('Klik op een base in het paneel om naar die plek in de trace te gaan; Shift + klik selecteert een bereik, dat Kopieer als FASTA kopieert.') }}</p>
+        <pre id="sg-seq" ref="pre" class="mono" v-if="m.ok" style="white-space:pre-wrap;overflow:auto;max-height:18em;margin-top:8px" @click="panelClick"><template v-for="r in seqRows" :key="r.pos"><span>{{ r.pos }}</span>{{ '  ' }}<template v-for="(g, gi) in r.groups" :key="gi"><template v-if="gi">{{ ' ' }}</template><span v-for="b in g" :key="b.i" :data-i="b.i" :class="{'sg-sel': b.i === sel, 'sg-rng': inRng(b.i)}" :title="b.o ? t('Origineel') + ': ' + b.o : null" :style="{background: b.i === sel ? '#90caf9' : inRng(b.i) ? '#bbdefb' : b.o ? '#ffe0b2' : b.hz ? HETBG : null, color: b.g ? 'var(--muted)' : null, cursor: 'pointer'}">{{ b.c }}</span></template>{{ '\n' }}</template></pre>
+        <div v-if="m.ok && het" id="sg-snp" style="margin-top:12px">
+          <h3>{{ t('SNP-tabel') }}</h3>
+          <p v-if="snpCounts" style="font-size:13px;margin:4px 0">{{ snpCounts }}</p>
+          <p v-if="snp.rows.length" style="font-size:13px;color:var(--muted);margin:4px 0">{{ t('Waarschuwingen zijn vuistregels om een call na te kijken, geen vaste grenzen.') }}</p>
+          <lk-note v-else kind="info">{{ t('Geen heterozygote, gemarkeerde of bewerkte posities.') }}</lk-note>
+          <div v-if="snp.rows.length" style="max-height:24em;overflow:auto"><lk-table table-id="sg-snp-tbl" :cols="snpCols" :rows="snp.rows"/></div>
+          <button v-if="snp.rows.length" type="button" id="sg-snp-csv" style="margin-top:8px" @click="saveSnp">{{ t('SNP-tabel als CSV') }}</button>
+        </div>
       </div>
     </div>
     <div>
@@ -69,6 +91,29 @@
         </div>
         <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('De read begint bij het eerste venster en eindigt bij het laatste venster waarvan de gemiddelde Phred-kwaliteit de drempel haalt; de rest staat grijs.') }}</p>
       </div>
+      <div class="panel">
+        <h3>{{ t('Heterozygoten') }}</h3>
+        <lk-field v-model="hthr" :label="t('Drempel tweede piek')" for-id="sg-het" inputmode="decimal"/>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('Per base de hoogte van de tweede piek gedeeld door die van de hoogste. Vanaf de drempel wordt de base een IUPAC-code (R, Y, S, W, K, M) en krijgt hij een paarse markering.') }}</p>
+      </div>
+      <div v-if="read" class="panel" id="sg-ovr">
+        <h3>{{ t('Handmatige calls') }}</h3>
+        <div class="row" style="gap:10px;align-items:flex-end;flex-wrap:wrap">
+          <lk-field v-model="opos" :label="t('Positie')" for-id="sg-ovr-pos" inputmode="numeric"/>
+          <lk-field v-model="obase" :label="t('Base')" for-id="sg-ovr-base"/>
+          <button type="button" id="sg-ovr-set" @click="setOvr">{{ t('Wijzig call') }}</button>
+        </div>
+        <lk-note v-if="!nEd" kind="info">{{ t('Geen handmatige calls.') }}</lk-note>
+        <table v-else id="sg-ovr-tbl" class="tbl" style="margin-top:8px">
+          <thead><tr><th>{{ t('Positie') }}</th><th>{{ t('Sequencer') }}</th><th>{{ t('Automatisch') }}</th><th>{{ t('Jouw call') }}</th><th></th></tr></thead>
+          <tbody><tr v-for="i in edited" :key="i">
+            <td><button type="button" class="mono" :aria-label="t('Ga naar positie ' + (i + 1))" @click="goTo(i)">{{ i + 1 }}</button></td>
+            <td class="mono">{{ read.bases[i] }}</td><td class="mono">{{ auto[i] }}</td><td class="mono">{{ edits[i] }}</td>
+            <td><button type="button" :aria-label="t('Positie ' + (i + 1) + ' terugzetten')" @click="setBase(i, auto[i])">{{ t('Terugzetten') }}</button></td>
+          </tr></tbody>
+        </table>
+        <button v-if="nEd" type="button" style="margin-top:8px" @click="undoAll">{{ t('Alle bewerkingen terugzetten') }}</button>
+      </div>
     </div>
   </div>
 </template>
@@ -77,7 +122,9 @@
 import {markRaw} from 'vue';
 import {lkNumIn} from '../lib/bridge.js';
 import {readAbif, abifRead} from '../lib/abif.js';
-import {trimWindow} from '../lib/sangertrim.js';
+import {trimWindow, comp, fasta} from '../lib/sangertrim.js';
+import {hetCalls, flags} from '../lib/sangerhet.js';
+import {traceSvg} from '../lib/tracesvg.js';
 import {DYE, drawTraces, drawOverview, clampView} from '../lib/tracedraw.js';
 
 const LB = 18, TH = 190, QB = 28, OV = 40, GAP = 20;   // hoogte trace, kwaliteitsstrook, overzichtsstrook en de strook met posities (CSS-pixels); LB = strook met de baseletters bovenaan
@@ -87,8 +134,10 @@ const SHADE = 'rgba(95,107,122,.18)';
 const qcol = q => q < 20 ? '#d7301f' : q < 30 ? '#f0a020' : '#1a9641';
 const IUPAC = /^[ACGTRYSWKMBDHVN]$/;
 const GREY = '#8a94a3';
+const MIX = 'RYSWKM', HETBG = '#e1bee7', HETC = '#8e24aa';   // gemengde calls van twee basen; paars = heterozygoot
 
 const intIn = (v, lo, hi, d) => { const n = Number(String(v).replace(',', '.')); return Number.isInteger(n) && n >= lo && n <= hi ? n : d; };
+const FLN = {weak: 'Zwak signaal', sat: 'Verzadigd', broad: 'Brede piek', blob: 'Kleurstofblob', N: 'N-call', slip: 'Mogelijke slippage'};
 const NL = (x, d) => lkNumIn(fmt(x, d));
 
 /* FASTA of kale basen: een regel met > geeft de naam, de rest houdt alleen IUPAC-letters */
@@ -106,7 +155,7 @@ export default {
     const saved = jget('sg-read', null);
     return {win: st['sg-win'] != null ? String(st['sg-win']) : '10', qthr: st['sg-q'] != null ? String(st['sg-q']) : '20',
       read: saved ? markRaw(saved) : null, paste: st['sg-paste'] != null ? String(st['sg-paste']) : '', err: '', over: false,
-      edits: saved && saved.edits ? saved.edits : {}, sel: null};
+      edits: saved && saved.edits ? saved.edits : {}, opos: '', obase: '', sel: null, rng: null, rc: !!st['sg-rc'], copied: '', hthr: st['sg-het'] != null ? String(st['sg-het']) : NL(0.2, 1)};
   },
   computed: {
     HT() { return HT; },
@@ -115,10 +164,39 @@ export default {
     hasQ() { return this.m.r.qual.length > 0; },
     /* {start, end} (1-gebaseerd, inclusief) of null; bewerkingen veranderen de kwaliteit niet */
     trim() { return this.hasQ ? trimWindow(this.m.r.qual, this.winN, this.qN) : null; },
+    edited() { return Object.keys(this.edits).map(Number).sort((a, b) => a - b); },
     nEd() { return Object.keys(this.edits).length; },
-    /* de sequentie met de bewerkingen erin; read.bases houdt de oorspronkelijke calls */
+    hN() { const n = Number(String(this.hthr).replace(',', '.')); return n > 0 && n <= 1 ? n : 0.2; },
+    /* per base de piekhoogtes, de verhouding en de IUPAC-code boven de drempel (S155); null zonder trace */
+    het() { const r = this.m.r; return r.traces ? hetCalls(r.traces, r.peaks, Math.min(r.peaks.length, r.bases.length), this.hN) : null; },
+    /* de automatische call: boven de drempel de IUPAC-code; eronder de call van de sequencer, maar een gemengde call van twee basen
+       (R, Y, …) wordt dan de hoogste piek, zodat de drempel in beide richtingen werkt */
+    auto() {
+      const b = this.m.r.bases, h = this.het;
+      if (!h) return b;
+      return b.split('').map((c, i) => !h[i] ? c : h[i].code || (MIX.includes(c) ? h[i].top : c)).join('');
+    },
+    /* waarschuwingen per base (S156) */
+    flg() { const r = this.m.r; return this.het ? flags(r.traces, r.peaks, this.seq, this.het) : null; },
+    /* de SNP-tabel: elke heterozygote, gemarkeerde of bewerkte positie; counts = aantal basen per waarschuwing */
+    snp() {
+      const h = this.het, f = this.flg, q = this.m.r.qual, t = this.t, rows = [], counts = {};
+      if (!h) return {rows, counts};
+      for (let i = 0; i < f.length; i++) {
+        for (const c of f[i]) counts[c] = (counts[c] || 0) + 1;
+        const ed = this.edits[i] != null;
+        if (!h[i].code && !f[i].length && !ed) continue;
+        const g = this.seq[i] + (h[i].code && !ed ? ' (' + [h[i].top, h[i].sec].sort().join('/') + ')' : '');
+        rows.push([i + 1, g, h[i].h.A, h[i].h.C, h[i].h.G, h[i].h.T, this.fmtR(h[i].ratio), q[i] != null ? q[i] : '–', f[i].map(c => t(FLN[c])).join(', ') || '–']);
+      }
+      return {rows, counts};
+    },
+    snpCols() { const t = this.t; return [{h: t('Positie'), num: true}, {h: t('Genotype')}, {h: 'A', num: true}, {h: 'C', num: true}, {h: 'G', num: true}, {h: 'T', num: true}, {h: t('Verhouding'), num: true}, {h: 'Q', num: true}, {h: t('Waarschuwingen')}]; },
+    snpCounts() { const c = this.snp.counts; return Object.keys(FLN).filter(k => c[k]).map(k => this.t(FLN[k]) + ': ' + NL(c[k], 0)).join(' · '); },
+    nHet() { return this.het ? this.het.filter(x => x.code).length : 0; },
+    /* de sequentie met de bewerkingen erin; read.bases houdt de oorspronkelijke calls, auto de calls na de piekverhouding */
     seq() {
-      const b = this.m.r.bases;
+      const b = this.auto;
       if (!this.nEd || !this.read) return b;
       const a = b.split('');
       for (const i in this.edits) if (i < a.length) a[i] = this.edits[i];
@@ -143,6 +221,7 @@ export default {
       if (r.qual.length) {
         const q20 = r.qual.filter(q => q >= 20).length;
         out.push([t('Gemiddelde kwaliteit'), NL(r.qual.reduce((a, b) => a + b, 0) / r.qual.length, 1) + ' (Phred)']);
+        if (this.het) out.push([t('Heterozygote posities'), NL(this.nHet, 0) + ' (' + t('drempel') + ' ' + this.fmtR(this.hN) + ')']);
         out.push([t('Q20 of hoger'), NL(q20, 0) + ' (' + NL(q20 / r.qual.length * 100, 1) + '%)']);
         const tr = this.trim;
         if (tr) {
@@ -153,27 +232,28 @@ export default {
       }
       return out;
     },
-    /* GenBank-ORIGIN: rijen van 60, groepen van 10, positie van de eerste base ervoor; een bewerkte base is een eigen stuk (o = oorspronkelijk) */
-    seqTokens() {
-      const q = this.seq, w = String(q.length).length, ed = this.edits, tr = this.trim, out = [];
-      let buf = '', g = false;
-      const flush = () => { if (buf) out.push({text: buf, g}); buf = ''; };
-      for (let i = 0; i < q.length; i++) {
-        const gi = !!tr && (i + 1 < tr.start || i + 1 > tr.end);
-        if (gi !== g) { flush(); g = gi; }
-        if (i % 60 === 0) buf += (i ? '\n' : '') + String(i + 1).padStart(w) + '  ';
-        else if (i % 10 === 0) buf += ' ';
-        if (ed[i] != null) { flush(); out.push({text: q[i], o: this.m.r.bases[i], g}); } else buf += q[i];
+    /* GenBank-ORIGIN: rijen van 60, groepen van 10, positie van de eerste base ervoor; per base {i = index in de originele read, c, g = getrimd, o = origineel als bewerkt}.
+       Reverse complement: de rij loopt van het 3'-einde terug en is genummerd 1..n in de getoonde (rc-)volgorde; i wijst naar de originele base. */
+    seqRows() {
+      const q = this.seq, n = q.length, w = String(n).length, ed = this.edits, tr = this.trim, rc = this.rc, rows = [];
+      for (let j = 0; j < n; j++) {
+        const i = rc ? n - 1 - j : j, o = ed[i] != null ? this.auto[i] : null, hz = !!this.het && !!this.het[i] && !!this.het[i].code;
+        if (j % 60 === 0) rows.push({pos: String(j + 1).padStart(w), groups: []});
+        const gs = rows[rows.length - 1].groups;
+        if (j % 10 === 0) gs.push([]);
+        gs[gs.length - 1].push({i, c: rc ? comp(q[i]) : q[i], o: o && (rc ? comp(o) : o), g: !!tr && (i + 1 < tr.start || i + 1 > tr.end), hz});
       }
-      flush();
-      return out;
+      return rows;
     }
   },
   watch: {
     /* een andere read: begin links, ingezoomd tot ongeveer 1 scanpunt per pixel (±70 basen) */
     'm.r'() { this.view = {x0: 0, spp: 1}; this.$nextTick(this.draw); },
-    sel() { this.draw(); },
+    sel() { this.draw(); this.reveal(); },
+    rng() { this.draw(); },
+    rc() { this.$nextTick(this.reveal); },
     edits() { this.draw(); },
+    het() { this.draw(); },
     trim() { this.draw(); },
     qN() { this.draw(); }
   },
@@ -203,7 +283,7 @@ export default {
         if (!p.bases) { this.err = this.t('Geen ABIF-bestand en geen sequentie gevonden.'); return; }
         r = {name: p.name || file.name, meta: null, order: '', traces: null, bases: p.bases, peaks: [], qual: []};
       }
-      this.edits = {}; this.sel = null;
+      this.edits = {}; this.sel = null; this.rng = null;
       this.read = markRaw(r);
       jset('sg-read', r);
     },
@@ -244,12 +324,21 @@ export default {
         x.fillStyle = 'rgba(21,101,192,.15)';
         x.fillRect((p[this.sel] - v.x0) / v.spp - bw / 2, 0, bw, LB + 4 + TH);
       }
-      if (bw < 7) return;
+      if (this.rng && this.rng.b < n) {
+        x.fillStyle = 'rgba(21,101,192,.15)';
+        x.fillRect((p[this.rng.a] - v.x0) / v.spp - bw / 2, 0, (p[this.rng.b] - p[this.rng.a]) / v.spp + bw, LB + 4 + TH);
+      }
+      const h = this.het;
+      if (bw < 7) {   // te krap voor letters: een paars streepje per heterozygote positie
+        if (h) { x.fillStyle = HETC; for (let i = 0; i < n; i++) if (h[i] && h[i].code) { const px = (p[i] - v.x0) / v.spp; if (px >= 0 && px <= W) x.fillRect(px - 1, 2, 2, LB - 4); } }
+        return;
+      }
       x.font = 'bold 12px system-ui,sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
       for (let i = 0; i < n; i++) {
         const px = (p[i] - v.x0) / v.spp;
         if (px < -10) continue;
         if (px > W + 10) break;
+        if (this.edits[i] == null && h && h[i] && h[i].code) { x.fillStyle = HETBG; x.beginPath(); (x.roundRect || x.rect).call(x, px - 6.5, 1, 13, LB - 2, 3); x.fill(); }
         if (this.edits[i] != null) { x.fillStyle = '#ffe0b2'; x.beginPath(); (x.roundRect || x.rect).call(x, px - 6.5, 1, 13, LB - 2, 3); x.fill(); }
         x.fillStyle = DYE[q[i]] || GREY;
         x.fillText(q[i], px, LB / 2 + 1);
@@ -323,21 +412,82 @@ export default {
       while (lo < hi) { const mid = (lo + hi) >> 1; if (p[mid] < s) lo = mid + 1; else hi = mid; }
       return n ? (lo > 0 && s - p[lo - 1] < p[lo] - s ? lo - 1 : lo) : null;
     },
-    select(i) { this.sel = i == null || !this.read || !this.read.peaks.length ? null : Math.max(0, Math.min(i, this.read.peaks.length - 1, this.read.bases.length - 1)); },
+    select(i) { this.rng = null; this.sel = i == null || !this.read || !this.read.peaks.length ? null : Math.max(0, Math.min(i, this.read.peaks.length - 1, this.read.bases.length - 1)); },
     /* base i (0-based) een nieuwe letter geven; gelijk aan het origineel haalt de bewerking weg */
     setBase(i, b) {
       b = String(b).toUpperCase();
-      if (!this.read || !this.read.peaks.length || !IUPAC.test(b) || !(i >= 0 && i < this.read.bases.length)) return;
+      if (!this.read || !IUPAC.test(b) || !(i >= 0 && i < this.read.bases.length)) return;
       const e = Object.assign({}, this.edits);
-      if (b === this.read.bases[i]) delete e[i]; else e[i] = b;
+      if (b === this.auto[i]) delete e[i]; else e[i] = b;
       this.edits = e; this.save();
     },
+    setOvr() {
+      const i = intIn(this.opos, 1, this.m.r.bases.length, 0) - 1;
+      if (i >= 0 && IUPAC.test(String(this.obase).toUpperCase())) { this.setBase(i, this.obase); this.opos = this.obase = ''; }
+    },
+    goTo(i) { this.select(i); if (this.read.peaks.length) this.center(this.read.peaks[i]); },
     undoAll() { this.edits = {}; this.save(); },
     save() { jset('sg-read', Object.assign({}, this.read, {edits: this.edits})); },
     onBase(e) { this.setBase(this.sel, e.target.value); e.target.value = this.seq[this.sel]; },
+    fmtR(r) { return NL(r, 2); },
+    inRng(i) { return !!this.rng && i >= this.rng.a && i <= this.rng.b; },
+    /* shift: bereik van sel tot base i (zonder sel wordt i de selectie) */
+    pick1(i, shift) {
+      if (shift && this.sel != null && i !== this.sel) this.rng = {a: Math.min(this.sel, i), b: Math.max(this.sel, i)};
+      else this.select(i);
+    },
+    panelClick(e) {
+      const el = e.target.closest('[data-i]');
+      if (!el) return;
+      const i = +el.dataset.i;
+      this.pick1(i, e.shiftKey);
+      if (this.read && this.read.peaks.length && !e.shiftKey) this.center(this.read.peaks[i]);
+    },
+    /* de geselecteerde base in het paneel in beeld, alleen door het paneel zelf te scrollen */
+    reveal() {
+      const pr = this.$refs.pre, el = pr && this.sel != null && pr.querySelector('[data-i="' + this.sel + '"]');
+      if (!el) return;
+      const a = el.getBoundingClientRect(), b = pr.getBoundingClientRect();
+      if (a.top < b.top) pr.scrollTop -= b.top - a.top; else if (a.bottom > b.bottom) pr.scrollTop += a.bottom - b.bottom;
+    },
+    async copy() {
+      const t = fasta(this.m.r.name, this.seq, this.rng, this.rc);
+      try { await navigator.clipboard.writeText(t); this.copied = this.t('Gekopieerd.'); } catch (e) { this.copied = this.t('Kopiëren geblokkeerd.'); }
+    },
+    base() { return safeName(String(this.m.r.name || 'chromatogram').replace(/\.[A-Za-z0-9]{1,4}$/, '')); },
+    /* PNG: het canvas zoals het nu is, overzichtsstrook en trimschaduw inbegrepen */
+    saveSnp() {
+      const tsv = [this.snpCols.map(c => c.h)].concat(this.snp.rows).map(r => r.join('\t')).join('\n');
+      saveBlob(this.base() + '-snp.csv', csvBlob(tsv)).catch(() => {});
+    },
+    savePng() { this.$refs.cv.toBlob(b => { if (b) saveBlob(this.base() + '.png', b).catch(() => {}); }, 'image/png'); },
+    /* de vier kanalen, baseletters en nummers van het zichtbare venster; zonder overzicht of kwaliteit */
+    saveSvg() {
+      const r = this.m.r, W = Math.round(this.$refs.cv.clientWidth);
+      saveBlob(this.base() + '.svg', new Blob([traceSvg({traces: r.traces, peaks: r.peaks, seq: this.seq, view: this.view, w: W, th: TH, keep: this.trim})], {type: 'image/svg+xml'})).catch(() => {});
+    },
+    /* de getrimde read (hele read zonder trimvoorstel), met bewerkingen en rc-schakelaar */
+    saveFasta() {
+      const t = this.trim, txt = fasta(this.m.r.name, this.seq, t ? {a: t.start - 1, b: t.end - 1} : null, this.rc);
+      saveBlob(this.base() + '.fasta', new Blob([txt], {type: 'text/plain'})).catch(() => {});
+    },
+    /* afdruk: de hele read in rijen van 60 basen, elke rij op zijn eigen hoogteschaal; getrimde einden grijs */
+    printHtml() {
+      const r = this.m.r, me = r.meta || {}, t = this.t, sp = this.sp(), n = Math.min(r.peaks.length, this.seq.length), w = 720, rows = [];
+      for (let a = 0; a < n; a += 60) {
+        const b = Math.min(n, a + 60), view = {x0: r.peaks[a] - sp / 2, spp: sp * 60 / w};
+        rows.push('<div class="r">' + traceSvg({traces: r.traces, peaks: r.peaks, seq: this.seq, view, w, th: 60, keep: this.trim}) + '</div>');
+      }
+      const tr = this.trim, info = [[t('Bestand'), r.name], [t('Monster'), me.sample], [t('Well'), me.well], [t('Instrument'), me.instrument],
+        [t('Start run'), me.start], [t('Leeslengte'), n + ' ' + t('basen')], [t('Trimvoorstel'), tr ? tr.start + '–' + tr.end : '']].filter(x => x[1]);
+      return '<!doctype html><meta charset="utf-8"><title>' + esc(r.name) + '</title><style>@page{size:A4;margin:12mm}body{font:12px system-ui,Arial,sans-serif;margin:0}'
+        + 'h1{font-size:16px;margin:0 0 4px}.i{margin:0 0 8px;color:#333}.r{break-inside:avoid;page-break-inside:avoid;margin:0 0 6px}svg{width:100%;height:auto;display:block}</style>'
+        + '<h1>' + esc(t('Chromatogram')) + '</h1><p class="i">' + info.map(x => '<b>' + esc(x[0]) + ':</b> ' + esc(String(x[1]))).join(' &nbsp; ') + '</p>' + rows.join('');
+    },
+    print() { rpPrint(this.printHtml()); },
     up(e) {
       const d = this.drag;
-      if (d && !d.ov && e && e.type === 'pointerup' && Math.abs(e.offsetX - d.sx) <= 3 && this.read && this.read.peaks.length) this.select(this.nearest(e.offsetX));
+      if (d && !d.ov && e && e.type === 'pointerup' && Math.abs(e.offsetX - d.sx) <= 3 && this.read && this.read.peaks.length) this.pick1(this.nearest(e.offsetX), e.shiftKey);
       this.drag = null; if (this.$refs.cv) this.$refs.cv.style.cursor = 'grab'; },
     key(e) {
       if (this.sel != null && !e.ctrlKey && !e.metaKey && !e.altKey) {
@@ -347,7 +497,7 @@ export default {
           if (px < 10 || px > W - 10) this.center(this.read.peaks[this.sel]);
         };
         if (/^[a-z]$/i.test(e.key)) { e.preventDefault(); this.setBase(i, e.key); return; }
-        const a = {Backspace: () => this.setBase(i, this.read.bases[i]), Delete: () => this.setBase(i, this.read.bases[i]),
+        const a = {Backspace: () => this.setBase(i, this.auto[i]), Delete: () => this.setBase(i, this.auto[i]),
           Escape: () => this.select(null), ArrowLeft: () => go(-1), ArrowRight: () => go(1)}[e.key];
         if (a) { e.preventDefault(); a(); return; }
       }
@@ -357,7 +507,7 @@ export default {
       if (k) { e.preventDefault(); k(); }
     },
     clear() {
-      this.read = null; this.edits = {}; this.sel = null; this.paste = ''; this.err = '';
+      this.read = null; this.edits = {}; this.sel = null; this.rng = null; this.paste = ''; this.err = '';
       jset('sg-read', null);
       const f = document.getElementById('sg-file'); if (f) f.value = '';
     }
