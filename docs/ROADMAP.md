@@ -123,7 +123,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | G1a ✅ | Opus 5 | S62–S65 (S63, S65 by Sonnet) | K3 | anything except Q2 |
 | G1b ✅ | Opus 5 | S66–S68 (S66, S68 by Sonnet) | G1a | anything except Q2 |
 | G2 ✅ | Opus 5.5 | S69–S74 (S71, S72 are Opus 5): guided mode, canvas-first layout, direct manipulation, undo | G1b | anything except Q2 |
-| G3 | Opus 5.5 | S75–S79 (S75, S78 are Opus 5) | G2 | anything except Q2, C2 |
+| G3 🔨 (S79 deels) | Opus 5.5 | S75–S79 (S75, S78 are Opus 5) | G2 | anything except Q2, C2 |
 | **Wave 5: charts, data, rework, workflows** | | | | |
 | C1a | Opus 5.5 | S80 chart style system, then S81–S84 (Opus 5 / Sonnet) | K3 | — |
 | C1b | Opus 5 | S85–S88 | C1a | anything except R3 |
