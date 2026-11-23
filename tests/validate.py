@@ -908,6 +908,26 @@ def _(pg):
     got = pg.evaluate("__cells('#s-unk tbody tr [data-x]')[0]")
     return [('standaarden', nstd, 8, 0), ('monsters', nunk, 8, 0), ('monster A3–A4', got, (m-a0)/b, 0.005)]
 
+@case('Standaardcurve', 'Plaatlezer-import, Tecan- en SoftMax-export', 'Zelftest: dezelfde plaat als hierboven, nu als export van Tecan i-control (kopregel <> en komma-csv met OVER in H12) en van SoftMax Pro (Plate:-blok zonder rijletters); de standaardcurve geeft hetzelfde monster A3–A4. De vier exportvormen zelf zijn getest in tests/unit/platereader.test.mjs')
+def _(pg):
+    conc = [0,25,125,250,500,750,1000,1500]
+    rows = []
+    for i in range(8):
+        a = 0.05 + conc[i]*0.0011
+        rows.append([f"{a:.4f}", f"{a+0.004:.4f}", f"{0.31+i*0.07:.4f}", f"{0.315+i*0.07:.4f}"] + ['']*7 + ['OVER' if i == 7 else ''])
+    tecan = 'Application: Tecan i-control\nWavelength: 450 nm\n<>,' + ','.join(str(c) for c in range(1,13)) + '\n' + '\n'.join('ABCDEFGH'[i] + ',' + ','.join(r) for i, r in enumerate(rows))
+    soft = 'Plate:\tPlate1\t1.3\tPlateFormat\tEndpoint\tAbsorbance\n\tTemperature(C)\t' + '\t'.join(str(c) for c in range(1,13)) + '\n' + '\n'.join('\t' + ('22.3' if i == 0 else '') + '\t' + '\t'.join(x.replace('OVER', 'Range?') for x in r) for i, r in enumerate(rows)) + '\n~End'
+    out = []
+    for txt in (tecan, soft):
+        pg.evaluate(f"__go('curve');__set('s-model','lin');__set('s-blank',false);__set('s-ptxt',{txt!r});__set('s-pstd','1-2');__set('s-pconc','0 25 125 250 500 750 1000 1500');__set('s-punk','3-4');__set('s-prep','2');__set('s-pdir','h');document.getElementById('s-pgo').click();")
+        out.append((pg.evaluate("document.querySelectorAll('#s-std tbody tr').length"), pg.evaluate("__cells('#s-unk tbody tr [data-x]')[0]")))
+    import numpy as np
+    X=[];Y=[]
+    for c in conc:
+        a=0.05+c*0.0011; X+=[c,c]; Y+=[round(a,4),round(a+0.004,4)]
+    b,a0=np.polyfit(X,Y,1); m=(0.31+0.315)/2
+    return [('Tecan: standaarden', out[0][0], 8, 0), ('Tecan: monster A3–A4', out[0][1], (m-a0)/b, 0.005), ('SoftMax: standaarden', out[1][0], 8, 0), ('SoftMax: monster A3–A4', out[1][1], (m-a0)/b, 0.005)]
+
 @case('Gelfoto-editor', 'Achtergrondcorrectie', 'Rekentest: profiel met schuine achtergrond (10 → 40) en een gaussische band (hoogte 100, σ 4 px, oppervlak 1002,7)')
 def _(pg):
     v = pg.evaluate("""(()=>{ const n=400, pr=new Float32Array(n); for(let i=0;i<n;i++) pr[i]=10+30*i/n+100*Math.exp(-((i-200)**2)/(2*16));

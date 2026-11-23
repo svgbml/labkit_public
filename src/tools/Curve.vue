@@ -256,7 +256,8 @@ export default {
     /* de plaatlezer-import: dezelfde regels als de oude plateImport(); de tabellen worden nu als
        waarden gezet in plaats van als innerHTML */
     plateImport() {
-      const P = parsePlate(this.ptxt), rows = Object.keys(P).sort(), t = this.t;
+      /* S91: plateRead() kent ook Tecan, SoftMax Pro en een lijst per putje; de eerste plaat telt */
+      const R = plateRead(this.ptxt), P = R.plates.length ? plateRows(R.plates[0]) : parsePlate(this.ptxt), rows = Object.keys(P).sort(), t = this.t;
       if (rows.length < 2) { this.pmsg = {kind: 'bad', text: t('Geen plaatblok gevonden. Elke regel moet beginnen met een rijletter (A, B, …) gevolgd door de meetwaarden.')}; return; }
       const S = colList(this.pstd), U = colList(this.punk), conc = stNums(this.pconc), rep = Math.max(1, Math.round(num(this.prep) || 1)), dir = this.pdir;
       const v = (r, c) => P[r] ? P[r][c - 1] : NaN; const std = [];
