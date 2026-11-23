@@ -596,6 +596,24 @@ def _(pg):
     return [('opgeslagen', int(saved == '{"ti":"Mijn ijklijn","ymin":"0","ymax":"2","lx":"log","lg":"br"}'), 1, 0), ('opnieuw getekend: anders', int(img1 != img0), 1, 0),
             ('opties toegepast', int(o == '["Mijn ijklijn",true,0.5,0,2,"br"]'), 1, 0), ('standaard: weg', int(gone), 1, 0), ('standaard: zoals eerst', int(img2 == img0), 1, 0)]
 
+@case('Standaardcurve', 'Aantekeningen en eerdere runs in een grafiek', 'Zelftest: in het venster ✎ een run bewaren en een tekst toevoegen, en per lkChartEd een pijl en een horizontale en verticale lijn; de grafiek tekent anders, de SVG bevat de aantekening en de runnaam, en na het weghalen is alles weer zoals eerst')
+def _(pg):
+    pg.evaluate("localStorage.removeItem('lkChartEd'); __go('curve')"); pg.wait_for_timeout(400)
+    img0 = pg.evaluate("document.getElementById('s-cv').toDataURL()")
+    pg.evaluate("document.querySelector('#t-curve [data-ched]').click()"); pg.wait_for_timeout(200)
+    pg.evaluate("""(()=>{ const B=document.querySelector('.lk-modal'), r=document._cvRow=document.getElementById('s-cv')._data.rows[0]; B.querySelector('[data-rn]').value='Run A'; B.querySelector('[data-run-add]').click();
+      const set=(k,v)=>{ B.querySelector('[data-a='+k+']').value=v; }; set('t','text'); set('x',String(r[1])); set('y',String(r[2])); set('s','Mijn aantekening'); B.querySelector('[data-ann-add]').click(); B.querySelector('[data-ok]').click(); })()""")
+    pg.wait_for_timeout(300)
+    pg.evaluate("""(()=>{ const a=JSON.parse(localStorage.getItem('lkChartEd')), e=a['s-cv'], r=document._cvRow; e.ann.push({t:'arrow',x:r[1],y:r[2],x2:r[1],y2:r[2]*1.2,s:'pijl'},{t:'hline',y:r[2],s:'grens'},{t:'vline',x:r[1],s:'loodrecht'}); localStorage.setItem('lkChartEd',JSON.stringify(a)); })()""")
+    pg.evaluate("__go('verdunning')"); pg.wait_for_timeout(200); pg.evaluate("__go('curve')"); pg.wait_for_timeout(400)
+    st = pg.evaluate("(()=>{ const e=JSON.parse(localStorage.getItem('lkChartEd'))['s-cv']; return [e.runs.length,e.runs[0].name,e.runs[0].pts.length>0,e.ann.map(a=>a.t).join()].join('|'); })()")
+    img1 = pg.evaluate("document.getElementById('s-cv').toDataURL()")
+    svg = pg.evaluate("chartSvg(document.getElementById('s-cv'))")
+    pg.evaluate("localStorage.removeItem('lkChartEd'); __go('verdunning'); __go('curve')"); pg.wait_for_timeout(400)
+    img2 = pg.evaluate("document.getElementById('s-cv').toDataURL()")
+    return [('opgeslagen', int(st == '1|Run A|true|text,arrow,hline,vline'), 1, 0), ('opnieuw getekend: anders', int(img1 != img0), 1, 0),
+            ('SVG bevat aantekening', int('Mijn aantekening' in svg and 'loodrecht' in svg), 1, 0), ('SVG bevat runnaam', int('Run A' in svg), 1, 0), ('weggehaald: zoals eerst', int(img2 == img0), 1, 0)]
+
 @case('Statistiek', 'Boxplot, viool en punten', 'R 4.x, datasets::PlantGrowth (ctrl): quantile(weight[group=="ctrl"]) geeft 25 % 4,5500, 50 % 5,1550, 75 % 5,2925 (type 7); bw.nrd0 = 0,9·min(SD 0,5831, IQR/1,34 0,5541)·10^(−1/5) = 0,3147; geen uitschieters: de bovengrens 5,2925 + 1,5 × 0,7425 = 6,4063 ligt boven 6,11')
 def _(pg):
     v = [4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14]

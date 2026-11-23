@@ -323,7 +323,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S84 | 124 | Significance brackets from statistics output | ✅ Haken met sterren (* tot ****) in de staafgrafiek van Statistiek, optioneel ns-paren | — |
 | S85 | 128 | Box, violin and scatter plots in Statistics | ✅ Keuze *Grafiektype* (`st-plot`) bij de groepsgrafiek van Statistiek: staaf met punten, boxplot (kwartielen als R `quantile` type 7, snorharen tot 1,5 × IQR, uitschieters als cirkels; `stBox`), viool (gaussische kerndichtheid met bandbreedte `bw.nrd0`; `stKde`) en punten met gemiddelde ± foutbalk; de haken met sterren (S84) en het onderschrift passen zich aan. Een x-y-spreidingsdiagram had Statistiek al (regressie). Getest in `tests/validate.py` met PlantGrowth | — |
 | S86 | 126, 131 | Plate heatmaps and toggleable data tables under charts | ✅ Plaatheatmap met uitschieters (Tukey) onder de ELISA-grafiek (`plateHeat`/`plateOut`) en knop Tabel tonen onder elke grafiek; qPCR-plaat heeft geen meetwaarden, dus daar geen heatmap | — |
-| S87 | 132, 133 | Chart annotations and overlaying several runs | Text/arrows/lines | Sonnet |
+| S87 | 132, 133 | Chart annotations and overlaying several runs | ✅ Aantekeningen (tekst, pijl, lijnen) en eerdere runs in het venster Grafiek aanpassen; ook in PNG en SVG. | — |
 | S88 | 134, 135 | Colour-blind preview and poster export | Preview toggle | Sonnet |
 | S89 | 121 | Figure maker part 1: canvas, drop outputs from tools | Panels placed | Opus 5.5 |
 | S90 | 121 | Figure maker part 2: A–D lettering, alignment, PNG/PDF/SVG export | 600 dpi export | Opus 5 |

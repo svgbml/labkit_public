@@ -237,13 +237,36 @@ function chEdOpen(cv){ const tool=(cv.closest('section.tool')||{dataset:{}}).dat
     <div class="fields"><div class="f"><label>X-as</label>${sel('lx',[['','zoals de tool'],['lin','lineair'],['log','logaritmisch']])}</div><div class="f"><label>Y-as</label>${sel('ly',[['','zoals de tool'],['lin','lineair'],['log','logaritmisch']])}</div>
     <div class="f"><label>Legenda</label>${sel('lg',[['','zoals de tool'],['tl','linksboven'],['tr','rechtsboven'],['bl','linksonder'],['br','rechtsonder'],['none','verbergen']])}</div></div>`}
     <div class="row" style="gap:10px;margin-top:8px;flex-wrap:wrap">${info.series.slice(0,8).map((s,i)=>`<label class="chk" style="gap:6px"><input type="color" data-col="${i}" value="${hex((e.col||[])[i]||s.color)}" style="width:40px;height:26px;padding:1px"><span data-notr>${esc(trPlain(s.name))}</span></label>`).join('')}</div>
+    ${bar?'':`<h4 style="margin:14px 0 6px;font-size:14px">Aantekeningen</h4>
+    <div class="fields"><div class="f"><label>Soort</label><select data-a="t"><option value="text">tekst</option><option value="arrow">pijl</option><option value="hline">horizontale lijn</option><option value="vline">verticale lijn</option></select></div>
+    <div class="f"><label>x</label><input class="txt" data-a="x" inputmode="decimal"></div><div class="f"><label>y</label><input class="txt" data-a="y" inputmode="decimal"></div>
+    <div class="f"><label>x einde pijl</label><input class="txt" data-a="x2" inputmode="decimal"></div><div class="f"><label>y einde pijl</label><input class="txt" data-a="y2" inputmode="decimal"></div>
+    <div class="f"><label>Tekst</label><input class="txt" data-a="s"></div></div>
+    <div class="row" style="gap:6px;margin-top:6px"><button type="button" data-ann-add>Aantekening toevoegen</button><span class="muted" style="font-size:12px">Horizontale lijn: alleen y; verticale lijn: alleen x.</span></div>
+    <div data-ann-list style="margin-top:6px"></div>
+    <h4 style="margin:14px 0 6px;font-size:14px">Eerdere runs</h4>
+    <div class="row" style="gap:6px"><input class="txt" data-rn placeholder="Naam van de run" style="max-width:180px"><button type="button" data-run-add>Run bewaren</button></div>
+    <div data-run-list style="margin-top:6px"></div>`}
     <div class="row" style="margin-top:14px;gap:6px"><button type="button" class="primary" data-ok>Toepassen</button><button type="button" data-reset>Terug naar standaard</button><button type="button" data-no>Annuleren</button></div>`);
   const redraw=()=>{ try{ if(calc[tool]) calc[tool](); }catch(err){} }, B=m.box, touched=new Set();
   B.querySelectorAll('[data-col]').forEach(el=>el.addEventListener('input',()=>touched.add(+el.dataset.col)));
+  const ann=(e.ann||[]).slice(), runs=(e.runs||[]).map(r=>({...r})), AN={text:'tekst',arrow:'pijl',hline:'horizontale lijn',vline:'verticale lijn'};
+  const lists=()=>{ const al=B.querySelector('[data-ann-list]'), rl=B.querySelector('[data-run-list]'); if(!al) return;
+    al.innerHTML=ann.map((a,i)=>`<div class="row" style="gap:8px"><span>${AN[a.t]}</span><span data-notr>${esc([a.x,a.y,a.x2,a.y2].filter(z=>z!=null).map(z=>String(z).replace('.',',')).join('; ')+(a.s?' · '+a.s:''))}</span><button type="button" data-ann-del="${i}" aria-label="Verwijderen">✕</button></div>`).join('');
+    rl.innerHTML=runs.map((r,i)=>`<div class="row" style="gap:8px"><label class="chk"><input type="checkbox" data-run-on="${i}"${r.on===false?'':' checked'}><span data-notr>${esc(r.name)}</span></label><span class="muted" data-notr>${r.pts.length}</span><button type="button" data-run-del="${i}" aria-label="Verwijderen">✕</button></div>`).join(''); tStatic(al); tStatic(rl); };
+  lists();
+  B.addEventListener('click',ev=>{ const t=ev.target;
+    if(t.matches('[data-ann-del]')){ ann.splice(+t.dataset.annDel,1); lists(); }
+    else if(t.matches('[data-run-del]')){ runs.splice(+t.dataset.runDel,1); lists(); }
+    else if(t.matches('[data-ann-add]')){ const g=k=>B.querySelector('[data-a='+k+']').value.trim(), n=k=>g(k)===''?NaN:num(g(k)), a={t:g('t'),s:g('s')};
+      const need={text:['x','y'],arrow:['x','y','x2','y2'],hline:['y'],vline:['x']}[a.t]; if(need.some(k=>!isFinite(n(k)))) return; need.forEach(k=>a[k]=n(k)); if(ann.length<30){ ann.push(a); lists(); } }
+    else if(t.matches('[data-run-add]')){ const pts=((cv._data&&cv._data.rows)||[]).filter(r=>isFinite(r[1])&&isFinite(r[2])).slice(0,2000).map(r=>[r[1],r[2]]); if(!pts.length||runs.length>=5) return;
+      const nm=B.querySelector('[data-rn]'); runs.push({name:nm.value.trim()||('Run '+(runs.length+1)),pts,on:true}); nm.value=''; lists(); }
+    else if(t.matches('[data-run-on]')) runs[+t.dataset.runOn].on=t.checked; });
   B.querySelector('[data-no]').addEventListener('click',m.close);
   B.querySelector('[data-reset]').addEventListener('click',()=>{ const a=jget('lkChartEd',{}); delete a[cv.id]; jset('lkChartEd',a); m.close(); redraw(); });
   B.querySelector('[data-ok]').addEventListener('click',()=>{ const n={}; B.querySelectorAll('[data-k]').forEach(el=>{ if(el.value.trim()) n[el.dataset.k]=el.value.trim(); });
-    const col=(e.col||[]).slice(); B.querySelectorAll('[data-col]').forEach(el=>{ const i=+el.dataset.col; if(touched.has(i)) col[i]=el.value; }); if(col.some(Boolean)) n.col=col;
+    const col=(e.col||[]).slice(); B.querySelectorAll('[data-col]').forEach(el=>{ const i=+el.dataset.col; if(touched.has(i)) col[i]=el.value; }); if(col.some(Boolean)) n.col=col; if(ann.length) n.ann=ann; if(runs.length) n.runs=runs;
     const a=jget('lkChartEd',{}); if(Object.keys(n).length) a[cv.id]=n; else delete a[cv.id]; jset('lkChartEd',a); m.close(); redraw(); }); }
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-ched]'); if(!b) return; const cv=b.parentNode.previousElementSibling; if(cv&&cv.tagName==='CANVAS') chEdOpen(cv); });
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-rep]'); if(!b) return; const bar=b.parentNode, cv=bar.previousElementSibling; if(!cv||cv.tagName!=='CANVAS'||!cv.width) return; const nt=bar.querySelector('[data-rep-nt]'); reportPng(cv,nt&&nt.checked).then(blob=>saveBlob(`${(cv.closest('section.tool')||{dataset:{}}).dataset.tool||'grafiek'}-verslag.png`,blob)).catch(()=>{}); });

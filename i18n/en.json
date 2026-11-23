@@ -5243,5 +5243,18 @@
 "Uitschieters volgens de regel van Tukey, per replicaat: {*}. Controleer deze wells op een pipetteerfout of luchtbel.": "Outliers by Tukey's rule, per replicate group: {*}. Check these wells for a pipetting error or an air bubble.",
 "absorptie: donker = laag, licht = hoog; × = uitschieter": "absorbance: dark = low, light = high; × = outlier",
 "well": "well",
-"uitschieter": "outlier"
+"uitschieter": "outlier",
+"Aantekeningen": "Annotations",
+"tekst": "text",
+"pijl": "arrow",
+"horizontale lijn": "horizontal line",
+"verticale lijn": "vertical line",
+"x einde pijl": "x end of arrow",
+"y einde pijl": "y end of arrow",
+"Tekst": "Text",
+"Aantekening toevoegen": "Add annotation",
+"Horizontale lijn: alleen y; verticale lijn: alleen x.": "Horizontal line: y only; vertical line: x only.",
+"Eerdere runs": "Earlier runs",
+"Naam van de run": "Name of the run",
+"Run bewaren": "Save run"
 }
