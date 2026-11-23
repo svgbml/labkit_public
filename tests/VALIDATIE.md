@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-23 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 507 van 507 controles binnen tolerantie.**
+**Resultaat: 511 van 511 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -282,6 +282,10 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Standaardcurve | Plaatlezer-import | standaarden | 8 | 8 | +0.00% | ✅ | Rekentest: plaatblok met standaarden in kolom 1–2 (A–H = 0…1500) en monsters in duplo; resultaat gelijk aan dezelfde waarden handmatig invoeren |
 | Standaardcurve | Plaatlezer-import | monsters | 8 | 8 | +0.00% | ✅ | Rekentest: plaatblok met standaarden in kolom 1–2 (A–H = 0…1500) en monsters in duplo; resultaat gelijk aan dezelfde waarden handmatig invoeren |
 | Standaardcurve | Plaatlezer-import | monster A3–A4 | 236,8 | 237 | +0.08% | ✅ | Rekentest: plaatblok met standaarden in kolom 1–2 (A–H = 0…1500) en monsters in duplo; resultaat gelijk aan dezelfde waarden handmatig invoeren |
+| Standaardcurve | Plaatlezer-import, Tecan- en SoftMax-export | Tecan: standaarden | 8 | 8 | +0.00% | ✅ | Zelftest: dezelfde plaat als hierboven, nu als export van Tecan i-control (kopregel <> en komma-csv met OVER in H12) en van SoftMax Pro (Plate:-blok zonder rijletters); de standaardcurve geeft hetzelfde monster A3–A4. De vier exportvormen zelf zijn getest in tests/unit/platereader.test.mjs |
+| Standaardcurve | Plaatlezer-import, Tecan- en SoftMax-export | Tecan: monster A3–A4 | 236,8 | 237 | +0.08% | ✅ | Zelftest: dezelfde plaat als hierboven, nu als export van Tecan i-control (kopregel <> en komma-csv met OVER in H12) en van SoftMax Pro (Plate:-blok zonder rijletters); de standaardcurve geeft hetzelfde monster A3–A4. De vier exportvormen zelf zijn getest in tests/unit/platereader.test.mjs |
+| Standaardcurve | Plaatlezer-import, Tecan- en SoftMax-export | SoftMax: standaarden | 8 | 8 | +0.00% | ✅ | Zelftest: dezelfde plaat als hierboven, nu als export van Tecan i-control (kopregel <> en komma-csv met OVER in H12) en van SoftMax Pro (Plate:-blok zonder rijletters); de standaardcurve geeft hetzelfde monster A3–A4. De vier exportvormen zelf zijn getest in tests/unit/platereader.test.mjs |
+| Standaardcurve | Plaatlezer-import, Tecan- en SoftMax-export | SoftMax: monster A3–A4 | 236,8 | 237 | +0.08% | ✅ | Zelftest: dezelfde plaat als hierboven, nu als export van Tecan i-control (kopregel <> en komma-csv met OVER in H12) en van SoftMax Pro (Plate:-blok zonder rijletters); de standaardcurve geeft hetzelfde monster A3–A4. De vier exportvormen zelf zijn getest in tests/unit/platereader.test.mjs |
 | Gelfoto-editor | Achtergrondcorrectie | dal tot dal | 1003 | 1001 | -0.21% | ✅ | Rekentest: profiel met schuine achtergrond (10 → 40) en een gaussische band (hoogte 100, σ 4 px, oppervlak 1002,7) |
 | Gelfoto-editor | Achtergrondcorrectie | rolling ball | 1003 | 986,9 | -1.57% | ✅ | Rekentest: profiel met schuine achtergrond (10 → 40) en een gaussische band (hoogte 100, σ 4 px, oppervlak 1002,7) |
 | Gelfoto-editor | Rf-waarde | Rf | 0,5 | 0,5 | +0.00% | ✅ | Rf = looplengte vanaf slotje / afstand slotje–front; front op 400 px, band op 200 px, geen slotjesrij → 0,5 |
