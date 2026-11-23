@@ -65,6 +65,7 @@
       <span id="q-copied" style="font-size:13px;color:var(--muted)">{{ copied }}</span>
     </div>
     <div id="q-msg">
+      <lk-note v-if="kitMg" kind="info">{{ t('De buffer bevat al ' + lkNumIn(kitMg) + ' mM MgCl₂ (1X); voeg geen MgCl₂ toe.') }}</lk-note>
       <lk-note v-if="m.water < 0" kind="bad">{{ t('De componenten passen niet in ' + vol(m.V) + ': ' + vol(-m.water) + ' te veel. Verlaag het templatevolume of gebruik geconcentreerdere stocks.') }}</lk-note>
       <lk-note kind="info">{{ t(mixTxt) }} {{ t('Verdeel ' + uv(lkNumIn(vol(m.V - m.T))) + ' mix per buis en voeg ' + uv(lkNumIn(vol(m.T))) + ' template toe; NTC krijgt ' + uv(lkNumIn(vol(m.T))) + ' water. Polymerase als laatste toevoegen, alles op ijs.') }}</lk-note>
     </div>
@@ -84,10 +85,26 @@ const QPRE = {
     ['Primer R', 10, 0.2, 'µM'], ['Taq-polymerase', 5, 1.25, 'U/50 µL']],
   taqmg: [['10X buffer (Mg-vrij)', 10, 1, 'X'], ['MgCl₂', 25, 1.5, 'mM'], ['dNTP-mix', 10, 0.2, 'mM'],
     ['Primer F', 10, 0.2, 'µM'], ['Primer R', 10, 0.2, 'µM'], ['Taq-polymerase', 5, 1.25, 'U/50 µL']],
-  mm2x: [['2X mastermix', 2, 1, 'X'], ['Primer F', 10, 0.2, 'µM'], ['Primer R', 10, 0.2, 'µM']]
+  mm2x: [['2X mastermix', 2, 1, 'X'], ['Primer F', 10, 0.2, 'µM'], ['Primer R', 10, 0.2, 'µM']],
+  /* kits, per 50 µL volgens de standaardprotocollen van de fabrikant (zie PRESETS voor de bron) */
+  nebtaq: [['10X Standard Taq-buffer', 10, 1, 'X'], ['dNTP-mix', 10, 0.2, 'mM'], ['Primer F', 10, 0.2, 'µM'],
+    ['Primer R', 10, 0.2, 'µM'], ['Taq-polymerase', 5, 1.25, 'U/50 µL']],
+  q5: [['5X Q5-reactiebuffer', 5, 1, 'X'], ['dNTP-mix', 10, 0.2, 'mM'], ['Primer F', 10, 0.5, 'µM'],
+    ['Primer R', 10, 0.5, 'µM'], ['Q5-polymerase', 2, 1, 'U/50 µL']],
+  phusion: [['5X Phusion HF-buffer', 5, 1, 'X'], ['dNTP-mix', 10, 0.2, 'mM'], ['Primer F', 10, 0.5, 'µM'],
+    ['Primer R', 10, 0.5, 'µM'], ['Phusion-polymerase', 2, 1, 'U/50 µL']],
+  onetaq: [['5X OneTaq-reactiebuffer', 5, 1, 'X'], ['dNTP-mix', 10, 0.2, 'mM'], ['Primer F', 10, 0.2, 'µM'],
+    ['Primer R', 10, 0.2, 'µM'], ['OneTaq-polymerase', 5, 1.25, 'U/50 µL']],
+  dreamtaq: [['10X DreamTaq-buffer', 10, 1, 'X'], ['dNTP-mix', 10, 0.2, 'mM'], ['Primer F', 10, 0.5, 'µM'],
+    ['Primer R', 10, 0.5, 'µM'], ['DreamTaq-polymerase', 5, 1.25, 'U/50 µL']]
 };
 const PRESETS = [{v: 'taq', n: 'Taq, losse componenten'}, {v: 'taqmg', n: 'Taq, Mg-vrije buffer + MgCl₂'},
-  {v: 'mm2x', n: '2X kant-en-klare mastermix'}];
+  {v: 'mm2x', n: '2X kant-en-klare mastermix'},
+  /* mg = mM MgCl₂ die al in 1X buffer zit. Bronnen: NEB M0273 (Taq), M0491 (Q5: 2 mM Mg), M0530 (Phusion HF:
+     1,5 mM Mg; Thermo F530 idem), M0480 (OneTaq Standard: 1,8 mM Mg), Thermo EP0701 (DreamTaq: 2 mM Mg) */
+  {v: 'nebtaq', n: 'NEB Taq (M0273)', mg: '1,5'}, {v: 'q5', n: 'NEB Q5 (M0491)', mg: '2'},
+  {v: 'phusion', n: 'Phusion (NEB M0530 / Thermo F530)', mg: '1,5'}, {v: 'onetaq', n: 'NEB OneTaq (M0480)', mg: '1,8'},
+  {v: 'dreamtaq', n: 'Thermo DreamTaq (EP0701)', mg: '2'}];
 const UNITS = ['X', 'mM', 'µM', 'U/50 µL', 'µL'];
 
 let seq = 0;
@@ -111,6 +128,7 @@ export default {
   created() { this.loadPreset('taq'); },
   computed: {
     presets() { return PRESETS; },
+    kitMg() { const p = PRESETS.find(q => q.v === this.preset); return p && p.mg; },
     units() { return UNITS; },
     formula() {
       return this.tHtml('volume = eindconc / stockconc × reactievolume · enzym: (U per 50 µL × volume/50) / (U/µL) · water vult aan tot reactievolume');
