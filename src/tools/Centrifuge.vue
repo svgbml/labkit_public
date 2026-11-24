@@ -22,6 +22,13 @@
         </div>
       </div>
       <p style="font-size:13px;color:var(--muted);margin:10px 0 0">{{ t('Vul rpm óf × g in; het andere veld rekent mee.') }}</p>
+      <details class="lk-unc" style="margin-top:10px">
+        <summary>{{ t('Onzekerheid van de invoer (±)') }}</summary>
+        <div class="fields" style="margin-top:8px">
+          <lk-field v-model="uR" :label="'± ' + t('Rotorstraal r')" for-id="z-ur" unit="cm"/>
+          <lk-field v-model="uN" :label="'± ' + (last === 'rpm' ? t('Toerental') : t('g-kracht'))" for-id="z-un" :unit="last === 'rpm' ? 'rpm' : '× g'"/>
+        </div>
+      </details>
       <div class="fields" style="margin-top:12px">
         <div class="f">
           <label for="z-rot">{{ t('Opgeslagen rotors') }}</label>
@@ -51,7 +58,7 @@
         <lk-kv :rows="res.rows"/>
         <lk-formula html="RCF = 1,118 × 10⁻⁵ × r × rpm²"/>
         <lk-note>{{ t('Controleer of de waarde binnen het maximum van de rotor valt en balanceer de buizen.') }}</lk-note>
-        <lk-report tool="centrifuge" :sentence="method" :answer="last === 'rpm' ? val.g : val.rpm" :unit="last === 'rpm' ? '× g' : 'rpm'" :digits="4"/>
+        <lk-report tool="centrifuge" :sentence="method" :answer="last === 'rpm' ? val.g : val.rpm" :unit="last === 'rpm' ? '× g' : 'rpm'" :sheet="sheet" :unc="uRes" :digits="4"/>
       </template>
       <div class="fields" style="margin-top:14px">
         <div class="f">
@@ -78,6 +85,7 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 import {balanceSet, balanceNext} from '../lib/balance.js';
+import {relU} from '../lib/uncert.js';
 
 const RKEY = 'labkit:v1:rotors';
 
@@ -92,7 +100,7 @@ export default {
   name: 'Centrifuge',
   data() {
     return {r: stored('z-r', '8,4'), rpm: stored('z-rpm', '13000'), g: stored('z-g', ''), last: 'rpm',
-      rotors: jget(RKEY, []), sel: '', name: '', n: '12', k: '5'};
+      uR: '', uN: '', rotors: jget(RKEY, []), sel: '', name: '', n: '12', k: '5'};
   },
   created() { this.sync(); },
   computed: {
@@ -113,6 +121,18 @@ export default {
     dots() {
       const n = num(this.n), on = new Set(this.bal.set);
       return [...Array(n).keys()].map(i => ({i, on: on.has(i), x: 40 * Math.sin(2 * Math.PI * i / n), y: -40 * Math.cos(2 * Math.PI * i / n)}));
+    },
+    /* S96 deel 3: rotorstraal en de invoer, de uitkomst als formule (machtsverheffen in plaats van WORTEL, zie sheet.js) */
+    sheet() {
+      const t = this.t, {r, rpm, g} = this.val, R = {k: 'r', label: t('Rotorstraal r'), value: r, unit: 'cm'};
+      return this.last === 'rpm'
+        ? [R, {k: 'n', label: t('Toerental'), value: rpm, unit: 'rpm'}, {label: t('g-kracht'), value: '=' + K + '*{r}*{n}^2', unit: '× g'}]
+        : [R, {k: 'g', label: t('g-kracht'), value: g, unit: '× g'}, {label: t('Toerental'), value: '=({g}/(' + K + '*{r}))^0.5', unit: 'rpm'}];
+    },
+    /* S96 deel 5 (#144): RCF = K·r·rpm², dus rpm telt dubbel; terug is rpm = (g/(K·r))^½ */
+    uRes() {
+      const {r, rpm, g} = this.val, ur = num(this.uR), un = num(this.uN);
+      return this.last === 'rpm' ? relU([[r, ur, 1], [rpm, un, 2]]) * g : relU([[r, ur, 0.5], [g, un, 0.5]]) * rpm;
     },
     /* S96: de methodezin */
     method() {

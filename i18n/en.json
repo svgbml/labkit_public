@@ -6094,5 +6094,21 @@
 "Gemeten uit afstanden": "Measured from distances",
 "Gel getekend uit de afstanden; de onbekende banden staan in de meettabel.": "Gel drawn from the distances; the unknown bands are in the measurement table.",
 "Kies minstens twee gels.": "Choose at least two gels.",
-"{#} gels als panelen in de Figuurmaker gezet.": "{#} gels placed as panels in the Figure maker."
+"{#} gels als panelen in de Figuurmaker gezet.": "{#} gels placed as panels in the Figure maker.",
+"Eenheid van de uitkomst": "Unit of the outcome",
+"Meer cijfers": "More digits",
+"Minder cijfers": "Fewer digits",
+"Grootheid": "Quantity",
+"Kopieer met formules": "Copy with formulas",
+"Plak in Excel: de uitkomst staat er als formule op de invoercellen": "Paste into Excel: the result is a formula on the input cells",
+"Meerdere monsters (batch)": "Several samples (batch)",
+"Monsters: naam en stockconcentratie per regel": "Samples: name and stock concentration per line",
+"Plak een kolom of twee kolommen uit Excel. Zonder eenheid achter het getal geldt de eenheid van C₂.": "Paste one or two columns from Excel. Without a unit after the number, the unit of C₂ applies.",
+"Vul C₂, het eindvolume en minstens één monster in.": "Enter C₂, the final volume and at least one sample.",
+"Een monster onder C₂ kun je niet verdunnen: gebruik het onverdund of concentreer het eerst.": "A sample below C₂ cannot be diluted: use it undiluted or concentrate it first.",
+"Onbekende eenheid of geen getal": "Unknown unit or no number",
+"lager dan C₂": "below C₂",
+"Onzekerheid van de invoer (±)": "Uncertainty of the inputs (±)",
+"(k = {#}, ongeveer {#} %)": "(k = {#}, about {#} %)",
+"Standaardonzekerheid per invoer, in de eenheid van dat veld (bijvoorbeeld de tolerantie van de pipet gedeeld door √{#}). De uitkomst krijgt ± U met k = {#} (JCGM {#}:{#}, vgl. {#}).": "Standard uncertainty per input, in the unit of that field (for example the pipette tolerance divided by √{#}). The result gets ± U with k = {#} (JCGM {#}:{#}, eq. {#})."
 }

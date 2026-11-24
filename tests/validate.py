@@ -756,6 +756,91 @@ def _(pg):
     return [('methodezin', int(all(x in m for x in ('50 X', '1 X', '10 mL', '500 mL'))), 1, 0), ('10 mL goed', int(v[0] == 'ok'), 1, 0), ('10,05 mL goed', int(v[1] == 'ok'), 1, 0),
             ('12 mL fout', int(v[2] == 'bad'), 1, 0), ('rapport geopend met Verdunning', int(rep[0] == '#report' and rep[1] == 'verdunning'), 1, 0), ('methodezin in het rapport', int(rep[2]), 1, 0)]
 
+@case('Verdunning', 'Uitkomst in een andere eenheid en met meer cijfers', 'Zelftest op 50X TAE naar 500 mL 1X (Bio-Rad Bulletin 6205: 10 mL stock): de uitkomst 10 mL is 10000 µL en 0,01 L; in µL is 10000 goed en 10 fout; 1 mM uit 3 mM in 1 mL vraagt 0,3333 mL, met meer cijfers 0,333333')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('d-c1u','X');__set('d-c2u','X');__set('d-c1','50');__set('d-c2','1');__set('d-v1','');__set('d-v2u','mL');__set('d-v1u','mL');__set('d-v2','500')"); pg.wait_for_timeout(200)
+    q = lambda: pg.evaluate("document.querySelector('#t-verdunning [data-answer]').textContent")
+    def unit(u): pg.evaluate(f"const e=document.querySelector('#t-verdunning [data-unit]'); e.value={u!r}; e.dispatchEvent(new Event('change',{{bubbles:true}}))"); pg.wait_for_timeout(100)
+    def chk(v):
+        pg.evaluate(f"const e=document.querySelector('#t-verdunning [data-check]'); e.value={v!r}; e.dispatchEvent(new Event('input',{{bubbles:true}}))"); pg.wait_for_timeout(100)
+        return pg.evaluate("(document.querySelector('#t-verdunning [data-verdict]')||{dataset:{}}).dataset.verdict")
+    n = lambda: pg.evaluate("__n(document.querySelector('#t-verdunning [data-answer]').textContent)")
+    ml = n(); unit('µL'); ul = n(); v = [chk('10000'), chk('10')]; unit('L'); l = n(); unit('mL'); chk('')
+    pg.evaluate("__set('d-c1u','mM');__set('d-c2u','mM');__set('d-c1','3');__set('d-c2','1');__set('d-v2','1')"); pg.wait_for_timeout(200)
+    a4 = q(); pg.evaluate("document.querySelector('#t-verdunning [data-more]').click()"); pg.wait_for_timeout(100); a10 = q()
+    pg.evaluate("document.querySelector('#t-verdunning [data-more]').click()")
+    return [('uitkomst (mL)', ml, 10, 0), ('in µL', ul, 10000, 0), ('in L', l, 0.01, 0), ('10000 µL goed', int(v[0] == 'ok'), 1, 0), ('10 µL fout', int(v[1] == 'bad'), 1, 0),
+            ('4 cijfers', int(a4 == '0,3333'), 1, 0), ('meer cijfers', int(a10 == '0,333333'), 1, 0)]
+
+@case('Verdunning', 'Batch: monsters naar 10 ng/µL in 20 µL', 'C₁V₁ = C₂V₂ per regel, met de hand: 50 ng/µL → 4 µL stock + 16 µL; 20 ng/µL → 10 + 10 µL; 0,04 mg/mL (= 40 ng/µL) → 5 + 15 µL; 5 ng/µL ligt onder C₂; een regel zonder getal wordt gemeld')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('d-mode','batch')"); pg.wait_for_timeout(100)
+    pg.evaluate("__set('d-c2u','ng/µL');__set('d-c2','10');__set('d-v2u','µL');__set('d-v2','20');"
+                "__set('d-batch','A\\t50\\nB\\t20 ng/µL\\nC 0,04 mg/mL\\nD\\t5\\nE\\tonbekend')"); pg.wait_for_timeout(200)
+    c = pg.evaluate("[...document.querySelectorAll('#d-btbl tbody tr')].map(tr=>[...tr.cells].map(td=>__n(__el(td))))")
+    cls = pg.evaluate("[...document.querySelectorAll('#d-btbl tbody tr')].map(tr=>tr.className)")
+    pg.evaluate("__set('d-mode','een')"); pg.wait_for_timeout(100)
+    return [('A stock (µL)', c[0][2], 4, 1e-9), ('A oplosmiddel (µL)', c[0][3], 16, 1e-9), ('B stock (µL)', c[1][2], 10, 1e-9), ('C stock (µL)', c[2][2], 5, 1e-9),
+            ('C oplosmiddel (µL)', c[2][3], 15, 1e-9), ('D onder C₂', int(cls[3] == 'warn'), 1, 0), ('E gemeld', int(cls[4] == 'bad'), 1, 0), ('vijf regels', len(c), 5, 0)]
+
+@case('Verdunning', 'Onzekerheid doorrekenen', 'JCGM 100:2008 (GUM) vgl. (12), met de hand: V₁ = C₂V₂/C₁ = 10 mL met u_r 1 % (C₁ 50 ± 0,5 X), 0,5 % (C₂ 1 ± 0,005 X) en 0,5 % (V₂ 500 ± 2,5 mL) → u_r = √1,5 % = 1,225 %, U (k = 2) = 0,245 mL = 245 µL')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('d-mode','een')"); pg.wait_for_timeout(100)
+    pg.evaluate("__set('d-c1u','X');__set('d-c2u','X');__set('d-c1','50');__set('d-c2','1');__set('d-v1','');__set('d-v2u','mL');__set('d-v1u','mL');__set('d-v2','500');"
+                "__set('u-d-c1','0,5');__set('u-d-c2','0,005');__set('u-d-v2','2,5')"); pg.wait_for_timeout(200)
+    U = lambda: pg.evaluate("__n(document.querySelector('#t-verdunning [data-unc]').textContent)")
+    ml = U(); pg.evaluate("const e=document.querySelector('#t-verdunning [data-unit]'); e.value='µL'; e.dispatchEvent(new Event('change',{bubbles:true}))"); pg.wait_for_timeout(100); ul = U()
+    pg.evaluate("const e=document.querySelector('#t-verdunning [data-unit]'); e.value='mL'; e.dispatchEvent(new Event('change',{bubbles:true}));__set('u-d-c1','');__set('u-d-c2','');__set('u-d-v2','')"); pg.wait_for_timeout(100)
+    gone = pg.evaluate("!document.querySelector('#t-verdunning [data-unc]')")
+    return [('U in mL (k = 2, 2 cijfers)', ml, 0.245, 0.03), ('U in µL (k = 2, 2 cijfers)', ul, 245, 0.03), ('zonder ± geen U', int(gone), 1, 0)]
+
+@case('Centrifuge', 'Onzekerheid doorrekenen', 'JCGM 100:2008 (GUM) vgl. (12) op RCF = 1,118·10⁻⁵·r·rpm² (Thermo Tech Tip #40): r 7 ± 0,07 cm en 5000 ± 50 rpm (elk 1 %) → u_r = √(1² + 2²) % = 2,236 %, U (k = 2) = 87,5 × g; terug van 1957 ± 19,57 × g: u_r(rpm) = √(0,5² + 0,5²) % → U = 70,7 rpm')
+def _(pg):
+    pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000');__set('z-ur','0,07');__set('z-un','50')"); pg.wait_for_timeout(200)
+    U = lambda: pg.evaluate("__n(document.querySelector('#t-centrifuge [data-unc]').textContent)")
+    g = U(); pg.evaluate("__set('z-g','1957');__set('z-un','19,57')"); pg.wait_for_timeout(200); rpm = U()
+    pg.evaluate("__set('z-ur','');__set('z-un','');__set('z-rpm','13000')")
+    return [('U (× g, k = 2, 2 cijfers)', g, 87.5, 0.03), ('U (rpm, k = 2, 2 cijfers)', rpm, 2 * 5000 * (0.5 ** 0.5) / 100, 0.03)]
+
+def _xl(pg, tool):
+    """S96 deel 3: klik "Kopieer met formules" (klembord onderschept) en reken het blad na zoals Excel:
+    de B-cellen invullen, ^ is machtsverheffen. Geeft de rijen en de waarde van elke formulerij."""
+    import re
+    pg.evaluate("navigator.clipboard.writeText=async t=>{window.__clip=t}; window.__clip=''")
+    pg.evaluate(f"document.querySelector('#t-{tool} [data-xl-formula]').click()"); pg.wait_for_timeout(150)
+    rows = [r.split('\t') for r in pg.evaluate("window.__clip").split('\r\n')]
+    def ev(i):
+        v = rows[i][1]
+        if not v.startswith('='): return float(v.replace(',', '.'))
+        e = re.sub(r'(\d),(\d)', r'\1.\2', v[1:]).replace('^', '**')
+        e = re.sub(r'B(\d+)', lambda m: '(' + repr(ev(int(m.group(1)) - 1)) + ')', e)
+        assert re.fullmatch(r'[\d.eE+\-*/() ]+', e), e
+        return eval(e)
+    return rows, [ev(i) for i, r in enumerate(rows) if r[1].startswith('=')]
+
+@case('Verdunning', 'Excel met formules', 'Het gekopieerde blad nagerekend zoals Excel: 50X naar 500 mL 1X geeft =B3*B4/B2 = 10 mL (Bio-Rad Bulletin 6205); 1 M naar 50 mM in 100 mL met V₁ in µL geeft 5000 µL (C₁V₁ = C₂V₂)')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('d-c1u','X');__set('d-c2u','X');__set('d-c1','50');__set('d-c2','1');__set('d-v1','');__set('d-v2u','mL');__set('d-v1u','mL');__set('d-v2','500')"); pg.wait_for_timeout(200)
+    rows, a = _xl(pg, 'verdunning')
+    pg.evaluate("__set('d-c1u','M');__set('d-c2u','mM');__set('d-c1','1');__set('d-c2','50');__set('d-v2','100');__set('d-v1u','µL')"); pg.wait_for_timeout(200)
+    _, b = _xl(pg, 'verdunning')
+    pg.evaluate("__set('d-v1u','mL')")
+    return [('formule =B3*B4/B2', int(rows[-1][1] == '=B3*B4/B2'), 1, 0), ('V₁ uit het blad (mL)', a[0], 10, 1e-9), ('V₁ uit het blad (µL)', b[0], 5000, 1e-9)]
+
+@case('Centrifuge', 'Excel met formules', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g; het gekopieerde blad nagerekend zoals Excel, en terug van 1957 × g naar 5000 rpm')
+def _(pg):
+    pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')"); pg.wait_for_timeout(200)
+    _, g = _xl(pg, 'centrifuge')
+    pg.evaluate("__set('z-g','1957')"); pg.wait_for_timeout(200)
+    _, rpm = _xl(pg, 'centrifuge')
+    return [('× g uit het blad', g[0], 1957, 0.001), ('rpm uit het blad', rpm[0], 5000, 0.001)]
+
+@case('Oplossing & buffer', 'Excel met formules', 'Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄): de massa per component in het gekopieerde blad nagerekend zoals Excel')
+def _(pg):
+    pg.evaluate("__go('oplossing');__set('o-v','1');__set('o-vu','L');__set('o-preset','pbs')"); pg.wait_for_timeout(200)
+    _, g = _xl(pg, 'oplossing')
+    return [('NaCl (g)', g[0], 8.0, 0.01), ('KCl (g)', g[1], 0.2, 0.02), ('Na₂HPO₄ (g)', g[2], 1.44, 0.02), ('KH₂PO₄ (g)', g[3], 0.24, 0.03)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")

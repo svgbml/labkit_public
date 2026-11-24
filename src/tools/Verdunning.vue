@@ -15,6 +15,7 @@
           <select id="d-mode" style="width:100%" v-model="mode">
             <option value="een">{{ t('Eén verdunning') }}</option>
             <option value="reeks">{{ t('Verdunningsreeks') }}</option>
+            <option value="batch">{{ t('Meerdere monsters (batch)') }}</option>
           </select>
         </div>
         <div class="f" v-for="f in conc" :key="f.id">
@@ -25,6 +26,10 @@
               <option v-for="u in concUnits" :key="u">{{ u }}</option>
             </select>
           </div>
+        </div>
+        <div v-if="batch" class="f" style="grid-column:1/-1">
+          <label for="d-batch">{{ t('Monsters: naam en stockconcentratie per regel') }}</label>
+          <textarea id="d-batch" rows="6" v-model="b" style="width:100%" :placeholder="btPh"></textarea>
         </div>
         <template v-if="reeks">
           <lk-field v-model="s.f" :label="t('Factor per stap')" for-id="ds-f"/>
@@ -41,10 +46,28 @@
           </div>
         </div>
       </div>
-      <p v-if="!reeks" class="note info">{{ t('Voorbeeld: 50X TAE naar 500 mL 1X loopbuffer.') }}</p>
+      <details v-if="!reeks && !batch" class="lk-unc" style="margin-top:10px">
+        <summary>{{ t('Onzekerheid van de invoer (±)') }}</summary>
+        <div class="fields" style="margin-top:8px">
+          <div class="f" v-for="f in uncFields" :key="f.id">
+            <label :for="'u-' + f.id">± {{ t(f.label) }}</label>
+            <div class="inu"><input :id="'u-' + f.id" inputmode="decimal" v-model="unc[f.id]"><span class="u">{{ v[f.id + 'u'] }}</span></div>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin:6px 0 0">{{ t('Standaardonzekerheid per invoer, in de eenheid van dat veld (bijvoorbeeld de tolerantie van de pipet gedeeld door √3). De uitkomst krijgt ± U met k = 2 (JCGM 100:2008, vgl. 12).') }}</p>
+      </details>
+      <p v-if="batch" class="note info">{{ t('Plak een kolom of twee kolommen uit Excel. Zonder eenheid achter het getal geldt de eenheid van C₂.') }}</p>
+      <p v-else-if="!reeks" class="note info">{{ t('Voorbeeld: 50X TAE naar 500 mL 1X loopbuffer.') }}</p>
       <p v-else class="note info">{{ t('Voor een tekening met labels, uitplaten en een afdrukbaar schema: zie Verdunningsschema.') }}</p>
     </div>
-    <div v-if="reeks" class="result" id="d-out">
+    <div v-if="batch" class="result" id="d-out">
+      <lk-note v-if="bt.err" kind="info">{{ t('Vul C₂, het eindvolume en minstens één monster in.') }}</lk-note>
+      <template v-else>
+        <lk-table table-id="d-btbl" :cols="btCols" :rows="bt.rows"/>
+        <lk-note v-if="bt.low" kind="warn">{{ t('Een monster onder C₂ kun je niet verdunnen: gebruik het onverdund of concentreer het eerst.') }}</lk-note>
+      </template>
+    </div>
+    <div v-else-if="reeks" class="result" id="d-out">
       <lk-note v-if="sr.bad" kind="bad">{{ t('Factor moet groter dan 1 zijn en het volume groter dan 0.') }}</lk-note>
       <template v-else>
         <lk-table :cols="srCols" :rows="srRows"/>
@@ -64,7 +87,7 @@
         <!-- geen t(): deze regel heeft geen woord van twee letters, dus de vertaallaag heeft
              er nooit een sleutel voor gemaakt en er is niets te vertalen -->
         <lk-formula html="V₁ = C₂ × V₂ / C₁"/>
-        <lk-report tool="verdunning" :sentence="method" :answer="check.a" :unit="check.u" :digits="4"/>
+        <lk-report tool="verdunning" :sentence="method" :answer="check.a" :unit="check.u" :units="checkUnits" :sheet="sheet" :unc="uRes" :digits="4"/>
         <div style="overflow-x:auto;margin-top:12px"><svg viewBox="0 0 240 150" style="display:block;width:240px;height:150px" role="img" :aria-label="t('Stock en eindverdunning')">
           <g v-for="(b, i) in tubes" :key="i" v-html="tube(b, i, 120)"></g>
         </svg></div>
@@ -110,6 +133,7 @@ import {pipHtml as pipTag} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 import {overage} from '../lib/overage.js';
 import {serie} from './Verdunningsschema.vue';
+import {relU} from '../lib/uncert.js';
 
 /* een volume met vijf cijfers als het in mL staat, zodat 21,978 mL niet 21,98 mL wordt */
 const volP = uL => (isFinite(uL) && Math.abs(uL) >= 1000 ? sig(uL / 1000, 5) + ' mL' : vol(uL));
@@ -127,7 +151,7 @@ export default {
   data() {
     return {v: {'d-c1': '50', 'd-c1u': 'X', 'd-c2': '1', 'd-c2u': 'X',
       'd-v1': '', 'd-v1u': 'mL', 'd-v2': '500', 'd-v2u': 'mL'},
-    mode: 'een', s: {f: '10', n: '5', v: '1000'},
+    mode: 'een', b: '', unc: {'d-c1': '', 'd-c2': '', 'd-v1': '', 'd-v2': ''}, s: {f: '10', n: '5', v: '1000'},
     ab: {d: '1000', v: '10', u: 'mL', k: '2', ov: 'pct', x: '10'}};
   },
   methods: {
@@ -168,7 +192,8 @@ export default {
         [t('Vermenigvuldigingsfactor'), lkNumIn(fmt(m.mult, 2)) + '×']];
     },
     reeks() { return this.mode === 'reeks'; },
-    conc() { return this.reeks ? CONC.slice(0, 1) : CONC; },
+    batch() { return this.mode === 'batch'; },
+    conc() { return this.reeks ? CONC.slice(0, 1) : this.batch ? CONC.slice(1) : CONC; },
     /* reeksmodus: C₁ (met eenheid) is de stock; de rekenregels staan in serie() van het Verdunningsschema */
     sr() {
       const f = num(this.s.f), n = Math.max(1, Math.min(10, Math.round(num(this.s.n) || 1))), V = num(this.s.v);
@@ -194,7 +219,29 @@ export default {
         {a: t('Totaal'), l: 1, o: 0.3, b: lkNumIn(vol(v2)), c: lkNumIn(sig(b2 / D2[1], 4)) + ' ' + u.u2}];
     },
     abBig() { return lkNumIn(vol(this.abm.ab)) + pipTag(this.abm.ab); },
-    vols() { return this.reeks ? [] : VOLS; },
+    vols() { return this.reeks ? [] : this.batch ? VOLS.slice(1) : VOLS; },
+    btCols() { const t = this.t; return [{h: t('Monster')}, {h: 'C₁', num: true}, {h: t('Stock'), num: true}, {h: t('Oplosmiddel'), num: true}]; },
+    btPh() { const m = trPlain('Monster', true); return m + ' 1\t' + lkNumIn('52,4') + '\n' + m + ' 2\t' + lkNumIn('18,9') + ' ng/µL'; },
+    /* S96 deel 4 (#148): elke regel is een monster, het laatste getal op de regel de stockconcentratie, met
+       eventueel een eenheid erachter (anders die van C₂); alles ervoor is de naam. Iedereen gaat naar
+       C₂ in het eindvolume V₂, met C₁V₁ = C₂V₂ per regel. */
+    bt() {
+      const V = this.v, u2 = V['d-c2u'], b2 = num(V['d-c2']) * DCU[u2][1], v2 = num(V['d-v2']) * UV[V['d-v2u']];
+      const lines = this.b.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      if (!(b2 > 0) || !(v2 > 0) || !lines.length) return {err: true};
+      let low = false;
+      const rows = lines.map((l, i) => {
+        const m = l.match(/^(.*?)[\s;]*(\d+(?:[.,]\d+)?)\s*([^\s\d;]*)$/);
+        const u = m && m[3] ? m[3] : u2, ok = m && DCU[u] && DCU[u][0] === DCU[u2][0];
+        const name = esc(m && m[1].trim() ? m[1].trim() : '#' + (i + 1));
+        if (!ok) return {cells: [esc(l), '–', this.t('Onbekende eenheid of geen getal'), '–'], cls: 'bad'};
+        const b1 = num(m[2]) * DCU[u][1], c1 = lkNumIn(sig(num(m[2]), 4)) + ' ' + u;
+        if (!(b1 >= b2)) { low = true; return {cells: [name, c1, this.t('lager dan C₂'), '–'], cls: 'warn'}; }
+        const v1 = b2 * v2 / b1;
+        return [name, c1, lkNumIn(vol(v1)) + pipTag(v1), lkNumIn(vol(v2 - v1))];
+      });
+      return {err: false, rows, low};
+    },
     concUnits() { return CU; },
     volUnits() { return VU; },
     /* de vier grootheden in basiseenheden; NaN betekent "dit veld is leeg" en dus te rekenen */
@@ -260,6 +307,27 @@ export default {
       if (isNaN(c1)) return {a: b1 / D1[1], u: this.raw.u1};
       return {a: b2 / D2[1], u: this.raw.u2};
     },
+    /* S96 deel 2: de uitkomst ook in een andere eenheid van dezelfde soort (volume, of een concentratie uit DCU) */
+    checkUnits() {
+      const u = this.check.u;
+      if (UV[u]) return VU.map(x => [x, UV[u] / UV[x]]);
+      return Object.keys(DCU).filter(x => DCU[x][0] === DCU[u][0]).map(x => [x, DCU[u][1] / DCU[x][1]]);
+    },
+    /* S96 deel 3: de invoer en het lege veld als Excel-formule; f rekent de eenheden van de formule om naar die van het lege veld */
+    sheet() {
+      const V = this.v, r = this.raw, t = this.t, D = u => DCU[u][1];
+      const fld = {c1: [CONC[0].label, r.c1, r.u1], c2: [CONC[1].label, r.c2, r.u2], v1: [VOLS[0].label, num(V['d-v1']), V['d-v1u']], v2: [VOLS[1].label, num(V['d-v2']), V['d-v2u']]};
+      const k = ['v1', 'v2', 'c1', 'c2'].find(x => isNaN(fld[x][1]));
+      const f = {v1: D(r.u2) / D(r.u1) * UV[V['d-v2u']] / UV[V['d-v1u']], c1: D(r.u2) / D(r.u1) * UV[V['d-v2u']] / UV[V['d-v1u']],
+        v2: D(r.u1) / D(r.u2) * UV[V['d-v1u']] / UV[V['d-v2u']], c2: D(r.u1) / D(r.u2) * UV[V['d-v1u']] / UV[V['d-v2u']]}[k];
+      const F = {v1: '{c2}*{v2}/{c1}', c1: '{c2}*{v2}/{v1}', v2: '{c1}*{v1}/{c2}', c2: '{c1}*{v1}/{v2}'}[k];
+      return [...['c1', 'c2', 'v1', 'v2'].filter(x => x !== k).map(x => ({k: x, label: t(fld[x][0]), value: fld[x][1], unit: fld[x][2]})),
+        {label: t(fld[k][0]), value: '=' + F + (f === 1 ? '' : '*' + Number(f.toPrecision(12))), unit: fld[k][2]}];
+    },
+    /* S96 deel 5 (#144): ± per ingevuld veld; alle vier staan met macht ±1 in C₁V₁ = C₂V₂, dus u_r is de wortel
+       uit de som van de kwadraten (relU), en de eenheid van elk veld valt weg in u/x */
+    uncFields() { return [...CONC, ...VOLS].filter(f => String(this.v[f.id]).trim() !== ''); },
+    uRes() { return relU(this.uncFields.map(f => [num(this.v[f.id]), num(this.unc[f.id]), 1])) * Math.abs(this.check.a); },
     solved() {
       /* het grote getal staat er ook bij een te hoge C₂: dan vertelt de melding eronder waarom */
       const bad = this.problem && this.problem.kind === 'bad' && this.kinds.D1[0] === this.kinds.D2[0];
