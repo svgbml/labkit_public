@@ -6094,5 +6094,8 @@
 "Gemeten uit afstanden": "Measured from distances",
 "Gel getekend uit de afstanden; de onbekende banden staan in de meettabel.": "Gel drawn from the distances; the unknown bands are in the measurement table.",
 "Kies minstens twee gels.": "Choose at least two gels.",
-"{#} gels als panelen in de Figuurmaker gezet.": "{#} gels placed as panels in the Figure maker."
+"{#} gels als panelen in de Figuurmaker gezet.": "{#} gels placed as panels in the Figure maker.",
+"Eenheid van de uitkomst": "Unit of the outcome",
+"Meer cijfers": "More digits",
+"Minder cijfers": "Fewer digits"
 }

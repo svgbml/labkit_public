@@ -64,7 +64,7 @@
         <!-- geen t(): deze regel heeft geen woord van twee letters, dus de vertaallaag heeft
              er nooit een sleutel voor gemaakt en er is niets te vertalen -->
         <lk-formula html="V₁ = C₂ × V₂ / C₁"/>
-        <lk-report tool="verdunning" :sentence="method" :answer="check.a" :unit="check.u" :digits="4"/>
+        <lk-report tool="verdunning" :sentence="method" :answer="check.a" :unit="check.u" :units="checkUnits" :digits="4"/>
         <div style="overflow-x:auto;margin-top:12px"><svg viewBox="0 0 240 150" style="display:block;width:240px;height:150px" role="img" :aria-label="t('Stock en eindverdunning')">
           <g v-for="(b, i) in tubes" :key="i" v-html="tube(b, i, 120)"></g>
         </svg></div>
@@ -259,6 +259,12 @@ export default {
       if (isNaN(v2)) return {a: s2 / UV[V['d-v2u']], u: V['d-v2u']};
       if (isNaN(c1)) return {a: b1 / D1[1], u: this.raw.u1};
       return {a: b2 / D2[1], u: this.raw.u2};
+    },
+    /* S96 deel 2: de uitkomst ook in een andere eenheid van dezelfde soort (volume, of een concentratie uit DCU) */
+    checkUnits() {
+      const u = this.check.u;
+      if (UV[u]) return VU.map(x => [x, UV[u] / UV[x]]);
+      return Object.keys(DCU).filter(x => DCU[x][0] === DCU[u][0]).map(x => [x, DCU[u][1] / DCU[x][1]]);
     },
     solved() {
       /* het grote getal staat er ook bij een te hoge C₂: dan vertelt de melding eronder waarom */

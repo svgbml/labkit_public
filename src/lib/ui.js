@@ -166,26 +166,41 @@ LKUI.steps = {
      mee; Kopieer zet hem op het klembord;
    - "→ Rapport" zet deze tool vooraan in de keuze van het rapport en opent het (window.__rpVm, Rapport.vue);
    - "Controleer je antwoord": je eigen uitkomst; goed binnen 1 % of binnen een halve eenheid van het laatste
-     cijfer dat je gaf. De knoppen en het invoerveld staan in een .row, die het rapport weglaat. */
+     cijfer dat je gaf. De knoppen en het invoerveld staan in een .row, die het rapport weglaat.
+   - de regel Uitkomst (S96 deel 2): standaard :digits significante cijfers met "Meer cijfers" (#146), en met
+     :units="[[eenheid, factor], …]" (waarde in die eenheid = answer × factor) een keuze van de eenheid (#145);
+     de antwoordcontrole rekent dan in de gekozen eenheid. */
 /* getallen in de notatie van de gebruiker (zoals lkNumIn in bridge.js; die importeert dit bestand zelf) */
 const lkn = v => (LANG === 'en' && typeof i18nNum === 'function' ? String(v).replace(/\d+(?:[.,]\d+)*/g, m => i18nNum(m)) : String(v));
 LKUI.report = {
-  props: {tool: String, sentence: {type: String, default: ''}, answer: {type: Number, default: NaN}, unit: {type: String, default: ''}, digits: {type: Number, default: 3}},
+  props: {tool: String, sentence: {type: String, default: ''}, answer: {type: Number, default: NaN}, unit: {type: String, default: ''}, digits: {type: Number, default: 3},
+    units: {type: Array, default: () => []}},
   setup(props) {
-    const mine = ref(''), copied = ref(false);
+    const mine = ref(''), copied = ref(false), more = ref(false), pick = ref('');
+    /* het antwoord in de gekozen eenheid; een keuze die niet meer in de lijst staat valt terug op unit */
+    const shown = () => { const k = props.units.find(x => x[0] === pick.value);
+      return k ? {a: props.answer * k[1], u: k[0]} : {a: props.answer, u: props.unit}; };
     const verdict = () => {
-      const t = mine.value.trim(); if (!t || !isFinite(props.answer)) return null;
+      const t = mine.value.trim(), A = shown().a; if (!t || !isFinite(A)) return null;
       const u = num(t); if (!isFinite(u)) return null;
       const dec = (t.replace(/^[^\d]*/, '').split(/[.,]/)[1] || '').replace(/[^\d]/g, '').length, half = 0.5 * 10 ** -dec;
-      const ok = Math.abs(u - props.answer) <= Math.max(Math.abs(props.answer) * 0.01, half);
-      return {ok, dev: props.answer ? (u - props.answer) / Math.abs(props.answer) * 100 : 0};
+      const ok = Math.abs(u - A) <= Math.max(Math.abs(A) * 0.01, half);
+      return {ok, dev: A ? (u - A) / Math.abs(A) * 100 : 0};
     };
     const copy = async () => { const d = document.createElement('div'); d.innerHTML = props.sentence; try { await navigator.clipboard.writeText(d.textContent); copied.value = true; setTimeout(() => { copied.value = false; }, 1500); } catch (e) {} };
     const toRep = () => { try { const r = jget('labkit:v1:recent', []).filter(x => x !== props.tool); r.unshift(props.tool); jset('labkit:v1:recent', r.slice(0, 8)); } catch (e) {}
       const vm = window.__rpVm; if (vm) vm.sel = [props.tool, ...vm.sel.filter(x => x !== props.tool)]; location.hash = '#report'; };
+    const clean = x => lkn(String(x).replace(/<[^>]+>/g, ''));
     return () => {
-      const v = verdict(), U = props.unit ? ' ' + props.unit : '';
+      const v = verdict(), S = shown(), U = S.u ? ' ' + S.u : '';
       return h('div', {class: 'lk-report', style: 'margin-top:10px'}, [
+        isFinite(S.a) ? h('p', {class: 'lk-answer', style: 'font-size:13px;margin:0 0 6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap'}, [
+          h('b', trPlain('Uitkomst') + ':'), h('span', {'data-answer': ''}, clean(sig(S.a, more.value ? 10 : props.digits))),
+          props.units.length > 1 ? h('select', {'data-unit': '', 'aria-label': trPlain('Eenheid van de uitkomst'), value: S.u, onChange: e => { pick.value = e.target.value; }},
+            props.units.map(x => h('option', {value: x[0]}, x[0]))) : (S.u ? h('span', S.u) : null),
+          h('button', {type: 'button', class: 'xlbtn', 'data-more': '', 'aria-pressed': String(more.value), onClick: () => { more.value = !more.value; }},
+            trPlain(more.value ? 'Minder cijfers' : 'Meer cijfers'))
+        ]) : null,
         props.sentence ? h('p', {class: 'lk-method', style: 'font-size:13px;margin:0 0 6px'}, [h('b', trPlain('Methode') + ': '), h('span', {innerHTML: props.sentence})]) : null,
         h('div', {class: 'row', style: 'gap:6px;align-items:center;flex-wrap:wrap'}, [
           props.sentence ? h('button', {type: 'button', class: 'xlbtn', 'data-method-copy': '', onClick: copy}, trPlain(copied.value ? 'Gekopieerd' : 'Kopieer methodezin')) : null,
@@ -193,9 +208,9 @@ LKUI.report = {
           isFinite(props.answer) ? h('label', {style: 'display:flex;gap:6px;align-items:center;font-size:13px;margin-left:auto'}, [
             trPlain('Controleer je antwoord:'),
             h('input', {class: 'txt', inputmode: 'decimal', style: 'width:110px', 'data-check': '', 'aria-label': trPlain('Je eigen antwoord'), value: mine.value, onInput: e => { mine.value = e.target.value; }}),
-            props.unit ? h('span', props.unit) : null,
+            S.u ? h('span', S.u) : null,
             v ? h('span', {'data-verdict': v.ok ? 'ok' : 'bad', style: 'font-weight:600;color:var(--' + (v.ok ? 'ok' : 'bad') + ')'},
-              v.ok ? '✓ ' + trPlain('Goed') : '✗ ' + trPlain('Niet goed: het antwoord is ' + uv(lkn(sig(props.answer, props.digits).replace(/<[^>]+>/g, '')) + U) + '.')) : null
+              v.ok ? '✓ ' + trPlain('Goed') : '✗ ' + trPlain('Niet goed: het antwoord is ' + uv(clean(sig(S.a, props.digits)) + U) + '.')) : null
           ]) : null
         ])
       ]);

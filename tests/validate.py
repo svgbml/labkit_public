@@ -756,6 +756,22 @@ def _(pg):
     return [('methodezin', int(all(x in m for x in ('50 X', '1 X', '10 mL', '500 mL'))), 1, 0), ('10 mL goed', int(v[0] == 'ok'), 1, 0), ('10,05 mL goed', int(v[1] == 'ok'), 1, 0),
             ('12 mL fout', int(v[2] == 'bad'), 1, 0), ('rapport geopend met Verdunning', int(rep[0] == '#report' and rep[1] == 'verdunning'), 1, 0), ('methodezin in het rapport', int(rep[2]), 1, 0)]
 
+@case('Verdunning', 'Uitkomst in een andere eenheid en met meer cijfers', 'Zelftest op 50X TAE naar 500 mL 1X (Bio-Rad Bulletin 6205: 10 mL stock): de uitkomst 10 mL is 10000 µL en 0,01 L; in µL is 10000 goed en 10 fout; 1 mM uit 3 mM in 1 mL vraagt 0,3333 mL, met meer cijfers 0,333333')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('d-c1u','X');__set('d-c2u','X');__set('d-c1','50');__set('d-c2','1');__set('d-v1','');__set('d-v2u','mL');__set('d-v1u','mL');__set('d-v2','500')"); pg.wait_for_timeout(200)
+    q = lambda: pg.evaluate("document.querySelector('#t-verdunning [data-answer]').textContent")
+    def unit(u): pg.evaluate(f"const e=document.querySelector('#t-verdunning [data-unit]'); e.value={u!r}; e.dispatchEvent(new Event('change',{{bubbles:true}}))"); pg.wait_for_timeout(100)
+    def chk(v):
+        pg.evaluate(f"const e=document.querySelector('#t-verdunning [data-check]'); e.value={v!r}; e.dispatchEvent(new Event('input',{{bubbles:true}}))"); pg.wait_for_timeout(100)
+        return pg.evaluate("(document.querySelector('#t-verdunning [data-verdict]')||{dataset:{}}).dataset.verdict")
+    n = lambda: pg.evaluate("__n(document.querySelector('#t-verdunning [data-answer]').textContent)")
+    ml = n(); unit('µL'); ul = n(); v = [chk('10000'), chk('10')]; unit('L'); l = n(); unit('mL'); chk('')
+    pg.evaluate("__set('d-c1u','mM');__set('d-c2u','mM');__set('d-c1','3');__set('d-c2','1');__set('d-v2','1')"); pg.wait_for_timeout(200)
+    a4 = q(); pg.evaluate("document.querySelector('#t-verdunning [data-more]').click()"); pg.wait_for_timeout(100); a10 = q()
+    pg.evaluate("document.querySelector('#t-verdunning [data-more]').click()")
+    return [('uitkomst (mL)', ml, 10, 0), ('in µL', ul, 10000, 0), ('in L', l, 0.01, 0), ('10000 µL goed', int(v[0] == 'ok'), 1, 0), ('10 µL fout', int(v[1] == 'bad'), 1, 0),
+            ('4 cijfers', int(a4 == '0,3333'), 1, 0), ('meer cijfers', int(a10 == '0,333333'), 1, 0)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")
