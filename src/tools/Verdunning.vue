@@ -46,6 +46,16 @@
           </div>
         </div>
       </div>
+      <details v-if="!reeks && !batch" class="lk-unc" style="margin-top:10px">
+        <summary>{{ t('Onzekerheid van de invoer (±)') }}</summary>
+        <div class="fields" style="margin-top:8px">
+          <div class="f" v-for="f in uncFields" :key="f.id">
+            <label :for="'u-' + f.id">± {{ t(f.label) }}</label>
+            <div class="inu"><input :id="'u-' + f.id" inputmode="decimal" v-model="unc[f.id]"><span class="u">{{ v[f.id + 'u'] }}</span></div>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin:6px 0 0">{{ t('Standaardonzekerheid per invoer, in de eenheid van dat veld (bijvoorbeeld de tolerantie van de pipet gedeeld door √3). De uitkomst krijgt ± U met k = 2 (JCGM 100:2008, vgl. 12).') }}</p>
+      </details>
       <p v-if="batch" class="note info">{{ t('Plak een kolom of twee kolommen uit Excel. Zonder eenheid achter het getal geldt de eenheid van C₂.') }}</p>
       <p v-else-if="!reeks" class="note info">{{ t('Voorbeeld: 50X TAE naar 500 mL 1X loopbuffer.') }}</p>
       <p v-else class="note info">{{ t('Voor een tekening met labels, uitplaten en een afdrukbaar schema: zie Verdunningsschema.') }}</p>
@@ -77,7 +87,7 @@
         <!-- geen t(): deze regel heeft geen woord van twee letters, dus de vertaallaag heeft
              er nooit een sleutel voor gemaakt en er is niets te vertalen -->
         <lk-formula html="V₁ = C₂ × V₂ / C₁"/>
-        <lk-report tool="verdunning" :sentence="method" :answer="check.a" :unit="check.u" :units="checkUnits" :sheet="sheet" :digits="4"/>
+        <lk-report tool="verdunning" :sentence="method" :answer="check.a" :unit="check.u" :units="checkUnits" :sheet="sheet" :unc="uRes" :digits="4"/>
         <div style="overflow-x:auto;margin-top:12px"><svg viewBox="0 0 240 150" style="display:block;width:240px;height:150px" role="img" :aria-label="t('Stock en eindverdunning')">
           <g v-for="(b, i) in tubes" :key="i" v-html="tube(b, i, 120)"></g>
         </svg></div>
@@ -123,6 +133,7 @@ import {pipHtml as pipTag} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 import {overage} from '../lib/overage.js';
 import {serie} from './Verdunningsschema.vue';
+import {relU} from '../lib/uncert.js';
 
 /* een volume met vijf cijfers als het in mL staat, zodat 21,978 mL niet 21,98 mL wordt */
 const volP = uL => (isFinite(uL) && Math.abs(uL) >= 1000 ? sig(uL / 1000, 5) + ' mL' : vol(uL));
@@ -140,7 +151,7 @@ export default {
   data() {
     return {v: {'d-c1': '50', 'd-c1u': 'X', 'd-c2': '1', 'd-c2u': 'X',
       'd-v1': '', 'd-v1u': 'mL', 'd-v2': '500', 'd-v2u': 'mL'},
-    mode: 'een', b: '', s: {f: '10', n: '5', v: '1000'},
+    mode: 'een', b: '', unc: {'d-c1': '', 'd-c2': '', 'd-v1': '', 'd-v2': ''}, s: {f: '10', n: '5', v: '1000'},
     ab: {d: '1000', v: '10', u: 'mL', k: '2', ov: 'pct', x: '10'}};
   },
   methods: {
@@ -313,6 +324,10 @@ export default {
       return [...['c1', 'c2', 'v1', 'v2'].filter(x => x !== k).map(x => ({k: x, label: t(fld[x][0]), value: fld[x][1], unit: fld[x][2]})),
         {label: t(fld[k][0]), value: '=' + F + (f === 1 ? '' : '*' + Number(f.toPrecision(12))), unit: fld[k][2]}];
     },
+    /* S96 deel 5 (#144): ± per ingevuld veld; alle vier staan met macht ±1 in C₁V₁ = C₂V₂, dus u_r is de wortel
+       uit de som van de kwadraten (relU), en de eenheid van elk veld valt weg in u/x */
+    uncFields() { return [...CONC, ...VOLS].filter(f => String(this.v[f.id]).trim() !== ''); },
+    uRes() { return relU(this.uncFields.map(f => [num(this.v[f.id]), num(this.unc[f.id]), 1])) * Math.abs(this.check.a); },
     solved() {
       /* het grote getal staat er ook bij een te hoge C₂: dan vertelt de melding eronder waarom */
       const bad = this.problem && this.problem.kind === 'bad' && this.kinds.D1[0] === this.kinds.D2[0];

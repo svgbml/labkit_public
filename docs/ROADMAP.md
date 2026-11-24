@@ -7,10 +7,10 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Model** (last column) is the cheapest model that can do the step well, so the shared usage limit lasts longer. Done steps show "—".
 - **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (1 open step).
 - **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (14 open steps).
-- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (25 open steps).
+- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (24 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (9 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **222 done, 1 started (S96), 47 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **223 done, 47 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-23)
 
@@ -23,7 +23,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 4 recipes and sequences | S37–S47 | ✅ done (batches P1–P3) |
 | Phase 5 execution | S48–S61 | ✅ done (batches E1–E4) |
 | Phase 6 gel editor rebuild | S62–S79 | ✅ done |
-| Phase 7 charts, figures and data | S80–S96 | **part done:** S94, S95 open, S96 started |
+| Phase 7 charts, figures and data | S80–S96 | **part done:** S94, S95 open (batch C4) |
 | Phase 8 rework existing tools | S97–S116 | **part done:** S99, S100, S105, S113, S114 open (batch R3) |
 | Phase 9 structure and workflows | S117–S121 | ⏳ not started (batch W1) |
 | Phase 10 performance | S122–S133 | ⏳ not started; F1a re-plans it first |
@@ -165,7 +165,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | C1a ✅ | Opus 5.5 | S80 chart style system, then S81–S84 (Opus 5 / Sonnet) | K3 | — | — |
 | C1b ✅ | Opus 5 | S85–S88 | C1a | anything except R3 | — |
 | C2 ✅ | Opus 5.5 | S89–S90 figure maker (new tool, Vue) | C1b | anything except G3 | — |
-| C3 🔨 (S96 deels) | Opus 5 | S91–S93, S96: imports and core-calculator extras | C1b | anything except R3 | tdd |
+| C3 ✅ | Opus 5 | S91–S93, S96: imports and core-calculator extras | C1b | anything except R3 | tdd |
 | C4 | Sonnet | S94, S95 | C3 | anything | tdd |
 | R1 ✅ | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 | — |
 | R2a ✅ | Sonnet | S106–S110 | K3 | anything except E3 | — |
@@ -370,7 +370,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S93 | 137, 195 | qPCR instrument import (CFX, QuantStudio, LightCycler) *(partly there: qPCR-analyse reads a pasted Ct table by its header)* | ✅ `qpcrRead()` in `src/lib/qpcrread.js` leest de exports van Bio-Rad CFX (Quantification Cq Results), QuantStudio/7500 (`[Results]`, Undetermined) en LightCycler 480 (een blok per gen na `Experiment:`, het gen uit de naam van het experiment); qPCR-analyse gebruikt hem eerst en valt anders terug op de kopregel, met een bestandskeuze erbij. Testbestanden met dezelfde run in `tests/fixtures/qpcr/`, `tests/unit/qpcrread.test.mjs` en een validatiegeval (fold change 6,28 in alle drie) | — |
 | S94 | 138, 139 | NanoDrop and flow summary import | Both import | Sonnet |
 | S95 | 140, 147, 141 | Interpretation lines, reference ranges, replicate checker | Shown in 10 tools | Sonnet |
-| S96 | 142, 143, 149, 150, 146, 145, 148, 144 | Results to report, method sentences, Excel with formulas, answer check, sig figs, output units, batch mode, uncertainty propagation (in 2–3 sub-steps if needed) | 🔨 Deel 1 gedaan: gedeelde component `<lk-report>` (`src/lib/ui.js`) met een methodezin (#143, staat in het resultaat en dus ook in het rapport), *Kopieer methodezin*, *→ Rapport* (#142: tool vooraan in de keuze van het rapport en dat openen) en *Controleer je antwoord* (#150: goed binnen 1 % of een halve eenheid van je laatste cijfer); in Verdunning en Centrifuge alle drie, in Oplossing methodezin en rapport (meerdere uitkomsten, geen enkel antwoord). Getest in `tests/validate.py`. Deel 2 gedaan: in `<lk-report>` de regel *Uitkomst* met standaard de significante cijfers van de tool en *Meer cijfers* (#146), en met `:units` een keuze van de uitvoereenheid (#145; Verdunning: µL/mL/L of elke concentratie van dezelfde soort), de antwoordcontrole rekent in die eenheid mee; validatiegeval. Deel 3 gedaan: *Kopieer met formules* in `<lk-report>` (#149): `sheetTSV()` (`src/lib/sheet.js`, unit test) zet de invoer en de uitkomst als Excel-formule op de invoercellen (geen functienamen, dus ook in een Nederlandse Excel); in Verdunning, Centrifuge en Oplossing, met validatiegevallen die het blad narekenen. Deel 4 gedaan: batchmodus (#148) in Verdunning, *Meerdere monsters (batch)*: een geplakte lijst (naam en stockconcentratie per regel, eventueel met eenheid) gaat in één tabel naar C₂ in V₂, monsters onder C₂ en onleesbare regels worden gemeld; validatiegeval. **Nog te doen:** onzekerheid doorrekenen (#144), en `<lk-report>` in de overige kerncalculators | Opus 5 |
+| S96 | 142, 143, 149, 150, 146, 145, 148, 144 | Results to report, method sentences, Excel with formulas, answer check, sig figs, output units, batch mode, uncertainty propagation (in 2–3 sub-steps if needed) | ✅ In vijf delen, alles in de gedeelde component `<lk-report>` (`src/lib/ui.js`) onder de uitkomst van de kerncalculators Verdunning, Centrifuge en Oplossing: (1) methodezin met *Kopieer methodezin* (#143), *→ Rapport* (#142) en *Controleer je antwoord* (#150, goed binnen 1 % of een halve eenheid van je laatste cijfer); (2) de regel *Uitkomst* met de significante cijfers van de tool en *Meer cijfers* (#146) en een keuze van de uitvoereenheid (#145, `:units`); (3) *Kopieer met formules* (#149): `sheetTSV()` in `src/lib/sheet.js` zet invoer en uitkomst als Excel-formule op de invoercellen, zonder functienamen zodat het ook in een Nederlandse Excel werkt; (4) batchmodus in Verdunning (#148): een geplakte lijst monsters in één tabel naar C₂ in V₂; (5) onzekerheid doorrekenen (#144): `relU()` in `src/lib/uncert.js` (GUM vgl. 12) met ± per invoer in Verdunning en Centrifuge, de uitkomst krijgt ± U (k = 2). Unit tests voor `sheet.js` en `uncert.js`, validatiegevallen per deel. Niet gedaan: ± in Oplossing (per component een eigen onzekerheid, dat vraagt een eigen tabel) en `<lk-report>` in tools buiten deze drie | — |
 
 ## Phase 8: rework existing tools (20 steps)
 | Step | Ideas | What | Model |
@@ -689,7 +689,7 @@ end of each batch with the full check (286/286).
 
 Checked 2026-11-23. The batch table above still decides what may run together.
 1. AL2b and SA2 are merged (2026-11-23), so AL2c and SA3 can start.
-2. **Finish what is started:** the rest of S96 (C3). The row has a handoff note already, so it is a short session. (S79, G3, is done.)
+2. **Finish what is started:** done (S96 and with it C3 on 2026-11-24; S79, G3, before that).
 3. **The cheap and self-contained batches:** C4 (Sonnet), Q2, and R3. R3 merges tools that have validation cases, so tdd matters most there.
 4. **The sequence line**, when it is the nearest practical need: SA3 → SA4, and AL2c → AL3 → AL4. SA4 also needs SQ2, which is done.
 5. **W1** only after a local grilling session has pinned down projects and data flow (see *Skills per batch*). It changes something every tool uses, so it runs alone.

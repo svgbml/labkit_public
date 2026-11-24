@@ -6107,5 +6107,8 @@
 "Vul C₂, het eindvolume en minstens één monster in.": "Enter C₂, the final volume and at least one sample.",
 "Een monster onder C₂ kun je niet verdunnen: gebruik het onverdund of concentreer het eerst.": "A sample below C₂ cannot be diluted: use it undiluted or concentrate it first.",
 "Onbekende eenheid of geen getal": "Unknown unit or no number",
-"lager dan C₂": "below C₂"
+"lager dan C₂": "below C₂",
+"Onzekerheid van de invoer (±)": "Uncertainty of the inputs (±)",
+"(k = {#}, ongeveer {#} %)": "(k = {#}, about {#} %)",
+"Standaardonzekerheid per invoer, in de eenheid van dat veld (bijvoorbeeld de tolerantie van de pipet gedeeld door √{#}). De uitkomst krijgt ± U met k = {#} (JCGM {#}:{#}, vgl. {#}).": "Standard uncertainty per input, in the unit of that field (for example the pipette tolerance divided by √{#}). The result gets ± U with k = {#} (JCGM {#}:{#}, eq. {#})."
 }

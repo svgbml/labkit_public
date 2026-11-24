@@ -172,19 +172,22 @@ LKUI.steps = {
      :units="[[eenheid, factor], …]" (waarde in die eenheid = answer × factor) een keuze van de eenheid (#145);
      de antwoordcontrole rekent dan in de gekozen eenheid.
    - :sheet (S96 deel 3, #149): de invoer en de uitkomst als rijen voor sheetTSV() (src/lib/sheet.js);
-     "Kopieer met formules" zet ze op het klembord, met de uitkomst als Excel-formule op de invoercellen. */
+     "Kopieer met formules" zet ze op het klembord, met de uitkomst als Excel-formule op de invoercellen.
+   - :unc (S96 deel 5, #144): de standaardonzekerheid van answer in dezelfde eenheid; de uitkomst krijgt dan
+     ± U met k = 2 (ongeveer 95 %), omgerekend naar de gekozen eenheid. */
 /* getallen in de notatie van de gebruiker (zoals lkNumIn in bridge.js; die importeert dit bestand zelf) */
 const lkn = v => (LANG === 'en' && typeof i18nNum === 'function' ? String(v).replace(/\d+(?:[.,]\d+)*/g, m => i18nNum(m)) : String(v));
 LKUI.report = {
   props: {tool: String, sentence: {type: String, default: ''}, answer: {type: Number, default: NaN}, unit: {type: String, default: ''}, digits: {type: Number, default: 3},
-    units: {type: Array, default: () => []}, sheet: {type: Array, default: () => []}},
+    units: {type: Array, default: () => []}, sheet: {type: Array, default: () => []}, unc: {type: Number, default: NaN}},
   setup(props) {
     const mine = ref(''), copied = ref(false), more = ref(false), pick = ref(''), xl = ref(false);
     const copyXl = async () => { try { await navigator.clipboard.writeText(sheetTSV(props.sheet, LANG, [trPlain('Grootheid'), trPlain('Waarde'), trPlain('Eenheid')]));
       xl.value = true; setTimeout(() => { xl.value = false; }, 1500); } catch (e) {} };
     /* het antwoord in de gekozen eenheid; een keuze die niet meer in de lijst staat valt terug op unit */
     const shown = () => { const k = props.units.find(x => x[0] === pick.value);
-      return k ? {a: props.answer * k[1], u: k[0]} : {a: props.answer, u: props.unit}; };
+      const f = k ? k[1] : 1;
+      return {a: props.answer * f, u: k ? k[0] : props.unit, U: 2 * props.unc * Math.abs(f)}; };
     const verdict = () => {
       const t = mine.value.trim(), A = shown().a; if (!t || !isFinite(A)) return null;
       const u = num(t); if (!isFinite(u)) return null;
@@ -201,10 +204,12 @@ LKUI.report = {
       return h('div', {class: 'lk-report', style: 'margin-top:10px'}, [
         isFinite(S.a) ? h('p', {class: 'lk-answer', style: 'font-size:13px;margin:0 0 6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap'}, [
           h('b', trPlain('Uitkomst') + ':'), h('span', {'data-answer': ''}, clean(sig(S.a, more.value ? 10 : props.digits))),
+          isFinite(S.U) && S.U > 0 ? h('span', {'data-unc': ''}, '± ' + clean(sig(S.U, 2))) : null,
           props.units.length > 1 ? h('select', {'data-unit': '', 'aria-label': trPlain('Eenheid van de uitkomst'), value: S.u, onChange: e => { pick.value = e.target.value; }},
             props.units.map(x => h('option', {value: x[0]}, x[0]))) : (S.u ? h('span', S.u) : null),
           h('button', {type: 'button', class: 'xlbtn', 'data-more': '', 'aria-pressed': String(more.value), onClick: () => { more.value = !more.value; }},
-            trPlain(more.value ? 'Minder cijfers' : 'Meer cijfers'))
+            trPlain(more.value ? 'Minder cijfers' : 'Meer cijfers')),
+          isFinite(S.U) && S.U > 0 ? h('span', {style: 'color:var(--muted)'}, trPlain('(k = 2, ongeveer 95 %)')) : null
         ]) : null,
         props.sentence ? h('p', {class: 'lk-method', style: 'font-size:13px;margin:0 0 6px'}, [h('b', trPlain('Methode') + ': '), h('span', {innerHTML: props.sentence})]) : null,
         h('div', {class: 'row', style: 'gap:6px;align-items:center;flex-wrap:wrap'}, [
