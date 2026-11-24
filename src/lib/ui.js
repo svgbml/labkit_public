@@ -1,5 +1,6 @@
 import {h, onMounted, onUnmounted, watch, ref} from 'vue';
 import {pipHtml} from './pip.js';
+import {sheetTSV} from './sheet.js';
 
 /* ================= GEDEELDE VUE-COMPONENTEN =================
    De eerste omgezette tools bouwden hun uitkomst nog als een string HTML en zetten die met
@@ -169,14 +170,18 @@ LKUI.steps = {
      cijfer dat je gaf. De knoppen en het invoerveld staan in een .row, die het rapport weglaat.
    - de regel Uitkomst (S96 deel 2): standaard :digits significante cijfers met "Meer cijfers" (#146), en met
      :units="[[eenheid, factor], …]" (waarde in die eenheid = answer × factor) een keuze van de eenheid (#145);
-     de antwoordcontrole rekent dan in de gekozen eenheid. */
+     de antwoordcontrole rekent dan in de gekozen eenheid.
+   - :sheet (S96 deel 3, #149): de invoer en de uitkomst als rijen voor sheetTSV() (src/lib/sheet.js);
+     "Kopieer met formules" zet ze op het klembord, met de uitkomst als Excel-formule op de invoercellen. */
 /* getallen in de notatie van de gebruiker (zoals lkNumIn in bridge.js; die importeert dit bestand zelf) */
 const lkn = v => (LANG === 'en' && typeof i18nNum === 'function' ? String(v).replace(/\d+(?:[.,]\d+)*/g, m => i18nNum(m)) : String(v));
 LKUI.report = {
   props: {tool: String, sentence: {type: String, default: ''}, answer: {type: Number, default: NaN}, unit: {type: String, default: ''}, digits: {type: Number, default: 3},
-    units: {type: Array, default: () => []}},
+    units: {type: Array, default: () => []}, sheet: {type: Array, default: () => []}},
   setup(props) {
-    const mine = ref(''), copied = ref(false), more = ref(false), pick = ref('');
+    const mine = ref(''), copied = ref(false), more = ref(false), pick = ref(''), xl = ref(false);
+    const copyXl = async () => { try { await navigator.clipboard.writeText(sheetTSV(props.sheet, LANG, [trPlain('Grootheid'), trPlain('Waarde'), trPlain('Eenheid')]));
+      xl.value = true; setTimeout(() => { xl.value = false; }, 1500); } catch (e) {} };
     /* het antwoord in de gekozen eenheid; een keuze die niet meer in de lijst staat valt terug op unit */
     const shown = () => { const k = props.units.find(x => x[0] === pick.value);
       return k ? {a: props.answer * k[1], u: k[0]} : {a: props.answer, u: props.unit}; };
@@ -205,6 +210,8 @@ LKUI.report = {
         h('div', {class: 'row', style: 'gap:6px;align-items:center;flex-wrap:wrap'}, [
           props.sentence ? h('button', {type: 'button', class: 'xlbtn', 'data-method-copy': '', onClick: copy}, trPlain(copied.value ? 'Gekopieerd' : 'Kopieer methodezin')) : null,
           h('button', {type: 'button', class: 'xlbtn', 'data-torep': '', onClick: toRep}, '→ ' + trPlain('Rapport')),
+          props.sheet.length ? h('button', {type: 'button', class: 'xlbtn', 'data-xl-formula': '', title: trPlain('Plak in Excel: de uitkomst staat er als formule op de invoercellen'), onClick: copyXl},
+            trPlain(xl.value ? 'Gekopieerd' : 'Kopieer met formules')) : null,
           isFinite(props.answer) ? h('label', {style: 'display:flex;gap:6px;align-items:center;font-size:13px;margin-left:auto'}, [
             trPlain('Controleer je antwoord:'),
             h('input', {class: 'txt', inputmode: 'decimal', style: 'width:110px', 'data-check': '', 'aria-label': trPlain('Je eigen antwoord'), value: mine.value, onInput: e => { mine.value = e.target.value; }}),

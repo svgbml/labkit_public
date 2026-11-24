@@ -6097,5 +6097,8 @@
 "{#} gels als panelen in de Figuurmaker gezet.": "{#} gels placed as panels in the Figure maker.",
 "Eenheid van de uitkomst": "Unit of the outcome",
 "Meer cijfers": "More digits",
-"Minder cijfers": "Fewer digits"
+"Minder cijfers": "Fewer digits",
+"Grootheid": "Quantity",
+"Kopieer met formules": "Copy with formulas",
+"Plak in Excel: de uitkomst staat er als formule op de invoercellen": "Paste into Excel: the result is a formula on the input cells"
 }

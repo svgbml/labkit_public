@@ -85,7 +85,7 @@
       <lk-note v-if="tooSmall" kind="warn"><span v-html="tooSmall"></span></lk-note>
       <lk-note v-if="order" kind="info"><span v-html="order"></span></lk-note>
     </div>
-    <div class="result" v-if="method" style="margin-top:12px"><lk-report tool="oplossing" :sentence="method"/></div>
+    <div class="result" v-if="method" style="margin-top:12px"><lk-report tool="oplossing" :sentence="method" :sheet="sheet"/></div>
     <p class="src" id="o-src-rec" data-notr="" style="margin:8px 0 0" v-html="recipeSource"></p>
     <lk-formula :html="tHtml('massa (g) = c (mol/L) × V (L) × M (g/mol) · % w/v: g = % / 100 × V (mL)')"/>
   </div>
@@ -130,6 +130,18 @@ export default {
       if (!this.filled.length) return '';
       const list = this.filled.map(i => (this.rows[i].n || trPlain('component', true)) + ' ' + lkNumIn(mass(this.masses[i]))).join(', ');
       return esc(this.t('Voor ' + uv(this.vtxt) + ' oplossing werd afgewogen: ' + uv(list) + '; daarna werd aangevuld met gedemineraliseerd water tot het eindvolume.'));
+    },
+    /* S96 deel 3: het eindvolume en per component de invoer, de massa als formule (zoals masses hierboven) */
+    sheet() {
+      const t = this.t, out = [{k: 'V', label: t('Eindvolume'), value: this.liters, unit: 'L'}];
+      const F = {'% w/v': '{c}/100*{V}*1000', 'g/L': '{c}*{V}', M: '{c}*{V}*{m}', mM: '{c}/1000*{V}*{m}', 'µM': '{c}/1000000*{V}*{m}'};
+      for (const i of this.filled) {
+        const r = this.rows[i], n = (r.n || trPlain('component', true)) + ' – ', mol = /M$/.test(r.u);
+        if (mol) out.push({k: 'm' + i, label: n + t('Molmassa'), value: num(r.mw), unit: 'g/mol'});
+        out.push({k: 'c' + i, label: n + t('Concentratie'), value: num(r.c), unit: r.u},
+          {label: n + t('Afwegen'), value: '=' + F[r.u].replace('{c}', '{c' + i + '}').replace('{m}', '{m' + i + '}'), unit: 'g'});
+      }
+      return out;
     },
     vtxt() { return this.vu === 'L' ? lkNumIn(fmt(num(this.v), 3)) + ' L' : lkNumIn(fmt(num(this.v), 1)) + ' mL'; },
     steps() {

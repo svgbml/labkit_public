@@ -64,7 +64,7 @@
         <!-- geen t(): deze regel heeft geen woord van twee letters, dus de vertaallaag heeft
              er nooit een sleutel voor gemaakt en er is niets te vertalen -->
         <lk-formula html="V₁ = C₂ × V₂ / C₁"/>
-        <lk-report tool="verdunning" :sentence="method" :answer="check.a" :unit="check.u" :units="checkUnits" :digits="4"/>
+        <lk-report tool="verdunning" :sentence="method" :answer="check.a" :unit="check.u" :units="checkUnits" :sheet="sheet" :digits="4"/>
         <div style="overflow-x:auto;margin-top:12px"><svg viewBox="0 0 240 150" style="display:block;width:240px;height:150px" role="img" :aria-label="t('Stock en eindverdunning')">
           <g v-for="(b, i) in tubes" :key="i" v-html="tube(b, i, 120)"></g>
         </svg></div>
@@ -265,6 +265,17 @@ export default {
       const u = this.check.u;
       if (UV[u]) return VU.map(x => [x, UV[u] / UV[x]]);
       return Object.keys(DCU).filter(x => DCU[x][0] === DCU[u][0]).map(x => [x, DCU[u][1] / DCU[x][1]]);
+    },
+    /* S96 deel 3: de invoer en het lege veld als Excel-formule; f rekent de eenheden van de formule om naar die van het lege veld */
+    sheet() {
+      const V = this.v, r = this.raw, t = this.t, D = u => DCU[u][1];
+      const fld = {c1: [CONC[0].label, r.c1, r.u1], c2: [CONC[1].label, r.c2, r.u2], v1: [VOLS[0].label, num(V['d-v1']), V['d-v1u']], v2: [VOLS[1].label, num(V['d-v2']), V['d-v2u']]};
+      const k = ['v1', 'v2', 'c1', 'c2'].find(x => isNaN(fld[x][1]));
+      const f = {v1: D(r.u2) / D(r.u1) * UV[V['d-v2u']] / UV[V['d-v1u']], c1: D(r.u2) / D(r.u1) * UV[V['d-v2u']] / UV[V['d-v1u']],
+        v2: D(r.u1) / D(r.u2) * UV[V['d-v1u']] / UV[V['d-v2u']], c2: D(r.u1) / D(r.u2) * UV[V['d-v1u']] / UV[V['d-v2u']]}[k];
+      const F = {v1: '{c2}*{v2}/{c1}', c1: '{c2}*{v2}/{v1}', v2: '{c1}*{v1}/{c2}', c2: '{c1}*{v1}/{v2}'}[k];
+      return [...['c1', 'c2', 'v1', 'v2'].filter(x => x !== k).map(x => ({k: x, label: t(fld[x][0]), value: fld[x][1], unit: fld[x][2]})),
+        {label: t(fld[k][0]), value: '=' + F + (f === 1 ? '' : '*' + Number(f.toPrecision(12))), unit: fld[k][2]}];
     },
     solved() {
       /* het grote getal staat er ook bij een te hoge C₂: dan vertelt de melding eronder waarom */

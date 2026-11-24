@@ -51,7 +51,7 @@
         <lk-kv :rows="res.rows"/>
         <lk-formula html="RCF = 1,118 × 10⁻⁵ × r × rpm²"/>
         <lk-note>{{ t('Controleer of de waarde binnen het maximum van de rotor valt en balanceer de buizen.') }}</lk-note>
-        <lk-report tool="centrifuge" :sentence="method" :answer="last === 'rpm' ? val.g : val.rpm" :unit="last === 'rpm' ? '× g' : 'rpm'" :digits="4"/>
+        <lk-report tool="centrifuge" :sentence="method" :answer="last === 'rpm' ? val.g : val.rpm" :unit="last === 'rpm' ? '× g' : 'rpm'" :sheet="sheet" :digits="4"/>
       </template>
       <div class="fields" style="margin-top:14px">
         <div class="f">
@@ -113,6 +113,13 @@ export default {
     dots() {
       const n = num(this.n), on = new Set(this.bal.set);
       return [...Array(n).keys()].map(i => ({i, on: on.has(i), x: 40 * Math.sin(2 * Math.PI * i / n), y: -40 * Math.cos(2 * Math.PI * i / n)}));
+    },
+    /* S96 deel 3: rotorstraal en de invoer, de uitkomst als formule (machtsverheffen in plaats van WORTEL, zie sheet.js) */
+    sheet() {
+      const t = this.t, {r, rpm, g} = this.val, R = {k: 'r', label: t('Rotorstraal r'), value: r, unit: 'cm'};
+      return this.last === 'rpm'
+        ? [R, {k: 'n', label: t('Toerental'), value: rpm, unit: 'rpm'}, {label: t('g-kracht'), value: '=' + K + '*{r}*{n}^2', unit: '× g'}]
+        : [R, {k: 'g', label: t('g-kracht'), value: g, unit: '× g'}, {label: t('Toerental'), value: '=({g}/(' + K + '*{r}))^0.5', unit: 'rpm'}];
     },
     /* S96: de methodezin */
     method() {

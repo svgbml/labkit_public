@@ -772,6 +772,45 @@ def _(pg):
     return [('uitkomst (mL)', ml, 10, 0), ('in µL', ul, 10000, 0), ('in L', l, 0.01, 0), ('10000 µL goed', int(v[0] == 'ok'), 1, 0), ('10 µL fout', int(v[1] == 'bad'), 1, 0),
             ('4 cijfers', int(a4 == '0,3333'), 1, 0), ('meer cijfers', int(a10 == '0,333333'), 1, 0)]
 
+def _xl(pg, tool):
+    """S96 deel 3: klik "Kopieer met formules" (klembord onderschept) en reken het blad na zoals Excel:
+    de B-cellen invullen, ^ is machtsverheffen. Geeft de rijen en de waarde van elke formulerij."""
+    import re
+    pg.evaluate("navigator.clipboard.writeText=async t=>{window.__clip=t}; window.__clip=''")
+    pg.evaluate(f"document.querySelector('#t-{tool} [data-xl-formula]').click()"); pg.wait_for_timeout(150)
+    rows = [r.split('\t') for r in pg.evaluate("window.__clip").split('\r\n')]
+    def ev(i):
+        v = rows[i][1]
+        if not v.startswith('='): return float(v.replace(',', '.'))
+        e = re.sub(r'(\d),(\d)', r'\1.\2', v[1:]).replace('^', '**')
+        e = re.sub(r'B(\d+)', lambda m: '(' + repr(ev(int(m.group(1)) - 1)) + ')', e)
+        assert re.fullmatch(r'[\d.eE+\-*/() ]+', e), e
+        return eval(e)
+    return rows, [ev(i) for i, r in enumerate(rows) if r[1].startswith('=')]
+
+@case('Verdunning', 'Excel met formules', 'Het gekopieerde blad nagerekend zoals Excel: 50X naar 500 mL 1X geeft =B3*B4/B2 = 10 mL (Bio-Rad Bulletin 6205); 1 M naar 50 mM in 100 mL met V₁ in µL geeft 5000 µL (C₁V₁ = C₂V₂)')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('d-c1u','X');__set('d-c2u','X');__set('d-c1','50');__set('d-c2','1');__set('d-v1','');__set('d-v2u','mL');__set('d-v1u','mL');__set('d-v2','500')"); pg.wait_for_timeout(200)
+    rows, a = _xl(pg, 'verdunning')
+    pg.evaluate("__set('d-c1u','M');__set('d-c2u','mM');__set('d-c1','1');__set('d-c2','50');__set('d-v2','100');__set('d-v1u','µL')"); pg.wait_for_timeout(200)
+    _, b = _xl(pg, 'verdunning')
+    pg.evaluate("__set('d-v1u','mL')")
+    return [('formule =B3*B4/B2', int(rows[-1][1] == '=B3*B4/B2'), 1, 0), ('V₁ uit het blad (mL)', a[0], 10, 1e-9), ('V₁ uit het blad (µL)', b[0], 5000, 1e-9)]
+
+@case('Centrifuge', 'Excel met formules', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g; het gekopieerde blad nagerekend zoals Excel, en terug van 1957 × g naar 5000 rpm')
+def _(pg):
+    pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')"); pg.wait_for_timeout(200)
+    _, g = _xl(pg, 'centrifuge')
+    pg.evaluate("__set('z-g','1957')"); pg.wait_for_timeout(200)
+    _, rpm = _xl(pg, 'centrifuge')
+    return [('× g uit het blad', g[0], 1957, 0.001), ('rpm uit het blad', rpm[0], 5000, 0.001)]
+
+@case('Oplossing & buffer', 'Excel met formules', 'Cold Spring Harbor Protocols, PBS (8 g NaCl, 0,2 g KCl, 1,44 g Na₂HPO₄, 0,24 g KH₂PO₄): de massa per component in het gekopieerde blad nagerekend zoals Excel')
+def _(pg):
+    pg.evaluate("__go('oplossing');__set('o-v','1');__set('o-vu','L');__set('o-preset','pbs')"); pg.wait_for_timeout(200)
+    _, g = _xl(pg, 'oplossing')
+    return [('NaCl (g)', g[0], 8.0, 0.01), ('KCl (g)', g[1], 0.2, 0.02), ('Na₂HPO₄ (g)', g[2], 1.44, 0.02), ('KH₂PO₄ (g)', g[3], 0.24, 0.03)]
+
 @case('Centrifuge', 'rpm → × g', 'Thermo Scientific Tech Tip #40: 5000 rpm, r = 7 cm → 1957 × g')
 def _(pg):
     pg.evaluate("__go('centrifuge');__set('z-r','7');__set('z-rpm','5000')")
