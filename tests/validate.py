@@ -585,6 +585,32 @@ def _(pg):
     return [('vergelijking per slotje', int(r == '["650+","650+ 300-","350-"]'), 1, 0), ('5 lanen naar WB', n, 5, 0), ('WB-tabel gevuld', wb, 5, 0),
             ('SVG is geldige XML', int(svg[0] == 0), 1, 0), ('lanelabel als SVG-tekst', int('NTC' in svg[1]), 1, 0)]
 
+@case('Gelfoto-editor', 'Meten uit afstanden (zonder foto)', 'Rekentest: 100 bp-ladder met de voorbeeldafstanden van Agarosegel & bandgrootte (600 bp op 29 mm, 500 bp op 34 mm, 400 bp op 40 mm, 300 bp op 47,5 mm); semi-log interpolatie: 31 mm = 600 × (5/6)^0,4 = 557,8 bp, 44,5 mm = 400 × 0,75^0,6 = 336,6 bp; zonder de 500 bp-band: 31 mm = 600 × (2/3)^(2/11) = 557,4 bp. De knop → Gelfoto-editor in Agarosegel opent de editor met dezelfde uitkomst; het paneel in de editor leest een streepje als band die je niet ziet')
+def _(pg):
+    pg.evaluate("__go('gel'); __set('b-ladder','100'); __set('b-unk','31 44,5')"); pg.wait_for_timeout(300)
+    pg.evaluate("document.getElementById('b-togf').click()"); pg.wait_for_timeout(500)
+    hash_ = pg.evaluate("location.hash")
+    a = pg.evaluate("gf.marks.map(m=>m.bp)")
+    lanes = pg.evaluate("[gf.lanes.length, gf.lanes[0].bands.length, gf.ladKey]")
+    pg.evaluate("__set('gf-dist-lad','100'); __set('gf-dist-d','14 17 20,5 24,5 29 - 40 47,5 56 67'); __set('gf-dist-u','31'); document.getElementById('gf-dist-go').click()"); pg.wait_for_timeout(300)
+    b = pg.evaluate("[gf.marks.map(m=>m.bp), gf.lanes[0].bands.length]")
+    return [('naar de editor', int(hash_ == '#gelfoto'), 1, 0), ('lanen en ladderbanden', int(lanes == [2, 10, '100']), 1, 0),
+            ('31 mm (bp)', a[0], 557.800, 0.001), ('44,5 mm (bp)', a[1], 336.587, 0.001),
+            ('zonder 500 bp-band: 31 mm (bp)', b[0][0], 557.359, 0.001), ('streepje = band overgeslagen', b[1], 9, 0)]
+
+@case('Gelfoto-editor', 'Meerdere gels in één figuur', 'Zelftest: twee bewaarde gels (demo-gel met en zonder titel) gaan als panelen A en B naast elkaar (1 × 2) in de Figuurmaker; met "ladderwaarden alleen bij het eerste paneel" is paneel B smaller dan A (geen ladderkolom); de open gel komt daarna terug')
+def _(pg):
+    pg.evaluate("(async()=>{ for(const e of await figList()) await figDel(e.id); localStorage.removeItem('lkFig'); })()"); pg.wait_for_timeout(300)
+    pg.evaluate("__go('gelfoto'); __set('gf-lad','100'); gfDemo(); __set('gx-bp', true); __set('gx-title', true)"); pg.wait_for_timeout(300)
+    pg.evaluate("window.__s1=JSON.parse(JSON.stringify(gfProjSnap())); __set('gf-title','Gel twee'); gfUpdate(); window.__s2=JSON.parse(JSON.stringify(gfProjSnap())); __set('gf-title','Open gel'); gfUpdate()"); pg.wait_for_timeout(200)
+    n = pg.evaluate("gfMultiFig([{snap:__s1,name:'a'},{snap:__s2,name:'b'}], true)"); pg.wait_for_timeout(500)
+    r = pg.evaluate("""(async()=>{ const v=window.__figVm, a=await figList(), w=v.slots.map(id=>(a.find(e=>e.id===id)||{}).w), L=figLayout(v.opts(300));
+      return [v.lay, v.slots.filter(Boolean).length, w, L.cells.map(c=>c.letter).filter(Boolean).join(''), gf.title, document.getElementById('gx-bp').checked]; })()""")
+    pg.evaluate("(async()=>{ for(const e of await figList()) await figDel(e.id); localStorage.removeItem('lkFig'); window.__figVm.slots=[]; })()"); pg.wait_for_timeout(300)
+    return [('2 panelen', n, 2, 0), ('indeling 1 × 2', int(r[0] == '1x2'), 1, 0), ('beide panelen gevuld', r[1], 2, 0),
+            ('letters A en B', int(r[3] == 'AB'), 1, 0), ('paneel B zonder ladderwaarden smaller', int(r[2][1] < r[2][0]), 1, 0),
+            ('open gel terug', int(r[4] == 'Open gel'), 1, 0), ('exportopmaak terug', int(r[5] is True), 1, 0)]
+
 @case('Standaardcurve', 'SVG-export van een grafiek', 'Zelftest: de SVG van een standaardcurve (chart), een staafgrafiek (pShow), het PCR-programma (drawProfile) en de gelcurve is geldige XML (geen parsererror) met tekst of paden, en elke grafiek-canvas die niet al een tekenbalk of eigen export heeft, heeft de SVG-knop')
 def _(pg):
     keep = pg.evaluate("[document.getElementById('st-groups').value, document.getElementById('st-test').value]")

@@ -71,6 +71,9 @@
           </table>
         </div>
         <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('Vul alleen banden in die je duidelijk ziet; de curve gebruikt elke rij met een afstand. Controleer bandgroottes met het datasheet van jouw ladder.') }}</p>
+        <div class="row" style="margin-top:8px">
+          <button type="button" id="b-togf" :disabled="!fit" :title="t('Tekent de gel uit deze afstanden in de Gelfoto-editor en meet daar de onbekende banden')" @click="toGf">→ {{ t('Gelfoto-editor') }}</button>
+        </div>
       </div>
       <div class="result" id="b-out">
         <canvas id="b-cv" width="420" height="260"></canvas>
@@ -200,6 +203,8 @@ export default {
     nl: NLN,
     /* een andere ladder: de afstanden beginnen opnieuw (met het voorbeeld, als er een is) */
     onLadder() { this.dist = exDist(this.ladder); },
+    /* meten uit afstanden in de Gelfoto-editor (S79, #202): dezelfde ladderrijen en onbekende banden */
+    toGf() { if (!this.fit) return; gfFromDist(this.ladder, this.dist.map(v => num(v)), this.fit.unk); location.hash = '#gelfoto'; },
     draw() {
       const cv = document.getElementById('b-cv'); if (!cv) return;
       const ctx = cv.getContext('2d'), f = this.fit;

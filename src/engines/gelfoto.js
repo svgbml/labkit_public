@@ -592,6 +592,46 @@ function gfSvg(){ if(!gf.src) return ''; const rec=[], c=gfRender(true,1,rec), W
   const txt=rec.map(r=>{ const m=r.m; return `<text transform="matrix(${[m.a,m.b,m.c,m.d,m.e,m.f].map(v=>+v.toFixed(4)).join(' ')})" x="${+r.x.toFixed(2)}" y="${+r.y.toFixed(2)}" style="font:${e(r.font)}" fill="${e(r.fill)}" text-anchor="${anc[r.al]||'start'}" dominant-baseline="${bl[r.bl]||'auto'}">${e(r.t)}</text>`; }).join('\n');
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">\n<image width="${W}" height="${H}" xlink:href="${c.toDataURL('image/png')}"/>\n${txt}\n</svg>`; }
 
+/* ================= GELFOTO: METEN UIT AFSTANDEN, MEERDERE GELS IN ÉÉN FIGUUR (S79) =================
+   gfFromDist (#202): zonder foto. De afstanden vanaf het putje (mm) van de ladderbanden (in de volgorde
+   van LADDERS[key], NaN voor een band die je niet ziet) en van de onbekende banden worden een getekende
+   gel met een ladderlane en een monsterlane, 10 px per mm. De ladderbanden krijgen hun grootte, de
+   onbekende banden worden metingen; de schatting is gfEst, dezelfde semi-log interpolatie tussen de
+   twee omringende ladderbanden als in Agarosegel & bandgrootte. Tabel, export en Figuurmaker werken
+   daarna zoals bij een foto.
+   gfMultiFig (#103): twee tot zes bewaarde gels als panelen A, B, … in de Figuurmaker. Elke gel krijgt
+   de exportopmaak van de gel die nu open is (dezelfde labels, letters en marges); met ladFirst staan
+   de ladderwaarden alleen bij het eerste paneel. Daarna komt de open gel met zijn geschiedenis terug. */
+const GF_MM=10, GF_Y0=30;
+function gfFromDist(key,dist,unk){ const lad=LADDERS[key]||[], pts=lad.map((bp,i)=>({bp,d:Number((dist||[])[i])})).filter(p=>isFinite(p.d)&&p.d>=0), u=(unk||[]).map(Number).filter(d=>isFinite(d)&&d>=0);
+  if(pts.length<2){ gfStatus('Vul minstens twee ladderafstanden in.'); return 0; }
+  const X=[80,180], Y=d=>GF_Y0+d*GF_MM, W=260, H=Math.round(Y(Math.max(...pts.map(p=>p.d),...u))+40);
+  const c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d'); x.fillStyle='#111'; x.fillRect(0,0,W,H);
+  x.fillStyle='rgba(255,255,255,.25)'; X.forEach(cx=>x.fillRect(cx-24,GF_Y0-10,48,6));
+  x.fillStyle='#e6ffee'; pts.forEach(p=>x.fillRect(X[0]-22,Y(p.d)-2,44,4)); u.forEach(d=>x.fillRect(X[1]-22,Y(d)-2,44,4));
+  gfLoadCanvas(c); gf.autoLadder=false; gf.ladKey=key; if(window.__gfLadVm) window.__gfLadVm.setLadder(key);
+  gf.title=trPlain('Gemeten uit afstanden'); gfSetIn('gf-title',gf.title); gf.lw=48; gfSetIn('gf-lw',48);
+  gf.lanes=[{x:X[0],label:'M',lad:true,bands:pts.map(p=>({y:Y(p.d),bp:p.bp}))},{x:X[1],label:'1',lad:false}]; gf.ladder=0; gf.bands=gf.lanes[0].bands;
+  gf.marks=u.map(d=>({x:X[1],y:Y(d),bp:gfEst(Y(d),X[1])}));
+  gfFine=gf.fine; clearTimeout(gfFineT);
+  gfLanesTable(); gfBandsTable(); gfMarksTable(); gfRender();
+  gfStatus('Gel getekend uit de afstanden; de onbekende banden staan in de meettabel.', u.length?'':'Vul afstanden van onbekende banden in.'); return gf.marks.length; }
+const GF_FIGLAY={2:'1x2',3:'1x3',4:'2x2',5:'2x3',6:'2x3'}, GF_FIGFMT=['gx-integ','gf-blab','gx-title','gx-lanes','gx-bp','gx-ticks','gx-unit','gx-marks','gx-pad','gx-mcol','gf-fs','gf-ang'];
+async function gfMultiFig(entries,ladFirst){ entries=(entries||[]).slice(0,6); if(entries.length<2){ gfStatus('Kies minstens twee gels.'); return 0; }
+  const s0=gfProjSnap(), keep=s0&&JSON.parse(JSON.stringify(s0,gfJsonW),gfJsonR), libId=gf.libId, H={list:gfHist.list,i:gfHist.i};
+  const fmt0={}; GF_FIGFMT.forEach(id=>{ const el=$('#'+id); if(el) fmt0[id]=el.type==='checkbox'?el.checked:el.value; });
+  const setF=(id,v)=>{ const el=$('#'+id); if(!el) return; if(el.type==='checkbox') el.checked=!!v; else el.value=String(v); el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); };
+  const ids=[]; gfHist.busy=true; clearTimeout(gfHist.t);
+  try{ for(let i=0;i<entries.length;i++){ await gfProjApply(entries[i].snap);
+      Object.keys(fmt0).forEach(id=>setF(id,ladFirst&&i>0&&(id==='gx-bp'||id==='gx-ticks')?false:fmt0[id]));
+      await new Promise(r=>setTimeout(r,0)); gfUpdate();
+      ids.push(await figAddCanvas(gfRender(true,3),3,gf.title||entries[i].name||trPlain('Gelfoto'),gfSvg())); } }
+  finally{ if(keep){ await gfProjApply(keep); gf.libId=libId; }
+    Object.keys(fmt0).forEach(id=>setF(id,fmt0[id])); await new Promise(r=>setTimeout(r,0)); gfUpdate();
+    gfHist.src=gf.src; gfHist.list=H.list; gfHist.i=H.i; gfHist.busy=false; gfHistUi(); }
+  const vm=window.__figVm; if(vm){ await vm.load(); vm.lay=GF_FIGLAY[ids.length]; vm.slots=ids.slice(); if(!vm.o.let) vm.o.let='A'; vm.save(); }
+  gfStatus(`${ids.length} gels als panelen in de Figuurmaker gezet.`); return ids.length; }
+
 /* ================= GELFOTO: AANTEKENINGEN EN KLEUREN (S78) =================
    Pijlen en kaders staan in gf.ann in beeldcoördinaten (de gel zonder marge), dus ze bewegen mee
    met marges en labels en gaan mee in de export, het project en de geschiedenis.
@@ -742,7 +782,7 @@ function gfLabEdit(i){ const old=$('#gf-labed'); if(old) old.remove(); const l=g
    en de waarden van de velden. De virtuele ladder (een tweede foto) en de zoom gaan niet mee. */
 const GF_PROJ=['persp','curve','chan','lut','ann','rot90','fine','flip','crop','inv','gray','bri','con','lanes','lw','ladder','ladKey','marks','title','fs','ang','angAuto','unit','disp','wells','autoLadder'];
 /* het veld-id's van de tool; de lanelabels staan in gf.lanes, de virtuele ladder gaat niet mee */
-const gfProjFields=()=>[...$$('#t-gelfoto input[id],#t-gelfoto select[id],#t-gelfoto textarea[id]')].filter(el=>el.type!=='file'&&!el.closest('table')&&!/^gf-(vl|ll|labed|expert|ba$)/.test(el.id));
+const gfProjFields=()=>[...$$('#t-gelfoto input[id],#t-gelfoto select[id],#t-gelfoto textarea[id]')].filter(el=>el.type!=='file'&&!el.closest('table')&&!/^gf-(vl|ll|labed|expert|ba$|dist)/.test(el.id));
 /* geeft verwijzingen naar gf terug: wie bewaart, kopieert (JSON of IndexedDB doen dat zelf) */
 /* de toestand zonder de foto: ook de momentopname van ongedaan maken (S74) */
 function gfStateSnap(){ const s={}; GF_PROJ.forEach(k=>{ if(gf[k]!==undefined) s[k]=gf[k]; }); const inp={}; gfProjFields().forEach(el=>{ inp[el.id]=el.type==='checkbox'?el.checked:el.value; }); return {gf:s,inp}; }
@@ -891,6 +931,8 @@ live({
   gfVlPick: [() => gfVlPick, v => { gfVlPick = v; }],
   gfVlSizes: [() => gfVlSizes, v => { gfVlSizes = v; }],
   gfVlUse: [() => gfVlUse, v => { gfVlUse = v; }],
+  gfFromDist: [() => gfFromDist, v => { gfFromDist = v; }],
+  gfMultiFig: [() => gfMultiFig, v => { gfMultiFig = v; }],
   gfVlChoose: [() => gfVlChoose, v => { gfVlChoose = v; }],
   gfVlApply: [() => gfVlApply, v => { gfVlApply = v; }],
   gfVlPreview: [() => gfVlPreview, v => { gfVlPreview = v; }],

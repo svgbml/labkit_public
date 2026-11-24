@@ -6081,5 +6081,18 @@
 "Gat openen en verlengen moeten getallen van {#} of meer zijn.": "Gap open and extend must be numbers of {#} or more.",
 "Te lang voor de eigen motor: gebruik EMBOSS needle of water, of Clustal Omega bij EBI.": "Too long for the built-in engine: use EMBOSS needle or water, or Clustal Omega at EBI.",
 "Score": "Score",
-"Uitgelijnd stuk": "Aligned region"
+"Uitgelijnd stuk": "Aligned region",
+"Tekent de gel uit deze afstanden in de Gelfoto-editor en meet daar de onbekende banden": "Draws the gel from these distances in the Gel photo editor and measures the unknown bands there",
+"Zonder foto: meten uit afstanden": "No photo: measure from distances",
+"Afstand per ladderband vanaf het putje (mm), van boven naar beneden": "Distance of each ladder band from the well (mm), top to bottom",
+"Teken en meet": "Draw and measure",
+"Eén getal per ladderband, in de volgorde van de ladder; een streepje voor een band die je niet ziet.": "One number per ladder band, in ladder order; a dash for a band you cannot see.",
+"Kiezen voor één figuur": "Choose for one figure",
+"Ladderwaarden alleen bij het eerste paneel": "Ladder values on the first panel only",
+"Maak één figuur (A, B, …)": "Make one figure (A, B, …)",
+"Vink twee tot zes gels aan. Ze krijgen de exportopmaak van de open gel en komen als panelen A, B, … in de Figuurmaker.": "Tick two to six gels. They get the export layout of the open gel and go into the Figure maker as panels A, B, ….",
+"Gemeten uit afstanden": "Measured from distances",
+"Gel getekend uit de afstanden; de onbekende banden staan in de meettabel.": "Gel drawn from the distances; the unknown bands are in the measurement table.",
+"Kies minstens twee gels.": "Choose at least two gels.",
+"{#} gels als panelen in de Figuurmaker gezet.": "{#} gels placed as panels in the Figure maker."
 }

@@ -103,6 +103,7 @@ import GfGuide from './tools/gelfoto/GfGuide.vue';
 import GfHistory from './tools/gelfoto/GfHistory.vue';
 import GfAnnot from './tools/gelfoto/GfAnnot.vue';
 import GfLink from './tools/gelfoto/GfLink.vue';
+import GfDist from './tools/gelfoto/GfDist.vue';
 import GfImage from './tools/gelfoto/GfImage.vue';
 import GfLibrary from './tools/gelfoto/GfLibrary.vue';
 import GfLanes from './tools/gelfoto/GfLanes.vue';
@@ -491,6 +492,7 @@ export function start() {
   mountTool('#gf-app-hist', GfHistory);
   mountTool('#gf-app-img', GfImage);
   mountTool('#gf-app-lib', GfLibrary);
+  mountTool('#gf-app-dist', GfDist);
   mountTool('#gf-app-lanes', GfLanes);
   mountTool('#gf-app-annot', GfAnnot);
   mountTool('#gf-app-lad', GfLadder);

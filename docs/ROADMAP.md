@@ -10,7 +10,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 - **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (25 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (9 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **221 done, 2 started (S79, S96), 47 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **222 done, 1 started (S96), 47 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-23)
 
@@ -22,7 +22,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 3 picture tools and plates | S21–S36 | ✅ done |
 | Phase 4 recipes and sequences | S37–S47 | ✅ done (batches P1–P3) |
 | Phase 5 execution | S48–S61 | ✅ done (batches E1–E4) |
-| Phase 6 gel editor rebuild | S62–S79 | **part done:** everything but S79 (multi-gel figure and the agarose link are left) |
+| Phase 6 gel editor rebuild | S62–S79 | ✅ done |
 | Phase 7 charts, figures and data | S80–S96 | **part done:** S94, S95 open, S96 started |
 | Phase 8 rework existing tools | S97–S116 | **part done:** S99, S100, S105, S113, S114 open (batch R3) |
 | Phase 9 structure and workflows | S117–S121 | ⏳ not started (batch W1) |
@@ -160,7 +160,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | G1a ✅ | Opus 5 | S62–S65 (S63, S65 by Sonnet) | K3 | anything except Q2 | — |
 | G1b ✅ | Opus 5 | S66–S68 (S66, S68 by Sonnet) | G1a | anything except Q2 | — |
 | G2 ✅ | Opus 5.5 | S69–S74 (S71, S72 are Opus 5): guided mode, canvas-first layout, direct manipulation, undo | G1b | anything except Q2 | — |
-| G3 🔨 (S79 deels) | Opus 5.5 | S75–S79 (S75, S78 are Opus 5) | G2 | anything except Q2, C2 | antislop |
+| G3 ✅ | Opus 5.5 | S75–S79 (S75, S78 are Opus 5) | G2 | anything except Q2, C2 | antislop |
 | **Wave 5: charts, data, rework, workflows** | | | | | |
 | C1a ✅ | Opus 5.5 | S80 chart style system, then S81–S84 (Opus 5 / Sonnet) | K3 | — | — |
 | C1b ✅ | Opus 5 | S85–S88 | C1a | anything except R3 | — |
@@ -194,7 +194,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | AL3 🔨 (S190 nog open: worker en lazy laden, met `inworker.js` uit SA4) | Opus 5 | S180 (after S158), S182–S184, S190 | AL2c | anything | tdd |
 | AL4 | Opus 5.5 | S185 small progressive alignment | AL3 | anything | tdd |
 
-**Route through the usage limit:** waves 1–4 are done apart from S79, and most of wave 5 and
+**Route through the usage limit:** waves 1–4 are done, and most of wave 5 and
 the *any time* batches have landed. *What to pick up next* at the bottom has the order for the
 47 steps that are left.
 
@@ -349,7 +349,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S76 | 107, 108 | Smart crop and perspective correction | ✅ *Perspectief* (`gf-persp`): vier versleepbare hoeken op de oorspronkelijke foto, *Hoeken zoeken* (`gfFindQuad`: wat duidelijk afwijkt van de fotorand en het midden raakt, uiterste punten langs x+y en x−y) en *Toepassen* trekt de vierhoek recht (`gfHomog` + `gfWarp`, bilineair, vóór draaien en bijsnijden; `gf.persp` gaat mee in project en geschiedenis). *Slim bijsnijden* (`gf-smartcrop`): het gelvlak met de bovenrand net boven de putjes. Het dye front als onderrand niet gedaan: daar is geen betrouwbare detectie voor. Getest in `tests/validate.py` met een projectief vervormde demo-gel | — |
 | S77 | 109, 104 | Curved-lane correction and lane intensity profiles | ✅ Paneel 3: *Gebogen lanen volgen* (`gf-curve`, `gfTrackLanes`): per lane het zwaartepunt van het signaal in 20 stroken, gewogen parabool x(y) = x + a·t + b·t² (`l.path`); laneprofielen, densitometrie en metingen volgen dat pad en de lanegrenzen worden gebogen getekend. *Profielen tonen* (`gf-prof`): het intensiteitsprofiel naast elke lane op de hoogte van de banden, met stippen voor ladderbanden en metingen (alleen in de editor). Banden die per lane anders lopen (smile in y) niet gecorrigeerd. Getest in `tests/validate.py` | — |
 | S78 | 111, 112, 113, 114 | Band size labels, annotations (arrows, boxes), channel choice, pseudo-colour LUTs | ✅ Nieuw paneel *Labels, aantekeningen en kleur* (`GfAnnot.vue`, weergave *Labels*): *Grootte naast de gemeten banden* (`gf-blab`, per lane naar onder geschoven bij overlap, links als het rechts niet past), *Pijl* en *Kader* slepen op de foto (`gf.ann`, kleur `gf-acol`, lijst met verwijderen; mee in export, project en geschiedenis), *Kanaal voor grijswaarden* (`gf-chan`: luminantie, rood, groen, blauw, automatisch = grootste spreiding) en *Pseudokleur* (`gf-lut`: Vuur, Viridis, Groen, Magenta; alleen weergave en export, de metingen blijven op de grijswaarde) met waarschuwing; beide staan in de bewerkingenlijst van S75. Labels van buurlanen kunnen bij een dichte gel nog over elkaar vallen. Getest in `tests/validate.py` | — |
-| S79 | 102, 103, 115, 116, 202, 204 | Compare with predicted gel, multiple gels per figure, SVG export, copy with caption; agarose tool and WB normalisation connect to the editor | 🔨 Gedaan: paneel *Vergelijken en doorsturen* (`GfLink.vue`, weergave Exporteren): *Vergelijk met de Gelplanner* (`gfCompare`: slotje i = lane i, binnen 10 % gevonden; groen/rood gestippeld/oranje omcirkeld op de foto, tabel per lane, lanenamen overgenomen), *Naar WB-normalisatie* (`gfToWb`: per lane de intensiteit van de band die het dichtst bij de gekozen doel- en laadcontrolegrootte ligt, naar `wb-tbl`), *SVG* (`gfSvg`: rasterafbeelding met de tekst als echte tekst) en *Kopieer met onderschrift* (afbeelding + figuurlegenda als HTML). Getest in `tests/validate.py`. **Nog te doen:** meerdere gels in één figuur met A/B-letters (#103) en de Agarosegel-tool in de editor opnemen als "meten uit afstanden" (#202) | Opus 5.5 |
+| S79 | 102, 103, 115, 116, 202, 204 | Compare with predicted gel, multiple gels per figure, SVG export, copy with caption; agarose tool and WB normalisation connect to the editor | ✅ Paneel *Vergelijken en doorsturen* (`GfLink.vue`, weergave Exporteren): *Vergelijk met de Gelplanner* (`gfCompare`: slotje i = lane i, binnen 10 % gevonden; groen/rood gestippeld/oranje omcirkeld op de foto, tabel per lane, lanenamen overgenomen), *Naar WB-normalisatie* (`gfToWb`: per lane de intensiteit van de band die het dichtst bij de gekozen doel- en laadcontrolegrootte ligt, naar `wb-tbl`), *SVG* (`gfSvg`: rasterafbeelding met de tekst als echte tekst) en *Kopieer met onderschrift* (afbeelding + figuurlegenda als HTML). Getest in `tests/validate.py`. Daarna: *meerdere gels in één figuur* (#103): in *Recente gels* twee tot zes gels aanvinken, `gfMultiFig` zet ze met de exportopmaak van de open gel als panelen A, B, … (1 × 2 t/m 2 × 3) in de Figuurmaker, de ladderwaarden desgewenst alleen bij paneel A, en zet de open gel met zijn geschiedenis terug. *Meten uit afstanden* (#202): `gfFromDist` tekent zonder foto een gel uit de ladder- en bandafstanden (mm vanaf het putje) en meet de onbekende banden met dezelfde semi-log interpolatie; bereikbaar via het paneel *Zonder foto: meten uit afstanden* (`GfDist.vue`) en de knop *→ Gelfoto-editor* in Agarosegel & bandgrootte, die zelf blijft voor gel gieten en buffer. Twee nieuwe gevallen in `tests/validate.py`. | Opus 5.5 |
 
 ## Phase 7: charts, figures and data (17 steps)
 | Step | Ideas | What | Done when | Model |
@@ -689,7 +689,7 @@ end of each batch with the full check (286/286).
 
 Checked 2026-11-23. The batch table above still decides what may run together.
 1. AL2b and SA2 are merged (2026-11-23), so AL2c and SA3 can start.
-2. **Finish what is started:** the rest of S79 (G3) and of S96 (C3). Both are rows with a handoff note already, so they are short sessions.
+2. **Finish what is started:** the rest of S96 (C3). The row has a handoff note already, so it is a short session. (S79, G3, is done.)
 3. **The cheap and self-contained batches:** C4 (Sonnet), Q2, and R3. R3 merges tools that have validation cases, so tdd matters most there.
 4. **The sequence line**, when it is the nearest practical need: SA3 → SA4, and AL2c → AL3 → AL4. SA4 also needs SQ2, which is done.
 5. **W1** only after a local grilling session has pinned down projects and data flow (see *Skills per batch*). It changes something every tool uses, so it runs alone.
