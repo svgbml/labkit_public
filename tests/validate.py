@@ -772,6 +772,17 @@ def _(pg):
     return [('uitkomst (mL)', ml, 10, 0), ('in µL', ul, 10000, 0), ('in L', l, 0.01, 0), ('10000 µL goed', int(v[0] == 'ok'), 1, 0), ('10 µL fout', int(v[1] == 'bad'), 1, 0),
             ('4 cijfers', int(a4 == '0,3333'), 1, 0), ('meer cijfers', int(a10 == '0,333333'), 1, 0)]
 
+@case('Verdunning', 'Batch: monsters naar 10 ng/µL in 20 µL', 'C₁V₁ = C₂V₂ per regel, met de hand: 50 ng/µL → 4 µL stock + 16 µL; 20 ng/µL → 10 + 10 µL; 0,04 mg/mL (= 40 ng/µL) → 5 + 15 µL; 5 ng/µL ligt onder C₂; een regel zonder getal wordt gemeld')
+def _(pg):
+    pg.evaluate("__go('verdunning');__set('d-mode','batch')"); pg.wait_for_timeout(100)
+    pg.evaluate("__set('d-c2u','ng/µL');__set('d-c2','10');__set('d-v2u','µL');__set('d-v2','20');"
+                "__set('d-batch','A\\t50\\nB\\t20 ng/µL\\nC 0,04 mg/mL\\nD\\t5\\nE\\tonbekend')"); pg.wait_for_timeout(200)
+    c = pg.evaluate("[...document.querySelectorAll('#d-btbl tbody tr')].map(tr=>[...tr.cells].map(td=>__n(__el(td))))")
+    cls = pg.evaluate("[...document.querySelectorAll('#d-btbl tbody tr')].map(tr=>tr.className)")
+    pg.evaluate("__set('d-mode','een')"); pg.wait_for_timeout(100)
+    return [('A stock (µL)', c[0][2], 4, 1e-9), ('A oplosmiddel (µL)', c[0][3], 16, 1e-9), ('B stock (µL)', c[1][2], 10, 1e-9), ('C stock (µL)', c[2][2], 5, 1e-9),
+            ('C oplosmiddel (µL)', c[2][3], 15, 1e-9), ('D onder C₂', int(cls[3] == 'warn'), 1, 0), ('E gemeld', int(cls[4] == 'bad'), 1, 0), ('vijf regels', len(c), 5, 0)]
+
 def _xl(pg, tool):
     """S96 deel 3: klik "Kopieer met formules" (klembord onderschept) en reken het blad na zoals Excel:
     de B-cellen invullen, ^ is machtsverheffen. Geeft de rijen en de waarde van elke formulerij."""

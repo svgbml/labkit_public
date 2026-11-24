@@ -6100,5 +6100,12 @@
 "Minder cijfers": "Fewer digits",
 "Grootheid": "Quantity",
 "Kopieer met formules": "Copy with formulas",
-"Plak in Excel: de uitkomst staat er als formule op de invoercellen": "Paste into Excel: the result is a formula on the input cells"
+"Plak in Excel: de uitkomst staat er als formule op de invoercellen": "Paste into Excel: the result is a formula on the input cells",
+"Meerdere monsters (batch)": "Several samples (batch)",
+"Monsters: naam en stockconcentratie per regel": "Samples: name and stock concentration per line",
+"Plak een kolom of twee kolommen uit Excel. Zonder eenheid achter het getal geldt de eenheid van C₂.": "Paste one or two columns from Excel. Without a unit after the number, the unit of C₂ applies.",
+"Vul C₂, het eindvolume en minstens één monster in.": "Enter C₂, the final volume and at least one sample.",
+"Een monster onder C₂ kun je niet verdunnen: gebruik het onverdund of concentreer het eerst.": "A sample below C₂ cannot be diluted: use it undiluted or concentrate it first.",
+"Onbekende eenheid of geen getal": "Unknown unit or no number",
+"lager dan C₂": "below C₂"
 }
