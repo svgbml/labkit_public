@@ -25,4 +25,6 @@ const note=(cls,txt)=>`<div class="note ${cls}">${txt}</div>`;
 const kv=rows=>`<dl class="kv">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
 const calc={};
 
-expose({hexRgb, rgbHex, mixHex, inkOn, $, $$, num, NL, fmt, sig, sci, vol, mass, list, esc, note, kv, calc});
+/* S140 (#283): 'smooth' voor scrollIntoView, of 'auto' als de gebruiker minder beweging wil */
+const lkScroll = () => (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
+expose({hexRgb, rgbHex, mixHex, inkOn, $, $$, num, NL, fmt, sig, sci, vol, mass, list, esc, note, kv, calc, lkScroll});

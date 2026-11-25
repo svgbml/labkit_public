@@ -518,6 +518,27 @@ function gfUp(e){ gfTouch.delete(e.pointerId); if(gfTouch.size<2) gf.pinch=null;
   if(gf.drag&&gf.drag.t==='ann'){ const a=gf.annPend; gf.annPend=null; if(a&&Math.hypot(a.x2-a.x1,a.y2-a.y1)>6){ ['x1','y1','x2','y2'].forEach(k=>a[k]=Math.round(a[k])); gf.ann=[...(gf.ann||[]),a]; } if(window.__gfRefresh) window.__gfRefresh(); }
   if(gf.drag&&gf.drag.t==='lw'){ gf.marks.forEach(m=>m.int=null); gfSetIn('gf-lw',gf.lw); } if(gf.drag&&gf.drag.t==='band'){ gf.bands.sort((a,b)=>a.y-b.y); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfBandsTable(); gfMarksTable(); } if(gf.drag&&gf.drag.t==='lane'){ const act=gf.lanes[gf.ladder]; gf.lanes.sort((a,b)=>a.x-b.x); gf.ladder=Math.max(0,gf.lanes.indexOf(act)); gfLanesTable(); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); } gf.drag=null; gfRender(); }
 gcv.addEventListener('pointerup',gfUp); gcv.addEventListener('pointercancel',gfUp);
+/* toetsenbord (S140, #281): de foto is focusbaar. N kiest het volgende onderdeel (lanen, dan de ladderbanden,
+   dan de meetpunten; Shift+N het vorige), de pijltjes verschuiven het 1 pixel (met Shift 10): een laan naar links
+   of rechts, een band of meetpunt omhoog of omlaag. Wat er gekozen is staat in de statusregel. */
+let gfKSel=null;
+const gfKItems=()=>[...gf.lanes.map((_,i)=>({t:'lane',i})),...gf.bands.map((_,i)=>({t:'band',i})),...gf.marks.map((_,i)=>({t:'mark',i}))];
+function gfKSay(){ const k=gfKSel; if(!k) return; const P=gfProc();
+  if(k.t==='lane') gfStatus('Laan '+uv(gf.lanes[k.i].label||String(k.i+1))+' gekozen, x = '+Math.round(gf.lanes[k.i].x)+' van '+P.w+' px.','Pijl links of rechts verschuift hem, N kiest het volgende onderdeel.');
+  else if(k.t==='band') gfStatus('Ladderband '+(k.i+1)+(isFinite(gf.bands[k.i].bp)?' ('+gf.bands[k.i].bp+' bp)':'')+' gekozen, y = '+Math.round(gf.bands[k.i].y)+' px.','Pijl omhoog of omlaag verschuift hem, N kiest het volgende onderdeel.');
+  else gfStatus('Meetpunt '+(k.i+1)+' gekozen, ongeveer '+Math.round(gf.marks[k.i].bp)+' bp.','Pijl omhoog of omlaag verschuift hem, N kiest het volgende onderdeel.'); }
+gcv.tabIndex=0; gcv.setAttribute('aria-label',trPlain('Gelfoto. Kies met N een laan, band of meetpunt en verschuif het met de pijltjes.'));
+gcv.addEventListener('keydown',e=>{ if(!gf.src||gf.mode==='crop'||gf.mode==='persp'||e.ctrlKey||e.metaKey||e.altKey) return;
+  const L=gfKItems(); if(!L.length) return;
+  if(e.key==='n'||e.key==='N'){ e.preventDefault(); const at=gfKSel?L.findIndex(x=>x.t===gfKSel.t&&x.i===gfKSel.i):-1;
+    gfKSel=L[(at+(e.shiftKey?-1:1)+L.length)%L.length]; gfKSay(); return; }
+  const k=gfKSel; if(!k||!L.some(x=>x.t===k.t&&x.i===k.i)) return;
+  const d=(e.shiftKey?10:1)*({ArrowLeft:-1,ArrowRight:1,ArrowUp:-1,ArrowDown:1}[e.key]||0); if(!d) return;
+  const horiz=e.key==='ArrowLeft'||e.key==='ArrowRight', P=gfProc(); if(horiz!==(k.t==='lane')) return; e.preventDefault();
+  if(k.t==='lane'){ const it=gf.lanes[k.i], act=gf.lanes[gf.ladder]; it.x=Math.max(0,Math.min(P.w,it.x+d)); gf.lanes.sort((a,b)=>a.x-b.x); k.i=gf.lanes.indexOf(it); gf.ladder=Math.max(0,gf.lanes.indexOf(act)); gfLanesTable(); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfMarksTable(); }
+  else if(k.t==='band'){ const it=gf.bands[k.i]; it.y=Math.max(0,Math.min(P.h,it.y+d)); gf.bands.sort((a,b)=>a.y-b.y); k.i=gf.bands.indexOf(it); gf.marks.forEach(m=>m.bp=gfEst(m.y,m.x)); gfBandsTable(); gfMarksTable(); }
+  else { const m=gf.marks[k.i]; m.y=Math.max(0,Math.min(P.h,m.y+d)); m.bp=gfEst(m.y,m.x); m.int=null; gfMarksTable(); }
+  gfRender(); gfKSay(); });
 
 /* ================= GELFOTO: DENSITOMETRIE EN AUTOMATISCH METEN ================= */
 function gfIntensity(x,y){ const pr=laneProfile(x), h=pr.length, k=Math.max(0,Math.min(h-1,Math.round(y))), pk=pr[k]; if(!(pk>0)) return 0;
@@ -872,6 +893,9 @@ async function gfLibOpen(e){ try{ await gfProjApply(e.snap); gf.libId=e.id; }cat
 /* Alles hierboven ook als globale naam, live: een toewijzing (timers = …, gfIntensity = …) in
    deze module of in de oude scripts komt aan beide kanten aan. */
 live({
+  gfKSel: [() => gfKSel, v => { gfKSel = v; }],
+  gfKItems: () => gfKItems,
+  gfKSay: () => gfKSay,
   gf: () => gf,
   gcv: () => gcv,
   gfStatus: [() => gfStatus, v => { gfStatus = v; }],

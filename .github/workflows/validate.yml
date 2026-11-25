@@ -37,6 +37,8 @@ jobs:
         run: python tools/build.py --check
       - name: Elke rekentool heeft één bronregel
         run: python tests/src_check.py
+      - name: Contrast van alle thema's (WCAG AA)
+        run: python tests/contrast_check.py
       - run: pip install playwright==1.48.0 scipy statsmodels scikit-posthocs opencv-python-headless numpy
       - run: python -m playwright install --with-deps chromium
       - name: Alle tools doorrekenen met gepubliceerde ruwe data

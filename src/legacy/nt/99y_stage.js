@@ -74,9 +74,9 @@ document.addEventListener('click',e=>{
   const g=e.target.closest('[data-crumb-grp]'); if(!g) return; const first=g.dataset.crumbGrp;
   const tile=()=>$$('#bento-rest > .tile').find(x=>x.querySelector(`.tl a[href="#${first}"]`));
   setTimeout(()=>{ let t=tile();
-    if(!t&&stageCur()){ stageSet(''); setTimeout(()=>{ const u=tile(); if(u){ u.scrollIntoView({behavior:'smooth',block:'center'}); u.classList.add('lk-hl'); setTimeout(()=>u.classList.remove('lk-hl'),1600); } },80); return; } /* de gekozen fase verbergt deze groep: dan alle fasen laten zien; Vue tekent de tegels pas op de volgende tick */
+    if(!t&&stageCur()){ stageSet(''); setTimeout(()=>{ const u=tile(); if(u){ u.scrollIntoView({behavior:lkScroll(),block:'center'}); u.classList.add('lk-hl'); setTimeout(()=>u.classList.remove('lk-hl'),1600); } },80); return; } /* de gekozen fase verbergt deze groep: dan alle fasen laten zien; Vue tekent de tegels pas op de volgende tick */
     if(!t) return;
-    t.scrollIntoView({behavior:'smooth',block:'center'}); t.classList.add('lk-hl'); setTimeout(()=>t.classList.remove('lk-hl'),1600); },140); });
+    t.scrollIntoView({behavior:lkScroll(),block:'center'}); t.classList.add('lk-hl'); setTimeout(()=>t.classList.remove('lk-hl'),1600); },140); });
 
 /* alles hierboven ook als globale naam, live (zie src/lib/global.js) */
 live({

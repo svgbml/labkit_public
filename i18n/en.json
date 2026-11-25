@@ -6158,5 +6158,14 @@
 "Voor transfectie en de meeste experimenten is dat aan de lage kant.": "That is on the low side for transfection and most experiments.",
 "Goed genoeg voor transfectie en de meeste experimenten.": "Good enough for transfection and most experiments.",
 "Positieve controles": "Positive controls",
-"Negatieve controles": "Negative controls"
+"Negatieve controles": "Negative controls",
+"Staafdiagram van {*}: {*}.": "Bar chart of {*}: {*}.",
+"Grafiek van {*} tegen {*} met {#} punten; x van {*} tot {*}, y van {*} tot {*}.": "Chart of {*} against {*} with {#} points; x from {*} to {*}, y from {*} to {*}.",
+"Laan {*} gekozen, x = {#} van {#} px.": "Lane {*} selected, x = {#} of {#} px.",
+"Pijl links of rechts verschuift hem, N kiest het volgende onderdeel.": "Left or right arrow moves it, N selects the next item.",
+"Ladderband {#} ({#} bp) gekozen, y = {#} px.": "Ladder band {#} ({#} bp) selected, y = {#} px.",
+"Ladderband {#} gekozen, y = {#} px.": "Ladder band {#} selected, y = {#} px.",
+"Pijl omhoog of omlaag verschuift hem, N kiest het volgende onderdeel.": "Up or down arrow moves it, N selects the next item.",
+"Meetpunt {#} gekozen, ongeveer {#} bp.": "Measurement point {#} selected, about {#} bp.",
+"Gelfoto. Kies met N een laan, band of meetpunt en verschuif het met de pijltjes.": "Gel photo. Press N to select a lane, band or measurement point and move it with the arrow keys."
 }

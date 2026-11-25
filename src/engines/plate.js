@@ -106,6 +106,8 @@ function plateDesigner(host, opts) {
       {n: 'Monster', c: PLCOL[1]}, {n: 'Controle', c: PLCOL[2]}]).map(g => ({...g}))
   };
   let sel = 0, erase = false, painting = false, tmode = false, wsel = null;
+  /* S140 (#281): het putje met de toetsenbordfocus (roving tabindex); kfocus = na render de focus terugzetten */
+  let kf = 'A1', kfocus = false;
   let shape = opts.shape === 'vierkant' ? 'vierkant' : 'rond';
   let autoLab = typeof opts.autoLabel === 'function' ? opts.autoLabel : opts.autoLabel !== false;
   let pool = (opts.palette && opts.palette.length ? opts.palette : PLCOL).slice();
@@ -274,6 +276,7 @@ function plateDesigner(host, opts) {
     g.classList.toggle('sq', shape === 'vierkant');
     g.style.gridTemplateColumns = `22px repeat(${c},${sz}px)`;
     g.style.gridAutoRows = sz + 'px';
+    { const p = pos(kf); if (p.i < 0 || p.i >= r || p.j >= c) kf = 'A1'; }
     let h = '<div></div>';
     for (let j = 1; j <= c; j++) h += `<button type="button" class="hd" data-plc="${j - 1}" title="Kolom ${j} vullen"><span data-notr="">${j}</span></button>`;
     for (let i = 0; i < r; i++) { h += `<button type="button" class="hd" data-plr="${i}" title="Rij ${uv(PLROW[i])} vullen"><span data-notr="">${PLROW[i]}</span></button>`;
@@ -281,9 +284,10 @@ function plateDesigner(host, opts) {
         const txt = on ? (seq[k] != null ? String(seq[k]) : '') : textOf(k, lab);
         const tip = [k, fill ? trPlain(S.groups[gi].n, true) : '', S.vals[k] || '', on && seq[k] != null ? trPlain('stap ' + seq[k]) : '']
           .filter(Boolean).join(' · ');
-        h += `<div class="well${fill ? ' on' : ''}${txt && room ? ' wtxt' : ''}${tmode && k === wsel ? ' wsel' : ''}" data-notr="" data-w="${k}" title="${esc(tip)}"${
+        h += `<div class="well${fill ? ' on' : ''}${txt && room ? ' wtxt' : ''}${tmode && k === wsel ? ' wsel' : ''}" data-notr="" data-w="${k}" title="${esc(tip)}" role="button" aria-label="${esc(tip)}" tabindex="${k === kf ? 0 : -1}"${
           fill ? ` style="--wc:${S.groups[gi].c};color:${inkOn(S.groups[gi].c)}"` : ''}>${txt && room ? `<span>${esc(txt)}</span>` : ''}</div>`; } }
     g.innerHTML = h; tStatic(g);
+    if (kfocus) { const w = g.querySelector(`[data-w="${kf}"]`); if (w) w.focus(); }
     const act = document.activeElement;
     if (!(act && act.dataset && act.dataset.plgn != null))
       q('legend').innerHTML = S.groups.map((x, i) =>
@@ -325,7 +329,7 @@ function plateDesigner(host, opts) {
     for (let t = 0; t < n; t++) { const ii = d === 'v' ? i + t : i, jj = d === 'h' ? j + t : j;
       if (ii >= r || jj >= c) break; paint(key(ii, jj)); }
   }
-  q('grid').addEventListener('pointerdown', e => { const w = e.target.closest('[data-w]'); if (!w) return;
+  q('grid').addEventListener('pointerdown', e => { const w = e.target.closest('[data-w]'); if (!w) return; kf = w.dataset.w;
     if (tmode) { e.preventDefault(); wsel = w.dataset.w; render(); setTimeout(() => q('wtext').focus(), 0); return; }
     painting = true; paintRun(w.dataset.w); render(); });
   q('grid').addEventListener('pointerover', e => { if (!painting || tmode) return; const w = e.target.closest('[data-w]'); if (w) { paintRun(w.dataset.w); render(); } });
@@ -334,6 +338,19 @@ function plateDesigner(host, opts) {
     const el = document.elementFromPoint(e.clientX, e.clientY), w = el && el.closest && el.closest('[data-w]');
     if (w && host.contains(w)) { e.preventDefault(); paint(w.dataset.w); render(); } });
   addEventListener('pointerup', () => { painting = false; });
+  /* toetsenbord: pijltjes, Home en End verplaatsen de focus over de putjes, Enter of spatie kleurt het putje
+     (met de herhalingen, zoals een klik) of kiest het in de tekstmodus */
+  q('grid').addEventListener('keydown', e => { const w = e.target.closest('[data-w]'); if (!w) return;
+    const {r, c} = dims(); let {i, j} = pos(w.dataset.w);
+    const mv = {ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0]}[e.key];
+    if (mv) { i = Math.min(r - 1, Math.max(0, i + mv[0])); j = Math.min(c - 1, Math.max(0, j + mv[1])); }
+    else if (e.key === 'Home') j = 0; else if (e.key === 'End') j = c - 1;
+    else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault(); kf = w.dataset.w;
+      if (tmode) { wsel = kf; render(); q('wtext').focus(); return; }
+      paintRun(kf); kfocus = true; render(); kfocus = false; return; }
+    else return;
+    e.preventDefault(); kf = key(i, j); kfocus = true; render(); kfocus = false; });
 
   host.addEventListener('click', e => {
     const hr = e.target.closest('[data-plr]'), hc = e.target.closest('[data-plc]');

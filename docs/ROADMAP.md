@@ -7,10 +7,10 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Model** (last column) is the cheapest model that can do the step well, so the shared usage limit lasts longer. Done steps show "—".
 - **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (1 open step).
 - **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (12 open steps).
-- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (24 open steps).
+- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (23 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (9 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **225 done, 45 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **226 done, 44 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-23)
 
@@ -27,7 +27,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 8 rework existing tools | S97–S116 | **part done:** S99, S100, S105, S113, S114 open (batch R3) |
 | Phase 9 structure and workflows | S117–S121 | ⏳ not started (batch W1) |
 | Phase 10 performance | S122–S133 | ⏳ not started; F1a re-plans it first |
-| Phase 11 quality, tests and dev | S134–S142 | **part done:** S140, S142 open (batch Q2) |
+| Phase 11 quality, tests and dev | S134–S142 | **part done:** S142 open (batch Q2) |
 | Phase 12 Sanger and SNP analysis | S147–S169 | **part done:** S147–S161 ✅, S162–S169 open |
 | Phase 13 alignment and Clustal Omega | S170–S190 | **part done:** S170–S184 and S186–S189 ✅, S185 and S190 open |
 | Phase 14 sequence toolbox and NCBI | S191–S201 | **part done:** S191–S198 ✅, S199–S201 open |
@@ -430,7 +430,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S137 | 284, 285, 289 | Copy error report, feedback link per tool, export/import everything | ✅ Elke tool (behalve start) heeft in de kop *Foutrapport kopiëren* (versie, tool, taal, browser, de laatste tien scriptfouten en de ingevulde velden; zonder klembord een venster met de tekst) en *Feedback*, dat een GitHub-issue opent met hetzelfde rapport al ingevuld (`src/legacy/nt/99z_ux.js`). *Instellingen → Gegevens verhuizen* exporteert en importeert alles als één bestand: hetzelfde bestand als *Sessie opslaan/openen*, nu ook met `sg-read` en de gelbibliotheek uit IndexedDB (`allExport`/`allImport` in `src/legacy/app.js`). Fouten van vóór `99z_ux.js` worden niet opgevangen | Sonnet |
 | S138 ✅ | 278 | Unit tests for pure calculation functions (`npm run test:unit`; primer Tm/dimer/hairpin left out: they need `NN` from `src/legacy/app.js`, which needs a DOM) | Sonnet |
 | S139 ✅ | 279 | Visual regression screenshots for key tools and the gel editor (`tests/visual_check.py`; `win32/` baselines are made on the first local Windows run) | Sonnet |
-| S140 | 280, 281, 282, 283 | Screen-reader results, keyboard gel editor/plate designer, theme contrast check, reduced motion | Opus 5 |
+| S140 | 280, 281, 282, 283 | Screen-reader results, keyboard gel editor/plate designer, theme contrast check, reduced motion | ✅ (1) Een onzichtbare live-regio (`#lk-live`, `lkSay()` in `99z_ux.js`) leest de hoofduitkomst van de open tool voor als die een seconde stilstaat; elke grafiek van `chart()` en `barChart()` krijgt `role="img"` en een `aria-label` met assen, aantal punten en bereik, of de waarde per staaf (`chAria()` in `src/lib/chart.js`). (2) Plaatontwerper: roving tabindex over de putjes, pijltjes/Home/End verplaatsen, Enter of spatie kleurt (of kiest in de tekstmodus); gel-editor: de foto is focusbaar, N kiest laan/ladderband/meetpunt, pijltjes verschuiven (Shift = 10 px), de statusregel (`aria-live`) zegt wat er gekozen is. (3) `tests/contrast_check.py` (in `check.py` en CI) rekent WCAG-AA voor tekst, grijze tekst, accent en meldingen in alle zes thema's; de donkere kamer kreeg daarvoor een lichtere `--muted` en `--sta`. (4) `prefers-reduced-motion`: geen animaties, overgangen of vloeiend scrollen (`lkScroll()`). Niet gedaan: een geselecteerd onderdeel van de gel krijgt nog geen eigen markering op de foto, alleen de statusregel | — |
 | S141 ✅ | 288, 294 | Consistent source citation per result; local "most used tools" overview (`tests/src_check.py`; copied tables and chart data carry a *Bron:* line; *Meest gebruikt* tile on the start page) | Sonnet |
 | S142 | 292 | Desktop auto-update via the Tauri updater | Opus 5 |
 | S143–S146 | 276, 277 | ✖ Split source from build and move all in-place tools into modules: **moved forward and replaced by phase 16 (S264–S272)**, because after the Vue migration it blocks every feature step instead of waiting until the end | — |
