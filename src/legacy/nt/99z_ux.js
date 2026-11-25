@@ -39,8 +39,14 @@ function rbarUpdate(){ const sec=$('#t-'+current), r=sec&&current!=='start'?sec.
 function rbarShow(){ let txt=null; const big=lkREl&&lkREl.querySelector('.big');
   if(big&&big.offsetParent!==null&&big.textContent.trim()){ const l=big.previousElementSibling; txt=[l&&l.classList.contains('lbl')?l.textContent.trim():'',big.textContent.replace(/\s+/g,' ').trim()]; }
   const on=!!txt&&!lkRVis&&lkNarrow.matches; lkRbar.hidden=!on;
-  if(on){ const h=`<span>${esc(txt[0])}</span><b>${esc(txt[1])}</b><i aria-hidden="true">↓</i>`; if(lkRbar.innerHTML!==h) lkRbar.innerHTML=h; lkRbar.setAttribute('aria-label',txt.join(' ')); } }
-lkRbar.addEventListener('click',()=>{ if(lkREl) lkREl.scrollIntoView({behavior:'smooth',block:'start'}); });
+  if(on){ const h=`<span>${esc(txt[0])}</span><b>${esc(txt[1])}</b><i aria-hidden="true">↓</i>`; if(lkRbar.innerHTML!==h) lkRbar.innerHTML=h; lkRbar.setAttribute('aria-label',txt.join(' ')); }
+  lkSay(txt?txt.filter(Boolean).join(': '):''); }
+/* S140 (#280): de hoofduitkomst van de open tool in een onzichtbare live-regio, zodat een schermlezer hem
+   voorleest; pas als hij een seconde stil staat, anders leest hij elke tussenstand van het typen voor */
+const lkLive=document.createElement('div'); lkLive.className='sr-only'; lkLive.id='lk-live'; lkLive.setAttribute('aria-live','polite'); lkLive.setAttribute('data-notr',''); document.body.appendChild(lkLive);
+let lkLiveT=0, lkLiveNow='';
+function lkSay(t){ if(t===lkLiveNow) return; lkLiveNow=t; clearTimeout(lkLiveT); lkLiveT=setTimeout(()=>{ lkLive.textContent=lkLiveNow; },1000); }
+lkRbar.addEventListener('click',()=>{ if(lkREl) lkREl.scrollIntoView({behavior:lkScroll(),block:'start'}); });
 lkMainWatch(rbarUpdate,120); window.addEventListener('hashchange',()=>setTimeout(rbarUpdate,60));
 
 /* ---------- badge "Gevalideerd" in de kop van tools die tests/VALIDATIE.md controleert ---------- */
@@ -365,6 +371,10 @@ smpUse('qplate',names=>{ const el=$('#qp2-s'); if(!el||!names.length) return;
 
 /* alles hierboven ook als globale naam, live (zie src/lib/global.js) */
 live({
+  lkLive: () => lkLive,
+  lkSay: () => lkSay,
+  lkLiveT: [() => lkLiveT, v => { lkLiveT = v; }],
+  lkLiveNow: [() => lkLiveNow, v => { lkLiveNow = v; }],
   LKERR: () => LKERR,
   lkErr: () => lkErr,
   lkReport: [() => lkReport, v => { lkReport = v; }],

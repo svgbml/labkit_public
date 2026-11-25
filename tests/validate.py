@@ -112,6 +112,36 @@ def _(pg):
     v = pg.evaluate("__n(__el(document.querySelector('#s-adv')))")
     return [('extra verdunning (×)', v, 10, 0.001)]
 
+@case('Standaardcurve', 'Modelvergelijking (AICc) en een punt uitsluiten', 'AICc = n·ln(SSR/n) + 2k + 2k(k+1)/(n−k−1) (Burnham en Anderson, Model Selection and Multimodel Inference, 2002, vgl. 2.14), SSR van een kleinste-kwadratenfit, onafhankelijk nagerekend met numpy.polyfit. Data: y = 0,05 + 0,002·x − 1,2·10⁻⁶·x² met vaste ruis, in duplo; kwadratisch hoort de laagste AICc te krijgen. Daarna krijgt 300 µg/mL één verkeerd replicaat (+0,15); dat wordt als uitschieter gemeld, en na aanklikken in de residuplot is R² gelijk aan die van numpy zonder dat punt')
+def _(pg):
+    import numpy as np
+    xs = [0, 100, 200, 300, 400, 500, 600]; eps = [[0.004, -0.003], [-0.002, 0.005], [0.003, -0.004], [-0.005, 0.002], [0.004, 0.001], [-0.003, 0.003], [0.002, -0.004]]
+    f = lambda x: 0.05 + 0.002 * x - 1.2e-6 * x * x
+    rows = [[x, round(f(x) + e[0], 4), round(f(x) + e[1], 4)] for x, e in zip(xs, eps)]
+    X = np.array([r[0] for r in rows for _ in (1, 2)], float); Y = np.array([v for r in rows for v in r[1:]], float)
+    def aicc(deg, X, Y):
+        k = deg + 1; n = len(X); ssr = float(np.sum((Y - np.polyval(np.polyfit(X, Y, deg), X)) ** 2)); return n * np.log(ssr / n) + 2 * k + 2 * k * (k + 1) / (n - k - 1)
+    js = "__go('curve');__set('s-preset','leeg');__set('s-model','lin');__set('s-blank',false);__tbl('s-std'," + str(rows) + ",'curve');"
+    pg.evaluate(js); pg.wait_for_timeout(200)
+    t = pg.evaluate("[...document.querySelectorAll('#s-aic tbody tr')].map(r=>[r.cells[0].textContent,__n(r.cells[2].textContent)])")
+    lin = [v for n, v in t if n.startswith('Lineair y')][0]; quad = [v for n, v in t if n.startswith('Kwadratisch')][0]
+    best = pg.evaluate("[...document.querySelectorAll('#s-aic tbody tr')].find(r=>r.querySelector('.chip'))?.cells[0].textContent||''")
+    pg.evaluate("document.getElementById('s-aicuse').click()"); pg.wait_for_timeout(200)
+    model = pg.evaluate("document.getElementById('s-model').value")
+    bad = [r[:] for r in rows]; bad[3][1] = round(bad[3][1] + 0.15, 4)
+    pg.evaluate("__tbl('s-std'," + str(bad) + ",'curve')"); pg.wait_for_timeout(200)
+    flagged = pg.evaluate("!!document.getElementById('s-resout')")
+    pt = pg.evaluate("""(()=>{ const vm=window.__curveVm, cv=document.getElementById('s-rcv'), r=cv.getBoundingClientRect(), sc=(cv.width/(window.devicePixelRatio||1))/cv.clientWidth;
+      const p=vm._rp.find(q=>q.key==='3:0'); return [r.left+p.x/sc, r.top+p.y/sc]; })()""")
+    pg.evaluate("([x,y])=>document.getElementById('s-rcv').dispatchEvent(new MouseEvent('click',{clientX:x,clientY:y,bubbles:true}))", pt); pg.wait_for_timeout(200)
+    r2 = pg.evaluate("__n(document.querySelector('#s-res .kv').textContent.split('R²')[1])")
+    X2 = np.delete(X, 6); Y2 = np.delete(np.array([v for r in bad for v in r[1:]], float), 6)
+    yh = np.polyval(np.polyfit(X2, Y2, 2), X2); r2ref = 1 - np.sum((Y2 - yh) ** 2) / np.sum((Y2 - Y2.mean()) ** 2)
+    pg.evaluate("document.getElementById('s-exclr')&&document.getElementById('s-exclr').click()")
+    return [('AICc lineair', lin, round(aicc(1, X, Y), 1), 0.005), ('AICc kwadratisch', quad, round(aicc(2, X, Y), 1), 0.005),
+            ('beste = kwadratisch', 1 if best.startswith('Kwadratisch') else 0, 1, 0), ('knop zet het model', 1 if model == 'quad' else 0, 1, 0),
+            ('uitschieter gemeld', 1 if flagged else 0, 1, 0), ('R² na uitsluiten', r2, round(float(r2ref), 4), 0.0002)]
+
 @case('Enzymkinetiek', 'Puromycin (behandeld)', 'Treloar 1974 via R-dataset Puromycin (Bates & Watts 1988); referentie: SciPy curve_fit')
 def _(pg):
     pg.evaluate("""__go('enzym');__set('k-su','mM');__set('k-vu','µmol/min');
@@ -1354,6 +1384,19 @@ def _(pg):
     v = pg.evaluate("[...document.querySelectorAll('#ti-out tbody tr')].map(r=>__n(r.cells[2].textContent))")
     return [('pH start', v[0], 2.88, 0.005), ('pH ½-equivalentie', v[1], 4.76, 0.003), ('pH equivalentiepunt', v[2], 8.72, 0.003)]
 
+@case('Titratiecurve', 'Schuif en verdeling over de vormen', 'Harris, Quantitative Chemical Analysis: bij ½-equivalentie is pH = pKₐ (4,76), dus HA en A⁻ elk 50 %; fosforzuur (2,15; 7,20; 12,35) 0,1 M met 0,1 M NaOH bij het tweede halve equivalentiepunt (37,5 mL op 25 mL): pH ≈ pKₐ₂ = 7,20, H₂PO₄⁻ ≈ HPO₄²⁻; de aandelen nagerekend met α_j ∝ [H⁺]^(n−j)·K₁⋯K_j bij de getoonde pH')
+def _(pg):
+    pg.evaluate("__go('titr');__set('ti-type','acid');__set('ti-pka','4,76');__set('ti-ca','0,1');__set('ti-va','25');__set('ti-cb','0,1');__set('ti-v','12.5')"); pg.wait_for_timeout(100)
+    sp = pg.evaluate("[...document.querySelectorAll('#ti-sp tbody tr')].map(r=>__n(r.cells[1].textContent))")
+    pg.evaluate("__set('ti-pka','2,15 7,20 12,35');__set('ti-v','37.5')"); pg.wait_for_timeout(100)
+    lab = pg.evaluate("document.getElementById('ti-now').textContent")
+    ph = pg.evaluate("t=>__n(t.split('pH')[1])", lab)
+    sp3 = pg.evaluate("[...document.querySelectorAll('#ti-sp tbody tr')].map(r=>__n(r.cells[1].textContent))")
+    H = 10 ** -ph; t = [H ** 3, H ** 2 * 10 ** -2.15, H * 10 ** (-2.15 - 7.20), 10 ** (-2.15 - 7.20 - 12.35)]; a = [x / sum(t) * 100 for x in t]
+    pg.evaluate("__set('ti-pka','4,76');__set('ti-v','12.5')")
+    return [('HA bij ½-eq (%)', sp[0], 50.0, 0.004), ('A⁻ bij ½-eq (%)', sp[1], 50.0, 0.004), ('pH bij 37,5 mL fosforzuur', ph, 7.20, 0.005),
+            ('H₂PO₄⁻ (%)', sp3[1], a[1], 0.004), ('HPO₄²⁻ (%)', sp3[2], a[2], 0.004)]
+
 @case('Kjeldahl', 'Melk, factor 6,38', 'AOAC 991.20: %N = 1,4007·c·(V−Vb)/m → 1,4007·0,1·15,2/1,0025 = 2,1237%; eiwit ×6,38 = 13,549%')
 def _(pg):
     pg.evaluate("__go('kjel');__set('kj-m','1,0025');__set('kj-c','0,1');__set('kj-vs','15,40');__set('kj-vb','0,20');__set('kj-f','6.38')")
@@ -1363,6 +1406,20 @@ def _(pg):
 def _(pg):
     pg.evaluate("__go('osmo');__set('os-phi','1');__tbl('os-tbl',[['NaCl',154,'']],'osmo')")
     return [('mOsm/L', pg.evaluate("__big('#os-out')"), 308, 0.001), ('ionsterkte (mM)', pg.evaluate("__kv('#os-out','Ionsterkte')"), 154, 0.001)]
+
+@case('Osmolariteit & ionsterkte', 'Voorbeeldmedia en aanvullen tot isotoon', 'PBS volgens Cold Spring Harbor Protocols (pdb.rec8247): 137 mM NaCl, 2,7 mM KCl, 10 mM Na₂HPO₄, 1,8 mM KH₂PO₄ → 2·137 + 2·2,7 + 3·10 + 2·1,8 = 313 mOsm/L (ideaal). Met de hand: 100 mM NaCl naar 290 mOsm/L vraagt (290 − 200)/2 = 45 mM NaCl = 45 × 58,44/1000 = 2,630 g/L, of 90 mM glucose = 90 × 180,16/1000 = 16,21 g/L; 154 mM NaCl (308) verdunnen tot 290: 308/290 = 1,062×')
+def _(pg):
+    pg.evaluate("__go('osmo');__set('os-phi','1');__set('os-iso','290');__set('os-pre','pbs')"); pg.wait_for_timeout(150)
+    pbs = pg.evaluate("__big('#os-out')")
+    pg.evaluate("__set('os-pre','');__tbl('os-tbl',[['NaCl',100,'']],'osmo');__set('os-add','NaCl')"); pg.wait_for_timeout(100)
+    a = pg.evaluate("[...document.getElementById('os-mk').textContent.matchAll(/\d+(?:[.,]\d+)?/g)].map(m=>__n(m[0]))")
+    pg.evaluate("__set('os-add','Glucose')"); pg.wait_for_timeout(100)
+    b = pg.evaluate("[...document.getElementById('os-mk').textContent.matchAll(/\d+(?:[.,]\d+)?/g)].map(m=>__n(m[0]))")
+    pg.evaluate("__tbl('os-tbl',[['NaCl',154,'']],'osmo')"); pg.wait_for_timeout(100)
+    c = pg.evaluate("__n(document.getElementById('os-mk').textContent.split('verdun')[1])")
+    pg.evaluate("__set('os-add','NaCl')")
+    return [('PBS (mOsm/L)', pbs, 313, 0.002), ('NaCl erbij (mM)', a[0], 45, 0.002), ('NaCl erbij (g/L)', a[1], 2.630, 0.002),
+            ('glucose erbij (mM)', b[0], 90, 0.002), ('glucose erbij (g/L)', b[1], 16.21, 0.002), ('verdunnen (×)', c, 308 / 290, 0.002)]
 
 @case('Verwantschapsindex', 'Trio, obligaat allel', 'Butler (2015) hfst. 15: vader heterozygoot voor obligaat allel → PI = 1/(2p); homozygoot → 1/p; CPI = product')
 def _(pg):

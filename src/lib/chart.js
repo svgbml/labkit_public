@@ -82,6 +82,7 @@ function chart(cv,o){
   (o.series||[]).forEach((s,i)=>{ if(s.pts) s.pts.forEach(p=>D.rows.push([s.name||('reeks '+(i+1)),p[0],p[1]])); });
   (o.series||[]).forEach(s=>{ if(s.fn&&s.name){ const a=tx(logx&&!((s.x0??xmin)>0)?xmin:(s.x0??xmin)), b=tx(s.x1??xmax); for(let k=0;k<=50;k++){ const xv=a+(b-a)*k/50, x=logx?10**xv:xv, y=s.fn(x); if(isFinite(y)) D.rows.push([s.name,x,y]); } } });
   cv._data=D; if(cv._tblOn) dataTable(cv);
+  chAria(cv,'line',o);
   return {X,Y};
 }
 const inp=(v,w=72,k='')=>`<input ${k} inputmode="decimal" value="${v==null||v===''||(typeof v==='number'&&!isFinite(v))?'':String(v).replace('.',',')}" style="text-align:right;width:${w}px">`;
@@ -106,6 +107,7 @@ function barChart(cv,cats,vals,lo,hi,o){
   x.save(); x.translate(14,(H-pad.b+pad.t)/2); x.rotate(-Math.PI/2); x.textAlign='center'; x.textBaseline='middle'; x.fillStyle=st.muted; x.font=st.lab+'px '+st.font; x.fillText(o.ylabel,0,0); x.restore();
   if(o.title){ x.fillStyle=st.ink; x.font=`600 ${st.lab+2}px ${st.font}`; x.textAlign='center'; x.textBaseline='top'; x.fillText(o.title,(W+pad.l)/2,6); }
   cv._data={head:['monster',o.ylabel,'ondergrens','bovengrens'],rows:cats.map((c,i)=>[c,vals[i],lo[i],hi[i]])}; if(cv._tblOn) dataTable(cv);
+  chAria(cv,'bar',o);
 }
 
 /* ================= DATATABEL ONDER EEN GRAFIEK (S86) =================
@@ -154,5 +156,19 @@ function plateHeat(cv,cells,o={}){ const R=o.rows||8, C=o.cols||12, st=chStyle()
   x.textAlign='left'; x.fillStyle=st.muted; if(o.label) x.fillText(o.label,bx,by0+18);
   cv._heat={min:mn,max:mx,out}; cv._data={head:['well',o.label||'waarde','uitschieter'],rows:cells.map(c=>[c.w,c.v,out.includes(c.w)?'ja':''])}; if(cv._tblOn) dataTable(cv); return cv._heat; }
 
-expose({dataTable, plateOut, plateHeat, niceStep, tickLabel, chart, inp, barChart, chStyle, chCol, chVars, chEdGet, chEdApply});
+/* ================= TEKSTSAMENVATTING VOOR SCHERMLEZERS (S140, #280) =================
+   Een canvas is voor een schermlezer leeg; chart() en barChart() geven het daarom role="img" en een
+   aria-label uit cv._data: bij een lijngrafiek de assen, het aantal punten en het bereik van x en y, bij een
+   staafdiagram de waarde per staaf. */
+function chAria(cv,kind,o){
+  const N=v=>{ const t=String(sig(v,3)).replace(/<[^>]+>/g,''); return LANG==='en'&&typeof i18nNum==='function'?t.replace(/\d+(?:[.,]\d+)*/g,m=>i18nNum(m)):t; };
+  const L=(t,d)=>uv(t?trPlain(String(t)):d), rows=(cv._data&&cv._data.rows)||[];
+  let s='';
+  if(kind==='bar'){ const v=rows.filter(r=>isFinite(r[1])).map(r=>r[0]+' '+N(r[1])); if(v.length) s=trPlain('Staafdiagram van '+L(o.ylabel,'y')+': '+uv(v.join('; '))+'.'); }
+  else { const xs=rows.map(r=>r[1]).filter(isFinite), ys=rows.map(r=>r[2]).filter(isFinite);
+    if(xs.length) s=trPlain('Grafiek van '+L(o.ylabel,'y')+' tegen '+L(o.xlabel,'x')+' met '+rows.length+' punten; x van '+uv(N(Math.min(...xs)))+' tot '+uv(N(Math.max(...xs)))+', y van '+uv(N(Math.min(...ys)))+' tot '+uv(N(Math.max(...ys)))+'.'); }
+  if(s){ cv.setAttribute('role','img'); cv.setAttribute('aria-label',i18nStrip(s)); } else { cv.removeAttribute('role'); cv.removeAttribute('aria-label'); }
+}
+
+expose({chAria, dataTable, plateOut, plateHeat, niceStep, tickLabel, chart, inp, barChart, chStyle, chCol, chVars, chEdGet, chEdApply});
 live({chStyleKey: [() => chStyleKey, v => { chStyleKey = v; }]});

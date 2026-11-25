@@ -575,7 +575,9 @@ const tagHref=t=>'#tag='+encodeURIComponent(t);
 const curTag=()=>{ const h=(location.hash||'').slice(1); if(!h.startsWith('tag=')) return ''; try{ return decodeURIComponent(h.slice(4)); }catch(e){ return ''; } };
 const tagChip=(t,on,n)=>`<a class="tag${on?' on':''}" href="${on?'#start':tagHref(t)}">${esc(t)}${n!=null?` <small>${n}</small>`:''}</a>`;
 Object.keys(TAGS).forEach(id=>{ const h=$(`#t-${id} .tool-head h2`); if(h&&!h.nextElementSibling?.classList.contains('tags')) h.insertAdjacentHTML('afterend',`<div class="tags">${tagsOf(id).map(t=>tagChip(t)).join('')}</div>`); });
-const navMatch=(el,q)=>{ const id=(el.getAttribute('href')||'').slice(1); return (el.textContent+' '+tagsOf(id).map(t=>t+' '+trPlain(t,true)).join(' ')+' '+((typeof SYN!=='undefined'&&SYN[id])||'')).toLowerCase().includes(q); };
+/* een navlink met data-group zoekt ook in de namen, tags en synoniemen van elk van zijn tools (S99) */
+const navMatch=(el,q)=>{ const ids=(el.dataset.group||(el.getAttribute('href')||'').slice(1)).split(' ');
+  return (el.textContent+' '+ids.map(id=>{ const h=$('#t-'+id+' .tool-head h2'); return (h?h.textContent:'')+' '+tagsOf(id).map(t=>t+' '+trPlain(t,true)).join(' ')+' '+((typeof SYN!=='undefined'&&SYN[id])||''); }).join(' ')).toLowerCase().includes(q); };
 
 /* ================= STARTPAGINA (BENTO) ================= */
 const RKEY='labkit:v1:recent', FKEY='labkit:v1:fav', UKEY='labkit:v1:usage';

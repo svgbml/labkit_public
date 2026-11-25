@@ -16,7 +16,8 @@ function route(){
   if(GONE[h]){ h=GONE[h]; try{ history.replaceState(null,'','#'+h); }catch(e){ location.hash='#'+h; } }
   current=TOOLS.includes(h)?h:'start';
   $$('.tool').forEach(s=>s.classList.toggle('active',s.id==='t-'+current));
-  $$('#nav > a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+current));
+  /* S99 (#161): een navlink met data-group (Scheikunde-rekenaars) is actief op elk van zijn tools */
+  $$('#nav > a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+current||(a.dataset.group||'').split(' ').includes(current)));
   if(calc[current]) calc[current]();
 }
 window.addEventListener('hashchange',route);
