@@ -48,6 +48,7 @@
           <lk-note v-if="!scOk" kind="info">{{ t('Minstens drie regels met een hoeveelheid boven nul en een Ct nodig.') }}</lk-note>
           <template v-else>
             <lk-big v-if="scRes.t" :label="t('Efficiëntie doelgen')" :value="F(scRes.t.eff, 1) + ' %'"/>
+            <lk-range v-if="scRes.t" :what="t('Efficiëntie doelgen')" :value="scRes.t.eff" :lo="90" :hi="110" :digits="0" unit="%" :low="t('Controleer primerontwerp, remmers en pipetteerwerk.')" :high="t('Dat wijst vaak op remming in de geconcentreerde standaarden, primer-dimeren of pipetteerfouten in de reeks.')" :ok="t('Goed genoeg voor de ΔΔCt-methode.')"/>
             <lk-table :cols="scCols" :rows="scRows"/>
           </template>
         </div>

@@ -1544,6 +1544,23 @@ def _(pg):
     pg.evaluate(f"__go('zprime');__set('zp-pos','{' '.join(str(v).replace('.',',') for v in P)}');__set('zp-neg','{' '.join(str(v).replace('.',',') for v in N)}');__set('zp-s','')")
     return [('Z′', pg.evaluate("__big('#zp-out')"), z, 0.002)]
 
+@case('Assaykwaliteit (Z′-factor)', 'Herhalingen controleren (CV en Grubbs)', 'ISO 5725-2:1994 tabel 5: kritieke waarde van Grubbs 1,715 voor n = 5 (α = 0,05). Met de hand: 10,0 10,2 10,1 10,3 12,9 geeft x̄ = 10,7, s = 1,2349, CV = 11,54 % en G = 2,2/1,2349 = 1,782 > 1,715, dus 12,9 is een uitschieter; 1 1,1 0,9 1,05 geeft G = 1,32 < 1,481 (n = 4) en CV 8,4 %, geen melding')
+def _(pg):
+    pg.evaluate("__go('zprime');__set('zp-pos','10 10,2 10,1 10,3 12,9');__set('zp-neg','1 1,1 0,9 1,05');__set('zp-s','')"); pg.wait_for_timeout(100)
+    r = pg.evaluate("[...document.querySelectorAll('#zp-out [data-reps]')].map(e=>[e.dataset.reps, e.textContent])")
+    cv = pg.evaluate("t=>__n(t.split('CV')[1])", r[0][1])
+    return [('positief: uitschieter gemeld', 1 if r[0][0] == 'out' and '12,9' in r[0][1] else 0, 1, 0), ('CV positief (%)', cv, 11.54, 0.005),
+            ('negatief: geen melding', 1 if r[1][0] == 'ok' else 0, 1, 0)]
+
+@case('RNA-kwaliteit', 'Zuiverheid tegen het verwachte bereik', 'Thermo Scientific T042 (NanoDrop): zuiver RNA heeft A₂₆₀/A₂₈₀ ≈ 2,0 en A₂₆₀/A₂₃₀ ≈ 2,0–2,2; Labkit gebruikt 1,8–2,2 en ≥ 1,8. A₂₆₀ 0,5 met A₂₈₀ 0,25 geeft 2,0 (binnen), met A₂₈₀ 0,32 geeft 1,5625 (onder)')
+def _(pg):
+    pg.evaluate("__go('rnaq');__set('rq-a260','0,5');__set('rq-a280','0,25');__set('rq-a230','0,24')"); pg.wait_for_timeout(100)
+    a = pg.evaluate("[...document.querySelectorAll('#rq-out [data-range]')].map(e=>e.dataset.range)")
+    pg.evaluate("__set('rq-a280','0,32')"); pg.wait_for_timeout(100)
+    b = pg.evaluate("[...document.querySelectorAll('#rq-out [data-range]')].map(e=>e.dataset.range)")
+    pg.evaluate("__set('rq-a280','0,262');__set('rq-a230','0,251')")
+    return [('260/280 = 2,0 binnen', 1 if a[:2] == ['in', 'in'] else 0, 1, 0), ('260/280 = 1,56 onder', 1 if b[0] == 'low' else 0, 1, 0)]
+
 @case('Assaykwaliteit (Z′-factor)', 'Plaatlezer-venster: putjes aanwijzen', 'Zelftest: de Tecan-export uit tests/fixtures/platereader (waarde = 0,05 + 0,1·rij + 0,013·kolom) in het venster Plaatlezer-bestand; rij B als positief en rij A als negatief aanwijzen geeft dezelfde Z′ als die 24 waarden met de hand (Zhang e.a. 1999, numpy met n − 1). ELISA krijgt hetzelfde bestand als absorptieblok van 8 × 12, Standaardcurve als plaatblok')
 def _(pg):
     import numpy as np

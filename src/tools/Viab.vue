@@ -27,7 +27,7 @@
           <lk-kv v-if="m.vols" :rows="volRows"/>
           <lk-note v-if="m.L < 100" kind="info">{{ t('Met ' + m.L + ' getelde levende cellen is de relatieve onzekerheid ongeveer ' + F(100 / Math.sqrt(Math.max(m.L, 1)), 0) + '%; tel meer vierkanten.') }}</lk-note>
           <lk-note v-if="m.L / m.sq > 100" kind="warn">{{ t('Meer dan 100 cellen per vierkant: verdun de suspensie voor een betrouwbare telling.') }}</lk-note>
-          <lk-note v-if="m.via < 0.9" kind="warn">{{ t('Viabiliteit onder 90%: voor transfectie en de meeste experimenten is dat aan de lage kant.') }}</lk-note>
+          <lk-range :what="t('Viabiliteit')" :value="m.via * 100" :lo="90" :digits="1" unit="%" :low="t('Voor transfectie en de meeste experimenten is dat aan de lage kant.')" :ok="t('Goed genoeg voor transfectie en de meeste experimenten.')"/>
           <lk-formula :html="tHtml('cellen/mL = N / vierkanten × verdunning × 10⁴ · viabiliteit = levend / totaal')"/>
         </template>
       </div>

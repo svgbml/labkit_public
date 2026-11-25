@@ -73,6 +73,7 @@
         <template v-else-if="has">
           <lk-big :label="t('Verdubbelingstijd')" :value="L(fmt(m.td * 60, 1))" sub="min" top="8px"/>
           <lk-kv :rows="kvRows"/>
+          <lk-range what="R² (ln)" :value="m.w.r.r2" :lo="0.98" :digits="3" :low="t('De punten in het venster liggen niet op een rechte lijn; kies een venster binnen de exponentiële fase.')" :ok="t('Het venster ligt in een nette exponentiële fase.')"/>
           <lk-note v-if="m.odHigh" kind="warn">{{ t('Het venster loopt boven OD 1,0; daar is OD niet meer evenredig met het celaantal. Verdun of kies een eerder venster.') }}</lk-note>
           <lk-note v-if="m.three" kind="info">{{ t('Het venster bevat maar 3 punten; meet vaker in de exponentiële fase.') }}</lk-note>
           <template v-if="pred">

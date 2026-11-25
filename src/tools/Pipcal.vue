@@ -29,6 +29,7 @@
       <template v-else>
         <lk-big :label="t('Gemiddeld volume')" :value="F(P.Vm, 3)" sub="µL"/>
         <lk-kv :rows="kvRows"/>
+        <lk-reps :vals="mVals" :cv-max="Infinity" :digits="4" :label="t('Wegingen (mg)')"/>
         <lk-kv v-if="P.lim" :rows="limRows"/>
         <lk-note v-if="nearNote" kind="info">{{ nearNote }}</lk-note>
         <lk-note v-if="P.n < 4" kind="warn">{{ t('Gebruik minstens 4 wegingen voor een betrouwbare schatting.') }}</lk-note>
@@ -105,6 +106,7 @@ export default {
     };
   },
   computed: {
+    mVals() { return numsC(this.m); },
     /* de maten uit pipcalCalc(); null zolang het volume of de wegingen ontbreken */
     P() { return pipcalCalc(num(this.v), num(this.nom), num(this.temp), numsC(this.m), num(this.ch) || 1); },
     bad() { const P = this.P; return isFinite(P.limS) && (!P.okS || !P.okR); },

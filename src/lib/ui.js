@@ -1,6 +1,7 @@
 import {h, onMounted, onUnmounted, watch, ref} from 'vue';
 import {pipHtml} from './pip.js';
 import {sheetTSV} from './sheet.js';
+import {repCheck} from './replicates.js';
 
 /* ================= GEDEELDE VUE-COMPONENTEN =================
    De eerste omgezette tools bouwden hun uitkomst nog als een string HTML en zetten die met
@@ -362,6 +363,45 @@ LKUI.etable = {
   }
 };
 
+/* ---------- referentiebereik met een uitleg in gewone taal (S95, #147 en #140) ----------
+   <lk-range what="A₂₆₀/A₂₈₀" :value="1.85" :lo="1.8" :hi="2.0" :digits="2" unit="%" :low="t('…')" :high="t('…')" :ok="t('…')">
+   Eén regel: de waarde, het verwachte bereik en of hij erbinnen valt; lo of hi mag ontbreken (≥ / ≤).
+   low, high en ok zijn de uitleg die de tool erachter zet, al vertaald. Zonder eindig getal: niets. */
+const rf = (x, d) => lkn(fmt(x, d));
+LKUI.range = {
+  props: {what: String, value: {type: Number, default: NaN}, lo: {type: Number, default: NaN}, hi: {type: Number, default: NaN},
+    digits: {type: Number, default: 2}, unit: {type: String, default: ''}, low: String, high: String, ok: String},
+  setup(props) {
+    return () => {
+      const v = props.value, lo = props.lo, hi = props.hi, d = props.digits, u = props.unit ? ' ' + props.unit : '';
+      if (!isFinite(v)) return null;
+      const where = isFinite(lo) && v < lo ? 'low' : isFinite(hi) && v > hi ? 'high' : 'in';
+      const rng = isFinite(lo) && isFinite(hi) ? rf(lo, d) + '–' + rf(hi, d) + u : isFinite(lo) ? '≥ ' + rf(lo, d) + u : '≤ ' + rf(hi, d) + u;
+      const head = uv(props.what) + ' = ' + rf(v, d) + u + ': ' + (where === 'in' ? 'binnen' : where === 'low' ? 'onder' : 'boven') + ' het verwachte bereik (' + rng + ').';
+      const why = where === 'in' ? props.ok : where === 'low' ? props.low : props.high;
+      return h('div', {class: 'note ' + (where === 'in' ? 'ok' : 'warn'), 'data-range': where},
+        [trPlain(head) + (why ? ' ' + why : '')]);
+    };
+  }
+};
+
+/* ---------- herhalingen controleren (S95, #141) ----------
+   <lk-reps :vals="[…]" :cv-max="15" :digits="3" label="Ct">: n, gemiddelde, SD en CV van herhaalde metingen,
+   met een waarschuwing als de CV boven de grens ligt en als Grubbs (α = 0,05) een uitschieter vindt (repCheck()). */
+LKUI.reps = {
+  props: {vals: {type: Array, default: () => []}, cvMax: {type: Number, default: 15}, digits: {type: Number, default: 3}, label: {type: String, default: ''}},
+  setup(props) {
+    return () => {
+      const r = repCheck(props.vals, props.cvMax); if (!r) return null;
+      const g = x => lkn(sig(x, props.digits)), lab = props.label ? uv(props.label) + ': ' : '';
+      const parts = [trPlain(lab + 'n = ' + r.n + ', gemiddelde ' + g(r.mean) + ', SD ' + g(r.sd) + ', CV ' + lkn(fmt(r.cv, 1)) + ' %.')];
+      if (r.high) parts.push(trPlain('De CV ligt boven ' + lkn(fmt(props.cvMax, 0)) + ' %: de herhalingen lopen ver uiteen.'));
+      if (r.out >= 0) parts.push(trPlain('De waarde ' + g(Number(props.vals[r.out])) + ' is volgens de toets van Grubbs (α = 0,05) een uitschieter; controleer hem voor je hem weglaat.'));
+      return h('div', {class: 'note ' + (r.high || r.out >= 0 ? 'warn' : 'info'), 'data-reps': r.out >= 0 ? 'out' : r.high ? 'cv' : 'ok'}, parts.join(' '));
+    };
+  }
+};
+
 /* Zet de gedeelde componenten op een app. lkVueMount() doet dit zelf, dus een tool hoeft er
    niets voor te doen. */
 export function lkUiInstall(app) {
@@ -376,4 +416,6 @@ export function lkUiInstall(app) {
   app.component('lk-steps', LKUI.steps);
   app.component('lk-report', LKUI.report);
   app.component('lk-etable', LKUI.etable);
+  app.component('lk-range', LKUI.range);
+  app.component('lk-reps', LKUI.reps);
 }

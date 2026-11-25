@@ -33,6 +33,8 @@
           <lk-big :label="t('Z′-factor')" :value="zText" :chip="grade.text" :chip-kind="grade.kind"/>
           <lk-kv :rows="rows"/>
           <lk-kv v-if="sampleRows.length" :rows="sampleRows"/>
+          <lk-reps :vals="sets.P" :cv-max="20" :label="t('Positieve controles')"/>
+          <lk-reps :vals="sets.N" :cv-max="20" :label="t('Negatieve controles')"/>
           <lk-note v-if="few" kind="info">{{ t('Met minder dan 8 controles per groep is de Z′ onnauwkeurig.') }}</lk-note>
           <lk-note :kind="grade.kind">{{ verdict }}</lk-note>
           <div class="lbl" style="margin-top:10px">{{ t('Controleputjes') }}</div>
