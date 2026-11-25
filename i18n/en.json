@@ -6167,5 +6167,12 @@
 "Ladderband {#} gekozen, y = {#} px.": "Ladder band {#} selected, y = {#} px.",
 "Pijl omhoog of omlaag verschuift hem, N kiest het volgende onderdeel.": "Up or down arrow moves it, N selects the next item.",
 "Meetpunt {#} gekozen, ongeveer {#} bp.": "Measurement point {#} selected, about {#} bp.",
-"Gelfoto. Kies met N een laan, band of meetpunt en verschuif het met de pijltjes.": "Gel photo. Press N to select a lane, band or measurement point and move it with the arrow keys."
+"Gelfoto. Kies met N een laan, band of meetpunt en verschuif het met de pijltjes.": "Gel photo. Press N to select a lane, band or measurement point and move it with the arrow keys.",
+"Toegevoegd volume titrant": "Added volume of titrant",
+"Gemeten punten (optioneel): per regel het volume in mL en de pH": "Measured points (optional): the volume in mL and the pH on each line",
+"Bij {#} mL: pH {#}": "At {#} mL: pH {#}",
+"Aandeel": "Fraction",
+"gemeten": "measured",
+"schuif": "slider",
+"Niet gelezen (geen volume en pH): {#} regel(s).": "Not read (no volume and pH): {#} line(s)."
 }

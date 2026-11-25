@@ -1354,6 +1354,19 @@ def _(pg):
     v = pg.evaluate("[...document.querySelectorAll('#ti-out tbody tr')].map(r=>__n(r.cells[2].textContent))")
     return [('pH start', v[0], 2.88, 0.005), ('pH ½-equivalentie', v[1], 4.76, 0.003), ('pH equivalentiepunt', v[2], 8.72, 0.003)]
 
+@case('Titratiecurve', 'Schuif en verdeling over de vormen', 'Harris, Quantitative Chemical Analysis: bij ½-equivalentie is pH = pKₐ (4,76), dus HA en A⁻ elk 50 %; fosforzuur (2,15; 7,20; 12,35) 0,1 M met 0,1 M NaOH bij het tweede halve equivalentiepunt (37,5 mL op 25 mL): pH ≈ pKₐ₂ = 7,20, H₂PO₄⁻ ≈ HPO₄²⁻; de aandelen nagerekend met α_j ∝ [H⁺]^(n−j)·K₁⋯K_j bij de getoonde pH')
+def _(pg):
+    pg.evaluate("__go('titr');__set('ti-type','acid');__set('ti-pka','4,76');__set('ti-ca','0,1');__set('ti-va','25');__set('ti-cb','0,1');__set('ti-v','12.5')"); pg.wait_for_timeout(100)
+    sp = pg.evaluate("[...document.querySelectorAll('#ti-sp tbody tr')].map(r=>__n(r.cells[1].textContent))")
+    pg.evaluate("__set('ti-pka','2,15 7,20 12,35');__set('ti-v','37.5')"); pg.wait_for_timeout(100)
+    lab = pg.evaluate("document.getElementById('ti-now').textContent")
+    ph = pg.evaluate("t=>__n(t.split('pH')[1])", lab)
+    sp3 = pg.evaluate("[...document.querySelectorAll('#ti-sp tbody tr')].map(r=>__n(r.cells[1].textContent))")
+    H = 10 ** -ph; t = [H ** 3, H ** 2 * 10 ** -2.15, H * 10 ** (-2.15 - 7.20), 10 ** (-2.15 - 7.20 - 12.35)]; a = [x / sum(t) * 100 for x in t]
+    pg.evaluate("__set('ti-pka','4,76');__set('ti-v','12.5')")
+    return [('HA bij ½-eq (%)', sp[0], 50.0, 0.004), ('A⁻ bij ½-eq (%)', sp[1], 50.0, 0.004), ('pH bij 37,5 mL fosforzuur', ph, 7.20, 0.005),
+            ('H₂PO₄⁻ (%)', sp3[1], a[1], 0.004), ('HPO₄²⁻ (%)', sp3[2], a[2], 0.004)]
+
 @case('Kjeldahl', 'Melk, factor 6,38', 'AOAC 991.20: %N = 1,4007·c·(V−Vb)/m → 1,4007·0,1·15,2/1,0025 = 2,1237%; eiwit ×6,38 = 13,549%')
 def _(pg):
     pg.evaluate("__go('kjel');__set('kj-m','1,0025');__set('kj-c','0,1');__set('kj-vs','15,40');__set('kj-vb','0,20');__set('kj-f','6.38')")
