@@ -367,7 +367,7 @@ LKUI.etable = {
    <lk-range what="A₂₆₀/A₂₈₀" :value="1.85" :lo="1.8" :hi="2.0" :digits="2" unit="%" :low="t('…')" :high="t('…')" :ok="t('…')">
    Eén regel: de waarde, het verwachte bereik en of hij erbinnen valt; lo of hi mag ontbreken (≥ / ≤).
    low, high en ok zijn de uitleg die de tool erachter zet, al vertaald. Zonder eindig getal: niets. */
-const rf = (x, d) => lkn(fmt(x, d));
+const rf = (x, d) => fmt(x, d);   /* Nederlandse notatie: trPlain() zet hem om; lkn() ervoor gaf "0,994" in het Engels */
 LKUI.range = {
   props: {what: String, value: {type: Number, default: NaN}, lo: {type: Number, default: NaN}, hi: {type: Number, default: NaN},
     digits: {type: Number, default: 2}, unit: {type: String, default: ''}, low: String, high: String, ok: String},
@@ -393,9 +393,9 @@ LKUI.reps = {
   setup(props) {
     return () => {
       const r = repCheck(props.vals, props.cvMax); if (!r) return null;
-      const g = x => lkn(sig(x, props.digits)), lab = props.label ? uv(props.label) + ': ' : '';
-      const parts = [trPlain(lab + 'n = ' + r.n + ', gemiddelde ' + g(r.mean) + ', SD ' + g(r.sd) + ', CV ' + lkn(fmt(r.cv, 1)) + ' %.')];
-      if (r.high) parts.push(trPlain('De CV ligt boven ' + lkn(fmt(props.cvMax, 0)) + ' %: de herhalingen lopen ver uiteen.'));
+      const g = x => sig(x, props.digits), lab = props.label ? uv(props.label) + ': ' : '';
+      const parts = [trPlain(lab + 'n = ' + r.n + ', gemiddelde ' + g(r.mean) + ', SD ' + g(r.sd) + ', CV ' + fmt(r.cv, 1) + ' %.')];
+      if (r.high) parts.push(trPlain('De CV ligt boven ' + fmt(props.cvMax, 0) + ' %: de herhalingen lopen ver uiteen.'));
       if (r.out >= 0) parts.push(trPlain('De waarde ' + g(Number(props.vals[r.out])) + ' is volgens de toets van Grubbs (α = 0,05) een uitschieter; controleer hem voor je hem weglaat.'));
       return h('div', {class: 'note ' + (r.high || r.out >= 0 ? 'warn' : 'info'), 'data-reps': r.out >= 0 ? 'out' : r.high ? 'cv' : 'ok'}, parts.join(' '));
     };
