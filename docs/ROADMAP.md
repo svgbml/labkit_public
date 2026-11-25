@@ -7,10 +7,10 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Model** (last column) is the cheapest model that can do the step well, so the shared usage limit lasts longer. Done steps show "—".
 - **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (1 open step).
 - **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (12 open steps).
-- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (22 open steps).
+- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (21 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (9 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **227 done, 43 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **228 done, 42 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-23)
 
@@ -24,7 +24,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 5 execution | S48–S61 | ✅ done (batches E1–E4) |
 | Phase 6 gel editor rebuild | S62–S79 | ✅ done |
 | Phase 7 charts, figures and data | S80–S96 | ✅ done |
-| Phase 8 rework existing tools | S97–S116 | **part done:** S99, S100, S105, S113, S114 open (batch R3) |
+| Phase 8 rework existing tools | S97–S116 | **part done:** S105, S113, S114 open (batch R3) |
 | Phase 9 structure and workflows | S117–S121 | ⏳ not started (batch W1) |
 | Phase 10 performance | S122–S133 | ⏳ not started; F1a re-plans it first |
 | Phase 11 quality, tests and dev | S134–S142 | **part done:** S142 open (batch Q2) |
@@ -170,12 +170,12 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | R1 ✅ | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 | — |
 | R2a ✅ | Sonnet | S106–S110 | K3 | anything except E3 | — |
 | R2b ✅ | Sonnet | S111, S112, S115, S116 | K3 | anything | — |
-| R3 | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 | tdd |
+| R3 🔨 (S99, S100 af; S105, S113, S114 open) | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 | tdd |
 | W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — | grilling + domain-modeling (with you, before the batch), then tdd |
 | **Wave 6: performance and quality** | | | | | |
 | Q1a ✅ | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything | — |
 | Q1b ✅ | Sonnet | S138, S139, S141 | K3 (then *any time*) | anything | — |
-| Q2 | Opus 5 | S140, S142 | K3 | anything except G1a–G3 | — |
+| Q2 🔨 (S140 af; S142 wacht op een signeersleutel en release-instellingen van de eigenaar) | Opus 5 | S140, S142 | K3 | anything except G1a–G3 | — |
 | F1a | Opus 5.5 | **Re-plan phase 10 first** (lazy init and DOM templates may be largely solved by mounting a component only when its tool opens, which phase 16 makes possible), then S125–S127 | K3 | — | diagnosing-bugs (measure first), improve-architecture, to-tickets |
 | F1b | Opus 5 | S122–S124, S128 | F1a | — | diagnosing-bugs |
 | F1c | Opus 5.5 | S129–S133 (S130, S131 are Opus 5) | F1b | — | diagnosing-bugs; tdd for S132 |
@@ -378,7 +378,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S97 | 151, 152, 155 | Dilution: tube visual, serial mode; live two-way unit converter ✅ the tool already solved the one empty field; serial mode reuses `serie()` from *Verdunningsschema*, which stays as its own tool | Sonnet |
 | S98 | 156, 157, 158 | Molar mass name lookup; buffer picker; Tris temperature correction ✅ hydrate buttons only for the substances in the small `REAG` table of *Molmassa*; pKa temperature slopes from Goldberg et al. 2002 | Sonnet |
 | S99 | 159, 160, 161 | Interactive titration curve; osmolarity presets; merge chemistry calculators into one tool | ✅ Deel 1: Titratiecurve heeft een schuif *Toegevoegd volume titrant* (`ti-v`) met de pH en de verdeling over de vormen op dat punt (`specFrac()` in `src/lib/species.js`, tabel `ti-sp`), en gemeten punten (`ti-meas`, volume en pH per regel) over de curve; unit tests en een validatiegeval. Deel 2 af: Osmolariteit heeft *Voorbeeld laden* (`os-pre`: PBS, fysiologisch zout, DMEM-zouten en glucose) en *Doel (isotoon)* met *Aanvullen met* NaCl, glucose, mannitol of sucrose (`os-iso`, `os-add`): hoeveel mM en g/L erbij, of hoeveel verdunnen; validatiegeval. Deel 3: Kjeldahl, Waterhardheid, Buffercapaciteit en Oplosbaarheid (K<sub>sp</sub>) staan in het menu als één item *Scheikunde-rekenaars* (`data-group` op de navlink: actief op elk van de vier, en het zoeken kijkt in hun namen, tags en synoniemen) met tabs bovenin elk van de vier (`.lk-tabs`). De vier secties, hun ids, deellinks en validatiegevallen zijn gebleven; ze zijn niet tot één component samengesmolten | — |
-| S100 | 162, 163 | Standard curve: compare models (AIC) and residual plot with click-to-exclude | Opus 5 |
+| S100 | 162, 163 | Standard curve: compare models (AIC) and residual plot with click-to-exclude | ✅ Standaardcurve fit alle vijf modellen op dezelfde punten en toont R², AICc en ΔAICc (`s-aic`; AICc volgens Burnham en Anderson 2002) met *beste* en een knop *Gebruik dit model* (`s-aicuse`). Onder de uitkomst een residuplot per replicaat (`s-rcv`): een residu groter dan 2,5 × de SD van de residuen wordt gemeld (`s-resout`), en een klik op een punt sluit dat replicaat uit van de fit of neemt het weer mee (`excl`, open rondjes; *Alles weer meenemen*). Zonder uitsluiting is de fit dezelfde als voorheen. Validatiegeval tegen numpy | — |
 | S101 | 164, 167, 171, 172 | Out-of-range unknowns, wavelength presets, Z′ verdict, purification chart ✅ dilution advice for unknowns above the standards (1-2-5 steps); Spec has no wavelength field, so a preset fills ε and names the wavelength; the Z′ well strip lists the control values, not their plate positions | Sonnet |
 | S102 | 165, 166 | Enzyme kinetics: all plots from one table; inhibition comparison ✅ global fit of four inhibition models with AICc and Akaike weights (`src/lib/inhib.js`); with noise-free competitive data the mixed model ties on fit, so the competitive weight tops out near 0.84 at n = 18 | Sonnet |
 | S103 | 168, 169 | Dose-response multi-compound; chromatography peak import ✅ several compounds via a paste box with IC50 ± 95% CI and an extra-sum-of-squares F test for two at a time; peak-table parser in `src/lib/peaktable.js` (unit-tested) with a labelled chromatogram sketch | Sonnet |

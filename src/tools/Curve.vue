@@ -82,8 +82,23 @@
             <lk-note v-if="fs.rcov > 15" kind="warn">{{ t('Een of meer standaarden wijken bij terugrekenen meer dan 15% af. Probeer een ander model of laat een afwijkend punt weg.') }}</lk-note>
             <lk-note v-if="model === 'lin' && std.length > 4 && fs.r2 < 0.99" kind="info">{{ t('Bradford-curves buigen af bij hogere concentraties; probeer kwadratisch of beperk de standaarden tot het lineaire deel.') }}</lk-note>
             <lk-note v-if="model === '4pl' && new Set(fs.X).size < 6" kind="warn">{{ t('Met minder dan 6 standaardniveaus is een 4PL-fit slecht bepaald.') }}</lk-note>
+            <!-- S100 (#162): alle modellen naast elkaar, met de AICc (Burnham en Anderson 2002) -->
+            <div class="lbl" style="margin-top:10px">{{ t('Modelvergelijking') }}</div>
+            <lk-table table-id="s-aic" :cols="aicCols" :rows="aicRows"/>
+            <div v-if="aic.best && aic.best !== model" class="row" style="gap:8px;align-items:center;margin-top:6px">
+              <lk-note kind="info" style="margin:0">{{ aicMsg }}</lk-note>
+              <button type="button" id="s-aicuse" @click="model = aic.best">{{ t('Gebruik dit model') }}</button>
+            </div>
           </template>
         </div>
+        <!-- S100 (#163): residuen per replicaat; klik een punt aan om het uit te sluiten of weer mee te nemen -->
+        <template v-if="fs.stage === 'ok'">
+          <div class="lbl" style="margin-top:12px">{{ t('Residuen (gemeten − fit)') }}</div>
+          <canvas id="s-rcv" @click="resClick" style="cursor:pointer"></canvas>
+          <p style="font-size:13px;color:var(--muted);margin:4px 0 0">{{ t('Klik op een punt om het uit te sluiten of weer mee te nemen; uitgesloten punten zijn open rondjes.') }}</p>
+          <lk-note v-if="resOut.length" kind="warn" id="s-resout">{{ resMsg }}</lk-note>
+          <lk-note v-if="excl.length" kind="info" id="s-exnote">{{ t(excl.length + ' punt(en) uitgesloten van de fit.') }} <button type="button" id="s-exclr" class="xlbtn" @click="excl = []">{{ t('Alles weer meenemen') }}</button></lk-note>
+        </template>
       </div>
     </div>
     <div class="panel">
@@ -137,6 +152,9 @@ const MODELS = [{k: 'lin', n: 'Lineair y = a + bx'}, {k: 'lin0', n: 'Lineair doo
 /* verdunningsfactor naar boven afgerond op de 1-2-5-reeks (2, 5, 10, 20, 50, 100, …), minstens 2 */
 const nice = f => { const p = 10 ** Math.floor(Math.log10(f)); return Math.max(2, [1, 2, 5, 10].map(k => k * p).find(v => v >= f * (1 - 1e-9))); };
 
+/* S100: aantal parameters per model, voor de AICc */
+const NPAR = {lin0: 1, lin: 2, quad: 3, '4pl': 4, '5pl': 5};
+
 const ST = {out: ['buiten curve', 'bad'], hi: ['boven hoogste std', 'warn'], lo: ['onder laagste std', 'warn'], ok: ['binnen bereik', 'ok']};
 
 export default {
@@ -147,7 +165,7 @@ export default {
       preset: 'bradford', model: P.model, unit: P.unit, blank: P.blank, logx: P.logx,
       std: stdRows(P), unk: unkRows(P),
       ptxt: '', pstd: '1-2', pconc: '0 25 125 250 500 750 1000 1500', punk: '3-12', prep: '2', pdir: 'h', pmsg: null,
-      copied: ''
+      copied: '', excl: []
     };
   },
   computed: {
@@ -168,7 +186,7 @@ export default {
     /* de hele fit: de oude calc.curve() tot en met de terugberekening van de standaarden */
     fs() {
       const model = this.model, unit = this.unit || '', useBlank = this.blank, logx = this.logx;
-      const rows = this.std.map(r => ({c: num(r[0]), a: [r[1], r[2], r[3]].map(num).filter(isFinite)}));
+      const ex = this.excl, rows = this.std.map((r, i) => ({c: num(r[0]), a: [r[1], r[2], r[3]].map((v, j) => (ex.includes(i + ':' + j) ? NaN : num(v))).filter(isFinite)}));
       let blank = 0; if (useBlank) { const z = rows.filter(r => r.c === 0 && r.a.length).flatMap(r => r.a); if (z.length) blank = mean(z); }
       const X = [], Y = []; const used = rows.filter(r => isFinite(r.c) && r.a.length);
       used.forEach(r => { r.y = r.a.map(v => v - blank); r.m = mean(r.y); r.y.forEach(v => { X.push(r.c); Y.push(v); }); });
@@ -242,7 +260,45 @@ export default {
       return [[t('Model'), t(MODELS.find(m => m.k === model).n)], ['R²', `<span class="chip ${r2 >= 0.99 ? 'ok' : r2 >= 0.98 ? 'warn' : 'bad'}">${FM(r2, 4)}</span>`],
         [t('Blanco'), useBlank && blank ? FM(blank, 3) : t('niet afgetrokken')], [t('Signaalbereik std'), `${FM(ylo, 3)} – ${FM(yhi, 3)}`], ...lodRows];
     },
-    eqHtml() { return lkNumIn(this.fs.fit.eq); }
+    eqHtml() { return lkNumIn(this.fs.fit.eq); },
+    /* S100: elk model op dezelfde punten; AICc = n·ln(SSR/n) + 2k + 2k(k+1)/(n−k−1), k = aantal parameters */
+    aic() {
+      const S = this.fs; if (S.stage !== 'ok') return {list: [], best: null};
+      const {X, Y} = S, n = X.length, my = mean(Y), sst = Y.reduce((s, y) => s + (y - my) ** 2, 0);
+      const list = MODELS.map(M => {
+        const k = NPAR[M.k], lv = new Set(X).size;
+        const fit = lv >= Math.max(2, k) ? fitCurve(M.k, X, Y) : null;
+        if (!fit || n - k - 1 <= 0) return {k: M.k, n: M.n};
+        const ssr = Y.reduce((s, y, i) => s + (y - fit.f(X[i])) ** 2, 0);
+        if (!(ssr > 0) || !isFinite(ssr)) return {k: M.k, n: M.n};
+        return {k: M.k, n: M.n, r2: 1 - ssr / sst, aicc: n * Math.log(ssr / n) + 2 * k + 2 * k * (k + 1) / (n - k - 1)};
+      });
+      const ok = list.filter(x => isFinite(x.aicc)), lo = ok.length ? Math.min(...ok.map(x => x.aicc)) : NaN;
+      list.forEach(x => { x.d = x.aicc - lo; });
+      return {list, best: ok.length ? ok.find(x => x.aicc === lo).k : null};
+    },
+    aicCols() { const t = this.t; return [{h: t('Model')}, {h: 'R²', num: true}, {h: 'AICc', num: true}, {h: 'ΔAICc', num: true}]; },
+    aicRows() {
+      const t = this.t;
+      return this.aic.list.map(x => ({cls: x.k === this.model ? 'sel' : '', cells: [t(x.n) + (x.k === this.aic.best ? ' <span class="chip ok">' + t('beste') + '</span>' : ''),
+        isFinite(x.r2) ? FM(x.r2, 4) : '–', isFinite(x.aicc) ? FM(x.aicc, 1) : '–', isFinite(x.d) ? FM(x.d, 1) : '–']}));
+    },
+    /* S100: residu van elk replicaat (ook de uitgesloten) tegen de huidige fit */
+    res() {
+      const S = this.fs; if (S.stage !== 'ok') return [];
+      const out = [];
+      this.std.forEach((r, i) => { const c = num(r[0]); if (!isFinite(c)) return;
+        [r[1], r[2], r[3]].forEach((v, j) => { const a = num(v); if (!isFinite(a)) return;
+          if (S.useBlank && c === 0) return;   /* de blanco zelf is de nul van de as */
+          const y = a - S.blank; out.push({key: i + ':' + j, c, y, e: y - S.fit.f(c), ex: this.excl.includes(i + ':' + j)}); }); });
+      const inc = out.filter(p => !p.ex), k = NPAR[S.model] || 2;
+      const s = inc.length > k ? Math.sqrt(inc.reduce((q, p) => q + p.e ** 2, 0) / (inc.length - k)) : NaN;
+      out.forEach(p => { p.big = !p.ex && s > 0 && Math.abs(p.e) > 2.5 * s; });
+      return out;
+    },
+    aicMsg() { return this.t('De laagste AICc heeft ' + uv(this.modelName(this.aic.best)) + '.'); },
+    resMsg() { return this.t('Mogelijke uitschieter (residu groter dan 2,5 × de standaardafwijking van de residuen): ' + uv(this.resOut.join('; ')) + '.'); },
+    resOut() { return this.res.filter(p => p.big).map(p => SG(p.c, 3) + ' ' + (this.unit || '') + ' (' + FM(p.y, 3) + ')'); }
   },
   mounted() {
     window.__curveVm = this;
@@ -288,8 +344,28 @@ export default {
       this.std = std.map(r => row([r[0], r[1], r[2], r[3]], SW)); this.unk = unk.map(r => { const x = row(r, UW); x[0] = String(r[0]); return x; });
       this.pmsg = {kind: 'info', text: t(`${rows.length} rijen gelezen: ${std.length} standaarden en ${unk.length} monsters overgenomen.`) + (rep > 3 ? ' ' + t('Er worden maximaal 3 replicaten gebruikt.') : '')};
     },
+    modelName(k) { const M = MODELS.find(m => m.k === k); return M ? this.t(M.n) : k; },
+    /* S100: de residuplot; this._rp onthoudt waar elk punt op het canvas staat, voor resClick */
+    drawRes() {
+      const cv = document.getElementById('s-rcv'), P = this.res; if (!cv || !P.length) return;
+      const xs = P.map(p => p.c).filter(x => !this.fs.logx || x > 0), es = P.map(p => p.e), m = Math.max(...es.map(Math.abs)) * 1.2 || 1;
+      const logx = this.fs.logx && xs.length > 0, xmin = logx ? Math.min(...xs) / 1.5 : 0, xmax = Math.max(...xs) * (logx ? 1.5 : 1.05);
+      const pts = P.filter(p => !logx || p.c > 0);
+      const map = chart(cv, {xmin, xmax, ymin: -m, ymax: m, logx, h: 220, xlabel: 'concentratie (' + (this.unit || '') + ')', ylabel: 'residu',
+        series: [{fn: () => 0, x0: xmin, x1: xmax, color: '--muted'},
+          {pts: pts.filter(p => !p.ex && !p.big).map(p => [p.c, p.e]), color: '--ink', name: 'standaard'},
+          {pts: pts.filter(p => p.big).map(p => [p.c, p.e]), color: '--bad', r: 5, name: 'mogelijke uitschieter'},
+          {pts: pts.filter(p => p.ex).map(p => [p.c, p.e]), color: '--muted', r: 5, hollow: true, name: 'uitgesloten'}]});
+      this._rp = map ? pts.map(p => ({key: p.key, x: map.X(p.c), y: map.Y(p.e)})) : [];
+    },
+    resClick(e) {
+      const cv = e.currentTarget, sc = (cv.width / (window.devicePixelRatio || 1)) / cv.clientWidth, x = e.offsetX * sc, y = e.offsetY * sc;
+      let best = null, bd = 12 * sc; (this._rp || []).forEach(p => { const d = Math.hypot(p.x - x, p.y - y); if (d < bd) { bd = d; best = p; } });
+      if (best) this.excl = this.excl.includes(best.key) ? this.excl.filter(k => k !== best.key) : [...this.excl, best.key];
+    },
     /* de tekening, met de tekencontext via chart(); dezelfde reeksen als de oude calc.curve() */
     draw() {
+      this.drawRes();
       const cv = document.getElementById('s-cv'), S = this.fs; if (!cv) return;
       if (S.stage === 'few') { cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); return; }
       if (S.stage !== 'ok') return;
