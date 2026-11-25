@@ -1,0 +1,4 @@
+Sample ID	User ID	Date	Time	Nucleic Acid Conc.	Unit	A260	A280	260/280	260/230	Sample Type	Factor
+S1	Default	11/24/2026	10:02 AM	85.0	ng/ul	1.700	0.919	1.85	2.10	DNA	50.00
+S2	Default	11/24/2026	10:03 AM	22.6	ng/ul	0.452	0.251	1.80	1.50	DNA	50.00
+S3	Default	11/24/2026	10:04 AM	156.0	ng/ul	3.120	1.560	2.00	2.20	DNA	50.00

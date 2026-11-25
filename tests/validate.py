@@ -201,6 +201,19 @@ def _(pg):
     pg.evaluate("__go('dna');__set('p-ng','50');__set('p-bp','1000');__set('p-t','660');__set('p-vol','1')")
     return [('nM', pg.evaluate("__kv('#p-out','Concentratie')"), 75.8, 0.002)]
 
+@case('DNA-kwantificatie', 'NanoDrop-export inlezen (2000 en One)', 'Thermo Scientific NanoDrop 2000/2000c User Manual en NanoDrop One User Guide: de export staat op 10 mm, dsDNA 50 ng/µL per A₂₆₀; testbestanden tests/fixtures/nanodrop/ met de concentraties 85,0 / 22,6 / 156,0 ng/µL die het apparaat zelf meldt; 260/280 = 1,85 en 260/230 = 2,10 voor S1')
+def _(pg):
+    out = []
+    for f in ('nd2000.tsv', 'one.csv'):
+        pg.evaluate("__go('dna');__set('n-type','50');__set('n-a320','');__set('n-df','10');__set('n-tc','')"); pg.wait_for_timeout(100)
+        pg.evaluate("__set('n-mode','multi')"); pg.wait_for_timeout(100)
+        pg.set_input_files('#nb-ndf', str(ROOT / 'tests' / 'fixtures' / 'nanodrop' / f)); pg.wait_for_timeout(300)
+        c = pg.evaluate("[...document.querySelectorAll('#nb-out tbody tr')].map(tr=>[...tr.cells].slice(1,4).map(td=>__n(__el(td))))")
+        out += [(f + ' S1 ng/µL', c[0][0], 85.0, 0.002), (f + ' S2 ng/µL', c[1][0], 22.6, 0.002), (f + ' S3 ng/µL', c[2][0], 156.0, 0.002),
+                (f + ' S1 260/280', c[0][1], 1.85, 0.003), (f + ' S1 260/230', c[0][2], 2.10, 0.003)]
+    pg.evaluate("__set('n-mode','one');__set('n-df','10')"); pg.wait_for_timeout(100)
+    return out
+
 @case('PCR-mastermix', 'NEB Taq, 25 en 50 µL', 'NEB-protocol M0273: 2,5 / 0,5 / 0,5 / 0,5 / 0,125 µL per 25 µL; Taq 0,25 µL per 50 µL')
 def _(pg):
     pg.evaluate("__go('pcr');__set('q-preset','taq');__set('q-v','25')")
@@ -2153,6 +2166,19 @@ def _(pg):
     pg.evaluate("__go('facs');__set('fc-n','10');__set('fc-x','0');__set('fc-v','50');__tbl('fc-tbl',[['CD4','PE',200,'nee']],'facs');__set('fc-mp','18500');__set('fc-mn','210');__set('fc-sd','95');__set('fc-ce','24500');__set('fc-be','5200');__set('fc-bc','1000');__set('fc-bv','50');__set('fc-sv','100')")
     b = pg.evaluate("[...document.querySelectorAll('#fc-out .big')].map(e=>__n(e.textContent))")
     return [('antilichaam per test (µL)', pg.evaluate("__n(document.querySelector('#fc-out tbody tr').cells[2].textContent)"), 0.25, 0.001), ('stain index', b[1], 18290/190, 0.002), ('cellen/µL', b[2], 24500/5200*500, 0.002)]
+
+@case('Flowcytometrie (panel & controles)', 'Populaties uit FlowJo en FACSDiva', 'Testbestanden tests/fixtures/flow/ (dezelfde twee buisjes in beide vormen): CD3+ 71,3 % van de ouder in T1; met telbeads (zoals BD Trucount: cellen/µL = events cellen / events beads × beads toegevoegd / monstervolume) 10234/5012 × 1000 × 50/100 = 1021 en 9120/4870 × 500 = 936,3 cellen/µL')
+def _(pg):
+    out = []
+    pg.evaluate("__go('facs');__set('fc-bc','1000');__set('fc-bv','50');__set('fc-sv','100')")
+    for f in ('flowjo.csv', 'facsdiva.csv'):
+        pg.set_input_files('#fc-flf', str(ROOT / 'tests' / 'fixtures' / 'flow' / f)); pg.wait_for_timeout(300)
+        p = pg.evaluate("[...document.querySelectorAll('#fc-fltbl tbody tr')].map(tr=>[...tr.cells].slice(1).map(td=>__n(td.textContent)))")
+        a = pg.evaluate("[...document.querySelectorAll('#fc-flabs tbody tr')].map(tr=>[...tr.cells].slice(1).map(td=>__n(td.textContent)))")
+        out += [(f + ' CD3+ % T1', p[0][2], 71.3, 0.001), (f + ' Lymphocytes % T2', p[1][0], 58.0, 0.001),
+                (f + ' CD3+ cellen/µL T1', a[0][-1], 10234 / 5012 * 500, 0.002), (f + ' CD3+ cellen/µL T2', a[1][-1], 9120 / 4870 * 500, 0.002)]
+    pg.evaluate("__set('fc-fl','')")
+    return out
 
 @case('Mengprofiel & LR', 'LR en mengverhouding', 'Vier allelen, slachtoffer 14/15, verdachte 16/18, θ = 0: LR = 1/(2·p₁₆·p₁₈) = 1/(2 × 0,25 × 0,15) = 13,3; M_x = (420 + 390)/3640 = 0,22. Met θ = 0,03 onafhankelijk in Python (Balding & Nichols 1994)')
 def _(pg):
