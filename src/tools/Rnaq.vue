@@ -32,8 +32,8 @@
           <lk-note kind="info">{{ t('Een indicatie op basis van alleen de 28S:18S-verhouding; de echte RIN (Agilent-algoritme) kun je niet uit een verhouding berekenen. Het elektroferogram is een illustratie, geen meting.') }}</lk-note>
         </template>
         <lk-note v-if="m.a < 0.1 || m.a > 1" kind="warn">{{ t('A₂₆₀ buiten 0,1–1,0: de meting is minder betrouwbaar; pas de verdunning aan.') }}</lk-note>
-        <lk-note v-if="isFinite(m.r1) && m.r1 < 1.8" kind="warn">{{ t('Lage A₂₆₀/A₂₈₀: mogelijk eiwit of fenol in het extract.') }}</lk-note>
-        <lk-note v-if="isFinite(m.r2) && m.r2 < 1.8" kind="warn">{{ t('Lage A₂₆₀/A₂₃₀: mogelijk guanidinezouten, fenol of koolhydraten van de extractie.') }}</lk-note>
+        <lk-range what="A₂₆₀/A₂₈₀" :value="m.r1" :lo="1.8" :hi="2.2" :low="t('Mogelijk eiwit of fenol in het extract.')" :high="t('Hoger dan verwacht; controleer de blanco.')" :ok="t('Geen teken van eiwit of fenol.')"/>
+        <lk-range what="A₂₆₀/A₂₃₀" :value="m.r2" :lo="1.8" :low="t('Mogelijk guanidinezouten, fenol of koolhydraten van de extractie.')" :ok="t('Geen teken van zouten of fenol van de extractie.')"/>
         <lk-formula :html="t('c = A₂₆₀ × 40 µg/mL × verdunning / weglengte')"/>
       </template>
     </div>

@@ -32,8 +32,7 @@
         <template v-if="m.mode === 'conc'">
           <lk-big :label="t('Concentratie (onverdund)')" :value="m.cmM" sub="mM"/>
           <lk-kv :rows="m.kv"/>
-          <lk-note v-if="m.high" kind="warn">{{ t('A boven ±1,5 valt buiten het lineaire bereik van de meeste fotometers; verdun en meet opnieuw.') }}</lk-note>
-          <lk-note v-else-if="m.low" kind="warn">{{ t('Erg lage absorbantie; de meetfout is relatief groot.') }}</lk-note>
+          <lk-range what="A" :value="m.A" :lo="0.05" :hi="1.5" :low="t('Bij een zo lage absorbantie is de meetfout relatief groot.')" :high="t('Dat valt buiten het lineaire bereik van de meeste fotometers; verdun en meet opnieuw.')" :ok="t('Binnen het lineaire bereik van de meeste fotometers.')"/>
           <lk-formula :html="t('c = A / (ε · l) × verdunning')"/>
         </template>
         <template v-else-if="m.mode === 'abs'">
@@ -107,7 +106,7 @@ export default {
         const c = A / (e * l) * df;
         m.mode = 'conc'; m.cmM = S(c * 1e3, 4);
         m.kv = [[t('In de cuvet'), S(A / (e * l) * 1e6, 4) + ' µM'], [t('Onverdund'), S(c * 1e6, 4) + ' µM'], [t('Verdunningsfactor'), F(df, 2)]];
-        m.high = A > 1.5; m.low = !m.high && A < 0.05;
+        m.A = A;
       } else if (isFinite(cin) && e > 0) {
         const a = cin / 1e3 * e * l / df;
         m.mode = 'abs'; m.aExp = F(a, 3);

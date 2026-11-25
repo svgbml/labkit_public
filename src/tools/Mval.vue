@@ -49,6 +49,7 @@
         <template v-else>
           <lk-big :label="t('Criteria voldaan')" :value="R.pass" :sub="t(`van ${R.tot}`)"/>
           <lk-kv :rows="rows"/>
+          <lk-reps :vals="repVals" :cv-max="Infinity" :digits="4" :label="t('Herhaalde metingen')"/>
         </template>
       </div>
     </div>
@@ -73,6 +74,7 @@ export default {
     };
   },
   computed: {
+    repVals() { return numsC(this.rep); },
     X() { return numsC(this.x); },
     Y() { return numsC(this.y); },
     /* de maten uit mvalCalc(); null zolang er niets is om te rekenen */

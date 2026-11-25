@@ -56,6 +56,28 @@
       </template>
       <lk-formula :html="tHtml('V&lt;sub&gt;antilichaam&lt;/sub&gt; = V&lt;sub&gt;test&lt;/sub&gt; / titratie · SI = (MFI&lt;sub&gt;pos&lt;/sub&gt; − MFI&lt;sub&gt;neg&lt;/sub&gt;) / (2·SD&lt;sub&gt;neg&lt;/sub&gt;)')"/>
     </div></div>
+    <!-- S94 (#139): de populaties uit een export van FlowJo of FACSDiva, met telbeads omgerekend naar cellen/µL -->
+    <div class="panel" style="grid-column:1/-1">
+      <h3 style="margin:0 0 6px;font-size:14px">{{ t('Populaties uit FlowJo of FACSDiva') }}</h3>
+      <div class="f">
+        <label for="fc-fl">{{ t('Plak de tabel of kies het bestand') }}</label>
+        <textarea id="fc-fl" rows="4" v-model="fl" style="width:100%"></textarea>
+      </div>
+      <div class="row" style="margin-top:6px;gap:6px">
+        <button type="button" id="fc-flb" @click="$refs.fl.click()">{{ t('Bestand…') }}</button>
+        <input ref="fl" id="fc-flf" type="file" accept=".csv,.txt,.tsv" hidden @change="flFile">
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('FlowJo: Table Editor, opslaan als CSV, met Freq. of Parent en Count. FACSDiva: populatiestatistiek met Population, #Events en %Parent. Een populatie met "bead" in de naam en een aantal telt als telbeads; dan staan de cellen/µL eronder, met de bead-gegevens hierboven.') }}</p>
+      <lk-note v-if="fl.trim() && !fr.samples.length" kind="bad">{{ t('Geen export van FlowJo of FACSDiva herkend.') }}</lk-note>
+      <template v-if="fr.samples.length">
+        <div class="lbl" style="margin-top:10px">{{ t('% van de ouderpopulatie') }}</div>
+        <lk-table table-id="fc-fltbl" :cols="flCols" :rows="flRows"/>
+        <template v-if="flAbs">
+          <div class="lbl" style="margin-top:10px">{{ t('Cellen/µL (telbeads)') }}</div>
+          <lk-table table-id="fc-flabs" :cols="flAbs.cols" :rows="flAbs.rows"/>
+        </template>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -63,6 +85,7 @@
 import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
 import {overage} from '../lib/overage.js';
+import {flowRead} from '../lib/flowread.js';
 
 /* een getal dat de component zelf opmaakt (fmt, sig, sci, vol) in de taal van de gebruiker */
 const L = lkNumIn;
@@ -75,7 +98,7 @@ export default {
       rows: [['CD3', 'FITC', '100', 'nee'], ['CD4', 'PE', '200', 'nee'], ['CD8', 'APC', '100', 'nee'],
         ['CD25', 'PE-Cy7', '50', 'ja'], ['CD127', 'BV421', '50', 'ja'], ['Viability', '7-AAD', '100', 'nee']],
       mp: '18500', mn: '210', sd: '95',
-      ce: '24500', be: '5200', bc: '1000', bv: '50', sv: '100'
+      ce: '24500', be: '5200', bc: '1000', bv: '50', sv: '100', fl: ''
     };
   },
   computed: {
@@ -125,6 +148,21 @@ export default {
       return isFinite(mp) && isFinite(mn) && sdn > 0 ? (mp - mn) / (2 * sdn) : null;
     },
     ratio() { const mp = num(this.mp), mn = num(this.mn); return mn > 0 ? L(fmt(mp / mn, 1)) : '–'; },
+    /* S94: de geplakte of gekozen export; de populaties zonder % (alleen een aantal, zoals de beads) staan niet in de %-tabel */
+    fr() { return flowRead(this.fl); },
+    flPops() { const r = this.fr; return r.pops.filter(p => r.samples.some(s => isFinite((r.pct[s] || {})[p.key]))); },
+    flCols() { return [{h: this.t('Monster')}, ...this.flPops.map(p => ({h: esc(p.name), num: true}))]; },
+    flRows() { const r = this.fr; return r.samples.map(s => [esc(s), ...this.flPops.map(p => { const v = (r.pct[s] || {})[p.key]; return isFinite(v) ? L(fmt(v, 1)) + ' %' : '–'; })]); },
+    /* cellen/µL = aantal / bead-events × beads toegevoegd / monstervolume, zoals cnt() hieronder, per monster */
+    flAbs() {
+      const r = this.fr, bead = r.pops.find(p => /bead/i.test(p.name)), bc = num(this.bc), bv = num(this.bv), sv = num(this.sv);
+      if (!bead || !(bc > 0 && bv > 0 && sv > 0)) return null;
+      const pops = r.pops.filter(p => p !== bead && r.samples.some(s => isFinite((r.cnt[s] || {})[p.key])));
+      if (!pops.length) return null;
+      return {cols: [{h: this.t('Monster')}, ...pops.map(p => ({h: esc(p.name), num: true}))],
+        rows: r.samples.map(s => { const b = (r.cnt[s] || {})[bead.key];
+          return [esc(s), ...pops.map(p => { const c = (r.cnt[s] || {})[p.key]; return b > 0 && isFinite(c) ? L(sig(c / b * bc * bv / sv, 3)) : '–'; })]; })};
+    },
     /* absolute celconcentratie met telbeads */
     cnt() {
       const ce = num(this.ce), be = num(this.be), bc = num(this.bc), bv = num(this.bv), sv = num(this.sv);
@@ -134,7 +172,8 @@ export default {
   },
   methods: {
     L, fmt, sig, sci, vol,
-    addRow() { this.rows = [...this.rows, ['', '', '', 'nee']]; }
+    addRow() { this.rows = [...this.rows, ['', '', '', 'nee']]; },
+    flFile(e) { const f = e.target.files[0]; if (!f) return; f.text().then(t => { this.fl = t; }); e.target.value = ''; }
   }
 };
 </script>

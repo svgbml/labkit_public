@@ -1,0 +1,9 @@
+Tube Name,Population,#Events,%Parent,%Total
+T1.fcs,Lymphocytes,15100,62.4,62.4
+T1.fcs,Single Cells,14360,95.1,59.3
+T1.fcs,CD3+,10234,71.3,42.3
+T1.fcs,Beads,5012,,20.7
+T2.fcs,Lymphocytes,13900,58.0,58.0
+T2.fcs,Single Cells,13066,94.0,54.5
+T2.fcs,CD3+,9120,68.2,37.2
+T2.fcs,Beads,4870,,20.3

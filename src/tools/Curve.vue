@@ -78,6 +78,7 @@
             <div class="lbl" style="margin-top:8px">{{ t('Fit') }}</div>
             <lk-kv :rows="kvRows"/>
             <lk-formula :html="eqHtml"/>
+            <lk-range what="R²" :value="fs.r2" :lo="0.99" :digits="3" :low="t('De standaarden liggen niet mooi op de curve; kijk naar afwijkende punten of kies een ander model.')" :ok="t('De standaarden liggen goed op de curve.')"/>
             <lk-note v-if="fs.rcov > 15" kind="warn">{{ t('Een of meer standaarden wijken bij terugrekenen meer dan 15% af. Probeer een ander model of laat een afwijkend punt weg.') }}</lk-note>
             <lk-note v-if="model === 'lin' && std.length > 4 && fs.r2 < 0.99" kind="info">{{ t('Bradford-curves buigen af bij hogere concentraties; probeer kwadratisch of beperk de standaarden tot het lineaire deel.') }}</lk-note>
             <lk-note v-if="model === '4pl' && new Set(fs.X).size < 6" kind="warn">{{ t('Met minder dan 6 standaardniveaus is een 4PL-fit slecht bepaald.') }}</lk-note>

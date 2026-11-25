@@ -62,6 +62,7 @@
           <lk-note v-if="m.bad.length" kind="warn">{{ t('Overgeslagen (geen hele telling): ' + list(m.bad) + '. Tel per vak alleen hele cellen.') }}</lk-note>
           <lk-note v-if="m.dead.length && m.dead.length !== m.live.length" kind="warn">{{ t('Levend heeft ' + m.live.length + ' vakken en dood ' + m.dead.length + '; tel beide in dezelfde vakken.') }}</lk-note>
           <lk-note v-if="m.mL < 10" kind="warn">{{ t('Gemiddeld minder dan 10 cellen per vak: tel meer of grotere vakken voor een betrouwbare schatting.') }}</lk-note>
+          <lk-reps :vals="m.live" :cv-max="Infinity" :label="t('Levende cellen per vak')"/>
           <lk-note v-if="m.cv > 25" kind="warn">{{ t('Grote spreiding tussen vakken (CV ' + fmt(m.cv, 0) + '%). Controleer of de suspensie goed gemengd en de kamer egaal gevuld is.') }}</lk-note>
           <lk-formula :html="tHtml('cellen/mL = gem. telling / V<sub>vak</sub>(µL) × 1000 × verdunning')"/>
           <!-- de knoppenbalk die SEND (tools/nt/99_app.js) eerder met insertAdjacentHTML onder de

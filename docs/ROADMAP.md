@@ -6,11 +6,11 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 
 **Model** (last column) is the cheapest model that can do the step well, so the shared usage limit lasts longer. Done steps show "—".
 - **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (1 open step).
-- **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (14 open steps).
+- **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (12 open steps).
 - **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (24 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (9 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **223 done, 47 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **225 done, 45 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-23)
 
@@ -23,7 +23,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 4 recipes and sequences | S37–S47 | ✅ done (batches P1–P3) |
 | Phase 5 execution | S48–S61 | ✅ done (batches E1–E4) |
 | Phase 6 gel editor rebuild | S62–S79 | ✅ done |
-| Phase 7 charts, figures and data | S80–S96 | **part done:** S94, S95 open (batch C4) |
+| Phase 7 charts, figures and data | S80–S96 | ✅ done |
 | Phase 8 rework existing tools | S97–S116 | **part done:** S99, S100, S105, S113, S114 open (batch R3) |
 | Phase 9 structure and workflows | S117–S121 | ⏳ not started (batch W1) |
 | Phase 10 performance | S122–S133 | ⏳ not started; F1a re-plans it first |
@@ -166,7 +166,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | C1b ✅ | Opus 5 | S85–S88 | C1a | anything except R3 | — |
 | C2 ✅ | Opus 5.5 | S89–S90 figure maker (new tool, Vue) | C1b | anything except G3 | — |
 | C3 ✅ | Opus 5 | S91–S93, S96: imports and core-calculator extras | C1b | anything except R3 | tdd |
-| C4 | Sonnet | S94, S95 | C3 | anything | tdd |
+| C4 ✅ | Sonnet | S94, S95 | C3 | anything | tdd |
 | R1 ✅ | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 | — |
 | R2a ✅ | Sonnet | S106–S110 | K3 | anything except E3 | — |
 | R2b ✅ | Sonnet | S111, S112, S115, S116 | K3 | anything | — |
@@ -368,8 +368,8 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S91 | 136 | Plate-reader import wizard part 1: parser for 3 formats *(partly there: Standaardcurve reads a pasted plate grid)* | ✅ `plateRead()` in `src/lib/platereader.js` herkent vier exportvormen: rijletter-raster (BioTek Gen5, Multiskan, Excel; meerdere metingen worden aparte platen met hun naam, de golflengte achter de rij telt niet mee), Tecan i-control/Magellan (`<>`-kop), SoftMax Pro (`Plate:`-blok zonder rijletters, tot `~End`) en een lijst per putje (BMG CLARIOstar, A01 of A1); verzadigde waarden (OVER, OVRFLW, Range?) vallen weg met een waarschuwing, 384-wells gaan mee. Testbestanden in `tests/fixtures/platereader/` (dezelfde plaat in alle vier) en `tests/unit/platereader.test.mjs`; de plaatlezer-import van Standaardcurve gebruikt hem al (validatiegeval Tecan en SoftMax) | — |
 | S92 | 136 | Import wizard part 2: map wells → standard curve, ELISA, Z′ | ✅ Venster *Plaatlezer-bestand…* (`plateWizard` in `src/tools/platewiz.js`) in Standaardcurve, ELISA en Z′: bestand openen of plakken, de vorm wordt herkend (S91), plaat kiezen bij meer metingen, verzadigde putjes gemeld. Standaardcurve krijgt het plaatblok in zijn plaatlezer-import (kolommen kies je daar), ELISA het absorptieblok van 8 × 12 (`el-a`), en bij Z′ wijs je putjes aan als positief, negatief of monster, die naar `zp-pos`, `zp-neg` en `zp-s` gaan. Getest in `tests/validate.py` met de Tecan-export | — |
 | S93 | 137, 195 | qPCR instrument import (CFX, QuantStudio, LightCycler) *(partly there: qPCR-analyse reads a pasted Ct table by its header)* | ✅ `qpcrRead()` in `src/lib/qpcrread.js` leest de exports van Bio-Rad CFX (Quantification Cq Results), QuantStudio/7500 (`[Results]`, Undetermined) en LightCycler 480 (een blok per gen na `Experiment:`, het gen uit de naam van het experiment); qPCR-analyse gebruikt hem eerst en valt anders terug op de kopregel, met een bestandskeuze erbij. Testbestanden met dezelfde run in `tests/fixtures/qpcr/`, `tests/unit/qpcrread.test.mjs` en een validatiegeval (fold change 6,28 in alle drie) | — |
-| S94 | 138, 139 | NanoDrop and flow summary import | Both import | Sonnet |
-| S95 | 140, 147, 141 | Interpretation lines, reference ranges, replicate checker | Shown in 10 tools | Sonnet |
+| S94 | 138, 139 | NanoDrop and flow summary import | ✅ `nanodropRead()` in `src/lib/nanodrop.js` leest exports van de NanoDrop 2000 en One/Eight (.tsv/.csv) in de tabel met meerdere monsters van DNA-kwantificatie (knop *NanoDrop-export…*, verdunning en weglengte op 1); `flowRead()` in `src/lib/flowread.js` leest populatietabellen uit FlowJo (Table Editor) en FACSDiva in Flowcytometrie, met % van de ouder en cellen/µL via telbeads. Testbestanden in `tests/fixtures/nanodrop/` en `tests/fixtures/flow/`, unit tests en twee validatiegevallen | Sonnet |
+| S95 | 140, 147, 141 | Interpretation lines, reference ranges, replicate checker | ✅ Twee gedeelde componenten in `src/lib/ui.js`: `<lk-range>` (waarde tegen het verwachte bereik, met een uitleg in gewone taal binnen, onder of boven het bereik) in RNA-kwaliteit (260/280, 260/230), Viabiliteit (≥ 90 %), Standaardcurve (R² ≥ 0,99), qPCR-analyse (efficiëntie 90–110 %), Spectrofotometrie (A 0,05–1,5) en Groeicurve (R² ≥ 0,98); `<lk-reps>` (n, gemiddelde, SD, CV en een uitschieter volgens Grubbs met `repCheck()` uit `src/lib/replicates.js`) in Z′ (beide controles), Telkamer, Methodevalidatie en Pipetkalibratie. Unit tests voor `repCheck()` en twee validatiegevallen. Dna-kwantificatie had al chips per verhouding en is niet aangepast | Sonnet |
 | S96 | 142, 143, 149, 150, 146, 145, 148, 144 | Results to report, method sentences, Excel with formulas, answer check, sig figs, output units, batch mode, uncertainty propagation (in 2–3 sub-steps if needed) | ✅ In vijf delen, alles in de gedeelde component `<lk-report>` (`src/lib/ui.js`) onder de uitkomst van de kerncalculators Verdunning, Centrifuge en Oplossing: (1) methodezin met *Kopieer methodezin* (#143), *→ Rapport* (#142) en *Controleer je antwoord* (#150, goed binnen 1 % of een halve eenheid van je laatste cijfer); (2) de regel *Uitkomst* met de significante cijfers van de tool en *Meer cijfers* (#146) en een keuze van de uitvoereenheid (#145, `:units`); (3) *Kopieer met formules* (#149): `sheetTSV()` in `src/lib/sheet.js` zet invoer en uitkomst als Excel-formule op de invoercellen, zonder functienamen zodat het ook in een Nederlandse Excel werkt; (4) batchmodus in Verdunning (#148): een geplakte lijst monsters in één tabel naar C₂ in V₂; (5) onzekerheid doorrekenen (#144): `relU()` in `src/lib/uncert.js` (GUM vgl. 12) met ± per invoer in Verdunning en Centrifuge, de uitkomst krijgt ± U (k = 2). Unit tests voor `sheet.js` en `uncert.js`, validatiegevallen per deel. Niet gedaan: ± in Oplossing (per component een eigen onzekerheid, dat vraagt een eigen tabel) en `<lk-report>` in tools buiten deze drie | — |
 
 ## Phase 8: rework existing tools (20 steps)
@@ -690,7 +690,7 @@ end of each batch with the full check (286/286).
 Checked 2026-11-23. The batch table above still decides what may run together.
 1. AL2b and SA2 are merged (2026-11-23), so AL2c and SA3 can start.
 2. **Finish what is started:** done (S96 and with it C3 on 2026-11-24; S79, G3, before that).
-3. **The cheap and self-contained batches:** C4 (Sonnet), Q2, and R3. R3 merges tools that have validation cases, so tdd matters most there.
+3. **The cheap and self-contained batches:** Q2 and R3 (C4 is done, 2026-11-25). R3 merges tools that have validation cases, so tdd matters most there.
 4. **The sequence line**, when it is the nearest practical need: SA3 → SA4, and AL2c → AL3 → AL4. SA4 also needs SQ2, which is done.
 5. **W1** only after a local grilling session has pinned down projects and data flow (see *Skills per batch*). It changes something every tool uses, so it runs alone.
 6. **F1a** last: re-plan phase 10 first, then F1b and F1c as the new rows say.

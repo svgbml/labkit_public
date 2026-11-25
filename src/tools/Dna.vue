@@ -36,7 +36,10 @@
         </div>
         <template v-if="mode === 'multi'">
           <lk-etable table-id="nb-tbl" :cols="cols" v-model:rows="rows" add-id="nb-tbl-add"/>
-          <div class="row" style="margin-top:8px"><button type="button" id="nb-tbl-add" @click="rows.push(['', '', '', ''])">{{ t('+ Monster') }}</button></div>
+          <div class="row" style="margin-top:8px;gap:6px;align-items:center"><button type="button" id="nb-tbl-add" @click="rows.push(['', '', '', ''])">{{ t('+ Monster') }}</button>
+            <button type="button" id="nb-nd" @click="$refs.nd.click()" :title="t('Een export van de NanoDrop 2000, One of Eight (.tsv of .csv)')">{{ t('NanoDrop-export…') }}</button>
+            <input ref="nd" id="nb-ndf" type="file" accept=".tsv,.csv,.txt,.ndj" hidden @change="ndFile"></div>
+          <lk-note v-if="ndMsg" :kind="ndMsg[0]">{{ ndMsg[1] }}</lk-note>
         </template>
       </div>
       <div v-if="mode === 'multi'" class="result" id="nb-out">
@@ -128,6 +131,7 @@
 <script>
 import {pipHtml} from '../lib/pip.js';
 import {lkNumIn} from '../lib/bridge.js';
+import {nanodropRead} from '../lib/nanodrop.js';
 
 /* getallen uit fmt/sig/sci in de taal van de gebruiker; tekst met een eenheid gaat door t() */
 const F = (x, d) => lkNumIn(fmt(x, d)), G = (x, d) => lkNumIn(sig(x, d)), S = (x, d) => lkNumIn(sci(x, d));
@@ -137,7 +141,7 @@ export default {
   name: 'Dna',
   data() {
     return {
-      mode: 'one', tc: '', tv: '20', rows: [[trPlain('Monster 1'), lkNumIn('0,85'), lkNumIn('0,46'), lkNumIn('0,41')], [trPlain('Monster 2'), lkNumIn('0,40'), lkNumIn('0,22'), lkNumIn('0,15')]],
+      ndMsg: null, mode: 'one', tc: '', tv: '20', rows: [[trPlain('Monster 1'), lkNumIn('0,85'), lkNumIn('0,46'), lkNumIn('0,41')], [trPlain('Monster 2'), lkNumIn('0,40'), lkNumIn('0,22'), lkNumIn('0,15')]],
       a260: lkNumIn('0,85'), a280: lkNumIn('0,46'), a230: lkNumIn('0,41'), a320: '', type: '50', df: '10', pl: '1', vol: '50',
       mc: lkNumIn('0,35'), mng: '1', mv: '15',
       png: '50', bp: '1000', pt: '660', pvol: '10',
@@ -220,6 +224,16 @@ export default {
     }
   },
   methods: {F, G,
+    /* S94 (#138): een NanoDrop-export in de tabel met meerdere monsters. De export staat al op 10 mm en is
+       onverdund gemeten, dus verdunningsfactor en weglengte gaan op 1. */
+    ndImport(text) {
+      const r = nanodropRead(text), d = x => (isFinite(x) ? lkNumIn(String(Math.round(x * 1e4) / 1e4).replace('.', ',')) : '');
+      if (!r.rows.length) { this.ndMsg = ['bad', this.t('Geen NanoDrop-export herkend: verwacht een kopregel met A260 en 260/280.')]; return; }
+      this.mode = 'multi'; this.df = '1'; this.pl = '1';
+      this.rows = r.rows.map(x => [x.name, d(x.a260), d(x.a280), d(x.a230)]);
+      this.ndMsg = ['ok', this.t(r.rows.length + ' monsters ingelezen; verdunningsfactor en weglengte op 1 gezet, want de export staat op 10 mm en is onverdund gemeten.')];
+    },
+    ndFile(e) { const f = e.target.files[0]; if (!f) return; f.text().then(t => this.ndImport(t)); e.target.value = ''; },
     /* A260 → concentratie en zuiverheid van één monster (de oude berekening, ongewijzigd + oordeel en verdunning) */
     one(s260, s280, s230) {
       const a260 = num(s260), a280 = num(s280), a230 = num(s230), a320 = num(this.a320) || 0;
