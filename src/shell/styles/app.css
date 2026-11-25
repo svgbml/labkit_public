@@ -158,6 +158,11 @@ canvas{max-width:100%}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
 .seg button{border:0;border-radius:0;padding:5px 12px;font-weight:500}
 .seg button+button{border-left:1px solid var(--line)}
+/* tabs bovenin samengevoegde tools (S99, Scheikunde-rekenaars) */
+.lk-tabs{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 12px;border-bottom:1px solid var(--line)}
+.lk-tabs a{padding:6px 12px;border:1px solid transparent;border-bottom:0;border-radius:6px 6px 0 0;color:var(--muted);text-decoration:none;font-weight:500;margin-bottom:-1px}
+.lk-tabs a:hover{color:var(--ink)}
+.lk-tabs a[aria-current=page]{color:var(--accent);background:var(--surface);border-color:var(--line);border-bottom:1px solid var(--surface)}
 .gfwrap{display:grid;grid-template-columns:104px minmax(0,1fr) 320px;gap:16px;align-items:start}
 /* canvas eerst (S70): alleen de panelen van het actieve gereedschap of de actieve stap */
 .gfwrap[data-gv="crop"] [data-gs]:not([data-gs~="crop"]),.gfwrap[data-gv="lanes"] [data-gs]:not([data-gs~="lanes"]),.gfwrap[data-gv="ladder"] [data-gs]:not([data-gs~="ladder"]),.gfwrap[data-gv="bands"] [data-gs]:not([data-gs~="bands"]),.gfwrap[data-gv="labels"] [data-gs]:not([data-gs~="labels"]),.gfwrap[data-gv="export"] [data-gs]:not([data-gs~="export"]),.gfwrap[data-gv="s1"] [data-gs]:not([data-gs~="s1"]),.gfwrap[data-gv="s2"] [data-gs]:not([data-gs~="s2"]),.gfwrap[data-gv="s3"] [data-gs]:not([data-gs~="s3"]),.gfwrap[data-gv="s4"] [data-gs]:not([data-gs~="s4"]){display:none}

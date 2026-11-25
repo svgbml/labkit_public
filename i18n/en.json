@@ -6183,5 +6183,10 @@
 "Fysiologisch zout ({#} % NaCl)": "Saline ({#} % NaCl)",
 "DMEM, zouten en glucose": "DMEM, salts and glucose",
 "Boven het doel: verdun {#}× met water (bijvoorbeeld {#} mL tot {#} mL).": "Above the target: dilute {#}× with water (for example {#} mL to {#} mL).",
-"Voeg {#} mM {*} toe ({#} g/L) voor {#} mOsm/L.": "Add {#} mM {*} ({#} g/L) for {#} mOsm/L."
+"Voeg {#} mM {*} toe ({#} g/L) voor {#} mOsm/L.": "Add {#} mM {*} ({#} g/L) for {#} mOsm/L.",
+"<span class=\"k\">N·β</span>Scheikunde-rekenaars": "<span class=\"k\">N·β</span>Chemistry calculators",
+"Scheikunde-rekenaars": "Chemistry calculators",
+"Kjeldahl": "Kjeldahl",
+"Waterhardheid": "Water hardness",
+"Oplosbaarheid (Ksp)": "Solubility (Ksp)"
 }
