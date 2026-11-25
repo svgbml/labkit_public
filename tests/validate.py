@@ -1377,6 +1377,20 @@ def _(pg):
     pg.evaluate("__go('osmo');__set('os-phi','1');__tbl('os-tbl',[['NaCl',154,'']],'osmo')")
     return [('mOsm/L', pg.evaluate("__big('#os-out')"), 308, 0.001), ('ionsterkte (mM)', pg.evaluate("__kv('#os-out','Ionsterkte')"), 154, 0.001)]
 
+@case('Osmolariteit & ionsterkte', 'Voorbeeldmedia en aanvullen tot isotoon', 'PBS volgens Cold Spring Harbor Protocols (pdb.rec8247): 137 mM NaCl, 2,7 mM KCl, 10 mM Na₂HPO₄, 1,8 mM KH₂PO₄ → 2·137 + 2·2,7 + 3·10 + 2·1,8 = 313 mOsm/L (ideaal). Met de hand: 100 mM NaCl naar 290 mOsm/L vraagt (290 − 200)/2 = 45 mM NaCl = 45 × 58,44/1000 = 2,630 g/L, of 90 mM glucose = 90 × 180,16/1000 = 16,21 g/L; 154 mM NaCl (308) verdunnen tot 290: 308/290 = 1,062×')
+def _(pg):
+    pg.evaluate("__go('osmo');__set('os-phi','1');__set('os-iso','290');__set('os-pre','pbs')"); pg.wait_for_timeout(150)
+    pbs = pg.evaluate("__big('#os-out')")
+    pg.evaluate("__set('os-pre','');__tbl('os-tbl',[['NaCl',100,'']],'osmo');__set('os-add','NaCl')"); pg.wait_for_timeout(100)
+    a = pg.evaluate("[...document.getElementById('os-mk').textContent.matchAll(/\d+(?:[.,]\d+)?/g)].map(m=>__n(m[0]))")
+    pg.evaluate("__set('os-add','Glucose')"); pg.wait_for_timeout(100)
+    b = pg.evaluate("[...document.getElementById('os-mk').textContent.matchAll(/\d+(?:[.,]\d+)?/g)].map(m=>__n(m[0]))")
+    pg.evaluate("__tbl('os-tbl',[['NaCl',154,'']],'osmo')"); pg.wait_for_timeout(100)
+    c = pg.evaluate("__n(document.getElementById('os-mk').textContent.split('verdun')[1])")
+    pg.evaluate("__set('os-add','NaCl')")
+    return [('PBS (mOsm/L)', pbs, 313, 0.002), ('NaCl erbij (mM)', a[0], 45, 0.002), ('NaCl erbij (g/L)', a[1], 2.630, 0.002),
+            ('glucose erbij (mM)', b[0], 90, 0.002), ('glucose erbij (g/L)', b[1], 16.21, 0.002), ('verdunnen (×)', c, 308 / 290, 0.002)]
+
 @case('Verwantschapsindex', 'Trio, obligaat allel', 'Butler (2015) hfst. 15: vader heterozygoot voor obligaat allel → PI = 1/(2p); homozygoot → 1/p; CPI = product')
 def _(pg):
     pg.evaluate("__go('kin');__set('kn-mo','1');__tbl('kn-tbl',[['L1',15,17,0.26,0.20,15,16,17,18],['L2',21,24,0.17,0.14,22,24,21,21]],'kin')")

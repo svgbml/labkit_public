@@ -6174,5 +6174,14 @@
 "Aandeel": "Fraction",
 "gemeten": "measured",
 "schuif": "slider",
-"Niet gelezen (geen volume en pH): {#} regel(s).": "Not read (no volume and pH): {#} line(s)."
+"Niet gelezen (geen volume en pH): {#} regel(s).": "Not read (no volume and pH): {#} line(s).",
+"eigen samenstelling": "own composition",
+"Doel (isotoon)": "Target (isotonic)",
+"Aanvullen met": "Top up with",
+"Al op het doel.": "Already at the target.",
+"PBS ({#}×)": "PBS ({#}×)",
+"Fysiologisch zout ({#} % NaCl)": "Saline ({#} % NaCl)",
+"DMEM, zouten en glucose": "DMEM, salts and glucose",
+"Boven het doel: verdun {#}× met water (bijvoorbeeld {#} mL tot {#} mL).": "Above the target: dilute {#}× with water (for example {#} mL to {#} mL).",
+"Voeg {#} mM {*} toe ({#} g/L) voor {#} mOsm/L.": "Add {#} mM {*} ({#} g/L) for {#} mOsm/L."
 }
