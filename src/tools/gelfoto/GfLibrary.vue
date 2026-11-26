@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import {libList, libDelete, gelProject} from './library.js';
+import {libList, libDelete, libGet, gelProject} from './library.js';
 
 export default {
   data() { return {items: [], pick: [], ladFirst: true, busy: false, all: false}; },
@@ -50,12 +50,13 @@ export default {
       if (this.items) { const r = jget('labkit:v1:runs', {}), act = r.active || ''; const k = e => (e.run === act ? '0' : '1' + (e.run || '~')); this.items.sort((a, b) => k(a).localeCompare(k(b)) || b.date - a.date); } const ids = new Set((this.items || []).map(e => e.id)); this.pick = this.pick.filter(id => ids.has(id)); },
     /* in de volgorde van de lijst (nieuwste eerst), hoogstens zes */
     async fig() {
-      const sel = this.items.filter(e => this.pick.includes(e.id)).slice(0, 6);
+      /* in het programma staat de gel zelf (snap) niet in de lijst: eerst ophalen */
+      const sel = (await Promise.all(this.items.filter(e => this.pick.includes(e.id)).slice(0, 6).map(e => (e.snap ? e : libGet(e.id, e.proj))))).filter(Boolean);
       this.busy = true;
       try { if (await gfMultiFig(sel, this.ladFirst)) location.hash = '#figuur'; } finally { this.busy = false; }
     },
     save() { gfLibSave(false); },
-    open(e) { gfLibOpen(e); },
+    async open(e) { const f = e.snap ? e : await libGet(e.id, e.proj); if (f) gfLibOpen(f); },
     del(e) { libDelete(e.id); },
     /* bij welke run (en met "alle projecten" welk project) een gel hoort */
     where(e) {

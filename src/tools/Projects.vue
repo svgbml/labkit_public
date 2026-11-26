@@ -135,6 +135,8 @@
 
 <script>
 import * as P from '../engines/projects.js';
+import {fileMode, storeDir} from '../engines/store.js';
+import {libMoveToFiles} from './gelfoto/library.js';
 import {startFlow} from '../engines/flow.js';
 import '../engines/ask.js';   /* S121: askQuery, askLabel, askApply als globale namen */
 import {OWNKEY, saveOwn, removeOwn, addShared} from '../lib/werkstroom.js';
@@ -143,7 +145,7 @@ const kB = n => (n < 1e6 ? Math.max(1, Math.round(n / 1024)) + ' kB' : n < 1e9 ?
 
 export default {
   name: 'Projects',
-  data() { return {open: false, m: P.meta(), runs: P.runsMeta(), size: {}, ren: '', renName: '', del: '', newName: '', st: null, est: null, notes: P.notes(), note: '', msg: null, restore: null, b: null, drag: -1, rs: null}; },
+  data() { return {open: false, m: P.meta(), runs: P.runsMeta(), size: {}, ren: '', renName: '', del: '', newName: '', st: null, est: null, notes: P.notes(), note: '', msg: null, restore: null, b: null, drag: -1, rs: null, dir: ''}; },
   computed: {
     rsText() { return this.rs ? this.t('Deel ' + this.uv(this.rs.name) + ": de werkstroom, de stap en de invoer van zijn tools, zonder gels of foto's. Wie de link opent, krijgt hem als nieuw project.") : ''; },
     /* alle tools met hun naam (zoals de werkstroombalk ze noemt) */
@@ -160,6 +162,7 @@ export default {
     cur() { return this.list.find(p => p.id === this.active) || null; },
     same() { return this.st ? this.runs.list.filter(r => r.wf === this.st.wf) : []; },
     spaceTxt() {
+      if (this.dir) return this.t('Projecten staan als bestanden in ' + this.uv(this.dir) + '.');
       const e = this.est; if (!e || !e.quota) return '';
       return this.t('Opslag in deze browser: ' + kB(e.usage || 0) + ' gebruikt, ' + kB(e.quota - (e.usage || 0)) + ' vrij.');
     }
@@ -250,7 +253,7 @@ export default {
     },
     async show() {
       this.refresh(); this.open = true; this.del = ''; this.ren = ''; this.rs = null;
-      this.est = await P.estimate();
+      this.est = await P.estimate(); this.dir = fileMode() ? await storeDir().catch(() => '') : '';
       for (const p of this.list) this.size = {...this.size, [p.id]: kB(await P.projectSize(p.id).catch(() => 0))};
     },
     /* alles wat herlaadt: dubbel klikken mag niets twee keer doen */
@@ -270,6 +273,8 @@ export default {
   mounted() {
     P.migrate(this.t('Mijn project')); this.refresh();
     P.persist();
+    /* S273: in het programma gaan projecten, runs en gels de eerste keer van IndexedDB naar bestanden */
+    if (fileMode()) libMoveToFiles().then(moved => { if (moved && window.__gfLibRefresh) window.__gfLibRefresh(); }).catch(() => {});
     startFlow();   /* S117: data tussen de stappen van de actieve run */
     this.takeSharedWf();
     this.takeSharedRun();

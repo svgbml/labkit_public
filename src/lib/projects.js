@@ -9,7 +9,7 @@ export const RUNS = 'labkit:v1:runs', WF = 'labkit:v1:wf', META = 'labkit:v1:pro
 /* voorkeuren en apparatuur blijven buiten projecten; al het andere van labkit: hoort erbij,
    zodat een nieuwe sleutel van een tool vanzelf per project is */
 const GLOBAL = new Set(['recent', 'usage', 'fav', 'pins', 'navcol', 'stage', 'expert', 'lang', 'tour', 'seenver', 'upd',
-  'rotors', 'sg-assays', 'timers', 'projects', 'wfown'].map(k => 'labkit:v1:' + k));
+  'rotors', 'sg-assays', 'timers', 'projects', 'wfown', 'filestore'].map(k => 'labkit:v1:' + k));
 export const isProjectKey = k => k === 'sg-read' || (k.startsWith('labkit:') && !GLOBAL.has(k));
 
 /* de sleutels die per tool zijn uit te splitsen; de rest (protocol, bench, monsternamen) blijft van het project */

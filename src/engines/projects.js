@@ -5,23 +5,13 @@
    De lijst van projecten staat in de globale sleutel labkit:v1:projects; de runs van het
    actieve project in labkit:v1:runs (een projectsleutel, dus hij wisselt mee). */
 import {isProjectKey, splitRun, enterRun, leaveRun, RUNS, WF as WFK, META, newId} from '../lib/projects.js';
-import {libList, libPut, gelProject} from '../tools/gelfoto/library.js';
+import {libListFull, libPut, gelProject} from '../tools/gelfoto/library.js';
 import {expose} from '../lib/global.js';
 import {OWNKEY, addShared} from '../lib/werkstroom.js';
+import {dbGet, dbPut, dbDel, dbAll, dropProject, clearAll} from './store.js';
 
-/* ---------- IndexedDB ---------- */
-const open = () => new Promise((ok, no) => {
-  const r = indexedDB.open('labkit-projects', 1);
-  r.onupgradeneeded = () => { r.result.createObjectStore('projects', {keyPath: 'id'}); r.result.createObjectStore('runs', {keyPath: 'id'}); };
-  r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error);
-});
-const tx = async (store, mode, f) => { const db = await open(); try { return await new Promise((ok, no) => {
-  const t = db.transaction(store, mode), s = t.objectStore(store); let out; f(s, v => { out = v; });
-  t.oncomplete = () => ok(out); t.onerror = t.onabort = () => no(t.error); }); } finally { db.close(); } };
-export const dbGet = (store, id) => tx(store, 'readonly', (s, set) => { const r = s.get(id); r.onsuccess = () => set(r.result || null); });
-export const dbPut = (store, v) => tx(store, 'readwrite', s => s.put(v));
-export const dbDel = (store, id) => tx(store, 'readwrite', s => s.delete(id));
-export const dbAll = store => tx(store, 'readonly', (s, set) => { const r = s.getAll(); r.onsuccess = () => set(r.result || []); });
+/* ---------- opslag: IndexedDB in de browser, bestanden in het programma (src/engines/store.js) ---------- */
+export {dbGet, dbPut, dbDel, dbAll};
 
 /* ---------- localStorage ---------- */
 const ls = () => { const o = {}; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (isProjectKey(k)) o[k] = localStorage.getItem(k); } } catch (e) {} return o; };
@@ -89,12 +79,11 @@ export async function newProject(name) {
   setMeta({active: id, list: [...m.list, {id, name, created: Date.now()}]}); reloadTo('start');
 }
 export function renameProject(id, name) { const m = meta(); setMeta({...m, list: m.list.map(p => (p.id === id ? {...p, name} : p))}); }
-/* een niet-actief project weg, met zijn runs (gels: zie deleteProjectGels in de component) */
+/* een niet-actief project weg, met zijn runs (en in het programma zijn hele map, met gels) */
 export async function deleteProject(id) {
   const m = meta(); if (!m || id === m.active) return;
-  const p = await dbGet('projects', id), runs = p ? (parse(p.data[RUNS]) || {}).list || [] : [];
-  for (const r of runs) await dbDel('runs', id + '/' + r.id).catch(() => {});
-  await dbDel('projects', id).catch(() => {});
+  const p = await dbGet('projects', id).catch(() => null), runs = p ? (parse(p.data[RUNS]) || {}).list || [] : [];
+  await dropProject(id, runs.map(r => r.id)).catch(() => {});
   setMeta({...m, list: m.list.filter(x => x.id !== id)});
 }
 /* grootte in tekens van een project (actief: localStorage, anders zijn record) */
@@ -150,7 +139,7 @@ export async function exportProject(id) {
   const data = id === m.active ? ls() : ((await dbGet('projects', id).catch(() => null)) || {}).data || {};
   const runs = [];
   for (const r of (parse(data[RUNS]) || {}).list || []) { const d = await dbGet('runs', id + '/' + r.id).catch(() => null); if (d) runs.push({id: r.id, data: d.data}); }
-  const gels = ((await libList(true)) || []).filter(g => gelProject(g) === id);
+  const gels = ((await libListFull(true)) || []).filter(g => gelProject(g) === id);
   return {app: 'Labkit BML', kind: 'labkitproject', v: 1, name: p.name, versie: APPVER, opgeslagen: new Date().toISOString(), data, runs, gels};
 }
 export async function downloadProject(id) { const j = await exportProject(id || meta().active); if (j) await download(`${safeName(j.name)}-${stamp()}.json`, j); }
@@ -174,14 +163,16 @@ export async function backupAll() {
   flush(); const data = {};
   try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && (k.startsWith('labkit:') || k === 'sg-read')) data[k] = localStorage.getItem(k); } } catch (e) {}
   const j = {app: 'Labkit BML', kind: 'labkitbackup', v: 1, versie: APPVER, opgeslagen: new Date().toISOString(), data,
-    projects: await dbAll('projects').catch(() => []), runs: await dbAll('runs').catch(() => []), gels: (await libList(true)) || []};
+    projects: await dbAll('projects').catch(() => []), runs: await dbAll('runs').catch(() => []), gels: (await libListFull(true)) || []};
   await download(`labkit-backup-${stamp()}.json`, j);
 }
 /* een back-up zet alles terug zoals het was (alles op dit apparaat wordt vervangen) */
 export async function restoreBackup(j) {
   try { Object.keys(localStorage).filter(k => k.startsWith('labkit:') || k === 'sg-read').forEach(k => localStorage.removeItem(k)); } catch (e) {}
   Object.entries(j.data || {}).forEach(([k, v]) => { if ((k.startsWith('labkit:') || k === 'sg-read') && typeof v === 'string') { try { localStorage.setItem(k, v); } catch (e) {} } });
-  for (const st of ['projects', 'runs']) { for (const o of await dbAll(st).catch(() => [])) await dbDel(st, o.id).catch(() => {}); for (const o of j[st] || []) if (o && o.id) await dbPut(st, o).catch(() => {}); }
+  /* eerst alles weg (in het programma ook de mappen met gels), dan de back-up erin */
+  await clearAll().catch(() => {});
+  for (const st of ['projects', 'runs']) for (const o of j[st] || []) if (o && o.id) await dbPut(st, o).catch(() => {});
   for (const g of j.gels || []) if (g && g.id && g.snap) await libPut(g);
   reloadTo('start');
 }
