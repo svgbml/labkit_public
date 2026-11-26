@@ -199,6 +199,7 @@ canvas{max-width:100%}
 .lk-wfb-pick{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:4px}
 .lk-wfb-share{margin-top:10px}
 .lk-wfb-qr{display:block;margin-top:8px}
+.lk-ask{display:block;margin:8px 0 0;text-align:left;max-width:100%;overflow-wrap:anywhere}
 .lk-wf-runs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}
 /* Statistiek: aannames en keuzehulp (S113) */
 .st-assume{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}

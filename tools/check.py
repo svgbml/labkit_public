@@ -11,7 +11,7 @@ PY = sys.executable
 BUILD = [['tools/build.py']]
 UNIT = ['node', '--no-warnings', '--import', './tests/unit/setup.mjs', '--test', 'tests/unit/*.test.mjs']  # rekenfuncties, geen browser
 QUICK = [UNIT, ['tests/stages_check.py'], ['tests/src_check.py'], ['tests/contrast_check.py'], ['tests/i18n_vue.py'], ['tests/paste_check.py'], ['tests/ncbi_check.py'], ['tests/perf_budget.py'], ['tests/i18n_collect.py']]
-FULL = [UNIT, ['tests/stages_check.py'], ['tests/src_check.py'], ['tests/contrast_check.py'], ['tests/i18n_vue.py'], ['tests/paste_check.py'], ['tests/ncbi_check.py'], ['tests/validate.py'], ['tests/layout_audit.py'], ['tests/robust_audit.py'], ['tests/sync_check.py'], ['tests/projects_check.py'], ['tests/flow_check.py'], ['tests/werkstroom_check.py'], ['tests/share_run_check.py'], ['tests/i18n_collect.py'],
+FULL = [UNIT, ['tests/stages_check.py'], ['tests/src_check.py'], ['tests/contrast_check.py'], ['tests/i18n_vue.py'], ['tests/paste_check.py'], ['tests/ncbi_check.py'], ['tests/validate.py'], ['tests/layout_audit.py'], ['tests/robust_audit.py'], ['tests/sync_check.py'], ['tests/projects_check.py'], ['tests/flow_check.py'], ['tests/werkstroom_check.py'], ['tests/share_run_check.py'], ['tests/ask_check.py'], ['tests/i18n_collect.py'],
         ['tests/perf_budget.py'], ('en', ['tests/layout_audit.py']), ['tests/visual_check.py']]
 
 def step(args, lang=None):

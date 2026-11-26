@@ -89,6 +89,13 @@ function mark(e) {
   }
 }
 
+/* velden die van buiten de run zijn ingevuld (een vraag in de zoekbalk, S121) zijn eigen waarden */
+export function markOwnFields(ids) {
+  const o = own(); let any = false;
+  for (const m of maps()) if (m.field && ids.includes(m.field) && !o.includes(m.id)) { setOwn(m.id, true); any = true; }
+  if (any) decorate();
+}
+
 let started = false;
 export function startFlow() {
   if (started) return; started = true;

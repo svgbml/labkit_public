@@ -7,10 +7,10 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Model** (last column) is the cheapest model that can do the step well, so the shared usage limit lasts longer. Done steps show "—".
 - **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (1 open step).
 - **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (12 open steps).
-- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (17 open steps).
+- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (16 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (7 open steps).
 
-**Total:** 275 steps (S0–S273, plus S204a) ≈ 135 hours; **235 done, 36 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 275 steps (S0–S273, plus S204a) ≈ 135 hours; **236 done, 35 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-23)
 
@@ -25,7 +25,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 6 gel editor rebuild | S62–S79 | ✅ done |
 | Phase 7 charts, figures and data | S80–S96 | ✅ done |
 | Phase 8 rework existing tools | S97–S116 | ✅ done (batch R3 finished 2026-11-26) |
-| Phase 9 structure and workflows | S117–S121, S273 | **part done:** S117, S118 ✅ (batch W1a, 2026-11-26); S119–S121 open (W1b), S273 (W2) |
+| Phase 9 structure and workflows | S117–S121, S273 | **part done:** S117–S121 ✅ (batches W1a and W1b, 2026-11-26); S273 open (W2) |
 | Phase 10 performance | S122–S133 | ⏳ not started; F1a re-plans it first |
 | Phase 11 quality, tests and dev | S134–S142 | **part done:** S142 open (batch Q2) |
 | Phase 12 Sanger and SNP analysis | S147–S169 | **part done:** S147–S161 ✅, S162–S169 open |
@@ -172,7 +172,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | R2b ✅ | Sonnet | S111, S112, S115, S116 | K3 | anything | — |
 | R3 ✅ | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 | tdd |
 | W1a ✅ | Opus 5.5 | S118 projects and runs, then S117 data flow; design in [W1.md](W1.md) (interview done 2026-11-26) | K3 | — | tdd |
-| W1b | Opus 5 | S119 own werkstromen and course templates, S120 share a run, S121 search that understands questions | W1a | — | tdd |
+| W1b ✅ | Opus 5 | S119 own werkstromen and course templates, S120 share a run, S121 search that understands questions | W1a | — | tdd |
 | W2 | Opus 5 | S273 projects as files in the Windows app | W1a | anything | tdd |
 | **Wave 6: performance and quality** | | | | | |
 | Q1a ✅ | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything | — |
@@ -406,7 +406,7 @@ Designed in the W1 interview (2026-11-26): [W1.md](W1.md), [GLOSSARY.md](../GLOS
 | S117 | 2 | Data flow inside the active run ✅ Mappings in `src/lib/flow.js` (alleen als beide tools in de actieve run zitten), de pagina-kant in `src/engines/flow.js`: een auto-waarde volgt zijn bron live; klikken in het veld of erin typen maakt er een eigen waarde van, met een knop *↺ Automatisch* die hem terugzet; bij een tabel per kolom. Eigen waarden staan per run (`labkit:v1:runs`, `own`). Eerste keten *Van DNA tot gel*: DNA-concentratie → templatevolume `q-t` (zelfde som als *Stuur door naar*), monsterlijst → laannamen en productgrootte `y-bp` uit PCR-cyclus (in-silico PCR) → verwachte maten in `gp-tbl`; de gel-editor las de Gelplanner al. De ladderlaan blijft staan. `tests/flow_check.py` | — |
 | S119 | 6, 7 | Custom workflows (pick tools, save, share) and course workflow templates ✅ *Werkstroom maken* (startpagina, `data-wf-new`): naam, tools zoeken en toevoegen, volgorde met slepen of ↑/↓, minstens twee stappen; ✎ bewerkt een eigen, ⧉ kopieert een ingebouwde of practicumsjabloon. Eigen werkstromen per apparaat in `labkit:v1:wfown` (`src/lib/werkstroom.js`); verwijderd blijft bewaard (`gone`) voor runs die hem gebruiken. Delen als link `?wf=` met QR; openen voegt hem één keer toe. Drie algemene practicumsjablonen (PCR en gel, celkweek, ELISA) tot de eigenaar de echte BML-modules aanlevert. Mappings werken ook in eigen werkstromen. `tests/werkstroom_check.py` | — |
 | S120 | 19 | Share a whole workflow run as one link/QR ✅ *Delen* in de werkstroombalk en bij elke run in het projectpaneel: link `?run=` (gecomprimeerd zoals de tooldeellink) met de werkstroom (bij een eigen werkstroom ook zijn stappen), de stap, de invoer van de tools van de run en welke velden eigen waarden zijn; zonder geschiedenis, gels of foto's. QR-code tot 2300 bytes. Openen maakt een nieuw project *Gedeeld: <naam>* met die run actief en laat de bestaande projecten met rust (`runPayload`/`openSharedRun` in `src/engines/projects.js`). `tests/share_run_check.py` | — |
-| S121 | 9 | Search that understands questions ("500 mL 0.9% NaCl" opens the tool with values filled in) | Opus 5 |
+| S121 | 9 | Search that understands questions ("500 mL 0.9% NaCl" opens the tool with values filled in) ✅ `ask()` in `src/lib/ask.js` leest een vraag in het Nederlands of Engels voor vijf rekenaars: Oplossing (volume, concentratie en stof; de molmassa uit `CHEM`), Verdunning ("1:10 van 50 mL", "10 µM uit 1 mM stock"), Centrifuge (rpm of × g met straal), Eenheden ("5 mg/mL naar µM", met molmassa bij een stof) en Molmassa. In het opdrachtpalet (Ctrl+K) staat de vraag bovenaan, onder de zoekbalk van de startpagina een knop (`bento-ask`); Enter opent de tool, vult hem met `toolApply()` en meldt *Ingevuld uit je zoekvraag*. In een run tellen die velden als eigen waarden (`markOwnFields`). `tests/ask_check.py` | — |
 | S273 | 5 | In the Windows app, inactive projects and gels as files in *Documenten\LabKit\Projecten* behind the same storage layer (needs S118) | Opus 5 |
 
 ## Phase 10: performance (12 steps)

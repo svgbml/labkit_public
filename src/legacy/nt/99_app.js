@@ -51,12 +51,15 @@ const fold=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
 function cmdItems(){ const T=toolIndex().map(t=>({k:'tool',id:t.id,n:t.name,s:t.grp,d:t.desc,g:t.tags,h:[t.name,t.grp,t.desc,...t.tags].join(' ')}));
   const A=[['share','Deze tool delen (link of QR-code)'],['undo','Ongedaan maken in deze tool'],['save','Sessie opslaan als bestand'],['open','Sessie openen'],['inst','Instellingen & updates'],['report','Rapport / labjournaal maken'],['start','Startpagina']].map(([id,n])=>({k:'act',id,n:trPlain(n),s:trPlain('opdracht'),h:trPlain(n)}));
   return [...A,...T]; }
-function cmdRun(it){ if(it.k==='tool'){ location.hash='#'+it.id; return; } const c=current;
+function cmdRun(it){ if(it.k==='ask'){ askApply(it.r); return; } if(it.k==='tool'){ location.hash='#'+it.id; return; } const c=current;
   if(it.id==='share') shareOpen(c); else if(it.id==='undo') undoDo(c); else if(it.id==='save') $('#sess-save').click(); else if(it.id==='open') $('#sess-open').click(); else location.hash='#'+it.id; }
 function cmdOpen(){ if(document.querySelector('.lk-modal')) return; const items=cmdItems();
   const m=appModal(`<input type="search" class="txt lk-cmdq" placeholder="Zoek een tool of opdracht…" aria-label="Zoek een tool of opdracht" autocomplete="off" style="width:100%;height:38px;font-size:15px"><div class="lk-cmdl" role="listbox" data-notr="" style="margin-top:8px"></div><div style="font-size:12px;color:var(--muted);margin-top:8px">↑ ↓ kiezen · Enter openen · Esc sluiten</div>`);
   const q=m.box.querySelector('.lk-cmdq'), L=m.box.querySelector('.lk-cmdl'); let sel=0, shown=[];
-  const render=()=>{ const w=fold(q.value).split(/\s+/).filter(Boolean); shown=items.filter(it=>w.every(x=>fold(it.h).includes(x))).slice(0,12); if(!w.length) shown=items.filter(it=>it.k==='act').concat(items.filter(it=>it.k==='tool').slice(0,7)); sel=Math.min(sel,Math.max(0,shown.length-1));
+  const render=()=>{ const w=fold(q.value).split(/\s+/).filter(Boolean); shown=items.filter(it=>w.every(x=>fold(it.h).includes(x))).slice(0,12); if(!w.length) shown=items.filter(it=>it.k==='act').concat(items.filter(it=>it.k==='tool').slice(0,7));
+    /* S121: een vraag ("500 mL 0,9% NaCl") bovenaan, met de ingevulde waarden */
+    const a=typeof askQuery==='function'?askQuery(q.value):null; if(a) shown.unshift({k:'ask',r:a,n:askLabel(a),s:trPlain('invullen')});
+    sel=Math.min(sel,Math.max(0,shown.length-1));
     L.innerHTML=shown.length?shown.map((it,i)=>`<div role="option" data-i="${i}" aria-selected="${i===sel}"${i===sel?' style="background:var(--accent-soft)"':''}><span>${esc(it.n)}${it.d?`<small>${esc(it.d)}</small>`:''}</span><span class="lk-cmd-m">${it.s}${it.g&&it.g.length?`<em>${it.g.slice(0,3).map(g=>`<span>${esc(trPlain(g,true))}</span>`).join('')}</em>`:''}</span></div>`).join(''):`<div style="padding:8px 10px;color:var(--muted)">${trPlain('Niets gevonden.')}</div>`; };
   q.addEventListener('input',()=>{ sel=0; render(); }); q.addEventListener('keydown',e=>{ if(e.key==='ArrowDown'){ e.preventDefault(); sel=Math.min(sel+1,shown.length-1); render(); } else if(e.key==='ArrowUp'){ e.preventDefault(); sel=Math.max(sel-1,0); render(); } else if(e.key==='Enter'&&shown[sel]){ e.preventDefault(); const it=shown[sel]; m.close(); cmdRun(it); } });
   L.addEventListener('click',e=>{ const r=e.target.closest('[data-i]'); if(r){ const it=shown[+r.dataset.i]; m.close(); cmdRun(it); } }); render(); setTimeout(()=>q.focus(),0); }

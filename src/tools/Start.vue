@@ -18,7 +18,9 @@
     <h2>Labkit BML</h2>
     <p>{{ t(all.length + ' tools voor rekenen, analyseren en vastleggen in het lab. Alles blijft op je eigen apparaat.') }}</p>
     <input id="bento-q" v-model="q" class="txt" type="search" :placeholder="t('Zoek een tool, bijvoorbeeld PCR, verdunning of ANOVA…')"
-      :aria-label="t('Zoek een tool')" autocomplete="off" @keydown.enter="openFirst">
+      :aria-label="t('Zoek een tool')" autocomplete="off" @keydown.enter="askR ? askApply(askR) : openFirst()">
+    <!-- S121: een vraag als "500 mL 0,9% NaCl" opent de tool met de waarden ingevuld -->
+    <button v-if="askR" type="button" id="bento-ask" class="lk-btn primary lk-ask" @click="askApply(askR)">{{ askLabel(askR) }} →</button>
     <div class="tags" id="bento-tags" :aria-label="t('Tags')">
       <a v-for="g in tags" :key="g[0]" :class="['tag', {on: g[0] === tag}]" :href="g[0] === tag ? '#start' : tagHref(g[0])">{{ t(g[0]) }} <small>{{ g[1] }}</small></a>
     </div>
@@ -80,6 +82,7 @@ export default {
     fav() { void this.tick; return jget(FKEY, []); },
     tag() { void this.hash; return curTag(); },
     tags() { void this.tick; return tagList(); },
+    askR() { return typeof askQuery === 'function' ? askQuery(this.q) : null; },
     runs() {
       void this.tick; const r = jget('labkit:v1:runs', {});
       return (r.list || []).map(x => ({id: x.id, name: x.name, on: x.id === r.active}));
@@ -119,6 +122,8 @@ export default {
   mounted() { this._h = () => { this.hash = location.hash; this.tick++; }; window.addEventListener('hashchange', this._h); },
   unmounted() { window.removeEventListener('hashchange', this._h); },
   methods: {
+    askApply(r) { askApply(r); },
+    askLabel(r) { return askLabel(r); },
     refresh() { this.tick++; },
     /* De eerste zin van de inleiding van een tool. Alleen de hele inleiding is een vertaalsleutel
        (de DOM-laag zoekt het hele <p> op), dus eerst die vertalen en dan pas de zin eruit halen. */

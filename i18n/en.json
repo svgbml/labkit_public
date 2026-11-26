@@ -6340,5 +6340,7 @@
 "Gedeeld": "Shared",
 "Deel {*}: de werkstroom, de stap en de invoer van zijn tools, zonder gels of foto's. Wie de link opent, krijgt hem als nieuw project.": "Share {*}: the workflow, the step and the inputs of its tools, without gels or photos. Whoever opens the link gets it as a new project.",
 "Te veel invoer voor een QR-code; deel de link.": "Too much input for a QR code; share the link.",
-"Deel deze werkstroom met zijn invoer": "Share this workflow with its inputs"
+"Deel deze werkstroom met zijn invoer": "Share this workflow with its inputs",
+"Ingevuld uit je zoekvraag": "Filled in from your search",
+"invullen": "fill in"
 }
