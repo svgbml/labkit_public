@@ -38,6 +38,24 @@
         </template>
       </div>
     </div>
+    <!-- S114 (#220): oefenen met willekeurige vragen; het antwoord wordt met dezelfde
+         BigInt-afronding nagekeken als de rekenaar hierboven -->
+    <details class="panel" id="sf-pr" style="grid-column:1/-1" @toggle="q || next()">
+      <summary style="cursor:pointer;font-weight:600">{{ t('Oefenen') }}</summary>
+      <template v-if="q">
+        <p style="margin:10px 0 6px" id="sf-q">
+          <template v-if="q.kind === 'count'">{{ t('Hoeveel significante cijfers heeft') }} <b class="mono">{{ lkNum(q.x) }}</b>?</template>
+          <template v-else>{{ t('Rond af op ' + q.n + ' significante cijfers:') }} <b class="mono">{{ lkNum(q.x) }}</b></template>
+        </p>
+        <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="sf-a" class="txt mono" style="max-width:180px" v-model="ans" :inputmode="q.kind === 'count' ? 'numeric' : 'text'" @keydown.enter="check" :aria-label="t('Jouw antwoord')">
+          <button type="button" id="sf-check" @click="check">{{ t('Nakijken') }}</button>
+          <button type="button" id="sf-next" @click="next">{{ t('Nieuwe vraag') }}</button>
+          <span id="sf-score" style="color:var(--muted)">{{ t('Goed: ' + score[0] + ' van ' + score[1]) }}</span>
+        </div>
+        <lk-note v-if="fb" :kind="fb.ok ? 'ok' : 'bad'" :html="fb.html"/>
+      </template>
+    </details>
   </div>
 </template>
 
@@ -85,7 +103,34 @@ function sfSci(D, e, neg) {
 
 export default {
   name: 'Sigfig',
-  data() { return {x: lkNumIn('0,0045650'), n: '3', mode: 'up', u: lkNumIn('0,0000234'), ud: '2'}; },
+  data() { return {x: lkNumIn('0,0045650'), n: '3', mode: 'up', u: lkNumIn('0,0000234'), ud: '2', q: null, ans: '', fb: null, score: [0, 0]}; },
+  methods: {
+    lkNum: v => lkNumIn(v),
+    /* een willekeurige vraag: een getal van 2–6 cijfers op een willekeurige decimaal, soms met een
+       significante nul aan het eind; geen geheel getal met nullen aan het eind bij "hoeveel",
+       want dat is dubbelzinnig */
+    next() {
+      const R = k => Math.floor(Math.random() * k);
+      for (;;) {
+        const len = 2 + R(5);
+        let digs = String(1 + R(9)); for (let i = 1; i < len; i++) digs += R(10);
+        const e = -len - R(4) + R(len + 4), kind = R(2) ? 'count' : 'round';
+        const x = sfStr(BigInt(digs), e, false), P = sfParse(x);
+        if (P.amb) continue;
+        if (kind === 'round' && P.sf < 2) continue;
+        const n = kind === 'round' ? 1 + R(P.sf - 1) : P.sf;
+        this.q = {kind, x, n}; this.ans = ''; this.fb = null; return;
+      }
+    },
+    check() {
+      const q = this.q, t = this.t; if (!q || !String(this.ans).trim()) return;
+      const P = sfParse(q.x), r = sfRoundSig(P, q.n, 'up'), right = q.kind === 'count' ? String(P.sf) : sfStr(r.D, r.e, false);
+      const a = sfParse(this.ans);
+      const ok = q.kind === 'count' ? Math.round(num(this.ans)) === P.sf : !!a && !a.neg && sfStr(a.D, a.e, false) === right;
+      this.score = [this.score[0] + (ok ? 1 : 0), this.score[1] + 1];
+      this.fb = {ok, html: ok ? t('Goed.') : this.tHtml('Niet goed; het antwoord is <b class="mono">' + lkNumIn(right) + '</b>.')};
+    }
+  },
   computed: {
     /* één sleutel voor de hele alinea, met de opmaak erin: zie tHtml() in lib/bridge.js */
     hint() {

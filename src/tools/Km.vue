@@ -22,6 +22,11 @@
     </div>
     <div class="result">
       <canvas id="km-cv" v-show="ok"></canvas>
+      <!-- S114 (#219): aantal at risk onder de curve, op ronde tijdstippen -->
+      <div v-if="ok" class="tbl-wrap" style="margin-bottom:10px">
+        <div class="lbl">{{ t('Aantal at risk') }}</div>
+        <lk-table table-id="km-risk" :cols="riskCols" :rows="riskRows" :wrap="false"/>
+      </div>
       <div id="km-out">
         <lk-note v-if="!ok" kind="info">{{ t('Vul per regel een groep (optioneel), een tijd en een status (1 of 0) in.') }}</lk-note>
         <template v-else>
@@ -37,6 +42,7 @@
 
 <script>
 import {lkNumIn} from '../lib/bridge.js';
+import {riskTimes, atRisk} from '../lib/atrisk.js';
 /* getallen in de uitkomst in de notatie van de gebruiker; binnen t() blijft het fmt(), want t() zet
    het getal zelf om */
 const F = (x, d) => lkNumIn(fmt(x, d));
@@ -86,6 +92,11 @@ export default {
       return [[t('Log-ranktoets'), head],
         ...G.map((g, i) => [t(this.uv(this.esc(g)) + ': waargenomen / verwacht'), `${O[i]} / ${F(E[i], 1)}`])];
     },
+    riskT() { return riskTimes(Math.max(...this.R.map(r => r.t))); },
+    riskCols() {
+      return [{h: this.t('Tijd (' + this.uv(this.esc(this.unit)) + ')')}, ...this.riskT.map(x => ({h: F(x, x % 1 ? 1 : 0), num: true}))];
+    },
+    riskRows() { return atRisk(this.R, this.G, this.riskT).map((r, i) => [this.esc(this.G[i]), ...r]); },
     cols2() {
       const t = this.t;
       return [{h: t('Groep')}, {h: t('Tijd'), num: true}, {h: t('At risk'), num: true},

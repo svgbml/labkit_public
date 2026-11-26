@@ -7,10 +7,10 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Model** (last column) is the cheapest model that can do the step well, so the shared usage limit lasts longer. Done steps show "—".
 - **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (1 open step).
 - **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (12 open steps).
-- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (19 open steps).
+- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (18 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (9 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **230 done, 40 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **231 done, 39 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-23)
 
@@ -24,7 +24,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 5 execution | S48–S61 | ✅ done (batches E1–E4) |
 | Phase 6 gel editor rebuild | S62–S79 | ✅ done |
 | Phase 7 charts, figures and data | S80–S96 | ✅ done |
-| Phase 8 rework existing tools | S97–S116 | **part done:** S114 open (batch R3) |
+| Phase 8 rework existing tools | S97–S116 | ✅ done (batch R3 finished 2026-11-26) |
 | Phase 9 structure and workflows | S117–S121 | ⏳ not started (batch W1) |
 | Phase 10 performance | S122–S133 | ⏳ not started; F1a re-plans it first |
 | Phase 11 quality, tests and dev | S134–S142 | **part done:** S142 open (batch Q2) |
@@ -170,7 +170,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | R1 ✅ | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 | — |
 | R2a ✅ | Sonnet | S106–S110 | K3 | anything except E3 | — |
 | R2b ✅ | Sonnet | S111, S112, S115, S116 | K3 | anything | — |
-| R3 🔨 (S99, S100, S105, S113 af; S114 open) | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 | tdd |
+| R3 ✅ | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 | tdd |
 | W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — | grilling + domain-modeling (with you, before the batch), then tdd |
 | **Wave 6: performance and quality** | | | | | |
 | Q1a ✅ | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything | — |
@@ -392,7 +392,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S111 | 201, 205, 206 | Virtual electropherogram; ligation ratio picture; transformation plate tap-count ✅ RIN-like estimate is a rough heuristic from 28S:18S; dish taps are not kept in links/undo | Sonnet |
 | S112 | 208, 209, 210 | STR electropherogram view; shared allele frequency table; bloodstain drawing ✅ frequency table (`afreq`, `AlleleFreq.vue`) holds invented example data only; in *Matchkans* the alleles go after the locus name for the fill; no live preview while dragging a stain | Sonnet |
 | S113 | 213, 215, 216 | Statistics "which test?" wizard, inline assumption checks, long-format paste ✅ *Welke toets past bij je vraag?* (`st-wiz`, `whichTest()` in `src/lib/statwiz.js`) opent de toets; LabKit heeft geen Mann-Whitney, dus twee niet-normale groepen gaan naar Kruskal-Wallis met twee groepen, en herhaalde metingen bij 3+ groepen verwijzen naar JASP of R. Blok *Aannames* (`st-assume`) bij t1, t2, gepaard en ANOVA: Lilliefors per groep, F-toets (t2) of Levene met de mediaan (ANOVA, `brownForsythe()`, gelijk aan `car::leveneTest`), met een knop naar Wilcoxon of Kruskal-Wallis. Een tabel in lange of brede vorm (`tableGroups()`) in A of in de groepen wordt herkend; validatiegeval tegen R | — |
-| S114 | 214, 217, 218, 219, 220 | APA sentence; Bland-Altman bias; ROC cut-off; Kaplan-Meier risk table; sig-fig practice | Opus 5 |
+| S114 | 214, 217, 218, 219, 220 | APA sentence; Bland-Altman bias; ROC cut-off; Kaplan-Meier risk table; sig-fig practice ✅ Statistiek geeft bij t-toetsen, ANOVA, Kruskal-Wallis en χ² een zin in APA-stijl (`st-apa`, p zonder voorloopnul, in het Nederlands met komma) met d, d<sub>z</sub> of η². Bland-Altman had de toets op proportionele afwijking al; erbij: *B / A (log-verhouding)* (`ba-m` = `log`) en de regressielijn in de grafiek als de afwijking proportioneel is. ROC: klik op de curve kiest de afkapwaarde, Youden-punt apart gemarkeerd, kruistabel `ro-cm`. Kaplan-Meier: tabel *Aantal at risk* (`km-risk`, `src/lib/atrisk.js`). Significante cijfers: *Oefenen* (`sf-pr`) met willekeurige vragen (tellen en afronden), nagekeken met dezelfde BigInt-afronding. Validatiegevallen voor alle vijf | — |
 | S115 | 221, 222 | Pipette profiles + certificate; Westgard violations on the chart ✅ profiles (`pipettes`) live in localStorage only, not in shared links; history chart spaces entries evenly, not by date | Sonnet |
 | S116 | 223, 224, 226 | Uncertainty pie chart; validation report template; pipetting scheme drag rows + kit templates ✅ kit templates read `QPRE`/`PRESETS` exported from `Pcr.vue`, so the S109 kits show up by themselves; rows move by drag or ↑/↓ buttons (no Alt+arrow keys) | Sonnet |
 

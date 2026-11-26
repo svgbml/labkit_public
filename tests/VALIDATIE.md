@@ -3,7 +3,7 @@
 Automatisch gegenereerd op 2026-11-26 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 786 van 786 controles binnen tolerantie.**
+**Resultaat: 812 van 812 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -349,6 +349,9 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Statistiek | Kruskal-Wallis + Dunn | Dunn trt1 − ctrl | 0,7911 | 0,791 | -0.01% | ✅ | R-dataset PlantGrowth; R kruskal.test: H = 7,988, p = 0,01842; Dunn met Bonferroni: referentie scikit-posthocs posthoc_dunn |
 | Statistiek | Kruskal-Wallis + Dunn | Dunn trt2 − ctrl | 0,2735 | 0,273 | -0.18% | ✅ | R-dataset PlantGrowth; R kruskal.test: H = 7,988, p = 0,01842; Dunn met Bonferroni: referentie scikit-posthocs posthoc_dunn |
 | Statistiek | Kruskal-Wallis + Dunn | Dunn trt2 − trt1 | 0,015 | 0,015 | -0.01% | ✅ | R-dataset PlantGrowth; R kruskal.test: H = 7,988, p = 0,01842; Dunn met Bonferroni: referentie scikit-posthocs posthoc_dunn |
+| Statistiek | Aannames: Levene (mediaan) en lange tabel | ANOVA F (lange tabel) | 4,846 | 4,846 | -0.00% | ✅ | R car::leveneTest(weight ~ group, PlantGrowth): F = 1,1192, df 2 en 27, p = 0,3412 (ook scipy.stats.levene). Dezelfde data als lange tabel (groep, waarde) geplakt moet dezelfde ANOVA geven: F = 4,8461 |
+| Statistiek | Aannames: Levene (mediaan) en lange tabel | Levene F | 1,119 | 1,119 | -0.02% | ✅ | R car::leveneTest(weight ~ group, PlantGrowth): F = 1,1192, df 2 en 27, p = 0,3412 (ook scipy.stats.levene). Dezelfde data als lange tabel (groep, waarde) geplakt moet dezelfde ANOVA geven: F = 4,8461 |
+| Statistiek | Aannames: Levene (mediaan) en lange tabel | Levene p | 0,3412 | 0,341 | -0.06% | ✅ | R car::leveneTest(weight ~ group, PlantGrowth): F = 1,1192, df 2 en 27, p = 0,3412 (ook scipy.stats.levene). Dezelfde data als lange tabel (groep, waarde) geplakt moet dezelfde ANOVA geven: F = 4,8461 |
 | Standaardcurve | ELISA, 5PL | terugberekend | 300 | 300 | +0.00% | ✅ | Rekentest: standaarden berekend met A = 0,05; B = 1,3; C = 400; D = 3,2; E = 0,6 (asymmetrisch, Gottschalk & Dunn 2005); monster x = 300 moet terugkomen |
 | Standaardcurve | Plaatlezer-import | standaarden | 8 | 8 | +0.00% | ✅ | Rekentest: plaatblok met standaarden in kolom 1–2 (A–H = 0…1500) en monsters in duplo; resultaat gelijk aan dezelfde waarden handmatig invoeren |
 | Standaardcurve | Plaatlezer-import | monsters | 8 | 8 | +0.00% | ✅ | Rekentest: plaatblok met standaarden in kolom 1–2 (A–H = 0…1500) en monsters in duplo; resultaat gelijk aan dezelfde waarden handmatig invoeren |
@@ -514,6 +517,29 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Overlevingscurve (Kaplan-Meier) | Mediaan en log-ranktoets | mediaan controle | 9 | 9 | +0.00% | ✅ | scipy.stats.ecdf (Kaplan-Meier) en scipy.stats.logrank op dezelfde gecensureerde data |
 | Overlevingscurve (Kaplan-Meier) | Mediaan en log-ranktoets | χ² | 4,05 | 4,05 | +0.01% | ✅ | scipy.stats.ecdf (Kaplan-Meier) en scipy.stats.logrank op dezelfde gecensureerde data |
 | Overlevingscurve (Kaplan-Meier) | Mediaan en log-ranktoets | p | 0,04418 | 0,044 | -0.41% | ✅ | scipy.stats.ecdf (Kaplan-Meier) en scipy.stats.logrank op dezelfde gecensureerde data |
+| Bland-Altman (methodevergelijking) | Log-verhouding | verhouding B/A | 1,034 | 1,03 | -0.41% | ✅ | Bland & Altman (1999), §5: d = ln(B/A), verhouding e^d̄ en grenzen e^(d̄ ± 1,96·s_d); onafhankelijk berekend met numpy |
+| Bland-Altman (methodevergelijking) | Log-verhouding | ondergrens | 0,9493 | 0,949 | -0.04% | ✅ | Bland & Altman (1999), §5: d = ln(B/A), verhouding e^d̄ en grenzen e^(d̄ ± 1,96·s_d); onafhankelijk berekend met numpy |
+| Bland-Altman (methodevergelijking) | Log-verhouding | bovengrens | 1,127 | 1,13 | +0.28% | ✅ | Bland & Altman (1999), §5: d = ln(B/A), verhouding e^d̄ en grenzen e^(d̄ ± 1,96·s_d); onafhankelijk berekend met numpy |
+| ROC-curve & diagnostische test | Kruistabel bij de Youden-afkapwaarde | echt positief, test positief | 8 | 8 | +0.00% | ✅ | Youden (1950): J = sens + spec − 1, maximaal over alle afkapwaarden (waarde ≥ afkap = positief); aantallen met de hand geteld in Python |
+| ROC-curve & diagnostische test | Kruistabel bij de Youden-afkapwaarde | vals positief | 2 | 2 | +0.00% | ✅ | Youden (1950): J = sens + spec − 1, maximaal over alle afkapwaarden (waarde ≥ afkap = positief); aantallen met de hand geteld in Python |
+| ROC-curve & diagnostische test | Kruistabel bij de Youden-afkapwaarde | vals negatief | 1 | 1 | +0.00% | ✅ | Youden (1950): J = sens + spec − 1, maximaal over alle afkapwaarden (waarde ≥ afkap = positief); aantallen met de hand geteld in Python |
+| ROC-curve & diagnostische test | Kruistabel bij de Youden-afkapwaarde | echt negatief | 8 | 8 | +0.00% | ✅ | Youden (1950): J = sens + spec − 1, maximaal over alle afkapwaarden (waarde ≥ afkap = positief); aantallen met de hand geteld in Python |
+| Overlevingscurve (Kaplan-Meier) | Aantal at risk | controle op t = 0 | 10 | 10 | +0.00% | ✅ | Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python |
+| Overlevingscurve (Kaplan-Meier) | Aantal at risk | controle op t = 5 | 9 | 9 | +0.00% | ✅ | Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python |
+| Overlevingscurve (Kaplan-Meier) | Aantal at risk | controle op t = 10 | 4 | 4 | +0.00% | ✅ | Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python |
+| Overlevingscurve (Kaplan-Meier) | Aantal at risk | controle op t = 15 | 1 | 1 | +0.00% | ✅ | Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python |
+| Overlevingscurve (Kaplan-Meier) | Aantal at risk | controle op t = 20 | 0 | 0 | +0.00% | ✅ | Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python |
+| Overlevingscurve (Kaplan-Meier) | Aantal at risk | controle op t = 25 | 0 | 0 | +0.00% | ✅ | Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python |
+| Overlevingscurve (Kaplan-Meier) | Aantal at risk | behandeld op t = 0 | 10 | 10 | +0.00% | ✅ | Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python |
+| Overlevingscurve (Kaplan-Meier) | Aantal at risk | behandeld op t = 5 | 10 | 10 | +0.00% | ✅ | Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python |
+| Overlevingscurve (Kaplan-Meier) | Aantal at risk | behandeld op t = 10 | 8 | 8 | +0.00% | ✅ | Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python |
+| Overlevingscurve (Kaplan-Meier) | Aantal at risk | behandeld op t = 15 | 5 | 5 | +0.00% | ✅ | Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python |
+| Overlevingscurve (Kaplan-Meier) | Aantal at risk | behandeld op t = 20 | 3 | 3 | +0.00% | ✅ | Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python |
+| Overlevingscurve (Kaplan-Meier) | Aantal at risk | behandeld op t = 25 | 1 | 1 | +0.00% | ✅ | Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python |
+| Statistiek | Zin in APA-stijl | df | 18 | 18 | +0.00% | ✅ | Student (1908), twee groepen: scipy.stats.ttest_ind (gelijke varianties, zoals de F-toets kiest) en Cohen d met de gepoolde s; APA 7 §6.36–6.46 |
+| Statistiek | Zin in APA-stijl | t (2 decimalen) | -1,86 | -1,86 | -0.00% | ✅ | Student (1908), twee groepen: scipy.stats.ttest_ind (gelijke varianties, zoals de F-toets kiest) en Cohen d met de gepoolde s; APA 7 §6.36–6.46 |
+| Statistiek | Zin in APA-stijl | p (3 decimalen) | 0,079 | 0,079 | +0.00% | ✅ | Student (1908), twee groepen: scipy.stats.ttest_ind (gelijke varianties, zoals de F-toets kiest) en Cohen d met de gepoolde s; APA 7 §6.36–6.46 |
+| Statistiek | Zin in APA-stijl | d (2 decimalen) | -0,83 | -0,83 | -0.00% | ✅ | Student (1908), twee groepen: scipy.stats.ttest_ind (gelijke varianties, zoals de F-toets kiest) en Cohen d met de gepoolde s; APA 7 §6.36–6.46 |
 | Significante cijfers & afronden | Afronden en onzekerheid | half naar boven | 0,00457 | 0,00457 | +0.00% | ✅ | Half naar boven: 0,004565 → 0,00457; half naar even: 0,00456; 9,995 → 10,0; GUM §7.2.6: 0,0045650 ± 0,0000234 → 0,004565 ± 0,000023 |
 | Significante cijfers & afronden | Afronden en onzekerheid | half naar even | 0,00456 | 0,00456 | +0.00% | ✅ | Half naar boven: 0,004565 → 0,00457; half naar even: 0,00456; 9,995 → 10,0; GUM §7.2.6: 0,0045650 ± 0,0000234 → 0,004565 ± 0,000023 |
 | Significante cijfers & afronden | Afronden en onzekerheid | 9,995 → 3 cijfers | 1 | 1 | +0.00% | ✅ | Half naar boven: 0,004565 → 0,00457; half naar even: 0,00456; 9,995 → 10,0; GUM §7.2.6: 0,0045650 ± 0,0000234 → 0,004565 ± 0,000023 |

@@ -18,6 +18,7 @@
           <select id="ba-m" v-model="mode">
             <option value="abs">{{ t('B − A (absoluut)') }}</option>
             <option value="pct">{{ t('(B − A) / gemiddelde (%)') }}</option>
+            <option value="log">{{ t('B / A (log-verhouding)') }}</option>
           </select>
         </div>
         <lk-field v-model="lim" :label="t('Klinisch aanvaardbaar verschil (optioneel)')" for-id="ba-lim"/>
@@ -29,11 +30,12 @@
       <div id="ba-out">
         <lk-note v-if="!ok" kind="info">{{ t('Vul minstens drie paren metingen in (twee getallen per regel).') }}</lk-note>
         <template v-else>
-          <lk-big :label="t('Bias (B − A)')" :value="G(M.b, 3) + u" :sub="'95%: ' + G(M.b - M.t * M.seB, 3) + ' – ' + G(M.b + M.t * M.seB, 3)"/>
+          <lk-big :label="log ? t('Gemiddelde verhouding B / A') : t('Bias (B − A)')" :value="G(X(M.b), 3) + u" :sub="'95%: ' + G(X(M.b - M.t * M.seB), 3) + ' – ' + G(X(M.b + M.t * M.seB), 3)"/>
           <lk-kv :rows="rows"/>
-          <lk-note v-if="M.pb < 0.05" kind="warn">{{ t('Het verschil hangt samen met de grootte van de meting; overweeg verschillen in procenten of een log-transformatie.') }}</lk-note>
+          <lk-note v-if="M.pb < 0.05" kind="warn">{{ t(log ? 'Ook de log-verhouding hangt samen met de grootte van de meting; de gestippelde regressielijn in de grafiek laat zien hoe de afwijking verloopt.' : 'Het verschil hangt samen met de grootte van de meting; overweeg verschillen in procenten of een log-transformatie (B / A). De gestippelde regressielijn in de grafiek laat zien hoe de afwijking verloopt.') }}</lk-note>
+          <lk-note v-if="log && dropped" kind="warn">{{ t(dropped + ' paren overgeslagen: een log-verhouding kan alleen met waarden boven nul.') }}</lk-note>
           <lk-note v-if="limNote" :kind="limNote.kind">{{ limNote.text }}</lk-note>
-          <lk-formula :html="tHtml('d̄ ± 1,96·s<sub>d</sub> · SE(grens) ≈ √(3s<sub>d</sub>²/n)')"/>
+          <lk-formula :html="tHtml(log ? 'd = ln(B/A); verhouding = e<sup>d̄</sup>, grenzen = e<sup>d̄ ± 1,96·s<sub>d</sub></sup> (Bland &amp; Altman 1999)' : 'd̄ ± 1,96·s<sub>d</sub> · SE(grens) ≈ √(3s<sub>d</sub>²/n)')"/>
         </template>
       </div>
     </div>
@@ -56,24 +58,33 @@ export default {
   },
   computed: {
     pct() { return this.mode === 'pct'; },
+    /* S114 (#217): log-verhouding. blandPairs() geeft [gemiddelde, B − A]; daaruit volgen A en B
+       terug, en d = ln(B/A). Bias en grenzen gaan terug met e^x, als verhouding B/A. */
+    log() { return this.mode === 'log'; },
+    X() { return this.log ? Math.exp : x => x; },
     u() { return this.pct ? '%' : ''; },
-    P() { return blandPairs(this.data, this.pct); },
+    raw() { return blandPairs(this.data, false); },
+    P() {
+      if (!this.log) return blandPairs(this.data, this.pct);
+      return this.raw.map(([m, d]) => [m, Math.log((m + d / 2) / (m - d / 2))]).filter(p => isFinite(p[1]));
+    },
+    dropped() { return this.raw.length - this.P.length; },
     ok() { return this.P.length >= 3; },
     M() { return this.ok ? blandCalc(this.P) : null; },
     rows() {
-      const t = this.t, M = this.M, u = this.u, {b, s, t: tq, lo, hi, seL, r, pb, p0, n} = M;
+      const t = this.t, M = this.M, u = this.u, X = this.X, {b, s, t: tq, lo, hi, seL, r, pb, p0, n} = M;
       return [
-        [t('Grenzen van overeenstemming'), `${G(lo, 3)} – ${G(hi, 3)}${u}`],
-        [t('95%-interval ondergrens'), `${G(lo - tq * seL, 3)} – ${G(lo + tq * seL, 3)}`],
-        [t('95%-interval bovengrens'), `${G(hi - tq * seL, 3)} – ${G(hi + tq * seL, 3)}`],
-        [t('SD van de verschillen'), G(s, 3) + u],
+        [t(this.log ? 'Grenzen van overeenstemming (B / A)' : 'Grenzen van overeenstemming'), `${G(X(lo), 3)} – ${G(X(hi), 3)}${u}`],
+        [t('95%-interval ondergrens'), `${G(X(lo - tq * seL), 3)} – ${G(X(lo + tq * seL), 3)}`],
+        [t('95%-interval bovengrens'), `${G(X(hi - tq * seL), 3)} – ${G(X(hi + tq * seL), 3)}`],
+        [t(this.log ? 'SD van ln(B/A)' : 'SD van de verschillen'), G(s, 3) + u],
         [t('Bias ≠ 0?'), p0 < 0.001 ? this.tHtml('p &lt; 0,001 (gepaarde t-toets)') : t(`p = ${fmt(p0, 3)} (gepaarde t-toets)`)],
         [t('Proportionele afwijking'), pb < 0.001 ? this.tHtml(`helling ${sig(r.b, 3)}, p &lt; 0,001`) : t(`helling ${sig(r.b, 3)}, p = ${fmt(pb, 3)}`)],
         [t('Paren'), n]
       ];
     },
     limNote() {
-      const lim = num(this.lim); if (!(lim > 0)) return null;
+      const lim = num(this.lim); if (!(lim > 0) || this.log) return null;
       const t = this.t, {lo, hi, t: tq, seL} = this.M, u = this.u;
       const inside = Math.max(Math.abs(lo - tq * seL), Math.abs(hi + tq * seL)) <= lim;
       return {kind: inside ? 'ok' : 'warn',
@@ -88,13 +99,15 @@ export default {
     /* de tekening wordt na elke render bijgewerkt; dat houdt canvas en uitkomst bij elkaar */
     draw() {
       const cv = document.getElementById('ba-cv'); if (!cv || !this.M) return;
-      const {d, m, b, lo, hi, t, seL} = this.M, P = this.P;
-      const ys = [...d, lo - t * seL, hi + t * seL], y0 = Math.min(...ys), y1 = Math.max(...ys), pd = (y1 - y0) * 0.1 || 1,
+      const {d, m, b, lo, hi, t, seL, r, pb} = this.M, X = this.X, P = this.P.map(([x, y]) => [x, X(y)]);
+      const ys = [...d, lo - t * seL, hi + t * seL].map(X), y0 = Math.min(...ys), y1 = Math.max(...ys), pd = (y1 - y0) * 0.1 || 1,
         x0 = Math.min(...m), x1 = Math.max(...m), px = (x1 - x0) * 0.06 || 1;
+      const series = [{fn: () => X(b), name: 'bias'}, {fn: () => X(lo), color: '--warn', dash: [5, 4]}, {fn: () => X(hi), color: '--warn', dash: [5, 4]},
+        {pts: P, color: '--ink', name: 'monsters'}];
+      /* proportionele afwijking: de regressielijn van het verschil op het gemiddelde erbij */
+      if (pb < 0.05) series.splice(3, 0, {fn: x => X(r.a + r.b * x), color: '--accent', dash: [2, 3], name: 'regressie'});
       chart(cv, {xmin: x0 - px, xmax: x1 + px, ymin: y0 - pd, ymax: y1 + pd, xlabel: 'gemiddelde van A en B',
-        ylabel: this.pct ? 'verschil (%)' : 'verschil B − A',
-        series: [{fn: () => b, name: 'bias'}, {fn: () => lo, color: '--warn', dash: [5, 4]}, {fn: () => hi, color: '--warn', dash: [5, 4]},
-          {pts: P, color: '--ink', name: 'monsters'}]});
+        ylabel: this.log ? 'verhouding B / A' : this.pct ? 'verschil (%)' : 'verschil B − A', series});
     }
   }
 };

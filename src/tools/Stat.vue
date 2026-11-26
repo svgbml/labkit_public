@@ -133,6 +133,8 @@
       <lk-note v-if="problem" :kind="problem.kind" :html="problem.html"/>
       <template v-else>
         <lk-big :label="R.label" :html="R.big"/>
+        <p v-if="R.apa" id="st-apa" class="st-apa"><span class="lbl">{{ t('In APA-stijl') }}</span> <span id="st-apa-txt" v-html="R.apa"></span>
+          <button type="button" class="xlbtn" @click="copyApa">{{ t('Kopieer') }}</button></p>
         <lk-steps v-if="R.steps" :steps="R.steps"/>
         <lk-kv v-if="R.kv" :rows="R.kv"/>
         <!-- S113 (#215): de aannames van de toets, met wat je doet als ze niet houden -->
@@ -190,6 +192,11 @@ const F = (x, d) => lkNumIn(fmt(x, d)), G = (x, d) => lkNumIn(sig(x, d));
 /* een voorbeeldwaarde in een veld: V() voor een naam, N() voor getallen. In het Nederlands
    blijft alles staan zoals het er staat. */
 const V = s => (typeof trPlain === 'function' ? trPlain(s, true) : s);
+/* S114 (#214): de uitkomst als zin in APA-stijl (APA 7, 6.36–6.46): twee decimalen, p met drie
+   en zonder voorloopnul (kan niet boven 1), p < .001 als ondergrens, statistieken cursief */
+const AP = (x, d) => lkNumIn(fmt(x, d));
+const noLead = s => s.replace(/^([−-]?)0(?=[.,])/, '$1');
+const APp = p => (p < 0.001 ? `<i>p</i> &lt; ${noLead(AP(0.001, 3))}` : `<i>p</i> = ${noLead(AP(p, 3))}`);
 const N = s => lkNumIn(s);
 
 const TESTS = [{v: 'desc', n: 'Beschrijvend en uitbijters'},
@@ -486,6 +493,7 @@ export default {
       const {tc, txt} = P.tCrit(df), rej = P.rejT(tv, tc), m0 = g(this.mu0, 4);
       return {
         label: t('t-toets, één steekproef'),
+        apa: `<i>t</i>(${df}) = ${AP(tv, 2)}, ${APp(p)}, <i>d</i> = ${AP((o.m - this.mu0) / o.sd, 2)}`,
         big: `t = ${F(tv, 3)} <small>p = ${lkNumIn(pfmt(p))}</small>`,
         steps: [
           P.h0(`µ = ${m0}`, P.sideTxt(`µ ≠ ${m0}`, `µ &gt; ${m0}`, `µ &lt; ${m0}`)),
@@ -512,6 +520,7 @@ export default {
       const uA = uv(esc(this.nA)), uB = uv(esc(this.nB));
       return {
         label: t(eq ? 't-toets, gelijke varianties' : 'Welch-toets, ongelijke varianties'),
+        apa: `<i>t</i>(${eq ? dfP : AP(dfW, 2)}) = ${AP(tv, 2)}, ${APp(p)}, <i>d</i> = ${AP((a.m - b.m) / Math.sqrt(sp2), 2)}`,
         big: `t = ${F(tv, 3)} <small>p = ${lkNumIn(pfmt(p))}</small>`,
         steps: [
           H(`<b>Eerst F-toets op gelijke varianties.</b> F = s²<sub>groot</sub> / s²<sub>klein</sub> = ${g(big.sd, 4)}² / ${g(sml.sd, 4)}² = <b>${f(Fv, 3)}</b>; F<sub>krit</sub> (tweezijdig, df ${d1}; ${d2}) = ${f(Fc, 3)}; p = ${pfmt(pF)} → ${eq ? 'varianties gelijk, gebruik de gepoolde t-toets' : 'varianties verschillen, gebruik de Welch-toets'}.`),
@@ -539,6 +548,7 @@ export default {
       const uA = uv(esc(this.nA)), uB = uv(esc(this.nB));
       return {
         label: t('Gepaarde t-toets'),
+        apa: `<i>t</i>(${df}) = ${AP(tv, 2)}, ${APp(p)}, <i>d</i><sub>z</sub> = ${AP(o.m / o.sd, 2)}`,
         big: `t = ${F(tv, 3)} <small>p = ${lkNumIn(pfmt(p))}</small>`,
         steps: [
           P.h0('µ<sub>d</sub> = 0 (geen verschil per paar)',
@@ -594,6 +604,7 @@ export default {
       const Rv = anovaCalc(AG, alpha), rej = Rv.F > Rv.Fc, notes = [];
       return {
         label: t('One-way ANOVA'),
+        apa: `<i>F</i>(${Rv.dfB}, ${Rv.dfW}) = ${AP(Rv.F, 2)}, ${APp(Rv.p)}, η² = ${noLead(AP(Rv.eta, 2))}`,
         big: `F = ${F(Rv.F, 3)} <small>p = ${lkNumIn(pfmt(Rv.p))}</small>`,
         steps: [
           P.h0('alle groepsgemiddelden zijn gelijk', 'minstens één gemiddelde wijkt af'),
@@ -786,6 +797,7 @@ export default {
       }
       return {
         label: t('χ²-toets'),
+        apa: `χ²(${m.df}, <i>N</i> = ${m.lines.flat().reduce((x, y) => x + y, 0)}) = ${AP(m.chi, 2)}, ${APp(m.p)}`,
         big: `χ² = ${F(m.chi, 3)} <small>p = ${lkNumIn(pfmt(m.p))}</small>`,
         steps: [
           P.h0(one ? 'de waargenomen verdeling volgt de verwachte verhouding'
@@ -817,6 +829,7 @@ export default {
       }
       return {
         label: t('Kruskal-Wallis-toets'),
+        apa: `<i>H</i>(${Rv.k - 1}) = ${AP(Rv.H, 2)}, ${APp(Rv.p)}`,
         big: `H = ${F(Rv.H, 3)} <small>p = ${lkNumIn(pfmt(Rv.p))}</small>`,
         steps: [
           P.h0('alle groepen komen uit dezelfde verdeling (gelijke medianen)', 'minstens één groep wijkt af'),
@@ -864,6 +877,10 @@ export default {
     lkNum(v) { return lkNumIn(v); },
     /* welke panelen bij de gekozen toets horen; dit deed stShow() met data-st-show */
     shown(list) { return list.split(' ').includes(this.test); },
+    copyApa() {
+      const el = document.getElementById('st-apa-txt');
+      if (el && navigator.clipboard) navigator.clipboard.writeText(el.textContent).catch(() => {});
+    },
     /* S113: naar de toets zonder de aanname. Van twee groepen naar Kruskal-Wallis gaan A en B
        mee als twee groepen; van t-toets één steekproef naar Wilcoxon wordt B leeg (tegen µ₀). */
     useAlt(to) {

@@ -1717,6 +1717,54 @@ def _(pg):
     m = pg.evaluate("__n(document.querySelector('#km-out tbody tr').cells[3].textContent)")
     return [('mediaan controle', m, float(med), 0.001), ('χ²', chi, lr.statistic**2, 0.005), ('p', p, lr.pvalue, 0.02)]
 
+@case('Bland-Altman (methodevergelijking)', 'Log-verhouding', 'Bland & Altman (1999), §5: d = ln(B/A), verhouding e^d̄ en grenzen e^(d̄ ± 1,96·s_d); onafhankelijk berekend met numpy')
+def _(pg):
+    import numpy as np
+    A = [4.8, 6.2, 7.9, 5.5, 9.8, 3.1, 6.7, 8.4]; B = [5.1, 6.0, 8.3, 5.9, 10.4, 3.0, 7.2, 8.6]
+    d = np.log(np.array(B) / np.array(A)); b = d.mean(); s = d.std(ddof=1)
+    pg.evaluate("__go('bland');__set('ba-m','log');__set('ba-lim','');__set('ba-d',"+repr('\n'.join(f"{a} {c}".replace('.',',') for a,c in zip(A,B)))+")")
+    lo = pg.evaluate("__kv('#ba-out','Grenzen')"); hi = pg.evaluate("__n(([...document.querySelectorAll('#ba-out dt')].find(d=>d.textContent.startsWith('Grenzen')).nextElementSibling.textContent.split('–')[1]))")
+    out = [('verhouding B/A', pg.evaluate("__big('#ba-out')"), np.exp(b), 0.005), ('ondergrens', lo, np.exp(b-1.96*s), 0.005), ('bovengrens', hi, np.exp(b+1.96*s), 0.005)]
+    pg.evaluate("__set('ba-m','abs')")
+    return out
+
+@case('ROC-curve & diagnostische test', 'Kruistabel bij de Youden-afkapwaarde', 'Youden (1950): J = sens + spec − 1, maximaal over alle afkapwaarden (waarde ≥ afkap = positief); aantallen met de hand geteld in Python')
+def _(pg):
+    P = [2.8, 3.5, 1.9, 4.2, 3.1, 2.4, 5.0, 3.8, 2.2]; N = [1.1, 0.8, 1.5, 2.0, 0.6, 2.4, 1.9, 0.9, 1.2, 2.6]
+    best = max(sorted(set(P + N), reverse=True), key=lambda c: sum(v >= c for v in P) / len(P) + sum(v < c for v in N) / len(N))
+    tp = sum(v >= best for v in P); tn = sum(v < best for v in N)
+    pg.evaluate(f"__go('roc');__set('ro-dir','hi');__set('ro-c','');__set('ro-p','{' '.join(str(v).replace('.',',') for v in P)}');__set('ro-n','{' '.join(str(v).replace('.',',') for v in N)}')")
+    cell = lambda r, c: pg.evaluate(f"__n(document.querySelectorAll('#ro-cm tbody tr')[{r}].cells[{c}].textContent)")
+    return [('echt positief, test positief', cell(0, 1), tp, 0), ('vals positief', cell(0, 2), len(N) - tn, 0),
+            ('vals negatief', cell(1, 1), len(P) - tp, 0), ('echt negatief', cell(1, 2), tn, 0)]
+
+@case('Overlevingscurve (Kaplan-Meier)', 'Aantal at risk', 'Aantal met tijd ≥ t op 0, 5, …, 25 (zoals de risk table van survminer::ggsurvplot), met de hand geteld in Python')
+def _(pg):
+    g1 = [(3,1),(5,1),(6,1),(6,0),(8,1),(9,1),(11,1),(12,0),(14,1),(15,0)]; g2 = [(5,1),(8,0),(10,1),(12,1),(14,0),(16,1),(18,0),(20,1),(22,0),(25,0)]
+    txt = '\\n'.join([f"controle {t} {e}" for t,e in g1]+[f"behandeld {t} {e}" for t,e in g2])
+    pg.evaluate(f"__go('km');__set('km-d','{txt}')")
+    rows = pg.evaluate("[...document.querySelectorAll('#km-risk tbody tr')].map(r=>[...r.cells].slice(1).map(c=>__n(c.textContent)))")
+    out = []
+    for gi, g in enumerate((g1, g2)):
+        for ti, t in enumerate(range(0, 30, 5)):
+            out.append((f"{'controle' if gi == 0 else 'behandeld'} op t = {t}", rows[gi][ti], sum(x >= t for x, _ in g), 0))
+    return out
+
+@case('Statistiek', 'Zin in APA-stijl', 'Student (1908), twee groepen: scipy.stats.ttest_ind (gelijke varianties, zoals de F-toets kiest) en Cohen d met de gepoolde s; APA 7 §6.36–6.46')
+def _(pg):
+    from scipy import stats
+    import numpy as np
+    a = [0.7, -1.6, -0.2, -1.2, -0.1, 3.4, 3.7, 0.8, 0.0, 2.0]; b = [1.9, 0.8, 1.1, 0.1, -0.1, 4.4, 5.5, 1.6, 4.6, 3.4]
+    r = stats.ttest_ind(a, b); sp = np.sqrt((np.var(a, ddof=1) + np.var(b, ddof=1)) / 2); d = (np.mean(a) - np.mean(b)) / sp
+    pg.evaluate("__go('stat');__set('st-alpha','0.05');__set('st-side','2');__set('st-a','0,7 -1,6 -0,2 -1,2 -0,1 3,4 3,7 0,8 0,0 2,0');__set('st-b','1,9 0,8 1,1 0,1 -0,1 4,4 5,5 1,6 4,6 3,4');__set('st-test','t2')")
+    txt = pg.evaluate("document.getElementById('st-apa-txt').textContent")
+    num = lambda s: float(s.strip().replace('−', '-').replace(',', '.'))
+    df = num(txt.split('(')[1].split(')')[0]); tv = num(txt.split('=')[1].split(', p')[0])
+    pv = num('0,' + txt.split('p = ,')[1][:3])   # APA: p zonder voorloopnul
+    dv = num(txt.split('d =')[1])
+    pg.evaluate("__set('st-test','desc')")
+    return [('df', df, 18, 0), ('t (2 decimalen)', tv, round(r.statistic, 2), 0.001), ('p (3 decimalen)', pv, round(r.pvalue, 3), 0.001), ('d (2 decimalen)', dv, round(d, 2), 0.001)]
+
 @case('Significante cijfers & afronden', 'Afronden en onzekerheid', 'Half naar boven: 0,004565 → 0,00457; half naar even: 0,00456; 9,995 → 10,0; GUM §7.2.6: 0,0045650 ± 0,0000234 → 0,004565 ± 0,000023')
 def _(pg):
     pg.evaluate("__go('sigfig');__set('sf-x','0,004565');__set('sf-n','3');__set('sf-m','up');__set('sf-u','')")
