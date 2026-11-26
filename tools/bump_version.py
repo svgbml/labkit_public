@@ -1,4 +1,4 @@
-"""Zet het versienummer op alle plekken tegelijk: package.json, APPVER in src/legacy/core.js (en de gegenereerde web/index.html), CACHE in web/sw.js,
+"""Zet het versienummer op alle plekken tegelijk: package.json, APPVER in src/legacy/core.js (web/index.html is gegenereerd: npm run build zet hem erin), CACHE in web/sw.js,
 src-tauri/tauri.conf.json en src-tauri/Cargo.toml. Vergeet je sw.js, dan blijven geïnstalleerde web-apps de oude cache gebruiken.
 Gebruik: python tools/bump_version.py 1.19.0   (zonder argument: toont de huidige versies)"""
 import os, re, sys
@@ -7,7 +7,6 @@ R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLACES = [
     ('package.json',              r'("version":\s*")([\d.]+)(")'),
     ('src/legacy/core.js',        r"(const APPVER=')([\d.]+)(')"),
-    ('web/index.html',            r"(const APPVER=')([\d.]+)(')"),
     ('web/sw.js',                 r"(const CACHE = 'labkit-v)([\d.]+)(')"),
     ('src-tauri/tauri.conf.json', r'("version":\s*")([\d.]+)(")'),
     ('src-tauri/Cargo.toml',      r'(^version\s*=\s*")([\d.]+)(")'),
