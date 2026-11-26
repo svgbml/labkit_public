@@ -1099,6 +1099,18 @@ def _(pg):
     pa = pg.evaluate("[...document.querySelectorAll('#st-dunn tbody tr')].map(r=>__n(r.cells[4].textContent))")
     return [('H', H, 7.9882, 0.001), ('p', p, 0.01842, 0.01), ('Dunn trt1 − ctrl', pa[0], 1.0 if ref[0,1] > 1 else ref[0,1], 0.01), ('Dunn trt2 − ctrl', pa[1], ref[0,2], 0.01), ('Dunn trt2 − trt1', pa[2], ref[1,2], 0.01)]
 
+@case('Statistiek', 'Aannames: Levene (mediaan) en lange tabel', 'R car::leveneTest(weight ~ group, PlantGrowth): F = 1,1192, df 2 en 27, p = 0,3412 (ook scipy.stats.levene). Dezelfde data als lange tabel (groep, waarde) geplakt moet dezelfde ANOVA geven: F = 4,8461')
+def _(pg):
+    G = {'ctrl': '4,17 5,58 5,18 6,11 4,50 4,61 5,17 4,53 5,33 5,14', 'trt1': '4,81 4,17 4,41 3,59 5,87 3,83 6,03 4,89 4,32 4,69', 'trt2': '6,31 5,12 5,54 5,50 5,37 5,29 4,92 6,15 5,80 5,26'}
+    long_ = 'group\tweight\n' + '\n'.join(f'{k}\t{v}' for k, vs in G.items() for v in vs.split())
+    keep = pg.evaluate("document.getElementById('st-groups').value")
+    pg.evaluate("t=>{__go('stat');__set('st-alpha','0.05');__set('st-groups',t);__set('st-test','anova')}", long_); pg.wait_for_timeout(200)
+    row = pg.evaluate("document.getElementById('st-assume').innerText.split('Levene')[1]||''")
+    F = pg.evaluate("__big('#st-out')")
+    lev = pg.evaluate("t=>__n(t.split('F =')[1])", row); p = pg.evaluate("t=>__n(t.split('p =')[1])", row)
+    pg.evaluate("t=>{__set('st-groups',t)}", keep)
+    return [('ANOVA F (lange tabel)', F, 4.8461, 0.001), ('Levene F', lev, 1.1192, 0.001), ('Levene p', p, 0.3412, 0.002)]
+
 @case('Standaardcurve', 'ELISA, 5PL', 'Rekentest: standaarden berekend met A = 0,05; B = 1,3; C = 400; D = 3,2; E = 0,6 (asymmetrisch, Gottschalk & Dunn 2005); monster x = 300 moet terugkomen')
 def _(pg):
     pg.evaluate("""__go('curve');__set('s-preset','leeg');__set('s-model','5pl');__set('s-blank',false);

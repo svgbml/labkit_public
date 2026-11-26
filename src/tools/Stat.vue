@@ -21,6 +21,31 @@
 <template>
   <div class="grid2">
     <div class="stack">
+      <!-- S113 (#213): de keuzehulp. Alleen eigen velden (st-w-*), dus v-if mag hier. -->
+      <details class="panel" id="st-wiz">
+        <summary>{{ t('Welke toets past bij je vraag?') }}</summary>
+        <div class="fields" style="margin-top:10px">
+          <div class="f"><label for="st-w-goal">{{ t('Wat wil je weten?') }}</label>
+            <select id="st-w-goal" style="width:100%" v-model="wz.goal">
+              <option value="groups">{{ t('Verschillen groepen van elkaar?') }}</option>
+              <option value="mu">{{ t('Wijkt één reeks af van een vaste waarde?') }}</option>
+              <option value="rel">{{ t('Hangen twee metingen samen?') }}</option>
+              <option value="count">{{ t('Kloppen aantallen per categorie met een verwachting?') }}</option>
+              <option value="desc">{{ t('Alleen beschrijven en uitbijters zoeken') }}</option>
+              <option value="n">{{ t('Hoeveel metingen heb ik nodig?') }}</option>
+            </select></div>
+          <div class="f" v-if="wz.goal === 'groups'"><label for="st-w-k">{{ t('Hoeveel groepen?') }}</label>
+            <select id="st-w-k" style="width:100%" v-model="wz.k"><option value="2">{{ t('Twee') }}</option><option value="3">{{ t('Drie of meer') }}</option></select></div>
+          <div class="f" v-if="wz.goal === 'groups'"><label for="st-w-pair">{{ t('Dezelfde proefpersonen of monsters in elke groep?') }}</label>
+            <select id="st-w-pair" style="width:100%" v-model="wz.paired"><option value="no">{{ t('Nee, onafhankelijke groepen') }}</option><option value="yes">{{ t('Ja, gepaard of herhaald gemeten') }}</option></select></div>
+          <div class="f" v-if="wz.goal === 'groups' && wz.k === '3' && wz.paired === 'no'"><label for="st-w-fac">{{ t('Hoeveel factoren?') }}</label>
+            <select id="st-w-fac" style="width:100%" v-model="wz.factors"><option value="1">{{ t('Eén (bijvoorbeeld de behandeling)') }}</option><option value="2">{{ t('Twee (bijvoorbeeld medium en temperatuur)') }}</option></select></div>
+          <div class="f" v-if="wzNorm"><label for="st-w-norm">{{ t('Normaal verdeeld?') }}</label>
+            <select id="st-w-norm" style="width:100%" v-model="wz.normal"><option value="unknown">{{ t('Weet ik niet') }}</option><option value="yes">{{ t('Ja') }}</option><option value="no">{{ t('Nee, scheef of met uitschieters') }}</option></select></div>
+        </div>
+        <lk-note :kind="wzR.test ? 'ok' : 'warn'" :html="wzHtml"/>
+        <button v-if="wzR.test" type="button" id="st-w-go" @click="test = wzR.test">{{ t('Open deze toets') }}</button>
+      </details>
       <div class="panel">
         <div class="fields">
           <div class="f">
@@ -55,6 +80,8 @@
           <div class="f" v-show="shown('desc t2 tp wil reg')"><label for="st-b" v-html="tHtml(labelB)"></label><textarea id="st-b" rows="7" v-model="b"></textarea></div>
         </div>
         <p style="font-size:13px;color:var(--muted);margin:8px 0 0" id="st-hint" v-show="shown('tp wil')">{{ t('Bij een gepaarde toets horen de waarden op dezelfde plek bij elkaar (zelfde proefpersoon, monster of plaat).') }}</p>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('Een tabel uit Excel plakken in A kan ook: lang (een kolom groep en een kolom waarde) of breed (een kolom per groep, met de namen bovenaan).') }}</p>
+        <lk-note v-if="pasteNote" kind="ok" :html="pasteNote"/>
       </div>
       <div class="panel" v-show="shown('anova2')">
         <div class="f">
@@ -88,6 +115,7 @@
           <textarea id="st-groups" rows="5" v-model="groups"></textarea>
         </div>
         <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('Plakken uit Excel kan ook: per regel een naam, een tab en dan de waarden. Voorbeeld: drooggewicht van planten onder een controle en twee behandelingen (R-dataset PlantGrowth, Dobson 1983).') }}</p>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0">{{ t('Of plak een tabel in lange vorm (een kolom groep en een kolom waarde) of in brede vorm (een kolom per groep, met de namen bovenaan).') }}</p>
       </div>
       <div class="panel" v-show="shown('chi')">
         <div class="f">
@@ -107,6 +135,13 @@
         <lk-big :label="R.label" :html="R.big"/>
         <lk-steps v-if="R.steps" :steps="R.steps"/>
         <lk-kv v-if="R.kv" :rows="R.kv"/>
+        <!-- S113 (#215): de aannames van de toets, met wat je doet als ze niet houden -->
+        <div v-if="assume" id="st-assume" class="st-assume">
+          <h4>{{ t('Aannames') }}</h4>
+          <lk-kv :rows="assume.rows"/>
+          <lk-note v-for="(n, i) in assume.notes" :key="i" :kind="n.kind" :html="n.html"/>
+          <button v-if="assume.to" type="button" id="st-assume-go" @click="useAlt(assume.to)">{{ t('Overschakelen naar') }} {{ t(TESTS.find(o => o.v === assume.to).n) }}</button>
+        </div>
         <div v-if="R.anova" class="tbl-wrap"><lk-table :table-id="R.anova.id" :cols="R.anova.cols" :rows="R.anova.rows" :wrap="false"/></div>
         <template v-if="R.post">
           <div class="lbl" style="margin-top:12px" v-html="R.post.label"></div>
@@ -146,6 +181,7 @@
 
 <script>
 import {lkNumIn, lkPicBar} from '../lib/bridge.js';
+import {whichTest, brownForsythe, tableGroups} from '../lib/statwiz.js';
 
 /* getallen: F en G voor de weergave (dus door lkNumIn), f en g voor tekst die nog door
    tHtml() of t() gaat — die zet de getallen zelf in de taal van de gebruiker */
@@ -185,7 +221,8 @@ export default {
         + 'M9 / 30 °C: 0,41 0,44 0,39 0,43\nM9 / 37 °C: 0,55 0,52 0,58 0,54'),
       fa: V('Medium'), fb: V('Temperatuur'),
       ptype: '2', pd: N('0,5'), psd: '1', pw: '80',
-      obs: '315 108 101 32', exp: '9 3 3 1'};
+      obs: '315 108 101 32', exp: '9 3 3 1',
+      wz: {goal: 'groups', k: '2', paired: 'no', factors: '1', normal: 'unknown'}, pasteNote: ''};
   },
   computed: {
     TESTS() { return TESTS; },
@@ -198,7 +235,62 @@ export default {
     A() { return stNums(this.a); },
     B() { return stNums(this.b); },
     /* de groepen van ANOVA en Kruskal-Wallis */
-    AG() { return this.test === 'anova' || this.test === 'kw' ? stGroups(this.groups) : []; },
+    AG() { return this.test === 'anova' || this.test === 'kw' ? (tableGroups(this.groups) || stGroups(this.groups)) : []; },
+    /* ---------- de keuzehulp (S113) ---------- */
+    wzNorm() {
+      const w = this.wz;
+      return w.goal === 'mu' || (w.goal === 'groups' && !(w.k === '3' && (w.paired === 'yes' || w.factors === '2')));
+    },
+    wzR() { return whichTest(this.wz); },
+    wzHtml() {
+      const r = this.wzR, t = this.t, o = TESTS.find(x => x.v === r.test);
+      const extra = r.test && this.wzNorm && this.wz.normal === 'unknown' && !['wil', 'kw'].includes(r.test)
+        ? ' ' + t('Onder de uitkomst staat of de aannames houdbaar zijn.') : '';
+      return (o ? '<b>' + esc(t(o.n)) + '.</b> ' : '') + esc(t(r.why)) + esc(extra);
+    },
+    /* ---------- de aannames bij de uitkomst (S113) ---------- */
+    assume() {
+      const T = this.test, t = this.t, H = this.tHtml, alpha = this.alpha;
+      if (!['t1', 't2', 'tp', 'anova'].includes(T) || this.problem) return null;
+      const chip = (ok, yes, no) => `<span class="chip ${ok ? 'ok' : 'warn'}">${t(ok ? yes : no)}</span>`;
+      const rows = [], notes = [];
+      let norm = true, few = false;
+      (T === 'tp' ? this.desc.slice(-1) : this.desc).forEach(([n, o]) => {
+        if (o.n < 8) few = true;
+        if (!isFinite(o.lD)) { rows.push([H(`Normaal verdeeld: ${uv(esc(V(n)))}`), t('te weinig waarden om te toetsen')]); return; }
+        if (o.lD > o.lC) norm = false;
+        rows.push([H(`Normaal verdeeld: ${uv(esc(V(n)))}`),
+          chip(o.lD <= o.lC, 'aanname houdbaar', 'nee') + ` <small>D = ${F(o.lD, 3)}, D<sub>krit</sub> = ${F(o.lC, 3)} (Lilliefors)</small>`]);
+      });
+      let vari = true;
+      if (T === 't2') {
+        const a = stDesc(this.A, alpha), b = stDesc(this.B, alpha), big = a.sd >= b.sd ? a : b, sml = a.sd >= b.sd ? b : a;
+        const Fv = big.sd ** 2 / sml.sd ** 2, d1 = big.n - 1, d2 = sml.n - 1;
+        vari = Fv <= finv(1 - alpha / 2, d1, d2);
+        rows.push([t('Gelijke varianties (F-toets)'), chip(vari, 'aanname houdbaar', 'nee')
+          + ` <small>F = ${F(Fv, 3)}, p = ${lkNumIn(pfmt(Math.min(1, 2 * (1 - fcdf(Fv, d1, d2)))))}</small>`]);
+        if (!vari) notes.push({kind: 'info', html: t('De varianties verschillen; daarom rekent LabKit hierboven met de Welch-toets, die dat niet aanneemt.')});
+      }
+      if (T === 'anova') {
+        const bf = brownForsythe(this.AG.map(x => x.v)), p = 1 - fcdf(bf.F, bf.df1, bf.df2);
+        vari = p >= 0.05;
+        rows.push([t('Gelijke varianties (Levene, mediaan)'), chip(vari, 'aanname houdbaar', 'nee')
+          + ` <small>F = ${F(bf.F, 3)} (df ${bf.df1}; ${bf.df2}), p = ${lkNumIn(pfmt(p))}</small>`]);
+      }
+      let to = null;
+      if (!norm) {
+        to = T === 't1' || T === 'tp' ? 'wil' : 'kw';
+        notes.push({kind: 'warn', html: t(T === 't1' || T === 'tp'
+          ? 'Niet normaal verdeeld: gebruik de Wilcoxon-rangtekentoets, die met rangnummers rekent.'
+          : T === 't2' ? 'Niet normaal verdeeld: gebruik Kruskal-Wallis met twee groepen; dat komt overeen met de Mann-Whitney-toets.'
+            : 'Niet normaal verdeeld: gebruik Kruskal-Wallis met Dunn, die met rangnummers rekent.')});
+      } else if (T === 'anova' && !vari) {
+        to = 'kw';
+        notes.push({kind: 'warn', html: t('De varianties verschillen: daar is ANOVA gevoelig voor, vooral bij ongelijke groepen. Kruskal-Wallis is een alternatief; bij meetwaarden waarvan de spreiding met het gemiddelde meegroeit helpt een log-transformatie vaak.')});
+      }
+      if (norm && few) notes.push({kind: 'info', html: t('Met minder dan 8 waarden per groep ziet een normaliteitstoets een afwijking zelden; kijk ook naar de grafiek.')});
+      return {rows, notes, to};
+    },
     labelA() {
       return this.test === 'reg'
         ? 'x-waarden (onafhankelijk) <span class="example">voorbeeld</span>'
@@ -498,11 +590,8 @@ export default {
     },
     rAnova() {
       const t = this.t, H = this.tHtml, P = this.proc, alpha = this.alpha, AG = this.AG;
+      /* de normaliteit en de varianties staan sinds S113 in het blok Aannames */
       const Rv = anovaCalc(AG, alpha), rej = Rv.F > Rv.Fc, notes = [];
-      if (this.desc.some(([, o]) => isFinite(o.lD) && o.lD > o.lC)) {
-        notes.push({kind: 'warn',
-          html: t('Niet alle groepen lijken normaal verdeeld (Lilliefors); ANOVA veronderstelt normaliteit en gelijke varianties.')});
-      }
       return {
         label: t('One-way ANOVA'),
         big: `F = ${F(Rv.F, 3)} <small>p = ${lkNumIn(pfmt(Rv.p))}</small>`,
@@ -750,12 +839,38 @@ export default {
       };
     }
   },
+  watch: {
+    /* S113 (#216): een tabel in lange of brede vorm in A wordt verdeeld: twee groepen naar A en B,
+       drie of meer naar de groepen van ANOVA */
+    a(v) {
+      const g = tableGroups(v);
+      if (!g || g.length < 2) return;
+      const vals = x => N(x.v.map(y => String(y).replace('.', ',')).join(' '));   // N() verwacht Nederlandse getallen
+      if (g.length === 2) {
+        this.na = g[0].name; this.nb = g[1].name; this.b = vals(g[1]); this.a = vals(g[0]);
+        if (this.test === 't1' || this.test === 'reg') this.test = 't2';
+        this.pasteNote = this.t('Tabel herkend: ' + uv(g[0].name) + ' (n = ' + g[0].v.length + ') in A en ' + uv(g[1].name) + ' (n = ' + g[1].v.length + ') in B.');
+      } else {
+        this.groups = g.map(x => x.name + ': ' + vals(x)).join('\n'); this.a = '';
+        if (this.test !== 'kw') this.test = 'anova';
+        this.pasteNote = '';
+      }
+    },
+    test() { this.pasteNote = ''; }
+  },
   mounted() { this.draw(); },
   updated() { this.draw(); },
   methods: {
     lkNum(v) { return lkNumIn(v); },
     /* welke panelen bij de gekozen toets horen; dit deed stShow() met data-st-show */
     shown(list) { return list.split(' ').includes(this.test); },
+    /* S113: naar de toets zonder de aanname. Van twee groepen naar Kruskal-Wallis gaan A en B
+       mee als twee groepen; van t-toets één steekproef naar Wilcoxon wordt B leeg (tegen µ₀). */
+    useAlt(to) {
+      if (to === 'kw' && this.test === 't2') this.groups = `${this.nA}: ${this.a}\n${this.nB}: ${this.b}`;
+      if (to === 'wil' && this.test === 't1') this.b = '';
+      this.test = to;
+    },
     /* de staafjes van de ANOVA en, zolang ze nog uit index.html komen, de tekeningen van
        regressie en power */
     draw() {

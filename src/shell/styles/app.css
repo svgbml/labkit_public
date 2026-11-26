@@ -163,6 +163,10 @@ canvas{max-width:100%}
 .lk-tabs a{padding:6px 12px;border:1px solid transparent;border-bottom:0;border-radius:6px 6px 0 0;color:var(--muted);text-decoration:none;font-weight:500;margin-bottom:-1px}
 .lk-tabs a:hover{color:var(--ink)}
 .lk-tabs a[aria-current=page]{color:var(--accent);background:var(--surface);border-color:var(--line);border-bottom:1px solid var(--surface)}
+/* Statistiek: aannames en keuzehulp (S113) */
+.st-assume{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+.st-assume h4{margin:0 0 6px}
+#st-wiz summary{cursor:pointer;font-weight:600}
 /* Telkamer: raster met getelde vakken en invoer per vak (S105) */
 .k-grid{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin-top:12px}
 .k-grid svg{width:170px;max-width:100%;flex:none}
