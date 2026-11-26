@@ -184,6 +184,7 @@ canvas{max-width:100%}
 .lk-proj-notes small{color:var(--muted);flex-basis:100%}
 .lk-proj-new textarea{flex:1 1 200px}
 .lk-proj-confirm{margin-top:8px}
+.lk-auto-reset{font-size:12px;padding:2px 8px;margin-top:4px}
 .lk-wf-runs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}
 /* Statistiek: aannames en keuzehulp (S113) */
 .st-assume{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}

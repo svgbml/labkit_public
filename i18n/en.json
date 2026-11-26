@@ -6315,5 +6315,11 @@
 "Project exporteren": "Export project",
 "Importeren": "Import",
 "Bewaar dit project als bestand, bijvoorbeeld om naar een andere computer over te zetten": "Save this project as a file, for example to move it to another computer",
-"Een project, een oude sessie of een back-up openen": "Open a project, an old session or a backup"
+"Een project, een oude sessie of een back-up openen": "Open a project, an old session or a backup",
+"Automatisch uit DNA-kwantificatie": "Automatic from DNA quantification",
+"Automatisch uit PCR-cyclus": "Automatic from PCR cycle",
+"Automatisch uit de monsterlijst": "Automatic from the sample list",
+"Weer automatisch uit DNA-kwantificatie": "Automatic again from DNA quantification",
+"Weer automatisch uit PCR-cyclus": "Automatic again from PCR cycle",
+"Weer automatisch uit de monsterlijst": "Automatic again from the sample list"
 }

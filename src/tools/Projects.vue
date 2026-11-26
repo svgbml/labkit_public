@@ -96,6 +96,7 @@
 
 <script>
 import * as P from '../engines/projects.js';
+import {startFlow} from '../engines/flow.js';
 
 const kB = n => (n < 1e6 ? Math.max(1, Math.round(n / 1024)) + ' kB' : n < 1e9 ? (n / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.round(n / 1073741824) + ' GB');
 
@@ -147,6 +148,7 @@ export default {
   mounted() {
     P.migrate(this.t('Mijn project')); this.refresh();
     P.persist();
+    startFlow();   /* S117: data tussen de stappen van de actieve run */
     window.__projVm = this;
   }
 };
