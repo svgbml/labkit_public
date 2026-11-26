@@ -163,6 +163,22 @@ canvas{max-width:100%}
 .lk-tabs a{padding:6px 12px;border:1px solid transparent;border-bottom:0;border-radius:6px 6px 0 0;color:var(--muted);text-decoration:none;font-weight:500;margin-bottom:-1px}
 .lk-tabs a:hover{color:var(--ink)}
 .lk-tabs a[aria-current=page]{color:var(--accent);background:var(--surface);border-color:var(--line);border-bottom:1px solid var(--surface)}
+/* Projecten en mijn werkstromen (S118) */
+.lk-proj-chip{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.lk-proj-ov{position:fixed;inset:0;background:rgba(15,20,30,.38);z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:8vh 12px 12px}
+.lk-proj-box{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.25);width:min(560px,100%);max-height:84vh;overflow:auto;padding:16px}
+.lk-proj-box h3{margin:0 0 8px}
+.lk-proj-head{display:flex;justify-content:space-between;align-items:center}
+.lk-proj-list{list-style:none;margin:0;padding:0}
+.lk-proj-list li{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--line)}
+.lk-proj-list li.on .nm{font-weight:600;color:var(--accent)}
+.lk-proj-list .nm{flex:1 1 140px;min-width:0;overflow-wrap:anywhere}
+.lk-proj-list small{color:var(--muted)}
+.lk-proj-list button.bad{color:var(--bad);border-color:var(--bad)}
+.lk-proj-new{gap:8px;margin-top:10px}
+.lk-proj-new input{flex:1 1 160px}
+.lk-proj-box .note-s{font-size:13px;color:var(--muted);margin:8px 0 0}
+.lk-wf-runs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}
 /* Statistiek: aannames en keuzehulp (S113) */
 .st-assume{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
 .st-assume h4{margin:0 0 6px}

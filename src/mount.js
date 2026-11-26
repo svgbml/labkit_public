@@ -50,6 +50,7 @@ import Chrom from './tools/Chrom.vue';
 import Spec from './tools/Spec.vue';
 import Ic50 from './tools/Ic50.vue';
 import Start from './tools/Start.vue';
+import Projects from './tools/Projects.vue';
 import Settings from './tools/Settings.vue';
 import Telkamer from './tools/Telkamer.vue';
 import Passage from './tools/Passage.vue';
@@ -508,6 +509,8 @@ export function start() {
   /* De app-schil (S263). De startpagina leest de navigatie, de fase, de favorieten en de werkstroom
      bij elke calc.start(): die roepen stageSet(), de sterren in de navigatie en het stoppen van een
      werkstroom al aan. Instellingen roept zelf applyUI() aan; calc.inst hoeft niets te doen. */
+  /* S118: de projectknop in de bovenbalk met het paneel voor projecten en werkstromen */
+  mountTool('#proj-host', Projects);
   const sp = mountTool('#bento', Start);
   calc.start = () => { if (sp && sp.vm) sp.vm.refresh(); };
   mountTool('#inst-app', Settings);

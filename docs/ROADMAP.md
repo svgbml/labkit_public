@@ -402,7 +402,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 Designed in the W1 interview (2026-11-26): [W1.md](W1.md), [GLOSSARY.md](../GLOSSARY.md), [adr/](adr/). S118 comes before S117.
 | Step | Ideas | What | Model |
 |---|---|---|---|
-| S118 | 5 | Projects and runs: a project holds inputs, gels, notes and several runs (each run its own copy of its tools' inputs); chip in the top bar to switch (reload), first start turns existing data into *Mijn project*, per-project export and import; inactive projects in IndexedDB. See [W1.md](W1.md) | Opus 5.5 |
+| S118 | 5 | Projects and runs: a project holds inputs, gels, notes and several runs (each run its own copy of its tools' inputs); chip in the top bar to switch (reload), first start turns existing data into *Mijn project*, per-project export and import; inactive projects in IndexedDB. See [W1.md](W1.md) 🔨 Deel 1 af: projecten en runs (`src/lib/projects.js`, `src/engines/projects.js`, `src/tools/Projects.vue`), projectknop `proj-chip` in de bovenbalk, migratie naar *Mijn project*, runs starten (leeg of als kopie), wisselen, stoppen, hernoemen, verwijderen; opslaggebruik en `navigator.storage.persist()`; `tests/projects_check.py`. **Nog te doen:** project exporteren/importeren en *Alles back-uppen*, gels per project en run, notities per project | Opus 5.5 |
 | S117 | 2 | Data flow inside the active run: live auto values, a click into the field stops them, a button switches back; first chain DNA conc → PCR → Gelplanner → gel editor. See [W1.md](W1.md) | Opus 5.5 |
 | S119 | 6, 7 | Custom workflows (pick tools, save, share) and course workflow templates | Opus 5 |
 | S120 | 19 | Share a whole workflow run as one link/QR | Opus 5 |

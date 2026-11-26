@@ -29,6 +29,11 @@
       <template v-if="b.wf">
         <h3>{{ t('Werkstromen') }} <span>{{ wf.length }}</span></h3>
         <p class="lk-wf-intro">{{ t('Doorloop de tools van een heel experiment op volgorde. Je invoer blijft per tool bewaard.') }}</p>
+        <!-- S118: de runs van dit project, met de naam die de student gaf -->
+        <div v-if="runs.length" class="lk-wf-runs" id="wf-runs">
+          <span class="lbl">{{ t('Mijn werkstromen') }}</span>
+          <button v-for="r in runs" :key="r.id" type="button" :class="['lk-btn', {primary: r.on}]" :data-run-open="r.id">{{ r.name }}</button>
+        </div>
         <div class="lk-wf-list">
           <button v-for="w in wf" :key="w.id" type="button" :class="['lk-wf-card', {on: w.on}]" :data-wf-start="w.id">
             <b>{{ t(w.n) }}</b><small><template v-for="(s, si) in w.steps" :key="s"><template v-if="si"> → </template><span>{{ s }}</span></template></small>
@@ -70,6 +75,10 @@ export default {
     fav() { void this.tick; return jget(FKEY, []); },
     tag() { void this.hash; return curTag(); },
     tags() { void this.tick; return tagList(); },
+    runs() {
+      void this.tick; const r = jget('labkit:v1:runs', {});
+      return (r.list || []).map(x => ({id: x.id, name: x.name, on: x.id === r.active}));
+    },
     wf() {
       void this.tick; if (typeof WF === 'undefined') return [];
       const cur = wfCur(), N = {}; this.all.forEach(x => { N[x.id] = x.name; });
