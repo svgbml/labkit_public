@@ -57,12 +57,12 @@ jobs:
           LABKIT_LANG: en
       - name: Visuele regressie (schermafbeeldingen)
         run: python tests/visual_check.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: validatierapport
           path: tests/VALIDATIE.md
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: visuele-verschillen
