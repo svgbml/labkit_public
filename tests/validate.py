@@ -220,6 +220,17 @@ def _(pg):
     pg.evaluate("__go('telkamer');__set('k-ch','0.1n');kSq();__set('k-sq','1');__set('k-live','39 39 39 39');__set('k-dead','');__set('k-df','20')")
     return [('cellen/mL', pg.evaluate("__big('#k-out')"), 7.8e6, 0.005)]
 
+@case('Telkamer', 'Per vak invullen (raster)', 'Zelfde ProSciTech-telling als hierboven, maar ingevuld in de vakken 1–5 van het raster: 528 cellen in 5 groepsvakken, 1:200 → 5,28 × 10⁶/µL')
+def _(pg):
+    pg.evaluate("__go('telkamer');__set('k-ch','0.1n');kSq();__set('k-sq','0.04');__set('k-live','');__set('k-dead','');__set('k-df','200')")
+    pg.wait_for_selector('#k-l5', state='attached')
+    for i, v in enumerate((105, 106, 105, 106, 106), 1):
+        pg.evaluate(f"(()=>{{const e=document.getElementById('k-l{i}');e.value='{v}';e.dispatchEvent(new Event('change'))}})()"); pg.wait_for_timeout(30)
+    out = [('cellen/mL', pg.evaluate("__big('#k-out')"), 5.28e9, 0.005),
+           ('vakken geteld', pg.evaluate("__n(document.getElementById('k-live').value.split(' ').length)"), 5, 0)]
+    pg.evaluate("__go('telkamer');__set('k-ch','0.1');kSq();__set('k-sq','1');__set('k-live','52 47 55 49');__set('k-dead','4 6 3 5');__set('k-df','2')")
+    return out
+
 # ---------------- DNA ----------------
 @case('DNA-kwantificatie', 'A₂₆₀ → concentratie', 'Pearson rekenvoorbeeld: A₂₆₀ 0,85 bij 1:10, dsDNA → 425 ng/µL')
 def _(pg):

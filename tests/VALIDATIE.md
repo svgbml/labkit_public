@@ -1,9 +1,9 @@
 # Validatie Labkit BML
 
-Automatisch gegenereerd op 2026-11-25 door `tests/validate.py`.
+Automatisch gegenereerd op 2026-11-26 door `tests/validate.py`.
 Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface van Labkit en vergelijkt de getoonde uitkomst met de referentie.
 
-**Resultaat: 784 van 784 controles binnen tolerantie.**
+**Resultaat: 786 van 786 controles binnen tolerantie.**
 
 | Tool | Dataset | Grootheid | Referentie | Labkit | Afwijking | Status | Bron |
 |---|---|---|---:|---:|---:|---|---|
@@ -54,6 +54,8 @@ Elke rij voert gepubliceerde of onafhankelijk berekende data in via de interface
 | Telkamer | Tellen uit een foto (trypaanblauw) | cells_dense.png dood | 30 | 30 | +0.00% | ✅ | Testfoto's met bekend aantal (tests/fixtures/make_cells.py, vaste seed): levende cellen met heldere kern en donkere rand, dode egaal blauw, met kamerlijnen (ook driedubbel), verloop, ruis en onscherpte. 45 levend/12 dood en 80/30 (dichter, kleiner); tolerantie 10% |
 | Telkamer | Neubauer, erytrocyten | cellen/mL | 5,2800e+09 | 5,2800e+09 | +0.00% | ✅ | ProSciTech: 528 cellen in 5 groepsvakken (0,2 mm²), 1:200 → 5,28 × 10⁶/µL |
 | Telkamer | Neubauer, leukocyten | cellen/mL | 7,8000e+06 | 7,8000e+06 | +0.00% | ✅ | ProSciTech: 156 cellen in 4 grote vakken, 1:20 → 7800/µL |
+| Telkamer | Per vak invullen (raster) | cellen/mL | 5,2800e+09 | 5,2800e+09 | +0.00% | ✅ | Zelfde ProSciTech-telling als hierboven, maar ingevuld in de vakken 1–5 van het raster: 528 cellen in 5 groepsvakken, 1:200 → 5,28 × 10⁶/µL |
+| Telkamer | Per vak invullen (raster) | vakken geteld | 5 | 5 | +0.00% | ✅ | Zelfde ProSciTech-telling als hierboven, maar ingevuld in de vakken 1–5 van het raster: 528 cellen in 5 groepsvakken, 1:200 → 5,28 × 10⁶/µL |
 | DNA-kwantificatie | A₂₆₀ → concentratie | ng/µL | 425 | 425 | +0.00% | ✅ | Pearson rekenvoorbeeld: A₂₆₀ 0,85 bij 1:10, dsDNA → 425 ng/µL |
 | DNA-kwantificatie | ng/µL → nM | nM | 75,8 | 75,8 | +0.00% | ✅ | Pearson rekenvoorbeeld: 50 ng/µL, 1000 bp → 75,8 nM |
 | DNA-kwantificatie | NanoDrop-export inlezen (2000 en One) | nd2000.tsv S1 ng/µL | 85 | 85 | +0.00% | ✅ | Thermo Scientific NanoDrop 2000/2000c User Manual en NanoDrop One User Guide: de export staat op 10 mm, dsDNA 50 ng/µL per A₂₆₀; testbestanden tests/fixtures/nanodrop/ met de concentraties 85,0 / 22,6 / 156,0 ng/µL die het apparaat zelf meldt; 260/280 = 1,85 en 260/230 = 2,10 voor S1 |

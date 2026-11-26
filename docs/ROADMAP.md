@@ -7,10 +7,10 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Model** (last column) is the cheapest model that can do the step well, so the shared usage limit lasts longer. Done steps show "—".
 - **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (1 open step).
 - **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (12 open steps).
-- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (21 open steps).
+- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (20 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (9 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **228 done, 42 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **229 done, 41 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-23)
 
@@ -24,7 +24,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 5 execution | S48–S61 | ✅ done (batches E1–E4) |
 | Phase 6 gel editor rebuild | S62–S79 | ✅ done |
 | Phase 7 charts, figures and data | S80–S96 | ✅ done |
-| Phase 8 rework existing tools | S97–S116 | **part done:** S105, S113, S114 open (batch R3) |
+| Phase 8 rework existing tools | S97–S116 | **part done:** S113, S114 open (batch R3) |
 | Phase 9 structure and workflows | S117–S121 | ⏳ not started (batch W1) |
 | Phase 10 performance | S122–S133 | ⏳ not started; F1a re-plans it first |
 | Phase 11 quality, tests and dev | S134–S142 | **part done:** S142 open (batch Q2) |
@@ -170,7 +170,7 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | R1 ✅ | Sonnet | S97, S98, S101–S104 | K3 | anything except E3, E4, R3 | — |
 | R2a ✅ | Sonnet | S106–S110 | K3 | anything except E3 | — |
 | R2b ✅ | Sonnet | S111, S112, S115, S116 | K3 | anything | — |
-| R3 🔨 (S99, S100 af; S105, S113, S114 open) | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 | tdd |
+| R3 🔨 (S99, S100, S105 af; S113, S114 open) | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 | tdd |
 | W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — | grilling + domain-modeling (with you, before the batch), then tdd |
 | **Wave 6: performance and quality** | | | | | |
 | Q1a ✅ | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything | — |
@@ -383,7 +383,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S102 | 165, 166 | Enzyme kinetics: all plots from one table; inhibition comparison ✅ global fit of four inhibition models with AICc and Akaike weights (`src/lib/inhib.js`); with noise-free competitive data the mixed model ties on fit, so the competitive weight tops out near 0.84 at n = 18 | Sonnet |
 | S103 | 168, 169 | Dose-response multi-compound; chromatography peak import ✅ several compounds via a paste box with IC50 ± 95% CI and an extra-sum-of-squares F test for two at a time; peak-table parser in `src/lib/peaktable.js` (unit-tested) with a labelled chromatogram sketch | Sonnet |
 | S104 | 173, 176 | CFU plate drawing with countable range; growth curve comparison stats ✅ the dishes show the plates the tool already selects (its own range setting); conditions in *Groeicurves vergelijken* come from series names without a trailing number, Welch test per condition against the first | Sonnet |
-| S105 | 177, 178 | One cell-counting tool with grid entry (merges telkamer, teller, viability) | Opus 5 |
+| S105 | 177, 178 | One cell-counting tool with grid entry (merges telkamer, teller, viability) ✅ Telkamer, Teller en Viabiliteit staan in het menu als één item *Celtelling* (`data-group`, zoals S99) met tabs bovenin elk van de drie; secties, ids, deellinks en validatiegevallen zijn gebleven. Telkamer heeft een raster van de gekozen kamer met de getelde vakken genummerd (`src/lib/chamber.js`, hoeken en midden eerst) en per vak een veld levend/dood (`k-l1`…, `k-d1`…) dat in `k-live`/`k-dead` schrijft, plus een balk levend/dood. Kamer-modi Bürker/Neubauer/Fuchs-Rosenthal waren er al in `k-ch` | — |
 | S106 | 179, 181, 183 | Seeding picture; visual MIC plate with EUCAST note; MPN tap tubes ✅ MIC has no built-in breakpoints per species, so the note points to the current EUCAST table; MPN tubes only for rows of up to 12 tubes | Sonnet |
 | S107 | 184, 187 | Measure cells on calibrated photos; disinfection log-reduction chart ✅ one photo calibration (not one per objective), lines can only be cleared all at once, not moved; the disinfection table got an optional contact-time column for the chart | Sonnet |
 | S108 | 188, 189, 190 | DNA quant batch + purity badge + "make it X ng/µL"; read primer synthesis report ✅ the report reader (`src/lib/oligoreport.js`, unit-tested) reads tables with a header, lines with units and name/yield/MW blocks, but not a comma-separated table with decimal commas | Sonnet |

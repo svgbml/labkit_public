@@ -35,6 +35,31 @@
         <label for="k-dead">{{ t('Dode cellen (blauw, trypaanblauw) per vak, optioneel') }}</label>
         <textarea id="k-dead" rows="2" v-model="deadTxt"></textarea>
       </div>
+      <!-- S105 (#177): het raster van de kamer met de getelde vakken, en per vak invullen.
+           De tekstvakken hierboven blijven de bron; deze velden schrijven erin. -->
+      <div class="k-grid">
+        <svg :viewBox="'-3 -3 ' + (g.w + 6) + ' ' + (g.w + 6)" role="img" :aria-label="t('Raster van de telkamer met de getelde vakken')">
+          <rect x="0" y="0" :width="g.w" :height="g.w" class="k-fr"/>
+          <line v-for="(l, i) in g.lines" :key="'l' + i" :x1="l[0]" :y1="l[1]" :x2="l[2]" :y2="l[3]"/>
+          <g v-for="(c, i) in shown" :key="'c' + i" :class="['k-c', {on: i === focus}]" @click="pick(i)">
+            <rect :x="c.x" :y="c.y" :width="c.s" :height="c.s"/>
+            <text v-if="c.s >= 20" :x="c.x + c.s / 2" :y="c.y + c.s / 2" :font-size="Math.min(c.s * 0.5, 34)">{{ i + 1 }}</text>
+          </g>
+        </svg>
+        <div>
+          <table class="k-rows" data-xl="1"><!-- invoer, geen uitkomst: geen Excel-knop -->
+            <thead><tr><th>{{ t('Vak') }}</th><th>{{ t('Levend') }}</th><th>{{ t('Dood') }}</th></tr></thead>
+            <tbody>
+              <tr v-for="(c, i) in shown" :key="i" :class="{on: i === focus}">
+                <td>{{ i + 1 }}</td>
+                <td><input :id="'k-l' + (i + 1)" inputmode="numeric" :value="tok.live[i] || ''" @focus="focus = i" @change="setTok('liveTxt', i, $event.target.value)"></td>
+                <td><input :id="'k-d' + (i + 1)" inputmode="numeric" :value="tok.dead[i] || ''" @focus="focus = i" @change="setTok('deadTxt', i, $event.target.value)"></td>
+              </tr>
+            </tbody>
+          </table>
+          <button v-if="shown.length < g.cells.length" type="button" id="k-more" @click="extra++">{{ t('Vak toevoegen') }}</button>
+        </div>
+      </div>
       <tel-foto @fill="fill"/>
       <div class="fields" style="margin-top:12px">
         <lk-field v-model="df" :label="t('Verdunningsfactor')" for-id="k-df"/>
@@ -58,6 +83,9 @@
         <template v-else>
           <lk-big :label="t('Levende cellen')" :html="concHtml" :sub="t('cellen/mL')"/>
           <div v-if="m.dead.length" style="margin-bottom:10px" v-html="viaHtml"></div>
+          <div v-if="m.dead.length" class="k-split" role="img" :aria-label="t('Levend') + ' ' + fmt(m.via, 1) + '%, ' + t('Dood') + ' ' + fmt(100 - m.via, 1) + '%'">
+            <span class="l" :style="{width: m.via + '%'}">{{ t('Levend') }} {{ fmt(m.via, 0) }}%</span><span class="d"><template v-if="m.via < 80">{{ t('Dood') }} {{ fmt(100 - m.via, 0) }}%</template></span>
+          </div>
           <lk-kv :rows="rows"/>
           <lk-note v-if="m.bad.length" kind="warn">{{ t('Overgeslagen (geen hele telling): ' + list(m.bad) + '. Tel per vak alleen hele cellen.') }}</lk-note>
           <lk-note v-if="m.dead.length && m.dead.length !== m.live.length" kind="warn">{{ t('Levend heeft ' + m.live.length + ' vakken en dood ' + m.dead.length + '; tel beide in dezelfde vakken.') }}</lk-note>
@@ -80,6 +108,9 @@
 <script>
 import {lkNumIn} from '../lib/bridge.js';
 import TelFoto from './TelFoto.vue';
+import {chamber, VAK_DEFAULT} from '../lib/chamber.js';
+
+const toks = s => String(s).split(/[\s,;]+/).filter(Boolean);
 
 const F = (x, d) => lkNumIn(fmt(x, d)), C = (x, d) => lkNumIn(sci(x, d));
 
@@ -87,7 +118,7 @@ export default {
   name: 'Telkamer',
   components: {TelFoto},
   data() {
-    return {ch: '0.1', sq: '1', liveTxt: '52 47 55 49', deadTxt: '4 6 3 5', df: '2', sv: '10', need: '1e5'};
+    return {ch: '0.1', sq: '1', liveTxt: '52 47 55 49', deadTxt: '4 6 3 5', df: '2', sv: '10', need: '1e5', focus: -1, extra: 0};
   },
   watch: {
     /* een andere kamer heeft andere vakken: blijft het gekozen vak bestaan dan blijft het,
@@ -97,10 +128,17 @@ export default {
       handler() {
         if (!this.opts.some(o => String(o[0]) === this.sq)) this.sq = String(this.opts[0][0]);
       }
-    }
+    },
+    sq() { this.extra = 0; this.focus = -1; }
   },
   methods: {
     fmt: (x, d) => fmt(x, d),
+    /* één vak invullen: zet de telling op plek i in het tekstvak (leeg haalt hem weg) */
+    setTok(key, i, v) {
+      const a = toks(this[key]); while (a.length < i) a.push('0');
+      a[i] = String(v).trim(); this[key] = a.filter(Boolean).join(' ');
+    },
+    pick(i) { this.focus = i; const el = document.getElementById('k-l' + (i + 1)); if (el) el.focus(); },
     /* tekst van de gebruiker blijft letterlijk staan in de vertaling */
     list: l => l.map(uv).join(', '),
     /* een fototelling (S60) komt als één vak achter de tellingen */
@@ -112,6 +150,12 @@ export default {
   computed: {
     send() { return typeof SEND !== 'undefined' && SEND.telkamer ? SEND.telkamer.to : []; },
     opts() { return KSQ[this.ch] || KSQ['0.1']; },
+    g() { return chamber(this.ch, num(this.sq)); },
+    tok() { return {live: toks(this.liveTxt), dead: toks(this.deadTxt)}; },
+    shown() {
+      const n = Math.max(VAK_DEFAULT(num(this.sq)) + this.extra, this.tok.live.length, this.tok.dead.length);
+      return this.g.cells.slice(0, n);
+    },
     liveLabel() {
       return this.tHtml('Tellingen levende / alle cellen per vak <span class="example">voorbeeld</span>');
     },

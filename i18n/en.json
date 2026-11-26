@@ -6199,5 +6199,11 @@
 "Mogelijke uitschieter (residu groter dan {#} × de standaardafwijking van de residuen): {*}.": "Possible outlier (residual larger than {#} × the standard deviation of the residuals): {*}.",
 "{#} punt(en) uitgesloten van de fit.": "{#} point(s) excluded from the fit.",
 "mogelijke uitschieter": "possible outlier",
-"uitgesloten": "excluded"
+"uitgesloten": "excluded",
+"<span class=\"k\">#</span>Celtelling": "<span class=\"k\">#</span>Cell counting",
+"Celtelling": "Cell counting",
+"Trypaanblauw": "Trypan blue",
+"Raster van de telkamer met de getelde vakken": "Counting chamber grid with the counted squares",
+"Vak": "Square",
+"Vak toevoegen": "Add square"
 }

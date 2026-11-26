@@ -163,6 +163,22 @@ canvas{max-width:100%}
 .lk-tabs a{padding:6px 12px;border:1px solid transparent;border-bottom:0;border-radius:6px 6px 0 0;color:var(--muted);text-decoration:none;font-weight:500;margin-bottom:-1px}
 .lk-tabs a:hover{color:var(--ink)}
 .lk-tabs a[aria-current=page]{color:var(--accent);background:var(--surface);border-color:var(--line);border-bottom:1px solid var(--surface)}
+/* Telkamer: raster met getelde vakken en invoer per vak (S105) */
+.k-grid{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin-top:12px}
+.k-grid svg{width:170px;max-width:100%;flex:none}
+.k-grid line,.k-fr{stroke:var(--muted);stroke-width:.6;fill:none}
+.k-fr{stroke-width:1.5}
+.k-c rect{fill:var(--accent);fill-opacity:.22;stroke:var(--accent);stroke-width:1.2;cursor:pointer}
+.k-c.on rect{fill-opacity:.55}
+.k-c text{fill:var(--ink);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.k-rows{border-collapse:collapse;font-size:13px}
+.k-rows th,.k-rows td{padding:2px 4px;text-align:left}
+.k-rows input{width:64px}
+.k-rows tr.on td:first-child{color:var(--accent);font-weight:600}
+#k-more{margin-top:6px}
+.k-split{display:flex;height:22px;border-radius:4px;overflow:hidden;font-size:12px;line-height:22px;margin-bottom:10px;background:var(--bad);color:#fff}
+.k-split .l{background:var(--ok);white-space:nowrap;overflow:hidden;padding:0 6px}
+.k-split .d{flex:1;white-space:nowrap;overflow:hidden;padding:0 6px;text-align:right}
 .gfwrap{display:grid;grid-template-columns:104px minmax(0,1fr) 320px;gap:16px;align-items:start}
 /* canvas eerst (S70): alleen de panelen van het actieve gereedschap of de actieve stap */
 .gfwrap[data-gv="crop"] [data-gs]:not([data-gs~="crop"]),.gfwrap[data-gv="lanes"] [data-gs]:not([data-gs~="lanes"]),.gfwrap[data-gv="ladder"] [data-gs]:not([data-gs~="ladder"]),.gfwrap[data-gv="bands"] [data-gs]:not([data-gs~="bands"]),.gfwrap[data-gv="labels"] [data-gs]:not([data-gs~="labels"]),.gfwrap[data-gv="export"] [data-gs]:not([data-gs~="export"]),.gfwrap[data-gv="s1"] [data-gs]:not([data-gs~="s1"]),.gfwrap[data-gv="s2"] [data-gs]:not([data-gs~="s2"]),.gfwrap[data-gv="s3"] [data-gs]:not([data-gs~="s3"]),.gfwrap[data-gv="s4"] [data-gs]:not([data-gs~="s4"]){display:none}
