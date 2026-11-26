@@ -8,9 +8,9 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 - **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (1 open step).
 - **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (12 open steps).
 - **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (19 open steps).
-- **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (9 open steps).
+- **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (8 open steps).
 
-**Total:** 275 steps (S0–S273, plus S204a) ≈ 135 hours; **231 done, 40 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 275 steps (S0–S273, plus S204a) ≈ 135 hours; **232 done, 39 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-23)
 
@@ -402,7 +402,7 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 Designed in the W1 interview (2026-11-26): [W1.md](W1.md), [GLOSSARY.md](../GLOSSARY.md), [adr/](adr/). S118 comes before S117.
 | Step | Ideas | What | Model |
 |---|---|---|---|
-| S118 | 5 | Projects and runs: a project holds inputs, gels, notes and several runs (each run its own copy of its tools' inputs); chip in the top bar to switch (reload), first start turns existing data into *Mijn project*, per-project export and import; inactive projects in IndexedDB. See [W1.md](W1.md) 🔨 Deel 1 af: projecten en runs (`src/lib/projects.js`, `src/engines/projects.js`, `src/tools/Projects.vue`), projectknop `proj-chip` in de bovenbalk, migratie naar *Mijn project*, runs starten (leeg of als kopie), wisselen, stoppen, hernoemen, verwijderen; opslaggebruik en `navigator.storage.persist()`; `tests/projects_check.py`. **Nog te doen:** project exporteren/importeren en *Alles back-uppen*, gels per project en run, notities per project | Opus 5.5 |
+| S118 | 5 | Projects and runs ✅ Een project houdt invoer, tabellen, geschiedenis, bench, monsternamen, runs, gels en notities; voorkeuren blijven van het apparaat (`isProjectKey` in `src/lib/projects.js`). Projectknop `proj-chip` in de bovenbalk met paneel (`src/tools/Projects.vue`): wisselen (herlaadt), nieuw, hernoemen, verwijderen (met zijn gels), exporteren, importeren (ook oude sessies, als nieuw project), *Alles back-uppen* en terugzetten, notities (ook in het Rapport), opslaggebruik; `navigator.storage.persist()`. Runs: elke run zijn eigen invoer voor zijn tools (`splitRun`/`enterRun`/`leaveRun`), starten leeg of als kopie, wisselen, stoppen; *Mijn werkstromen* op de startpagina en *Wisselen* in de werkstroombalk. Inactieve projecten en runs in IndexedDB `labkit-projects` (`src/engines/projects.js`). Gels krijgen project en run, de bibliotheek toont het actieve project met *Toon alle projecten*, 30 per project. Eerste start: alles wordt *Mijn project*, een lopende werkstroom de eerste run. *Sessie opslaan/openen* heten nu *Project exporteren* en *Importeren*. `tests/projects_check.py` (ook in de volledige check) | — |
 | S117 | 2 | Data flow inside the active run: live auto values, a click into the field stops them, a button switches back; first chain DNA conc → PCR → Gelplanner → gel editor. See [W1.md](W1.md) | Opus 5.5 |
 | S119 | 6, 7 | Custom workflows (pick tools, save, share) and course workflow templates | Opus 5 |
 | S120 | 19 | Share a whole workflow run as one link/QR | Opus 5 |

@@ -5,6 +5,8 @@
    De lijst van projecten staat in de globale sleutel labkit:v1:projects; de runs van het
    actieve project in labkit:v1:runs (een projectsleutel, dus hij wisselt mee). */
 import {isProjectKey, splitRun, enterRun, leaveRun, RUNS, WF as WFK, META, newId} from '../lib/projects.js';
+import {libList, libPut, gelProject} from '../tools/gelfoto/library.js';
+import {expose} from '../lib/global.js';
 
 /* ---------- IndexedDB ---------- */
 const open = () => new Promise((ok, no) => {
@@ -134,3 +136,72 @@ export async function deleteRun(rid) {
   await dbDel('runs', runKey(rid)).catch(() => {});
   try { const st = {[RUNS]: localStorage.getItem(RUNS)}; setRuns(st, m => ({...m, list: m.list.filter(x => x.id !== rid)})); localStorage.setItem(RUNS, st[RUNS]); } catch (e) {}
 }
+
+/* ---------- exporteren, importeren, back-up ---------- */
+
+const stamp = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const download = (name, obj) => saveBlob(name, new Blob([JSON.stringify(obj, null, 1)], {type: 'application/json'})).catch(() => {});
+
+/* één project als bestand: zijn opslag, de invoer van zijn runs en zijn gels */
+export async function exportProject(id) {
+  flush(); const m = meta(), p = m.list.find(x => x.id === id); if (!p) return null;
+  const data = id === m.active ? ls() : ((await dbGet('projects', id).catch(() => null)) || {}).data || {};
+  const runs = [];
+  for (const r of (parse(data[RUNS]) || {}).list || []) { const d = await dbGet('runs', id + '/' + r.id).catch(() => null); if (d) runs.push({id: r.id, data: d.data}); }
+  const gels = ((await libList(true)) || []).filter(g => gelProject(g) === id);
+  return {app: 'Labkit BML', kind: 'labkitproject', v: 1, name: p.name, versie: APPVER, opgeslagen: new Date().toISOString(), data, runs, gels};
+}
+export async function downloadProject(id) { const j = await exportProject(id || meta().active); if (j) await download(`${safeName(j.name)}-${stamp()}.json`, j); }
+
+/* een projectbestand, of een sessie van voor S118, wordt een nieuw project; geeft zijn naam */
+export async function importProject(j) {
+  const m = meta(), id = newId('p'), data = {};
+  Object.entries(j.data || {}).forEach(([k, v]) => { if (isProjectKey(k) && typeof v === 'string') data[k] = v; });
+  if (j.kind !== 'labkitproject') { delete data[WFK]; delete data[WFK + ':at']; delete data[RUNS]; }   /* oude sessie: geen runs */
+  let name = String(j.name || j.project || '').trim() || 'Geïmporteerd project', k = 2;
+  const base = name; while (m.list.some(x => x.name === name)) name = base + ' (' + k++ + ')';
+  await dbPut('projects', {id, data, saved: Date.now()});
+  for (const r of Array.isArray(j.runs) ? j.runs : []) if (r && r.id && r.data) await dbPut('runs', {id: id + '/' + r.id, data: r.data});
+  for (const g of Array.isArray(j.gels) ? j.gels : []) if (g && g.snap) await libPut({...g, id: newId('g'), proj: id});
+  setMeta({...m, list: [...m.list, {id, name, created: Date.now()}]});
+  return name;
+}
+
+/* alles van dit apparaat: alle labkit-sleutels, alle projecten en runs, alle gels */
+export async function backupAll() {
+  flush(); const data = {};
+  try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && (k.startsWith('labkit:') || k === 'sg-read')) data[k] = localStorage.getItem(k); } } catch (e) {}
+  const j = {app: 'Labkit BML', kind: 'labkitbackup', v: 1, versie: APPVER, opgeslagen: new Date().toISOString(), data,
+    projects: await dbAll('projects').catch(() => []), runs: await dbAll('runs').catch(() => []), gels: (await libList(true)) || []};
+  await download(`labkit-backup-${stamp()}.json`, j);
+}
+/* een back-up zet alles terug zoals het was (alles op dit apparaat wordt vervangen) */
+export async function restoreBackup(j) {
+  try { Object.keys(localStorage).filter(k => k.startsWith('labkit:') || k === 'sg-read').forEach(k => localStorage.removeItem(k)); } catch (e) {}
+  Object.entries(j.data || {}).forEach(([k, v]) => { if ((k.startsWith('labkit:') || k === 'sg-read') && typeof v === 'string') { try { localStorage.setItem(k, v); } catch (e) {} } });
+  for (const st of ['projects', 'runs']) { for (const o of await dbAll(st).catch(() => [])) await dbDel(st, o.id).catch(() => {}); for (const o of j[st] || []) if (o && o.id) await dbPut(st, o).catch(() => {}); }
+  for (const g of j.gels || []) if (g && g.id && g.snap) await libPut(g);
+  reloadTo('start');
+}
+
+/* "Importeren": een back-up vraagt eerst of alles vervangen mag; een project of oude sessie wordt
+   een nieuw project. Geeft {kind, name} of null bij een onbekend bestand. */
+export async function importFile(f) {
+  let j; try { j = JSON.parse(await f.text()); } catch (e) { return null; }
+  if (!j || j.app !== 'Labkit BML' || typeof j.data !== 'object') return null;
+  if (j.kind === 'labkitbackup') return {kind: 'backup', j};
+  return {kind: 'project', name: await importProject(j)};
+}
+
+/* ---------- notities per project ---------- */
+const NOTES = 'labkit:v1:notes';
+export const notes = () => { const n = parse(localStorage.getItem(NOTES)); return Array.isArray(n) ? n : []; };
+export function addNote(text) {
+  const t = String(text || '').trim(); if (!t) return;
+  const r = runsMeta(), run = r.list.find(x => x.id === r.active);
+  try { localStorage.setItem(NOTES, JSON.stringify([...notes(), {t: Date.now(), run: run ? run.name : '', text: t}])); } catch (e) {}
+}
+export function delNote(at) { try { localStorage.setItem(NOTES, JSON.stringify(notes().filter(n => n.t !== at))); } catch (e) {} }
+
+/* voor de oude code: Sessie opslaan/openen (app.js), Instellingen en het Rapport */
+expose({projDownload: downloadProject, projBackup: backupAll, projImportFile: importFile, projRestore: restoreBackup, projNotes: notes});

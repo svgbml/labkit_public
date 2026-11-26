@@ -77,6 +77,38 @@ with sync_playwright() as p:
     check('terug naar Mijn project, in zijn run', (pg.inner_text('#proj-chip'), val(pg, 'dna', 'n-a260')), ('Mijn project', '0,5'))
     pg.click('#proj-chip'); pg.wait_for_timeout(300); reload_after(pg, lambda: pg.click('#proj-list .proj-open'))
     check('Week 4 houdt zijn waarde', val(pg, 'dna', 'n-a260'), '1,1')
+
+    # gels horen bij hun project
+    pg.evaluate("indexedDB.deleteDatabase('labkit-gels')"); pg.goto(URL + '#gelfoto'); pg.wait_for_timeout(300)
+    pg.evaluate("gfDemo()"); pg.wait_for_timeout(800); pg.evaluate("gfLibSave(true)"); pg.wait_for_timeout(800)
+    check('gel in de bibliotheek van Week 4', pg.locator('#gf-lib li').count(), 1)
+    # notities
+    pg.click('#proj-chip'); pg.fill('#proj-note', 'Gel 2 liep scheef'); pg.click('#proj-note-add'); pg.wait_for_timeout(200)
+    check('notitie bewaard', pg.evaluate("JSON.parse(localStorage.getItem('labkit:v1:notes')).map(n=>n.text)"), ['Gel 2 liep scheef'])
+    # exporteren en weer importeren als nieuw project
+    with pg.expect_download() as d: pg.locator('#proj-list li.on .proj-export').click()
+    exp = d.value.path(); j = __import__('json').load(open(exp, encoding='utf-8'))
+    check('export: soort, naam, gels', (j['kind'], j['name'], len(j['gels'])), ('labkitproject', 'Week 4', 1))
+    pg.set_input_files('#proj-file', exp); pg.wait_for_timeout(800)
+    check('import: nieuw project naast het oude', [x['name'] for x in pg.evaluate("JSON.parse(localStorage.getItem('labkit:v1:projects')).list")], ['Mijn project', 'Week 4', 'Week 4 (2)'])
+    # een sessie van voor S118 wordt ook een project
+    old = __import__('json').dumps({'app': 'Labkit BML', 'project': 'Oude sessie', 'data': {'labkit:v1:inputs': '{"n-a260":"0,3"}', 'labkit:v1:pins': '["dna"]', 'labkit:v1:wf': '{"w":"pcrgel"}'}, 'gels': []})
+    pg.set_input_files('#proj-file', {'name': 'oud.json', 'mimeType': 'application/json', 'buffer': old.encode()}); pg.wait_for_timeout(800)
+    pid = pg.evaluate("JSON.parse(localStorage.getItem('labkit:v1:projects')).list.find(p=>p.name==='Oude sessie').id")
+    reload_after(pg, lambda: pg.locator('#proj-list li', has_text='Oude sessie').locator('.proj-open').click())
+    check('oude sessie: invoer, geen werkstroom, voorkeuren blijven van het apparaat',
+          (val(pg, 'dna', 'n-a260'), pg.evaluate("localStorage.getItem('labkit:v1:wf')"), pg.locator('#gf-lib li').count() if (pg.goto(URL + '#gelfoto'), pg.wait_for_timeout(500)) else 0), ('0,3', None, 0))
+    pg.check('#gf-liball'); pg.wait_for_timeout(400)
+    check('alle projecten: beide gels', pg.locator('#gf-lib li').count(), 2)
+    # back-up en terugzetten
+    pg.click('#proj-chip')
+    with pg.expect_download() as d: pg.click('#proj-backup')
+    bk = d.value.path(); nproj = len(pg.evaluate("JSON.parse(localStorage.getItem('labkit:v1:projects')).list"))
+    pg.locator('#proj-list li:not(.on)').first.locator('button', has_text='Verwijderen').click(); pg.locator('#proj-list li:not(.on)').first.locator('button', has_text='Zeker').click(); pg.wait_for_timeout(400)
+    check('project verwijderd', len(pg.evaluate("JSON.parse(localStorage.getItem('labkit:v1:projects')).list")), nproj - 1)
+    pg.set_input_files('#proj-file', bk); pg.wait_for_selector('#proj-restore')
+    reload_after(pg, lambda: pg.click('#proj-restore'))
+    check('back-up teruggezet', len(pg.evaluate("JSON.parse(localStorage.getItem('labkit:v1:projects')).list")), nproj)
     check('geen paginafouten', errs, [])
     b.close()
 

@@ -6302,5 +6302,18 @@
 "Mijn project": "My project",
 "Wisselen": "Switch",
 "Andere werkstroom of project": "Another workflow or project",
-"Opslag in deze browser: {*} gebruikt, {*} vrij.": "Storage in this browser: {*} used, {*} free."
+"Opslag in deze browser: {*} gebruikt, {*} vrij.": "Storage in this browser: {*} used, {*} free.",
+"Toon alle projecten": "Show all projects",
+"Notitie bij dit project": "Note for this project",
+"Bestanden": "Files",
+"Project importeren": "Import project",
+"Alles back-uppen": "Back up everything",
+"Dit is een back-up van een heel apparaat. Terugzetten vervangt alle projecten, werkstromen en gels hier.": "This is a backup of a whole device. Restoring it replaces all projects, workflows and gels here.",
+"Alles vervangen": "Replace everything",
+"Toegevoegd als project: {*}. Open het in de lijst hierboven.": "Added as project: {*}. Open it in the list above.",
+"Dit bestand is geen Labkit-project, -sessie of -back-up.": "This file is not a Labkit project, session or backup.",
+"Project exporteren": "Export project",
+"Importeren": "Import",
+"Bewaar dit project als bestand, bijvoorbeeld om naar een andere computer over te zetten": "Save this project as a file, for example to move it to another computer",
+"Een project, een oude sessie of een back-up openen": "Open a project, an old session or a backup"
 }

@@ -20,6 +20,7 @@
             <span v-if="p.id === active" class="chip ok">{{ t('open') }}</span>
             <button v-else type="button" class="proj-open" @click="busy(() => switchProject(p.id))">{{ t('Openen') }}</button>
             <button type="button" class="ghost" @click="ren = p.id; renName = p.name">{{ t('Naam') }}</button>
+            <button type="button" class="ghost proj-export" @click="busy(() => downloadProject(p.id))">{{ t('Exporteren') }}</button>
             <button v-if="p.id !== active" type="button" :class="['ghost', {bad: del === p.id}]" @click="del === p.id ? busy(() => remove(p.id)) : del = p.id">{{ del === p.id ? t('Zeker? Verwijderen') : t('Verwijderen') }}</button>
           </template>
         </li>
@@ -48,6 +49,27 @@
           </template>
         </li>
       </ul>
+      <h3 style="margin-top:16px">{{ t('Notities') }}</h3>
+      <ul v-if="notes.length" class="lk-proj-notes" id="proj-notes">
+        <li v-for="n in notes" :key="n.t"><small>{{ when(n.t) }}<template v-if="n.run"> · {{ n.run }}</template></small>
+          <span>{{ n.text }}</span><button type="button" class="ghost" :aria-label="t('Verwijderen')" @click="P.delNote(n.t); refresh()">✕</button></li>
+      </ul>
+      <div class="row lk-proj-new">
+        <textarea id="proj-note" rows="2" v-model="note" :placeholder="t('Notitie bij dit project')"></textarea>
+        <button type="button" id="proj-note-add" :disabled="!note.trim()" @click="P.addNote(note); note = ''; refresh()">{{ t('Toevoegen') }}</button>
+      </div>
+      <h3 style="margin-top:16px">{{ t('Bestanden') }}</h3>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <button type="button" id="proj-import" @click="$refs.file.click()">{{ t('Project importeren') }}</button>
+        <button type="button" class="ghost" id="proj-backup" @click="busy(P.backupAll)">{{ t('Alles back-uppen') }}</button>
+        <input ref="file" type="file" id="proj-file" accept=".json,application/json" hidden @change="pickFile">
+      </div>
+      <lk-note v-if="msg" :kind="msg.kind">{{ msg.text }}</lk-note>
+      <div v-if="restore" class="lk-proj-confirm">
+        <lk-note kind="warn">{{ t('Dit is een back-up van een heel apparaat. Terugzetten vervangt alle projecten, werkstromen en gels hier.') }}</lk-note>
+        <div class="row" style="gap:8px"><button type="button" class="primary" id="proj-restore" @click="busy(() => P.restoreBackup(restore))">{{ t('Alles vervangen') }}</button>
+          <button type="button" class="ghost" @click="restore = null">{{ t('Annuleren') }}</button></div>
+      </div>
       <p class="note-s" id="proj-space">{{ spaceTxt }}</p>
     </div>
   </div>
@@ -75,12 +97,13 @@
 <script>
 import * as P from '../engines/projects.js';
 
-const kB = n => (n < 1e6 ? Math.max(1, Math.round(n / 1024)) + ' kB' : (n / 1048576).toFixed(1).replace('.', ',') + ' MB');
+const kB = n => (n < 1e6 ? Math.max(1, Math.round(n / 1024)) + ' kB' : n < 1e9 ? (n / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.round(n / 1073741824) + ' GB');
 
 export default {
   name: 'Projects',
-  data() { return {open: false, m: P.meta(), runs: P.runsMeta(), size: {}, ren: '', renName: '', del: '', newName: '', st: null, est: null}; },
+  data() { return {open: false, m: P.meta(), runs: P.runsMeta(), size: {}, ren: '', renName: '', del: '', newName: '', st: null, est: null, notes: P.notes(), note: '', msg: null, restore: null}; },
   computed: {
+    P() { return P; },
     list() { return this.m ? this.m.list : []; },
     active() { return this.m ? this.m.active : ''; },
     cur() { return this.list.find(p => p.id === this.active) || null; },
@@ -91,8 +114,17 @@ export default {
     }
   },
   methods: {
-    switchProject: P.switchProject, switchRun: P.switchRun, stopRun: P.stopRun, startRun: P.startRun, wfName: P.wfName,
-    refresh() { this.m = P.meta(); this.runs = P.runsMeta(); },
+    switchProject: P.switchProject, downloadProject: P.downloadProject, switchRun: P.switchRun, stopRun: P.stopRun, startRun: P.startRun, wfName: P.wfName,
+    refresh() { this.m = P.meta(); this.runs = P.runsMeta(); this.notes = P.notes(); const n = document.getElementById('sess-name'); if (n && this.cur) n.value = this.cur.name; },
+    when(d) { return new Date(d).toLocaleString(LANG === 'en' ? 'en-GB' : 'nl-NL', {dateStyle: 'short', timeStyle: 'short'}); },
+    pickFile(e) { const f = e.target.files[0]; e.target.value = ''; if (f) this.importFile(f); },
+    /* ook voor "Importeren" in de zijbalk (app.js) */
+    async importFile(f) {
+      const r = await P.importFile(f); this.open = true; this.restore = null;
+      if (!r) this.msg = {kind: 'bad', text: this.t('Dit bestand is geen Labkit-project, -sessie of -back-up.')};
+      else if (r.kind === 'backup') { this.msg = null; this.restore = r.j; }
+      else { this.msg = {kind: 'ok', text: this.t('Toegevoegd als project: ' + this.uv(r.name) + '. Open het in de lijst hierboven.')}; this.refresh(); }
+    },
     async show() {
       this.refresh(); this.open = true; this.del = ''; this.ren = '';
       this.est = await P.estimate();
@@ -113,7 +145,7 @@ export default {
     }
   },
   mounted() {
-    if (P.migrate(this.t('Mijn project'))) this.refresh();
+    P.migrate(this.t('Mijn project')); this.refresh();
     P.persist();
     window.__projVm = this;
   }
