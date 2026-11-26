@@ -118,7 +118,7 @@ $('main').insertAdjacentHTML('afterbegin','<div id="lk-wf" class="lk-wf" hidden>
 const wfRun=()=>{ const r=jget('labkit:v1:runs',{}); return (r.list||[]).find(x=>x.id===r.active)||null; };
 function wfRender(){ const bar=$('#lk-wf'), w=wfCur(), i=w?w.steps.indexOf(current):-1; if(!w||i<0){ bar.hidden=true; return; }
   const N=wfNames(), prev=w.steps[i-1], next=w.steps[i+1], run=wfRun();
-  bar.innerHTML=`<div class="lk-wf-top"><b>${esc(run?run.name:w.n)}</b><span>stap ${i+1} van ${w.steps.length}</span><button type="button" class="ghost" data-wf-switch title="Andere werkstroom of project">Wisselen</button><button type="button" class="ghost" data-wf-stop title="Werkstroom beëindigen">Stoppen</button></div>`+
+  bar.innerHTML=`<div class="lk-wf-top"><b>${esc(run?run.name:w.n)}</b><span>stap ${i+1} van ${w.steps.length}</span>${run?`<button type="button" class="ghost" data-wf-share title="Deel deze werkstroom met zijn invoer">Delen</button>`:''}<button type="button" class="ghost" data-wf-switch title="Andere werkstroom of project">Wisselen</button><button type="button" class="ghost" data-wf-stop title="Werkstroom beëindigen">Stoppen</button></div>`+
     `<ol class="lk-wf-steps">${w.steps.map((id,k)=>`<li class="${k<i?'done':k===i?'on':''}"><a href="#${id}">${esc(N[id]||id)}</a></li>`).join('')}</ol>`+
     `<div class="lk-wf-nav">${prev?`<a class="lk-btn" href="#${prev}">← Vorige</a>`:'<span></span>'}${next?`<a class="lk-btn primary" href="#${next}">Volgende: ${ud(N[next]||next)} →</a>`:`<button type="button" class="primary" data-wf-stop>Werkstroom afronden</button>`}</div>`;
   bar.hidden=false; }
@@ -131,6 +131,7 @@ document.addEventListener('click',e=>{
     if(window.__projVm) window.__projVm.startDialog(w.id); else { jset(WFKEY,{w:w.id}); location.hash='#'+w.steps[0]; } return; }
   const o=e.target.closest('[data-run-open]'); if(o&&window.__projVm){ const r=wfRun(); if(r&&r.id===o.dataset.runOpen){ const w=wfCur(); location.hash='#'+(jget(WFKEY+':at','')||(w&&w.steps[0])||'start'); } else window.__projVm.busy(()=>window.__projVm.switchRun(o.dataset.runOpen)); return; }
   if(e.target.closest('[data-wf-switch]')&&window.__projVm){ window.__projVm.show(); return; }
+  if(e.target.closest('[data-wf-share]')&&window.__projVm){ window.__projVm.shareActive(); return; }
   const ed=e.target.closest('[data-wf-edit]'); if(ed&&window.__projVm){ window.__projVm.builder(ed.dataset.wfEdit); return; }
   if(e.target.closest('[data-wf-new]')&&window.__projVm){ window.__projVm.builder(null); return; }
   if(e.target.closest('[data-wf-stop]')){ if(window.__projVm&&wfRun()) window.__projVm.busy(window.__projVm.stopRun); else { jset(WFKEY,{}); wfRender(); if(current==='start') calc.start(); } } });

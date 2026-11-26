@@ -7,6 +7,7 @@
 import {isProjectKey, splitRun, enterRun, leaveRun, RUNS, WF as WFK, META, newId} from '../lib/projects.js';
 import {libList, libPut, gelProject} from '../tools/gelfoto/library.js';
 import {expose} from '../lib/global.js';
+import {OWNKEY, addShared} from '../lib/werkstroom.js';
 
 /* ---------- IndexedDB ---------- */
 const open = () => new Promise((ok, no) => {
@@ -42,7 +43,8 @@ let frozen = false;
 export const reloadTo = hash => {
   frozen = true;
   try { Storage.prototype.setItem = function () {}; Storage.prototype.removeItem = function () {}; } catch (e) {}
-  if (hash != null) { try { history.replaceState(null, '', '#' + hash); } catch (e) {} }
+  /* ook ?run= of ?wf= uit de adresbalk, anders opent het herladen de link opnieuw */
+  if (hash != null) { try { history.replaceState(null, '', location.pathname + '#' + hash); } catch (e) {} }
   location.reload();
 };
 export const isFrozen = () => frozen;
@@ -205,3 +207,36 @@ export function delNote(at) { try { localStorage.setItem(NOTES, JSON.stringify(n
 
 /* voor de oude code: Sessie opslaan/openen (app.js), Instellingen en het Rapport */
 expose({projDownload: downloadProject, projBackup: backupAll, projImportFile: importFile, projRestore: restoreBackup, projNotes: notes});
+
+/* ---------- een run delen als link (S120) ---------- */
+
+/* wat in de link gaat: de werkstroom (met zijn stappen als het een eigen is), de stap en de invoer
+   van de tools van de run, zonder geschiedenis, gels of foto's */
+export async function runPayload(rid) {
+  flush();
+  const r = runsMeta(), run = r.list.find(x => x.id === rid); if (!run) return null;
+  const steps = wfSteps(run.wf);
+  const data = rid === r.active ? splitRun(ls(), steps, toolOf).run : ((await dbGet('runs', runKey(rid)).catch(() => null)) || {}).data || {};
+  const d = {...data}; delete d['labkit:v1:hist'];
+  const w = (window.WF || []).find(x => x.id === run.wf);
+  const at = rid === r.active ? parse(localStorage.getItem(WFK + ':at')) || run.at : run.at;
+  return {v: 1, n: run.name, wf: run.wf, def: w && w.kind === 'own' ? {n: w.n, s: w.steps} : null, at, own: run.own || [], d};
+}
+
+/* een gedeelde run openen: een nieuw project "Gedeeld: <naam>" met die run actief. Geeft false
+   als de werkstroom hier niet bestaat. */
+export async function openSharedRun(o, label = 'Gedeeld') {
+  if (!o || !o.d || typeof o.d !== 'object') return false;
+  let wf = o.wf;
+  if (o.def) { const own = parse(localStorage.getItem(OWNKEY)) || [], r = addShared(own, o.def, typeof wfKnown === 'function' ? wfKnown() : []);
+    if (!r) return false; if (r.added) { try { localStorage.setItem(OWNKEY, JSON.stringify(r.list)); } catch (e) {} if (typeof wfReload === 'function') wfReload(); } wf = r.id; }
+  const steps = wfSteps(wf); if (!steps.length) return false;
+  const m = meta(), id = newId('p'), run = {id: newId('r'), name: String(o.n || wfName(wf)), wf, at: steps.includes(o.at) ? o.at : steps[0], created: Date.now(),
+    own: Array.isArray(o.own) ? o.own.filter(x => typeof x === 'string') : []};
+  const d = {}; Object.entries(o.d).forEach(([k, v]) => { if (typeof v === 'string' && isProjectKey(k)) d[k] = v; });
+  await packCurrent();
+  lsWrite(enterRun({[RUNS]: JSON.stringify({active: null, list: [run]})}, run, d, steps, toolOf));
+  let name = label + ': ' + run.name, k = 2; const base = name; while (m.list.some(x => x.name === name)) name = base + ' (' + k++ + ')';
+  setMeta({active: id, list: [...m.list, {id, name, created: Date.now()}]});
+  reloadTo(run.at); return true;
+}

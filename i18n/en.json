@@ -6336,5 +6336,9 @@
 "Practicum: ELISA": "Practical: ELISA",
 "Werkstroom toegevoegd aan je werkstromen.": "Workflow added to your workflows.",
 "Deze werkstroom had je al.": "You already had this workflow.",
-"Deze werkstroomlink kon niet worden gelezen.": "This workflow link could not be read."
+"Deze werkstroomlink kon niet worden gelezen.": "This workflow link could not be read.",
+"Gedeeld": "Shared",
+"Deel {*}: de werkstroom, de stap en de invoer van zijn tools, zonder gels of foto's. Wie de link opent, krijgt hem als nieuw project.": "Share {*}: the workflow, the step and the inputs of its tools, without gels or photos. Whoever opens the link gets it as a new project.",
+"Te veel invoer voor een QR-code; deel de link.": "Too much input for a QR code; share the link.",
+"Deel deze werkstroom met zijn invoer": "Share this workflow with its inputs"
 }

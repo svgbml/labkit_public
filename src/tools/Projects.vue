@@ -45,10 +45,18 @@
             </template>
             <button v-else type="button" class="run-open" @click="busy(() => switchRun(r.id))">{{ t('Openen') }}</button>
             <button type="button" class="ghost" @click="ren = r.id; renName = r.name">{{ t('Naam') }}</button>
+            <button type="button" class="ghost run-share" @click="shareRun(r.id)">{{ t('Delen') }}</button>
             <button v-if="r.id !== runs.active" type="button" :class="['ghost', {bad: del === r.id}]" @click="del === r.id ? delRun(r.id) : del = r.id">{{ del === r.id ? t('Zeker? Verwijderen') : t('Verwijderen') }}</button>
           </template>
         </li>
       </ul>
+      <!-- S120: een run delen; wie de link opent krijgt hem als nieuw project -->
+      <div v-if="rs" class="lk-wfb-share" id="run-share">
+        <p class="note-s">{{ rsText }}</p>
+        <div class="row" style="gap:6px"><input class="lk-url" id="run-url" readonly :value="rs.url" style="flex:1;min-width:0"><button type="button" @click="copyRun">{{ rs.copied ? t('Gekopieerd') : t('Kopieer') }}</button></div>
+        <canvas v-show="rs.qr" ref="runqr" class="lk-wfb-qr"></canvas>
+        <p v-if="!rs.qr" class="note-s">{{ t('Te veel invoer voor een QR-code; deel de link.') }}</p>
+      </div>
       <h3 style="margin-top:16px">{{ t('Notities') }}</h3>
       <ul v-if="notes.length" class="lk-proj-notes" id="proj-notes">
         <li v-for="n in notes" :key="n.t"><small>{{ when(n.t) }}<template v-if="n.run"> · {{ n.run }}</template></small>
@@ -134,8 +142,9 @@ const kB = n => (n < 1e6 ? Math.max(1, Math.round(n / 1024)) + ' kB' : n < 1e9 ?
 
 export default {
   name: 'Projects',
-  data() { return {open: false, m: P.meta(), runs: P.runsMeta(), size: {}, ren: '', renName: '', del: '', newName: '', st: null, est: null, notes: P.notes(), note: '', msg: null, restore: null, b: null, drag: -1}; },
+  data() { return {open: false, m: P.meta(), runs: P.runsMeta(), size: {}, ren: '', renName: '', del: '', newName: '', st: null, est: null, notes: P.notes(), note: '', msg: null, restore: null, b: null, drag: -1, rs: null}; },
   computed: {
+    rsText() { return this.rs ? this.t('Deel ' + this.uv(this.rs.name) + ": de werkstroom, de stap en de invoer van zijn tools, zonder gels of foto's. Wie de link opent, krijgt hem als nieuw project.") : ''; },
     /* alle tools met hun naam (zoals de werkstroombalk ze noemt) */
     names() { return typeof wfNames === 'function' ? wfNames() : {}; },
     picks() {
@@ -201,6 +210,34 @@ export default {
       } catch (e) { alertBox(this.t('Deze werkstroomlink kon niet worden gelezen.')); }
       try { const u = new URL(location.href); u.searchParams.delete('wf'); history.replaceState(null, '', u.pathname + u.search + u.hash); } catch (e) {}
     },
+    /* ---------- een run delen (S120) ---------- */
+    async shareRun(rid) {
+      const o = await P.runPayload(rid); if (!o) return;
+      const url = `${shareBase()}?run=${await shareEncode(o)}#start`;
+      this.rs = {name: o.n, url, qr: false, copied: false};
+      await this.$nextTick();
+      const cv = this.$refs.runqr;
+      if (cv && new TextEncoder().encode(url).length <= 2300) {
+        const sz = 220, d = window.devicePixelRatio || 1; cv.width = sz * d; cv.height = sz * d; cv.style.width = sz + 'px';
+        const x = cv.getContext('2d'); x.scale(d, d);
+        try { drawQR(x, url, 0, 0, sz, url.length > 1200 ? 'L' : 'M'); this.rs.qr = true; } catch (e) {}
+      }
+    },
+    async shareActive() { await this.show(); if (this.runs.active) await this.shareRun(this.runs.active); },
+    copyRun() {
+      const done = () => { this.rs.copied = true; };
+      (navigator.clipboard ? navigator.clipboard.writeText(this.rs.url) : Promise.reject()).then(done)
+        .catch(() => { const el = document.getElementById('run-url'); if (el) { el.select(); document.execCommand('copy'); done(); } });
+    },
+    async takeSharedRun() {
+      const code = new URLSearchParams(location.search).get('run'); if (!code) return;
+      let ok = false;
+      try { ok = await P.openSharedRun(await shareDecode(code), this.t('Gedeeld')); } catch (e) {}
+      if (!ok) {
+        alertBox(this.t('Deze werkstroomlink kon niet worden gelezen.'));
+        try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+      }
+    },
     when(d) { return new Date(d).toLocaleString(LANG === 'en' ? 'en-GB' : 'nl-NL', {dateStyle: 'short', timeStyle: 'short'}); },
     pickFile(e) { const f = e.target.files[0]; e.target.value = ''; if (f) this.importFile(f); },
     /* ook voor "Importeren" in de zijbalk (app.js) */
@@ -211,7 +248,7 @@ export default {
       else { this.msg = {kind: 'ok', text: this.t('Toegevoegd als project: ' + this.uv(r.name) + '. Open het in de lijst hierboven.')}; this.refresh(); }
     },
     async show() {
-      this.refresh(); this.open = true; this.del = ''; this.ren = '';
+      this.refresh(); this.open = true; this.del = ''; this.ren = ''; this.rs = null;
       this.est = await P.estimate();
       for (const p of this.list) this.size = {...this.size, [p.id]: kB(await P.projectSize(p.id).catch(() => 0))};
     },
@@ -234,6 +271,7 @@ export default {
     P.persist();
     startFlow();   /* S117: data tussen de stappen van de actieve run */
     this.takeSharedWf();
+    this.takeSharedRun();
     window.__projVm = this;
   }
 };
