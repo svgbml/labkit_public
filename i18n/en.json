@@ -6343,5 +6343,13 @@
 "Deel deze werkstroom met zijn invoer": "Share this workflow with its inputs",
 "Ingevuld uit je zoekvraag": "Filled in from your search",
 "invullen": "fill in",
-"Projecten staan als bestanden in {*}.": "Projects are stored as files in {*}."
+"Projecten staan als bestanden in {*}.": "Projects are stored as files in {*}.",
+"Projecten: bewaar invoer, gels en notities per project en wissel met de knop bovenin.": "Projects: keep inputs, gels and notes per project and switch with the button at the top.",
+"Een werkstroom kun je meerdere keren doen; elke run houdt zijn eigen invoer.": "You can run a workflow more than once; each run keeps its own inputs.",
+"In een run gaan waarden vanzelf door naar de volgende stap, zoals de DNA-concentratie naar de PCR-mix.": "In a run, values flow to the next step by themselves, such as the DNA concentration into the PCR mix.",
+"Maak je eigen werkstromen, of kopieer en pas een bestaande aan.": "Make your own workflows, or copy and adapt an existing one.",
+"Deel een werkstroom of een hele run als link of QR-code.": "Share a workflow or a whole run as a link or QR code.",
+"Typ een vraag als \"500 mL 0,9% NaCl\" in de zoekbalk en de tool opent met de waarden ingevuld.": "Type a question such as \"500 mL 0.9% NaCl\" in the search bar and the tool opens with the values filled in.",
+"Exporteer een project als bestand of maak een back-up van alles.": "Export a project as a file or back up everything.",
+"In het Windows-programma staan projecten als bestanden in Documenten\\LabKit\\Projecten.": "In the Windows app, projects are stored as files in Documents\\LabKit\\Projecten."
 }

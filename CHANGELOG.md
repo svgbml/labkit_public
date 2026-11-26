@@ -6,8 +6,16 @@ in de app: `python tools/build_changelog.py` zet het om in `tools/nt/97_news.js`
 Schrijf per versie een kopje `## <versie> — <datum>` en daaronder korte regels die met `- ` beginnen.
 Elke regel is één zin in het Nederlands en heeft een vertaling nodig in `i18n/en.json`.
 
-## Nog niet uitgebracht
+## 1.19.0 — 2026-11-26
 
+- Projecten: bewaar invoer, gels en notities per project en wissel met de knop bovenin.
+- Een werkstroom kun je meerdere keren doen; elke run houdt zijn eigen invoer.
+- In een run gaan waarden vanzelf door naar de volgende stap, zoals de DNA-concentratie naar de PCR-mix.
+- Maak je eigen werkstromen, of kopieer en pas een bestaande aan.
+- Deel een werkstroom of een hele run als link of QR-code.
+- Typ een vraag als "500 mL 0,9% NaCl" in de zoekbalk en de tool opent met de waarden ingevuld.
+- Exporteer een project als bestand of maak een back-up van alles.
+- In het Windows-programma staan projecten als bestanden in Documenten\LabKit\Projecten.
 - Elke tool hoort nu bij een fase van het experiment: voorbereiden, uitvoeren of analyseren.
 - Tabs boven de zijbalk filteren de tools en de startpagina op die fase, met een eigen kleur per fase.
 - In de kop van elke tool staat een kruimelpad van fase naar groep naar tool.
