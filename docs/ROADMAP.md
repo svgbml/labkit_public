@@ -7,10 +7,10 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 **Model** (last column) is the cheapest model that can do the step well, so the shared usage limit lasts longer. Done steps show "—".
 - **Haiku**: purely mechanical work, such as generated files, a fixed format to copy or a small toggle (1 open step).
 - **Sonnet**: the default. The design is settled and the step extends something that already exists, such as most rework steps (12 open steps).
-- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (18 open steps).
+- **Opus 5**: the step needs real decisions or has to stay numerically correct, such as parsers, statistics, merging tools, i18n, most gel-editor and performance steps (19 open steps).
 - **Opus 5.5**: only the architecture steps that everything else builds on, such as new shells and layouts, image analysis, undo, sync, lazy loading, and the alignment engine (9 open steps).
 
-**Total:** 274 steps (S0–S272, plus S204a) ≈ 135 hours; **231 done, 39 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
+**Total:** 275 steps (S0–S273, plus S204a) ≈ 135 hours; **231 done, 40 open, 4 dropped** (S143–S146, replaced by phase 16). Every chosen idea number appears in at least one step. Steps marked *(needs Sx)* depend on an earlier step.
 
 ## Where it stands (checked 2026-11-23)
 
@@ -25,7 +25,7 @@ The ideas chosen from [ideas.md](ideas.md) (the `#` numbers), planned as **steps
 | Phase 6 gel editor rebuild | S62–S79 | ✅ done |
 | Phase 7 charts, figures and data | S80–S96 | ✅ done |
 | Phase 8 rework existing tools | S97–S116 | ✅ done (batch R3 finished 2026-11-26) |
-| Phase 9 structure and workflows | S117–S121 | ⏳ not started (batch W1) |
+| Phase 9 structure and workflows | S117–S121, S273 | ⏳ designed (interview 2026-11-26, [W1.md](W1.md)); build in batches W1a, W1b, W2 |
 | Phase 10 performance | S122–S133 | ⏳ not started; F1a re-plans it first |
 | Phase 11 quality, tests and dev | S134–S142 | **part done:** S142 open (batch Q2) |
 | Phase 12 Sanger and SNP analysis | S147–S169 | **part done:** S147–S161 ✅, S162–S169 open |
@@ -171,7 +171,9 @@ in order, and the *any time* batches can be slotted in when that is more useful.
 | R2a ✅ | Sonnet | S106–S110 | K3 | anything except E3 | — |
 | R2b ✅ | Sonnet | S111, S112, S115, S116 | K3 | anything | — |
 | R3 ✅ | Opus 5 | S99, S100, S105, S113, S114: tool merges and statistics | K3 | anything except E3, R1, C1b, C3 | tdd |
-| W1 | Opus 5.5 | S117–S118 data flow and projects, then S119–S121 (Opus 5) | K3 | — | grilling + domain-modeling (with you, before the batch), then tdd |
+| W1a | Opus 5.5 | S118 projects and runs, then S117 data flow; design in [W1.md](W1.md) (interview done 2026-11-26) | K3 | — | tdd |
+| W1b | Opus 5 | S119 own werkstromen and course templates, S120 share a run, S121 search that understands questions | W1a | — | tdd |
+| W2 | Opus 5 | S273 projects as files in the Windows app | W1a | anything | tdd |
 | **Wave 6: performance and quality** | | | | | |
 | Q1a ✅ | Sonnet | S134–S137 (S136 by Haiku) | K3 (then *any time*; cheap safety nets) | anything | — |
 | Q1b ✅ | Sonnet | S138, S139, S141 | K3 (then *any time*) | anything | — |
@@ -396,14 +398,16 @@ Automatic ladder detection stays, and every ladder label (number or text) stays 
 | S115 | 221, 222 | Pipette profiles + certificate; Westgard violations on the chart ✅ profiles (`pipettes`) live in localStorage only, not in shared links; history chart spaces entries evenly, not by date | Sonnet |
 | S116 | 223, 224, 226 | Uncertainty pie chart; validation report template; pipetting scheme drag rows + kit templates ✅ kit templates read `QPRE`/`PRESETS` exported from `Pcr.vue`, so the S109 kits show up by themselves; rows move by drag or ↑/↓ buttons (no Alt+arrow keys) | Sonnet |
 
-## Phase 9: structure and workflows (5 steps)
+## Phase 9: structure and workflows (6 steps)
+Designed in the W1 interview (2026-11-26): [W1.md](W1.md), [GLOSSARY.md](../GLOSSARY.md), [adr/](adr/). S118 comes before S117.
 | Step | Ideas | What | Model |
 |---|---|---|---|
-| S117 | 2 | Data flow between workflow steps (DNA conc → PCR → Gelplanner → gel editor) | Opus 5.5 |
-| S118 | 5 | Projects: group inputs, gels and notes under a name; switch projects | Opus 5.5 |
+| S118 | 5 | Projects and runs: a project holds inputs, gels, notes and several runs (each run its own copy of its tools' inputs); chip in the top bar to switch (reload), first start turns existing data into *Mijn project*, per-project export and import; inactive projects in IndexedDB. See [W1.md](W1.md) | Opus 5.5 |
+| S117 | 2 | Data flow inside the active run: live auto values, a click into the field stops them, a button switches back; first chain DNA conc → PCR → Gelplanner → gel editor. See [W1.md](W1.md) | Opus 5.5 |
 | S119 | 6, 7 | Custom workflows (pick tools, save, share) and course workflow templates | Opus 5 |
 | S120 | 19 | Share a whole workflow run as one link/QR | Opus 5 |
 | S121 | 9 | Search that understands questions ("500 mL 0.9% NaCl" opens the tool with values filled in) | Opus 5 |
+| S273 | 5 | In the Windows app, inactive projects and gels as files in *Documenten\LabKit\Projecten* behind the same storage layer (needs S118) | Opus 5 |
 
 ## Phase 10: performance (12 steps)
 | Step | Ideas | What | Model |
@@ -692,7 +696,7 @@ Checked 2026-11-23. The batch table above still decides what may run together.
 2. **Finish what is started:** done (S96 and with it C3 on 2026-11-24; S79, G3, before that).
 3. **The cheap and self-contained batches:** Q2 and R3 (C4 is done, 2026-11-25). R3 merges tools that have validation cases, so tdd matters most there.
 4. **The sequence line**, when it is the nearest practical need: SA3 → SA4, and AL2c → AL3 → AL4. SA4 also needs SQ2, which is done.
-5. **W1** only after a local grilling session has pinned down projects and data flow (see *Skills per batch*). It changes something every tool uses, so it runs alone.
+5. **W1a**, then **W1b**: the grilling session is done ([W1.md](W1.md)). They change something every tool uses, so each runs alone. **W2** (files in the Windows app) after W1a.
 6. **F1a** last: re-plan phase 10 first, then F1b and F1c as the new rows say.
 
 ## Known bugs (not fixed yet)
