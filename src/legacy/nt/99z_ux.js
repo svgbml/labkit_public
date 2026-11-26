@@ -1,5 +1,6 @@
 /* Letterlijk overgenomen uit tools/nt/99z_ux.js (S269): een classic script dat als module in de bundel staat
    en zijn namen live op window zet, zodat de andere code ze als globale namen blijft lezen. */
+import {COURSE, OWNKEY} from '../../lib/werkstroom.js';
 import {live} from '../../lib/global.js';
 
 /* ================= UX 1.19: telefoonmenu, resultaatbalk, inklapbare groepen, validatiebadge, invoerfouten,
@@ -100,9 +101,17 @@ const WF=[
   {id:'eiwit',n:'Eiwit en western blot',steps:['curve','sds','wb']},
   {id:'foren',n:'Forensisch DNA-profiel',steps:['dna','strchk','mix','rmp','kin']},
   {id:'qc',n:'Methode in gebruik nemen',steps:['pipcal','mval','munc','westgard']}
-].map(w=>({...w,steps:w.steps.filter(id=>$('#t-'+id))}));
+].map(w=>({...w,kind:'built',steps:w.steps.filter(id=>$('#t-'+id))}));
+/* S119: daarachter de practicumsjablonen en de eigen werkstromen (src/lib/werkstroom.js). WF blijft
+   hetzelfde array, zodat iedereen die WF leest de nieuwe ziet; verwijderde eigen blijven erin (gone)
+   voor runs die ze nog gebruiken. */
+const wfKnown=()=>TOOLS.filter(id=>id!=='start'&&$('#t-'+id));
+function wfReload(){ for(let i=WF.length-1;i>=0;i--) if(WF[i].kind!=='built') WF.splice(i,1);
+  const own=jget(OWNKEY,[]); [...COURSE,...(Array.isArray(own)?own:[])].forEach(w=>{ if(w&&Array.isArray(w.steps)) WF.push({...w,steps:w.steps.filter(id=>$('#t-'+id))}); }); }
+wfReload();
 const WFKEY='labkit:v1:wf';
-const wfNames=()=>{ const m={}; toolIndex().forEach(t=>{ m[t.id]=t.name; }); return m; };
+/* namen van de tools; tools die in het menu onder één item staan (S99, S105) hebben geen eigen navlink, dan de kop van de tool */
+const wfNames=()=>{ const m={}; TOOLS.forEach(id=>{ const h=$('#t-'+id+' .tool-head h2'); if(h) m[id]=h.textContent.trim(); }); toolIndex().forEach(t=>{ m[t.id]=t.name; }); return m; };
 const wfCur=()=>WF.find(w=>w.id===jget(WFKEY,{}).w)||null;
 $('main').insertAdjacentHTML('afterbegin','<div id="lk-wf" class="lk-wf" hidden></div>');
 /* S118: de actieve run (naam die de student gaf) van het actieve project */
@@ -122,6 +131,8 @@ document.addEventListener('click',e=>{
     if(window.__projVm) window.__projVm.startDialog(w.id); else { jset(WFKEY,{w:w.id}); location.hash='#'+w.steps[0]; } return; }
   const o=e.target.closest('[data-run-open]'); if(o&&window.__projVm){ const r=wfRun(); if(r&&r.id===o.dataset.runOpen){ const w=wfCur(); location.hash='#'+(jget(WFKEY+':at','')||(w&&w.steps[0])||'start'); } else window.__projVm.busy(()=>window.__projVm.switchRun(o.dataset.runOpen)); return; }
   if(e.target.closest('[data-wf-switch]')&&window.__projVm){ window.__projVm.show(); return; }
+  const ed=e.target.closest('[data-wf-edit]'); if(ed&&window.__projVm){ window.__projVm.builder(ed.dataset.wfEdit); return; }
+  if(e.target.closest('[data-wf-new]')&&window.__projVm){ window.__projVm.builder(null); return; }
   if(e.target.closest('[data-wf-stop]')){ if(window.__projVm&&wfRun()) window.__projVm.busy(window.__projVm.stopRun); else { jset(WFKEY,{}); wfRender(); if(current==='start') calc.start(); } } });
 window.addEventListener('hashchange',()=>{ const w=wfCur(); if(w&&w.steps.includes(current)) jset(WFKEY+':at',current); wfRender(); });
 /* de werkstroomtegel op de startpagina tekent src/tools/Start.vue (S263) */
@@ -403,6 +414,8 @@ live({
   WFKEY: () => WFKEY,
   wfNames: () => wfNames,
   wfCur: () => wfCur,
+  wfKnown: () => wfKnown,
+  wfReload: () => wfReload,
   wfRun: () => wfRun,
   wfRender: [() => wfRender, v => { wfRender = v; }],
   wfTile: [() => wfTile, v => { wfTile = v; }],

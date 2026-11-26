@@ -35,10 +35,15 @@
           <button v-for="r in runs" :key="r.id" type="button" :class="['lk-btn', {primary: r.on}]" :data-run-open="r.id">{{ r.name }}</button>
         </div>
         <div class="lk-wf-list">
-          <button v-for="w in wf" :key="w.id" type="button" :class="['lk-wf-card', {on: w.on}]" :data-wf-start="w.id">
-            <b>{{ t(w.n) }}</b><small><template v-for="(s, si) in w.steps" :key="s"><template v-if="si"> → </template><span>{{ s }}</span></template></small>
-          </button>
+          <!-- S119: elke kaart met een knop ernaast: eigen werkstroom bewerken, of een andere kopiëren -->
+          <div v-for="w in wf" :key="w.id" class="lk-wf-item">
+            <button type="button" :class="['lk-wf-card', {on: w.on}]" :data-wf-start="w.id">
+              <b>{{ w.kind === 'own' ? w.n : t(w.n) }}<span v-if="w.kind !== 'built'" class="lk-wf-kind">{{ t(w.kind === 'own' ? 'eigen' : 'practicum') }}</span></b><small><template v-for="(s, si) in w.steps" :key="s"><template v-if="si"> → </template><span>{{ s }}</span></template></small>
+            </button>
+            <button type="button" class="ghost lk-wf-edit" :data-wf-edit="w.id" :title="t(w.kind === 'own' ? 'Bewerken' : 'Kopiëren en aanpassen')" :aria-label="t(w.kind === 'own' ? 'Bewerken' : 'Kopiëren en aanpassen')">{{ w.kind === 'own' ? '✎' : '⧉' }}</button>
+          </div>
         </div>
+        <button type="button" class="lk-btn lk-wf-new" data-wf-new>+ {{ t('Werkstroom maken') }}</button>
       </template>
       <template v-else>
         <h3 v-if="b.tagHead"><span class="tags" style="margin:0"><a class="tag on" href="#start">{{ t(b.tagHead) }}</a></span><span>{{ b.list.length }}</span></h3>
@@ -81,8 +86,8 @@ export default {
     },
     wf() {
       void this.tick; if (typeof WF === 'undefined') return [];
-      const cur = wfCur(), N = {}; this.all.forEach(x => { N[x.id] = x.name; });
-      return WF.map(w => ({id: w.id, n: w.n, on: !!(cur && cur.id === w.id), steps: w.steps.map(id => N[id] || id)}));
+      const cur = wfCur(), N = wfNames(); this.all.forEach(x => { N[x.id] = x.name; });
+      return WF.filter(w => !w.gone && w.steps.length).map(w => ({id: w.id, n: w.n, kind: w.kind, on: !!(cur && cur.id === w.id), steps: w.steps.map(id => N[id] || id)}));
     },
     blocks() {
       const t = this.t, T = this.shown, ql = this.q.trim().toLowerCase(), by = id => T.find(x => x.id === id);

@@ -91,19 +91,59 @@
       </div>
     </div>
   </div>
+    <!-- S119: een eigen werkstroom maken of bewerken: naam, tools zoeken, volgorde met slepen of ↑/↓ -->
+    <div v-if="b" class="lk-modal lk-proj-ov" @mousedown.self="b = null">
+      <div role="dialog" aria-modal="true" :aria-label="t('Werkstroom maken')" class="lk-proj-box" id="wfb">
+        <div class="lk-proj-head"><h3>{{ b.id ? t('Werkstroom bewerken') : t('Werkstroom maken') }}</h3><button type="button" class="ghost" @click="b = null">{{ t('Sluiten') }}</button></div>
+        <div class="f"><label for="wfb-name">{{ t('Naam') }}</label><input id="wfb-name" class="txt" v-model="b.name"></div>
+        <ol class="lk-wfb-steps" id="wfb-steps">
+          <li v-for="(id, i) in b.steps" :key="id" draggable="true" :class="{drag: drag === i}"
+              @dragstart="drag = i" @dragend="drag = -1" @dragover.prevent @drop.prevent="moveTo(i)">
+            <span class="grip" aria-hidden="true">⋮⋮</span><span class="nm">{{ names[id] || id }}</span>
+            <button type="button" class="ghost" :disabled="!i" :aria-label="t('Omhoog')" @click="move(i, -1)">↑</button>
+            <button type="button" class="ghost" :disabled="i === b.steps.length - 1" :aria-label="t('Omlaag')" @click="move(i, 1)">↓</button>
+            <button type="button" class="ghost" :aria-label="t('Verwijderen')" @click="b.steps.splice(i, 1)">✕</button>
+          </li>
+        </ol>
+        <p v-if="!b.steps.length" class="note-s">{{ t('Nog geen stappen. Zoek hieronder een tool en voeg hem toe.') }}</p>
+        <div class="f" style="margin-top:10px"><label for="wfb-q">{{ t('Tool toevoegen') }}</label><input id="wfb-q" class="txt" type="search" v-model="b.q" autocomplete="off" :placeholder="t('Zoek een tool…')"></div>
+        <ul class="lk-wfb-pick" id="wfb-pick">
+          <li v-for="x in picks" :key="x.id"><button type="button" class="ghost" :data-add="x.id" @click="b.steps.push(x.id); b.q = ''">+ {{ x.name }}</button></li>
+        </ul>
+        <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:12px">
+          <button type="button" class="primary" id="wfb-save" :disabled="b.steps.length < 2 || !b.name.trim()" @click="saveWf">{{ t('Bewaren') }}</button>
+          <button v-if="b.id" type="button" class="ghost" id="wfb-share" @click="shareWf">{{ t('Delen') }}</button>
+          <button v-if="b.id" type="button" :class="['ghost', {bad: b.del}]" id="wfb-del" @click="b.del ? delWf() : b.del = true">{{ b.del ? t('Zeker? Verwijderen') : t('Verwijderen') }}</button>
+        </div>
+        <p class="note-s">{{ t('Minstens twee stappen. Je werkstromen staan op dit apparaat, in elk project.') }}</p>
+        <div v-if="b.url" class="lk-wfb-share">
+          <div class="row" style="gap:6px"><input class="lk-url" id="wfb-url" readonly :value="b.url" style="flex:1;min-width:0"><button type="button" @click="copyUrl">{{ b.copied ? t('Gekopieerd') : t('Kopieer') }}</button></div>
+          <canvas v-show="b.qr" ref="qr" class="lk-wfb-qr"></canvas>
+        </div>
+      </div>
+    </div>
   </Teleport>
 </template>
 
 <script>
 import * as P from '../engines/projects.js';
 import {startFlow} from '../engines/flow.js';
+import {OWNKEY, saveOwn, removeOwn, addShared} from '../lib/werkstroom.js';
 
 const kB = n => (n < 1e6 ? Math.max(1, Math.round(n / 1024)) + ' kB' : n < 1e9 ? (n / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.round(n / 1073741824) + ' GB');
 
 export default {
   name: 'Projects',
-  data() { return {open: false, m: P.meta(), runs: P.runsMeta(), size: {}, ren: '', renName: '', del: '', newName: '', st: null, est: null, notes: P.notes(), note: '', msg: null, restore: null}; },
+  data() { return {open: false, m: P.meta(), runs: P.runsMeta(), size: {}, ren: '', renName: '', del: '', newName: '', st: null, est: null, notes: P.notes(), note: '', msg: null, restore: null, b: null, drag: -1}; },
   computed: {
+    /* alle tools met hun naam (zoals de werkstroombalk ze noemt) */
+    names() { return typeof wfNames === 'function' ? wfNames() : {}; },
+    picks() {
+      if (!this.b) return [];
+      const f = x => String(x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''), q = f(this.b.q.trim()), N = this.names;
+      return wfKnown().filter(id => !this.b.steps.includes(id) && (!q || f(N[id] || id).includes(q) || id.includes(q)))
+        .map(id => ({id, name: N[id] || id})).sort((a, c) => a.name.localeCompare(c.name)).slice(0, q ? 12 : 8);
+    },
     P() { return P; },
     list() { return this.m ? this.m.list : []; },
     active() { return this.m ? this.m.active : ''; },
@@ -117,6 +157,50 @@ export default {
   methods: {
     switchProject: P.switchProject, downloadProject: P.downloadProject, switchRun: P.switchRun, stopRun: P.stopRun, startRun: P.startRun, wfName: P.wfName,
     refresh() { this.m = P.meta(); this.runs = P.runsMeta(); this.notes = P.notes(); const n = document.getElementById('sess-name'); if (n && this.cur) n.value = this.cur.name; },
+    /* ---------- eigen werkstromen (S119) ---------- */
+    own() { const o = jget(OWNKEY, []); return Array.isArray(o) ? o : []; },
+    builder(id) {
+      const w = id && WF.find(x => x.id === id);
+      this.b = w && w.kind === 'own' ? {id: w.id, name: w.n, steps: w.steps.slice(), q: '', url: '', qr: false, del: false, copied: false}
+        : {id: null, name: w ? this.t(w.n) + ' (' + this.t('kopie') + ')' : '', steps: w ? w.steps.slice() : [], q: '', url: '', qr: false, del: false, copied: false};
+      this.$nextTick(() => { const el = document.getElementById('wfb-name'); if (el) el.focus(); });
+    },
+    move(i, d) { const s = this.b.steps, [x] = s.splice(i, 1); s.splice(i + d, 0, x); },
+    moveTo(i) { if (this.drag < 0 || this.drag === i) return; const s = this.b.steps, [x] = s.splice(this.drag, 1); s.splice(i, 0, x); this.drag = -1; },
+    store(list) { jset(OWNKEY, list); wfReload(); if (calc.start) calc.start(); },
+    saveWf() {
+      const list = saveOwn(this.own(), {id: this.b.id, name: this.b.name, steps: this.b.steps}, wfKnown());
+      this.store(list); if (!this.b.id) this.b.id = list[list.length - 1].id;
+      this.b.del = false;
+    },
+    delWf() { this.store(removeOwn(this.own(), this.b.id)); this.b = null; },
+    async shareWf() {
+      this.saveWf();
+      const url = `${shareBase()}?wf=${await shareEncode({n: this.b.name.trim(), s: this.b.steps})}#start`;
+      this.b.url = url; this.b.copied = false;
+      await this.$nextTick();
+      const cv = this.$refs.qr; this.b.qr = false;
+      if (cv && new TextEncoder().encode(url).length <= 2300) {
+        const sz = 220, d = window.devicePixelRatio || 1; cv.width = sz * d; cv.height = sz * d; cv.style.width = sz + 'px';
+        const x = cv.getContext('2d'); x.scale(d, d);
+        try { drawQR(x, url, 0, 0, sz, url.length > 1200 ? 'L' : 'M'); this.b.qr = true; } catch (e) {}
+      }
+    },
+    copyUrl() {
+      const done = () => { this.b.copied = true; };
+      (navigator.clipboard ? navigator.clipboard.writeText(this.b.url) : Promise.reject()).then(done)
+        .catch(() => { const el = document.getElementById('wfb-url'); if (el) { el.select(); document.execCommand('copy'); done(); } });
+    },
+    /* ?wf=… in de adresbalk: een gedeelde werkstroom toevoegen */
+    async takeSharedWf() {
+      const code = new URLSearchParams(location.search).get('wf'); if (!code) return;
+      try {
+        const r = addShared(this.own(), await shareDecode(code), wfKnown());
+        if (r) { if (r.added) this.store(r.list); alertBox(this.t(r.added ? 'Werkstroom toegevoegd aan je werkstromen.' : 'Deze werkstroom had je al.')); }
+        else alertBox(this.t('Deze werkstroomlink kon niet worden gelezen.'));
+      } catch (e) { alertBox(this.t('Deze werkstroomlink kon niet worden gelezen.')); }
+      try { const u = new URL(location.href); u.searchParams.delete('wf'); history.replaceState(null, '', u.pathname + u.search + u.hash); } catch (e) {}
+    },
     when(d) { return new Date(d).toLocaleString(LANG === 'en' ? 'en-GB' : 'nl-NL', {dateStyle: 'short', timeStyle: 'short'}); },
     pickFile(e) { const f = e.target.files[0]; e.target.value = ''; if (f) this.importFile(f); },
     /* ook voor "Importeren" in de zijbalk (app.js) */
@@ -149,6 +233,7 @@ export default {
     P.migrate(this.t('Mijn project')); this.refresh();
     P.persist();
     startFlow();   /* S117: data tussen de stappen van de actieve run */
+    this.takeSharedWf();
     window.__projVm = this;
   }
 };

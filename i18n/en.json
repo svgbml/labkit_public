@@ -6321,5 +6321,20 @@
 "Automatisch uit de monsterlijst": "Automatic from the sample list",
 "Weer automatisch uit DNA-kwantificatie": "Automatic again from DNA quantification",
 "Weer automatisch uit PCR-cyclus": "Automatic again from PCR cycle",
-"Weer automatisch uit de monsterlijst": "Automatic again from the sample list"
+"Weer automatisch uit de monsterlijst": "Automatic again from the sample list",
+"Nog geen stappen. Zoek hieronder een tool en voeg hem toe.": "No steps yet. Search for a tool below and add it.",
+"Tool toevoegen": "Add tool",
+"Minstens twee stappen. Je werkstromen staan op dit apparaat, in elk project.": "At least two steps. Your workflows are stored on this device, in every project.",
+"Werkstroom maken": "Create workflow",
+"Werkstroom bewerken": "Edit workflow",
+"practicum": "practical",
+"kopie": "copy",
+"Bewerken": "Edit",
+"Kopiëren en aanpassen": "Copy and adapt",
+"Practicum: PCR en gel": "Practical: PCR and gel",
+"Practicum: celkweek": "Practical: cell culture",
+"Practicum: ELISA": "Practical: ELISA",
+"Werkstroom toegevoegd aan je werkstromen.": "Workflow added to your workflows.",
+"Deze werkstroom had je al.": "You already had this workflow.",
+"Deze werkstroomlink kon niet worden gelezen.": "This workflow link could not be read."
 }

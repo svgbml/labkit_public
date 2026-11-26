@@ -185,6 +185,20 @@ canvas{max-width:100%}
 .lk-proj-new textarea{flex:1 1 200px}
 .lk-proj-confirm{margin-top:8px}
 .lk-auto-reset{font-size:12px;padding:2px 8px;margin-top:4px}
+.lk-wf-item{display:flex;gap:4px;align-items:stretch}
+.lk-wf-item .lk-wf-card{flex:1;min-width:0}
+.lk-wf-edit{padding:4px 8px;align-self:flex-start}
+.lk-wf-kind{font-size:11px;font-weight:500;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 6px;margin-left:6px;vertical-align:1px}
+.lk-wf-new{margin-top:10px}
+.lk-wfb-steps{margin:10px 0 0;padding:0;list-style:none;counter-reset:st}
+.lk-wfb-steps li{display:flex;align-items:center;gap:6px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;margin-bottom:4px;background:var(--surface);counter-increment:st}
+.lk-wfb-steps li::before{content:counter(st) '.';color:var(--muted);font-size:12px;min-width:18px}
+.lk-wfb-steps li.drag{opacity:.5}
+.lk-wfb-steps .grip{cursor:grab;color:var(--muted)}
+.lk-wfb-steps .nm{flex:1;min-width:0;overflow-wrap:anywhere}
+.lk-wfb-pick{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:4px}
+.lk-wfb-share{margin-top:10px}
+.lk-wfb-qr{display:block;margin-top:8px}
 .lk-wf-runs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}
 /* Statistiek: aannames en keuzehulp (S113) */
 .st-assume{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
